@@ -1,0 +1,14 @@
+*~
+*.pyc
+.idea
+data
+logs
+*/logs/*
+*.sql
+test/*
+tools/*
+*.log
+*.orig
+*.zip
+*.swp
+*.tar.gz

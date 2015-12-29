@@ -1,0 +1,14 @@
+Flask==0.9
+Flask-Script==0.5.2
+Flask-Babel==0.8
+Flask-principal==0.3.5
+Flask-mail==0.7.4
+pymysql==0.5
+sqlalchemy==0.8.2
+Flask-sqlalchemy==0.16
+Flask-cache==0.9.2
+redis==2.7.2
+gunicorn==0.17.4
+celery==3.0.18
+flask-celery=2.4.3
+Jinja2==2.7.1
