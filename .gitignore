@@ -18,3 +18,4 @@ config.cfg
 *.tar.gz
 core/special.py
 lib/special
+lib/audit*
