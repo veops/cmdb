@@ -4,17 +4,17 @@
 import redis
 
 from flask import current_app
-import settings
 
 
 class RedisHandler(object):
     def __init__(self):
+        config = current_app.config
         try:
             pool = redis.ConnectionPool(
-                max_connections=settings.REDIS_MAX_CONN,
-                host=settings.REDIS_HOST,
-                port=settings.REDIS_PORT,
-                db=settings.REDIS_DB)
+                max_connections=config.get("REDIS_MAX_CONN"),
+                host=config.get("CACHE_REDIS_HOST"),
+                port=config.get("CACHE_REDIS_PORT"),
+                db=config.get("REDIS_DB"))
             self.r = redis.Redis(connection_pool=pool)
         except Exception as e:
             print e

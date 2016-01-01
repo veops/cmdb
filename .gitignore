@@ -21,3 +21,4 @@ lib/special
 lib/audit*
 templates/*audit*
 codeLin*
+lib/spec_*
