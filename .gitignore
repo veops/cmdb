@@ -2,11 +2,8 @@
 *.pyc
 .idea
 data
-logs
-*/logs/*
-*.sql
-deploy.sh
 logs/*
+*.sql
 test/*
 tools/*
 cmdb_agent/*
