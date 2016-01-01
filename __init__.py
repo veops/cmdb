@@ -1,4 +1,4 @@
-# encoding=utf-8
+# -*- coding: utf-8 -*-
 
 import os
 import logging
@@ -11,18 +11,12 @@ from flask import g
 from flask.ext.babel import Babel
 from flask.ext.principal import identity_loaded
 
+import core
 from extensions import db
 from extensions import mail
 from extensions import cache
 from extensions import celery
-from core import attribute
-from core import citype
-from core import cityperelation
-from core import cirelation
-from core import ci
-from core import history
-from core import account
-from core import special
+from extensions import rd
 from models.account import User
 from lib.template import filters
 
@@ -30,19 +24,18 @@ from lib.template import filters
 APP_NAME = "CMDB-API"
 
 MODULES = (
-    (attribute, "/api/v0.1/attributes"),
-    (citype, "/api/v0.1/citypes"),
-    (cityperelation, "/api/v0.1/cityperelations"),
-    (cirelation, "/api/v0.1/cirelations"),
-    (ci, "/api/v0.1/ci"),
-    (history, "/api/v0.1/history"),
-    (account, "/api/v0.1/accounts"),
-    (special, ""),
+    (core.attribute, "/api/v0.1/attributes"),
+    (core.citype, "/api/v0.1/citypes"),
+    (core.cityperelation, "/api/v0.1/cityperelations"),
+    (core.cirelation, "/api/v0.1/cirelations"),
+    (core.ci, "/api/v0.1/ci"),
+    (core.history, "/api/v0.1/history"),
+    (core.account, "/api/v0.1/accounts"),
+    # (core.special, ""),
 )
 
 
 def make_app(config=None, modules=None):
-    modules = modules
     if not modules:
         modules = MODULES
     app = Flask(APP_NAME)
@@ -58,11 +51,11 @@ def make_app(config=None, modules=None):
 
 def configure_extensions(app):
     db.app = app
-    celery.init_app(app)
     db.init_app(app)
     mail.init_app(app)
     cache.init_app(app)
     celery.init_app(app)
+    rd.init_app(app)
 
 
 def configure_i18n(app):
@@ -97,7 +90,7 @@ def configure_logging(app):
         app.config['MAIL_SERVER'],
         app.config['DEFAULT_MAIL_SENDER'],
         app.config['ADMINS'],
-        '[%s] CMDB error' % hostname,
+        '[%s] CMDB API error' % hostname,
         (
             app.config['MAIL_USERNAME'],
             app.config['MAIL_PASSWORD'],

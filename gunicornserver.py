@@ -1,4 +1,4 @@
-# encoding=utf-8
+# -*- coding: utf-8 -*-
 
 from flask_script import Command, Option
 
@@ -7,7 +7,7 @@ class GunicornServer(Command):
     description = 'Run the app within Gunicorn'
 
     def __init__(self, host='127.0.0.1', port=5000, workers=8,
-                 worker_class="gevent", daemon=False):
+                 worker_class="sync", daemon=False):
         self.port = port
         self.host = host
         self.workers = workers

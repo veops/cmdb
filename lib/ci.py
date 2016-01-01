@@ -11,6 +11,7 @@ from flask import abort
 from sqlalchemy import or_
 
 from extensions import db
+from extensions import rd
 from models.ci import CI
 from models.ci_relation import CIRelation
 from models.ci_type import CITypeAttribute
@@ -28,7 +29,6 @@ from lib.query_sql import QUERY_HOSTS_NUM_BY_BU
 from lib.query_sql import QUERY_HOSTS_NUM_BY_PROJECT
 from lib.query_sql import QUERY_CIS_BY_IDS
 from lib.query_sql import QUERY_CIS_BY_VALUE_TABLE
-from lib.utils import rd
 from tasks.cmdb import ci_cache
 from tasks.cmdb import ci_delete
 
