@@ -8,7 +8,7 @@ from flask import current_app
 
 from extensions import celery
 from extensions import db
-from lib.utils import rd
+from extensions import rd
 import lib.ci
 
 

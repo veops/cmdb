@@ -7,8 +7,12 @@ from flask import current_app
 
 
 class RedisHandler(object):
-    def __init__(self):
-        config = current_app.config
+    def __init__(self, flask_app=None):
+        self.flask_app = flask_app
+
+    def init_app(self, app):
+        self.flask_app = app
+        config = self.flask_app.config
         try:
             pool = redis.ConnectionPool(
                 max_connections=config.get("REDIS_MAX_CONN"),
@@ -17,14 +21,13 @@ class RedisHandler(object):
                 db=config.get("REDIS_DB"))
             self.r = redis.Redis(connection_pool=pool)
         except Exception as e:
-            print e
             current_app.logger.error("init redis connection failed")
 
-    @classmethod
-    def instance(cls):
-        if not hasattr(cls, "_instance"):
-            cls._instance = cls()
-        return cls._instance
+    # @classmethod
+    # def instance(cls):
+    #     if not hasattr(cls, "_instance"):
+    #         cls._instance = cls()
+    #     return cls._instance
 
     def get(self, ci_ids, key="CMDB_CI"):
         try:
@@ -50,8 +53,6 @@ class RedisHandler(object):
                 current_app.logger.warn("ci [%d] is not in redis" % ci_id)
         except Exception as e:
             current_app.logger.error("delete redis key error, %s" % str(e))
-
-rd = RedisHandler.instance()
 
 
 def get_page(page):
