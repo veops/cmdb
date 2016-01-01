@@ -19,3 +19,4 @@ config.cfg
 core/special.py
 lib/special
 lib/audit*
+templates/*audit*
