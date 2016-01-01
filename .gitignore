@@ -5,10 +5,16 @@ data
 logs
 */logs/*
 *.sql
+deploy.sh
+logs/*
 test/*
 tools/*
+cmdb_agent/*
 *.log
 *.orig
 *.zip
 *.swp
+config.cfg
 *.tar.gz
+core/special.py
+lib/special
