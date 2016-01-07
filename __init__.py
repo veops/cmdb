@@ -10,6 +10,7 @@ from flask import request
 from flask import g
 from flask.ext.babel import Babel
 from flask.ext.principal import identity_loaded
+from flask.ext.principal import Principal
 
 import core
 from extensions import db
@@ -78,7 +79,7 @@ def configure_blueprints(app, modules):
 
 
 def configure_identity(app):
-
+    principal = Principal(app)
     @identity_loaded.connect_via(app)
     def on_identity_loaded(sender, identity):
         g.user = User.query.from_identity(identity)
