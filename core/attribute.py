@@ -104,7 +104,8 @@ def delete_attribute(attr_id=None):
 @attribute.route("/citype/<int:type_id>", methods=["GET"])
 def get_attributes_by_type(type_id=None):
     manager = CITypeAttributeManager()
-    from models.cmdb import CITypeCache, CIAttributeCache
+    from models.attribute import CIAttributeCache
+    from models.ci_type import CITypeCache
 
     t = CITypeCache.get(type_id)
     if not t:

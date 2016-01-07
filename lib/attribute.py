@@ -152,6 +152,7 @@ class AttributeManager(object):
                 choice_table = type_map["choice"].get(attr.value_type)
                 db.session.query(choice_table).filter(
                     choice_table.attr_id == attr_id).delete()
+                db.session.flush()
             name = attr.attr_name
             CIAttributeCache.clean(attr)
             db.session.delete(attr)
