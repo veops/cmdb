@@ -16,6 +16,7 @@ from flask import abort
 
 from lib.auth import auth_with_key
 from lib.ci import CIManager
+from lib.ci import HostNumStatis
 from lib.search import Search
 from lib.search import SearchError
 from lib.utils import get_page
@@ -156,6 +157,14 @@ def update_ci():
     return jsonify(ci_id=ci_id)
 
 
+@ci.route("/<int:ci_id>/unique", methods=["PUT"])
+@auth_with_key
+def update_ci_unique(ci_id):
+    m = CIManager()
+    m.update_unique_value(ci_id, request.values)
+    return jsonify(ci_id=ci_id)
+
+
 @ci.route("/<int:ci_id>", methods=["DELETE"])
 @auth_with_key
 def delete_ci(ci_id=None):
@@ -187,3 +196,21 @@ def get_heartbeat():
                                                  ci_type,
                                                  agent_status=agent_status)
     return jsonify(numfound=numfound, result=result)
+
+
+######################### just for frontend ###################################
+
+@ci.route("/hosts/nums", methods=["GET"])
+def get_hosts_nums():
+    ci_type = request.args.get("ci_type", "").strip()
+    ci_ids = request.args.get("ci_ids", "").strip()
+    ci_id_list = ci_ids.split(",")
+    ci_id_list = map(str, filter(lambda x: x != "", ci_id_list))
+    res = {}
+    if ci_type == "bu":
+        res = HostNumStatis().get_hosts_by_bu(ci_id_list)
+    elif ci_type == "product":
+        res = HostNumStatis().get_hosts_by_product(ci_id_list)
+    elif ci_type == "project":
+        res = HostNumStatis().get_hosts_by_project(ci_id_list)
+    return jsonify(hosts=res)

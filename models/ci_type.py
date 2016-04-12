@@ -30,6 +30,7 @@ class CITypeAttribute(db.Model):
                         db.ForeignKey("ci_attributes.attr_id"),
                         primary_key=True)
     is_required = db.Column(db.Boolean, default=False)
+    order = db.Column(db.Integer, default=0)
 
     __table_args__ = (db.UniqueConstraint("type_id", "attr_id",
                                           name="type_attr_uniq"), )

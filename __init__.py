@@ -32,7 +32,7 @@ MODULES = (
     (core.ci, "/api/v0.1/ci"),
     (core.history, "/api/v0.1/history"),
     (core.account, "/api/v0.1/accounts"),
-    # (core.special, ""),
+    (core.special, ""),
 )
 
 

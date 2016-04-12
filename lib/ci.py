@@ -140,16 +140,16 @@ class CIManager(object):
             abort(404, "CIType {0} is not existed".format(ci_type_name))
 
         unique_key = CIAttributeCache.get(ci_type.uniq_id) \
-            or abort(500, 'illegality unique attribute')
+            or abort(400, 'illegality unique attribute')
 
         unique = ci_dict.get(unique_key.attr_name) \
-            or abort(500, '{0} missing'.format(unique_key.attr_name))
+            or abort(400, '{0} missing'.format(unique_key.attr_name))
 
         old_ci = self.ci_is_exist(ci_type, unique_key, unique)
         if old_ci is not None:
             ci_existed = True
             if exist_policy == 'reject':
-                return abort(500, 'CI is existed')
+                return abort(400, 'CI is existed')
             if old_ci.type_id != ci_type.type_id:  # update ci_type
                 old_ci.type_id = ci_type.type_id
                 db.session.add(old_ci)
@@ -169,7 +169,7 @@ class CIManager(object):
             except Exception as e:
                 db.session.rollback()
                 current_app.logger.error('add CI error: {0}'.format(str(e)))
-                return abort(500, 'add CI error')
+                return abort(400, 'add CI error')
         value_manager = AttributeValueManager()
         histories = list()
         for p, v in ci_dict.items():
@@ -182,7 +182,7 @@ class CIManager(object):
                 if not ci_existed:
                     self.delete(ci.ci_id)
                 current_app.logger.info(res)
-                return abort(500, res)
+                return abort(400, res)
             if res is not None:
                 histories.append(res)
         try:
@@ -192,11 +192,38 @@ class CIManager(object):
             db.session.rollback()
             if not ci_existed:  # only add
                 self.delete(ci.ci_id)
-            return abort(500, "add CI error")
+            return abort(400, "add CI error")
         his_manager = CIAttributeHistoryManger()
         his_manager.add(ci.ci_id, histories)
         ci_cache.apply_async([ci.ci_id], queue="cmdb_async")
         return ci.ci_id
+
+    def update_unique_value(self, ci_id, args):
+        ci = self.get_ci_by_id(ci_id, need_children=False)
+        unique_key = ci.get("unique")
+        attr = CIAttributeCache.get(unique_key)
+        table_key = "index_{0}".format(attr.value_type) \
+            if attr.is_index else attr.value_type
+        value_table = type_map.get("table").get(table_key)
+        v = args.get(unique_key)
+        if value_table and v:
+            item = db.session.query(value_table).filter(
+                value_table.ci_id == ci_id).filter(
+                    value_table.attr_id == attr.attr_id).first()
+            if item:
+                converter = type_map.get("converter").get(attr.value_type)
+                try:
+                    item.value = converter(v)
+                except:
+                    return abort(400, "value is illegal")
+                db.session.add(item)
+                try:
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    current_app.logger.error(str(e))
+                    return abort(400, "update unique failed")
+                ci_cache.apply_async([ci_id], queue="cmdb_async")
 
     def delete(self, ci_id):
         ci = db.session.query(CI).filter(CI.ci_id == ci_id).first()
@@ -224,7 +251,7 @@ class CIManager(object):
             except Exception as e:
                 db.session.rollback()
                 current_app.logger.error("delete CI error, {0}".format(str(e)))
-                return abort(500, "delete CI error, {0}".format(str(e)))
+                return abort(400, "delete CI error, {0}".format(str(e)))
             # TODO: write history
             ci_delete.apply_async([ci.ci_id], queue="cmdb_async")
             return ci_id
@@ -485,7 +512,7 @@ class CIRelationManager(object):
             db.session.rollback()
             current_app.logger.error("add CIRelation is error, {0}".format(
                 str(e)))
-            return abort(500, "add CIRelation is error, {0}".format(str(e)))
+            return abort(400, "add CIRelation is error, {0}".format(str(e)))
             # write history
         his_manager = CIRelationHistoryManager()
         his_manager.add(cr.cr_id, cr.first_ci_id, cr.second_ci_id,
@@ -507,7 +534,7 @@ class CIRelationManager(object):
                 current_app.logger.error(
                     "delete CIRelation is error, {0}".format(str(e)))
                 return abort(
-                    500, "delete CIRelation is error, {0}".format(str(e)))
+                    400, "delete CIRelation is error, {0}".format(str(e)))
             his_manager = CIRelationHistoryManager()
             his_manager.add(cr_id, first_ci, second_ci,
                             cr.relation_type, operate_type="delete")

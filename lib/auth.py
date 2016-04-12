@@ -18,10 +18,10 @@ from models.account import UserCache
 def auth_with_key(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if isinstance(getattr(g, 'user', None), User):
-            identity_changed.send(current_app._get_current_object(),
-                                  identity=Identity(g.user.uid))
-            return func(*args, **kwargs)
+        # if isinstance(getattr(g, 'user', None), User):
+        #     identity_changed.send(current_app._get_current_object(),
+        #                           identity=Identity(g.user.uid))
+        #     return func(*args, **kwargs)
         ip = request.remote_addr
         if request.data:
             request_args = dict()
@@ -46,7 +46,7 @@ def auth_with_key(func):
             else:
                 identity_changed.send(current_app._get_current_object(),
                                       identity=AnonymousIdentity())
-                return abort(400, "invalid _key and _secret")
+                return abort(401, "invalid _key and _secret")
 
         path = request.path
 
@@ -63,6 +63,6 @@ def auth_with_key(func):
         else:
             identity_changed.send(current_app._get_current_object(),
                                   identity=AnonymousIdentity())
-            return abort(400, "invalid _key and _secret")
+            return abort(401, "invalid _key and _secret")
 
     return wrapper
