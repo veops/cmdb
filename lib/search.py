@@ -139,6 +139,12 @@ class Search(object):
                     "ORDER BY B.ci_id {1} LIMIT {0:d}, {2};".format(
                         (self.page - 1) * self.count, sort_type, self.count))
             elif self.type_id_list:
+                self.query_sql = """SELECT B.ci_id
+                FROM ({0}) AS B {1}""".format(
+                    query_sql,
+                    "INNER JOIN cis on cis.ci_id=B.ci_id "
+                    "WHERE cis.type_id in ({0}) ".format(
+                        ",".join(self.type_id_list)))
                 return """SELECT SQL_CALC_FOUND_ROWS DISTINCT B.ci_id
                 FROM ({0}) AS B {1}""".format(
                     query_sql,
@@ -148,6 +154,10 @@ class Search(object):
                         (self.page - 1) * self.count, sort_type, self.count,
                         ",".join(self.type_id_list)))
             else:
+                self.query_sql = """SELECT B.ci_id
+                FROM ({0}) AS B {1}""".format(
+                    query_sql,
+                    "INNER JOIN cis on cis.ci_id=B.ci_id ")
                 return """SELECT SQL_CALC_FOUND_ROWS DISTINCT B.ci_id
                 FROM ({0}) AS B {1}""".format(
                     query_sql,
@@ -172,6 +182,12 @@ class Search(object):
                                                   (self.page - 1) * self.count,
                                                   sort_type, self.count)
             elif self.type_id_list:
+                self.query_sql = """SELECT C.ci_id
+                    FROM ({0}) AS C
+                    INNER JOIN cis on cis.ci_id=C.ci_id
+                    WHERE cis.type_id in ({1})""".format(
+                    new_table,
+                    ",".join(self.type_id_list))
                 return """SELECT SQL_CALC_FOUND_ROWS DISTINCT C.ci_id
                     FROM ({0}) AS C
                     INNER JOIN cis on cis.ci_id=C.ci_id
@@ -306,6 +322,7 @@ class Search(object):
                 table_name = TableMap(attr_name=k).table_name
                 query_sql = FACET_QUERY.format(
                     table_name, self.query_sql, attr.attr_id)
+                current_app.logger.debug(query_sql)
                 result = db.session.execute(query_sql).fetchall()
                 facet[k] = result
         facet_result = dict()

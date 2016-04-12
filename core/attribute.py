@@ -102,15 +102,21 @@ def delete_attribute(attr_id=None):
 
 
 @attribute.route("/citype/<int:type_id>", methods=["GET"])
-def get_attributes_by_type(type_id=None):
+@attribute.route("/citype/<string:type_name>", methods=["GET"])
+def get_attributes_by_type(type_id=None, type_name=None):
     manager = CITypeAttributeManager()
     from models.attribute import CIAttributeCache
     from models.ci_type import CITypeCache
+    from models.ci_type import CITypeAttributeCache
 
     t = CITypeCache.get(type_id)
     if not t:
-        return abort(400, "CIType {0} is not existed".format(type_id))
+        t = CITypeCache.get(type_name)
+        if not t:
+            return abort(400, "CIType {0} is not existed".format(type_id))
+        type_id = t.type_id
     uniq_id = t.uniq_id
+    CITypeAttributeCache.clean(type_id)
     unique = CIAttributeCache.get(uniq_id).attr_name
     return jsonify(attributes=manager.get_attributes_by_type_id(type_id),
                    type_id=type_id, uniq_id=uniq_id, unique=unique)

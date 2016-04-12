@@ -88,9 +88,9 @@ FACET_QUERY = """
     SELECT {0}.value,
            count({0}.ci_id)
     FROM {0}
-    INNER JOIN ({1}) AS B ON B.ci_id={0}.ci_id
+    INNER JOIN ({1}) AS F ON F.ci_id={0}.ci_id
     WHERE {0}.attr_id={2:d}
-    GROUP BY {0}.ci_id
+    GROUP BY {0}.value
 """
 
 QUERY_CI_BY_ATTR_NAME = """

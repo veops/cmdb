@@ -30,6 +30,7 @@ class CITypeAttributeManager(object):
         for attr in attrs:
             attr_dict = attr_manager.get_attribute_by_id(attr.attr_id)
             attr_dict["is_required"] = attr.is_required
+            attr_dict["order"] = attr.order
             result.append(attr_dict)
         return result
 
