@@ -18,10 +18,6 @@ from models.account import UserCache
 def auth_with_key(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        # if isinstance(getattr(g, 'user', None), User):
-        #     identity_changed.send(current_app._get_current_object(),
-        #                           identity=Identity(g.user.uid))
-        #     return func(*args, **kwargs)
         ip = request.remote_addr
         if request.data:
             request_args = dict()
