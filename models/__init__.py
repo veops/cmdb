@@ -11,14 +11,3 @@ def row2dict(row):
         else:
             d[c.name] = getattr(row, c.name)
     return d
-
-
-from account import *
-from attribute import *
-from ci import *
-from ci_relation import *
-from ci_type import *
-from ci_type_relation import *
-from ci_value import *
-from history import *
-from statis import *

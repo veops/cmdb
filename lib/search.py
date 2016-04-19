@@ -9,7 +9,7 @@ from lib.const import TableMap
 from models.attribute import CIAttributeCache
 from models.ci_type import CITypeCache
 from extensions import db
-from models import CI
+from models.ci import CI
 from lib.ci import get_cis_by_ids
 from lib.query_sql import FACET_QUERY
 from lib.query_sql import QUERY_CI_BY_TYPE
