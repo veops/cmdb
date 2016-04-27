@@ -18,7 +18,6 @@ class CITypeRelation(db.Model):
     child = db.relationship(
         "CIType", primaryjoin="CIType.type_id==CITypeRelation.child_id")
     relation_type = db.Column(
-        db.String(7),
         db.Enum("contain", "connect", "deploy", "install",
                 name="relation_type"),
         default="contain")

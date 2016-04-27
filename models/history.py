@@ -23,8 +23,8 @@ class CIAttributeHistory(db.Model):
     __tablename__ = "histories"
 
     h_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    operate_type = db.Column(db.String(6), db.Enum("add", "delete", "update",
-                                                   name="operate_type"))
+    operate_type = db.Column(db.Enum("add", "delete", "update",
+                                     name="operate_type"))
     record_id = db.Column(db.Integer,
                           db.ForeignKey("records.record_id"),
                           nullable=False)
@@ -38,14 +38,13 @@ class CIRelationHistory(db.Model):
     __tablename__ = "relation_histories"
 
     rh_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    operate_type = db.Column(db.String(6),
-                             db.Enum("add", "delete", name="operate_type"))
+    operate_type = db.Column(db.Enum("add", "delete", name="operate_type"))
     record_id = db.Column(db.Integer,
                           db.ForeignKey("records.record_id"),
                           nullable=False)
     first_ci_id = db.Column(db.Integer)
     second_ci_id = db.Column(db.Integer)
     relation_type = db.Column(
-        db.String(8), db.Enum("connect", "deploy", "install", "contain",
-                              name="relation_type"))
+        db.Enum("connect", "deploy", "install", "contain",
+                name="relation_type"))
     relation = db.Column(db.Integer, nullable=False)

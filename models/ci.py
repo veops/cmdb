@@ -14,7 +14,6 @@ class CI(db.Model):
                         db.ForeignKey("ci_types.type_id"),
                         nullable=False)
     ci_type = db.relationship("CIType", backref="cis")
-    status = db.Column(db.String(8),
-                       db.Enum("review", "validate", name="stauts"))
+    status = db.Column(db.Enum("review", "validate", name="status"))
     created_time = db.Column(db.DateTime, default=datetime.datetime.now())
     heartbeat = db.Column(db.DateTime, default=datetime.datetime.now())

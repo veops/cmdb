@@ -18,8 +18,8 @@ class CIRelation(db.Model):
     second_ci = db.relationship(
         "CI", primaryjoin="CI.ci_id==CIRelation.second_ci_id")
     relation_type = db.Column(
-        db.String(8), db.Enum("connect", "deploy", "install", "contain",
-                              name="relation_type"), nullable=False)
+        db.Enum("connect", "deploy", "install", "contain",
+                name="relation_type"), nullable=False)
     more = db.Column(db.Integer, db.ForeignKey("cis.ci_id"))
 
     __table_args__ = (db.UniqueConstraint("first_ci_id", "second_ci_id",

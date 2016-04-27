@@ -10,7 +10,6 @@ class CIAttribute(db.Model):
     attr_name = db.Column(db.String(32), nullable=False, unique=True)
     attr_alias = db.Column(db.String(32), nullable=False, unique=True)
     value_type = db.Column(
-        db.String(8),
         db.Enum("int", "float", "text", "datetime", name='value_type'),
         default="text",
         nullable=False)
