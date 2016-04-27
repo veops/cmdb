@@ -8,6 +8,6 @@ def row2dict(row):
                           (basestring, long, int, float, list, tuple, dict)) \
                 and getattr(row, c.name):
             d[c.name] = getattr(row, c.name).strftime("%Y-%m-%d %H:%M:%S")
-        else:
+        elif c.name not in ("password", "secret"):
             d[c.name] = getattr(row, c.name)
     return d
