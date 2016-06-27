@@ -3,6 +3,8 @@
 
 import datetime
 
+from markupsafe import escape
+
 from models.attribute import TextChoice
 from models.attribute import FloatChoice
 from models.attribute import IntegerChoice
@@ -39,7 +41,7 @@ type_map = {
     'converter': {
         'int': string2int,
         'float': float,
-        'text': unicode,
+        'text': escape,
         'datetime': str2datetime,
     },
     'choice': {
