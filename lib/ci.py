@@ -241,8 +241,8 @@ class CIManager(object):
                 CIRelation.first_ci_id == ci_id).delete()
             db.session.query(CIRelation).filter(
                 CIRelation.second_ci_id == ci_id).delete()
-            db.session.query(CIAttributeHistory).filter(
-                CIAttributeHistory.ci_id == ci_id).delete()
+            # db.session.query(CIAttributeHistory).filter(
+            #     CIAttributeHistory.ci_id == ci_id).delete()
 
             db.session.flush()
             db.session.delete(ci)
@@ -252,7 +252,7 @@ class CIManager(object):
                 db.session.rollback()
                 current_app.logger.error("delete CI error, {0}".format(str(e)))
                 return abort(400, "delete CI error, {0}".format(str(e)))
-            # TODO: write history
+            # todo: write history
             ci_delete.apply_async([ci.ci_id], queue="cmdb_async")
             return ci_id
         return abort(404, "CI {0} not found".format(ci_id))
