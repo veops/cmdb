@@ -13,7 +13,7 @@
 
 
 
-- 在线预览: [CMDB]("http://39.100.252.148:8000")
+- 在线预览: [CMDB](http://39.100.252.148:8000)
     - username: admin
     - password: admin
     
