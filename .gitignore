@@ -68,22 +68,12 @@ settings.py
 *.db
 
 # UI
-node_modules
-dist
-
-# local env files
-.env.local
-.env.*.local
+ui/node_modules
+ui/dist
 
 # Log files
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-yarn.lock
+ui/npm-debug.log*
+ui/yarn-debug.log*
+ui/yarn-error.log*
+ui/yarn.lock
 
-# Editor directories and files
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw*
