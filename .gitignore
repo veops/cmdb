@@ -1,21 +1,95 @@
 *~
-*.pyc
 .idea
-data
-logs/*
+.vscode
+migrates
+*/logs/*
+config.cfg
 *.sql
-test/*
-tools/*
-cmdb_agent/*
+logs/*
 *.log
+*_packed.js
+*_packed.css
 *.orig
 *.zip
-*.swp
-config.cfg
-*.tar.gz
-core/special.py
-lib/special
-lib/audit*
-templates/*audit*
-codeLin*
-lib/spec_*
+nohup.out
+.DS_Store
+*.py[cod]
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+#lib
+#lib64
+Pipfile.lock
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+nosetests.xml
+.pytest_cache
+
+# Translations
+*.mo
+
+# Mr Developer
+.mr.developer.cfg
+.project
+.pydevproject
+
+# Complexity
+output/*.html
+output/*/index.html
+
+# Sphinx
+docs/_build
+
+# Virtualenvs
+env/
+
+
+# Configuration
+api/settings.py
+tests/settings.py
+
+# Development database
+*.db
+
+# UI
+ui/.DS_Store
+ui/node_modules
+ui/dist
+
+# local env files
+ui/.env.local
+ui/.env.*.local
+
+# Log files
+ui/npm-debug.log*
+ui/yarn-debug.log*
+ui/yarn-error.log*
+ui/yarn.lock
+
+# Editor directories and files
+ui/.idea
+ui/.vscode
+ui/*.suo
+ui/*.ntvs*
+ui/*.njsproj
+ui/*.sln
+ui/*.sw*
+
+
