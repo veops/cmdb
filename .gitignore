@@ -62,34 +62,28 @@ env/
 
 
 # Configuration
-api/settings.py
-tests/settings.py
+settings.py
 
 # Development database
 *.db
 
 # UI
-ui/.DS_Store
-ui/node_modules
-ui/dist
+node_modules
+dist
 
 # local env files
-ui/.env.local
-ui/.env.*.local
+.env.local
+.env.*.local
 
 # Log files
-ui/npm-debug.log*
-ui/yarn-debug.log*
-ui/yarn-error.log*
-ui/yarn.lock
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+yarn.lock
 
 # Editor directories and files
-ui/.idea
-ui/.vscode
-ui/*.suo
-ui/*.ntvs*
-ui/*.njsproj
-ui/*.sln
-ui/*.sw*
-
-
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw*
