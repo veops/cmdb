@@ -1,10 +1,6 @@
 # -*- coding:utf-8 -*-
 
-import six
-if six.PY2:
-    import sys
-    reload(sys)
-    sys.setdefaultencoding("utf-8")
+from __future__ import unicode_literals
 
 from api.extensions import cache
 from api.models.cmdb import Attribute
