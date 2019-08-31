@@ -25,7 +25,7 @@ class LoginView(APIView):
         password = request.values.get("password")
         user, authenticated = User.query.authenticate(username, password)
         if not authenticated:
-            return abort(401, "invalid username or password")
+            return abort(403, "invalid username or password")
 
         login_user(user)
 
