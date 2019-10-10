@@ -34,6 +34,8 @@ from api.models.cmdb import CITypeAttribute
 from api.tasks.cmdb import ci_cache
 from api.tasks.cmdb import ci_delete
 
+__author__ = 'pycook'
+
 
 class CIManager(object):
     """ manage CI interface
@@ -104,8 +106,12 @@ class CIManager(object):
         res["ci_type"] = ci_type.name
 
         fields = CITypeAttributeManager.get_attr_names_by_type_id(ci.type_id) if not fields else fields
-
-        _res = AttributeValueManager().get_attr_values(fields, ci_id, ret_key=ret_key, use_master=use_master)
+        unique_key = AttributeCache.get(ci_type.unique_id)
+        _res = AttributeValueManager().get_attr_values(fields,
+                                                       ci_id,
+                                                       ret_key=ret_key,
+                                                       unique_key=unique_key,
+                                                       use_master=use_master)
         res.update(_res)
 
         res['_type'] = ci_type.id
@@ -164,9 +170,9 @@ class CIManager(object):
         unique_key = AttributeCache.get(ci_type.unique_id) or abort(400, 'illegality unique attribute')
 
         unique_value = ci_dict.get(unique_key.name) or \
-                       ci_dict.get(unique_key.alias) or \
-                       ci_dict.get(unique_key.id) or \
-                       abort(400, '{0} missing'.format(unique_key.name))
+            ci_dict.get(unique_key.alias) or \
+            ci_dict.get(unique_key.id) or \
+            abort(400, '{0} missing'.format(unique_key.name))
 
         existed = cls.ci_is_exist(unique_key, unique_value)
         if existed is not None:
