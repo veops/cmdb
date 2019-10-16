@@ -5,7 +5,7 @@
 
 <div align="center">
 
-[![License](https://img.shields.io/badge/License-mit-brightgreen)](https://github.com/pycook/cmdb/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-brightgreen)](https://github.com/pycook/cmdb/blob/master/LICENSE)
 [![UI](https://img.shields.io/badge/UI-Ant%20Design%20Pro%20Vue-brightgreen)](https://github.com/sendya/ant-design-pro-vue) 
 [![API](https://img.shields.io/badge/API-Flask-brightgreen)](https://github.com/pallets/flask) 
 
