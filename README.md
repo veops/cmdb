@@ -45,7 +45,7 @@ cp api/settings.py.example api/settings.py
   - 后端: ```pipenv run pipenv install```
   - 前端: ```cd ui && yarn install && cd ..```
   
-- 创建数据库表 ```flask run flask db-setup```
+- 创建数据库表 ```pipenv run flask db-setup```
   
 - 启动服务
   - 后端: ```pipenv run flask run```
