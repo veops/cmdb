@@ -31,6 +31,8 @@ Overview
 
 安装
 ----
+- 启动mysql服务, redis服务
+
 - 创建数据库cmdb
 
 - 拉取代码
