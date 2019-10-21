@@ -14,6 +14,7 @@ from api.lib.cmdb.const import TableMap
 from api.lib.cmdb.const import ExistPolicy
 from api.lib.cmdb.const import OperateType
 from api.lib.cmdb.history import AttributeHistoryManger
+from api.models.cmdb import Attribute
 
 
 class AttributeValueManager(object):
@@ -47,6 +48,7 @@ class AttributeValueManager(object):
             attr = self._get_attr(field)
             if not attr:
                 continue
+
             value_table = TableMap(attr_name=attr.name).table
             rs = value_table.get_by(ci_id=ci_id,
                                     attr_id=attr.id,
@@ -130,9 +132,16 @@ class AttributeValueManager(object):
 
         for v in value_list:
             v = self._validate(attr, v, value_table, ci_id)
+            if not v and attr.value_type != Attribute.TEXT:
+                v = None
+
             if operate_type == OperateType.ADD:
-                value_table.create(ci_id=ci_id, attr_id=attr.id, value=v)
-                self._write_change(ci_id, attr.id, operate_type, None, v)
+                if v is not None:
+                    value_table.create(ci_id=ci_id, attr_id=attr.id, value=v)
+                    self._write_change(ci_id, attr.id, operate_type, None, v)
             elif existed_attr.value != v:
-                existed_attr.update(value=v)
+                if v is not None:
+                    existed_attr.update(value=v)
+                else:
+                    existed_attr.delete()
                 self._write_change(ci_id, attr.id, operate_type, existed_value, v)
