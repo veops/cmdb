@@ -34,8 +34,6 @@ from api.models.cmdb import CITypeAttribute
 from api.tasks.cmdb import ci_cache
 from api.tasks.cmdb import ci_delete
 
-__author__ = 'pycook'
-
 
 class CIManager(object):
     """ manage CI interface

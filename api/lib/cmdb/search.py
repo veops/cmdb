@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*- 
 
 
+from __future__ import unicode_literals
+
 import time
 
 from flask import current_app
@@ -39,7 +41,7 @@ class Search(object):
         self.query_sql = ""
         self.type_id_list = []
         self.only_type_query = False
-    
+
     @staticmethod
     def _operator_proc(key):
         operator = "&"
@@ -127,7 +129,7 @@ class Search(object):
 
         if self.only_type_query:
             return ret_sql.format(query_sql, "ORDER BY B.ci_id {1} LIMIT {0:d}, {2};".format(
-                    (self.page - 1) * self.count, sort_type, self.count))
+                (self.page - 1) * self.count, sort_type, self.count))
 
         elif self.type_id_list:
             self.query_sql = "SELECT B.ci_id FROM ({0}) AS B {1}".format(
@@ -170,13 +172,13 @@ class Search(object):
         elif self.type_id_list:
             self.query_sql = """SELECT C.ci_id
                                 FROM ({0}) AS C
-                                INNER JOIN cis on c_cis.id=C.ci_id
-                                WHERE cis.type_id in ({1})""".format(new_table, ",".join(self.type_id_list))
+                                INNER JOIN c_cis on c_cis.id=C.ci_id
+                                WHERE c_cis.type_id in ({1})""".format(new_table, ",".join(self.type_id_list))
 
             return """SELECT SQL_CALC_FOUND_ROWS DISTINCT C.ci_id, C.value
                       FROM ({0}) AS C
-                      INNER JOIN cis on c_cis.id=C.ci_id
-                      WHERE cis.type_id in ({4})
+                      INNER JOIN c_cis on c_cis.id=C.ci_id
+                      WHERE c_cis.type_id in ({4})
                       ORDER BY C.value {2}
                       LIMIT {1:d}, {3};""".format(new_table,
                                                   (self.page - 1) * self.count,
@@ -299,7 +301,7 @@ class Search(object):
             self.query_sql = query_sql
             current_app.logger.debug(query_sql)
             numfound, res = self._execute_sql(query_sql)
-            current_app.logger.info("query ci ids is: {0}".format(time.time() - s))
+            current_app.logger.debug("query ci ids is: {0}".format(time.time() - s))
             return numfound, [_res[0] for _res in res]
 
         return 0, []
