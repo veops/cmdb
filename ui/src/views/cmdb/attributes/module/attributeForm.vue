@@ -255,7 +255,6 @@ export default {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          // eslint-disable-next-line no-console
           console.log('Received values of form: ', values)
           if (values.choice_value) {
             values.choice_value = values.choice_value.split('\n')

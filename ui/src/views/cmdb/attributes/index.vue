@@ -12,7 +12,9 @@
       :rowKey="record=>record.id"
       :rowSelection="options.rowSelection"
       :scroll="scroll"
-      :showPagination="showPagination"
+      :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条记录`, pageSizeOptions: pageSizeOptions}"
+      showPagination="auto"
+      :pageSize="25"
       ref="table"
       size="middle"
 
@@ -20,7 +22,7 @@
       <div slot="filterDropdown" slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }" class="custom-filter-dropdown">
         <a-input
           v-ant-ref="c => searchInput = c"
-          :placeholder="`Search ${column.dataIndex}`"
+          :placeholder="` ${column.title}`"
           :value="selectedKeys[0]"
           @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
           @pressEnter="() => handleSearch(selectedKeys, confirm, column)"
@@ -32,12 +34,12 @@
           icon="search"
           size="small"
           style="width: 90px; margin-right: 8px"
-        >Search</a-button>
+        >搜索</a-button>
         <a-button
           @click="() => handleReset(clearFilters, column)"
           size="small"
           style="width: 90px"
-        >Reset</a-button>
+        >重置</a-button>
       </div>
       <a-icon slot="filterIcon" slot-scope="filtered" type="search" :style="{ color: filtered ? '#108ee9' : undefined }" />
 
@@ -69,7 +71,16 @@
         <template>
           <a @click="handleEdit(record)">编辑</a>
           <a-divider type="vertical"/>
-          <a @click="handleDelete(record)">删除</a>
+
+          <a-popconfirm
+            title="确认删除?"
+            @confirm="handleDelete(record)"
+            @cancel="cancel"
+            okText="是"
+            cancelText="否"
+          >
+            <a>删除</a>
+          </a-popconfirm>
         </template>
       </span>
 
@@ -93,7 +104,7 @@ export default {
   },
   data () {
     return {
-      scroll: { x: 1400, y: 500 },
+      scroll: { x: 1000, y: 500 },
       btnName: '新增属性',
 
       CITypeName: this.$route.params.CITypeName,
@@ -107,11 +118,8 @@ export default {
       transferTargetKeys: [],
       transferSelectedKeys: [],
       originTargetKeys: [],
+      pageSizeOptions: ['10', '25', '50', '100'],
 
-      pagination: {
-        defaultPageSize: 20
-      },
-      showPagination: false,
       columnSearchText: {
         alias: '',
         name: ''
@@ -121,7 +129,7 @@ export default {
           title: '名称',
           dataIndex: 'alias',
           sorter: false,
-          width: 200,
+          width: 250,
           scopedSlots: {
             customRender: 'aliasSearchRender',
             filterDropdown: 'filterDropdown',
@@ -140,7 +148,7 @@ export default {
           title: '英文名',
           dataIndex: 'name',
           sorter: false,
-          width: 200,
+          width: 250,
           scopedSlots: {
             customRender: 'nameSearchRender',
             filterDropdown: 'filterDropdown',
@@ -159,7 +167,7 @@ export default {
           title: '类型',
           dataIndex: 'value_type',
           sorter: false,
-          width: 100,
+          width: 80,
           scopedSlots: { customRender: 'value_type' },
           customRender: (text) => valueTypeMap[text]
 
@@ -167,7 +175,7 @@ export default {
         {
           title: '唯一',
           dataIndex: 'is_unique',
-          width: 80,
+          width: 50,
           sorter: false,
           scopedSlots: { customRender: 'is_check' }
 
@@ -176,7 +184,7 @@ export default {
           title: '索引',
           dataIndex: 'is_index',
           sorter: false,
-          width: 80,
+          width: 50,
           scopedSlots: { customRender: 'is_check' }
 
         },
@@ -184,7 +192,7 @@ export default {
           title: '排序',
           dataIndex: 'is_sortable',
           sorter: false,
-          width: 80,
+          width: 50,
           scopedSlots: { customRender: 'is_check' }
 
         },
@@ -192,7 +200,7 @@ export default {
           title: '链接',
           dataIndex: 'is_link',
           sorter: false,
-          width: 80,
+          width: 50,
           scopedSlots: { customRender: 'is_check' }
 
         },
@@ -200,7 +208,7 @@ export default {
           title: '密码',
           dataIndex: 'is_password',
           sorter: false,
-          width: 100,
+          width: 50,
           scopedSlots: { customRender: 'is_check' }
 
         },
@@ -221,15 +229,22 @@ export default {
         }
       ],
       loadData: parameter => {
+        parameter['page_size'] = parameter['pageSize']
+        parameter['page'] = parameter['pageNo']
+        Object.assign(parameter, this.queryParam)
         console.log('loadData.parameter', parameter)
 
-        return searchAttributes()
+        return searchAttributes(parameter)
           .then(res => {
-            this.allAttributes = res.attributes
-            return {
-              data: res.attributes
+            res.pageNo = res.page
+            res.pageSize = res.total
+            res.totalCount = res.numfound
+            res.totalPage = Math.ceil(res.numfound / parameter.pageSize)
+            res.data = res.attributes
 
-            }
+            console.log('loadData.res', res)
+            this.allAttributes = res.attributes
+            return res
           })
       },
 
@@ -285,17 +300,20 @@ export default {
     this.getAttributes()
     this.setScrollY()
   },
+  inject: ['reload'],
+
   methods: {
     handleSearch (selectedKeys, confirm, column) {
       confirm()
       this.columnSearchText[column.dataIndex] = selectedKeys[0]
+      this.queryParam[column.dataIndex] = selectedKeys[0]
     },
 
     handleReset (clearFilters, column) {
       clearFilters()
       this.columnSearchText[column.dataIndex] = ''
+      this.queryParam[column.dataIndex] = ''
     },
-
     getAttributes () {
       searchAttributes().then(res => {
         this.allAttributes = res.attributes

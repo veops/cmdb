@@ -11,16 +11,26 @@ from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.attribute import AttributeManager
 from api.lib.decorator import args_required
 from api.lib.utils import handle_arg_list
+from api.lib.utils import get_page
+from api.lib.utils import get_page_size
+
 
 
 class AttributeSearchView(APIView):
     url_prefix = ("/attributes/s", "/attributes/search")
 
     def get(self):
-        q = request.values.get("q")
-        attrs = AttributeManager().get_attributes(name=q)
-        count = len(attrs)
-        return self.jsonify(numfound=count, attributes=attrs)
+        name = request.values.get("name")
+        alias = request.values.get("alias")
+        page = get_page(request.values.get("page", 1))
+        page_size = get_page_size(request.values.get("page_size"))
+        numfound, res = AttributeManager.search_attributes(name=name, alias=alias, page=page, page_size=page_size)
+
+        return self.jsonify(page=page,
+                            page_size=page_size,
+                            numfound=numfound,
+                            total=len(res),
+                            attributes=res)
 
 
 class AttributeView(APIView):

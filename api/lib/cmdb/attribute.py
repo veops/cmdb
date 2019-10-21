@@ -38,17 +38,30 @@ class AttributeManager(object):
             db.session.add(table)
         db.session.flush()
 
-    def get_attributes(self, name=None):
+    @classmethod
+    def search_attributes(cls, name=None, alias=None, page=1, page_size=None):
         """
         :param name: 
+        :param alias: 
+        :param page: 
+        :param page_size: 
         :return: attribute, if name is None, then return all attributes
         """
-        attrs = Attribute.get_by_like(name=name) if name is not None else Attribute.get_by()
+        if name is not None:
+            attrs = Attribute.get_by_like(name=name)
+        elif alias is not None:
+            attrs = Attribute.get_by_like(alias=alias)
+        else:
+            attrs = Attribute.get_by()
+
+        numfound = len(attrs)
+        attrs = attrs[(page - 1) * page_size:][:page_size]
         res = list()
         for attr in attrs:
-            attr["is_choice"] and attr.update(dict(choice_value=self.get_choice_values(attr["id"], attr["value_type"])))
+            attr["is_choice"] and attr.update(dict(choice_value=cls.get_choice_values(attr["id"], attr["value_type"])))
             res.append(attr)
-        return res
+
+        return numfound, res
 
     def get_attribute_by_name(self, name):
         attr = Attribute.get_by(name=name, first=True)
@@ -112,19 +125,19 @@ class AttributeManager(object):
         is_choice = True if choice_value else False
 
         attr.update(flush=True, **kwargs)
-        
+
         if is_choice:
             self._add_choice_values(attr.id, attr.value_type, choice_value)
-            
+
         try:
             db.session.commit()
         except Exception as e:
             db.session.rollback()
             current_app.logger.error("update attribute error, {0}".format(str(e)))
             return abort(400, "update attribute <{0}> failed".format(_id))
-        
+
         AttributeCache.clean(attr)
-        
+
         return attr.id
 
     @staticmethod
