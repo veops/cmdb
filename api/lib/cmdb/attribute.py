@@ -96,7 +96,8 @@ class AttributeManager(object):
         name = kwargs.pop("name")
         alias = kwargs.pop("alias", "")
         alias = name if not alias else alias
-        Attribute.get_by(name=name, first=True) and abort(400, "attribute {0} is already existed".format(name))
+        Attribute.get_by(name=name, first=True) and abort(400, "attribute name <{0}> is already existed".format(name))
+        Attribute.get_by(alias=alias, first=True) and abort(400, "attribute alias <{0}> is already existed".format(name))
 
         attr = Attribute.create(flush=True,
                                 name=name,
@@ -120,6 +121,15 @@ class AttributeManager(object):
 
     def update(self, _id, **kwargs):
         attr = Attribute.get_by_id(_id) or abort(404, "Attribute <{0}> does not exist".format(_id))
+
+        if kwargs.get("name"):
+            other = Attribute.get_by(name=kwargs['name'], first=True, to_dict=False)
+            if other and other.id != attr.id:
+                return abort(400, "Attribute name <{0}> cannot be duplicate!".format(kwargs['name']))
+        if kwargs.get("alias"):
+            other = Attribute.get_by(alias=kwargs['alias'], first=True, to_dict=False)
+            if other and other.id != attr.id:
+                return abort(400, "Attribute alias <{0}> cannot be duplicate!".format(kwargs['alias']))
 
         choice_value = kwargs.pop("choice_value", False)
         is_choice = True if choice_value else False
