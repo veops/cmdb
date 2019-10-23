@@ -135,7 +135,7 @@ export default {
             filterDropdown: 'filterDropdown',
             filterIcon: 'filterIcon'
           },
-          onFilter: (value, record) => record.alias.toLowerCase().includes(value.toLowerCase()),
+          onFilter: (value, record) => record.alias && record.alias.toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
               setTimeout(() => {
@@ -154,7 +154,7 @@ export default {
             filterDropdown: 'filterDropdown',
             filterIcon: 'filterIcon'
           },
-          onFilter: (value, record) => record.name.toLowerCase().includes(value.toLowerCase()),
+          onFilter: (value, record) => record.name && record.name.toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
               setTimeout(() => {

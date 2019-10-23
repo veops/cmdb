@@ -16,6 +16,7 @@
       :showPagination="showPagination"
       ref="table"
       size="middle"
+
     >
       <div slot="filterDropdown" slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }" class="custom-filter-dropdown">
         <a-input
@@ -69,7 +70,15 @@
         <template>
           <a @click="handleEdit(record)">编辑</a>
           <a-divider type="vertical"/>
-          <a @click="handleDelete(record)">删除</a>
+
+          <a-popconfirm
+            title="确认删除?"
+            @confirm="handleDelete(record)"
+            okText="是"
+            cancelText="否"
+          >
+            <a>删除</a>
+          </a-popconfirm>
         </template>
       </span>
 
@@ -84,7 +93,7 @@
       placement="right"
       width="30%"
     >
-      <a-form :form="form" :layout="formLayout" @submit="handleBatchUpdateSubmit">
+      <a-form :form="form" :layout="formLayout" @submit="handleBatchUpdateSubmit" style="margin-bottom: 5rem">
 
         <a-transfer
           :dataSource="transferData"
@@ -147,7 +156,7 @@ export default {
   data () {
     return {
       form: this.$form.createForm(this),
-      scroll: { x: 1300, y: 600 },
+      scroll: { x: 1030, y: 600 },
       singleAttrAction: {
         btnName: '新增属性',
         drawerTitle: '新增属性',
@@ -335,7 +344,7 @@ export default {
 
   beforeCreate () {
   },
-
+  inject: ['reload'],
   computed: {
 
     removeTransferKeys () {
@@ -445,6 +454,7 @@ export default {
     },
     handleOk () {
       this.$refs.table.refresh()
+      this.reload()
     },
     handleCreate () {
       this.$refs.attributeForm.handleCreate()

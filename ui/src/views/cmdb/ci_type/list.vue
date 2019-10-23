@@ -28,6 +28,9 @@
                 <a-icon type="setting" />
               </router-link>
               <a-icon type="edit" @click="handleEdit(item)"/>
+              <a-popconfirm title="确认删除" @confirm="handleDelete(item)" okText="是" cancelText="否">
+                <a-icon type="delete"/>
+              </a-popconfirm>
             </template>
             <a-card-meta>
               <div slot="title" style="margin-bottom: 3px">{{ item.alias || item.name }}</div>
@@ -89,9 +92,13 @@
         >
 
           <a-select
+            showSearch
+            optionFilterProp="children"
             name="unique_key"
             style="width: 200px"
+            :filterOption="filterOption"
             v-decorator="['unique_key', {rules: [{required: true}], } ]"
+
           >
             <a-select-option :key="item.id" :value="item.id" v-for="item in allAttributes">{{ item.alias || item.name }}</a-select-option>
           </a-select>
@@ -130,7 +137,7 @@
 
 <script>
 
-import { getCITypes, createCIType, updateCIType } from '@/api/cmdb/CIType'
+import { getCITypes, createCIType, updateCIType, deleteCIType } from '@/api/cmdb/CIType'
 import { searchAttributes } from '@/api/cmdb/CITypeAttr'
 
 export default {
@@ -177,6 +184,12 @@ export default {
     this.getAttributes()
   },
   methods: {
+
+    filterOption (input, option) {
+      return (
+        option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
+      )
+    },
     getCITypes () {
       getCITypes().then(res => {
         this.CITypes = res.ci_types
@@ -185,7 +198,7 @@ export default {
     },
 
     getAttributes () {
-      searchAttributes().then(res => {
+      searchAttributes({ page_size: 10000 }).then(res => {
         this.allAttributes = res.attributes
       })
     },
@@ -201,7 +214,6 @@ export default {
       this.drawerTitle = '编辑模型'
       this.drawerVisible = true
 
-      console.log(record)
       this.$nextTick(() => {
         this.form.setFieldsValue({
           id: record.id,
@@ -211,6 +223,15 @@ export default {
 
         })
       })
+    },
+
+    handleDelete (record) {
+      deleteCIType(record.id)
+        .then(res => {
+          this.$message.success(`删除成功`)
+          this.getCITypes()
+        })
+        .catch(err => this.requestFailed(err))
     },
 
     handleSubmit (e) {
