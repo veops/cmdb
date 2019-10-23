@@ -14,6 +14,7 @@ from api.lib.database import CRUDModel
 
 
 class UserQuery(BaseQuery):
+
     def authenticate(self, login, password):
         user = self.filter(db.or_(User.username == login,
                                   User.email == login)).first()
@@ -28,8 +29,8 @@ class UserQuery(BaseQuery):
         user = self.filter(User.key == key).filter(User.block == 0).first()
         if not user:
             return None, False
-        if user and hashlib.sha1('%s%s%s' % (
-                path, user.secret, "".join(args))).hexdigest() == secret:
+        if user and hashlib.sha1('{0}{1}{2}'.format(
+                path, user.secret, "".join(args)).encode("utf-8")).hexdigest() == secret:
             authenticated = True
         else:
             authenticated = False
@@ -79,9 +80,6 @@ class User(CRUDModel):
     wx_id = db.Column(db.String(32))
     avatar = db.Column(db.String(128))
 
-    def __init__(self, *args, **kwargs):
-        super(User, self).__init__(*args, **kwargs)
-
     def __str__(self):
         return self.username
 
@@ -99,7 +97,7 @@ class User(CRUDModel):
         return self._password
 
     def _set_password(self, password):
-        self._password = hashlib.md5(password).hexdigest()
+        self._password = hashlib.md5(password.encode('utf-8')).hexdigest()
 
     password = db.synonym("_password",
                           descriptor=property(_get_password,
@@ -176,7 +174,7 @@ class RoleCache(object):
     @classmethod
     def get(cls, rid):
         role = None
-        if isinstance(rid, (int, long)):
+        if isinstance(rid, six.integer_types):
             role = cache.get("Role::rid::%s" % rid)
             if not role:
                 role = db.session.query(Role).filter(Role.rid == rid).first()
