@@ -55,9 +55,21 @@ export function updateCIType (CITypeId, data) {
 }
 
 /**
+ * 删除 ci_type
+ * @param CITypeId
+ * @returns {AxiosPromise}
+ */
+export function deleteCIType (CITypeId) {
+  return axios({
+    url: `/v0.1/ci_types/${CITypeId}`,
+    method: 'DELETE'
+  })
+}
+
+/**
  * 获取 某个 ci_type 的分组
  * @param CITypeId
- * @param parameter
+ * @param data
  * @returns {AxiosPromise}
  */
 export function getCITypeGroupById (CITypeId, data) {
