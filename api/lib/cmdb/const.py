@@ -47,8 +47,8 @@ type_map = {
         Attribute.FLOAT: float,
         Attribute.TEXT: str,
         Attribute.TIME: str,
-        Attribute.DATE: lambda x: x.strftime("%Y%m%d"),
-        Attribute.DATETIME: lambda x: x.strftime("%Y%m%d %H:%M:%S"),
+        Attribute.DATE: lambda x: x.strftime("%Y-%m-%d"),
+        Attribute.DATETIME: lambda x: x.strftime("%Y-%m-%d %H:%M:%S"),
     },
     'serialize2': {
         Attribute.INT: int,
