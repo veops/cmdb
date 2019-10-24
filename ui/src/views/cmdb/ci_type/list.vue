@@ -10,7 +10,7 @@
     >
       <a-list-item slot="renderItem" slot-scope="item">
 
-        <template v-if="item === null">
+        <template v-if="Object.keys(item).length === 0">
           <a-button class="new-btn" type="dashed" @click="handleCreate">
             <a-icon type="plus"/>
             新增
@@ -193,7 +193,7 @@ export default {
     getCITypes () {
       getCITypes().then(res => {
         this.CITypes = res.ci_types
-        this.CITypes.unshift(null)
+        this.CITypes.unshift({})
       })
     },
 
