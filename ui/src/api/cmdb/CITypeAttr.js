@@ -61,11 +61,11 @@ export function createAttribute (data) {
  * @param data
  * @returns {AxiosPromise}
  */
-export function searchAttributes (data) {
+export function searchAttributes (params) {
   return axios({
     url: `/v0.1/attributes/s`,
     method: 'get',
-    params: data
+    params: params
   })
 }
 
