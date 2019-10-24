@@ -124,7 +124,7 @@
         <a-textarea
           :rows="5"
           name="choice_value"
-          placeholder="多个值使用半角逗号“,”分隔"
+          placeholder="多个值使用换行分隔"
           v-decorator="['choice_value', {rules: []} ]"
         />
       </a-form-item>
