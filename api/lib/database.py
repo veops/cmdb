@@ -10,7 +10,9 @@ from api.lib.exception import CommitException
 
 class FormatMixin(object):
     def to_dict(self):
-        return dict([(k.name, getattr(self, k.name)) for k in getattr(self, "__table__").columns])
+        return dict([(k.name,
+                      getattr(self, k.name) if not isinstance(getattr(self, k.name), datetime.datetime) else getattr(
+                          self, k.name).strftime('%Y-%m-%d %H:%M:%S')) for k in getattr(self, "__table__").columns])
 
     @classmethod
     def get_columns(cls):
@@ -18,7 +20,6 @@ class FormatMixin(object):
 
 
 class CRUDMixin(FormatMixin):
-
     @classmethod
     def create(cls, flush=False, **kwargs):
         return cls(**kwargs).save(flush=flush)

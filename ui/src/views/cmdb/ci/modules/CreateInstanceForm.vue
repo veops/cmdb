@@ -128,6 +128,11 @@ export default {
     createInstance (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
+        Object.keys(values).forEach(k => {
+          if (typeof values[k] === 'object') {
+            values[k] = values[k].format("YYYY-MM-DD HH:mm:ss")
+          }
+        })
         if (!err) {
           if (this.action === 'update') {
             this.$emit('submit', values)
