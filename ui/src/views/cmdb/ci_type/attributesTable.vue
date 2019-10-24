@@ -393,7 +393,7 @@ export default {
     },
 
     getAttributes () {
-      searchAttributes().then(res => {
+      searchAttributes({ page_size: 10000 }).then(res => {
         this.allAttributes = res.attributes
       })
     },
