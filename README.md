@@ -34,7 +34,6 @@ Overview
 - 启动mysql服务, redis服务
 
 - 创建数据库cmdb
-
 - 拉取代码
 ```bash
 git clone https://github.com/pycook/cmdb.git
@@ -48,6 +47,7 @@ cp api/settings.py.example api/settings.py
   - 前端: ```cd ui && yarn install && cd ..```
   
 - 创建数据库表 ```pipenv run flask db-setup```
+- 可以将docs/cmdb.sql导入到数据库里，登录用户和密码都是:admin
   
 - 启动服务
   - 后端: ```pipenv run flask run```
