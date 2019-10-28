@@ -4,7 +4,6 @@
 migrates
 */logs/*
 config.cfg
-*.sql
 logs/*
 *.log
 *_packed.js
