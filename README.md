@@ -19,9 +19,9 @@
     
 Overview
 ----
-![基础资源视图](ui/public/cmdb01.jpeg)
+![基础资源视图](https://raw.githubusercontent.com/pycook/cmdb/master/ui/public/cmdb01.jpeg)
 
-![模型配置](ui/public/cmdb02.jpeg)
+![模型配置](https://raw.githubusercontent.com/pycook/cmdb/master/ui/public/cmdb02.jpeg)
 
 环境和依赖
 ----
