@@ -2,9 +2,7 @@
 .idea
 .vscode
 migrates
-*/logs/*
 config.cfg
-logs/*
 *.log
 *_packed.js
 *_packed.css
