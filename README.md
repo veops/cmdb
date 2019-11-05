@@ -50,9 +50,9 @@ cp api/settings.py.example api/settings.py
 - 可以将docs/cmdb.sql导入到数据库里，登录用户和密码都是:admin
   
 - 启动服务
-  - 后端: ```pipenv run flask run```
+  - 后端: ```pipenv run flask run -h 0.0.0.0```
   - 前端: ```cd ui && yarn run serve```
   
   - 浏览器打开:  [http://127.0.0.1:8000](http://127.0.0.1:8000)
-    - 如果是非本机访问, 要修改ui/.env里VUE_APP_API_BASE_URL里的IP地址
+    - 如果是非本机访问, 要修改**ui/.env**里**VUE_APP_API_BASE_URL**里的IP地址为后端服务的ip地址
 
