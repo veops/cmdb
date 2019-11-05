@@ -45,6 +45,7 @@ cp api/settings.py.example api/settings.py
 - 安装库
   - 后端: ```pipenv run pipenv install```
   - 前端: ```cd ui && yarn install && cd ..```
+    - 如果是非本机访问, 要修改ui/.env里VUE_APP_API_BASE_URL里的IP地址
   
 - 创建数据库表 ```pipenv run flask db-setup```
 - 可以将docs/cmdb.sql导入到数据库里，登录用户和密码都是:admin
