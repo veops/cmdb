@@ -5,8 +5,8 @@ from flask import session
 from flask_login import current_user
 
 from api.lib.decorator import args_required
-from api.lib.perm.acl import ACLManager
-from api.lib.perm.acl import validate_permission
+from api.lib.perm.acl.acl import ACLManager
+from api.lib.perm.acl.acl import validate_permission
 from api.resource import APIView
 
 

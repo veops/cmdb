@@ -3,17 +3,15 @@
 import json
 
 import bs4
+from flask import Blueprint
+from flask import current_app, session, request, url_for, redirect
+from flask_login import login_user, logout_user
 from six.moves.urllib_request import urlopen
 
-from flask import Blueprint
-from flask_login import login_user, logout_user
-from flask import current_app, session, request, url_for, redirect
-
+from api.models.account import UserCache
 from .cas_urls import create_cas_login_url
 from .cas_urls import create_cas_logout_url
 from .cas_urls import create_cas_validate_url
-
-from api.models.account import UserCache
 
 blueprint = Blueprint('cas', __name__)
 

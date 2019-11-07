@@ -1,14 +1,14 @@
 # -*- coding:utf-8 -*-
 
 
-from flask import request
 from flask import abort
+from flask import request
 
-from api.resource import APIView
-from api.lib.perm.acl import role_required
 from api.lib.cmdb.const import RoleEnum
-from api.lib.decorator import args_required
 from api.lib.cmdb.relation_type import RelationTypeManager
+from api.lib.decorator import args_required
+from api.lib.perm.acl.acl import role_required
+from api.resource import APIView
 
 
 class RelationTypeView(APIView):

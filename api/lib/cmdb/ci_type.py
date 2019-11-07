@@ -1,21 +1,21 @@
 # -*- coding:utf-8 -*- 
 
 
-from flask import current_app
 from flask import abort
+from flask import current_app
 
-from api.models.cmdb import CITypeAttribute
-from api.models.cmdb import CIType
-from api.models.cmdb import CITypeGroup
-from api.models.cmdb import CITypeGroupItem
-from api.models.cmdb import CITypeRelation
-from api.models.cmdb import CITypeAttributeGroup
-from api.models.cmdb import CITypeAttributeGroupItem
+from api.lib.cmdb.attribute import AttributeManager
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributeCache
 from api.lib.cmdb.cache import CITypeCache
-from api.lib.cmdb.attribute import AttributeManager
 from api.lib.decorator import kwargs_required
+from api.models.cmdb import CIType
+from api.models.cmdb import CITypeAttribute
+from api.models.cmdb import CITypeAttributeGroup
+from api.models.cmdb import CITypeAttributeGroupItem
+from api.models.cmdb import CITypeGroup
+from api.models.cmdb import CITypeGroupItem
+from api.models.cmdb import CITypeRelation
 
 
 class CITypeManager(object):
@@ -54,8 +54,7 @@ class CITypeManager(object):
         unique_key = kwargs.pop("unique_key", None)
         unique_key = AttributeCache.get(unique_key) or abort(404, "Unique key is not defined")
 
-        CIType.get_by(name=kwargs['name'], first=True) and \
-            abort(404, "CIType <{0}> is already existed".format(kwargs.get("name")))
+        CIType.get_by(name=kwargs['name']) and abort(404, "CIType <{0}> is already existed".format(kwargs.get("name")))
 
         kwargs["alias"] = kwargs["name"] if not kwargs.get("alias") else kwargs["alias"]
 
@@ -349,8 +348,8 @@ class CITypeAttributeGroupManager(object):
         :param attr_order:
         :return:
         """
-        existed = CITypeAttributeGroup.get_by(type_id=type_id, name=name, first=True, to_dict=False) \
-            or CITypeAttributeGroup.create(type_id=type_id, name=name, order=group_order)
+        existed = CITypeAttributeGroup.get_by(type_id=type_id, name=name, first=True, to_dict=False)
+        existed = existed or CITypeAttributeGroup.create(type_id=type_id, name=name, order=group_order)
         existed.update(order=group_order)
         attr_order = dict(attr_order)
         current_app.logger.info(attr_order)
@@ -382,7 +381,7 @@ class CITypeAttributeGroupManager(object):
     @staticmethod
     def delete(group_id):
         group = CITypeAttributeGroup.get_by_id(group_id) \
-            or abort(404, "AttributeGroup <{0}> does not exist".format(group_id))
+                or abort(404, "AttributeGroup <{0}> does not exist".format(group_id))
         group.soft_delete()
 
         items = CITypeAttributeGroupItem.get_by(group_id=group_id, to_dict=False)

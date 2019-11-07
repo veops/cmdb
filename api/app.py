@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """The app module, containing the app factory function."""
+import logging
 import os
 import sys
-import logging
-from logging.handlers import RotatingFileHandler
 from inspect import getmembers
+from logging.handlers import RotatingFileHandler
 
 from flask import Flask
 from flask import make_response, jsonify
@@ -12,8 +12,6 @@ from flask.blueprints import Blueprint
 from flask.cli import click
 
 import api.views
-from api.models.account import User
-from api.flask_cas import CAS
 from api.extensions import (
     bcrypt,
     cors,
@@ -24,6 +22,8 @@ from api.extensions import (
     celery,
     rd,
 )
+from api.flask_cas import CAS
+from api.models.account import User
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir)

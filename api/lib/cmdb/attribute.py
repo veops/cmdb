@@ -1,15 +1,15 @@
 # -*- coding:utf-8 -*- 
 
-from flask import current_app
 from flask import abort
+from flask import current_app
 
 from api.extensions import db
-from api.models.cmdb import Attribute
-from api.models.cmdb import CITypeAttribute
-from api.models.cmdb import PreferenceShowAttributes
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.const import type_map
 from api.lib.decorator import kwargs_required
+from api.models.cmdb import Attribute
+from api.models.cmdb import CITypeAttribute
+from api.models.cmdb import PreferenceShowAttributes
 
 
 class AttributeManager(object):
@@ -97,7 +97,8 @@ class AttributeManager(object):
         alias = kwargs.pop("alias", "")
         alias = name if not alias else alias
         Attribute.get_by(name=name, first=True) and abort(400, "attribute name <{0}> is already existed".format(name))
-        Attribute.get_by(alias=alias, first=True) and abort(400, "attribute alias <{0}> is already existed".format(name))
+        Attribute.get_by(alias=alias, first=True) and abort(400,
+                                                            "attribute alias <{0}> is already existed".format(name))
 
         attr = Attribute.create(flush=True,
                                 name=name,

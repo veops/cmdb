@@ -3,10 +3,10 @@
 
 from flask import request
 
-from api.lib.perm.acl import role_required
-from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.ci_type import CITypeRelationManager
+from api.lib.cmdb.const import RoleEnum
 from api.lib.decorator import args_required
+from api.lib.perm.acl.acl import role_required
 from api.resource import APIView
 
 

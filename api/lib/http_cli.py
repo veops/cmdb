@@ -4,10 +4,10 @@
 import hashlib
 
 import requests
-from future.moves.urllib.parse import urlparse
 from flask import abort
-from flask import g
 from flask import current_app
+from flask import g
+from future.moves.urllib.parse import urlparse
 
 
 def build_api_key(path, params):
