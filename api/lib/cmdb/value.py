@@ -129,7 +129,9 @@ class AttributeValueManager(object):
         operate_type = OperateType.ADD if existed_attr is None else OperateType.UPDATE
 
         value_list = handle_arg_list(value) if attr.is_list else [value]
-
+        if not isinstance(value, list):
+            value_list = [value]
+        
         for v in value_list:
             v = self._validate(attr, v, value_table, ci_id)
             if not v and attr.value_type != Attribute.TEXT:
