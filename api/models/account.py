@@ -4,16 +4,17 @@ import copy
 import hashlib
 from datetime import datetime
 
-import six
 from flask import current_app
 from flask_sqlalchemy import BaseQuery
 
-from api.extensions import db
 from api.extensions import cache
+from api.extensions import db
 from api.lib.database import CRUDModel
 
 
 class UserQuery(BaseQuery):
+    def _join(self, *args, **kwargs):
+        super(UserQuery, self)._join(*args, **kwargs)
 
     def authenticate(self, login, password):
         user = self.filter(db.or_(User.username == login,
@@ -60,9 +61,6 @@ class User(CRUDModel):
     __bind_key__ = "user"
     query_class = UserQuery
 
-    ADMIN = 1
-    OP = 2
-
     uid = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(32), unique=True)
     nickname = db.Column(db.String(20), nullable=True)
@@ -79,6 +77,7 @@ class User(CRUDModel):
     has_logined = db.Column(db.Boolean, default=False)
     wx_id = db.Column(db.String(32))
     avatar = db.Column(db.String(128))
+    is_admin = db.Column(db.Boolean, default=False)
 
     def __str__(self):
         return self.username
@@ -108,91 +107,34 @@ class User(CRUDModel):
             return False
         return self.password == password
 
-    @property
-    def roles(self):
-        urs = db.session.query(UserRole.rid).filter(
-            UserRole.uid == self.uid).all()
-        return [x.rid for x in urs]
-
-    @property
-    def rolenames(self):
-        roles = list()
-        for rid in self.roles:
-            role = db.session.query(Role).filter(Role.rid == rid).first()
-            roles.append(role.role_name)
-        return roles
-
-    @property
-    def is_admin(self):
-        return self.ADMIN in self.roles
-
-
-class Role(CRUDModel):
-    __tablename__ = 'roles'
-    __bind_key__ = "user"
-
-    rid = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    role_name = db.Column(db.String(64), nullable=False, unique=True)
-
-
-class UserRole(CRUDModel):
-    __tablename__ = 'users_roles'
-    __bind_key__ = "user"
-
-    uid = db.Column(db.Integer, db.ForeignKey('users.uid'), primary_key=True)
-    rid = db.Column(db.Integer, db.ForeignKey('roles.rid'), primary_key=True)
-
 
 class UserCache(object):
+    PREFIX_ID = "User::uid::{0}"
+    PREFIX_NAME = "User::username::{0}"
+    PREFIX_NICK = "User::nickname::{0}"
+
     @classmethod
     def get(cls, key):
-        user = cache.get("User::uid::%s" % key) or \
-            cache.get("User::username::%s" % key) or \
-            cache.get("User::nickname::%s" % key)
+        user = cache.get(cls.PREFIX_ID.format(key)) or \
+               cache.get(cls.PREFIX_NAME.format(key)) or \
+               cache.get(cls.PREFIX_NICK.format(key))
         if not user:
             user = User.query.get(key) or \
-                User.query.get_by_username(key) or \
-                User.query.get_by_nickname(key)
+                   User.query.get_by_username(key) or \
+                   User.query.get_by_nickname(key)
         if user:
             cls.set(user)
+
         return user
 
     @classmethod
     def set(cls, user):
-        cache.set("User::uid::%s" % user.uid, user)
-        cache.set("User::username::%s" % user.username, user)
-        cache.set("User::nickname::%s" % user.nickname, user)
+        cache.set(cls.PREFIX_ID.format(user.uid, user))
+        cache.set(cls.PREFIX_NAME.format(user.username, user))
+        cache.set(cls.PREFIX_NICK.format(user.nickname, user))
 
     @classmethod
     def clean(cls, user):
-        cache.delete("User::uid::%s" % user.uid)
-        cache.delete("User::username::%s" % user.username)
-        cache.delete("User::nickname::%s" % user.nickname)
-
-
-class RoleCache(object):
-    @classmethod
-    def get(cls, rid):
-        role = None
-        if isinstance(rid, six.integer_types):
-            role = cache.get("Role::rid::%s" % rid)
-            if not role:
-                role = db.session.query(Role).filter(Role.rid == rid).first()
-                cls.set(role)
-        elif isinstance(rid, six.string_types):
-            role = cache.get("Role::role_name::%s" % rid)
-            if not role:
-                role = db.session.query(Role).filter(
-                    Role.role_name == rid).first()
-                cls.set(role)
-        return role
-
-    @classmethod
-    def set(cls, role):
-        cache.set("Role::rid::%s" % role.rid, role)
-        cache.set("Role::role_name::%s" % role.role_name, role)
-
-    @classmethod
-    def clean(cls, role):
-        cache.delete("Role::rid::%s" % role.rid, role)
-        cache.delete("Role::role_name::%s" % role.role_name, role)
+        cache.delete(cls.PREFIX_ID.format(user.uid))
+        cache.delete(cls.PREFIX_NAME.format(user.username))
+        cache.delete(cls.PREFIX_NICK.format(user.nickname))

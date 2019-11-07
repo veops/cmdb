@@ -4,11 +4,11 @@
 from functools import wraps
 
 import jwt
+from flask import abort
 from flask import current_app
+from flask import g
 from flask import request
 from flask import session
-from flask import g
-from flask import abort
 from flask_login import login_user
 
 from api.models.account import User
@@ -54,7 +54,7 @@ def _auth_with_token():
         return True
     except jwt.ExpiredSignatureError:
         return False
-    except (jwt.InvalidTokenError, Exception) as e:
+    except (jwt.InvalidTokenError, Exception):
         return False
 
 

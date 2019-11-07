@@ -1,7 +1,8 @@
 # -*- coding:utf-8 -*-
 
-from api.extensions import celery
 from flask import current_app
+
+from api.extensions import celery
 
 
 @celery.task(queue="ticket_web")

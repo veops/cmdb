@@ -5,19 +5,19 @@ import datetime
 import six
 from markupsafe import escape
 
+from api.lib.cmdb.cache import AttributeCache
 from api.models.cmdb import Attribute
-from api.models.cmdb import TextChoice
-from api.models.cmdb import FloatChoice
-from api.models.cmdb import IntegerChoice
-from api.models.cmdb import CIValueText
-from api.models.cmdb import CIValueInteger
-from api.models.cmdb import CIValueFloat
-from api.models.cmdb import CIValueDateTime
 from api.models.cmdb import CIIndexValueDateTime
 from api.models.cmdb import CIIndexValueFloat
 from api.models.cmdb import CIIndexValueInteger
 from api.models.cmdb import CIIndexValueText
-from api.lib.cmdb.cache import AttributeCache
+from api.models.cmdb import CIValueDateTime
+from api.models.cmdb import CIValueFloat
+from api.models.cmdb import CIValueInteger
+from api.models.cmdb import CIValueText
+from api.models.cmdb import FloatChoice
+from api.models.cmdb import IntegerChoice
+from api.models.cmdb import TextChoice
 
 
 def string2int(x):
@@ -143,6 +143,7 @@ class PermEnum(object):
 
 class RoleEnum(object):
     CONFIG = "admin"
+
 
 CMDB_QUEUE = "cmdb_async"
 REDIS_PREFIX = "CMDB_CI"

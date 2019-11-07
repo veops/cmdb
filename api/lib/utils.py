@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*- 
 
-import six
 import redis
+import six
 from flask import current_app
 
 
@@ -52,7 +52,7 @@ class RedisHandler(object):
         try:
             value = self.r.hmget(self.prefix, key_ids)
         except Exception as e:
-            current_app.logger.error("get redis error, %s" % str(e))
+            current_app.logger.error("get redis error, {0}".format(str(e)))
             return
         return value
 
@@ -60,7 +60,7 @@ class RedisHandler(object):
         try:
             self.r.hmset(self.prefix, obj)
         except Exception as e:
-            current_app.logger.error("set redis error, %s" % str(e))
+            current_app.logger.error("set redis error, {0}".format(str(e)))
 
     def add(self, obj):
         self._set(obj)
@@ -69,6 +69,6 @@ class RedisHandler(object):
         try:
             ret = self.r.hdel(self.prefix, key_id)
             if not ret:
-                current_app.logger.warn("[%d] is not in redis" % key_id)
+                current_app.logger.warn("[%d] is not in redis".format(key_id))
         except Exception as e:
-            current_app.logger.error("delete redis key error, %s" % str(e))
+            current_app.logger.error("delete redis key error, {0}".format(str(e)))

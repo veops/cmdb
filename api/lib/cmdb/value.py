@@ -2,18 +2,17 @@
 
 
 import markupsafe
-
 from flask import abort
 
 from api.extensions import db
-from api.lib.utils import handle_arg_list
-from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.attribute import AttributeManager
-from api.lib.cmdb.const import type_map
-from api.lib.cmdb.const import TableMap
+from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.const import ExistPolicy
 from api.lib.cmdb.const import OperateType
+from api.lib.cmdb.const import TableMap
+from api.lib.cmdb.const import type_map
 from api.lib.cmdb.history import AttributeHistoryManger
+from api.lib.utils import handle_arg_list
 from api.models.cmdb import Attribute
 
 
@@ -87,10 +86,10 @@ class AttributeValueManager(object):
 
     @staticmethod
     def __check_is_unique(value_table, attr_id, ci_id, value):
-        db.session.query(value_table.attr_id).filter(
+        existed = db.session.query(value_table.attr_id).filter(
             value_table.attr_id == attr_id).filter(value_table.deleted.is_(False)).filter(
-            value_table.value == value).filter(value_table.ci_id != ci_id).first() \
-            and abort(400, "attribute <{0}> value {1} must be unique".format(attr_id, value))
+            value_table.value == value).filter(value_table.ci_id != ci_id).first()
+        existed and abort(400, "attribute <{0}> value {1} must be unique".format(attr_id, value))
 
     def _validate(self, attr, value, value_table, ci_id):
         v = self.__deserialize_value(attr.value_type, value)
@@ -131,7 +130,7 @@ class AttributeValueManager(object):
         value_list = handle_arg_list(value) if attr.is_list else [value]
         if not isinstance(value, list):
             value_list = [value]
-        
+
         for v in value_list:
             v = self._validate(attr, v, value_table, ci_id)
             if not v and attr.value_type != Attribute.TEXT:

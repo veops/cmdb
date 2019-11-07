@@ -167,10 +167,10 @@ class CIManager(object):
 
         unique_key = AttributeCache.get(ci_type.unique_id) or abort(400, 'illegality unique attribute')
 
-        unique_value = ci_dict.get(unique_key.name) or \
-            ci_dict.get(unique_key.alias) or \
-            ci_dict.get(unique_key.id) or \
-            abort(400, '{0} missing'.format(unique_key.name))
+        unique_value = ci_dict.get(unique_key.name)
+        unique_value = unique_value or ci_dict.get(unique_key.alias)
+        unique_value = unique_value or ci_dict.get(unique_key.id)
+        unique_value = unique_value or abort(400, '{0} missing'.format(unique_key.name))
 
         existed = cls.ci_is_exist(unique_key, unique_value)
         if existed is not None:
@@ -425,8 +425,8 @@ class CIRelationManager(object):
 
     def get_second_cis(self, first_ci_id, relation_type_id=None, page=1, per_page=None, **kwargs):
         second_cis = db.session.query(CI.id).filter(CI.deleted.is_(False)).join(
-                CIRelation, CIRelation.second_ci_id == CI.id).filter(
-                    CIRelation.first_ci_id == first_ci_id)
+            CIRelation, CIRelation.second_ci_id == CI.id).filter(
+            CIRelation.first_ci_id == first_ci_id)
 
         if relation_type_id is not None:
             second_cis = second_cis.filter(CIRelation.relation_type_id == relation_type_id)
