@@ -56,3 +56,9 @@ cp api/settings.py.example api/settings.py
   - 浏览器打开:  [http://127.0.0.1:8000](http://127.0.0.1:8000)
     - 如果是非本机访问, 要修改**ui/.env**里**VUE_APP_API_BASE_URL**里的IP地址为后端服务的ip地址
 
+docker运行
+----
+进入主目录
+```
+    docker-compose up
+```

@@ -1,0 +1,100 @@
+version: '3.4'
+
+services:
+  cmdb-ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile-ui
+    image: cmdb-ui:0.1
+    container_name: cmdb-ui
+    command: ["sh", "-c", "sed -i 's#http://127.0.0.1:5000##g' .env && yarn run serve"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 5s
+      timeout: 5s
+      retries: 100
+      start_period: 10s
+    depends_on:
+      - cmdb-api
+    ports:
+      - "8000:8000"
+    networks:
+      - new
+
+  cmdb-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile-api
+    image: cmdb-api:0.1
+    container_name: cmdb-api
+    command: 
+      - /bin/bash
+      - -c
+      - |
+        cp api/settings.py.example api/settings.py
+        sed -i 's#{user}:{password}@127.0.0.1:3306/{db}#cmdb:123456@mysql:3306/cmdb#g' api/settings.py
+        sed -i 's/127.0.0.1/redis/g' api/settings.py
+        gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000
+    depends_on:
+      - cmdb-db 
+      - cmdb-cache
+    networks:
+      new:
+        aliases:
+          - cmdb-api 
+    
+  cmdb-db:
+    image: mysql:5.7
+    container_name: cmdb-db
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: '123456' 
+      MYSQL_DATABASE: 'cmdb'
+      MYSQL_USER: 'cmdb'
+      MYSQL_PASSWORD: '123456'
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./docs/cmdb.sql:/docker-entrypoint-initdb.d/cmdb.sql
+    networks:
+      new:
+        aliases:
+          - mysql 
+
+  cmdb-cache:
+    image: redis:latest
+    container_name: cmdb-cache
+    networks:
+      new:
+        aliases:
+          - redis
+
+  cmdb-proxy:
+    image: nginx:latest
+    container_name: cmdb-proxy
+    depends_on: 
+      - cmdb-api
+      - cmdb-ui
+    volumes:
+      - "$PWD/conf.d:/etc/nginx/conf.d"
+    environment:
+      CMDB_API_HOST: cmdb-api:5000
+      CMDB_UI_HOST: cmdb-ui:8000
+      NGINX_PORT: 80
+    volumes:
+      - ./docker-start/nginx.cmdb.conf.example:/etc/nginx/conf.d/nginx.cmdb.conf.example
+    command: 
+      - /bin/bash
+      - -c
+      - |
+        envsubst '$$CMDB_API_HOST  $$CMDB_UI_HOST $$NGINX_PORT' < /etc/nginx/conf.d/nginx.cmdb.conf.example > /etc/nginx/conf.d/cmdb.conf
+        nginx -g  'daemon off;'
+    networks:
+      - new
+    ports:
+      - "80:80"
+
+volumes:
+  db-data:
+
+networks:
+  new:
