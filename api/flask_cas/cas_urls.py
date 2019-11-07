@@ -68,7 +68,7 @@ def create_cas_login_url(cas_url, cas_route, service,
         ('service', service),
         ('renew', renew),
         ('gateway', gateway),
-        )
+    )
 
 
 def create_cas_logout_url(cas_url, cas_route, url=None):
@@ -91,7 +91,7 @@ def create_cas_logout_url(cas_url, cas_route, url=None):
         cas_url,
         cas_route,
         ('service', url),
-        )
+    )
 
 
 def create_cas_validate_url(cas_url, cas_route, service, ticket,
@@ -119,4 +119,4 @@ def create_cas_validate_url(cas_url, cas_route, service, ticket,
         ('service', service),
         ('ticket', ticket),
         ('renew', renew),
-        )
+    )

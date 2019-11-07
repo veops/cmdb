@@ -10,73 +10,84 @@ from api.models.cmdb import RelationType
 
 
 class AttributeCache(object):
+    PREFIX_ID = 'Field::ID::{0}'
+    PREFIX_NAME = 'Field::Name::{0}'
+    PREFIX_ALIAS = 'Field::Alias::{0}'
+
     @classmethod
     def get(cls, key):
         if key is None:
             return
-        attr = cache.get('Field::Name::{0}'.format(key)) \
-            or cache.get('Field::ID::{0}'.format(key)) \
-            or cache.get('Field::Alias::{0}'.format(key))
+        attr = cache.get(cls.PREFIX_NAME.format(key))
+        attr = attr or cache.get(cls.PREFIX_ID.format(key))
+        attr = attr or cache.get(cls.PREFIX_ALIAS.format(key))
 
         if attr is None:
-            attr = Attribute.get_by(name=key, first=True, to_dict=False) \
-                   or Attribute.get_by_id(key) \
-                   or Attribute.get_by(alias=key, first=True, to_dict=False)
+            attr = Attribute.get_by(name=key, first=True, to_dict=False)
+            attr = attr or Attribute.get_by_id(key)
+            attr = attr or Attribute.get_by(alias=key, first=True, to_dict=False)
             if attr is not None:
                 cls.set(attr)
         return attr
 
     @classmethod
     def set(cls, attr):
-        cache.set('Field::ID::{0}'.format(attr.id), attr)
-        cache.set('Field::Name::{0}'.format(attr.name), attr)
-        cache.set('Field::Alias::{0}'.format(attr.alias), attr)
+        cache.set(cls.PREFIX_ID.format(attr.id), attr)
+        cache.set(cls.PREFIX_NAME.format(attr.name), attr)
+        cache.set(cls.PREFIX_ALIAS.format(attr.alias), attr)
 
     @classmethod
     def clean(cls, attr):
-        cache.delete('Field::ID::{0}'.format(attr.id))
-        cache.delete('Field::Name::{0}'.format(attr.name))
-        cache.delete('Field::Alias::{0}'.format(attr.alias))
+        cache.delete(cls.PREFIX_ID.format(attr.id))
+        cache.delete(cls.PREFIX_NAME.format(attr.name))
+        cache.delete(cls.PREFIX_ALIAS.format(attr.alias))
 
 
 class CITypeCache(object):
+    PREFIX_ID = "CIType::ID::{0}"
+    PREFIX_NAME = "CIType::Name::{0}"
+    PREFIX_ALIAS = "CIType::Alias::{0}"
+
     @classmethod
     def get(cls, key):
         if key is None:
             return
-        ct = cache.get("CIType::ID::{0}".format(key)) or \
-            cache.get("CIType::Name::{0}".format(key)) or \
-            cache.get("CIType::Alias::{0}".format(key))
+        ct = cache.get(cls.PREFIX_NAME.format(key))
+        ct = ct or cache.get(cls.PREFIX_ID.format(key))
+        ct = ct or cache.get(cls.PREFIX_ALIAS.format(key))
         if ct is None:
-            ct = CIType.get_by(name=key, first=True, to_dict=False) or \
-                 CIType.get_by_id(key) or \
-                 CIType.get_by(alias=key, first=True, to_dict=False)
+            ct = CIType.get_by(name=key, first=True, to_dict=False)
+            ct = ct or CIType.get_by_id(key)
+            ct = ct or CIType.get_by(alias=key, first=True, to_dict=False)
             if ct is not None:
                 cls.set(ct)
         return ct
 
     @classmethod
     def set(cls, ct):
-        cache.set("CIType::Name::{0}".format(ct.name), ct)
-        cache.set("CIType::ID::{0}".format(ct.id), ct)
-        cache.set("CIType::Alias::{0}".format(ct.alias), ct)
+        cache.set(cls.PREFIX_NAME.format(ct.name), ct)
+        cache.set(cls.PREFIX_ID.format(ct.id), ct)
+        cache.set(cls.PREFIX_ALIAS.format(ct.alias), ct)
 
     @classmethod
     def clean(cls, key):
         ct = cls.get(key)
         if ct is not None:
-            cache.delete("CIType::Name::{0}".format(ct.name))
-            cache.delete("CIType::ID::{0}".format(ct.id))
-            cache.delete("CIType::Alias::{0}".format(ct.alias))
+            cache.delete(cls.PREFIX_NAME.format(ct.name))
+            cache.delete(cls.PREFIX_ID.format(ct.id))
+            cache.delete(cls.PREFIX_ALIAS.format(ct.alias))
 
 
 class RelationTypeCache(object):
+    PREFIX_ID = "RelationType::ID::{0}"
+    PREFIX_NAME = "RelationType::Name::{0}"
+
     @classmethod
     def get(cls, key):
         if key is None:
             return
-        ct = cache.get("RelationType::ID::{0}".format(key)) or \
-            cache.get("RelationType::Name::{0}".format(key))
+        ct = cache.get(cls.PREFIX_NAME.format(key))
+        ct = ct or cache.get(cls.PREFIX_ID.format(key))
         if ct is None:
             ct = RelationType.get_by(name=key, first=True, to_dict=False) or RelationType.get_by_id(key)
             if ct is not None:
@@ -85,15 +96,15 @@ class RelationTypeCache(object):
 
     @classmethod
     def set(cls, ct):
-        cache.set("RelationType::Name::{0}".format(ct.name), ct)
-        cache.set("RelationType::ID::{0}".format(ct.id), ct)
+        cache.set(cls.PREFIX_NAME.format(ct.name), ct)
+        cache.set(cls.PREFIX_ID.format(ct.id), ct)
 
     @classmethod
     def clean(cls, key):
         ct = cls.get(key)
         if ct is not None:
-            cache.delete("RelationType::Name::{0}".format(ct.name))
-            cache.delete("RelationType::ID::{0}".format(ct.id))
+            cache.delete(cls.PREFIX_NAME.format(ct.name))
+            cache.delete(cls.PREFIX_ID.format(ct.id))
 
 
 class CITypeAttributeCache(object):
@@ -101,13 +112,16 @@ class CITypeAttributeCache(object):
     key is type_id or type_name
     """
 
+    PREFIX_ID = "CITypeAttribute::ID::{0}"
+    PREFIX_NAME = "CITypeAttribute::Name::{0}"
+
     @classmethod
     def get(cls, key):
         if key is None:
             return
 
-        attrs = cache.get("CITypeAttribute::Name::{0}".format(key)) \
-            or cache.get("CITypeAttribute::ID::{0}".format(key))
+        attrs = cache.get(cls.PREFIX_NAME.format(key))
+        attrs = attrs or cache.get(cls.PREFIX_ID.format(key))
         if not attrs:
             attrs = CITypeAttribute.get_by(type_id=key, to_dict=False)
             if not attrs:
@@ -122,13 +136,13 @@ class CITypeAttributeCache(object):
     def set(cls, key, values):
         ci_type = CITypeCache.get(key)
         if ci_type is not None:
-            cache.set("CITypeAttribute::ID::{0}".format(ci_type.id), values)
-            cache.set("CITypeAttribute::Name::{0}".format(ci_type.name), values)
+            cache.set(cls.PREFIX_ID.format(ci_type.id), values)
+            cache.set(cls.PREFIX_NAME.format(ci_type.name), values)
 
     @classmethod
     def clean(cls, key):
         ci_type = CITypeCache.get(key)
         attrs = cls.get(key)
         if attrs is not None and ci_type:
-            cache.delete("CITypeAttribute::ID::{0}".format(ci_type.id))
-            cache.delete("CITypeAttribute::Name::{0}".format(ci_type.name))
+            cache.delete(cls.PREFIX_ID.format(ci_type.id))
+            cache.delete(cls.PREFIX_NAME.format(ci_type.name))

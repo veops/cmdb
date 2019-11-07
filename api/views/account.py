@@ -3,15 +3,15 @@
 import datetime
 
 import jwt
-from flask import request
-from flask import current_app
 from flask import abort
+from flask import current_app
+from flask import request
 from flask_login import login_user, logout_user
 
-from api.resource import APIView
 from api.lib.decorator import args_required
 from api.lib.perm.auth import auth_abandoned
 from api.models.account import User
+from api.resource import APIView
 
 
 class LoginView(APIView):

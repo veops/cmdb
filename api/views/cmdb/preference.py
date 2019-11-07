@@ -3,14 +3,13 @@
 
 from flask import request
 
-from api.resource import APIView
-from api.lib.perm.acl import has_perm_from_args
+from api.lib.cmdb.ci_type import CITypeManager
 from api.lib.cmdb.const import ResourceType, PermEnum
 from api.lib.cmdb.preference import PreferenceManager
-from api.lib.cmdb.ci import CIManager
-from api.lib.cmdb.ci_type import CITypeManager
 from api.lib.decorator import args_required
+from api.lib.perm.acl.acl import has_perm_from_args
 from api.lib.utils import handle_arg_list
+from api.resource import APIView
 
 
 class PreferenceShowCITypesView(APIView):

@@ -1,22 +1,20 @@
 # -*- coding:utf-8 -*- 
 
 
-from flask import g
 from flask import abort
-
+from flask import g
 
 from api.extensions import db
-from api.models.cmdb import Attribute
-from api.models.cmdb import OperationRecord
-from api.models.cmdb import AttributeHistory
-from api.models.cmdb import CIRelationHistory
-from api.models.account import UserCache
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import RelationTypeCache
+from api.models.account import UserCache
+from api.models.cmdb import Attribute
+from api.models.cmdb import AttributeHistory
+from api.models.cmdb import CIRelationHistory
+from api.models.cmdb import OperationRecord
 
 
 class AttributeHistoryManger(object):
-
     @staticmethod
     def get_records(start, end, username, page, page_size):
         records = db.session.query(OperationRecord).filter(OperationRecord.deleted.is_(False))
@@ -113,7 +111,6 @@ class AttributeHistoryManger(object):
 
 
 class CIRelationHistoryManager(object):
-
     @staticmethod
     def add(rel_obj, operate_type=CIRelationHistory.ADD):
         record = OperationRecord.create(uid=g.user.uid)

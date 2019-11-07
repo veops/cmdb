@@ -5,17 +5,17 @@ from flask import abort
 from flask import current_app
 from flask import request
 
-from api.resource import APIView
-from api.lib.perm.acl import role_required
-from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeCache
-from api.lib.cmdb.ci_type import CITypeAttributeManager
-from api.lib.cmdb.ci_type import CITypeManager
-from api.lib.cmdb.ci_type import CITypeGroupManager
 from api.lib.cmdb.ci_type import CITypeAttributeGroupManager
+from api.lib.cmdb.ci_type import CITypeAttributeManager
+from api.lib.cmdb.ci_type import CITypeGroupManager
+from api.lib.cmdb.ci_type import CITypeManager
+from api.lib.cmdb.const import RoleEnum
 from api.lib.decorator import args_required
+from api.lib.perm.acl.acl import role_required
 from api.lib.utils import handle_arg_list
+from api.resource import APIView
 
 
 class CITypeView(APIView):
@@ -128,7 +128,7 @@ class CITypeAttributeView(APIView):
     def post(self, type_id=None):
         attr_id_list = handle_arg_list(request.values.get("attr_id"))
         params = request.values
-        params.pop("attr_id",  "")
+        params.pop("attr_id", "")
 
         CITypeAttributeManager.add(type_id, attr_id_list, **params)
         return self.jsonify(attributes=attr_id_list)

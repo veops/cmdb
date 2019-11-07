@@ -3,8 +3,8 @@
 
 import datetime
 
-from api.lib.database import Model
 from api.extensions import db
+from api.lib.database import Model
 
 
 # template
@@ -57,7 +57,7 @@ class CITypeRelation(Model):
 
 class Attribute(Model):
     __tablename__ = "c_attributes"
-    
+
     INT = "0"
     FLOAT = "1"
     TEXT = "2"
@@ -76,8 +76,8 @@ class Attribute(Model):
     is_link = db.Column(db.Boolean, default=False)
     is_password = db.Column(db.Boolean, default=False)
     is_sortable = db.Column(db.Boolean, default=False)
-    
-    
+
+
 class CITypeAttribute(Model):
     __tablename__ = "c_ci_type_attributes"
 
@@ -171,7 +171,7 @@ class CIIndexValueInteger(Model):
     ci = db.relationship("CI", backref="c_value_index_integers.ci_id")
     attr = db.relationship("Attribute", backref="c_value_index_integers.attr_id")
 
-    __table_args__ = (db.Index("integer_attr_value_index", "attr_id", "value"), )
+    __table_args__ = (db.Index("integer_attr_value_index", "attr_id", "value"),)
 
 
 class CIIndexValueFloat(Model):
@@ -184,7 +184,7 @@ class CIIndexValueFloat(Model):
     ci = db.relationship("CI", backref="c_value_index_floats.ci_id")
     attr = db.relationship("Attribute", backref="c_value_index_floats.attr_id")
 
-    __table_args__ = (db.Index("float_attr_value_index", "attr_id", "value"), )
+    __table_args__ = (db.Index("float_attr_value_index", "attr_id", "value"),)
 
 
 class CIIndexValueText(Model):
@@ -197,7 +197,7 @@ class CIIndexValueText(Model):
     ci = db.relationship("CI", backref="c_value_index_texts.ci_id")
     attr = db.relationship("Attribute", backref="c_value_index_texts.attr_id")
 
-    __table_args__ = (db.Index("text_attr_value_index", "attr_id", "value"), )
+    __table_args__ = (db.Index("text_attr_value_index", "attr_id", "value"),)
 
 
 class CIIndexValueDateTime(Model):
@@ -210,7 +210,7 @@ class CIIndexValueDateTime(Model):
     ci = db.relationship("CI", backref="c_value_index_datetime.ci_id")
     attr = db.relationship("Attribute", backref="c_value_index_datetime.attr_id")
 
-    __table_args__ = (db.Index("datetime_attr_value_index", "attr_id", "value"), )
+    __table_args__ = (db.Index("datetime_attr_value_index", "attr_id", "value"),)
 
 
 class CIValueInteger(Model):

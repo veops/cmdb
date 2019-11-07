@@ -2,22 +2,21 @@
 
 import six
 import toposort
-from flask import g
 from flask import abort
+from flask import g
 
 from api.extensions import db
+from api.lib.cmdb.attribute import AttributeManager
 from api.lib.cmdb.cache import AttributeCache
-from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.cache import CITypeAttributeCache
+from api.lib.cmdb.cache import CITypeCache
+from api.models.cmdb import CITypeAttribute
+from api.models.cmdb import PreferenceRelationView
 from api.models.cmdb import PreferenceShowAttributes
 from api.models.cmdb import PreferenceTreeView
-from api.models.cmdb import PreferenceRelationView
-from api.models.cmdb import CITypeAttribute
-from api.lib.cmdb.attribute import AttributeManager
 
 
 class PreferenceManager(object):
-
     @staticmethod
     def get_types(instance=False, tree=False):
         types = db.session.query(PreferenceShowAttributes.type_id).filter(

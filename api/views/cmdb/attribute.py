@@ -1,19 +1,18 @@
 # -*- coding:utf-8 -*- 
 
 
-from flask import request
 from flask import abort
 from flask import current_app
+from flask import request
 
-from api.resource import APIView
-from api.lib.perm.acl import role_required
-from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.attribute import AttributeManager
+from api.lib.cmdb.const import RoleEnum
 from api.lib.decorator import args_required
-from api.lib.utils import handle_arg_list
+from api.lib.perm.acl.acl import role_required
 from api.lib.utils import get_page
 from api.lib.utils import get_page_size
-
+from api.lib.utils import handle_arg_list
+from api.resource import APIView
 
 
 class AttributeSearchView(APIView):
@@ -72,4 +71,4 @@ class AttributeView(APIView):
     @role_required(RoleEnum.CONFIG)
     def delete(self, attr_id):
         attr_name = AttributeManager.delete(attr_id)
-        return self. jsonify(message="attribute {0} deleted".format(attr_name))
+        return self.jsonify(message="attribute {0} deleted".format(attr_name))
