@@ -60,5 +60,5 @@ docker运行
 ----
 进入主目录
 ```
-    docker-compose up
+    docker-compose up -d
 ```

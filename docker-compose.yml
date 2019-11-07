@@ -81,7 +81,7 @@ services:
       CMDB_UI_HOST: cmdb-ui:8000
       NGINX_PORT: 80
     volumes:
-      - ./docker-start/nginx.cmdb.conf.example:/etc/nginx/conf.d/nginx.cmdb.conf.example
+      - ./docs/nginx.cmdb.conf.example:/etc/nginx/conf.d/nginx.cmdb.conf.example
     command: 
       - /bin/bash
       - -c
