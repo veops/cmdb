@@ -12,7 +12,7 @@ WORKDIR /data/apps/cmdb
 
 RUN yum install -y epel-release \
 	&&  yum install -y python-pip \
-    && pip install  --no-cache-dir -r docker-start/requirements.txt 
+    && pip install  --no-cache-dir -r docs/requirements.txt 
 
 CMD ["bash", "-c", "cp api/settings.py.example api/settings.py && sed -i 's#{user}:{password}@127.0.0.1:3306/{db}#:@127.0.0.1:3306/cmdb#g' api/settings.py && flask run"]
 
