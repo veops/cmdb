@@ -18,6 +18,8 @@
 --
 -- Table structure for table `c_attribute_histories`
 --
+CREATE DATABASE IF NOT EXISTS cmdb DEFAULT CHARACTER SET = utf8mb4;
+Use cmdb
 
 DROP TABLE IF EXISTS `c_attribute_histories`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

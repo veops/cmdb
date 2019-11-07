@@ -54,3 +54,9 @@ cp api/settings.py.example api/settings.py
   - 前端: ```cd ui && yarn run serve```
   - 浏览器打开:  [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
+docker运行
+----
+进入主目录
+```
+    docker-compose up
+```
