@@ -4,7 +4,7 @@ services:
   cmdb-ui:
     build:
       context: ./ui
-      dockerfile: Dockerfile-ui
+      dockerfile: Dockerfile
     image: cmdb-ui:0.1
     container_name: cmdb-ui
     command: ["sh", "-c", "sed -i 's#http://127.0.0.1:5000##g' .env && yarn run serve"]
@@ -16,15 +16,13 @@ services:
       start_period: 10s
     depends_on:
       - cmdb-api
-    ports:
-      - "8000:8000"
     networks:
       - new
 
   cmdb-api:
     build: 
-      context: .
-      dockerfile: Dockerfile-api
+      context: . 
+      dockerfile: api/Dockerfile
     image: cmdb-api:0.1
     container_name: cmdb-api
     command: 
@@ -34,7 +32,9 @@ services:
         cp api/settings.py.example api/settings.py
         sed -i 's#{user}:{password}@127.0.0.1:3306/{db}#cmdb:123456@mysql:3306/cmdb#g' api/settings.py
         sed -i 's/127.0.0.1/redis/g' api/settings.py
-        gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000
+        gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000 -D
+        sleep 5
+        celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1
     depends_on:
       - cmdb-db 
       - cmdb-cache
@@ -87,7 +87,9 @@ services:
       - -c
       - |
         envsubst '$$CMDB_API_HOST  $$CMDB_UI_HOST $$NGINX_PORT' < /etc/nginx/conf.d/nginx.cmdb.conf.example > /etc/nginx/conf.d/cmdb.conf
+        rm /etc/nginx/conf.d/default.conf
         nginx -g  'daemon off;'
+        curl http://localhost/api/v0.1/ci/flush
     networks:
       - new
     ports:
