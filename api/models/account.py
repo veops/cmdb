@@ -77,7 +77,6 @@ class User(CRUDModel):
     has_logined = db.Column(db.Boolean, default=False)
     wx_id = db.Column(db.String(32))
     avatar = db.Column(db.String(128))
-    is_admin = db.Column(db.Boolean, default=False)
 
     def __str__(self):
         return self.username
