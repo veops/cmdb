@@ -1,5 +1,7 @@
 # -*- coding:utf-8 -*- 
 
+from __future__ import unicode_literals
+
 
 QUERY_CIS_BY_VALUE_TABLE = """
     SELECT attr.name AS attr_name,
@@ -61,3 +63,4 @@ QUERY_CI_BY_TYPE = """
     FROM c_cis
     WHERE c_cis.type_id in ({0})
 """
+
