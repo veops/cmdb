@@ -10,7 +10,7 @@ COPY . /data/apps/cmdb
 
 WORKDIR /data/apps/cmdb
 
-RUN yum install -y epel-release \
+RUN yum install -y epel-release && yum clean all\
 	&&  yum install -y python-pip \
     && pip install  --no-cache-dir -r docs/requirements.txt 
 
