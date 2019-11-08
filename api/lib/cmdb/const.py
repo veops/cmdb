@@ -45,8 +45,8 @@ type_map = {
     'serialize': {
         Attribute.INT: int,
         Attribute.FLOAT: float,
-        Attribute.TEXT: str,
-        Attribute.TIME: str,
+        Attribute.TEXT: lambda x: x if isinstance(x, six.text_type) else str(x),
+        Attribute.TIME: lambda x: x if isinstance(x, six.text_type) else str(x),
         Attribute.DATE: lambda x: x.strftime("%Y-%m-%d"),
         Attribute.DATETIME: lambda x: x.strftime("%Y-%m-%d %H:%M:%S"),
     },

@@ -33,7 +33,6 @@ services:
         sed -i 's#{user}:{password}@127.0.0.1:3306/{db}#cmdb:123456@mysql:3306/cmdb#g' api/settings.py
         sed -i 's/127.0.0.1/redis/g' api/settings.py
         gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000 -D
-        sleep 5
         celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1
     depends_on:
       - cmdb-db 
@@ -87,7 +86,7 @@ services:
       - -c
       - |
         envsubst '$$CMDB_API_HOST  $$CMDB_UI_HOST $$NGINX_PORT' < /etc/nginx/conf.d/nginx.cmdb.conf.example > /etc/nginx/conf.d/cmdb.conf
-        rm /etc/nginx/conf.d/default.conf
+        rm -f /etc/nginx/conf.d/default.conf
         nginx -g  'daemon off;'
         curl http://localhost/api/v0.1/ci/flush
     networks:
