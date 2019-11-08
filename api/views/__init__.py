@@ -29,3 +29,9 @@ perm_rest.add_resource(GetUserInfoView, GetUserInfoView.url_prefix)
 blueprint_cmdb_v01 = Blueprint('cmdb_api_v01', __name__, url_prefix='/api/v0.1')
 rest = Api(blueprint_cmdb_v01)
 register_resources(os.path.join(HERE, "cmdb"), rest)
+
+
+# acl
+blueprint_acl_v1 = Blueprint('cmdb_acl_v1', __name__, url_prefix='/api/v1/acl')
+rest = Api(blueprint_acl_v1)
+register_resources(os.path.join(HERE, "acl"), rest)
