@@ -1,13 +1,18 @@
-FROM alpine:3.9
+FROM alpine:3.9 as builder
 
 LABEL description="cmdb-ui"
-
-RUN mkdir -p /data/apps/cmdb-ui/logs
 
 COPY . /data/apps/cmdb-ui 
 
 WORKDIR /data/apps/cmdb-ui
 
-RUN apk add yarn && yarn install 
+RUN apk add yarn && yarn install && sed -i 's#http://127.0.0.1:5000##g' .env && yarn build
 
-CMD ["sh", "-c", "yarn run serve"]
+
+FROM nginx:latest
+
+RUN apt-get update && apt-get install -y curl && apt-get clean
+
+RUN mkdir /etc/nginx/html
+
+COPY --from=builder /data/apps/cmdb-ui/dist /etc/nginx/html/

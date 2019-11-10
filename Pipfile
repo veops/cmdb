@@ -19,7 +19,7 @@ redis = "==3.2.1"
 Flask-Migrate = "==2.5.2"
 # Deployment
 gevent = "==1.4.0"
-gunicorn = ">=19.1.1"
+gunicorn = "==19.1.1"
 supervisor = "==4.0.3"
 # Auth
 Flask-Login = "==0.4.1"

@@ -63,4 +63,4 @@ docker 一键构建和运行
     docker-compose up -d
 ```
 
-- 浏览器打开: [http://localhost](http://localhost)
+- 浏览器打开: [http://localhost:8000](http://localhost:8000)
