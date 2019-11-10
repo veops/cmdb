@@ -61,7 +61,6 @@ services:
       CMDB_API_HOST: cmdb-api:5000
       NGINX_PORT: 80
     volumes:
-      - "$PWD/conf.d:/etc/nginx/conf.d"
       - ./docs/nginx.cmdb.conf.example:/etc/nginx/conf.d/nginx.cmdb.conf.example
     command:
       - /bin/bash

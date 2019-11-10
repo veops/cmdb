@@ -7,7 +7,7 @@ import 'nprogress/nprogress.css' // progress bar style
 import notification from 'ant-design-vue/es/notification'
 import { setDocumentTitle, domTitle } from '@/utils/domUtil'
 import config from '@/config/defaultSettings'
-import { ACCESS_TOKEN } from './store/mutation-types';
+import { ACCESS_TOKEN } from './store/mutation-types'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
@@ -44,15 +44,13 @@ router.beforeEach((to, from, next) => {
           store.dispatch('Logout')
         }, 3000)
       })
-
   } else if (to.path === '/user/login' && !config.useSSO && store.getters.roles.length !== 0) {
     next({ path: '/' })
     NProgress.done()
-  } else if (!config.useSSO && !Vue.ls.get(ACCESS_TOKEN) && to.path !== "/user/login") {
+  } else if (!config.useSSO && !Vue.ls.get(ACCESS_TOKEN) && to.path !== '/user/login') {
     next({ path: '/user/login', query: { redirect: to.fullPath } })
     NProgress.done()
-  }
-  else {
+  } else {
     next()
   }
 })
