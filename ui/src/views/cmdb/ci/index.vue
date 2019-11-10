@@ -107,7 +107,7 @@ export default {
     CreateInstanceForm,
     CiDetail
   },
-  data() {
+  data () {
     return {
       loading: false,
       loadTip: '',
@@ -185,25 +185,25 @@ export default {
       },
       optionAlertShow: false,
       watch: {
-        '$route.path': function(newPath, oldPath) {
+        '$route.path': function (newPath, oldPath) {
           this.reload()
         }
       }
     }
   },
 
-  created() {
+  created () {
     this.tableOption()
     this.loadColumns()
   },
   watch: {
-    '$route.path': function(newPath, oldPath) {
+    '$route.path': function (newPath, oldPath) {
       this.reload()
     }
   },
   inject: ['reload'],
   methods: {
-    setColumnWidth() {
+    setColumnWidth () {
       let rows = []
       try {
         rows = document.querySelector('.ant-table-body').childNodes[0].childNodes[2].childNodes[0].childNodes
@@ -225,7 +225,7 @@ export default {
         document.querySelector('.ant-table-fixed-right').offsetWidth
       this.scrollY = window.innerHeight - this.$refs.table.$el.offsetTop - 300
     },
-    tableOption() {
+    tableOption () {
       if (!this.optionAlertShow) {
         this.options = {
           alert: {
@@ -258,7 +258,7 @@ export default {
       }
     },
 
-    loadColumns() {
+    loadColumns () {
       getSubscribeAttributes(this.$router.currentRoute.meta.typeId).then(res => {
         const prefAttrList = res.attributes
         this.preferenceAttrList = prefAttrList
@@ -294,16 +294,16 @@ export default {
       })
     },
 
-    onSelectChange(selectedRowKeys, selectedRows) {
+    onSelectChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
     },
 
-    refreshTable(bool = false) {
+    refreshTable (bool = false) {
       this.$refs.table.refresh(bool)
     },
 
-    onCellChange(key, dataIndex, event, oldValue) {
+    onCellChange (key, dataIndex, event, oldValue) {
       const value = event[0]
       const payload = {}
       payload[dataIndex] = value
@@ -317,14 +317,14 @@ export default {
           })
         })
     },
-    async batchDownload() {
+    async batchDownload () {
       this.loading = true
       this.loadTip = '正在下载 ...'
       const promises = this.selectedRowKeys.map(ciId => {
         return searchCI(`q=_id:${ciId}`).then(res => {
-          let ciMap = {}
+          const ciMap = {}
           Object.keys(res.result[0]).forEach(k => {
-            if (!["ci_type", "_id", "ci_type_alias", "_type"].includes(k)) {
+            if (!['ci_type', '_id', 'ci_type_alias', '_type'].includes(k)) {
               ciMap[k] = res.result[0][k]
             }
           })
@@ -337,12 +337,12 @@ export default {
 
       return results
     },
-    batchUpdate(values) {
+    batchUpdate (values) {
       const that = this
       this.$confirm({
         title: '警告',
         content: '确认要批量修改吗 ?',
-        onOk() {
+        onOk () {
           that.loading = true
           that.loadTip = '正在批量修改 ...'
           const payload = {}
@@ -379,12 +379,12 @@ export default {
         }
       })
     },
-    batchDelete() {
+    batchDelete () {
       const that = this
       this.$confirm({
         title: '警告',
         content: '真的要删除吗 ?',
-        onOk() {
+        onOk () {
           that.loading = true
           that.loadTip = '正在删除 ...'
           const promises = that.selectedRowKeys.map(ciId => {
@@ -412,12 +412,12 @@ export default {
         }
       })
     },
-    deleteCI(record) {
+    deleteCI (record) {
       const that = this
       this.$confirm({
         title: '警告',
         content: '真的要删除吗 ?',
-        onOk() {
+        onOk () {
           deleteCI(record.key)
             .then(res => {
               that.$refs.table.refresh(true)

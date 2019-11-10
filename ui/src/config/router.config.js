@@ -1,7 +1,7 @@
 // eslint-disable-next-line
 import store from '@/store'
 
-import { UserLayout, BasicLayout, RouteView, PageView } from '@/layouts'
+import { UserLayout, BasicLayout, RouteView } from '@/layouts'
 import { getPreference } from '@/api/cmdb/preference'
 
 const cmdbRouter = [
@@ -68,7 +68,7 @@ const cmdbRouter = [
   }
 ]
 
-function copyArray(arr) {
+function copyArray (arr) {
   return arr.map((e) => {
     if (typeof e === 'object') {
       return Object.assign({}, e)

@@ -1,4 +1,4 @@
-FROM alpine:3.9 as builder
+FROM node:alpine as builder
 
 LABEL description="cmdb-ui"
 
@@ -6,7 +6,7 @@ COPY . /data/apps/cmdb-ui
 
 WORKDIR /data/apps/cmdb-ui
 
-RUN apk add yarn && yarn install && sed -i 's#http://127.0.0.1:5000##g' .env && yarn build
+RUN sed -i 's#http://127.0.0.1:5000##g' .env && yarn install  && yarn build
 
 
 FROM nginx:latest
