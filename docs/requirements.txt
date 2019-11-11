@@ -11,10 +11,10 @@ SQLAlchemy ==1.3.5
 PyMySQL ==0.9.3
 redis ==3.2.1
 # Migrations
-Flask-Migrate ==2.5.2
+Flask-Migrate == 2.5.2
 # Deployment
 gevent ==1.4.0
-gunicorn>=19.1.1
+gunicorn == 19.5.0
 supervisor ==4.0.3
 # Auth
 Flask-Login ==0.4.1
