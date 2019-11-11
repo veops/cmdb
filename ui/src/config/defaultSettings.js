@@ -14,7 +14,7 @@
  */
 
 export default {
-  useSSO: false,  
+  useSSO: false,
   primaryColor: '#1890ff', // primary color of ant design
   navTheme: 'dark', // theme for nav menu
   layout: 'sidemenu', // nav menu position: sidemenu or topmenu

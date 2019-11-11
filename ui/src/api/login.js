@@ -12,7 +12,7 @@ import config from '@/config/defaultSettings'
  * @param parameter
  * @returns {*}
  */
-export function login(parameter) {
+export function login (parameter) {
   return axios({
     url: api.Login,
     method: 'post',
@@ -20,7 +20,7 @@ export function login(parameter) {
   })
 }
 
-export function getSmsCaptcha(parameter) {
+export function getSmsCaptcha (parameter) {
   return axios({
     url: api.SendSms,
     method: 'post',
@@ -28,7 +28,7 @@ export function getSmsCaptcha(parameter) {
   })
 }
 
-export function getInfo() {
+export function getInfo () {
   return axios({
     url: api.UserInfo,
     method: 'get',
@@ -38,7 +38,7 @@ export function getInfo() {
   })
 }
 
-export function logout() {
+export function logout () {
   console.log('logout........')
   if (config.useSSO) {
     window.location.replace(api.Logout)
@@ -51,14 +51,13 @@ export function logout() {
       }
     })
   }
-
 }
 
 /**
  * get user 2step code open?
  * @param parameter {*}
  */
-export function get2step(parameter) {
+export function get2step (parameter) {
   return axios({
     url: api.twoStepCode,
     method: 'post',

@@ -1,24 +1,6 @@
 version: '3.4'
 
 services:
-  cmdb-ui:
-    build:
-      context: ./ui
-      dockerfile: Dockerfile
-    image: cmdb-ui:0.1
-    container_name: cmdb-ui
-    command: ["sh", "-c", "sed -i 's#http://127.0.0.1:5000##g' .env && yarn run serve"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000"]
-      interval: 5s
-      timeout: 5s
-      retries: 100
-      start_period: 10s
-    depends_on:
-      - cmdb-api
-    networks:
-      - new
-
   cmdb-api:
     build: 
       context: . 
@@ -67,32 +49,31 @@ services:
         aliases:
           - redis
 
-  cmdb-proxy:
-    image: nginx:latest
-    container_name: cmdb-proxy
+  cmdb-ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    image: cmdb-ui:0.1
+    container_name: cmdb-ui
     depends_on: 
       - cmdb-api
-      - cmdb-ui
-    volumes:
-      - "$PWD/conf.d:/etc/nginx/conf.d"
     environment:
       CMDB_API_HOST: cmdb-api:5000
-      CMDB_UI_HOST: cmdb-ui:8000
       NGINX_PORT: 80
     volumes:
       - ./docs/nginx.cmdb.conf.example:/etc/nginx/conf.d/nginx.cmdb.conf.example
-    command: 
+    command:
       - /bin/bash
       - -c
       - |
-        envsubst '$$CMDB_API_HOST  $$CMDB_UI_HOST $$NGINX_PORT' < /etc/nginx/conf.d/nginx.cmdb.conf.example > /etc/nginx/conf.d/cmdb.conf
+        envsubst '$$CMDB_API_HOST  $$NGINX_PORT' < /etc/nginx/conf.d/nginx.cmdb.conf.example > /etc/nginx/conf.d/cmdb.conf
         rm -f /etc/nginx/conf.d/default.conf
+        curl http://cmdb-api:5000/api/v0.1/ci/flush
         nginx -g  'daemon off;'
-        curl http://localhost/api/v0.1/ci/flush
     networks:
       - new
     ports:
-      - "80:80"
+      - "8000:80"
 
 volumes:
   db-data:
