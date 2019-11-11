@@ -6,7 +6,7 @@ services:
     container_name: cmdb-db
     environment:
       TZ: Asia/Shanghai
-      MYSQL_ROOT_PASSWORD: '123456' 
+      MYSQL_ROOT_PASSWORD: '123456'
       MYSQL_DATABASE: 'cmdb'
       MYSQL_USER: 'cmdb'
       MYSQL_PASSWORD: '123456'
@@ -16,7 +16,7 @@ services:
     networks:
       new:
         aliases:
-          - mysql 
+          - mysql
 
   cmdb-cache:
     image: redis:latest
@@ -32,6 +32,8 @@ services:
       dockerfile: api/Dockerfile
     image: cmdb-api:0.1
     container_name: cmdb-api
+    environment:
+      TZ: Asia/Shanghai
     command:
       - /bin/bash
       - -c
@@ -53,9 +55,10 @@ services:
       dockerfile: Dockerfile
     image: cmdb-ui:0.1
     container_name: cmdb-ui
-    depends_on: 
+    depends_on:
       - cmdb-api
     environment:
+      TZ: Asia/Shanghai
       CMDB_API_HOST: cmdb-api:5000
       NGINX_PORT: 80
     volumes:
