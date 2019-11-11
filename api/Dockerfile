@@ -2,7 +2,7 @@
 # maybe use: cd ..
 FROM centos:7.6.1810 AS cmdb-api
 
-LABEL description="Python3.7.5,cmdb"
+LABEL description="Python2.7.5,cmdb"
 
 RUN mkdir -p /data/apps/cmdb /data/apps/cmdb/logs 
 

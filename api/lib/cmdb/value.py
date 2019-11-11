@@ -74,8 +74,6 @@ class AttributeValueManager(object):
         deserialize = type_map["deserialize"][value_type]
         try:
             v = deserialize(value)
-            if isinstance(v, markupsafe.Markup):
-                v = str(v)
             return v
         except ValueError:
             return abort(400, "attribute value <{0}> is invalid".format(value))

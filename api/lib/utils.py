@@ -69,6 +69,6 @@ class RedisHandler(object):
         try:
             ret = self.r.hdel(self.prefix, key_id)
             if not ret:
-                current_app.logger.warn("[%d] is not in redis".format(key_id))
+                current_app.logger.warn("[{0}] is not in redis".format(key_id))
         except Exception as e:
             current_app.logger.error("delete redis key error, {0}".format(str(e)))
