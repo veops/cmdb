@@ -6,13 +6,11 @@ COPY . /data/apps/cmdb-ui
 
 WORKDIR /data/apps/cmdb-ui
 
-RUN sed -i 's#http://127.0.0.1:5000##g' .env && yarn install  && yarn build
+RUN sed -i "s#http://127.0.0.1:5000##g" .env && yarn install  && yarn build
 
 
-FROM nginx:latest
+FROM nginx:alpine
 
-RUN apt-get update && apt-get install -y curl && apt-get clean
-
-RUN mkdir /etc/nginx/html
+RUN mkdir /etc/nginx/html && rm -f /etc/nginx/conf.d/default.conf
 
 COPY --from=builder /data/apps/cmdb-ui/dist /etc/nginx/html/

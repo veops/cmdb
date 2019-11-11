@@ -2,9 +2,14 @@ module.exports = {
   presets: [
     '@vue/app',
     [
-      '@babel/preset-env',
+      "@babel/preset-env",
       {
-        'useBuiltIns': 'entry'
+        "useBuiltIns": "usage", // "usage" | "entry" | false, defaults to false.
+        "corejs": "3.1.2",
+        "targets": {
+          "esmodules": true,
+          "ie": "11"
+        }
       }
     ]
   ]
