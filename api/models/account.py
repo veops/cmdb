@@ -128,9 +128,9 @@ class UserCache(object):
 
     @classmethod
     def set(cls, user):
-        cache.set(cls.PREFIX_ID.format(user.uid, user))
-        cache.set(cls.PREFIX_NAME.format(user.username, user))
-        cache.set(cls.PREFIX_NICK.format(user.nickname, user))
+        cache.set(cls.PREFIX_ID.format(user.uid), user)
+        cache.set(cls.PREFIX_NAME.format(user.username), user)
+        cache.set(cls.PREFIX_NICK.format(user.nickname), user)
 
     @classmethod
     def clean(cls, user):
