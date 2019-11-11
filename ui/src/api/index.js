@@ -1,7 +1,7 @@
 import config from '@/config/defaultSettings'
 
 const api = {
-  Login:  config.useSSO ? '/api/sso/login' : '/login',
+  Login: config.useSSO ? '/api/sso/login' : '/login',
   Logout: config.useSSO ? '/api/sso/logout' : '/logout',
   ForgePassword: '/auth/forge-password',
   Register: '/auth/register',

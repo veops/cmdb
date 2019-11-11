@@ -139,7 +139,7 @@ export default {
         }
       })
     },
-    
+
     loginSuccess (res) {
       this.$router.push({ path: this.$route.query.redirect })
       // 延迟 1 秒显示欢迎信息

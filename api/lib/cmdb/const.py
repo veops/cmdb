@@ -1,5 +1,8 @@
 # -*- coding:utf-8 -*- 
 
+
+from __future__ import unicode_literals
+
 import datetime
 
 import six
@@ -37,8 +40,8 @@ type_map = {
     'deserialize': {
         Attribute.INT: string2int,
         Attribute.FLOAT: float,
-        Attribute.TEXT: escape,
-        Attribute.TIME: escape,
+        Attribute.TEXT: lambda x: escape(x).encode('utf-8').decode('utf-8'),
+        Attribute.TIME: lambda x: escape(x).encode('utf-8').decode('utf-8'),
         Attribute.DATETIME: str2datetime,
         Attribute.DATE: str2datetime,
     },
