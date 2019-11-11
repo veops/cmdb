@@ -1,4 +1,4 @@
-FROM node:alpine as builder
+FROM node:alpine AS builder
 
 LABEL description="cmdb-ui"
 
@@ -9,7 +9,7 @@ WORKDIR /data/apps/cmdb-ui
 RUN sed -i "s#http://127.0.0.1:5000##g" .env && yarn install  && yarn build
 
 
-FROM nginx:alpine
+FROM nginx:alpine AS cmdb-ui
 
 RUN mkdir /etc/nginx/html && rm -f /etc/nginx/conf.d/default.conf
 

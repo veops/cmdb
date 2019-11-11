@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*- 
 
 
+from __future__ import unicode_literals
+
 from functools import wraps
 
 import jwt
@@ -20,7 +22,7 @@ def _auth_with_key():
     secret = request.values.get('_secret')
     path = request.path
     keys = sorted(request.values.keys())
-    req_args = [request.values[k] for k in keys if str(k) not in ("_key", "_secret")]
+    req_args = [request.values[k] for k in keys if k not in ("_key", "_secret")]
     user, authenticated = User.query.authenticate_with_key(key, secret, req_args, path)
     if user and authenticated:
         login_user(user)
