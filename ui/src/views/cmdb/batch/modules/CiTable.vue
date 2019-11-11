@@ -16,27 +16,23 @@ export default {
   props: { ciTypeAttrs: { type: Object, required: true } },
   data: function () {
     return {
-      root: 'test-hot',
-      dataTitle: []
+      root: 'test-hot'
     }
   },
   computed: {
     hotSettings () {
       const whiteColumn = []
       const aliasList = []
-      const dataTitle = []
       this.$props.ciTypeAttrs.attributes.forEach(item => {
-        dataTitle.push(item.name)
         aliasList.push(item.alias)
         whiteColumn.push('')
       })
-      this.dataTitle = dataTitle
       const dt = {
         data: [whiteColumn],
         startRows: 11,
         startCols: 6,
         minRows: 5,
-        minCols: 4,
+        minCols: 1,
         maxRows: 90,
         maxCols: 90,
         rowHeaders: true,
@@ -88,7 +84,7 @@ export default {
   methods: {
     getDataList () {
       const data = this.$refs.HTable.$data.hotInstance.getData()
-      data.unshift(this.dataTitle)
+      data.unshift(this.$refs.HTable.$data.hotInstance.getColHeader())
       return data
     }
   }

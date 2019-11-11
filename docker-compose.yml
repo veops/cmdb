@@ -1,29 +1,6 @@
 version: '3.4'
 
 services:
-  cmdb-api:
-    build: 
-      context: . 
-      dockerfile: api/Dockerfile
-    image: cmdb-api:0.1
-    container_name: cmdb-api
-    command: 
-      - /bin/bash
-      - -c
-      - |
-        cp api/settings.py.example api/settings.py
-        sed -i 's#{user}:{password}@127.0.0.1:3306/{db}#cmdb:123456@mysql:3306/cmdb#g' api/settings.py
-        sed -i 's/127.0.0.1/redis/g' api/settings.py
-        gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000 -D
-        celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1
-    depends_on:
-      - cmdb-db 
-      - cmdb-cache
-    networks:
-      new:
-        aliases:
-          - cmdb-api 
-    
   cmdb-db:
     image: mysql:5.7
     container_name: cmdb-db
@@ -49,6 +26,27 @@ services:
         aliases:
           - redis
 
+  cmdb-api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    image: cmdb-api:0.1
+    container_name: cmdb-api
+    command:
+      - /bin/bash
+      - -c
+      - |
+        gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000 -D
+        flask init-cache
+        celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1
+    depends_on:
+      - cmdb-db
+      - cmdb-cache
+    networks:
+      new:
+        aliases:
+          - cmdb-api
+
   cmdb-ui:
     build:
       context: ./ui
@@ -63,12 +61,10 @@ services:
     volumes:
       - ./docs/nginx.cmdb.conf.example:/etc/nginx/conf.d/nginx.cmdb.conf.example
     command:
-      - /bin/bash
+      - /bin/sh
       - -c
       - |
         envsubst '$$CMDB_API_HOST  $$NGINX_PORT' < /etc/nginx/conf.d/nginx.cmdb.conf.example > /etc/nginx/conf.d/cmdb.conf
-        rm -f /etc/nginx/conf.d/default.conf
-        curl http://cmdb-api:5000/api/v0.1/ci/flush
         nginx -g  'daemon off;'
     networks:
       - new
