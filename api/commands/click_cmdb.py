@@ -19,8 +19,8 @@ def init_cache():
 
     cis = CI.get_by(to_dict=False)
     for ci in cis:
-
-        if list(filter(lambda x: x, rd.get([ci.id]))):
+        res = rd.get([ci.id])
+        if res and list(filter(lambda x: x, res)):
             continue
 
         m = api.lib.cmdb.ci.CIManager()
