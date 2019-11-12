@@ -1,4 +1,4 @@
-version: '3.4'
+version: '3.5'
 
 services:
   cmdb-db:
@@ -29,7 +29,7 @@ services:
   cmdb-api:
     build:
       context: .
-      dockerfile: api/Dockerfile
+      target: cmdb-api
     image: cmdb-api:0.1
     container_name: cmdb-api
     environment:
@@ -51,8 +51,8 @@ services:
 
   cmdb-ui:
     build:
-      context: ./ui
-      dockerfile: Dockerfile
+      context: .
+      target: cmdb-ui
     image: cmdb-ui:0.1
     container_name: cmdb-ui
     depends_on:
