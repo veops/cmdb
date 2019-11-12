@@ -29,7 +29,7 @@ Overview
 - python版本: python2.7, >=python3.6
 
 
-安装
+Install
 ----
 - 启动mysql服务, redis服务
 
@@ -40,23 +40,45 @@ git clone https://github.com/pycook/cmdb.git
 cd cmdb
 cp api/settings.py.example api/settings.py
 ```
-设置api/settings.py里的database
+**设置api/settings.py里的database**
 
 - 安装库
   - 后端: ```pipenv run pipenv install```
   - 前端: ```cd ui && yarn install && cd ..```
   
-- 创建数据库表 ```pipenv run flask db-setup```
+- 创建数据库表 ```pipenv run flask db-setup && pipenv run flask init-cache```
 - 可以将docs/cmdb.sql导入到数据库里，登录用户和密码都是:admin
   
 - 启动服务
   - 后端: ```pipenv run flask run -h 0.0.0.0```
   - 前端: ```cd ui && yarn run serve```
+  - worker: ```celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1```
   
   - 浏览器打开:  [http://127.0.0.1:8000](http://127.0.0.1:8000)
     - 如果是非本机访问, 要修改**ui/.env**里**VUE_APP_API_BASE_URL**里的IP地址为后端服务的ip地址
 
-docker 一键构建和运行
+
+Install by Makefile
+----
+- 启动mysql服务, redis服务
+
+- 创建数据库cmdb
+- 拉取代码
+```bash
+git clone https://github.com/pycook/cmdb.git
+cd cmdb
+cp api/settings.py.example api/settings.py
+```
+**设置api/settings.py里的database**
+
+- 顺序在cmdb目录下执行
+    - 环境: ```make env```
+    - 启动API: ```make api```
+    - 启动UI: ```make ui```
+    - 启动worker: ```make worker```
+
+
+Install by Docker
 ----
 - 进入主目录（首次镜像的构建需要**10分钟**左右，视网络情况而定）
 ```
