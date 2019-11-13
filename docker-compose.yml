@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   cmdb-db:
-    image: mysql:5.7
+    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-db:1.0
     container_name: cmdb-db
     environment:
       TZ: Asia/Shanghai
@@ -19,7 +19,7 @@ services:
           - mysql
 
   cmdb-cache:
-    image: redis:latest
+    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-cache:1.0
     container_name: cmdb-cache
     networks:
       new:
@@ -27,10 +27,7 @@ services:
           - redis
 
   cmdb-api:
-    build:
-      context: .
-      target: cmdb-api
-    image: cmdb-api:0.1
+    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-api:1.0
     container_name: cmdb-api
     environment:
       TZ: Asia/Shanghai
@@ -50,10 +47,7 @@ services:
           - cmdb-api
 
   cmdb-ui:
-    build:
-      context: .
-      target: cmdb-ui
-    image: cmdb-ui:0.1
+    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-ui:1.0
     container_name: cmdb-ui
     depends_on:
       - cmdb-api

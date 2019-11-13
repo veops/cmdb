@@ -23,11 +23,21 @@ Overview
 
 ![模型配置](https://raw.githubusercontent.com/pycook/cmdb/master/ui/public/cmdb02.jpeg)
 
-环境和依赖
+
+Docker一键快速构建
+----
+- 进入主目录（先安装docker环境）
+```
+    docker-compose up -d
+```
+
+- 浏览器打开: [http://localhost:8000](http://localhost:8000)
+
+
+本地搭建: 环境和依赖
 ----
 - 存储: mysql, redis
 - python版本: python2.7, >=python3.6
-
 
 Install
 ----
@@ -76,13 +86,3 @@ cp api/settings.py.example api/settings.py
     - 启动API: ```make api```
     - 启动UI: ```make ui```
     - 启动worker: ```make worker```
-
-
-Install by Docker
-----
-- 进入主目录（首次镜像的构建需要**10分钟**左右，视网络情况而定）
-```
-    docker-compose up -d
-```
-
-- 浏览器打开: [http://localhost:8000](http://localhost:8000)
