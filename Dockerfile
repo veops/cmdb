@@ -26,7 +26,9 @@ COPY . /data/apps/cmdb
 
 WORKDIR /data/apps/cmdb
 
-RUN apk add --no-cache gcc musl-dev libffi-dev
+RUN apk add --no-cache tzdata gcc musl-dev libffi-dev
+
+ENV TZ=Asia/Shanghai
 
 RUN pip install  --no-cache-dir -r docs/requirements.txt \
     && cp ./api/settings.py.example ./api/settings.py \
