@@ -31,7 +31,7 @@ Docker一键快速构建
     docker-compose up -d
 ```
 
-- 浏览器打开: [http://localhost:8000](http://localhost:8000)
+- 浏览器打开: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
 
 本地搭建: 环境和依赖
