@@ -156,3 +156,6 @@ class ResourceCRUD(object):
         resource = Resource.get_by_id(_id) or abort(404, "Resource <{0}> is not found".format(_id))
 
         resource.soft_delete()
+
+
+

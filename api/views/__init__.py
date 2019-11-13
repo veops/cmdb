@@ -32,6 +32,6 @@ register_resources(os.path.join(HERE, "cmdb"), rest)
 
 
 # acl
-blueprint_acl_v1 = Blueprint('cmdb_acl_v1', __name__, url_prefix='/api/v1/acl')
+blueprint_acl_v1 = Blueprint('acl_api_v1', __name__, url_prefix='/api/v1/acl')
 rest = Api(blueprint_acl_v1)
 register_resources(os.path.join(HERE, "acl"), rest)

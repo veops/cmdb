@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 
 from api.extensions import cache
+from api.models.acl import Permission
 from api.models.acl import Role
 
 
@@ -46,8 +47,8 @@ class RoleRelationCache(object):
     def get_parent_ids(cls, rid):
         parent_ids = cache.get(cls.PREFIX_PARENT.format(rid))
         if not parent_ids:
-            from api.lib.perm.acl.role import RoleCRUD
-            parent_ids = RoleCRUD.get_parent_ids(rid)
+            from api.lib.perm.acl.role import RoleRelationCRUD
+            parent_ids = RoleRelationCRUD.get_parent_ids(rid)
             cache.set(cls.PREFIX_PARENT.format(rid), parent_ids, timeout=0)
 
         return parent_ids
@@ -56,8 +57,8 @@ class RoleRelationCache(object):
     def get_child_ids(cls, rid):
         child_ids = cache.get(cls.PREFIX_CHILDREN.format(rid))
         if not child_ids:
-            from api.lib.perm.acl.role import RoleCRUD
-            child_ids = RoleCRUD.get_child_ids(rid)
+            from api.lib.perm.acl.role import RoleRelationCRUD
+            child_ids = RoleRelationCRUD.get_child_ids(rid)
             cache.set(cls.PREFIX_CHILDREN.format(rid), child_ids, timeout=0)
 
         return child_ids
@@ -89,3 +90,25 @@ class RoleRelationCache(object):
         cache.delete(cls.PREFIX_PARENT.format(rid))
         cache.delete(cls.PREFIX_CHILDREN.format(rid))
         cache.delete(cls.PREFIX_RESOURCES.format(rid))
+
+
+class PermissionCache(object):
+    PREFIX_ID = "Permission::id::{0}"
+    PREFIX_NAME = "Permission::name::{0}"
+
+    @classmethod
+    def get(cls, key):
+        perm = cache.get(cls.PREFIX_ID.format(key))
+        perm = perm or cache.get(cls.PREFIX_NAME.format(key))
+        if perm is None:
+            perm = Permission.get_by_id(key)
+            perm = perm or Permission.get_by(name=key, first=True, to_dict=False)
+            if perm is not None:
+                cache.set(cls.PREFIX_ID.format(key), perm)
+
+        return perm
+
+    @classmethod
+    def clean(cls, key):
+        cache.delete(cls.PREFIX_ID.format(key))
+        cache.delete(cls.PREFIX_NAME.format(key))
