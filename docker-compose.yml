@@ -32,7 +32,7 @@ services:
     environment:
       TZ: Asia/Shanghai
     command:
-      - /bin/bash
+      - /bin/sh
       - -c
       - |
         gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000 -D
