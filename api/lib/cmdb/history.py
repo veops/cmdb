@@ -7,7 +7,7 @@ from flask import g
 from api.extensions import db
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import RelationTypeCache
-from api.models.account import UserCache
+from api.lib.perm.acl.cache import UserCache
 from api.models.cmdb import Attribute
 from api.models.cmdb import AttributeHistory
 from api.models.cmdb import CIRelationHistory

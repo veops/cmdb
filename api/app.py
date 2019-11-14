@@ -23,7 +23,7 @@ from api.extensions import (
     rd,
 )
 from api.flask_cas import CAS
-from api.models.account import User
+from api.models.acl import User
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir)
