@@ -89,5 +89,5 @@ cp api/settings.py.example api/settings.py
 
 
 ----
-_**欢迎加入CMDB运维开发QQ群（336164978），本群主旨在于开发出足够任何企业、个人通用的CMDB。随手留一个CMDB，让工作足够简单、有一个好的开端。再次欢迎大家进群探讨！**_
-![QQ群](statics/imgs/qr_code.jpg)
+_**欢迎加入CMDB运维开发QQ群（336164978）**_
+![QQ群](ui/public/qr_code.jpg)
