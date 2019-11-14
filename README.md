@@ -90,4 +90,5 @@ cp api/settings.py.example api/settings.py
 
 ----
 _**欢迎加入CMDB运维开发QQ群（336164978）**_
+
 ![QQ群](ui/public/qr_code.jpg)
