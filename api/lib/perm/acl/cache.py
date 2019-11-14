@@ -3,6 +3,39 @@
 from api.extensions import cache
 from api.models.acl import Permission
 from api.models.acl import Role
+from api.models.acl import User
+
+
+class UserCache(object):
+    PREFIX_ID = "User::uid::{0}"
+    PREFIX_NAME = "User::username::{0}"
+    PREFIX_NICK = "User::nickname::{0}"
+
+    @classmethod
+    def get(cls, key):
+        user = cache.get(cls.PREFIX_ID.format(key)) or \
+               cache.get(cls.PREFIX_NAME.format(key)) or \
+               cache.get(cls.PREFIX_NICK.format(key))
+        if not user:
+            user = User.query.get(key) or \
+                   User.query.get_by_username(key) or \
+                   User.query.get_by_nickname(key)
+        if user:
+            cls.set(user)
+
+        return user
+
+    @classmethod
+    def set(cls, user):
+        cache.set(cls.PREFIX_ID.format(user.uid), user)
+        cache.set(cls.PREFIX_NAME.format(user.username), user)
+        cache.set(cls.PREFIX_NICK.format(user.nickname), user)
+
+    @classmethod
+    def clean(cls, user):
+        cache.delete(cls.PREFIX_ID.format(user.uid))
+        cache.delete(cls.PREFIX_NAME.format(user.username))
+        cache.delete(cls.PREFIX_NICK.format(user.nickname))
 
 
 class RoleCache(object):
