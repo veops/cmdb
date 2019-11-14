@@ -18,13 +18,21 @@ from api.tasks.acl import role_rebuild
 
 class RoleRelationCRUD(object):
     @staticmethod
-    def get_parents(rids):
-        rids = [rids] if isinstance(rids, six.integer_types) else rids
+    def get_parents(rids=None, uids=None):
+        rid2uid = dict()
+        if uids is not None:
+            uids = [uids] if isinstance(uids, six.integer_types) else uids
+            rids = db.session.query(Role).filter(Role.deleted.is_(False)).filter(Role.uid.in_(uids))
+            rid2uid = {i.rid: i.uid for i in rids}
+            rids = [i.rid for i in rids]
+        else:
+            rids = [rids] if isinstance(rids, six.integer_types) else rids
+
         res = db.session.query(RoleRelation).filter(
             RoleRelation.child_id.in_(rids)).filter(RoleRelation.deleted.is_(False))
         id2parents = {}
         for i in res:
-            id2parents.setdefault(i.child_id, []).append(RoleCache.get(i.parent_id).to_dict())
+            id2parents.setdefault(rid2uid.get(i.child_id, i.child_id), []).append(RoleCache.get(i.parent_id).to_dict())
 
         return id2parents
 

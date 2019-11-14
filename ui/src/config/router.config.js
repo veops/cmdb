@@ -65,6 +65,36 @@ const cmdbRouter = [
         meta: { title: '属性库', keepAlive: true }
       }
     ]
+  },
+  {
+    path: '/acl',
+    name: 'cmdb_acl',
+    component: RouteView,
+    redirect: '/acl/users',
+    meta: { title: '权限管理', icon: 'safety-certificate', permission: ['admin'] },
+    children: [
+      {
+        path: '/acl/users',
+        name: 'acl_users',
+        hideChildrenInMenu: true,
+        component: () => import('@/views/cmdb/acl/users'),
+        meta: { title: 'Users', keepAlive: true }
+      },
+      {
+        path: '/acl/roles',
+        name: 'acl_roles',
+        hideChildrenInMenu: true,
+        component: () => import('@/views/cmdb/acl/roles'),
+        meta: { title: 'Roles', keepAlive: true }
+      },
+      {
+        path: '/acl/resources',
+        name: 'acl_resources',
+        hideChildrenInMenu: true,
+        component: () => import('@/views/cmdb/acl/resources'),
+        meta: { title: 'Resources', keepAlive: true }
+      }
+    ]
   }
 ]
 
