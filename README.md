@@ -86,3 +86,9 @@ cp api/settings.py.example api/settings.py
     - 启动API: ```make api```
     - 启动UI: ```make ui```
     - 启动worker: ```make worker```
+
+
+----
+_**欢迎加入CMDB运维开发QQ群（336164978）**_
+
+![QQ群](ui/public/qr_code.jpg)
