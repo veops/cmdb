@@ -11,6 +11,7 @@ from flask_sqlalchemy import BaseQuery
 from api.extensions import db
 from api.lib.database import CRUDModel
 from api.lib.database import Model
+from api.lib.database import SoftDeleteMixin
 
 
 class App(Model):
@@ -34,6 +35,7 @@ class UserQuery(BaseQuery):
             authenticated = user.check_password(password)
         else:
             authenticated = False
+
         return user, authenticated
 
     def authenticate_with_key(self, key, secret, args, path):
@@ -45,6 +47,7 @@ class UserQuery(BaseQuery):
             authenticated = True
         else:
             authenticated = False
+
         return user, authenticated
 
     def search(self, key):
@@ -55,18 +58,21 @@ class UserQuery(BaseQuery):
 
     def get_by_username(self, username):
         user = self.filter(User.username == username).first()
+
         return user
 
     def get_by_nickname(self, nickname):
         user = self.filter(User.nickname == nickname).first()
+
         return user
 
     def get(self, uid):
         user = self.filter(User.uid == uid).first()
+
         return copy.deepcopy(user)
 
 
-class User(CRUDModel):
+class User(CRUDModel, SoftDeleteMixin):
     __tablename__ = 'users'
     __bind_key__ = "user"
     query_class = UserQuery
@@ -107,9 +113,7 @@ class User(CRUDModel):
     def _set_password(self, password):
         self._password = hashlib.md5(password.encode('utf-8')).hexdigest()
 
-    password = db.synonym("_password",
-                          descriptor=property(_get_password,
-                                              _set_password))
+    password = db.synonym("_password", descriptor=property(_get_password, _set_password))
 
     def check_password(self, password):
         if self.password is None:

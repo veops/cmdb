@@ -6,8 +6,8 @@ from flask import session
 from flask_login import current_user
 
 from api.lib.decorator import args_required
-from api.lib.perm.acl.user import UserCRUD
 from api.lib.perm.acl.role import RoleRelationCRUD
+from api.lib.perm.acl.user import UserCRUD
 from api.lib.utils import get_page
 from api.lib.utils import get_page_size
 from api.resource import APIView
@@ -36,11 +36,17 @@ class UserView(APIView):
 
         id2parents = RoleRelationCRUD.get_parents(uids=[i.uid for i in users])
 
+        users = [i.to_dict() for i in users]
+        for u in users:
+            u.pop('password', None)
+            u.pop('key', None)
+            u.pop('secret', None)
+
         return self.jsonify(numfound=numfound,
                             page=page,
                             page_size=page_size,
                             id2parents=id2parents,
-                            users=[i.to_dict() for i in users])
+                            users=users)
 
     @args_required('username')
     @args_required('email')
@@ -58,3 +64,15 @@ class UserView(APIView):
         UserCRUD.delete(uid)
 
         return self.jsonify(uid=uid)
+
+
+class UserResetKeySecretView(APIView):
+    url_prefix = "/users/reset_key_secret"
+
+    def post(self):
+        key, secret = UserCRUD.reset_key_secret()
+
+        return self.jsonify(key=key, secret=secret)
+
+    def put(self):
+        return self.post()
