@@ -68,7 +68,7 @@ class UserQuery(BaseQuery):
 
 class User(CRUDModel):
     __tablename__ = 'users'
-    __bind_key__ = "user"
+    # __bind_key__ = "user"
     query_class = UserQuery
 
     uid = db.Column(db.Integer, primary_key=True, autoincrement=True)
