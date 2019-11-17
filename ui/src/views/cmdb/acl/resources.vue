@@ -169,6 +169,10 @@ export default {
         }
       ],
       loadData: parameter => {
+        parameter.page = parameter.pageNo
+        parameter.page_size = parameter.pageSize
+        delete parameter.pageNo
+        delete parameter.pageSize
         Object.assign(parameter, this.queryParam)
         console.log('loadData.parameter', parameter)
 

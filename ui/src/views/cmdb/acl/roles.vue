@@ -73,11 +73,16 @@
         <a-icon type="check" v-if="text"/>
       </span>
 
+      <span slot="id" slot-scope="key">
+        <a-tag color="cyan" v-for="role in id2parents[key]" :key="role.id">{{ role.name }}</a-tag>
+      </span>
+
       <span slot="action" slot-scope="text, record">
         <template>
+          <a @click="handleAddRoleRelation(record)">关联角色</a>
+          <a-divider type="vertical"/>
           <a @click="handleEdit(record)">编辑</a>
           <a-divider type="vertical"/>
-
           <a-popconfirm
             title="确认删除?"
             @confirm="handleDelete(record)"
@@ -92,6 +97,7 @@
 
     </s-table>
     <roleForm ref="roleForm" :handleOk="handleOk"> </roleForm>
+    <addRoleRelationForm ref="AddRoleRelationForm" :handleOk="handleOk"> </addRoleRelationForm>
 
   </a-card>
 </template>
@@ -99,13 +105,15 @@
 <script>
 import { STable } from '@/components'
 import roleForm from './module/roleForm'
+import AddRoleRelationForm from './module/addRoleRelationForm'
 import { deleteRoleById, searchRole } from '@/api/acl/role'
 
 export default {
   name: 'Index',
   components: {
     STable,
-    roleForm
+    roleForm,
+    AddRoleRelationForm
   },
   data () {
     return {
@@ -119,6 +127,7 @@ export default {
       formLayout: 'vertical',
 
       allRoles: [],
+      id2parents: {},
       pageSizeOptions: ['10', '25', '50', '100'],
 
       columnSearchText: {
@@ -130,7 +139,7 @@ export default {
           title: '角色名',
           dataIndex: 'name',
           sorter: false,
-          width: 50,
+          width: 250,
           scopedSlots: {
             customRender: 'nameSearchRender',
             filterDropdown: 'filterDropdown',
@@ -148,27 +157,38 @@ export default {
         {
           title: '应用',
           dataIndex: 'app_id',
-          width: 50,
+          width: 250,
           sorter: false,
           scopedSlots: { customRender: 'app_id' }
         },
         {
-          title: '应用管理角色',
+          title: '管理者',
           dataIndex: 'is_app_admin',
-          width: 50,
+          width: 100,
           sorter: false,
           scopedSlots: { customRender: 'is_app_admin' }
 
         },
         {
+          title: '父角色',
+          dataIndex: 'id',
+          sorter: false,
+          scopedSlots: { customRender: 'id' }
+
+        },
+        {
           title: '操作',
           dataIndex: 'action',
-          width: 150,
+          width: 300,
           fixed: 'right',
           scopedSlots: { customRender: 'action' }
         }
       ],
       loadData: parameter => {
+        parameter.page = parameter.pageNo
+        parameter.page_size = parameter.pageSize
+        delete parameter.pageNo
+        delete parameter.pageSize
         Object.assign(parameter, this.queryParam)
         console.log('loadData.parameter', parameter)
 
@@ -182,6 +202,7 @@ export default {
 
             console.log('loadData.res', res)
             this.allRoles = res.roles
+            this.id2parents = res.id2parents
             return res
           })
       },
@@ -239,7 +260,6 @@ export default {
 
   },
   mounted () {
-    this.searchRoles(this.queryParam)
     this.setScrollY()
   },
   inject: ['reload'],
@@ -264,6 +284,10 @@ export default {
 
     setScrollY () {
       this.scroll.y = window.innerHeight - this.$refs.table.$el.offsetTop - 200
+    },
+
+    handleAddRoleRelation (record) {
+      this.$refs.AddRoleRelationForm.handleAddRoleRelation(record)
     },
 
     handleEdit (record) {
