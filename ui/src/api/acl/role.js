@@ -32,3 +32,35 @@ export function deleteRoleById (id) {
     method: 'DELETE'
   })
 }
+
+export function addParentRole (id, otherID) {
+  return axios({
+    url: urlPrefix + `/roles/${id}/parents`,
+    method: 'POST',
+    data: { parent_id: otherID }
+  })
+}
+
+export function addChildRole (id, otherID) {
+  return axios({
+    url: urlPrefix + `/roles/${otherID}/parents`,
+    method: 'POST',
+    data: { parent_id: id }
+  })
+}
+
+export function delParentRole (cid, pid) {
+  return axios({
+    url: urlPrefix + `/roles/${cid}/parents`,
+    method: 'DELETE',
+    data: { parent_id: pid }
+  })
+}
+
+export function delChildRole (pid, cid) {
+  return axios({
+    url: urlPrefix + `/roles/${cid}/parents`,
+    method: 'DELETE',
+    data: { parent_id: pid }
+  })
+}
