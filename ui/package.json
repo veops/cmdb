@@ -13,10 +13,14 @@
   },
   "dependencies": {
     "@antv/data-set": "^0.10.2",
+    "@handsontable-pro/vue": "^3.1.1",
+    "@handsontable/vue": "^4.1.1",
     "ant-design-vue": "^1.4.2",
     "axios": "^0.19.0",
     "core-js": "^3.1.2",
     "enquire.js": "^2.1.6",
+    "handsontable": "^7.2.2",
+    "handsontable-pro": "^6.2.3",
     "js-cookie": "^2.2.0",
     "json2csv": "^4.5.2",
     "lodash.get": "^4.4.2",
@@ -37,10 +41,7 @@
     "vuex": "^3.1.1",
     "wangeditor": "^3.1.1",
     "xlsx": "latest",
-    "@handsontable-pro/vue": "^3.1.1",
-    "@handsontable/vue": "^4.1.1",
-    "handsontable": "^7.2.2",
-    "handsontable-pro": "^6.2.3"
+    "yarn": "^1.19.1"
   },
   "devDependencies": {
     "@ant-design/colors": "^3.2.1",

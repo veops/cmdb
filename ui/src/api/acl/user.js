@@ -1,6 +1,6 @@
 import { axios } from '@/utils/request'
 
-const urlPrefix = '/v0.1'
+const urlPrefix = '/v1/acl'
 
 export function currentUser () {
   return axios({
@@ -11,8 +11,9 @@ export function currentUser () {
 
 export function searchUser (params) {
   return axios({
-    url: urlPrefix + `/users?${params}`,
-    method: 'GET'
+    url: urlPrefix + `/users`,
+    method: 'GET',
+    data: params
   })
 }
 
@@ -38,4 +39,3 @@ export function deleteUserById (id) {
     method: 'DELETE'
   })
 }
-

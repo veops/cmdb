@@ -13,79 +13,31 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="用户名(英文)"
+        label="资源名"
       >
         <a-input
-          name="username"
-          placeholder="英文名"
-          v-decorator="['username', {rules: [{ required: true, message: '请输入用户名'}]} ]"
+          name="name"
+          placeholder=""
+          v-decorator="['name', {rules: [{ required: true, message: '请输入资源名'}]} ]"
         />
       </a-form-item>
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="中文名"
+        label="应用列表"
       >
-        <a-input
-          name="nickname"
-          v-decorator="['nickname', {rules: []} ]"
-        />
+        <a-select name="app_id" default-value="1" v-decorator="['app_id', {rules: []} ]">
+          <a-select-option value="1">默认应用</a-select-option>
+        </a-select>
       </a-form-item>
-
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="部门"
+        label="资源类型"
       >
-        <a-input
-          name="department"
-          v-decorator="['department', {rules: []} ]"
-        />
-      </a-form-item>
-
-      <a-form-item
-        :label-col="formItemLayout.labelCol"
-        :wrapper-col="formItemLayout.wrapperCol"
-        label="小组"
-      >
-        <a-input
-          name="catalog"
-          v-decorator="['catalog', {rules: []} ]"
-        />
-      </a-form-item>
-
-      <a-form-item
-        :label-col="formItemLayout.labelCol"
-        :wrapper-col="formItemLayout.wrapperCol"
-        label="邮箱"
-      >
-        <a-input
-          name="email"
-          v-decorator="['email', {rules: [{ required: true, message: '请输入邮箱'},{message: '请输入正确的邮箱', pattern: RegExp('^\w+@\w+\.\w+$')}]} ]"
-        />
-      </a-form-item>
-
-      <a-form-item
-        :label-col="formItemLayout.labelCol"
-        :wrapper-col="formItemLayout.wrapperCol"
-        label="手机号码"
-      >
-        <a-input
-          name="mobile"
-          v-decorator="['mobile', {rules: [{message: '请输入正确的手机号码', pattern: RegExp('^1\d{10}$')}]} ]"
-        />
-      </a-form-item>
-
-      <a-form-item
-        :label-col="horizontalFormItemLayout.labelCol"
-        :wrapper-col="horizontalFormItemLayout.wrapperCol"
-        label="是否锁定"
-      >
-        <a-switch
-          @change="onChange"
-          name="block"
-          v-decorator="['block', {rules: [], valuePropName: 'checked',} ]"
-        />
+        <a-select name="resource_type_id" default-value="1" v-decorator="['resource_type_id', {rules: []} ]">
+          <a-select-option value="1">默认资源类型</a-select-option>
+        </a-select>
       </a-form-item>
 
       <a-form-item>
@@ -120,16 +72,16 @@
 
 <script>
 import { STable } from '@/components'
-import { addUser, updateUserById } from '@/api/acl/user'
+import { addResource, updateResourceById } from '@/api/acl/resource'
 
 export default {
-  name: 'AttributeForm',
+  name: 'ResourceForm',
   components: {
     STable
   },
   data () {
     return {
-      drawerTitle: '新增用户',
+      drawerTitle: '新增资源',
       drawerVisible: false,
       formLayout: 'vertical'
     }
@@ -183,14 +135,10 @@ export default {
       console.log(record)
       this.$nextTick(() => {
         this.form.setFieldsValue({
-          uid: record.uid,
-          username: record.username,
-          nickname: record.nickname,
-          department: record.department,
-          catalog: record.catalog,
-          email: record.email,
-          mobile: record.mobile,
-          block: record.block
+          id: record.id,
+          name: record.name,
+          app_id: record.app_id,
+          resource_type_id: record.resource_type_id
         })
       })
     },
@@ -202,15 +150,15 @@ export default {
           console.log('Received values of form: ', values)
 
           if (values.id) {
-            this.updateUser(values.id, values)
+            this.updateResource(values.id, values)
           } else {
-            this.createUser(values)
+            this.createResource(values)
           }
         }
       })
     },
-    updateUser (attrId, data) {
-      updateUserById(attrId, data)
+    updateResource (id, data) {
+      updateResourceById(id, data)
         .then(res => {
           this.$message.success(`更新成功`)
           this.handleOk()
@@ -218,8 +166,8 @@ export default {
         }).catch(err => this.requestFailed(err))
     },
 
-    createUser (data) {
-      addUser(data)
+    createResource (data) {
+      addResource(data)
         .then(res => {
           this.$message.success(`添加成功`)
           this.handleOk()

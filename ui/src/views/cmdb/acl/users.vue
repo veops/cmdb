@@ -43,9 +43,9 @@
       </div>
       <a-icon slot="filterIcon" slot-scope="filtered" type="search" :style="{ color: filtered ? '#108ee9' : undefined }" />
 
-      <template slot="nameSearchRender" slot-scope="text">
+      <template slot="usernameSearchRender" slot-scope="text">
         <span v-if="columnSearchText.name">
-          <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${columnSearchText.name})|(?=${columnSearchText.name})`, 'i'))">
+          <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${columnSearchText.username})|(?=${columnSearchText.username})`, 'i'))">
             <mark v-if="fragment.toLowerCase() === columnSearchText.name.toLowerCase()" :key="i" class="highlight">{{ fragment }}</mark>
             <template v-else>{{ fragment }}</template>
           </template>
@@ -53,9 +53,9 @@
         <template v-else>{{ text }}</template>
       </template>
 
-      <template slot="aliasSearchRender" slot-scope="text">
+      <template slot="nicknameSearchRender" slot-scope="text">
         <span v-if="columnSearchText.alias">
-          <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${columnSearchText.alias})|(?=${columnSearchText.alias})`, 'i'))">
+          <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${columnSearchText.nickname})|(?=${columnSearchText.nickname})`, 'i'))">
             <mark v-if="fragment.toLowerCase() === columnSearchText.alias.toLowerCase()" :key="i" class="highlight">{{ fragment }}</mark>
             <template v-else>{{ fragment }}</template>
           </template>
@@ -125,11 +125,11 @@ export default {
           sorter: false,
           width: 250,
           scopedSlots: {
-            customRender: 'aliasSearchRender',
+            customRender: 'usernameSearchRender',
             filterDropdown: 'filterDropdown',
             filterIcon: 'filterIcon'
           },
-          onFilter: (value, record) => record.alias && record.alias.toLowerCase().includes(value.toLowerCase()),
+          onFilter: (value, record) => record.username && record.username.toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
               setTimeout(() => {
@@ -144,11 +144,11 @@ export default {
           sorter: false,
           width: 250,
           scopedSlots: {
-            customRender: 'nameSearchRender',
+            customRender: 'nicknameSearchRender',
             filterDropdown: 'filterDropdown',
             filterIcon: 'filterIcon'
           },
-          onFilter: (value, record) => record.name && record.name.toLowerCase().includes(value.toLowerCase()),
+          onFilter: (value, record) => record.nickname && record.nickname.toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
               setTimeout(() => {

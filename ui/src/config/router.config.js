@@ -78,21 +78,21 @@ const cmdbRouter = [
         name: 'acl_users',
         hideChildrenInMenu: true,
         component: () => import('@/views/cmdb/acl/users'),
-        meta: { title: 'Users', keepAlive: true }
+        meta: { title: '用户管理', keepAlive: true }
       },
       {
         path: '/acl/roles',
         name: 'acl_roles',
         hideChildrenInMenu: true,
         component: () => import('@/views/cmdb/acl/roles'),
-        meta: { title: 'Roles', keepAlive: true }
+        meta: { title: '角色管理', keepAlive: true }
       },
       {
         path: '/acl/resources',
         name: 'acl_resources',
         hideChildrenInMenu: true,
         component: () => import('@/views/cmdb/acl/resources'),
-        meta: { title: 'Resources', keepAlive: true }
+        meta: { title: '资源管理', keepAlive: true }
       }
     ]
   }
