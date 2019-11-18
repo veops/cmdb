@@ -111,9 +111,13 @@ class ESHandler(object):
 
         self.es.delete(index=self.index, id=_id)
 
-    def read(self, query, filter_path=None):
+    def read(self, query, filter_path=None, sort=None):
         filter_path = filter_path or []
         if filter_path:
             filter_path.append('hits.total')
+
+        if sort:
+            query.update(dict(sort=sort))
+
         res = self.es.search(index=self.index, body=query, filter_path=filter_path)
         return res['hits']['total']['value'], [i['_source'] for i in res['hits']['hits']]
