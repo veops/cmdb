@@ -3,6 +3,7 @@
 from flask import request
 
 from api.lib.decorator import args_required
+from api.lib.perm.acl import validate_app
 from api.lib.perm.acl.resource import ResourceCRUD
 from api.lib.perm.acl.resource import ResourceGroupCRUD
 from api.lib.utils import get_page
@@ -15,6 +16,7 @@ class ResourceView(APIView):
     url_prefix = ("/resources", "/resources/<int:resource_id>")
 
     @args_required('app_id')
+    @validate_app
     def get(self):
         page = get_page(request.values.get("page", 1))
         page_size = get_page_size(request.values.get("page_size"))
@@ -31,6 +33,7 @@ class ResourceView(APIView):
     @args_required('name')
     @args_required('type_id')
     @args_required('app_id')
+    @validate_app
     def post(self):
         name = request.values.get('name')
         type_id = request.values.get('type_id')
@@ -57,6 +60,7 @@ class ResourceView(APIView):
 class ResourceGroupView(APIView):
     url_prefix = ("/resource_groups", "/resource_groups/<int:group_id>")
 
+    @validate_app
     def get(self):
         page = get_page(request.values.get("page", 1))
         page_size = get_page_size(request.values.get("page_size"))
@@ -73,6 +77,7 @@ class ResourceGroupView(APIView):
     @args_required('name')
     @args_required('type_id')
     @args_required('app_id')
+    @validate_app
     def post(self):
         name = request.values.get('name')
         type_id = request.values.get('type_id')

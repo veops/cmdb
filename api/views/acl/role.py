@@ -3,6 +3,7 @@
 from flask import request
 
 from api.lib.decorator import args_required
+from api.lib.perm.acl import validate_app
 from api.lib.perm.acl.role import RoleCRUD
 from api.lib.perm.acl.role import RoleRelationCRUD
 from api.lib.utils import get_page
@@ -14,6 +15,7 @@ class RoleView(APIView):
     url_prefix = ("/roles", "/roles/<int:rid>")
 
     @args_required('app_id')
+    @validate_app
     def get(self):
         page = get_page(request.values.get("page", 1))
         page_size = get_page_size(request.values.get("page_size"))
@@ -32,6 +34,7 @@ class RoleView(APIView):
 
     @args_required('name')
     @args_required('app_id')
+    @validate_app
     def post(self):
         name = request.values.get('name')
         app_id = request.values.get('app_id')
