@@ -23,8 +23,8 @@ from api.lib.cmdb.const import TableMap
 from api.lib.cmdb.const import type_map
 from api.lib.cmdb.history import AttributeHistoryManger
 from api.lib.cmdb.history import CIRelationHistoryManager
-from api.lib.cmdb.query_sql import QUERY_CIS_BY_IDS
-from api.lib.cmdb.query_sql import QUERY_CIS_BY_VALUE_TABLE
+from api.lib.cmdb.search.db.query_sql import QUERY_CIS_BY_IDS
+from api.lib.cmdb.search.db.query_sql import QUERY_CIS_BY_VALUE_TABLE
 from api.lib.cmdb.value import AttributeValueManager
 from api.lib.decorator import kwargs_required
 from api.lib.utils import handle_arg_list
@@ -112,8 +112,8 @@ class CIManager(object):
                                                        use_master=use_master)
         res.update(_res)
 
-        res['_type'] = ci_type.id
-        res['_id'] = ci_id
+        res['type_id'] = ci_type.id
+        res['ci_id'] = ci_id
 
         return res
 

@@ -13,9 +13,9 @@ from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci import CIManager
 from api.lib.cmdb.const import RetKey
 from api.lib.cmdb.const import TableMap
-from api.lib.cmdb.query_sql import FACET_QUERY
-from api.lib.cmdb.query_sql import QUERY_CI_BY_ATTR_NAME
-from api.lib.cmdb.query_sql import QUERY_CI_BY_TYPE
+from api.lib.cmdb.search.db.query_sql import FACET_QUERY
+from api.lib.cmdb.search.db.query_sql import QUERY_CI_BY_ATTR_NAME
+from api.lib.cmdb.search.db.query_sql import QUERY_CI_BY_TYPE
 from api.lib.utils import handle_arg_list
 from api.models.cmdb import Attribute
 from api.models.cmdb import CI
