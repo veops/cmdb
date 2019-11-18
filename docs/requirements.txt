@@ -35,3 +35,4 @@ bs4>=0.0.1
 toposort>=1.5
 requests>=2.22.0
 PyJWT>=1.7.1
+elasticsearch ==7.0.4

@@ -60,6 +60,7 @@ class ResourceView(APIView):
 class ResourceGroupView(APIView):
     url_prefix = ("/resource_groups", "/resource_groups/<int:group_id>")
 
+    @args_required('app_id')
     @validate_app
     def get(self):
         page = get_page(request.values.get("page", 1))

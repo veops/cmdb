@@ -9,6 +9,7 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
+from api.lib.utils import ESHandler
 from api.lib.utils import RedisHandler
 
 bcrypt = Bcrypt()
@@ -19,3 +20,4 @@ cache = Cache()
 celery = Celery()
 cors = CORS(supports_credentials=True)
 rd = RedisHandler(prefix="CMDB_CI")  # TODO
+es = ESHandler()
