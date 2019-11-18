@@ -30,7 +30,7 @@ class Search(object):
         self.count = count or current_app.config.get("DEFAULT_PAGE_COUNT")
         self.sort = sort
 
-        self.query = dict(query=dict(bool=dict(should=[], must=[], must_not=[])))
+        self.query = dict(filter=dict(bool=dict(should=[], must=[], must_not=[])))
 
     @staticmethod
     def _operator_proc(key):
@@ -69,24 +69,65 @@ class Search(object):
         else:
             raise SearchError("{0} is not existed".format(key))
 
-    def _in_query_handle(self, attr, v, operator):
-        self._operator2query(operator).append({})
+    def _in_query_handle(self, attr, v):
+        terms = v[1:-1].split(";")
+        operator = "|"
+        for term in terms:
+            self._operator2query(operator).append({
+                "term": {
+                    attr: term
+                }
+            })
+
+    @staticmethod
+    def _digit(s):
+        if s.isdigit():
+            return int(float(s))
+        return s
 
     def _range_query_handle(self, attr, v, operator):
+        left, right = v.split("_TO_")
+        left, right = left.strip()[1:], right.strip()[:-1]
         self._operator2query(operator).append({
             "range": {
                 attr: {
-                    "gte": 10,
-                    "lte": 10,
+                    "to": self._digit(right),
+                    "from": self._digit(left),
                 }
             }
         })
 
     def _comparison_query_handle(self, attr, v, operator):
-        pass
+        if v.startswith(">="):
+            _query = dict(gte=self._digit(v[2:]))
+        elif v.startswith("<="):
+            _query = dict(lte=self._digit(v[2:]))
+        elif v.startswith(">"):
+            _query = dict(gt=self._digit(v[1:]))
+        elif v.startswith("<"):
+            _query = dict(lt=self._digit(v[1:]))
+        else:
+            return
+
+        self._operator2query(operator).append({
+            "range": {
+                attr: _query
+            }
+        })
 
     def _match_query_handle(self, attr, v, operator):
-        pass
+        if "*" in v:
+            self._operator2query(operator).append({
+                "wildcard": {
+                    attr: v
+                }
+            })
+        else:
+            self._operator2query(operator).append({
+                "term": {
+                    attr: v
+                }
+            })
 
     def __query_build_by_field(self, queries):
 
@@ -98,7 +139,7 @@ class Search(object):
                 if field_name:
                     # in query
                     if v.startswith("(") and v.endswith(")"):
-                        self._in_query_handle(field_name, v, operator)
+                        self._in_query_handle(field_name, v)
                     # range query
                     elif v.startswith("[") and v.endswith("]") and "_TO_" in v:
                         self._range_query_handle(field_name, v, operator)
@@ -119,16 +160,42 @@ class Search(object):
 
         self.__query_build_by_field(queries)
 
-        self.__paginate()
+        self._paginate_build()
 
         filter_path = self._fl_build()
 
-        return es.read(self.query, filter_path=filter_path)
+        sort = self._sort_build()
+
+        return es.read(self.query, filter_path=filter_path, sort=sort)
 
     def _facet_build(self):
-        return {}
+        return {
+            "aggs": {
+                self.facet_field: {
+                    "cardinality": {
+                        "field": self.facet_field
+                    }
+                }
+            }
+        }
 
-    def __paginate(self):
+    def _sort_build(self):
+        fields = list(filter(lambda x: x != "", self.sort or ""))
+        sorts = []
+        for field in fields:
+            sort_type = "asc"
+            if field.startswith("+"):
+                field = field[1:]
+            elif field.startswith("-"):
+                field = field[1:]
+                sort_type = "desc"
+            else:
+                continue
+            sorts.append({field: {"order": sort_type}})
+
+        return sorts
+
+    def _paginate_build(self):
         self.query.update({"from": (self.page - 1) * self.count,
                            "size": self.count})
 
