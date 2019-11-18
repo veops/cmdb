@@ -1,9 +1,35 @@
 # -*- coding:utf-8 -*-
 
 from api.extensions import cache
+from api.models.acl import App
 from api.models.acl import Permission
 from api.models.acl import Role
 from api.models.acl import User
+
+
+class AppCache(object):
+    PREFIX_ID = "App::id::{0}"
+    PREFIX_NAME = "App::name::{0}"
+
+    @classmethod
+    def get(cls, key):
+        app = cache.get(cls.PREFIX_ID.format(key)) or cache.get(cls.PREFIX_NAME.format(key))
+        if app is None:
+            app = App.get_by_id(key) or App.get_by(name=key, to_dict=False, first=True)
+        if app is not None:
+            cls.set(app)
+
+        return app
+
+    @classmethod
+    def set(cls, app):
+        cache.set(cls.PREFIX_ID.format(app.id), app)
+        cache.set(cls.PREFIX_NAME.format(app.name), app)
+
+    @classmethod
+    def clean(cls, app):
+        cache.delete(cls.PREFIX_ID.format(app.id))
+        cache.delete(cls.PREFIX_NAME.format(app.name))
 
 
 class UserCache(object):
