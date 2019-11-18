@@ -10,9 +10,14 @@ from api.lib.exception import CommitException
 
 class FormatMixin(object):
     def to_dict(self):
-        return dict([(k.name,
-                      getattr(self, k.name) if not isinstance(getattr(self, k.name), datetime.datetime) else getattr(
-                          self, k.name).strftime('%Y-%m-%d %H:%M:%S')) for k in getattr(self, "__table__").columns])
+        res = dict()
+        for k in getattr(self, "__table__").columns:
+            if not isinstance(getattr(self, k.name), datetime.datetime):
+                res[k.name] = getattr(self, k.name)
+            else:
+                res[k.name] = getattr(self, k.name).strftime('%Y-%m-%d %H:%M:%S')
+
+        return res
 
     @classmethod
     def get_columns(cls):

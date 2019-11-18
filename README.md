@@ -17,6 +17,9 @@
     - username: admin
     - password: admin
     
+> **重要提示**: `master` 分支在开发过程中可能处于 *不稳定的状态* 。
+请通过[releases](https://github.com/pycook/cmdb/releases)获取
+    
 Overview
 ----
 ![基础资源视图](https://raw.githubusercontent.com/pycook/cmdb/master/ui/public/cmdb01.jpeg)
