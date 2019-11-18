@@ -1,7 +1,12 @@
 # -*- coding:utf-8 -*-
 
 
+import uuid
+import string
+import random
+
 from flask import abort
+from flask import g
 
 from api.extensions import db
 from api.lib.perm.acl.cache import UserCache
@@ -20,12 +25,21 @@ class UserCRUD(object):
         return numfound, query.offset((page - 1) * page_size).limit(page_size)
 
     @staticmethod
-    def add(**kwargs):
+    def _gen_key_secret():
+        key = uuid.uuid4().hex
+        secret = ''.join(random.sample(string.ascii_letters + string.digits + '~!@#$%^&*?', 32))
+
+        return key, secret
+
+    @classmethod
+    def add(cls, **kwargs):
         existed = User.get_by(username=kwargs['username'], email=kwargs['email'])
         existed and abort(400, "User <{0}> is already existed".format(kwargs['username']))
 
-        kwargs['nickname'] = kwargs['username'] if not kwargs.get('nickname') else kwargs['nickname']
+        kwargs['nickname'] = kwargs.get('nickname') or kwargs['username']
         kwargs['block'] = 0
+        kwargs['key'], kwargs['secret'] = cls._gen_key_secret()
+
         return User.create(**kwargs)
 
     @staticmethod
@@ -35,6 +49,13 @@ class UserCRUD(object):
         UserCache.clean(rid)
 
         return user.update(**kwargs)
+
+    @classmethod
+    def reset_key_secret(cls):
+        key, secret = cls._gen_key_secret()
+        g.user.update(key=key, secret=secret)
+
+        return key, secret
 
     @classmethod
     def delete(cls, uid):
