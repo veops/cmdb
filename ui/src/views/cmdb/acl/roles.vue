@@ -1,21 +1,9 @@
 <template>
   <a-card :bordered="false">
-    <a-form layout="inline">
-      <a-row :gutter="48">
-        <a-col :md="3" :sm="24">
-          <div class="action-btn">
-            <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem;">{{ btnName }}</a-button>
-          </div>
-        </a-col>
-        <a-col :md="8" :sm="24">
-          <a-form-item label="应用列表">
-            <a-select placeholder="请选择" v-model="queryParam.app_id">
-              <a-select-option v-for="app in appList" :key="app.id" :label="app.name" :value="app.id">{{ app.name }}</a-select-option>
-            </a-select>
-          </a-form-item>
-        </a-col>
-      </a-row>
-    </a-form>
+
+    <div class="action-btn">
+      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem;">{{ btnName }}</a-button>
+    </div>
 
     <s-table
       :alert="options.alert"
@@ -65,10 +53,6 @@
         <template v-else>{{ text }}</template>
       </template>
 
-      <span slot="app_id" slot-scope="text">
-        <template>{{ text }}</template>
-      </span>
-
       <span slot="is_app_admin" slot-scope="text">
         <a-icon type="check" v-if="text"/>
       </span>
@@ -117,10 +101,6 @@ export default {
   },
   data () {
     return {
-      appList: [{
-        id: '1',
-        name: '默认应用'
-      }],
       scroll: { x: 1000, y: 500 },
       btnName: '新增角色',
 
@@ -155,13 +135,6 @@ export default {
           }
         },
         {
-          title: '应用',
-          dataIndex: 'app_id',
-          width: 250,
-          sorter: false,
-          scopedSlots: { customRender: 'app_id' }
-        },
-        {
           title: '管理者',
           dataIndex: 'is_app_admin',
           width: 100,
@@ -185,6 +158,7 @@ export default {
         }
       ],
       loadData: parameter => {
+        parameter.app_id = this.$store.state.app.name
         parameter.page = parameter.pageNo
         parameter.page_size = parameter.pageSize
         delete parameter.pageNo
@@ -231,10 +205,6 @@ export default {
     this.form = this.$form.createForm(this)
   },
 
-  created () {
-    this.queryParam.app_id = this.appList[0].id
-  },
-
   computed: {
 
     formItemLayout () {
@@ -275,11 +245,6 @@ export default {
       clearFilters()
       this.columnSearchText[column.dataIndex] = ''
       this.queryParam[column.dataIndex] = ''
-    },
-    searchRoles (params) {
-      searchRole(params).then(res => {
-        this.allRoles = res.roles
-      })
     },
 
     setScrollY () {

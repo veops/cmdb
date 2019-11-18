@@ -65,8 +65,7 @@ export default {
       drawerTitle: '角色关联',
       drawerVisible: false,
       formLayout: 'vertical',
-      allRoles: [],
-      app_id: 0
+      allRoles: []
     }
   },
 
@@ -108,7 +107,6 @@ export default {
     handleAddRoleRelation (record) {
       this.drawerVisible = true
       this.$nextTick(() => {
-        this.app_id = record.app_id
         this.getAllRoles()
         this.form.setFieldsValue({
           id: record.id
@@ -132,7 +130,7 @@ export default {
       })
     },
     getAllRoles () {
-      searchRole({ page_size: 999, app_id: this.app_id }).then(res => {
+      searchRole({ page_size: 999, app_id: this.$store.state.app.name }).then(res => {
         this.allRoles = res.roles
       })
     },
