@@ -26,6 +26,33 @@ services:
         aliases:
           - redis
 
+  cmdb-search:
+    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-search:1.2
+#    build:
+#      context: .
+#      target: cmdb-search
+    container_name: cmdb-search
+    environment:
+      - discovery.type=single-node
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      new:
+        aliases:
+          - cmdb-search
+
   cmdb-api:
     image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-api:1.0
     container_name: cmdb-api
@@ -35,12 +62,15 @@ services:
       - /bin/sh
       - -c
       - |
+        sed -i "s#USE_ES = False#USE_ES = True#g" api/settings.py
+        sed -i "s#ES_HOST = '127.0.0.1'#ES_HOST = cmdb-search#g" api/settings.py
         gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000 -D
         flask init-cache
         celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1
     depends_on:
       - cmdb-db
       - cmdb-cache
+      - cmdb-search
     networks:
       new:
         aliases:
@@ -70,6 +100,7 @@ services:
 
 volumes:
   db-data:
+  esdata:
 
 networks:
   new:

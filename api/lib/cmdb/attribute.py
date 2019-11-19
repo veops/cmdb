@@ -96,9 +96,8 @@ class AttributeManager(object):
         name = kwargs.pop("name")
         alias = kwargs.pop("alias", "")
         alias = name if not alias else alias
-        Attribute.get_by(name=name, first=True) and abort(400, "attribute name <{0}> is already existed".format(name))
-        Attribute.get_by(alias=alias, first=True) and abort(400,
-                                                            "attribute alias <{0}> is already existed".format(name))
+        Attribute.get_by(name=name, first=True) and abort(400, "attribute name <{0}> is duplicated".format(name))
+        Attribute.get_by(alias=alias, first=True) and abort(400, "attribute alias <{0}> is duplicated".format(name))
 
         attr = Attribute.create(flush=True,
                                 name=name,
@@ -117,6 +116,22 @@ class AttributeManager(object):
             return abort(400, "add attribute <{0}> failed".format(name))
 
         AttributeCache.clean(attr)
+
+        if current_app.config.get("USE_ES"):
+            from api.extensions import es
+            other = dict()
+            other['index'] = True if attr.is_index else False
+            if attr.value_type == Attribute.TEXT:
+                other['analyzer'] = 'ik_max_word'
+                other['search_analyzer'] = 'ik_smart'
+                if attr.is_index:
+                    other["fields"] = {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+            es.update_mapping(name, type_map['es_type'][attr.value_type], other)
 
         return attr.id
 

@@ -75,7 +75,6 @@
           <a-popconfirm
             title="确认删除?"
             @confirm="handleDelete(record)"
-            @cancel="cancel"
             okText="是"
             cancelText="否"
           >

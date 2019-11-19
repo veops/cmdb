@@ -20,7 +20,7 @@
             bordered
             ref="table"
             size="middle"
-            rowKey="_id"
+            rowKey="ci_id"
             :columns="columns"
             :data="loadInstances"
             :scroll="{ x: scrollX, y: scrollY }"
@@ -105,7 +105,7 @@ export default {
           result.totalCount = res.numfound
           result.totalPage = Math.ceil(res.numfound / (params.pageSize || 25))
           result.data = Object.assign([], res.result)
-          result.data.forEach((item, index) => (item.key = item._id))
+          result.data.forEach((item, index) => (item.key = item.ci_id))
           setTimeout(() => {
             this.setColumnWidth()
           }, 200)
@@ -203,7 +203,7 @@ export default {
           this.current = [this.typeId]
           this.loadColumns()
           this.levels = res.find(item => item.id === this.typeId).levels
-          this.$refs.table.refresh(true)
+          this.$refs.table && this.$refs.table.refresh(true)
         }
       })
     },
