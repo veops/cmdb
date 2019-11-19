@@ -12,8 +12,9 @@ from api.lib.cmdb.ci import CIManager
 from api.lib.cmdb.const import ExistPolicy
 from api.lib.cmdb.const import ResourceType, PermEnum
 from api.lib.cmdb.const import RetKey
-from api.lib.cmdb.search import Search
-from api.lib.cmdb.search import SearchError
+from api.lib.cmdb.search.db.search import Search as SearchFromDB
+from api.lib.cmdb.search.es.search import Search as SearchFromES
+from api.lib.cmdb.search.db.search import SearchError
 from api.lib.perm.acl.acl import has_perm_from_args
 from api.lib.perm.auth import auth_abandoned
 from api.lib.utils import get_page
@@ -144,14 +145,14 @@ class CISearchView(APIView):
         sort = request.values.get("sort")
 
         start = time.time()
-        s = Search(query, fl, facet, page, ret_key, count, sort)
+        if current_app.config.get("USE_ES"):
+            s = SearchFromES(query, fl, facet, page, ret_key, count, sort)
+        else:
+            s = SearchFromDB(query, fl, facet, page, ret_key, count, sort)
         try:
             response, counter, total, page, numfound, facet = s.search()
         except SearchError as e:
             return abort(400, str(e))
-        except Exception as e:
-            current_app.logger.error(str(e))
-            return abort(500, "search unknown error")
         current_app.logger.debug("search time is :{0}".format(time.time() - start))
         return self.jsonify(numfound=numfound,
                             total=total,
