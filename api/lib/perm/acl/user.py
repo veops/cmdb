@@ -43,10 +43,10 @@ class UserCRUD(object):
         return User.create(**kwargs)
 
     @staticmethod
-    def update(rid, **kwargs):
-        user = User.get_by_id(rid) or abort(404, "User <{0}> does not exist".format(rid))
+    def update(uid, **kwargs):
+        user = User.get_by_id(uid) or abort(404, "User <{0}> does not exist".format(uid))
 
-        UserCache.clean(rid)
+        UserCache.clean(uid)
 
         return user.update(**kwargs)
 
