@@ -105,7 +105,7 @@ export default {
           result.totalCount = res.numfound
           result.totalPage = Math.ceil(res.numfound / (params.pageSize || 25))
           result.data = Object.assign([], res.result)
-          result.data.forEach((item, index) => (item.key = item._id))
+          result.data.forEach((item, index) => (item.key = item.ci_id))
           setTimeout(() => {
             this.setColumnWidth()
           }, 200)

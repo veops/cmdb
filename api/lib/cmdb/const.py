@@ -93,6 +93,14 @@ type_map = {
         'index_{0}'.format(Attribute.DATE): 'c_value_index_datetime',
         'index_{0}'.format(Attribute.TIME): 'c_value_index_texts',
         'index_{0}'.format(Attribute.FLOAT): 'c_value_index_floats',
+    },
+    'es_type': {
+        Attribute.INT: 'long',
+        Attribute.TEXT: 'text',
+        Attribute.DATETIME: 'text',
+        Attribute.DATE: 'text',
+        Attribute.TIME: 'text',
+        Attribute.FLOAT: 'float'
     }
 }
 
