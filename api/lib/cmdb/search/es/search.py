@@ -28,9 +28,9 @@ class Search(object):
         self.page = page
         self.ret_key = ret_key
         self.count = count or current_app.config.get("DEFAULT_PAGE_COUNT")
-        self.sort = sort
+        self.sort = sort or "ci_id"
 
-        self.query = dict(filter=dict(bool=dict(should=[], must=[], must_not=[])))
+        self.query = dict(query=dict(bool=dict(should=[], must=[], must_not=[])))
 
     @staticmethod
     def _operator_proc(key):
@@ -91,21 +91,22 @@ class Search(object):
         self._operator2query(operator).append({
             "range": {
                 attr: {
-                    "to": self._digit(right),
-                    "from": self._digit(left),
+                    "lte": self._digit(right),
+                    "gte": self._digit(left),
+                    "boost": 2.0
                 }
             }
         })
 
     def _comparison_query_handle(self, attr, v, operator):
         if v.startswith(">="):
-            _query = dict(gte=self._digit(v[2:]))
+            _query = dict(gte=self._digit(v[2:]), boost=2.0)
         elif v.startswith("<="):
-            _query = dict(lte=self._digit(v[2:]))
+            _query = dict(lte=self._digit(v[2:]), boost=2.0)
         elif v.startswith(">"):
-            _query = dict(gt=self._digit(v[1:]))
+            _query = dict(gt=self._digit(v[1:]), boost=2.0)
         elif v.startswith("<"):
-            _query = dict(lt=self._digit(v[1:]))
+            _query = dict(lt=self._digit(v[1:]), boost=2.0)
         else:
             return
 
@@ -123,6 +124,8 @@ class Search(object):
                 }
             })
         else:
+            if attr == "ci_type" and v.isdigit():
+                attr = "type_id"
             self._operator2query(operator).append({
                 "term": {
                     attr: v
@@ -164,23 +167,32 @@ class Search(object):
 
         filter_path = self._fl_build()
 
-        sort = self._sort_build()
+        self._sort_build()
 
-        return es.read(self.query, filter_path=filter_path, sort=sort)
+        self._facet_build()
+
+        return es.read(self.query, filter_path=filter_path)
 
     def _facet_build(self):
-        return {
-            "aggs": {
-                self.facet_field: {
-                    "cardinality": {
-                        "field": self.facet_field
+        aggregations = dict(aggs={})
+        for field in self.facet_field:
+            attr = AttributeCache.get(field)
+            if not attr:
+                raise SearchError("Facet by <{0}> does not exist".format(field))
+            aggregations['aggs'].update({
+                field: {
+                    "terms": {
+                        "field": "{0}.keyword".format(field)
+                        if attr.value_type not in (Attribute.INT, Attribute.FLOAT) else field
                     }
                 }
-            }
-        }
+            })
+
+        if aggregations['aggs']:
+            self.query.update(aggregations)
 
     def _sort_build(self):
-        fields = list(filter(lambda x: x != "", self.sort or ""))
+        fields = list(filter(lambda x: x != "", (self.sort or "").split(",")))
         sorts = []
         for field in fields:
             sort_type = "asc"
@@ -190,10 +202,20 @@ class Search(object):
                 field = field[1:]
                 sort_type = "desc"
             else:
+                field = field
+            if field == "ci_id":
+                sorts.append({field: {"order": sort_type}})
                 continue
-            sorts.append({field: {"order": sort_type}})
 
-        return sorts
+            attr = AttributeCache.get(field)
+            if not attr:
+                raise SearchError("Sort by <{0}> does not exist".format(field))
+
+            sort_by = "{0}.keyword".format(field) \
+                if attr.value_type not in (Attribute.INT, Attribute.FLOAT) else field
+            sorts.append({sort_by: {"order": sort_type}})
+
+        self.query.update(dict(sort=sorts))
 
     def _paginate_build(self):
         self.query.update({"from": (self.page - 1) * self.count,
@@ -204,16 +226,22 @@ class Search(object):
 
     def search(self):
         try:
-            numfound, cis = self._query_build_raw()
+            numfound, cis, facet = self._query_build_raw()
         except Exception as e:
             current_app.logger.error(str(e))
             raise SearchError("unknown search error")
 
-        if self.facet_field and numfound:
-            facet = self._facet_build()
-        else:
-            facet = dict()
-
         total = len(cis)
 
-        return cis, {}, total, self.page, numfound, facet
+        counter = dict()
+        for ci in cis:
+            ci_type = ci.get("ci_type")
+            if ci_type not in counter.keys():
+                counter[ci_type] = 0
+            counter[ci_type] += 1
+
+        facet_ = dict()
+        for k in facet:
+            facet_[k] = [[i['key'], i['doc_count'], k] for i in facet[k]["buckets"]]
+
+        return cis, counter, total, self.page, numfound, facet_

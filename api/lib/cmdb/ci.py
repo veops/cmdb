@@ -346,8 +346,8 @@ class CIManager(object):
             if ci_id not in ci_set:
                 ci_dict = dict()
                 ci_type = CITypeCache.get(type_id)
-                ci_dict["_id"] = ci_id
-                ci_dict["_type"] = type_id
+                ci_dict["ci_id"] = ci_id
+                ci_dict["ci_type"] = type_id
                 ci_dict["ci_type"] = ci_type.name
                 ci_dict["ci_type_alias"] = ci_type.alias
                 ci_set.add(ci_id)
