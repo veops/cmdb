@@ -9,7 +9,6 @@ from flask.cli import with_appcontext
 
 import api.lib.cmdb.ci
 from api.extensions import db
-from api.extensions import es
 from api.extensions import rd
 from api.models.cmdb import CI
 
@@ -18,6 +17,29 @@ from api.models.cmdb import CI
 @with_appcontext
 def init_cache():
     db.session.remove()
+
+    if current_app.config.get("USE_ES"):
+        from api.extensions import es
+        from api.models.cmdb import Attribute
+        from api.lib.cmdb.const import type_map
+        attributes = Attribute.get_by(to_dict=False)
+        for attr in attributes:
+            other = dict()
+            other['index'] = True if attr.is_index else False
+            if attr.value_type == Attribute.TEXT:
+                other['analyzer'] = 'ik_max_word'
+                other['search_analyzer'] = 'ik_smart'
+                if attr.is_index:
+                    other["fields"] = {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+            try:
+                es.update_mapping(attr.name, type_map['es_type'][attr.value_type], other)
+            except Exception as e:
+                print(e)
 
     cis = CI.get_by(to_dict=False)
     for ci in cis:

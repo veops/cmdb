@@ -40,7 +40,7 @@
         bordered
         ref="table"
         size="middle"
-        rowKey="_id"
+        rowKey="ci_id"
         :columns="columns"
         :data="loadInstances"
         :alert="options.alert"
@@ -158,7 +158,7 @@ export default {
           result.totalCount = res.numfound
           result.totalPage = Math.ceil(res.numfound / params.pageSize)
           result.data = Object.assign([], res.result)
-          result.data.forEach((item, index) => (item.key = item._id))
+          result.data.forEach((item, index) => (item.key = item.ci_id))
           setTimeout(() => {
             this.setColumnWidth()
           }, 200)

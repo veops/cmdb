@@ -88,6 +88,18 @@ class ESHandler(object):
         if not self.es.indices.exists(index=self.index):
             self.es.indices.create(index=self.index)
 
+    def update_mapping(self, field, value_type, other):
+        body = {
+            "properties": {
+                field: {"type": value_type},
+            }}
+        body['properties'][field].update(other)
+
+        self.es.indices.put_mapping(
+            index=self.index,
+            body=body
+        )
+
     def get_index_id(self, ci_id):
         query = {
             'query': {
@@ -111,13 +123,15 @@ class ESHandler(object):
 
         self.es.delete(index=self.index, id=_id)
 
-    def read(self, query, filter_path=None, sort=None):
+    def read(self, query, filter_path=None):
         filter_path = filter_path or []
         if filter_path:
             filter_path.append('hits.total')
 
-        if sort:
-            query.update(dict(sort=sort))
-
         res = self.es.search(index=self.index, body=query, filter_path=filter_path)
-        return res['hits']['total']['value'], [i['_source'] for i in res['hits']['hits']]
+        if res['hits'].get('hits'):
+            return res['hits']['total']['value'], \
+                   [i['_source'] for i in res['hits']['hits']], \
+                   res.get("aggregations", {})
+        else:
+            return 0, [], {}
