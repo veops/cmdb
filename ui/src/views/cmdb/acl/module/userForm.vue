@@ -61,7 +61,7 @@
       >
         <a-input
           name="email"
-          v-decorator="['email', {rules: [{ required: true, message: '请输入邮箱'},{message: '请输入正确的邮箱', pattern: RegExp('^\w+@\w+\.\w+$')}]} ]"
+          v-decorator="['email', {rules: [{ required: true, message: '请输入邮箱'},{message: '请输入正确的邮箱', pattern: /^\w+\@\w+(\.\w+)+$/}]} ]"
         />
       </a-form-item>
 
@@ -72,7 +72,7 @@
       >
         <a-input
           name="mobile"
-          v-decorator="['mobile', {rules: [{message: '请输入正确的手机号码', pattern: RegExp('^1\d{10}$')}]} ]"
+          v-decorator="['mobile', {rules: [{message: '请输入正确的手机号码', pattern: /^1\d{10}$/ }]} ]"
         />
       </a-form-item>
 
@@ -183,7 +183,7 @@ export default {
       console.log(record)
       this.$nextTick(() => {
         this.form.setFieldsValue({
-          uid: record.uid,
+          id: record.uid,
           username: record.username,
           nickname: record.nickname,
           department: record.department,

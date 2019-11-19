@@ -21,15 +21,7 @@
           v-decorator="['name', {rules: [{ required: true, message: '请输入资源名'}]} ]"
         />
       </a-form-item>
-      <a-form-item
-        :label-col="formItemLayout.labelCol"
-        :wrapper-col="formItemLayout.wrapperCol"
-        label="应用列表"
-      >
-        <a-select name="app_id" default-value="1" v-decorator="['app_id', {rules: []} ]">
-          <a-select-option value="1">默认应用</a-select-option>
-        </a-select>
-      </a-form-item>
+
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
@@ -38,6 +30,14 @@
         <a-select name="resource_type_id" default-value="1" v-decorator="['resource_type_id', {rules: []} ]">
           <a-select-option value="1">默认资源类型</a-select-option>
         </a-select>
+      </a-form-item>
+
+      <a-form-item>
+        <a-input
+          name="app_id"
+          type="hidden"
+          v-decorator="['app_id', {rules: []} ]"
+        />
       </a-form-item>
 
       <a-form-item>
@@ -137,7 +137,7 @@ export default {
         this.form.setFieldsValue({
           id: record.id,
           name: record.name,
-          app_id: record.app_id,
+          app_id: this.$store.state.app.name,
           resource_type_id: record.resource_type_id
         })
       })

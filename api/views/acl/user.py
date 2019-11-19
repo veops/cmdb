@@ -33,7 +33,6 @@ class UserView(APIView):
         page_size = get_page_size(request.values.get('page_size'))
         q = request.values.get("q")
         numfound, users = UserCRUD.search(q, page, page_size)
-
         id2parents = RoleRelationCRUD.get_parents(uids=[i.uid for i in users])
 
         users = [i.to_dict() for i in users]
