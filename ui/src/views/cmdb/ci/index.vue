@@ -324,7 +324,7 @@ export default {
         return searchCI(`q=_id:${ciId}`).then(res => {
           const ciMap = {}
           Object.keys(res.result[0]).forEach(k => {
-            if (!['ci_type', '_id', 'ci_type_alias', '_type'].includes(k)) {
+            if (!['ci_type', 'ci_id', 'ci_type_alias', 'type_id'].includes(k)) {
               ciMap[k] = res.result[0][k]
             }
           })
