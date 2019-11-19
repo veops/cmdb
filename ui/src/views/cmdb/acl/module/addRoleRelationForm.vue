@@ -16,7 +16,7 @@
         label="角色列表"
       >
         <a-select name="otherID" v-decorator="['otherID', {rules: [{ required: true, message: '请选择另一个角色'}]} ]">
-          <a-select-option v-for="role in allRoles" :key="role.id">{{ role.name }}</a-select-option>
+          <a-select-option v-for="role in allRoles" v-if="role.id != current_record.id" :key="role.id">{{ role.name }}</a-select-option>
         </a-select>
       </a-form-item>
 
@@ -65,7 +65,8 @@ export default {
       drawerTitle: '角色关联',
       drawerVisible: false,
       formLayout: 'vertical',
-      allRoles: []
+      allRoles: [],
+      current_record: null
     }
   },
 
@@ -105,6 +106,7 @@ export default {
       this.drawerVisible = false
     },
     handleAddRoleRelation (record) {
+      this.current_record = record
       this.drawerVisible = true
       this.$nextTick(() => {
         this.getAllRoles()

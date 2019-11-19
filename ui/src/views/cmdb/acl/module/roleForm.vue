@@ -22,16 +22,6 @@
         />
       </a-form-item>
       <a-form-item
-        :label-col="formItemLayout.labelCol"
-        :wrapper-col="formItemLayout.wrapperCol"
-        label="应用列表"
-      >
-        <a-select name="app_id" default-value="1" v-decorator="['app_id', {rules: []} ]">
-          <a-select-option value="1">默认应用</a-select-option>
-        </a-select>
-      </a-form-item>
-
-      <a-form-item
         :label-col="horizontalFormItemLayout.labelCol"
         :wrapper-col="horizontalFormItemLayout.wrapperCol"
         label="是否应用管理员"
@@ -40,6 +30,14 @@
           @change="onChange"
           name="is_app_admin"
           v-decorator="['is_app_admin', {rules: [], valuePropName: 'checked',} ]"
+        />
+      </a-form-item>
+
+      <a-form-item>
+        <a-input
+          name="app_id"
+          type="hidden"
+          v-decorator="['app_id', {rules: []} ]"
         />
       </a-form-item>
 
@@ -140,7 +138,7 @@ export default {
         this.form.setFieldsValue({
           id: record.id,
           name: record.name,
-          app_id: record.app_id,
+          app_id: this.$store.state.app.name,
           is_app_admin: record.is_app_admin
         })
       })

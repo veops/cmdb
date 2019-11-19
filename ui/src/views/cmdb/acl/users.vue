@@ -9,7 +9,7 @@
       :alert="options.alert"
       :columns="columns"
       :data="loadData"
-      :rowKey="record=>record.id"
+      :rowKey="record=>record.uid"
       :rowSelection="options.rowSelection"
       :scroll="scroll"
       :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条记录`, pageSizeOptions: pageSizeOptions}"
@@ -123,7 +123,7 @@ export default {
           title: '用户名',
           dataIndex: 'username',
           sorter: false,
-          width: 250,
+          width: 150,
           scopedSlots: {
             customRender: 'usernameSearchRender',
             filterDropdown: 'filterDropdown',
@@ -142,7 +142,7 @@ export default {
           title: '中文名',
           dataIndex: 'nickname',
           sorter: false,
-          width: 250,
+          width: 150,
           scopedSlots: {
             customRender: 'nicknameSearchRender',
             filterDropdown: 'filterDropdown',
@@ -160,7 +160,7 @@ export default {
         {
           title: '部门',
           dataIndex: 'department',
-          width: 50,
+          width: 200,
           sorter: false,
           scopedSlots: { customRender: 'department' }
 
@@ -169,7 +169,7 @@ export default {
           title: '小组',
           dataIndex: 'catalog',
           sorter: false,
-          width: 50,
+          width: 200,
           scopedSlots: { customRender: 'catalog' }
 
         },
@@ -177,7 +177,7 @@ export default {
           title: '邮箱',
           dataIndex: 'email',
           sorter: false,
-          width: 50,
+          width: 200,
           scopedSlots: { customRender: 'email' }
 
         },
@@ -185,7 +185,7 @@ export default {
           title: '手机',
           dataIndex: 'mobile',
           sorter: false,
-          width: 50,
+          width: 200,
           scopedSlots: { customRender: 'mobile' }
 
         },
@@ -193,7 +193,7 @@ export default {
           title: '锁定',
           dataIndex: 'block',
           sorter: false,
-          width: 50,
+          width: 100,
           scopedSlots: { customRender: 'block' }
 
         },
@@ -203,6 +203,13 @@ export default {
           sorter: false,
           scopedSlots: { customRender: 'date_joined' }
 
+        },
+        {
+          title: '操作',
+          dataIndex: 'action',
+          width: 100,
+          fixed: 'right',
+          scopedSlots: { customRender: 'action' }
         }
       ],
       loadData: parameter => {
@@ -276,7 +283,6 @@ export default {
 
   },
   mounted () {
-    this.searchUsers()
     this.setScrollY()
   },
   inject: ['reload'],
@@ -293,11 +299,6 @@ export default {
       this.columnSearchText[column.dataIndex] = ''
       this.queryParam[column.dataIndex] = ''
     },
-    searchUsers () {
-      searchUser().then(res => {
-        this.allUsers = res.users
-      })
-    },
 
     setScrollY () {
       this.scroll.y = window.innerHeight - this.$refs.table.$el.offsetTop - 200
@@ -307,7 +308,7 @@ export default {
       this.$refs.userForm.handleEdit(record)
     },
     handleDelete (record) {
-      this.deleteUserById(record.id)
+      this.deleteUser(record.uid)
     },
     handleOk () {
       this.$refs.table.refresh()

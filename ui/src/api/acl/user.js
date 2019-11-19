@@ -13,7 +13,7 @@ export function searchUser (params) {
   return axios({
     url: urlPrefix + `/users`,
     method: 'GET',
-    data: params
+    params: params
   })
 }
 
