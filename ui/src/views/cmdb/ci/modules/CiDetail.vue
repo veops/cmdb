@@ -33,7 +33,7 @@
         <div v-for="parent in parentCITypes" :key="'ctr_' + parent.ctr_id">
           <a-card type="inner" :title="parent.alias || parent.name" v-if="firstCIs[parent.name]">
             <a-table
-              rowKey="_id"
+              rowKey="ci_id"
               size="middle"
               :columns="firstCIColumns[child.id]"
               :dataSource="firstCIs[child.name]"
@@ -45,7 +45,7 @@
         <div v-for="child in childCITypes" :key="'ctr_' + child.ctr_id">
           <a-card type="inner" :title="child.alias || child.name" v-if="secondCIs[child.name]">
             <a-table
-              rowKey="_id"
+              rowKey="ci_id"
               size="middle"
               :columns="secondCIColumns[child.id]"
               :dataSource="secondCIs[child.name]"

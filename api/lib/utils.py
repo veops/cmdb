@@ -2,6 +2,7 @@
 
 import redis
 import six
+from elasticsearch import Elasticsearch
 from flask import current_app
 
 
@@ -72,3 +73,65 @@ class RedisHandler(object):
                 current_app.logger.warn("[{0}] is not in redis".format(key_id))
         except Exception as e:
             current_app.logger.error("delete redis key error, {0}".format(str(e)))
+
+
+class ESHandler(object):
+    def __init__(self, flask_app=None):
+        self.flask_app = flask_app
+        self.es = None
+        self.index = "cmdb"
+
+    def init_app(self, app):
+        self.flask_app = app
+        config = self.flask_app.config
+        self.es = Elasticsearch(config.get("ES_HOST"))
+        if not self.es.indices.exists(index=self.index):
+            self.es.indices.create(index=self.index)
+
+    def update_mapping(self, field, value_type, other):
+        body = {
+            "properties": {
+                field: {"type": value_type},
+            }}
+        body['properties'][field].update(other)
+
+        self.es.indices.put_mapping(
+            index=self.index,
+            body=body
+        )
+
+    def get_index_id(self, ci_id):
+        query = {
+            'query': {
+                'match': {'ci_id': ci_id}
+            },
+        }
+        res = self.es.search(index=self.index, body=query)
+        if res['hits']['hits']:
+            return res['hits']['hits'][-1].get('_id')
+
+    def create(self, body):
+        return self.es.index(index=self.index, body=body).get("_id")
+
+    def update(self, ci_id, body):
+        _id = self.get_index_id(ci_id)
+
+        return self.es.index(index=self.index, id=_id, body=body).get("_id")
+
+    def delete(self, ci_id):
+        _id = self.get_index_id(ci_id)
+
+        self.es.delete(index=self.index, id=_id)
+
+    def read(self, query, filter_path=None):
+        filter_path = filter_path or []
+        if filter_path:
+            filter_path.append('hits.total')
+
+        res = self.es.search(index=self.index, body=query, filter_path=filter_path)
+        if res['hits'].get('hits'):
+            return res['hits']['total']['value'], \
+                   [i['_source'] for i in res['hits']['hits']], \
+                   res.get("aggregations", {})
+        else:
+            return 0, [], {}
