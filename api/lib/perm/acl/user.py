@@ -44,7 +44,7 @@ class UserCRUD(object):
 
     @staticmethod
     def update(uid, **kwargs):
-        user = User.get_by_id(uid) or abort(404, "User <{0}> does not exist".format(uid))
+        user = User.get_by(uid=uid, to_dict=False, first=True) or abort(404, "User <{0}> does not exist".format(uid))
 
         UserCache.clean(uid)
 
@@ -59,7 +59,7 @@ class UserCRUD(object):
 
     @classmethod
     def delete(cls, uid):
-        user = User.get_by_id(uid) or abort(404, "User <{0}> does not exist".format(uid))
+        user = User.get_by(uid=uid, to_dict=False, first=True) or abort(404, "User <{0}> does not exist".format(uid))
 
         UserCache.clean(user)
 
