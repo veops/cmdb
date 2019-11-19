@@ -34,7 +34,7 @@ API_PACKAGE = "api"
 @login_manager.user_loader
 def load_user(user_id):
     """Load user by ID."""
-    return User.get_by_id(int(user_id))
+    return User.get_by(uid=int(user_id), first=True, to_dict=False)
 
 
 class ReverseProxy(object):
