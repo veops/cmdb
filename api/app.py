@@ -21,6 +21,7 @@ from api.extensions import (
     migrate,
     celery,
     rd,
+    es
 )
 from api.flask_cas import CAS
 from api.models.acl import User
@@ -33,7 +34,7 @@ API_PACKAGE = "api"
 @login_manager.user_loader
 def load_user(user_id):
     """Load user by ID."""
-    return User.get_by_id(int(user_id))
+    return User.get_by(uid=int(user_id), first=True, to_dict=False)
 
 
 class ReverseProxy(object):
@@ -98,6 +99,8 @@ def register_extensions(app):
     login_manager.init_app(app)
     migrate.init_app(app, db)
     rd.init_app(app)
+    if app.config.get("USE_ES"):
+        es.init_app(app)
     celery.conf.update(app.config)
 
 

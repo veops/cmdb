@@ -36,3 +36,9 @@ RUN pip install  --no-cache-dir -r docs/requirements.txt \
     && sed -i "s/127.0.0.1/redis/g" api/settings.py
 
 CMD ["bash", "-c", "flask run"]
+
+
+# ================================= Search ================================
+FROM docker.elastic.co/elasticsearch/elasticsearch:7.4.2 AS cmdb-search
+
+RUN yes | ./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.4.2/elasticsearch-analysis-ik-7.4.2.zip
