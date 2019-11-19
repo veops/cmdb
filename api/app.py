@@ -99,7 +99,8 @@ def register_extensions(app):
     login_manager.init_app(app)
     migrate.init_app(app, db)
     rd.init_app(app)
-    es.init_app(app)
+    if app.config.get("USE_ES"):
+        es.init_app(app)
     celery.conf.update(app.config)
 
 

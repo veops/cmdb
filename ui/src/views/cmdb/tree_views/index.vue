@@ -20,7 +20,7 @@
             bordered
             ref="table"
             size="middle"
-            rowKey="_id"
+            rowKey="ci_id"
             :columns="columns"
             :data="loadInstances"
             :scroll="{ x: scrollX, y: scrollY }"
@@ -203,7 +203,7 @@ export default {
           this.current = [this.typeId]
           this.loadColumns()
           this.levels = res.find(item => item.id === this.typeId).levels
-          this.$refs.table.refresh(true)
+          this.$refs.table && this.$refs.table.refresh(true)
         }
       })
     },
