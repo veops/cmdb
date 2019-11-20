@@ -93,6 +93,13 @@ const cmdbRouter = [
         hideChildrenInMenu: true,
         component: () => import('@/views/cmdb/acl/resources'),
         meta: { title: '资源管理', keepAlive: true }
+      },
+      {
+        path: '/acl/resource_types',
+        name: 'acl_resource_types',
+        hideChildrenInMenu: true,
+        component: () => import('@/views/cmdb/acl/resource_types'),
+        meta: { title: '资源类型', keepAlive: true }
       }
     ]
   }
