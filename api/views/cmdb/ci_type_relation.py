@@ -25,18 +25,26 @@ class GetParentsView(APIView):
 
 
 class CITypeRelationView(APIView):
-    url_prefix = "/ci_type_relations/<int:parent_id>/<int:child_id>"
+    url_prefix = ("/ci_type_relations", "/ci_type_relations/<int:parent_id>/<int:child_id>")
+
+    @role_required(RoleEnum.CONFIG)
+    def get(self):
+        res = CITypeRelationManager.get()
+
+        return self.jsonify(res)
 
     @role_required(RoleEnum.CONFIG)
     @args_required("relation_type_id")
     def post(self, parent_id, child_id):
         relation_type_id = request.values.get("relation_type_id")
         ctr_id = CITypeRelationManager.add(parent_id, child_id, relation_type_id)
+
         return self.jsonify(ctr_id=ctr_id)
 
     @role_required(RoleEnum.CONFIG)
     def delete(self, parent_id, child_id):
         CITypeRelationManager.delete_2(parent_id, child_id)
+
         return self.jsonify(code=200, parent_id=parent_id, child_id=child_id)
 
 
@@ -46,4 +54,5 @@ class CITypeRelationDelete2View(APIView):
     @role_required(RoleEnum.CONFIG)
     def delete(self, ctr_id):
         CITypeRelationManager.delete(ctr_id)
+
         return self.jsonify(code=200, ctr_id=ctr_id)
