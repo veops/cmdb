@@ -4,6 +4,9 @@
 import datetime
 
 from api.extensions import db
+from api.lib.cmdb.const import CIStatusEnum
+from api.lib.cmdb.const import OperateType
+from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.database import Model
 
 
@@ -58,16 +61,9 @@ class CITypeRelation(Model):
 class Attribute(Model):
     __tablename__ = "c_attributes"
 
-    INT = "0"
-    FLOAT = "1"
-    TEXT = "2"
-    DATETIME = "3"
-    DATE = "4"
-    TIME = "5"
-
     name = db.Column(db.String(32), nullable=False)
     alias = db.Column(db.String(32), nullable=False)
-    value_type = db.Column(db.Enum(INT, FLOAT, TEXT, DATETIME, DATE, TIME), default=TEXT, nullable=False)
+    value_type = db.Column(db.Enum(*ValueTypeEnum.all()), default=ValueTypeEnum.TEXT, nullable=False)
 
     is_choice = db.Column(db.Boolean, default=False)
     is_list = db.Column(db.Boolean, default=False)
@@ -111,11 +107,8 @@ class CITypeAttributeGroupItem(Model):
 class CI(Model):
     __tablename__ = "c_cis"
 
-    REVIEW = "0"
-    VALIDATE = "1"
-
     type_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)
-    status = db.Column(db.Enum(REVIEW, VALIDATE, name="status"))
+    status = db.Column(db.Enum(*CIStatusEnum.all(), name="status"))
     heartbeat = db.Column(db.DateTime, default=lambda: datetime.datetime.now())
 
     ci_type = db.relationship("CIType", backref="c_cis.type_id")
@@ -270,11 +263,7 @@ class OperationRecord(Model):
 class AttributeHistory(Model):
     __tablename__ = "c_attribute_histories"
 
-    ADD = "0"
-    DELETE = "1"
-    UPDATE = "2"
-
-    operate_type = db.Column(db.Enum(ADD, DELETE, UPDATE, name="operate_type"))
+    operate_type = db.Column(db.Enum(*OperateType.all(), name="operate_type"))
     record_id = db.Column(db.Integer, db.ForeignKey("c_records.id"), nullable=False)
     ci_id = db.Column(db.Integer, index=True, nullable=False)
     attr_id = db.Column(db.Integer, index=True)
@@ -285,10 +274,7 @@ class AttributeHistory(Model):
 class CIRelationHistory(Model):
     __tablename__ = "c_relation_histories"
 
-    ADD = "0"
-    DELETE = "1"
-
-    operate_type = db.Column(db.Enum(ADD, DELETE, name="operate_type"))
+    operate_type = db.Column(db.Enum(OperateType.ADD, OperateType.DELETE, name="operate_type"))
     record_id = db.Column(db.Integer, db.ForeignKey("c_records.id"), nullable=False)
     first_ci_id = db.Column(db.Integer)
     second_ci_id = db.Column(db.Integer)

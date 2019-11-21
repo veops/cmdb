@@ -5,7 +5,8 @@ from flask import current_app
 
 from api.extensions import db
 from api.lib.cmdb.cache import AttributeCache
-from api.lib.cmdb.const import type_map
+from api.lib.cmdb.const import ValueTypeEnum
+from api.lib.cmdb.utils import ValueTypeMap
 from api.lib.decorator import kwargs_required
 from api.models.cmdb import Attribute
 from api.models.cmdb import CITypeAttribute
@@ -22,13 +23,13 @@ class AttributeManager(object):
 
     @staticmethod
     def get_choice_values(attr_id, value_type):
-        choice_table = type_map.get("choice").get(value_type)
+        choice_table = ValueTypeMap.choice.get(value_type)
         choice_values = choice_table.get_by(fl=["value"], attr_id=attr_id)
         return [choice_value["value"] for choice_value in choice_values]
 
     @staticmethod
     def _add_choice_values(_id, value_type, choice_values):
-        choice_table = type_map.get("choice").get(value_type)
+        choice_table = ValueTypeMap.choice.get(value_type)
 
         db.session.query(choice_table).filter(choice_table.attr_id == _id).delete()
         db.session.flush()
@@ -121,7 +122,7 @@ class AttributeManager(object):
             from api.extensions import es
             other = dict()
             other['index'] = True if attr.is_index else False
-            if attr.value_type == Attribute.TEXT:
+            if attr.value_type == ValueTypeEnum.TEXT:
                 other['analyzer'] = 'ik_max_word'
                 other['search_analyzer'] = 'ik_smart'
                 if attr.is_index:
@@ -131,7 +132,7 @@ class AttributeManager(object):
                             "ignore_above": 256
                         }
                     }
-            es.update_mapping(name, type_map['es_type'][attr.value_type], other)
+            es.update_mapping(name, ValueTypeMap.es_type[attr.value_type], other)
 
         return attr.id
 
@@ -172,7 +173,7 @@ class AttributeManager(object):
         name = attr.name
 
         if attr.is_choice:
-            choice_table = type_map["choice"].get(attr.value_type)
+            choice_table = ValueTypeMap.choice.get(attr.value_type)
             db.session.query(choice_table).filter(choice_table.attr_id == _id).delete()  # FIXME: session conflict
             db.session.flush()
 

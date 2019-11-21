@@ -19,5 +19,5 @@ migrate = Migrate()
 cache = Cache()
 celery = Celery()
 cors = CORS(supports_credentials=True)
-rd = RedisHandler(prefix="CMDB_CI")  # TODO
+rd = RedisHandler()
 es = ESHandler()
