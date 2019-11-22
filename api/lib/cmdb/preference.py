@@ -1,5 +1,7 @@
 # -*- coding:utf-8 -*-
 
+import json
+
 import six
 import toposort
 from flask import abort
@@ -113,21 +115,28 @@ class PreferenceManager(object):
         views = PreferenceRelationView.get_by(to_dict=True)
         result = dict()
         for view in views:
-            result.setdefault(view['name'], []).append(view)
+            result.setdefault(view['name'], []).extend(json.loads(view['cr_ids']))
 
+        id2type = dict()
         for view_name in result:
-            result[view_name] = toposort.toposort_flatten({i['child_id']: {i['parent_id']} for i in result[view_name]})
+            result[view_name] = toposort.toposort_flatten(
+                {i['child_id']: {i['parent_id']} for i in result[view_name]})
+            for i in result[view_name]:
+                id2type[i['parent_id']] = None
+                id2type[i['child']] = None
 
-        return result
+        for type_id in id2type:
+            id2type[type_id] = CITypeCache.get(type_id).to_dict()
 
-    @staticmethod
-    def create_or_update_relation_view(name, parent_id, child_id):
-        existed = PreferenceRelationView.get_by(name=name, parent_id=parent_id, child_id=child_id,
-                                                to_dict=False, first=True)
+        return result, id2type
+
+    @classmethod
+    def create_or_update_relation_view(cls, name, cr_ids):
+        existed = PreferenceRelationView.get_by(name=name, to_dict=False, first=True)
         if existed is None:
-            return PreferenceRelationView.create(name=name, parent_id=parent_id, child_id=child_id)
+            return PreferenceRelationView.create(name=name, cr_ids=json.dumps(cr_ids))
 
-        return existed
+        return cls.get_relation_view()
 
     @staticmethod
     def delete_relation_view(name):

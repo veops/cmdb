@@ -307,5 +307,4 @@ class PreferenceRelationView(Model):
     __tablename__ = "c_preference_relation_views"
 
     name = db.Column(db.String(8), index=True, nullable=False)
-    parent_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)
-    child_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)
+    cr_ids = db.Column(db.TEXT)  # [{parent_id: x, child_id: y}] TODO: JSON
