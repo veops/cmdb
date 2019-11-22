@@ -135,12 +135,12 @@ class Search(object):
         elif self.type_id_list:
             self.query_sql = "SELECT B.ci_id FROM ({0}) AS B {1}".format(
                 query_sql,
-                "INNER JOIN c_cis on c_cis.id=B.ci_id WHERE c_cis.type_id in ({0}) ".format(
+                "INNER JOIN c_cis on c_cis.id=B.ci_id WHERE c_cis.type_id IN ({0}) ".format(
                     ",".join(self.type_id_list)))
 
             return ret_sql.format(
                 query_sql,
-                "INNER JOIN c_cis on c_cis.id=B.ci_id WHERE c_cis.type_id in ({3}) "
+                "INNER JOIN c_cis on c_cis.id=B.ci_id WHERE c_cis.type_id IN ({3}) "
                 "ORDER BY B.ci_id {1} LIMIT {0:d}, {2};".format(
                     (self.page - 1) * self.count, sort_type, self.count, ",".join(self.type_id_list)))
 
@@ -174,12 +174,12 @@ class Search(object):
             self.query_sql = """SELECT C.ci_id
                                 FROM ({0}) AS C
                                 INNER JOIN c_cis on c_cis.id=C.ci_id
-                                WHERE c_cis.type_id in ({1})""".format(new_table, ",".join(self.type_id_list))
+                                WHERE c_cis.type_id IN ({1})""".format(new_table, ",".join(self.type_id_list))
 
             return """SELECT SQL_CALC_FOUND_ROWS DISTINCT C.ci_id, C.value
                       FROM ({0}) AS C
                       INNER JOIN c_cis on c_cis.id=C.ci_id
-                      WHERE c_cis.type_id in ({4})
+                      WHERE c_cis.type_id IN ({4})
                       ORDER BY C.value {2}
                       LIMIT {1:d}, {3};""".format(new_table,
                                                   (self.page - 1) * self.count,
@@ -289,7 +289,7 @@ class Search(object):
 
     def _filter_ids(self, query_sql):
         if self.ci_ids:
-            return "SELECT * FROM ({0}) AS IN_QUERY WHERE IN_QUERY.ci_id in ({1})".format(
+            return "SELECT * FROM ({0}) AS IN_QUERY WHERE IN_QUERY.ci_id IN ({1})".format(
                 query_sql, ",".join(list(map(str, self.ci_ids))))
 
         return query_sql
