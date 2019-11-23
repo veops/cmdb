@@ -8,20 +8,20 @@ from flask import current_app
 from api.extensions import es
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.const import RetKey
+from api.lib.cmdb.const import ValueTypeEnum
+from api.lib.cmdb.search import SearchError
 from api.lib.utils import handle_arg_list
-from api.models.cmdb import Attribute
-
-
-class SearchError(Exception):
-    def __init__(self, v):
-        self.v = v
-
-    def __str__(self):
-        return self.v
 
 
 class Search(object):
-    def __init__(self, query=None, fl=None, facet_field=None, page=1, ret_key=RetKey.NAME, count=1, sort=None):
+    def __init__(self, query=None,
+                 fl=None,
+                 facet_field=None,
+                 page=1,
+                 ret_key=RetKey.NAME,
+                 count=1,
+                 sort=None,
+                 ci_ids=None):
         self.orig_query = query
         self.fl = fl
         self.facet_field = facet_field
@@ -29,6 +29,7 @@ class Search(object):
         self.ret_key = ret_key
         self.count = count or current_app.config.get("DEFAULT_PAGE_COUNT")
         self.sort = sort or "ci_id"
+        self.ci_ids = ci_ids or []
 
         self.query = dict(query=dict(bool=dict(should=[], must=[], must_not=[])))
 
@@ -58,10 +59,10 @@ class Search(object):
         operator, key = self._operator_proc(key)
 
         if key in ('ci_type', 'type', '_type'):
-            return 'ci_type', Attribute.TEXT, operator
+            return 'ci_type', ValueTypeEnum.TEXT, operator
 
         if key in ('id', 'ci_id', '_id'):
-            return 'ci_id', Attribute.TEXT, operator
+            return 'ci_id', ValueTypeEnum.TEXT, operator
 
         attr = AttributeCache.get(key)
         if attr:
@@ -78,6 +79,10 @@ class Search(object):
                     attr: term
                 }
             })
+
+    def _filter_ids(self):
+        if self.ci_ids:
+            self.query['query']['bool'].update(dict(filter=dict(terms=dict(ci_id=self.ci_ids))))
 
     @staticmethod
     def _digit(s):
@@ -171,6 +176,8 @@ class Search(object):
 
         self._facet_build()
 
+        self._filter_ids()
+
         return es.read(self.query, filter_path=filter_path)
 
     def _facet_build(self):
@@ -183,7 +190,7 @@ class Search(object):
                 field: {
                     "terms": {
                         "field": "{0}.keyword".format(field)
-                        if attr.value_type not in (Attribute.INT, Attribute.FLOAT) else field
+                        if attr.value_type not in (ValueTypeEnum.INT, ValueTypeEnum.FLOAT) else field
                     }
                 }
             })
@@ -212,7 +219,7 @@ class Search(object):
                 raise SearchError("Sort by <{0}> does not exist".format(field))
 
             sort_by = "{0}.keyword".format(field) \
-                if attr.value_type not in (Attribute.INT, Attribute.FLOAT) else field
+                if attr.value_type not in (ValueTypeEnum.INT, ValueTypeEnum.FLOAT) else field
             sorts.append({sort_by: {"order": sort_type}})
 
         self.query.update(dict(sort=sorts))

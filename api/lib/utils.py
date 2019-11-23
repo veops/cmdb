@@ -29,10 +29,27 @@ def handle_arg_list(arg):
     return list(filter(lambda x: x != "", arg.strip().split(","))) if isinstance(arg, six.string_types) else arg
 
 
+class BaseEnum(object):
+    _ALL_ = set()  # type: Set[str]
+
+    @classmethod
+    def is_valid(cls, item):
+        return item in cls.all()
+
+    @classmethod
+    def all(cls):
+        if not cls._ALL_:
+            cls._ALL_ = {
+                getattr(cls, attr)
+                for attr in dir(cls)
+                if not attr.startswith("_") and not callable(getattr(cls, attr))
+            }
+        return cls._ALL_
+
+
 class RedisHandler(object):
-    def __init__(self, flask_app=None, prefix=None):
+    def __init__(self, flask_app=None):
         self.flask_app = flask_app
-        self.prefix = prefix
         self.r = None
 
     def init_app(self, app):
@@ -49,26 +66,26 @@ class RedisHandler(object):
             current_app.logger.warning(str(e))
             current_app.logger.error("init redis connection failed")
 
-    def get(self, key_ids):
+    def get(self, key_ids, prefix):
         try:
-            value = self.r.hmget(self.prefix, key_ids)
+            value = self.r.hmget(prefix, key_ids)
         except Exception as e:
             current_app.logger.error("get redis error, {0}".format(str(e)))
             return
         return value
 
-    def _set(self, obj):
+    def _set(self, obj, prefix):
         try:
-            self.r.hmset(self.prefix, obj)
+            self.r.hmset(prefix, obj)
         except Exception as e:
             current_app.logger.error("set redis error, {0}".format(str(e)))
 
-    def add(self, obj):
-        self._set(obj)
+    def create_or_update(self, obj, prefix):
+        self._set(obj, prefix)
 
-    def delete(self, key_id):
+    def delete(self, key_id, prefix):
         try:
-            ret = self.r.hdel(self.prefix, key_id)
+            ret = self.r.hdel(prefix, key_id)
             if not ret:
                 current_app.logger.warn("[{0}] is not in redis".format(key_id))
         except Exception as e:

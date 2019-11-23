@@ -69,7 +69,7 @@ class CRUDMixin(FormatMixin):
     @classmethod
     def get_by_id(cls, _id):
         if any((isinstance(_id, six.string_types) and _id.isdigit(),
-                isinstance(_id, (int, float))), ):
+                isinstance(_id, (int, long, float))), ):
             return getattr(cls, "query").get(int(_id)) or None
 
     @classmethod

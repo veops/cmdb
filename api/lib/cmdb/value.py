@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 
-import markupsafe
 from flask import abort
 
 from api.extensions import db
@@ -11,11 +10,11 @@ from api.lib.cmdb.attribute import AttributeManager
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.const import ExistPolicy
 from api.lib.cmdb.const import OperateType
-from api.lib.cmdb.const import TableMap
-from api.lib.cmdb.const import type_map
+from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.cmdb.history import AttributeHistoryManger
+from api.lib.cmdb.utils import TableMap
+from api.lib.cmdb.utils import ValueTypeMap
 from api.lib.utils import handle_arg_list
-from api.models.cmdb import Attribute
 
 
 class AttributeValueManager(object):
@@ -58,9 +57,9 @@ class AttributeValueManager(object):
             field_name = getattr(attr, ret_key)
 
             if attr.is_list:
-                res[field_name] = [type_map["serialize"][attr.value_type](i.value) for i in rs]
+                res[field_name] = [ValueTypeMap.serialize[attr.value_type](i.value) for i in rs]
             else:
-                res[field_name] = type_map["serialize"][attr.value_type](rs[0].value) if rs else None
+                res[field_name] = ValueTypeMap.serialize[attr.value_type](rs[0].value) if rs else None
 
             if unique_key is not None and attr.id == unique_key.id and rs:
                 res['unique'] = unique_key.name
@@ -71,7 +70,7 @@ class AttributeValueManager(object):
     def __deserialize_value(value_type, value):
         if not value:
             return value
-        deserialize = type_map["deserialize"][value_type]
+        deserialize = ValueTypeMap.deserialize[value_type]
         try:
             v = deserialize(value)
             return v
@@ -133,7 +132,7 @@ class AttributeValueManager(object):
 
         for v in value_list:
             v = self._validate(attr, v, value_table, ci_id)
-            if not v and attr.value_type != Attribute.TEXT:
+            if not v and attr.value_type != ValueTypeEnum.TEXT:
                 v = None
 
             if operate_type == OperateType.ADD:
