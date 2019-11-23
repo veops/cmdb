@@ -20,8 +20,20 @@ class ResourceTypeCRUD(object):
             query = query.filter(ResourceType.name.ilike('%{0}%'.format(q)))
 
         numfound = query.count()
+        res = query.offset((page - 1) * page_size).limit(page_size)
+        rt_ids = [i.id for i in res]
+        perms = db.session.query(Permission).filter(Permission.deleted.is_(False)).filter(
+            Permission.resource_type_id.in_(rt_ids))
+        id2perms = dict()
+        for perm in perms:
+            id2perms.setdefault(perm.resource_type_id, []).append(perm.to_dict())
 
-        return numfound, query.offset((page - 1) * page_size).limit(page_size)
+        return numfound, res, id2perms
+
+    @staticmethod
+    def get_perms(rt_id):
+        perms = Permission.get_by(resource_type_id=rt_id, to_dict=False)
+        return [i.to_dict() for i in perms]
 
     @classmethod
     def add(cls, app_id, name, perms):
@@ -36,6 +48,8 @@ class ResourceTypeCRUD(object):
 
     @classmethod
     def update(cls, rt_id, **kwargs):
+        kwargs.pop('app_id', None)
+
         rt = ResourceType.get_by_id(rt_id) or abort(404, "ResourceType <{0}> is not found".format(rt_id))
         if 'name' in kwargs:
             other = ResourceType.get_by(name=kwargs['name'], app_id=rt.app_id, to_dict=False, first=True)
