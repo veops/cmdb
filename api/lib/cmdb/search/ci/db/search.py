@@ -12,25 +12,25 @@ from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci import CIManager
 from api.lib.cmdb.const import RetKey
-from api.lib.cmdb.const import TableMap
-from api.lib.cmdb.search.db.query_sql import FACET_QUERY
-from api.lib.cmdb.search.db.query_sql import QUERY_CI_BY_ATTR_NAME
-from api.lib.cmdb.search.db.query_sql import QUERY_CI_BY_TYPE
+from api.lib.cmdb.const import ValueTypeEnum
+from api.lib.cmdb.search import SearchError
+from api.lib.cmdb.search.ci.db.query_sql import FACET_QUERY
+from api.lib.cmdb.search.ci.db.query_sql import QUERY_CI_BY_ATTR_NAME
+from api.lib.cmdb.search.ci.db.query_sql import QUERY_CI_BY_TYPE
+from api.lib.cmdb.utils import TableMap
 from api.lib.utils import handle_arg_list
-from api.models.cmdb import Attribute
 from api.models.cmdb import CI
 
 
-class SearchError(Exception):
-    def __init__(self, v):
-        self.v = v
-
-    def __str__(self):
-        return self.v
-
-
 class Search(object):
-    def __init__(self, query=None, fl=None, facet_field=None, page=1, ret_key=RetKey.NAME, count=1, sort=None):
+    def __init__(self, query=None,
+                 fl=None,
+                 facet_field=None,
+                 page=1,
+                 ret_key=RetKey.NAME,
+                 count=1,
+                 sort=None,
+                 ci_ids=None):
         self.orig_query = query
         self.fl = fl
         self.facet_field = facet_field
@@ -38,6 +38,7 @@ class Search(object):
         self.ret_key = ret_key
         self.count = count
         self.sort = sort
+        self.ci_ids = ci_ids or []
         self.query_sql = ""
         self.type_id_list = []
         self.only_type_query = False
@@ -60,10 +61,10 @@ class Search(object):
         operator, key = self._operator_proc(key)
 
         if key in ('ci_type', 'type', '_type'):
-            return '_type', Attribute.TEXT, operator, None
+            return '_type', ValueTypeEnum.TEXT, operator, None
 
         if key in ('id', 'ci_id', '_id'):
-            return '_id', Attribute.TEXT, operator, None
+            return '_id', ValueTypeEnum.TEXT, operator, None
 
         attr = AttributeCache.get(key)
         if attr:
@@ -134,12 +135,12 @@ class Search(object):
         elif self.type_id_list:
             self.query_sql = "SELECT B.ci_id FROM ({0}) AS B {1}".format(
                 query_sql,
-                "INNER JOIN c_cis on c_cis.id=B.ci_id WHERE c_cis.type_id in ({0}) ".format(
+                "INNER JOIN c_cis on c_cis.id=B.ci_id WHERE c_cis.type_id IN ({0}) ".format(
                     ",".join(self.type_id_list)))
 
             return ret_sql.format(
                 query_sql,
-                "INNER JOIN c_cis on c_cis.id=B.ci_id WHERE c_cis.type_id in ({3}) "
+                "INNER JOIN c_cis on c_cis.id=B.ci_id WHERE c_cis.type_id IN ({3}) "
                 "ORDER BY B.ci_id {1} LIMIT {0:d}, {2};".format(
                     (self.page - 1) * self.count, sort_type, self.count, ",".join(self.type_id_list)))
 
@@ -173,12 +174,12 @@ class Search(object):
             self.query_sql = """SELECT C.ci_id
                                 FROM ({0}) AS C
                                 INNER JOIN c_cis on c_cis.id=C.ci_id
-                                WHERE c_cis.type_id in ({1})""".format(new_table, ",".join(self.type_id_list))
+                                WHERE c_cis.type_id IN ({1})""".format(new_table, ",".join(self.type_id_list))
 
             return """SELECT SQL_CALC_FOUND_ROWS DISTINCT C.ci_id, C.value
                       FROM ({0}) AS C
                       INNER JOIN c_cis on c_cis.id=C.ci_id
-                      WHERE c_cis.type_id in ({4})
+                      WHERE c_cis.type_id IN ({4})
                       ORDER BY C.value {2}
                       LIMIT {1:d}, {3};""".format(new_table,
                                                   (self.page - 1) * self.count,
@@ -286,6 +287,13 @@ class Search(object):
                 alias += "AA"
         return None, query_sql
 
+    def _filter_ids(self, query_sql):
+        if self.ci_ids:
+            return "SELECT * FROM ({0}) AS IN_QUERY WHERE IN_QUERY.ci_id IN ({1})".format(
+                query_sql, ",".join(list(map(str, self.ci_ids))))
+
+        return query_sql
+
     def _query_build_raw(self):
 
         queries = handle_arg_list(self.orig_query)
@@ -298,6 +306,7 @@ class Search(object):
 
         s = time.time()
         if query_sql:
+            query_sql = self._filter_ids(query_sql)
             self.query_sql = query_sql
             current_app.logger.debug(query_sql)
             numfound, res = self._execute_sql(query_sql)

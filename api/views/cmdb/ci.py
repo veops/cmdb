@@ -12,9 +12,9 @@ from api.lib.cmdb.ci import CIManager
 from api.lib.cmdb.const import ExistPolicy
 from api.lib.cmdb.const import ResourceType, PermEnum
 from api.lib.cmdb.const import RetKey
-from api.lib.cmdb.search.db.search import Search as SearchFromDB
-from api.lib.cmdb.search.es.search import Search as SearchFromES
-from api.lib.cmdb.search.db.search import SearchError
+from api.lib.cmdb.search import SearchError
+from api.lib.cmdb.search.ci.db.search import Search as SearchFromDB
+from api.lib.cmdb.search.ci.es.search import Search as SearchFromES
 from api.lib.perm.acl.acl import has_perm_from_args
 from api.lib.perm.auth import auth_abandoned
 from api.lib.utils import get_page
@@ -126,13 +126,13 @@ class CISearchView(APIView):
     def get(self):
         """@params: q: query statement
                     fl: filter by column
-                    count: the number of ci
+                    count/page_size: the number of ci
                     ret_key: id, name, alias
                     facet: statistic
         """
 
         page = get_page(request.values.get("page", 1))
-        count = get_page_size(request.values.get("count"))
+        count = get_page_size(request.values.get("count") or request.values.get("page_size"))
 
         query = request.values.get('q', "")
         fl = handle_arg_list(request.values.get('fl', ""))
@@ -140,8 +140,6 @@ class CISearchView(APIView):
         if ret_key not in (RetKey.NAME, RetKey.ALIAS, RetKey.ID):
             ret_key = RetKey.NAME
         facet = handle_arg_list(request.values.get("facet", ""))
-        fl = list(filter(lambda x: x != "", fl))
-        facet = list(filter(lambda x: x != "", facet))
         sort = request.values.get("sort")
 
         start = time.time()

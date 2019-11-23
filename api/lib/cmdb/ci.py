@@ -18,13 +18,14 @@ from api.lib.cmdb.ci_type import CITypeManager
 from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import ExistPolicy
 from api.lib.cmdb.const import OperateType
+from api.lib.cmdb.const import REDIS_PREFIX_CI
 from api.lib.cmdb.const import RetKey
-from api.lib.cmdb.const import TableMap
-from api.lib.cmdb.const import type_map
 from api.lib.cmdb.history import AttributeHistoryManger
 from api.lib.cmdb.history import CIRelationHistoryManager
-from api.lib.cmdb.search.db.query_sql import QUERY_CIS_BY_IDS
-from api.lib.cmdb.search.db.query_sql import QUERY_CIS_BY_VALUE_TABLE
+from api.lib.cmdb.search.ci.db.query_sql import QUERY_CIS_BY_IDS
+from api.lib.cmdb.search.ci.db.query_sql import QUERY_CIS_BY_VALUE_TABLE
+from api.lib.cmdb.utils import TableMap
+from api.lib.cmdb.utils import ValueTypeMap
 from api.lib.cmdb.value import AttributeValueManager
 from api.lib.decorator import kwargs_required
 from api.lib.utils import handle_arg_list
@@ -33,6 +34,8 @@ from api.models.cmdb import CIRelation
 from api.models.cmdb import CITypeAttribute
 from api.tasks.cmdb import ci_cache
 from api.tasks.cmdb import ci_delete
+from api.tasks.cmdb import ci_relation_cache
+from api.tasks.cmdb import ci_relation_delete
 
 
 class CIManager(object):
@@ -302,7 +305,7 @@ class CIManager(object):
 
     @staticmethod
     def _get_cis_from_cache(ci_ids, ret_key=RetKey.NAME, fields=None):
-        res = rd.get(ci_ids)
+        res = rd.get(ci_ids, REDIS_PREFIX_CI)
         if res is not None and None not in res and ret_key == RetKey.NAME:
             res = list(map(json.loads, res))
             if not fields:
@@ -332,7 +335,7 @@ class CIManager(object):
 
         ci_ids = ",".join(ci_ids)
         if value_tables is None:
-            value_tables = type_map["table_name"].values()
+            value_tables = ValueTypeMap.table_name.values()
 
         value_sql = " UNION ".join([QUERY_CIS_BY_VALUE_TABLE.format(value_table, ci_ids)
                                     for value_table in value_tables])
@@ -362,7 +365,7 @@ class CIManager(object):
             else:
                 return abort(400, "invalid ret key")
 
-            value = type_map["serialize2"][value_type](value)
+            value = ValueTypeMap.serialize2[value_type](value)
             if is_list:
                 ci_dict.setdefault(attr_key, []).append(value)
             else:
@@ -532,6 +535,9 @@ class CIRelationManager(object):
                                         second_ci_id=second_ci_id,
                                         relation_type_id=relation_type_id)
             CIRelationHistoryManager().add(existed, OperateType.ADD)
+
+            ci_relation_cache.apply_async(args=(first_ci_id, second_ci_id), queue=CMDB_QUEUE)
+
         if more is not None:
             existed.upadte(more=more)
 
@@ -545,6 +551,8 @@ class CIRelationManager(object):
         his_manager = CIRelationHistoryManager()
         his_manager.add(cr, operate_type=OperateType.DELETE)
 
+        ci_relation_delete.apply_async(args=(cr.first_ci_id, cr.second_ci_id), queue=CMDB_QUEUE)
+
         return cr_id
 
     @classmethod
@@ -553,4 +561,7 @@ class CIRelationManager(object):
                                second_ci_id=second_ci_id,
                                to_dict=False,
                                first=True)
+
+        ci_relation_delete.apply_async(args=(first_ci_id, second_ci_id), queue=CMDB_QUEUE)
+
         return cls.delete(cr.cr_id)

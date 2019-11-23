@@ -4,6 +4,7 @@
 from flask import abort
 from flask import current_app
 
+from api.extensions import db
 from api.lib.cmdb.attribute import AttributeManager
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributeCache
@@ -263,8 +264,26 @@ class CITypeRelationManager(object):
     manage relation between CITypes
     """
 
-    def __init__(self):
-        pass
+    @staticmethod
+    def get():
+        res = CITypeRelation.get_by(to_dict=False)
+        for idx, item in enumerate(res):
+            _item = item.to_dict()
+            res[idx] = _item
+            res[idx]['parent'] = item.parent.to_dict()
+            res[idx]['child'] = item.child.to_dict()
+            res[idx]['relation_type'] = item.relation_type.to_dict()
+
+        return res
+
+    @staticmethod
+    def get_child_type_ids(type_id, level):
+        ids = [type_id]
+        query = db.session.query(CITypeRelation).filter(CITypeRelation.deleted.is_(False))
+        for _ in range(0, level):
+            ids = [i.child_id for i in query.filter(CITypeRelation.parent_id.in_(ids))]
+
+        return ids
 
     @staticmethod
     def _wrap_relation_type_dict(type_id, relation_inst):

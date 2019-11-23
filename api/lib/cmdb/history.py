@@ -7,6 +7,7 @@ from flask import g
 from api.extensions import db
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import RelationTypeCache
+from api.lib.cmdb.const import OperateType
 from api.lib.perm.acl.cache import UserCache
 from api.models.cmdb import Attribute
 from api.models.cmdb import AttributeHistory
@@ -112,7 +113,7 @@ class AttributeHistoryManger(object):
 
 class CIRelationHistoryManager(object):
     @staticmethod
-    def add(rel_obj, operate_type=CIRelationHistory.ADD):
+    def add(rel_obj, operate_type=OperateType.ADD):
         record = OperationRecord.create(uid=g.user.uid)
 
         CIRelationHistory.create(relation_id=rel_obj.id,
