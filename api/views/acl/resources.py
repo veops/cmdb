@@ -24,12 +24,13 @@ class ResourceTypeView(APIView):
         q = request.values.get('q')
         app_id = request.values.get('app_id')
 
-        numfound, res = ResourceTypeCRUD.search(q, app_id, page, page_size)
+        numfound, res, id2perms = ResourceTypeCRUD.search(q, app_id, page, page_size)
 
         return self.jsonify(numfound=numfound,
                             page=page,
                             page_size=page_size,
-                            groups=[i.to_dict() for i in res])
+                            groups=[i.to_dict() for i in res],
+                            id2perms=id2perms)
 
     @args_required('name')
     @args_required('app_id')
@@ -40,7 +41,7 @@ class ResourceTypeView(APIView):
         app_id = request.values.get('app_id')
         perms = request.values.get('perms')
 
-        rt = ResourceTypeCRUD.add(name, app_id, perms)
+        rt = ResourceTypeCRUD.add(app_id, name, perms)
 
         return self.jsonify(rt.to_dict())
 
@@ -53,6 +54,13 @@ class ResourceTypeView(APIView):
         ResourceTypeCRUD.delete(type_id)
 
         return self.jsonify(type_id=type_id)
+
+
+class ResourceTypePermsView(APIView):
+    url_prefix = "/resource_types/<int:type_id>/perms"
+
+    def get(self, type_id):
+        return self.jsonify(ResourceTypeCRUD.get_perms(type_id))
 
 
 class ResourceView(APIView):
