@@ -32,3 +32,41 @@ export function deleteResourceById (id) {
     method: 'DELETE'
   })
 }
+
+export function searchResourceType (params) {
+  return axios({
+    url: urlPrefix + `/resource_types`,
+    method: 'GET',
+    params: params
+  })
+}
+
+export function addResourceType (params) {
+  return axios({
+    url: urlPrefix + '/resource_types',
+    method: 'POST',
+    data: params
+  })
+}
+
+export function updateResourceTypeById (id, params) {
+  return axios({
+    url: urlPrefix + `/resource_types/${id}`,
+    method: 'PUT',
+    data: params
+  })
+}
+
+export function deleteResourceTypeById (id) {
+  return axios({
+    url: urlPrefix + `/resource_types/${id}`,
+    method: 'DELETE'
+  })
+}
+
+export function getResourcePermissions (id) {
+  return axios({
+    url: urlPrefix + `/resources/${id}/permissions`,
+    method: 'DELETE'
+  })
+}

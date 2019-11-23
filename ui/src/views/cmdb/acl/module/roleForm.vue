@@ -35,14 +35,6 @@
 
       <a-form-item>
         <a-input
-          name="app_id"
-          type="hidden"
-          v-decorator="['app_id', {rules: []} ]"
-        />
-      </a-form-item>
-
-      <a-form-item>
-        <a-input
           name="id"
           type="hidden"
           v-decorator="['id', {rules: []} ]"
@@ -138,7 +130,6 @@ export default {
         this.form.setFieldsValue({
           id: record.id,
           name: record.name,
-          app_id: this.$store.state.app.name,
           is_app_admin: record.is_app_admin
         })
       })
@@ -149,7 +140,7 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           console.log('Received values of form: ', values)
-
+          values.app_id = this.$store.state.app.name
           if (values.id) {
             this.updateRole(values.id, values)
           } else {

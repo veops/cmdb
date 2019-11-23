@@ -132,7 +132,7 @@ export default {
       })
     },
     getAllRoles () {
-      searchRole({ page_size: 999, app_id: this.$store.state.app.name }).then(res => {
+      searchRole({ page_size: 9999, app_id: this.$store.state.app.name }).then(res => {
         this.allRoles = res.roles
       })
     },

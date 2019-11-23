@@ -53,9 +53,7 @@
         <template v-else>{{ text }}</template>
       </template>
 
-      <span slot="resource_type_id" slot-scope="text">
-        <a-icon type="check" v-if="text"/>
-      </span>
+      <template slot="resource_type_id" slot-scope="text">{{ text }}</template>
 
       <span slot="action" slot-scope="text, record">
         <template>

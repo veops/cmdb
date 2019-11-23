@@ -13,7 +13,7 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="资源名"
+        label="类型名"
       >
         <a-input
           name="name"
@@ -25,19 +25,24 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="资源类型"
+        label="描述"
       >
-        <a-select name="resource_type_id" default-value="1" v-decorator="['resource_type_id', {rules: []} ]">
-          <a-select-option value="1">默认资源类型</a-select-option>
-        </a-select>
+        <a-textarea placeholder="请输入描述信息..." name="description" :rows="4" />
       </a-form-item>
 
-      <a-form-item>
-        <a-input
-          name="app_id"
-          type="hidden"
-          v-decorator="['app_id', {rules: []} ]"
-        />
+      <a-form-item
+        :label-col="formItemLayout.labelCol"
+        :wrapper-col="formItemLayout.wrapperCol"
+        label="权限"
+      >
+        <div :style="{ borderBottom: '1px solid #E9E9E9' }">
+          <a-checkbox :indeterminate="indeterminate" @change="onCheckAllChange" :checked="checkAll">
+            全选
+          </a-checkbox>
+        </div>
+        <br />
+        <a-checkbox-group :options="plainOptions" v-model="perms" @change="onPermChange" />
+
       </a-form-item>
 
       <a-form-item>
@@ -72,7 +77,7 @@
 
 <script>
 import { STable } from '@/components'
-import { addResource, updateResourceById } from '@/api/acl/resource'
+import { addResourceType, updateResourceTypeById } from '@/api/acl/resource'
 
 export default {
   name: 'ResourceForm',
@@ -81,9 +86,13 @@ export default {
   },
   data () {
     return {
-      drawerTitle: '新增资源',
+      drawerTitle: '新增资源类型',
       drawerVisible: false,
-      formLayout: 'vertical'
+      formLayout: 'vertical',
+      perms: ['1'],
+      indeterminate: true,
+      checkAll: false,
+      plainOptions: ['1', '2']
     }
   },
 
@@ -118,7 +127,17 @@ export default {
   mounted () {
   },
   methods: {
-
+    onPermChange (perms) {
+      this.indeterminate = !!perms.length && perms.length < this.plainOptions.length
+      this.checkAll = perms.length === this.plainOptions.length
+    },
+    onCheckAllChange (e) {
+      Object.assign(this, {
+        perms: e.target.checked ? this.plainOptions : [],
+        indeterminate: false,
+        checkAll: e.target.checked
+      })
+    },
     handleCreate () {
       this.drawerVisible = true
     },
@@ -137,8 +156,7 @@ export default {
         this.form.setFieldsValue({
           id: record.id,
           name: record.name,
-          app_id: this.$store.state.app.name,
-          resource_type_id: record.resource_type_id
+          description: record.description
         })
       })
     },
@@ -149,16 +167,18 @@ export default {
         if (!err) {
           console.log('Received values of form: ', values)
 
+          values.app_id = this.$store.state.app.name
+          values.perms = this.perms
           if (values.id) {
-            this.updateResource(values.id, values)
+            this.updateResourceType(values.id, values)
           } else {
-            this.createResource(values)
+            this.createResourceType(values)
           }
         }
       })
     },
-    updateResource (id, data) {
-      updateResourceById(id, data)
+    updateResourceType (id, data) {
+      updateResourceTypeById(id, data)
         .then(res => {
           this.$message.success(`更新成功`)
           this.handleOk()
@@ -166,8 +186,8 @@ export default {
         }).catch(err => this.requestFailed(err))
     },
 
-    createResource (data) {
-      addResource(data)
+    createResourceType (data) {
+      addResourceType(data)
         .then(res => {
           this.$message.success(`添加成功`)
           this.handleOk()
