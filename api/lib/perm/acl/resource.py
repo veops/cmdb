@@ -106,7 +106,7 @@ class ResourceGroupCRUD(object):
 
     @staticmethod
     def add(name, type_id, app_id):
-        ResourceGroup.get(name=name, resource_type_id=type_id, app_id=app_id) and abort(
+        ResourceGroup.get_by(name=name, resource_type_id=type_id, app_id=app_id) and abort(
             400, "ResourceGroup <{0}> is already existed".format(name))
 
         return ResourceGroup.create(name=name, resource_type_id=type_id, app_id=app_id)
@@ -150,7 +150,7 @@ class ResourceCRUD(object):
 
     @staticmethod
     def add(name, type_id, app_id):
-        Resource.get(name=name, resource_type_id=type_id, app_id=app_id) and abort(
+        Resource.get_by(name=name, resource_type_id=type_id, app_id=app_id) and abort(
             400, "Resource <{0}> is already existed".format(name))
 
         return Resource.create(name=name, resource_type_id=type_id, app_id=app_id)
