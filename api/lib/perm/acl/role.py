@@ -119,6 +119,8 @@ class RoleCRUD(object):
 
     @staticmethod
     def update_role(rid, **kwargs):
+        kwargs.pop('app_id', None)
+
         role = Role.get_by_id(rid) or abort(404, "Role <{0}> does not exist".format(rid))
 
         RoleCache.clean(rid)
