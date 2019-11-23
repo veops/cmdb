@@ -27,7 +27,7 @@
         :wrapper-col="formItemLayout.wrapperCol"
         label="描述"
       >
-        <a-textarea placeholder="请输入描述信息..." name="description" :rows="4" />
+        <a-textarea placeholder="请输入描述信息..." name="description" :rows="4"  v-decorator="['description', {rules: []} ]"/>
       </a-form-item>
 
       <a-form-item
@@ -35,13 +35,8 @@
         :wrapper-col="formItemLayout.wrapperCol"
         label="权限"
       >
-        <div :style="{ borderBottom: '1px solid #E9E9E9' }">
-          <a-checkbox :indeterminate="indeterminate" @change="onCheckAllChange" :checked="checkAll">
-            全选
-          </a-checkbox>
-        </div>
-        <br />
-        <a-checkbox-group :options="plainOptions" v-model="perms" @change="onPermChange" />
+        <a-select mode="tags" v-model="perms" style="width: 100%" placeholder="请输入权限名...">
+        </a-select>
 
       </a-form-item>
 
@@ -89,10 +84,7 @@ export default {
       drawerTitle: '新增资源类型',
       drawerVisible: false,
       formLayout: 'vertical',
-      perms: ['1'],
-      indeterminate: true,
-      checkAll: false,
-      plainOptions: ['1', '2']
+      perms: []
     }
   },
 
@@ -101,7 +93,6 @@ export default {
   },
 
   computed: {
-
     formItemLayout () {
       const { formLayout } = this
       return formLayout === 'horizontal' ? {
@@ -127,17 +118,6 @@ export default {
   mounted () {
   },
   methods: {
-    onPermChange (perms) {
-      this.indeterminate = !!perms.length && perms.length < this.plainOptions.length
-      this.checkAll = perms.length === this.plainOptions.length
-    },
-    onCheckAllChange (e) {
-      Object.assign(this, {
-        perms: e.target.checked ? this.plainOptions : [],
-        indeterminate: false,
-        checkAll: e.target.checked
-      })
-    },
     handleCreate () {
       this.drawerVisible = true
     },
@@ -152,6 +132,7 @@ export default {
     handleEdit (record) {
       this.drawerVisible = true
       console.log(record)
+      this.perms = record.perms
       this.$nextTick(() => {
         this.form.setFieldsValue({
           id: record.id,

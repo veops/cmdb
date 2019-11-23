@@ -112,7 +112,7 @@ export default {
           title: '类型名',
           dataIndex: 'name',
           sorter: false,
-          width: 50,
+          width: 300,
           scopedSlots: {
             customRender: 'nameSearchRender',
             filterDropdown: 'filterDropdown',
@@ -130,7 +130,7 @@ export default {
         {
           title: '描述',
           dataIndex: 'description',
-          width: 250,
+          width: 500,
           sorter: false,
           scopedSlots: { customRender: 'description' }
         },
@@ -241,6 +241,15 @@ export default {
     },
 
     handleEdit (record) {
+      var perms = []
+      var permList = this.id2perms[record.id]
+      if (permList) {
+        for (var i = 0; i < permList.length; i++) {
+          perms.push(permList[i].name)
+        }
+      }
+      record.perms = perms
+      console.log(record)
       this.$refs.resourceTypeForm.handleEdit(record)
     },
     handleDelete (record) {
