@@ -27,17 +27,9 @@
         :wrapper-col="formItemLayout.wrapperCol"
         label="资源类型"
       >
-        <a-select name="resource_type_id" default-value="1" v-decorator="['resource_type_id', {rules: []} ]">
-          <a-select-option value="1">默认资源类型</a-select-option>
+        <a-select name="type_id" v-decorator="['type_id', {rules: []} ]">
+          <a-select-option v-for="type in allTypes" :key="type.id">{{ type.name }}</a-select-option>
         </a-select>
-      </a-form-item>
-
-      <a-form-item>
-        <a-input
-          name="app_id"
-          type="hidden"
-          v-decorator="['app_id', {rules: []} ]"
-        />
       </a-form-item>
 
       <a-form-item>
@@ -72,7 +64,7 @@
 
 <script>
 import { STable } from '@/components'
-import { addResource, updateResourceById } from '@/api/acl/resource'
+import { addResource, updateResourceById, searchResourceType } from '@/api/acl/resource'
 
 export default {
   name: 'ResourceForm',
@@ -83,12 +75,17 @@ export default {
     return {
       drawerTitle: '新增资源',
       drawerVisible: false,
-      formLayout: 'vertical'
+      formLayout: 'vertical',
+      allTypes: []
     }
   },
 
   beforeCreate () {
     this.form = this.$form.createForm(this)
+  },
+
+  created () {
+    this.getAllResourceTypes()
   },
 
   computed: {
@@ -118,7 +115,11 @@ export default {
   mounted () {
   },
   methods: {
-
+    getAllResourceTypes () {
+      searchResourceType({ page_size: 9999, app_id: this.$store.state.app.name }).then(res => {
+        this.allTypes = res.groups
+      })
+    },
     handleCreate () {
       this.drawerVisible = true
     },
@@ -137,8 +138,7 @@ export default {
         this.form.setFieldsValue({
           id: record.id,
           name: record.name,
-          app_id: this.$store.state.app.name,
-          resource_type_id: record.resource_type_id
+          type_id: record.resource_type_id
         })
       })
     },
@@ -149,6 +149,7 @@ export default {
         if (!err) {
           console.log('Received values of form: ', values)
 
+          values.app_id = this.$store.state.app.name
           if (values.id) {
             this.updateResource(values.id, values)
           } else {

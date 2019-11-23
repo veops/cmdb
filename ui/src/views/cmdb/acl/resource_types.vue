@@ -55,6 +55,10 @@
 
       <template slot="description" slot-scope="text">{{ text }}</template>
 
+      <span slot="id" slot-scope="key">
+        <a-tag color="cyan" v-for="perm in id2perms[key]" :key="perm.id">{{ perm.name }}</a-tag>
+      </span>
+
       <span slot="action" slot-scope="text, record">
         <template>
           <a @click="handleEdit(record)">编辑</a>
@@ -73,34 +77,30 @@
       </span>
 
     </s-table>
-    <resourceForm ref="resourceForm" :handleOk="handleOk"> </resourceForm>
+    <resourceTypeForm ref="resourceTypeForm" :handleOk="handleOk"> </resourceTypeForm>
 
   </a-card>
 </template>
 
 <script>
 import { STable } from '@/components'
-import resourceForm from './module/resourceForm'
-import { deleteResourceById, searchResource } from '@/api/acl/resource'
+import resourceTypeForm from './module/resourceTypeForm'
+import { deleteResourceTypeById, searchResourceType } from '@/api/acl/resource'
 
 export default {
   name: 'Index',
   components: {
     STable,
-    resourceForm
+    resourceTypeForm
   },
   data () {
     return {
-      appList: [{
-        id: '1',
-        name: '默认应用'
-      }],
+      id2perms: {},
       scroll: { x: 1000, y: 500 },
-      btnName: '新增资源',
+      btnName: '新增资源类型',
 
       formLayout: 'vertical',
 
-      allResources: [],
       pageSizeOptions: ['10', '25', '50', '100'],
 
       columnSearchText: {
@@ -109,7 +109,7 @@ export default {
       },
       columns: [
         {
-          title: '资源名',
+          title: '类型名',
           dataIndex: 'name',
           sorter: false,
           width: 50,
@@ -128,12 +128,17 @@ export default {
           }
         },
         {
-          title: '资源类型',
-          dataIndex: 'resource_type_id',
-          width: 50,
+          title: '描述',
+          dataIndex: 'description',
+          width: 250,
           sorter: false,
-          scopedSlots: { customRender: 'resource_type_id' }
-
+          scopedSlots: { customRender: 'description' }
+        },
+        {
+          title: '权限',
+          dataIndex: 'id',
+          sorter: false,
+          scopedSlots: { customRender: 'id' }
         },
         {
           title: '操作',
@@ -152,16 +157,15 @@ export default {
         Object.assign(parameter, this.queryParam)
         console.log('loadData.parameter', parameter)
 
-        return searchResource(parameter)
+        return searchResourceType(parameter)
           .then(res => {
             res.pageNo = res.page
             res.pageSize = res.total
             res.totalCount = res.numfound
             res.totalPage = Math.ceil(res.numfound / parameter.pageSize)
-            res.data = res.resources
-
+            res.data = res.groups
+            this.id2perms = res.id2perms
             console.log('loadData.res', res)
-            this.allResources = res.resources
             return res
           })
       },
@@ -237,21 +241,21 @@ export default {
     },
 
     handleEdit (record) {
-      this.$refs.resourceForm.handleEdit(record)
+      this.$refs.resourceTypeForm.handleEdit(record)
     },
     handleDelete (record) {
-      this.deleteResource(record.id)
+      this.deleteResourceType(record.id)
     },
     handleOk () {
       this.$refs.table.refresh()
     },
 
     handleCreate () {
-      this.$refs.resourceForm.handleCreate()
+      this.$refs.resourceTypeForm.handleCreate()
     },
 
-    deleteResource (id) {
-      deleteResourceById(id)
+    deleteResourceType (id) {
+      deleteResourceTypeById(id)
         .then(res => {
           this.$message.success(`删除成功`)
           this.handleOk()
