@@ -137,12 +137,15 @@ class ResourceGroupCRUD(object):
 
 class ResourceCRUD(object):
     @staticmethod
-    def search(q, app_id, page=1, page_size=None):
+    def search(q, app_id, resource_type_id=None, page=1, page_size=None):
         query = db.session.query(Resource).filter(
             Resource.deleted.is_(False)).filter(Resource.app_id == app_id)
 
         if q:
             query = query.filter(Resource.name.ilike("%{0}%".format(q)))
+
+        if resource_type_id:
+            query = query.filter(Resource.resource_type_id == resource_type_id)
 
         numfound = query.count()
 
