@@ -46,7 +46,7 @@ class UserCRUD(object):
     def update(uid, **kwargs):
         user = User.get_by(uid=uid, to_dict=False, first=True) or abort(404, "User <{0}> does not exist".format(uid))
 
-        UserCache.clean(uid)
+        UserCache.clean(user)
 
         return user.update(**kwargs)
 
