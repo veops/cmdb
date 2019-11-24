@@ -72,9 +72,10 @@ class ResourceView(APIView):
         page = get_page(request.values.get("page", 1))
         page_size = get_page_size(request.values.get("page_size"))
         q = request.values.get('q')
+        resource_type_id = request.values.get('resource_type_id')
         app_id = request.values.get('app_id')
 
-        numfound, res = ResourceCRUD.search(q, app_id, page, page_size)
+        numfound, res = ResourceCRUD.search(q, app_id, resource_type_id, page, page_size)
 
         return self.jsonify(numfound=numfound,
                             page=page,
