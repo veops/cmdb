@@ -9,7 +9,7 @@
       :alert="options.alert"
       :columns="columns"
       :data="loadData"
-      :rowKey="record=>record.uid"
+      :rowKey="record=>record.id"
       :rowSelection="options.rowSelection"
       :scroll="scroll"
       :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条记录`, pageSizeOptions: pageSizeOptions}"
@@ -43,9 +43,9 @@
       </div>
       <a-icon slot="filterIcon" slot-scope="filtered" type="search" :style="{ color: filtered ? '#108ee9' : undefined }" />
 
-      <template slot="usernameSearchRender" slot-scope="text">
+      <template slot="nameSearchRender" slot-scope="text">
         <span v-if="columnSearchText.name">
-          <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${columnSearchText.username})|(?=${columnSearchText.username})`, 'i'))">
+          <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${columnSearchText.name})|(?=${columnSearchText.name})`, 'i'))">
             <mark v-if="fragment.toLowerCase() === columnSearchText.name.toLowerCase()" :key="i" class="highlight">{{ fragment }}</mark>
             <template v-else>{{ fragment }}</template>
           </template>
@@ -53,18 +53,10 @@
         <template v-else>{{ text }}</template>
       </template>
 
-      <template slot="nicknameSearchRender" slot-scope="text">
-        <span v-if="columnSearchText.alias">
-          <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${columnSearchText.nickname})|(?=${columnSearchText.nickname})`, 'i'))">
-            <mark v-if="fragment.toLowerCase() === columnSearchText.alias.toLowerCase()" :key="i" class="highlight">{{ fragment }}</mark>
-            <template v-else>{{ fragment }}</template>
-          </template>
-        </span>
-        <template v-else>{{ text }}</template>
-      </template>
+      <template slot="description" slot-scope="text">{{ text }}</template>
 
-      <span slot="is_check" slot-scope="text">
-        <a-icon type="check" v-if="text"/>
+      <span slot="id" slot-scope="key">
+        <a-tag color="cyan" v-for="perm in id2perms[key]" :key="perm.id">{{ perm.name }}</a-tag>
       </span>
 
       <span slot="action" slot-scope="text, record">
@@ -85,33 +77,30 @@
       </span>
 
     </s-table>
-    <userForm ref="userForm" :handleOk="handleOk"> </userForm>
+    <resourceTypeForm ref="resourceTypeForm" :handleOk="handleOk"> </resourceTypeForm>
 
   </a-card>
 </template>
 
 <script>
 import { STable } from '@/components'
-import userForm from './module/userForm'
-import { deleteUserById, searchUser } from '@/api/acl/user'
+import resourceTypeForm from './module/resourceTypeForm'
+import { deleteResourceTypeById, searchResourceType } from '@/api/acl/resource'
 
 export default {
   name: 'Index',
   components: {
     STable,
-    userForm
+    resourceTypeForm
   },
   data () {
     return {
+      id2perms: {},
       scroll: { x: 1000, y: 500 },
-      btnName: '新增用户',
-
-      CITypeName: this.$route.params.CITypeName,
-      CITypeId: this.$route.params.CITypeId,
+      btnName: '新增资源类型',
 
       formLayout: 'vertical',
 
-      allUsers: [],
       pageSizeOptions: ['10', '25', '50', '100'],
 
       columnSearchText: {
@@ -120,16 +109,16 @@ export default {
       },
       columns: [
         {
-          title: '用户名',
-          dataIndex: 'username',
+          title: '类型名',
+          dataIndex: 'name',
           sorter: false,
           width: 150,
           scopedSlots: {
-            customRender: 'usernameSearchRender',
+            customRender: 'nameSearchRender',
             filterDropdown: 'filterDropdown',
             filterIcon: 'filterIcon'
           },
-          onFilter: (value, record) => record.username && record.username.toLowerCase().includes(value.toLowerCase()),
+          onFilter: (value, record) => record.name && record.name.toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
               setTimeout(() => {
@@ -139,70 +128,17 @@ export default {
           }
         },
         {
-          title: '中文名',
-          dataIndex: 'nickname',
+          title: '描述',
+          dataIndex: 'description',
+          width: 500,
           sorter: false,
-          width: 150,
-          scopedSlots: {
-            customRender: 'nicknameSearchRender',
-            filterDropdown: 'filterDropdown',
-            filterIcon: 'filterIcon'
-          },
-          onFilter: (value, record) => record.nickname && record.nickname.toLowerCase().includes(value.toLowerCase()),
-          onFilterDropdownVisibleChange: (visible) => {
-            if (visible) {
-              setTimeout(() => {
-                this.searchInput.focus()
-              }, 0)
-            }
-          }
+          scopedSlots: { customRender: 'description' }
         },
         {
-          title: '部门',
-          dataIndex: 'department',
-          width: 200,
+          title: '权限',
+          dataIndex: 'id',
           sorter: false,
-          scopedSlots: { customRender: 'department' }
-
-        },
-        {
-          title: '小组',
-          dataIndex: 'catalog',
-          sorter: false,
-          width: 200,
-          scopedSlots: { customRender: 'catalog' }
-
-        },
-        {
-          title: '邮箱',
-          dataIndex: 'email',
-          sorter: false,
-          width: 200,
-          scopedSlots: { customRender: 'email' }
-
-        },
-        {
-          title: '手机',
-          dataIndex: 'mobile',
-          sorter: false,
-          width: 200,
-          scopedSlots: { customRender: 'mobile' }
-
-        },
-        {
-          title: '锁定',
-          dataIndex: 'block',
-          sorter: false,
-          width: 100,
-          scopedSlots: { customRender: 'block' }
-
-        },
-        {
-          title: '加入时间',
-          dataIndex: 'date_joined',
-          sorter: false,
-          scopedSlots: { customRender: 'date_joined' }
-
+          scopedSlots: { customRender: 'id' }
         },
         {
           title: '操作',
@@ -213,6 +149,7 @@ export default {
         }
       ],
       loadData: parameter => {
+        parameter.app_id = this.$store.state.app.name
         parameter.page = parameter.pageNo
         parameter.page_size = parameter.pageSize
         delete parameter.pageNo
@@ -220,16 +157,15 @@ export default {
         Object.assign(parameter, this.queryParam)
         console.log('loadData.parameter', parameter)
 
-        return searchUser(parameter)
+        return searchResourceType(parameter)
           .then(res => {
             res.pageNo = res.page
             res.pageSize = res.total
             res.totalCount = res.numfound
             res.totalPage = Math.ceil(res.numfound / parameter.pageSize)
-            res.data = res.users
-
+            res.data = res.groups
+            this.id2perms = res.id2perms
             console.log('loadData.res', res)
-            this.allUsers = res.users
             return res
           })
       },
@@ -279,10 +215,8 @@ export default {
       return formLayout === 'horizontal' ? {
         wrapperCol: { span: 14, offset: 4 }
       } : {}
-    },
-    cancel () {
-      return false
     }
+
   },
   mounted () {
     this.setScrollY()
@@ -307,21 +241,30 @@ export default {
     },
 
     handleEdit (record) {
-      this.$refs.userForm.handleEdit(record)
+      var perms = []
+      var permList = this.id2perms[record.id]
+      if (permList) {
+        for (var i = 0; i < permList.length; i++) {
+          perms.push(permList[i].name)
+        }
+      }
+      record.perms = perms
+      console.log(record)
+      this.$refs.resourceTypeForm.handleEdit(record)
     },
     handleDelete (record) {
-      this.deleteUser(record.uid)
+      this.deleteResourceType(record.id)
     },
     handleOk () {
       this.$refs.table.refresh()
     },
 
     handleCreate () {
-      this.$refs.userForm.handleCreate()
+      this.$refs.resourceTypeForm.handleCreate()
     },
 
-    deleteUser (attrId) {
-      deleteUserById(attrId)
+    deleteResourceType (id) {
+      deleteResourceTypeById(id)
         .then(res => {
           this.$message.success(`删除成功`)
           this.handleOk()
@@ -331,6 +274,9 @@ export default {
     requestFailed (err) {
       const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
       this.$message.error(`${msg}`)
+    },
+    cancel () {
+
     }
 
   },
