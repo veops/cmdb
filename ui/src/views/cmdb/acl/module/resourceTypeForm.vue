@@ -27,7 +27,7 @@
         :wrapper-col="formItemLayout.wrapperCol"
         label="描述"
       >
-        <a-textarea placeholder="请输入描述信息..." name="description" :rows="4"  v-decorator="['description', {rules: []} ]"/>
+        <a-textarea placeholder="请输入描述信息..." name="description" :rows="4" v-decorator="['description', {rules: []} ]"/>
       </a-form-item>
 
       <a-form-item

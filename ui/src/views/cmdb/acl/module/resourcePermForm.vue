@@ -134,14 +134,14 @@ export default {
       })
     },
     deletePerm (roleID, permName) {
-      deleteRoleResourcePerm(roleID, this.record.id, [permName]).then(res => {
+      deleteRoleResourcePerm(roleID, this.record.id, { perms: [permName] }).then(res => {
         this.$message.success(`删除成功`)
         this.handleOk()
       })
         .catch(err => this.requestFailed(err))
     },
     addPerm (roleID, permName) {
-      setRoleResourcePerm(roleID, this.record.id, [permName]).then(res => {
+      setRoleResourcePerm(roleID, this.record.id, { perms: [permName] }).then(res => {
         this.$message.success(`添加成功`)
         this.handleOk()
       })
