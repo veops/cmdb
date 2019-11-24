@@ -53,11 +53,11 @@ class ResourceTypeCRUD(object):
         rt = ResourceType.get_by_id(rt_id) or abort(404, "ResourceType <{0}> is not found".format(rt_id))
         if 'name' in kwargs:
             other = ResourceType.get_by(name=kwargs['name'], app_id=rt.app_id, to_dict=False, first=True)
-            if other.id != rt_id:
+            if other and other.id != rt_id:
                 return abort(400, "ResourceType <{0}> is duplicated".format(kwargs['name']))
 
         if 'perms' in kwargs:
-            cls.update_perms(rt_id, kwargs['perms'], rt.app_id)
+            cls.update_perms(rt_id, kwargs.pop('perms'), rt.app_id)
 
         return rt.update(**kwargs)
 
@@ -160,7 +160,7 @@ class ResourceCRUD(object):
         resource = Resource.get_by_id(_id) or abort(404, "Resource <{0}> is not found".format(_id))
 
         other = Resource.get_by(name=name, resource_type_id=resource.resource_type_id, to_dict=False, first=True)
-        if other.id != _id:
+        if other and other.id != _id:
             return abort(400, "Resource <{0}> is duplicated".format(name))
 
         return resource.update(name=name)
