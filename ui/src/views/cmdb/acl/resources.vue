@@ -59,7 +59,8 @@
         <template>
           <a @click="handleEdit(record)">编辑</a>
           <a-divider type="vertical"/>
-
+          <a @click="handlePerm(record)">权限</a>
+          <a-divider type="vertical"/>
           <a-popconfirm
             title="确认删除?"
             @confirm="handleDelete(record)"
@@ -74,6 +75,7 @@
 
     </s-table>
     <resourceForm ref="resourceForm" :handleOk="handleOk"> </resourceForm>
+    <resourcePermForm ref="resourcePermForm"> </resourcePermForm>
 
   </a-card>
 </template>
@@ -81,20 +83,18 @@
 <script>
 import { STable } from '@/components'
 import resourceForm from './module/resourceForm'
+import resourcePermForm from './module/resourcePermForm'
 import { deleteResourceById, searchResource } from '@/api/acl/resource'
 
 export default {
   name: 'Index',
   components: {
     STable,
-    resourceForm
+    resourceForm,
+    resourcePermForm
   },
   data () {
     return {
-      appList: [{
-        id: '1',
-        name: '默认应用'
-      }],
       scroll: { x: 1000, y: 500 },
       btnName: '新增资源',
 
@@ -112,7 +112,7 @@ export default {
           title: '资源名',
           dataIndex: 'name',
           sorter: false,
-          width: 50,
+          width: 300,
           scopedSlots: {
             customRender: 'nameSearchRender',
             filterDropdown: 'filterDropdown',
@@ -130,7 +130,6 @@ export default {
         {
           title: '资源类型',
           dataIndex: 'resource_type_id',
-          width: 50,
           sorter: false,
           scopedSlots: { customRender: 'resource_type_id' }
 
@@ -238,6 +237,10 @@ export default {
 
     handleEdit (record) {
       this.$refs.resourceForm.handleEdit(record)
+    },
+
+    handlePerm (record) {
+      this.$refs.resourcePermForm.handlePerm(record)
     },
     handleDelete (record) {
       this.deleteResource(record.id)

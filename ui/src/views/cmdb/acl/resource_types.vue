@@ -112,7 +112,7 @@ export default {
           title: '类型名',
           dataIndex: 'name',
           sorter: false,
-          width: 300,
+          width: 150,
           scopedSlots: {
             customRender: 'nameSearchRender',
             filterDropdown: 'filterDropdown',
