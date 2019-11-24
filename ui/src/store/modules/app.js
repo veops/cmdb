@@ -14,6 +14,7 @@ import {
 
 const app = {
   state: {
+    name: 'cmdb',
     sidebar: true,
     device: 'desktop',
     theme: '',
