@@ -281,8 +281,8 @@ export default {
       const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
       this.$message.error(`${msg}`)
     },
-    cancel () {
-
+    cancel (e) {
+      return false
     }
 
   },
