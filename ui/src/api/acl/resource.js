@@ -63,10 +63,3 @@ export function deleteResourceTypeById (id) {
     method: 'DELETE'
   })
 }
-
-export function getResourcePermissions (id) {
-  return axios({
-    url: urlPrefix + `/resources/${id}/permissions`,
-    method: 'DELETE'
-  })
-}
