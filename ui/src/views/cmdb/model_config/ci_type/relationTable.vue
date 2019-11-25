@@ -103,7 +103,8 @@
 </template>
 
 <script>
-import { createRelation, deleteRelation, getCITypeChildren, getRelationTypes } from '@/api/cmdb/CITypeRelation'
+import { createRelation, deleteRelation, getCITypeChildren } from '@/api/cmdb/CITypeRelation'
+import { getRelationTypes } from '@/api/cmdb/relationType'
 import { getCITypes } from '@/api/cmdb/CIType'
 
 import { STable } from '@/components'

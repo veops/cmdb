@@ -143,8 +143,8 @@ import {
 } from '@/api/cmdb/CITypeAttr'
 import { STable } from '@/components'
 import { mixin, mixinDevice } from '@/utils/mixin'
-import AttributeForm from '@/views/cmdb/attributes/module/attributeForm'
-import { valueTypeMap } from '@/views/cmdb/attributes/module/const'
+import AttributeForm from '@/views/cmdb/model_config/attributes/module/attributeForm'
+import { valueTypeMap } from '@/views/cmdb/model_config/attributes/module/const'
 
 export default {
   name: 'AttributesTable',

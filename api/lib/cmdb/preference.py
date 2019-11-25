@@ -119,11 +119,12 @@ class PreferenceManager(object):
 
         id2type = dict()
         for view_name in result:
-            result[view_name] = toposort.toposort_flatten(
-                {i['child_id']: {i['parent_id']} for i in result[view_name]})
             for i in result[view_name]:
                 id2type[i['parent_id']] = None
-                id2type[i['child']] = None
+                id2type[i['child_id']] = None
+
+            result[view_name] = toposort.toposort_flatten(
+                {i['child_id']: {i['parent_id']} for i in result[view_name]})
 
         for type_id in id2type:
             id2type[type_id] = CITypeCache.get(type_id).to_dict()

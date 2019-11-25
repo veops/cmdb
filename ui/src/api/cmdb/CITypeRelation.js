@@ -15,14 +15,6 @@ export function getCITypeParent (CITypeID) {
   })
 }
 
-export function getRelationTypes (CITypeID, parameter) {
-  return axios({
-    url: '/v0.1/relation_types',
-    method: 'get',
-    params: parameter
-  })
-}
-
 export function createRelation (parentId, childrenId, relationTypeId) {
   return axios({
     url: `/v0.1/ci_type_relations/${parentId}/${childrenId}`,

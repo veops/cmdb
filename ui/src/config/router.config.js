@@ -12,7 +12,23 @@ const cmdbRouter = [
     name: 'cmdb_preference',
     meta: { title: '我的订阅', icon: 'book', keepAlive: true }
   },
-  // views
+  // relation views
+  {
+    path: '/relation_views',
+    component: () => import('@/views/cmdb/relation_views'),
+    name: 'cmdb_relation_views',
+    meta: { title: '关系视图', icon: 'link', keepAlive: true },
+    hideChildrenInMenu: true,
+    children: [
+      {
+        path: '/relation_views/:id',
+        name: 'cmdb_relation_views_item',
+        component: () => import('@/views/cmdb/relation_views'),
+        meta: { title: '关系视图', keepAlive: true },
+        hidden: true
+      }]
+  },
+  // tree views
   {
     path: '/tree_views',
     component: () => import('@/views/cmdb/tree_views'),
@@ -36,33 +52,47 @@ const cmdbRouter = [
     meta: { 'title': '批量导入', icon: 'upload', keepAlive: true }
   },
   {
-    path: '/ci_types',
+    path: '/config//ci_types',
     name: 'cmdb_ci_type',
     component: RouteView,
-    redirect: '/ci_type',
+    redirect: '/ci_types',
     meta: { title: '模型配置', icon: 'setting', permission: ['admin'] },
     children: [
       {
-        path: '/ci_types',
+        path: '/config/ci_types',
         name: 'ci_type',
-        hideChildrenInMenu: true, // 强制显示 MenuItem 而不是 SubMenu
-        component: () => import('@/views/cmdb/ci_type/list'),
-        meta: { title: '模型定义', keepAlive: true }
+        hideChildrenInMenu: true,
+        component: () => import('@/views/cmdb/model_config/ci_type/list'),
+        meta: { title: '模型管理', keepAlive: true }
       },
       {
-        path: '/ci_types/:CITypeName/detail/:CITypeId',
+        path: '/config/ci_types/:CITypeName/detail/:CITypeId',
         name: 'ci_type_detail',
-        hideChildrenInMenu: true, // 强制显示 MenuItem 而不是 SubMenu
-        component: () => import('@/views/cmdb/ci_type/detail'),
-        meta: { title: '模型配置', keepAlive: true, hidden: true },
+        hideChildrenInMenu: true,
+        component: () => import('@/views/cmdb/model_config/ci_type/detail'),
+        meta: { title: '模型管理', keepAlive: true, hidden: true },
         hidden: true
       },
       {
-        path: '/attributes',
+        path: '/config/attributes',
         name: 'attributes',
-        hideChildrenInMenu: true, // 强制显示 MenuItem 而不是 SubMenu
-        component: () => import('@/views/cmdb/attributes/index'),
+        hideChildrenInMenu: true,
+        component: () => import('@/views/cmdb/model_config/attributes/index'),
         meta: { title: '属性库', keepAlive: true }
+      },
+      {
+        path: '/config/relation_type',
+        name: 'relation_type',
+        hideChildrenInMenu: true,
+        component: () => import('@/views/cmdb/model_config/relation_type/index'),
+        meta: { title: '关系类型', keepAlive: true }
+      },
+      {
+        path: '/config/preference_relation',
+        name: 'preference_relation',
+        hideChildrenInMenu: true,
+        component: () => import('@/views/cmdb/model_config/preference_relation/index'),
+        meta: { title: '关系视图配置', keepAlive: true }
       }
     ]
   },
@@ -128,7 +158,7 @@ export const generatorDynamicRouter = () => {
           component: () => import(`@/views/cmdb/ci/index`),
           name: `cmdb_${item.id}`,
           meta: { title: item.alias, icon: 'table', keepAlive: true, typeId: item.id },
-          hideChildrenInMenu: true // 强制显示 MenuItem 而不是 SubMenu
+          hideChildrenInMenu: true
         })
       }
 
