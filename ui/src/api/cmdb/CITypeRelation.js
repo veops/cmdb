@@ -3,7 +3,7 @@ import { axios } from '@/utils/request'
 export function getCITypeChildren (CITypeID, parameter) {
   return axios({
     url: '/v0.1/ci_type_relations/' + CITypeID + '/children',
-    method: 'get',
+    method: 'GET',
     params: parameter
   })
 }
@@ -11,14 +11,21 @@ export function getCITypeChildren (CITypeID, parameter) {
 export function getCITypeParent (CITypeID) {
   return axios({
     url: '/v0.1/ci_type_relations/' + CITypeID + '/parents',
-    method: 'get'
+    method: 'GET'
+  })
+}
+
+export function getCITypeRelations () {
+  return axios({
+    url: '/v0.1/ci_type_relations',
+    method: 'GET'
   })
 }
 
 export function createRelation (parentId, childrenId, relationTypeId) {
   return axios({
     url: `/v0.1/ci_type_relations/${parentId}/${childrenId}`,
-    method: 'post',
+    method: 'POST',
     data: { relation_type_id: relationTypeId }
   })
 }
@@ -26,7 +33,7 @@ export function createRelation (parentId, childrenId, relationTypeId) {
 export function deleteRelation (parentId, childrenId) {
   return axios({
     url: `/v0.1/ci_type_relations/${parentId}/${childrenId}`,
-    method: 'delete'
+    method: 'DELETE'
 
   })
 }

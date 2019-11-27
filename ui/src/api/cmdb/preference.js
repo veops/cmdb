@@ -39,3 +39,26 @@ export function subscribeTreeView (ciTypeId, levels) {
     data: { type_id: ciTypeId, levels: levels }
   })
 }
+
+export function getRelationView () {
+  return axios({
+    url: `/v0.1/preference/relation/view`,
+    method: 'GET'
+  })
+}
+
+export function deleteRelationView (viewName) {
+  return axios({
+    url: `/v0.1/preference/relation/view`,
+    method: 'DELETE',
+    data: { name: viewName }
+  })
+}
+
+export function subscribeRelationView (payload) {
+  return axios({
+    url: `/v0.1/preference/relation/view`,
+    method: 'POST',
+    data: payload
+  })
+}

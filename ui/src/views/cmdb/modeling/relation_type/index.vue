@@ -80,7 +80,7 @@
 
 <script>
 import { STable } from '@/components'
-import RelationTypeForm from './module/relationTypeForm'
+import RelationTypeForm from './modules/relationTypeForm'
 import { getRelationTypes, deleteRelationType } from '@/api/cmdb/relationType'
 
 export default {

@@ -13,12 +13,12 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="类型名"
+        label="关系视图名"
       >
         <a-input
           name="name"
           placeholder=""
-          v-decorator="['name', {rules: [{ required: true, message: '请输入资源名'}]} ]"
+          v-decorator="['name', {rules: [{ required: true, message: '请输入 关系视图名'}]} ]"
         />
       </a-form-item>
 
@@ -53,19 +53,16 @@
 </template>
 
 <script>
-import { STable } from '@/components'
-import { addRelationType, updateRelationType } from '@/api/cmdb/relationType'
+import { subscribeRelationView } from '@/api/cmdb/preference'
 
 export default {
-  name: 'RelationTypeForm',
-  components: {
-    STable
-  },
+  name: 'RelationViewForm',
   data () {
     return {
-      drawerTitle: '新增关系类型',
+      drawerTitle: '新增关系视图',
       drawerVisible: false,
-      formLayout: 'vertical'
+      formLayout: 'vertical',
+      crIds: []
     }
   },
 
@@ -96,29 +93,14 @@ export default {
     }
 
   },
-  mounted () {
-  },
   methods: {
-    handleCreate () {
+    handleCreate (crIds) {
+      this.crIds = crIds
       this.drawerVisible = true
     },
     onClose () {
       this.form.resetFields()
       this.drawerVisible = false
-    },
-    onChange (e) {
-      console.log(`checked = ${e}`)
-    },
-
-    handleEdit (record) {
-      this.drawerVisible = true
-      console.log(record)
-      this.$nextTick(() => {
-        this.form.setFieldsValue({
-          id: record.id,
-          name: record.name
-        })
-      })
     },
 
     handleSubmit (e) {
@@ -126,46 +108,27 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           console.log('Received values of form: ', values)
-
-          if (values.id) {
-            this.updateResourceType(values.id, values)
-          } else {
-            this.createResourceType(values)
-          }
+          this.createRelationView(values)
         }
       })
     },
-    updateResourceType (id, data) {
-      updateRelationType(id, data)
-        .then(res => {
-          this.$message.success(`更新成功`)
-          this.handleOk()
-          this.onClose()
-        }).catch(err => this.requestFailed(err))
-    },
 
-    createResourceType (data) {
-      addRelationType(data)
+    createRelationView (data) {
+      data.cr_ids = this.crIds
+      subscribeRelationView(data)
         .then(res => {
           this.$message.success(`添加成功`)
-          this.handleOk()
           this.onClose()
         })
         .catch(err => this.requestFailed(err))
     },
 
     requestFailed (err) {
+      console.log(err, 'error')
       const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
       this.$message.error(`${msg}`)
     }
 
-  },
-  watch: {},
-  props: {
-    handleOk: {
-      type: Function,
-      default: null
-    }
   }
 
 }
