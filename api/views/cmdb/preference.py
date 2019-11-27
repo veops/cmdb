@@ -80,9 +80,9 @@ class PreferenceRelationApiView(APIView):
     def post(self):
         name = request.values.get("name")
         cr_ids = request.values.get("cr_ids")
-        res = PreferenceManager.create_or_update_relation_view(name, cr_ids)
+        views, id2type = PreferenceManager.create_or_update_relation_view(name, cr_ids)
 
-        return self.jsonify(res)
+        return self.jsonify(views, id2type)
 
     def put(self):
         return self.post()
