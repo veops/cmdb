@@ -62,14 +62,14 @@ const cmdbRouter = [
         path: '/config/ci_types',
         name: 'ci_type',
         hideChildrenInMenu: true,
-        component: () => import('@/views/cmdb/model_config/ci_type/list'),
+        component: () => import('@/views/cmdb/modeling/ci_type/list'),
         meta: { title: '模型管理', keepAlive: true }
       },
       {
         path: '/config/ci_types/:CITypeName/detail/:CITypeId',
         name: 'ci_type_detail',
         hideChildrenInMenu: true,
-        component: () => import('@/views/cmdb/model_config/ci_type/detail'),
+        component: () => import('@/views/cmdb/modeling/ci_type/detail'),
         meta: { title: '模型管理', keepAlive: true, hidden: true },
         hidden: true
       },
@@ -77,22 +77,22 @@ const cmdbRouter = [
         path: '/config/attributes',
         name: 'attributes',
         hideChildrenInMenu: true,
-        component: () => import('@/views/cmdb/model_config/attributes/index'),
+        component: () => import('@/views/cmdb/modeling/attributes/index'),
         meta: { title: '属性库', keepAlive: true }
       },
       {
         path: '/config/relation_type',
         name: 'relation_type',
         hideChildrenInMenu: true,
-        component: () => import('@/views/cmdb/model_config/relation_type/index'),
+        component: () => import('@/views/cmdb/modeling/relation_type/index'),
         meta: { title: '关系类型', keepAlive: true }
       },
       {
         path: '/config/preference_relation',
         name: 'preference_relation',
         hideChildrenInMenu: true,
-        component: () => import('@/views/cmdb/model_config/preference_relation/index'),
-        meta: { title: '关系视图配置', keepAlive: true }
+        component: () => import('@/views/cmdb/modeling/preference_relation/index'),
+        meta: { title: '关系视图定义', keepAlive: true }
       }
     ]
   },
@@ -107,28 +107,28 @@ const cmdbRouter = [
         path: '/acl/users',
         name: 'acl_users',
         hideChildrenInMenu: true,
-        component: () => import('@/views/cmdb/acl/users'),
+        component: () => import('@/views/acl/users'),
         meta: { title: '用户管理', keepAlive: true }
       },
       {
         path: '/acl/roles',
         name: 'acl_roles',
         hideChildrenInMenu: true,
-        component: () => import('@/views/cmdb/acl/roles'),
+        component: () => import('@/views/acl/roles'),
         meta: { title: '角色管理', keepAlive: true }
       },
       {
         path: '/acl/resources',
         name: 'acl_resources',
         hideChildrenInMenu: true,
-        component: () => import('@/views/cmdb/acl/resources'),
+        component: () => import('@/views/acl/resources'),
         meta: { title: '资源管理', keepAlive: true }
       },
       {
         path: '/acl/resource_types',
         name: 'acl_resource_types',
         hideChildrenInMenu: true,
-        component: () => import('@/views/cmdb/acl/resource_types'),
+        component: () => import('@/views/acl/resource_types'),
         meta: { title: '资源类型', keepAlive: true }
       }
     ]

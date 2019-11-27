@@ -28,6 +28,7 @@
     "md5": "^2.2.1",
     "moment": "^2.24.0",
     "nprogress": "^0.2.0",
+    "vis-network": "^6.4.4",
     "viser-vue": "^2.3.3",
     "vue": "^2.6.10",
     "vue-clipboard2": "^0.2.1",
