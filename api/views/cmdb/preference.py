@@ -71,18 +71,18 @@ class PreferenceRelationApiView(APIView):
     url_prefix = "/preference/relation/view"
 
     def get(self):
-        views, id2type = PreferenceManager.get_relation_view()
+        views, id2type, name2id = PreferenceManager.get_relation_view()
 
-        return self.jsonify(views=views, id2type=id2type)
+        return self.jsonify(views=views, id2type=id2type, name2id=name2id)
 
     @role_required(RoleEnum.CONFIG)
     @args_required("name")
     def post(self):
         name = request.values.get("name")
         cr_ids = request.values.get("cr_ids")
-        views, id2type = PreferenceManager.create_or_update_relation_view(name, cr_ids)
+        views, id2type, name2id = PreferenceManager.create_or_update_relation_view(name, cr_ids)
 
-        return self.jsonify(views, id2type)
+        return self.jsonify(views=views, id2type=id2type, name2id=name2id)
 
     def put(self):
         return self.post()

@@ -114,8 +114,10 @@ class PreferenceManager(object):
     def get_relation_view():
         views = PreferenceRelationView.get_by(to_dict=True)
         result = dict()
+        name2id = list()
         for view in views:
             result.setdefault(view['name'], []).extend(json.loads(view['cr_ids']))
+            name2id.append([view['name'], view['id']])
 
         id2type = dict()
         for view_name in result:
@@ -129,7 +131,7 @@ class PreferenceManager(object):
         for type_id in id2type:
             id2type[type_id] = CITypeCache.get(type_id).to_dict()
 
-        return result, id2type
+        return result, id2type, sorted(name2id, key=lambda x: x[1])
 
     @classmethod
     def create_or_update_relation_view(cls, name, cr_ids):
