@@ -21,7 +21,7 @@ const cmdbRouter = [
     hideChildrenInMenu: true,
     children: [
       {
-        path: '/relation_views/:id',
+        path: '/relation_views/:viewId',
         name: 'cmdb_relation_views_item',
         component: () => import('@/views/cmdb/relation_views'),
         meta: { title: '关系视图', keepAlive: true },

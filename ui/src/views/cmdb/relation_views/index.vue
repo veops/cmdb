@@ -1,13 +1,13 @@
 <template>
   <a-card :bordered="false">
-    <a-menu v-model="current" mode="horizontal" v-if="ciTypes.length">
-      <a-menu-item :key="ciType.id" v-for="ciType in ciTypes">
+    <a-menu v-model="current" mode="horizontal" v-if="relationViews.name2id && relationViews.name2id.length">
+      <a-menu-item :key="item[1]" v-for="item in relationViews.name2id">
         <router-link
-          :to="{name: 'cmdb_tree_views_item', params: {typeId: ciType.id}}"
-        >{{ ciType.alias || ciTypes.name }}</router-link>
+          :to="{name: 'cmdb_relation_views_item', params: { viewId: item[1]} }"
+        >{{ item[0] }}</router-link>
       </a-menu-item>
     </a-menu>
-    <a-alert message="请先到 我的订阅 页面完成订阅!" banner v-else></a-alert>
+    <a-alert message="管理员 还未配置关系视图!" banner v-else></a-alert>
     <div style="clear: both; margin-top: 20px"></div>
     <template>
       <a-row :gutter="8">
@@ -37,7 +37,7 @@
 <script>
 import { STable } from '@/components'
 
-import { getSubscribeTreeView, getSubscribeAttributes } from '@/api/cmdb/preference'
+import { getRelationView, getSubscribeAttributes } from '@/api/cmdb/preference'
 import { searchCI } from '@/api/cmdb/ci'
 export default {
   components: { STable },
@@ -47,8 +47,11 @@ export default {
       triggerSelect: false,
       treeNode: null,
       ciTypes: [],
+      relationViews: {},
       levels: [],
       typeId: null,
+      viewId: null,
+      viewName: null,
       current: [],
       instanceList: [],
       treeKeys: [],
@@ -59,9 +62,11 @@ export default {
       scrollY: 0,
 
       loadInstances: parameter => {
+        console.log(parameter, 'load instances')
         const params = parameter || {}
         // const params = Object.assign(parameter, this.$refs.search.queryParam)
         let q = `q=_type:${this.typeId}`
+        console.log(params, 'params')
         Object.keys(params).forEach(key => {
           if (!['pageNo', 'pageSize', 'sortField', 'sortOrder'].includes(key) && params[key] + '' !== '') {
             if (typeof params[key] === 'object' && params[key].length > 1) {
@@ -121,20 +126,21 @@ export default {
   },
 
   created () {
-    this.getCITypes()
+    this.getRelationViews()
   },
 
   inject: ['reload'],
   watch: {
     '$route.path': function (newPath, oldPath) {
-      this.typeId = this.$route.params.typeId
-      this.getCITypes()
+      this.viewId = this.$route.params.viewId
+      this.getRelationViews()
       this.reload()
     }
   },
 
   methods: {
     onSelect (keys) {
+      console.log('onSelect')
       this.triggerSelect = true
       if (keys.length) {
         this.treeKeys = keys[0].split('-').filter(item => item !== '')
@@ -143,6 +149,7 @@ export default {
       this.$refs.table.refresh(true)
     },
     wrapTreeData (facet) {
+      console.log('wrapTreeData')
       if (this.triggerSelect) {
         return
       }
@@ -169,7 +176,7 @@ export default {
         rows = document.querySelector('.ant-table-body').childNodes[0].childNodes[1].childNodes[0].childNodes
       }
       let scrollX = 0
-
+      console.log(rows, 'rows')
       const columns = Object.assign([], this.columns)
       for (let i = 0; i < rows.length; i++) {
         columns[i].width = rows[i].offsetWidth < 80 ? 80 : rows[i].offsetWidth
@@ -182,6 +189,7 @@ export default {
     },
 
     onLoadData (treeNode) {
+      console.log(treeNode, 'load data')
       this.triggerSelect = false
       return new Promise(resolve => {
         if (treeNode.dataRef.children) {
@@ -195,20 +203,28 @@ export default {
       })
     },
 
-    getCITypes () {
-      getSubscribeTreeView().then(res => {
-        this.ciTypes = res
-        if (this.ciTypes.length) {
-          this.typeId = this.$route.params.typeId || this.ciTypes[0].id
-          this.current = [this.typeId]
-          this.loadColumns()
-          this.levels = res.find(item => item.id === this.typeId).levels
-          this.$refs.table && this.$refs.table.refresh(true)
+    getRelationViews () {
+      getRelationView().then(res => {
+        this.relationViews = res
+
+        if ((Object.keys(this.relationViews.views) || []).length) {
+          this.viewId = parseInt(this.$route.params.viewId) || this.relationViews.name2id[0][1]
+          this.relationViews.name2id.forEach(item => {
+            if (item[1] === this.viewId) {
+              this.viewName = item[0]
+            }
+          })
+          this.levels = this.relationViews.views[this.viewName]
+          this.current = [this.levels[0]]
+          this.typeId = this.levels[0]
+          console.log(this.levels, 'levels')
+          // this.loadColumns()
+          // this.$refs.table && this.$refs.table.refresh(true)
         }
       })
     },
     loadColumns () {
-      getSubscribeAttributes(this.typeId).then(res => {
+      getSubscribeAttributes(this.levels[this.levels.length - 1]).then(res => {
         const prefAttrList = res.attributes
 
         const columns = []
