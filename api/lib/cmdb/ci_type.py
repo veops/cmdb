@@ -10,6 +10,7 @@ from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributeCache
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.decorator import kwargs_required
+from api.models.cmdb import CI
 from api.models.cmdb import CIType
 from api.models.cmdb import CITypeAttribute
 from api.models.cmdb import CITypeAttributeGroup
@@ -17,6 +18,8 @@ from api.models.cmdb import CITypeAttributeGroupItem
 from api.models.cmdb import CITypeGroup
 from api.models.cmdb import CITypeGroupItem
 from api.models.cmdb import CITypeRelation
+from api.models.cmdb import PreferenceTreeView
+from api.models.cmdb import PreferenceShowAttributes
 
 
 class CITypeManager(object):
@@ -99,6 +102,22 @@ class CITypeManager(object):
     @classmethod
     def delete(cls, type_id):
         ci_type = cls.check_is_existed(type_id)
+
+        if CI.get_by(type_id=type_id, first=True, to_dict=False) is not False:
+            return abort(400, "cannot delete, because CI instance exists")
+
+        for item in CITypeRelation.get_by(parent_id=type_id, to_dict=False):
+            item.soft_delete()
+
+        for item in CITypeRelation.get_by(child_id=type_id, to_dict=False):
+            item.soft_delete()
+
+        for item in PreferenceTreeView.get_by(type_id=type_id, to_dict=False):
+            item.soft_delete()
+
+        for item in PreferenceShowAttributes.get_by(type_id=type_id, to_dict=False):
+            item.soft_delete()
+
         ci_type.soft_delete()
 
         CITypeCache.clean(type_id)

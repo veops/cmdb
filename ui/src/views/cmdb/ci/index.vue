@@ -407,7 +407,7 @@ export default {
               that.$refs.table.clearSelected()
               setTimeout(() => {
                 that.$refs.table.refresh(true)
-              }, 1000)
+              }, 1500)
             })
             .catch(e => {
               console.log(e)
