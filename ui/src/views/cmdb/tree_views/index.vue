@@ -1,13 +1,13 @@
 <template>
   <a-card :bordered="false">
-    <a-menu v-model="current" mode="horizontal" v-if="ciTypes.length">
+    <a-menu v-model="current" mode="horizontal" v-if="ciTypes && ciTypes.length">
       <a-menu-item :key="ciType.id" v-for="ciType in ciTypes">
         <router-link
           :to="{name: 'cmdb_tree_views_item', params: {typeId: ciType.id}}"
         >{{ ciType.alias || ciTypes.name }}</router-link>
       </a-menu-item>
     </a-menu>
-    <a-alert message="请先到 我的订阅 页面完成订阅!" banner v-else></a-alert>
+    <a-alert message="请先到 我的订阅 页面完成订阅!" banner v-else-if="ciTypes && !ciTypes.length"></a-alert>
     <div style="clear: both; margin-top: 20px"></div>
     <template>
       <a-row :gutter="8">
@@ -15,8 +15,9 @@
           <a-tree showLine :loadData="onLoadData" @select="onSelect" :treeData="treeData"></a-tree>
         </a-col>
         <a-col :span="19">
+          <search-form ref="search" @refresh="refreshTable" :preferenceAttrList="preferenceAttrList" />
           <s-table
-            v-if="ciTypes.length"
+            v-if="ciTypes && ciTypes.length"
             bordered
             ref="table"
             size="middle"
@@ -39,14 +40,18 @@ import { STable } from '@/components'
 
 import { getSubscribeTreeView, getSubscribeAttributes } from '@/api/cmdb/preference'
 import { searchCI } from '@/api/cmdb/ci'
+import SearchForm from '@/views/cmdb/ci/modules/SearchForm'
 export default {
-  components: { STable },
+  components: {
+    STable,
+    SearchForm
+  },
   data () {
     return {
       treeData: [],
       triggerSelect: false,
       treeNode: null,
-      ciTypes: [],
+      ciTypes: null,
       levels: [],
       typeId: null,
       current: [],
@@ -57,10 +62,10 @@ export default {
       loading: false,
       scrollX: 0,
       scrollY: 0,
+      preferenceAttrList: [],
 
       loadInstances: parameter => {
-        const params = parameter || {}
-        // const params = Object.assign(parameter, this.$refs.search.queryParam)
+        const params = Object.assign(parameter || {}, this.$refs.search.queryParam)
         let q = `q=_type:${this.typeId}`
         Object.keys(params).forEach(key => {
           if (!['pageNo', 'pageSize', 'sortField', 'sortOrder'].includes(key) && params[key] + '' !== '') {
@@ -134,6 +139,10 @@ export default {
   },
 
   methods: {
+    refreshTable (bool = false) {
+      this.$refs.table.refresh(bool)
+    },
+
     onSelect (keys) {
       this.triggerSelect = true
       if (keys.length) {
@@ -210,6 +219,7 @@ export default {
     loadColumns () {
       getSubscribeAttributes(this.typeId).then(res => {
         const prefAttrList = res.attributes
+        this.preferenceAttrList = prefAttrList
 
         const columns = []
         prefAttrList.forEach((item, index) => {

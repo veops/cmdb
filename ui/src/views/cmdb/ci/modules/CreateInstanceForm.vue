@@ -3,7 +3,7 @@
   <a-drawer
     :title="title + CIType.alias"
     width="500"
-    @close="() => { visible = false }"
+    @close="() => { visible = false; $emit('refresh', true) }"
     :visible="visible"
     :wrapStyle="{height: 'calc(100% - 108px)', overflow: 'auto', paddingBottom: '108px'}"
   >

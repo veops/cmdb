@@ -7,7 +7,7 @@
         >{{ item[0] }}</router-link>
       </a-menu-item>
     </a-menu>
-    <a-alert message="管理员 还未配置关系视图!" banner v-else></a-alert>
+    <a-alert message="管理员 还未配置关系视图!" banner v-else-if="relationViews.name2id && !relationViews.name2id.length"></a-alert>
     <div style="clear: both; margin-top: 20px"></div>
     <template>
       <a-row :gutter="8">
@@ -15,8 +15,9 @@
           <a-tree showLine :loadData="onLoadData" @select="onSelect" :treeData="treeData"></a-tree>
         </a-col>
         <a-col :span="19">
+          <search-form ref="search" @refresh="refreshTable" :preferenceAttrList="preferenceAttrList" />
           <s-table
-            v-if="ciTypes.length"
+            v-if="levels.length > 1"
             bordered
             ref="table"
             size="middle"
@@ -38,9 +39,14 @@
 import { STable } from '@/components'
 
 import { getRelationView, getSubscribeAttributes } from '@/api/cmdb/preference'
+import { searchCIRelation, statisticsCIRelation } from '@/api/cmdb/CIRelation'
 import { searchCI } from '@/api/cmdb/ci'
+import SearchForm from '@/views/cmdb/ci/modules/SearchForm'
 export default {
-  components: { STable },
+  components: {
+    STable,
+    SearchForm
+  },
   data () {
     return {
       treeData: [],
@@ -60,13 +66,12 @@ export default {
       loading: false,
       scrollX: 0,
       scrollY: 0,
+      preferenceAttrList: [],
 
       loadInstances: parameter => {
         console.log(parameter, 'load instances')
-        const params = parameter || {}
-        // const params = Object.assign(parameter, this.$refs.search.queryParam)
-        let q = `q=_type:${this.typeId}`
-        console.log(params, 'params')
+        const params = Object.assign(parameter || {}, this.$refs.search.queryParam)
+        let q = `q=_type:${this.levels[this.levels.length - 1]}`
         Object.keys(params).forEach(key => {
           if (!['pageNo', 'pageSize', 'sortField', 'sortOrder'].includes(key) && params[key] + '' !== '') {
             if (typeof params[key] === 'object' && params[key].length > 1) {
@@ -80,17 +85,6 @@ export default {
             }
           }
         })
-
-        if (this.treeKeys.length > 0) {
-          this.treeKeys.forEach((item, idx) => {
-            q += `,${this.levels[idx].name}:${item}`
-          })
-        }
-
-        if (this.levels.length > this.treeKeys.length) {
-          q += `&facet=${this.levels[this.treeKeys.length].name}`
-        }
-
         if ('pageNo' in params) {
           q += `&page=${params['pageNo']}&count=${params['pageSize']}`
         }
@@ -103,7 +97,31 @@ export default {
           q += `&sort=${order}${params['sortField']}`
         }
 
-        return searchCI(q).then(res => {
+        if (this.treeKeys.length === 0) {
+          return searchCI(q).then(res => {
+            const result = {}
+            result.pageNo = res.page
+            result.pageSize = res.total
+            result.totalCount = res.numfound
+            result.totalPage = Math.ceil(res.numfound / (params.pageSize || 25))
+            result.data = Object.assign([], res.result)
+            result.data.forEach((item, index) => (item.key = item.ci_id))
+            if (res.numfound !== 0) {
+              setTimeout(() => {
+                this.setColumnWidth()
+              }, 200)
+            }
+            this.loadRoot()
+            return result
+          })
+        }
+
+        q += `&root_id=${this.treeKeys[this.treeKeys.length - 1]}`
+        q += `&level=${this.levels.length - this.treeKeys.length}`
+        if (q[0] === '&') {
+          q = q.slice(1)
+        }
+        return searchCIRelation(q).then(res => {
           const result = {}
           result.pageNo = res.page
           result.pageSize = res.total
@@ -111,12 +129,12 @@ export default {
           result.totalPage = Math.ceil(res.numfound / (params.pageSize || 25))
           result.data = Object.assign([], res.result)
           result.data.forEach((item, index) => (item.key = item.ci_id))
-          setTimeout(() => {
-            this.setColumnWidth()
-          }, 200)
 
-          if (Object.values(res.facet).length) {
-            this.wrapTreeData(res.facet)
+          if (res.numfound !== 0) {
+            setTimeout(() => {
+              this.setColumnWidth()
+            }, 200)
+            this.loadNoRoot(this.treeKeys[this.treeKeys.length - 1], this.levels.length - this.treeKeys.length - 1)
           }
 
           return result
@@ -139,8 +157,48 @@ export default {
   },
 
   methods: {
+    refreshTable (bool = false) {
+      this.$refs.table.refresh(bool)
+    },
+
+    loadRoot () {
+      searchCI(`q=_type:${this.levels[0]}&count=10000`).then(res => {
+        const facet = []
+        const ciIds = []
+        res.result.forEach(item => {
+          facet.push([item[item.unique], 0, item.ci_id])
+          ciIds.push(item.ci_id)
+        })
+        statisticsCIRelation({ root_ids: ciIds.join(','), level: this.levels.length - 1 }).then(num => {
+          facet.forEach((item, idx) => {
+            item[1] = num[ciIds[idx] + '']
+          })
+          this.wrapTreeData(facet)
+        })
+      })
+    },
+
+    loadNoRoot (rootId, level) {
+      if (level === 0) {
+        return
+      }
+      searchCIRelation(`root_id=${rootId}&level=1&count=10000`).then(res => {
+        const facet = []
+        const ciIds = []
+        res.result.forEach(item => {
+          facet.push([item[item.unique], 0, item.ci_id])
+          ciIds.push(item.ci_id)
+        })
+        statisticsCIRelation({ root_ids: ciIds.join(','), level: level }).then(num => {
+          facet.forEach((item, idx) => {
+            item[1] = num[ciIds[idx] + '']
+          })
+          this.wrapTreeData(facet)
+        })
+      })
+    },
+
     onSelect (keys) {
-      console.log('onSelect')
       this.triggerSelect = true
       if (keys.length) {
         this.treeKeys = keys[0].split('-').filter(item => item !== '')
@@ -149,16 +207,15 @@ export default {
       this.$refs.table.refresh(true)
     },
     wrapTreeData (facet) {
-      console.log('wrapTreeData')
       if (this.triggerSelect) {
         return
       }
       const treeData = []
-      Object.values(facet)[0].forEach(item => {
+      facet.forEach(item => {
         treeData.push({
           title: `${item[0]} (${item[1]})`,
-          key: this.treeKeys.join('-') + '-' + item[0],
-          isLeaf: this.levels.length - 1 === this.treeKeys.length
+          key: this.treeKeys.join('-') + '-' + item[2],
+          isLeaf: this.levels.length - 2 === this.treeKeys.length
         })
       })
       if (this.treeNode === null) {
@@ -176,7 +233,6 @@ export default {
         rows = document.querySelector('.ant-table-body').childNodes[0].childNodes[1].childNodes[0].childNodes
       }
       let scrollX = 0
-      console.log(rows, 'rows')
       const columns = Object.assign([], this.columns)
       for (let i = 0; i < rows.length; i++) {
         columns[i].width = rows[i].offsetWidth < 80 ? 80 : rows[i].offsetWidth
@@ -189,7 +245,6 @@ export default {
     },
 
     onLoadData (treeNode) {
-      console.log(treeNode, 'load data')
       this.triggerSelect = false
       return new Promise(resolve => {
         if (treeNode.dataRef.children) {
@@ -215,17 +270,17 @@ export default {
             }
           })
           this.levels = this.relationViews.views[this.viewName]
-          this.current = [this.levels[0]]
+          this.current = [this.viewId]
           this.typeId = this.levels[0]
-          console.log(this.levels, 'levels')
-          // this.loadColumns()
-          // this.$refs.table && this.$refs.table.refresh(true)
+          this.loadColumns()
+          this.$refs.table && this.$refs.table.refresh(true)
         }
       })
     },
     loadColumns () {
       getSubscribeAttributes(this.levels[this.levels.length - 1]).then(res => {
         const prefAttrList = res.attributes
+        this.preferenceAttrList = prefAttrList
 
         const columns = []
         prefAttrList.forEach((item, index) => {

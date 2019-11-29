@@ -13,3 +13,18 @@ export function getSecondCIs (ciId) {
     method: 'GET'
   })
 }
+
+export function searchCIRelation (params) {
+  return axios({
+    url: `/v0.1/ci_relations/s?${params}`,
+    method: 'GET'
+  })
+}
+
+export function statisticsCIRelation (params) {
+  return axios({
+    url: '/v0.1/ci_relations/statistics',
+    method: 'GET',
+    params: params
+  })
+}

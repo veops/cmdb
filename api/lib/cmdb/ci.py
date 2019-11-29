@@ -231,9 +231,11 @@ class CIManager(object):
                 item.delete()
 
         for item in CIRelation.get_by(first_ci_id=ci_id, to_dict=False):
+            ci_relation_delete.apply_async(args=(item.first_ci_id, item.second_ci_id), queue=CMDB_QUEUE)
             item.delete()
 
         for item in CIRelation.get_by(second_ci_id=ci_id, to_dict=False):
+            ci_relation_delete.apply_async(args=(item.first_ci_id, item.second_ci_id), queue=CMDB_QUEUE)
             item.delete()
 
         ci.delete()  # TODO: soft delete

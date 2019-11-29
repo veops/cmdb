@@ -70,7 +70,7 @@
         </span>
       </s-table>
 
-      <create-instance-form ref="create" @submit="batchUpdate" />
+      <create-instance-form @refresh="refreshTable" ref="create" @submit="batchUpdate" />
     </a-spin>
   </a-card>
 </template>
@@ -159,9 +159,11 @@ export default {
           result.totalPage = Math.ceil(res.numfound / params.pageSize)
           result.data = Object.assign([], res.result)
           result.data.forEach((item, index) => (item.key = item.ci_id))
-          setTimeout(() => {
-            this.setColumnWidth()
-          }, 200)
+          if (res.numfound) {
+            setTimeout(() => {
+              this.setColumnWidth()
+            }, 200)
+          }
           this.instanceList = result.data
           return result
         })
@@ -365,7 +367,9 @@ export default {
               that.$refs.create.visible = false
 
               that.$refs.table.clearSelected()
-              that.$refs.table.refresh(true)
+              setTimeout(() => {
+                that.$refs.table.refresh(true)
+              }, 1000)
               that.reload()
             })
             .catch(e => {
@@ -374,7 +378,9 @@ export default {
               notification.error({
                 message: e.response.data.message
               })
-              that.$refs.table.refresh(true)
+              setTimeout(() => {
+                that.$refs.table.refresh(true)
+              }, 1000)
             })
         }
       })
@@ -399,7 +405,9 @@ export default {
                 message: '删除成功'
               })
               that.$refs.table.clearSelected()
-              that.$refs.table.refresh(true)
+              setTimeout(() => {
+                that.$refs.table.refresh(true)
+              }, 1000)
             })
             .catch(e => {
               console.log(e)
@@ -407,7 +415,9 @@ export default {
               notification.error({
                 message: e.response.data.message
               })
-              that.$refs.table.refresh(true)
+              setTimeout(() => {
+                that.$refs.table.refresh(true)
+              }, 1000)
             })
         }
       })
@@ -420,7 +430,9 @@ export default {
         onOk () {
           deleteCI(record.key)
             .then(res => {
-              that.$refs.table.refresh(true)
+              setTimeout(() => {
+                that.$refs.table.refresh(true)
+              }, 1000)
             })
             .catch(e => {
               console.log(e)
