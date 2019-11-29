@@ -22,7 +22,7 @@
         :key="view"
         v-for="view in Object.keys(relationViews.views)">
         <a-card :bordered="true" :title="view">
-          <a slot="extra"><a-icon type='close' @click="deleteView(view)"></a-icon></a>
+          <a slot="extra"><a-icon type="close" @click="deleteView(view)"></a-icon></a>
           <div :id="&quot;view-&quot; + (relationViews.views[view] || []).join(&quot;&quot;)" style="height:200px"></div>
         </a-card>
       </a-col>

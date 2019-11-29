@@ -137,7 +137,7 @@ class PreferenceManager(object):
     def create_or_update_relation_view(cls, name, cr_ids):
         existed = PreferenceRelationView.get_by(name=name, to_dict=False, first=True)
         if existed is None:
-            return PreferenceRelationView.create(name=name, cr_ids=json.dumps(cr_ids))
+            PreferenceRelationView.create(name=name, cr_ids=json.dumps(cr_ids))
 
         return cls.get_relation_view()
 
