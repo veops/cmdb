@@ -18,13 +18,13 @@ from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
 
 @celery.task(name="cmdb.ci_cache", queue=CMDB_QUEUE)
 def ci_cache(ci_id):
-    time.sleep(0.1)
+    time.sleep(0.01)
     db.session.close()
 
     m = api.lib.cmdb.ci.CIManager()
     ci = m.get_ci_by_id_from_db(ci_id, need_children=False, use_master=False)
     if current_app.config.get("USE_ES"):
-        es.update(ci_id, ci)
+        es.create_or_update(ci_id, ci)
     else:
         rd.create_or_update({ci_id: json.dumps(ci)}, REDIS_PREFIX_CI)
 

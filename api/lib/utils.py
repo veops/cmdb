@@ -133,12 +133,23 @@ class ESHandler(object):
     def update(self, ci_id, body):
         _id = self.get_index_id(ci_id)
 
-        return self.es.index(index=self.index, id=_id, body=body).get("_id")
+        if _id:
+            return self.es.index(index=self.index, id=_id, body=body).get("_id")
+
+    def create_or_update(self, ci_id, body):
+        try:
+            self.update(ci_id, body) or self.create(body)
+        except KeyError:
+            self.create(body)
 
     def delete(self, ci_id):
-        _id = self.get_index_id(ci_id)
+        try:
+            _id = self.get_index_id(ci_id)
+        except KeyError:
+            return
 
-        self.es.delete(index=self.index, id=_id)
+        if _id:
+            self.es.delete(index=self.index, id=_id)
 
     def read(self, query, filter_path=None):
         filter_path = filter_path or []

@@ -57,6 +57,25 @@ class CIRelationSearchView(APIView):
                             result=response)
 
 
+class CIRelationStatisticsView(APIView):
+    url_prefix = "/ci_relations/statistics"
+
+    @auth_abandoned
+    def get(self):
+        root_ids = list(map(int, handle_arg_list(request.values.get('root_ids'))))
+        level = request.values.get('level', 1)
+
+        start = time.time()
+        s = Search(root_ids, level)
+        try:
+            result = s.statistics()
+        except SearchError as e:
+            return abort(400, str(e))
+        current_app.logger.debug("search time is :{0}".format(time.time() - start))
+
+        return self.jsonify(result)
+
+
 class GetSecondCIsView(APIView):
     url_prefix = "/ci_relations/<int:first_ci_id>/second_cis"
 
