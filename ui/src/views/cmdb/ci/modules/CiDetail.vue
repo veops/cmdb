@@ -35,8 +35,8 @@
             <a-table
               rowKey="ci_id"
               size="middle"
-              :columns="firstCIColumns[child.id]"
-              :dataSource="firstCIs[child.name]"
+              :columns="firstCIColumns[parent.id]"
+              :dataSource="firstCIs[parent.name]"
               :pagination="false"
               :scroll="{x: '100%'}"
             ></a-table>
