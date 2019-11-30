@@ -54,7 +54,10 @@ services:
           - cmdb-search
 
   cmdb-api:
-    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-api:1.0
+    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-api:1.5
+#    build:
+#      context: .
+#      target: cmdb-api
     container_name: cmdb-api
     environment:
       TZ: Asia/Shanghai
@@ -63,7 +66,8 @@ services:
       - -c
       - |
         sed -i "s#USE_ES = False#USE_ES = True#g" api/settings.py
-        sed -i "s#ES_HOST = '127.0.0.1'#ES_HOST = cmdb-search#g" api/settings.py
+        sed -i "s#ES_HOST = '127.0.0.1'#ES_HOST = 'cmdb-search'#g" api/settings.py
+        sleep 15
         gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000 -D
         flask init-cache
         celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1
@@ -77,7 +81,10 @@ services:
           - cmdb-api
 
   cmdb-ui:
-    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-ui:1.0
+    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-ui:1.5
+#    build:
+#      context: .
+#      target: cmdb-ui
     container_name: cmdb-ui
     depends_on:
       - cmdb-api
