@@ -33,7 +33,8 @@ ENV TZ=Asia/Shanghai
 RUN pip install  --no-cache-dir -r docs/requirements.txt \
     && cp ./api/settings.py.example ./api/settings.py \
     && sed -i "s#{user}:{password}@127.0.0.1:3306/{db}#cmdb:123456@mysql:3306/cmdb#g" api/settings.py \
-    && sed -i "s/127.0.0.1/redis/g" api/settings.py
+    && sed -i "s#redis://127.0.0.1#redis://redis#g" api/settings.py \
+    && sed -i 's#CACHE_REDIS_HOST = "127.0.0.1"#CACHE_REDIS_HOST = "redis"#g' api/settings.py
 
 CMD ["bash", "-c", "flask run"]
 
