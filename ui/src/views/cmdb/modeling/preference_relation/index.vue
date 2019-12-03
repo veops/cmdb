@@ -1,7 +1,8 @@
 <template>
   <div>
     <a-card :bordered="true" title="关系视图定义面板">
-      <a-card-meta description="先打开右上角的开关，便可选择树的节点"></a-card-meta>
+      <a-card-meta description="方法1. 右键选择树节点(推荐)"></a-card-meta>
+      <a-card-meta description="方法2. 先打开右上角的开关，再选择树的节点"></a-card-meta>
       <a-switch
         slot="extra"
         @change="toggleSelect"
@@ -307,7 +308,7 @@ export default {
     },
 
     mouseDown () {
-      if (event.button === 0 && this.canSelect) {
+      if ((event.button === 0 && this.canSelect) || event.button === 2) {
         this.saveDrawingSurface()
         this.rect.startX = event.offsetX
         this.rect.startY = event.offsetY
@@ -317,7 +318,7 @@ export default {
     },
 
     mouseUp () {
-      if (event.button === 0 && this.canSelect) {
+      if ((event.button === 0 && this.canSelect) || event.button === 2) {
         this.restoreDrawingSurface()
         this.drag = false
 
