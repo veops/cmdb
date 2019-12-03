@@ -73,6 +73,10 @@ class Search(object):
     def _in_query_handle(self, attr, v):
         terms = v[1:-1].split(";")
         operator = "|"
+        if attr in ('_type', 'ci_type', 'type_id') and terms and terms[0].isdigit():
+            attr = "type_id"
+            terms = map(int, terms)
+        current_app.logger.warning(terms)
         for term in terms:
             self._operator2query(operator).append({
                 "term": {
@@ -164,6 +168,7 @@ class Search(object):
     def _query_build_raw(self):
 
         queries = handle_arg_list(self.orig_query)
+
         current_app.logger.debug(queries)
 
         self.__query_build_by_field(queries)

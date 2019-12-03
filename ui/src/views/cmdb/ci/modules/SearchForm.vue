@@ -68,7 +68,7 @@
           </a-col>
         </template>
 
-        <a-col :lg="!advanced && 6 || 24" :md="!advanced && 8 || 24" :sm="24" style="float: right">
+        <a-col :lg="!advanced && 6 || 24" :md="!advanced && 8 || 24" :sm="24" style="float: right; padding-left: 0">
           <span
             class="table-page-search-submitButtons"
             :style="advanced && { float: 'right', overflow: 'hidden' } || {} "

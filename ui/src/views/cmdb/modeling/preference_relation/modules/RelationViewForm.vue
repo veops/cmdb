@@ -119,6 +119,7 @@ export default {
         .then(res => {
           this.$message.success(`添加成功`)
           this.onClose()
+          this.$emit('refresh')
         })
         .catch(err => this.requestFailed(err))
     },

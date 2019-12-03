@@ -1,6 +1,6 @@
 <template>
-  <a-card :bordered="false">
-    <a-menu v-model="current" mode="horizontal" v-if="relationViews.name2id && relationViews.name2id.length">
+  <a-card :bordered="false" class="relation-card">
+    <a-menu v-model="currentView" mode="horizontal" v-if="relationViews.name2id && relationViews.name2id.length">
       <a-menu-item :key="item[1]" v-for="item in relationViews.name2id">
         <router-link
           :to="{name: 'cmdb_relation_views_item', params: { viewId: item[1]} }"
@@ -15,9 +15,14 @@
           <a-tree showLine :loadData="onLoadData" @select="onSelect" :treeData="treeData"></a-tree>
         </a-col>
         <a-col :span="19">
-          <search-form ref="search" @refresh="refreshTable" :preferenceAttrList="preferenceAttrList" />
+          <a-menu v-model="currentTypeId" mode="horizontal" v-if="showTypeIds && showTypeIds.length > 1">
+            <a-menu-item :key="item.id" v-for="item in showTypes">
+              <a @click="changeCIType(item.id)">{{ item.alias || item.name }}</a>
+            </a-menu-item>
+          </a-menu>
+          <search-form style="margin-top: 10px" ref="search" @refresh="refreshTable" :preferenceAttrList="preferenceAttrList" />
           <s-table
-            v-if="levels.length > 1"
+            v-if="levels.length"
             bordered
             ref="table"
             size="middle"
@@ -49,16 +54,22 @@ export default {
   },
   data () {
     return {
+      parameter: {},
       treeData: [],
       triggerSelect: false,
       treeNode: null,
       ciTypes: [],
       relationViews: {},
       levels: [],
+      showTypeIds: [],
+      showTypes: [],
+      leaf2showTypes: {},
+      leaf: [],
       typeId: null,
       viewId: null,
       viewName: null,
-      current: [],
+      currentView: [],
+      currentTypeId: [],
       instanceList: [],
       treeKeys: [],
       columns: [],
@@ -70,8 +81,9 @@ export default {
 
       loadInstances: parameter => {
         console.log(parameter, 'load instances')
+        this.parameter = parameter
         const params = Object.assign(parameter || {}, this.$refs.search.queryParam)
-        let q = `q=_type:${this.levels[this.levels.length - 1]}`
+        let q = `q=_type:${this.currentTypeId[0]}`
         Object.keys(params).forEach(key => {
           if (!['pageNo', 'pageSize', 'sortField', 'sortOrder'].includes(key) && params[key] + '' !== '') {
             if (typeof params[key] === 'object' && params[key].length > 1) {
@@ -109,15 +121,36 @@ export default {
             if (res.numfound !== 0) {
               setTimeout(() => {
                 this.setColumnWidth()
-              }, 200)
+                console.log('set column')
+              }, 300)
             }
             this.loadRoot()
             return result
           })
         }
 
-        q += `&root_id=${this.treeKeys[this.treeKeys.length - 1]}`
-        q += `&level=${this.levels.length - this.treeKeys.length}`
+        q += `&root_id=${this.treeKeys[this.treeKeys.length - 1].split('_')[0]}`
+        const typeId = parseInt(this.treeKeys[this.treeKeys.length - 1].split('_')[1])
+        let level = []
+        if (!this.leaf.includes(typeId)) {
+          let startIdx = 0
+          this.levels.forEach((item, idx) => {
+            if (item.includes(typeId)) {
+              startIdx = idx
+            }
+          })
+
+          this.leaf.forEach(leafId => {
+            this.levels.forEach((item, levelIdx) => {
+              if (item.includes(leafId) && levelIdx - startIdx + 1 > 0) {
+                level.push(levelIdx - startIdx + 1)
+              }
+            })
+          })
+        } else {
+          level = [1]
+        }
+        q += `&level=${level.join(',')}`
         if (q[0] === '&') {
           q = q.slice(1)
         }
@@ -133,10 +166,10 @@ export default {
           if (res.numfound !== 0) {
             setTimeout(() => {
               this.setColumnWidth()
-            }, 200)
-            this.loadNoRoot(this.treeKeys[this.treeKeys.length - 1], this.levels.length - this.treeKeys.length - 1)
+              console.log('set column')
+            }, 300)
+            this.loadNoRoot(this.treeKeys[this.treeKeys.length - 1], level)
           }
-
           return result
         })
       }
@@ -161,40 +194,63 @@ export default {
       this.$refs.table.refresh(bool)
     },
 
-    loadRoot () {
-      searchCI(`q=_type:${this.levels[0]}&count=10000`).then(res => {
+    changeCIType (typeId) {
+      this.currentTypeId = [typeId]
+      this.loadColumns(typeId)
+      this.$refs.table.renderClear()
+      setTimeout(() => {
+        this.refreshTable(true)
+      }, 100)
+    },
+
+    async loadRoot () {
+      searchCI(`q=_type:(${this.levels[0].join(';')})&count=10000`).then(async res => {
         const facet = []
         const ciIds = []
         res.result.forEach(item => {
-          facet.push([item[item.unique], 0, item.ci_id])
+          facet.push([item[item.unique], 0, item.ci_id, item.type_id])
           ciIds.push(item.ci_id)
         })
-        statisticsCIRelation({ root_ids: ciIds.join(','), level: this.levels.length - 1 }).then(num => {
-          facet.forEach((item, idx) => {
-            item[1] = num[ciIds[idx] + '']
+        const promises = this.leaf.map(leafId => {
+          let level = 0
+          this.levels.forEach((item, idx) => {
+            if (item.includes(leafId)) {
+              level = idx + 1
+            }
           })
-          this.wrapTreeData(facet)
+          return statisticsCIRelation({ root_ids: ciIds.join(','), level: level }).then(num => {
+            facet.forEach((item, idx) => {
+              item[1] += num[ciIds[idx] + '']
+            })
+          })
         })
+        await Promise.all(promises)
+        this.wrapTreeData(facet)
       })
     },
 
-    loadNoRoot (rootId, level) {
-      if (level === 0) {
-        return
-      }
-      searchCIRelation(`root_id=${rootId}&level=1&count=10000`).then(res => {
+    async loadNoRoot (rootIdAndTypeId, level) {
+      const rootId = rootIdAndTypeId.split('_')[0]
+
+      searchCIRelation(`root_id=${rootId}&level=1&count=10000`).then(async res => {
         const facet = []
         const ciIds = []
         res.result.forEach(item => {
-          facet.push([item[item.unique], 0, item.ci_id])
+          facet.push([item[item.unique], 0, item.ci_id, item.type_id])
           ciIds.push(item.ci_id)
         })
-        statisticsCIRelation({ root_ids: ciIds.join(','), level: level }).then(num => {
-          facet.forEach((item, idx) => {
-            item[1] = num[ciIds[idx] + '']
-          })
-          this.wrapTreeData(facet)
+
+        const promises = level.map(_level => {
+          if (_level > 1) {
+            return statisticsCIRelation({ root_ids: ciIds.join(','), level: _level - 1 }).then(num => {
+              facet.forEach((item, idx) => {
+                item[1] += num[ciIds[idx] + '']
+              })
+            })
+          }
         })
+        await Promise.all(promises)
+        this.wrapTreeData(facet)
       })
     },
 
@@ -214,8 +270,8 @@ export default {
       facet.forEach(item => {
         treeData.push({
           title: `${item[0]} (${item[1]})`,
-          key: this.treeKeys.join('-') + '-' + item[2],
-          isLeaf: this.levels.length - 2 === this.treeKeys.length
+          key: this.treeKeys.join('-') + '-' + item[2] + '_' + item[3],
+          isLeaf: this.leaf.includes(item[3])
         })
       })
       if (this.treeNode === null) {
@@ -269,16 +325,25 @@ export default {
               this.viewName = item[0]
             }
           })
-          this.levels = this.relationViews.views[this.viewName]
-          this.current = [this.viewId]
-          this.typeId = this.levels[0]
+          this.levels = this.relationViews.views[this.viewName].topo
+          this.showTypes = this.relationViews.views[this.viewName].show_types
+          const showTypeIds = []
+          this.showTypes.forEach(item => {
+            showTypeIds.push(item.id)
+          })
+          this.showTypeIds = showTypeIds
+          this.leaf2showTypes = this.relationViews.views[this.viewName].leaf2show_types
+          this.leaf = this.relationViews.views[this.viewName].leaf
+          this.currentView = [this.viewId]
+          this.currentTypeId = [this.showTypeIds[0]]
+          this.typeId = this.levels[0][0]
           this.loadColumns()
           this.$refs.table && this.$refs.table.refresh(true)
         }
       })
     },
     loadColumns () {
-      getSubscribeAttributes(this.levels[this.levels.length - 1]).then(res => {
+      getSubscribeAttributes(this.currentTypeId[0]).then(res => {
         const prefAttrList = res.attributes
         this.preferenceAttrList = prefAttrList
 
@@ -309,11 +374,14 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang='less'>
 .ant-menu-horizontal {
   border-bottom: 1px solid #ebedf0 !important;
 }
 .ant-menu-horizontal {
   border-bottom: 1px solid #ebedf0 !important;
+}
+.relation-card > .ant-card-body {
+  padding-top: 0 !important;
 }
 </style>

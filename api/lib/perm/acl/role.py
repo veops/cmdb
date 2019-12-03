@@ -90,7 +90,7 @@ class RoleRelationCRUD(object):
 
     @staticmethod
     def delete2(parent_id, child_id):
-        existed = RoleRelation.get_by(parent_id=parent_id, child_id=child_id)
+        existed = RoleRelation.get_by(parent_id=parent_id, child_id=child_id, first=True, to_dict=False)
         existed or abort(400, "RoleRelation < {0} -> {1} > does not exist".format(parent_id, child_id))
 
         existed.soft_delete()

@@ -67,7 +67,7 @@ def init_cache():
     ci_relations = CIRelation.get_by(to_dict=False)
     relations = dict()
     for cr in ci_relations:
-        relations.setdefault(cr.first_ci_id, []).append(cr.second_ci_id)
+        relations.setdefault(cr.first_ci_id, {}).update({cr.second_ci_id: cr.second_ci.type_id})
     for i in relations:
         relations[i] = json.dumps(relations[i])
     if relations:
