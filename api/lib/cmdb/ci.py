@@ -548,7 +548,7 @@ class CIRelationManager(object):
     @staticmethod
     def delete(cr_id):
         cr = CIRelation.get_by_id(cr_id) or abort(404, "CIRelation <{0}> is not existed".format(cr_id))
-        cr.soft_delete()
+        cr.delete()
 
         his_manager = CIRelationHistoryManager()
         his_manager.add(cr, operate_type=OperateType.DELETE)
