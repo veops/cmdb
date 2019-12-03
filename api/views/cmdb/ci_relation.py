@@ -34,7 +34,7 @@ class CIRelationSearchView(APIView):
         count = get_page_size(request.values.get("count") or request.values.get("page_size"))
 
         root_id = request.values.get('root_id')
-        level = request.values.get('level', 1)
+        level = list(map(int, handle_arg_list(request.values.get('level', '1'))))
 
         query = request.values.get('q', "")
         fl = handle_arg_list(request.values.get('fl', ""))
@@ -64,11 +64,12 @@ class CIRelationStatisticsView(APIView):
     def get(self):
         root_ids = list(map(int, handle_arg_list(request.values.get('root_ids'))))
         level = request.values.get('level', 1)
+        type_ids = set(map(int, handle_arg_list(request.values.get('type_ids', []))))
 
         start = time.time()
         s = Search(root_ids, level)
         try:
-            result = s.statistics()
+            result = s.statistics(type_ids)
         except SearchError as e:
             return abort(400, str(e))
         current_app.logger.debug("search time is :{0}".format(time.time() - start))

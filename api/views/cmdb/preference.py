@@ -77,6 +77,7 @@ class PreferenceRelationApiView(APIView):
 
     @role_required(RoleEnum.CONFIG)
     @args_required("name")
+    @args_required("cr_ids")
     def post(self):
         name = request.values.get("name")
         cr_ids = request.values.get("cr_ids")

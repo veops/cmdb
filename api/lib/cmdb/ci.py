@@ -566,4 +566,4 @@ class CIRelationManager(object):
 
         ci_relation_delete.apply_async(args=(first_ci_id, second_ci_id), queue=CMDB_QUEUE)
 
-        return cls.delete(cr.cr_id)
+        return cls.delete(cr.id)

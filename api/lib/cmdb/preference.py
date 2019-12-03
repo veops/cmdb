@@ -13,6 +13,7 @@ from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributeCache
 from api.lib.cmdb.cache import CITypeCache
 from api.models.cmdb import CITypeAttribute
+from api.models.cmdb import CITypeRelation
 from api.models.cmdb import PreferenceRelationView
 from api.models.cmdb import PreferenceShowAttributes
 from api.models.cmdb import PreferenceTreeView
@@ -124,17 +125,28 @@ class PreferenceManager(object):
             for i in result[view_name]:
                 id2type[i['parent_id']] = None
                 id2type[i['child_id']] = None
+            topo = {i['child_id']: {i['parent_id']} for i in result[view_name]}
+            leaf = list(set(toposort.toposort_flatten(topo)) - set([j for i in topo.values() for j in i]))
 
-            result[view_name] = toposort.toposort_flatten(
-                {i['child_id']: {i['parent_id']} for i in result[view_name]})
+            leaf2show_types = {i: [t['child_id'] for t in CITypeRelation.get_by(parent_id=i)] for i in leaf}
+
+            result[view_name] = dict(topo=list(map(list, toposort.toposort(topo))),
+                                     topo_flatten=list(toposort.toposort_flatten(topo)),
+                                     leaf=leaf,
+                                     leaf2show_types=leaf2show_types,
+                                     show_types=[CITypeCache.get(j).to_dict()
+                                                 for i in leaf2show_types.values() for j in i])
 
         for type_id in id2type:
             id2type[type_id] = CITypeCache.get(type_id).to_dict()
-
+        print(result)
         return result, id2type, sorted(name2id, key=lambda x: x[1])
 
     @classmethod
     def create_or_update_relation_view(cls, name, cr_ids):
+        if not cr_ids:
+            return abort(400, "Node must be selected")
+
         existed = PreferenceRelationView.get_by(name=name, to_dict=False, first=True)
         if existed is None:
             PreferenceRelationView.create(name=name, cr_ids=json.dumps(cr_ids))
@@ -145,4 +157,5 @@ class PreferenceManager(object):
     def delete_relation_view(name):
         for existed in PreferenceRelationView.get_by(name=name, to_dict=False):
             existed.soft_delete()
+
         return name

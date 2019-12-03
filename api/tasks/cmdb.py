@@ -14,6 +14,7 @@ from api.extensions import rd
 from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import REDIS_PREFIX_CI
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
+from api.models.cmdb import CIRelation
 
 
 @celery.task(name="cmdb.ci_cache", queue=CMDB_QUEUE)
@@ -46,10 +47,13 @@ def ci_delete(ci_id):
 @celery.task(name="cmdb.ci_relation_cache", queue=CMDB_QUEUE)
 def ci_relation_cache(parent_id, child_id):
     children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
-    children = json.loads(children) if children is not None else []
-    children.append(child_id)
+    children = json.loads(children) if children is not None else {}
 
-    rd.create_or_update({parent_id: json.dumps(list(set(children)))}, REDIS_PREFIX_CI_RELATION)
+    cr = CIRelation.get_by(first_ci_id=parent_id, second_ci_id=child_id, first=True, to_dict=False)
+    if child_id not in children:
+        children[child_id] = cr.second_ci.type_id
+
+    rd.create_or_update({parent_id: json.dumps(children)}, REDIS_PREFIX_CI_RELATION)
 
     current_app.logger.info("ADD ci relation cache: {0} -> {1}".format(parent_id, child_id))
 
@@ -57,10 +61,11 @@ def ci_relation_cache(parent_id, child_id):
 @celery.task(name="cmdb.ci_relation_delete", queue=CMDB_QUEUE)
 def ci_relation_delete(parent_id, child_id):
     children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
-    children = json.loads(children) if children is not None else []
-    if child_id in children:
-        children.remove(child_id)
+    children = json.loads(children) if children is not None else {}
 
-    rd.create_or_update({parent_id: json.dumps(list(set(children)))}, REDIS_PREFIX_CI_RELATION)
+    if child_id in children:
+        children.pop(child_id)
+
+    rd.create_or_update({parent_id: json.dumps(children)}, REDIS_PREFIX_CI_RELATION)
 
     current_app.logger.info("DELETE ci relation cache: {0} -> {1}".format(parent_id, child_id))
