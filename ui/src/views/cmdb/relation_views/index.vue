@@ -64,6 +64,7 @@ export default {
       showTypeIds: [],
       showTypes: [],
       leaf2showTypes: {},
+      node2ShowTypes: {},
       leaf: [],
       typeId: null,
       viewId: null,
@@ -131,6 +132,14 @@ export default {
 
         q += `&root_id=${this.treeKeys[this.treeKeys.length - 1].split('_')[0]}`
         const typeId = parseInt(this.treeKeys[this.treeKeys.length - 1].split('_')[1])
+
+        this.showTypes = this.node2ShowTypes[typeId + '']
+        const showTypeIds = []
+        this.showTypes.forEach(item => {
+          showTypeIds.push(item.id)
+        })
+        this.showTypeIds = showTypeIds
+
         let level = []
         if (!this.leaf.includes(typeId)) {
           let startIdx = 0
@@ -333,6 +342,7 @@ export default {
           })
           this.showTypeIds = showTypeIds
           this.leaf2showTypes = this.relationViews.views[this.viewName].leaf2show_types
+          this.node2ShowTypes = this.relationViews.views[this.viewName].node2show_types
           this.leaf = this.relationViews.views[this.viewName].leaf
           this.currentView = [this.viewId]
           this.currentTypeId = [this.showTypeIds[0]]
