@@ -1,7 +1,13 @@
 <template>
   <div>
     <a-card :bordered="true" title="关系视图定义面板">
-      <a-card-meta description="点击右键可选择节点"></a-card-meta>
+      <a-card-meta description="先打开右上角的开关，便可选择树的节点"></a-card-meta>
+      <a-switch
+        slot="extra"
+        @change="toggleSelect"
+        checkedChildren="on"
+        unCheckedChildren="off"
+      />
       <div
         id="visualization"
         style="height:400px"
@@ -9,7 +15,7 @@
         @mouseup="mouseUp"
         @mousemove="mouseMove">
       </div>
-      <relation-view-form ref="relationViewForm"></relation-view-form>
+      <relation-view-form @refresh="reload" ref="relationViewForm"></relation-view-form>
     </a-card>
 
     <a-row :gutter="0">
@@ -23,7 +29,7 @@
         v-for="view in Object.keys(relationViews.views)">
         <a-card :bordered="true" :title="view">
           <a slot="extra"><a-icon type="close" @click="deleteView(view)"></a-icon></a>
-          <div :id="&quot;view-&quot; + (relationViews.views[view] || []).join(&quot;&quot;)" style="height:200px"></div>
+          <div :id="&quot;view-&quot; + (relationViews.views[view].topo_flatten || []).join(&quot;&quot;)" style="height:200px"></div>
         </a-card>
       </a-col>
     </a-row>
@@ -32,7 +38,6 @@
 </template>
 
 <script>
-// 按需引入
 import { DataSet, Network } from 'vis-network'
 import { getCITypeRelations } from '@/api/cmdb/CITypeRelation'
 import { getRelationView, deleteRelationView } from '@/api/cmdb/preference'
@@ -48,12 +53,15 @@ export default {
       relationViews: { views: {} },
       relations: [],
       network: null,
+      options: {},
+      viewData: {},
       container: null,
       nodes: null,
       edges: null,
       canvas: null,
       ctx: null,
       drag: false,
+      canSelect: false,
       rect: {},
       drawingSurfaceImageData: null
     }
@@ -61,6 +69,7 @@ export default {
   created () {
     this.create()
   },
+  inject: ['reload'],
   methods: {
     create () {
       getRelationView().then(res => {
@@ -145,30 +154,54 @@ export default {
 
         // initialize your network!
         this.container.oncontextmenu = () => { return false }
+        this.options = options
+        this.viewData = data
         this.network = new Network(this.container, data, options)
         this.canvas = this.network.canvas.frame.canvas
         this.ctx = this.canvas.getContext('2d')
       })
     },
 
+    toggleSelect (checked) {
+      if (checked) {
+        this.canSelect = true
+        this.options.autoResize = false
+        this.options.interaction.hover = false
+        this.options.interaction.dragView = false
+        this.options.interaction.dragNodes = false
+        this.network = new Network(this.container, this.viewData, this.options)
+        this.canvas = this.network.canvas.frame.canvas
+        this.ctx = this.canvas.getContext('2d')
+      } else {
+        this.canSelect = false
+        this.options.autoResize = true
+        this.options.interaction.hover = true
+        this.options.interaction.dragView = true
+        this.options.interaction.dragNodes = true
+        this.network = new Network(this.container, this.viewData, this.options)
+        this.canvas = this.network.canvas.frame.canvas
+        this.ctx = this.canvas.getContext('2d')
+      }
+    },
+
     createRelationViews () {
       Object.keys(this.relationViews.views).forEach(viewName => {
         const nodes = []
         const edges = []
-        const len = this.relationViews.views[viewName].length
-        this.relationViews.views[viewName].slice(0, len - 1).forEach((fromId, idx) => {
+        const len = this.relationViews.views[viewName].topo_flatten.length
+        this.relationViews.views[viewName].topo_flatten.slice(0, len - 1).forEach((fromId, idx) => {
           nodes.push({
             id: fromId,
             label: this.relationViews.id2type[fromId].alias
           })
           edges.push({
             from: fromId,
-            to: this.relationViews.views[viewName][idx + 1]
+            to: this.relationViews.views[viewName].topo_flatten[idx + 1]
           })
         })
         nodes.push({
-          id: this.relationViews.views[viewName][len - 1],
-          label: this.relationViews.id2type[this.relationViews.views[viewName][len - 1]].alias
+          id: this.relationViews.views[viewName].topo_flatten[len - 1],
+          label: this.relationViews.id2type[this.relationViews.views[viewName].topo_flatten[len - 1]].alias
         })
         const _nodes = new DataSet(nodes)
         const _edges = new DataSet(edges)
@@ -208,9 +241,9 @@ export default {
           }
         }
         setTimeout(() => {
-          const container = document.querySelector('#view-' + this.relationViews.views[viewName].join(''))
+          const container = document.querySelector('#view-' + this.relationViews.views[viewName].topo_flatten.join(''))
           const n = new Network(container, data, options)
-          console.log(n)
+          console.log(n) // TODO
         }, 100)
       })
     },
@@ -274,7 +307,7 @@ export default {
     },
 
     mouseDown () {
-      if (event.button === 2) {
+      if (event.button === 0 && this.canSelect) {
         this.saveDrawingSurface()
         this.rect.startX = event.offsetX
         this.rect.startY = event.offsetY
@@ -284,7 +317,7 @@ export default {
     },
 
     mouseUp () {
-      if (event.button === 2) {
+      if (event.button === 0 && this.canSelect) {
         this.restoreDrawingSurface()
         this.drag = false
 
