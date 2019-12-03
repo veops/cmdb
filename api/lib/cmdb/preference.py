@@ -1,5 +1,7 @@
 # -*- coding:utf-8 -*-
 
+
+import copy
 import json
 
 import six
@@ -129,11 +131,26 @@ class PreferenceManager(object):
             leaf = list(set(toposort.toposort_flatten(topo)) - set([j for i in topo.values() for j in i]))
 
             leaf2show_types = {i: [t['child_id'] for t in CITypeRelation.get_by(parent_id=i)] for i in leaf}
+            node2show_types = copy.deepcopy(leaf2show_types)
+
+            def _find_parent(node_id):
+                parents = topo.get(node_id, {})
+                for parent in parents:
+                    node2show_types.setdefault(parent, []).extend(node2show_types.get(node_id, []))
+                    _find_parent(parent)
+                if not parents:
+                    return
+            for l in leaf:
+                _find_parent(l)
+
+            for node_id in node2show_types:
+                node2show_types[node_id] = [CITypeCache.get(i).to_dict() for i in set(node2show_types[node_id])]
 
             result[view_name] = dict(topo=list(map(list, toposort.toposort(topo))),
                                      topo_flatten=list(toposort.toposort_flatten(topo)),
                                      leaf=leaf,
                                      leaf2show_types=leaf2show_types,
+                                     node2show_types=node2show_types,
                                      show_types=[CITypeCache.get(j).to_dict()
                                                  for i in leaf2show_types.values() for j in i])
 
