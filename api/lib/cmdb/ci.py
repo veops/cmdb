@@ -431,7 +431,7 @@ class CIRelationManager(object):
     def get_second_cis(self, first_ci_id, relation_type_id=None, page=1, per_page=None, **kwargs):
         second_cis = db.session.query(CI.id).filter(CI.deleted.is_(False)).join(
             CIRelation, CIRelation.second_ci_id == CI.id).filter(
-            CIRelation.first_ci_id == first_ci_id)
+            CIRelation.first_ci_id == first_ci_id).filter(CIRelation.deleted.is_(False))
 
         if relation_type_id is not None:
             second_cis = second_cis.filter(CIRelation.relation_type_id == relation_type_id)
