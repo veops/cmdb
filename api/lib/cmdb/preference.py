@@ -116,30 +116,32 @@ class PreferenceManager(object):
     @staticmethod
     def get_relation_view():
         views = PreferenceRelationView.get_by(to_dict=True)
+        view2cr_ids = dict()
         result = dict()
         name2id = list()
         for view in views:
-            result.setdefault(view['name'], []).extend(json.loads(view['cr_ids']))
+            view2cr_ids.setdefault(view['name'], []).extend(json.loads(view['cr_ids']))
             name2id.append([view['name'], view['id']])
 
         id2type = dict()
-        for view_name in result:
-            for i in result[view_name]:
+        for view_name in view2cr_ids:
+            for i in view2cr_ids[view_name]:
                 id2type[i['parent_id']] = None
                 id2type[i['child_id']] = None
-            topo = {i['child_id']: {i['parent_id']} for i in result[view_name]}
+            topo = {i['child_id']: {i['parent_id']} for i in view2cr_ids[view_name]}
             leaf = list(set(toposort.toposort_flatten(topo)) - set([j for i in topo.values() for j in i]))
 
             leaf2show_types = {i: [t['child_id'] for t in CITypeRelation.get_by(parent_id=i)] for i in leaf}
             node2show_types = copy.deepcopy(leaf2show_types)
 
-            def _find_parent(node_id):
-                parents = topo.get(node_id, {})
+            def _find_parent(_node_id):
+                parents = topo.get(_node_id, {})
                 for parent in parents:
-                    node2show_types.setdefault(parent, []).extend(node2show_types.get(node_id, []))
+                    node2show_types.setdefault(parent, []).extend(node2show_types.get(_node_id, []))
                     _find_parent(parent)
                 if not parents:
                     return
+
             for l in leaf:
                 _find_parent(l)
 
@@ -156,7 +158,7 @@ class PreferenceManager(object):
 
         for type_id in id2type:
             id2type[type_id] = CITypeCache.get(type_id).to_dict()
-        print(result)
+
         return result, id2type, sorted(name2id, key=lambda x: x[1])
 
     @classmethod
