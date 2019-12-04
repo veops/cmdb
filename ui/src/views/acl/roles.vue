@@ -11,13 +11,11 @@
       :data="loadData"
       :rowKey="record=>record.id"
       :rowSelection="options.rowSelection"
-      :scroll="scroll"
       :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条记录`, pageSizeOptions: pageSizeOptions}"
       showPagination="auto"
       :pageSize="25"
       ref="table"
       size="middle"
-
     >
       <div slot="filterDropdown" slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }" class="custom-filter-dropdown">
         <a-input
@@ -57,15 +55,13 @@
         <a-icon type="check" v-if="text"/>
       </span>
 
-      <span slot="id" slot-scope="key">
+      <span slot="inherit" slot-scope="key">
         <a-tag color="cyan" v-for="role in id2parents[key]" :key="role.id">{{ role.name }}</a-tag>
       </span>
 
       <span slot="action" slot-scope="text, record">
         <template>
-          <a @click="handleAddRoleRelation(record)">关联角色</a>
-          <a-divider type="vertical"/>
-          <a @click="handleEdit(record)">编辑</a>
+          <a @click="handleEdit(record)">修改</a>
           <a-divider type="vertical"/>
           <a-popconfirm
             title="确认删除?"
@@ -78,26 +74,21 @@
           </a-popconfirm>
         </template>
       </span>
-
     </s-table>
-    <roleForm ref="roleForm" :handleOk="handleOk"> </roleForm>
-    <addRoleRelationForm ref="AddRoleRelationForm" :handleOk="handleOk"> </addRoleRelationForm>
-
+    <roleForm ref="roleForm" :allRoles="allRoles" :id2parents="id2parents" :handleOk="handleOk"></roleForm>
   </a-card>
 </template>
 
 <script>
 import { STable } from '@/components'
 import roleForm from './module/roleForm'
-import AddRoleRelationForm from './module/addRoleRelationForm'
 import { deleteRoleById, searchRole } from '@/api/acl/role'
 
 export default {
   name: 'Index',
   components: {
     STable,
-    roleForm,
-    AddRoleRelationForm
+    roleForm
   },
   data () {
     return {
@@ -119,7 +110,7 @@ export default {
           title: '角色名',
           dataIndex: 'name',
           sorter: false,
-          width: 250,
+          width: 150,
           scopedSlots: {
             customRender: 'nameSearchRender',
             filterDropdown: 'filterDropdown',
@@ -135,7 +126,7 @@ export default {
           }
         },
         {
-          title: '管理者',
+          title: '是否管理员',
           dataIndex: 'is_app_admin',
           width: 100,
           sorter: false,
@@ -143,22 +134,22 @@ export default {
 
         },
         {
-          title: '父角色',
+          title: '继承自',
           dataIndex: 'id',
           sorter: false,
-          scopedSlots: { customRender: 'id' }
+          width: 250,
+          scopedSlots: { customRender: 'inherit' }
 
         },
         {
           title: '操作',
           dataIndex: 'action',
           width: 150,
-          fixed: 'right',
           scopedSlots: { customRender: 'action' }
         }
       ],
       loadData: parameter => {
-        parameter.app_id = this.$store.state.app.name
+        parameter.app_id = this.$route.name.split('_')[0]
         parameter.page = parameter.pageNo
         parameter.page_size = parameter.pageSize
         delete parameter.pageNo
@@ -200,11 +191,6 @@ export default {
 
     }
   },
-
-  beforeCreate () {
-    this.form = this.$form.createForm(this)
-  },
-
   computed: {
 
     formItemLayout () {

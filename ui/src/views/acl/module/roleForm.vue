@@ -11,8 +11,8 @@
     <a-form :form="form" :layout="formLayout" @submit="handleSubmit">
 
       <a-form-item
-        :label-col="formItemLayout.labelCol"
-        :wrapper-col="formItemLayout.wrapperCol"
+        :label-col="{span:6}"
+        :wrapper-col="{span:12}"
         label="角色名"
       >
         <a-input
@@ -22,8 +22,20 @@
         />
       </a-form-item>
       <a-form-item
-        :label-col="horizontalFormItemLayout.labelCol"
-        :wrapper-col="horizontalFormItemLayout.wrapperCol"
+        :label-col="{span:6}"
+        :wrapper-col="{span:12}"
+        label="继承自"
+      >
+        <a-select
+          v-model="selectedParents"
+          placeholder="可选择继承角色"
+          mode="multiple">
+          <a-select-option v-for="role in allRoles" v-if="current_id !== role.id" :key="role.id">{{ role.name }}</a-select-option>
+        </a-select>
+      </a-form-item>
+      <a-form-item
+        :label-col="{span:8}"
+        :wrapper-col="{span:10}"
         label="是否应用管理员"
       >
         <a-switch
@@ -32,7 +44,6 @@
           v-decorator="['is_app_admin', {rules: [], valuePropName: 'checked',} ]"
         />
       </a-form-item>
-
       <a-form-item>
         <a-input
           name="id"
@@ -50,12 +61,10 @@
           borderTop: '1px solid #e9e9e9',
           padding: '0.8rem 1rem',
           background: '#fff',
-
         }"
       >
         <a-button @click="handleSubmit" type="primary" style="margin-right: 1rem">确定</a-button>
         <a-button @click="onClose">取消</a-button>
-
       </div>
 
     </a-form>
@@ -65,7 +74,7 @@
 
 <script>
 import { STable } from '@/components'
-import { addRole, updateRoleById } from '@/api/acl/role'
+import { addRole, updateRoleById, addParentRole, delParentRole } from '@/api/acl/role'
 
 export default {
   name: 'RoleForm',
@@ -75,8 +84,11 @@ export default {
   data () {
     return {
       drawerTitle: '新增角色',
+      current_id: 0,
       drawerVisible: false,
-      formLayout: 'vertical'
+      formLayout: 'vertical',
+      selectedParents: [],
+      oldParents: []
     }
   },
 
@@ -96,7 +108,7 @@ export default {
 
     horizontalFormItemLayout () {
       return {
-        labelCol: { span: 5 },
+        labelCol: { span: 8 },
         wrapperCol: { span: 12 }
       }
     },
@@ -113,10 +125,13 @@ export default {
   methods: {
 
     handleCreate () {
+      this.drawerTitle = '新增'
       this.drawerVisible = true
     },
     onClose () {
       this.form.resetFields()
+      this.selectedParents = []
+      this.oldParents = []
       this.drawerVisible = false
     },
     onChange (e) {
@@ -124,8 +139,16 @@ export default {
     },
 
     handleEdit (record) {
+      this.drawerTitle = '编辑'
       this.drawerVisible = true
-      console.log(record)
+      this.current_id = record.id
+      const _parents = this.id2parents[record.id]
+      if (_parents) {
+        _parents.forEach(item => {
+          this.selectedParents.push(item.id)
+          this.oldParents.push(item.id)
+        })
+      }
       this.$nextTick(() => {
         this.form.setFieldsValue({
           id: record.id,
@@ -140,7 +163,7 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           console.log('Received values of form: ', values)
-          values.app_id = this.$store.state.app.name
+          values.app_id = this.$route.name.split('_')[0]
           if (values.id) {
             this.updateRole(values.id, values)
           } else {
@@ -150,6 +173,7 @@ export default {
       })
     },
     updateRole (id, data) {
+      this.updateParents(id)
       updateRoleById(id, data)
         .then(res => {
           this.$message.success(`更新成功`)
@@ -162,12 +186,24 @@ export default {
       addRole(data)
         .then(res => {
           this.$message.success(`添加成功`)
+          this.updateParents(res.id)
           this.handleOk()
           this.onClose()
         })
         .catch(err => this.requestFailed(err))
     },
-
+    updateParents (id) {
+      this.oldParents.forEach(item => {
+        if (!this.selectedParents.includes(item)) {
+          delParentRole(id, item).catch(err => this.requestFailed(err))
+        }
+      })
+      this.selectedParents.forEach(item => {
+        if (!this.oldParents.includes(item)) {
+          addParentRole(id, item).catch(err => this.requestFailed(err))
+        }
+      })
+    },
     requestFailed (err) {
       const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
       this.$message.error(`${msg}`)
@@ -179,6 +215,14 @@ export default {
     handleOk: {
       type: Function,
       default: null
+    },
+    allRoles: {
+      type: Array,
+      required: true
+    },
+    id2parents: {
+      type: Object,
+      required: true
     }
   }
 

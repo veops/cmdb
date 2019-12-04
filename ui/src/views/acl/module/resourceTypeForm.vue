@@ -17,8 +17,8 @@
       >
         <a-input
           name="name"
-          placeholder=""
-          v-decorator="['name', {rules: [{ required: true, message: '请输入资源名'}]} ]"
+          placeholder="类型名称"
+          v-decorator="['name', {rules: [{ required: true, message: '请输入类型名'}]} ]"
         />
       </a-form-item>
 
@@ -123,6 +123,7 @@ export default {
     },
     onClose () {
       this.form.resetFields()
+      this.perms = []
       this.drawerVisible = false
     },
     onChange (e) {
@@ -148,7 +149,7 @@ export default {
         if (!err) {
           console.log('Received values of form: ', values)
 
-          values.app_id = this.$store.state.app.name
+          values.app_id = this.$route.name.split('_')[0]
           values.perms = this.perms
           if (values.id) {
             this.updateResourceType(values.id, values)

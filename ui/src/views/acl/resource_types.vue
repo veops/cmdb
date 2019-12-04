@@ -130,13 +130,14 @@ export default {
         {
           title: '描述',
           dataIndex: 'description',
-          width: 500,
+          width: 200,
           sorter: false,
           scopedSlots: { customRender: 'description' }
         },
         {
           title: '权限',
           dataIndex: 'id',
+          width: 300,
           sorter: false,
           scopedSlots: { customRender: 'id' }
         },
@@ -144,12 +145,11 @@ export default {
           title: '操作',
           dataIndex: 'action',
           width: 150,
-          fixed: 'right',
           scopedSlots: { customRender: 'action' }
         }
       ],
       loadData: parameter => {
-        parameter.app_id = this.$store.state.app.name
+        parameter.app_id = this.$route.name.split('_')[0]
         parameter.page = parameter.pageNo
         parameter.page_size = parameter.pageSize
         delete parameter.pageNo

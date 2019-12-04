@@ -167,7 +167,7 @@ export default {
         if (!err) {
           console.log('Received values of form: ', values)
 
-          values.app_id = this.$store.state.app.name
+          values.app_id = this.$route.name.split('_')[0]
           values.perms = this.perms
           if (values.id) {
             this.updateResourceType(values.id, values)
