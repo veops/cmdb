@@ -22,10 +22,25 @@
     
 Overview
 ----
-![基础资源视图](https://raw.githubusercontent.com/pycook/cmdb/master/ui/public/cmdb01.jpeg)
+### 3种类型视图
+1. 资源视图 - 模型的实例数据, 用户可订阅
+2. 树形视图 - 模型按字段分级, 用树形图方式展示, 用户可订阅
+3. 关系视图 - 模型之间的关系, 用树形图方式展示, **管理员可配置**
 
-![模型配置](https://raw.githubusercontent.com/pycook/cmdb/master/ui/public/cmdb02.jpeg)
+##### 资源视图
+![基础资源视图](https://raw.githubusercontent.com/pycook/cmdb/master/ui/public/cmdb-ci.jpeg) 
 
+##### 树形视图
+![树形视图](https://raw.githubusercontent.com/pycook/cmdb/master/ui/public/cmdb-tree.jpeg) 
+
+##### 关系视图
+![关系视图](https://raw.githubusercontent.com/pycook/cmdb/master/ui/public/cmdb-relation.jpeg) 
+
+##### 用户订阅
+![用户订阅](https://raw.githubusercontent.com/pycook/cmdb/master/ui/public/cmdb-preference.jpeg)
+
+##### 关系视图配置
+![关系视图配置](https://raw.githubusercontent.com/pycook/cmdb/master/ui/public/cmdb-relation-define.jpeg)
 
 Docker一键快速构建
 ----
