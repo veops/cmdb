@@ -1,15 +1,17 @@
 # -*- coding:utf-8 -*-
 
 
-import uuid
-import string
 import random
+import string
+import uuid
 
 from flask import abort
 from flask import g
 
 from api.extensions import db
 from api.lib.perm.acl.cache import UserCache
+from api.lib.perm.acl.role import RoleCRUD
+from api.models.acl import Role
 from api.models.acl import User
 
 
@@ -40,13 +42,27 @@ class UserCRUD(object):
         kwargs['block'] = 0
         kwargs['key'], kwargs['secret'] = cls._gen_key_secret()
 
-        return User.create(**kwargs)
+        user = User.create(**kwargs)
+
+        RoleCRUD.add_role(user.username, uid=user.uid)
+
+        return user
 
     @staticmethod
     def update(uid, **kwargs):
         user = User.get_by(uid=uid, to_dict=False, first=True) or abort(404, "User <{0}> does not exist".format(uid))
 
+        if kwargs.get("username"):
+            other = User.get_by(username=kwargs['username'], first=True, to_dict=False)
+            if other is not None and other.uid != user.uid:
+                return abort(400, "User <{0}> cannot be duplicated".format(kwargs['username']))
+
         UserCache.clean(user)
+
+        if kwargs.get("username") and kwargs['username'] != user.username:
+            role = Role.get_by(name=user.username, first=True, to_dict=False)
+            if role is not None:
+                RoleCRUD.update_role(role.id, **dict(name=kwargs['name']))
 
         return user.update(**kwargs)
 

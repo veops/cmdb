@@ -21,8 +21,9 @@ class RoleView(APIView):
         page_size = get_page_size(request.values.get("page_size"))
         q = request.values.get('q')
         app_id = request.values.get('app_id')
+        user_role = request.values.get('user_role', False)
 
-        numfound, roles = RoleCRUD.search(q, app_id, page, page_size)
+        numfound, roles = RoleCRUD.search(q, app_id, page, page_size, user_role)
 
         id2parents = RoleRelationCRUD.get_parents([i.id for i in roles])
 

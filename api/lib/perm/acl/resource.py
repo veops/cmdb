@@ -36,11 +36,11 @@ class ResourceTypeCRUD(object):
         return [i.to_dict() for i in perms]
 
     @classmethod
-    def add(cls, app_id, name, perms):
+    def add(cls, app_id, name, description, perms):
         ResourceType.get_by(name=name, app_id=app_id) and abort(
             400, "ResourceType <{0}> is already existed".format(name))
 
-        rt = ResourceType.create(name=name, app_id=app_id)
+        rt = ResourceType.create(name=name, description=description, app_id=app_id)
 
         cls.update_perms(rt.id, perms, app_id)
 
