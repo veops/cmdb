@@ -1,6 +1,22 @@
 <template>
   <a-card :bordered="false">
-
+    <div>
+      <a-list :grid="{ gutter: 12, column: 12 }" style="height: 40px;clear: both">
+        <a-list-item
+          v-for="rtype in allResourceTypes"
+          :key="rtype.id"
+          :class="{'bottom-border':currentType.name===rtype.name}"
+          style="text-align: center;height: 30px; margin:0 30px"
+        >
+          <a
+            @click="loadCurrentType(rtype)"
+            :style="currentType.name === rtype.name?'color:#108ee9':'color:grey'">
+            <span style="font-size: 18px">{{ rtype.name }}</span>
+          </a>
+        </a-list-item>
+      </a-list>
+    </div>
+    <a-divider style="margin-top: -16px" />
     <div class="action-btn">
       <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem;">{{ btnName }}</a-button>
     </div>
@@ -52,14 +68,11 @@
         </span>
         <template v-else>{{ text }}</template>
       </template>
-
-      <template slot="resource_type_id" slot-scope="text">{{ text }}</template>
-
       <span slot="action" slot-scope="text, record">
         <template>
-          <a @click="handleEdit(record)">编辑</a>
+          <a @click="handlePerm(record)">查看授权</a>
           <a-divider type="vertical"/>
-          <a @click="handlePerm(record)">权限</a>
+          <a @click="handlePermManage(record)">授权</a>
           <a-divider type="vertical"/>
           <a-popconfirm
             title="确认删除?"
@@ -74,9 +87,9 @@
       </span>
 
     </s-table>
-    <resourceForm ref="resourceForm" :handleOk="handleOk"> </resourceForm>
+    <resourceForm ref="resourceForm" @fresh="handleOk"> </resourceForm>
     <resourcePermForm ref="resourcePermForm"> </resourcePermForm>
-
+    <ResourcePermManageForm ref="resourcePermManageForm" :groupTypeMessage="currentType"></ResourcePermManageForm>
   </a-card>
 </template>
 
@@ -84,20 +97,23 @@
 import { STable } from '@/components'
 import resourceForm from './module/resourceForm'
 import resourcePermForm from './module/resourcePermForm'
-import { deleteResourceById, searchResource } from '@/api/acl/resource'
+import ResourcePermManageForm from './module/resourcePermManageForm'
+import { deleteResourceById, searchResource, searchResourceType } from '@/api/acl/resource'
 
 export default {
   name: 'Index',
   components: {
     STable,
     resourceForm,
-    resourcePermForm
+    resourcePermForm,
+    ResourcePermManageForm
   },
   data () {
     return {
       scroll: { x: 1000, y: 500 },
       btnName: '新增资源',
-
+      allResourceTypes: [],
+      currentType: { id: 0 },
       formLayout: 'vertical',
 
       allResources: [],
@@ -112,7 +128,7 @@ export default {
           title: '资源名',
           dataIndex: 'name',
           sorter: false,
-          width: 300,
+          width: 250,
           scopedSlots: {
             customRender: 'nameSearchRender',
             filterDropdown: 'filterDropdown',
@@ -128,29 +144,30 @@ export default {
           }
         },
         {
-          title: '资源类型',
-          dataIndex: 'resource_type_id',
-          sorter: false,
-          scopedSlots: { customRender: 'resource_type_id' }
-
+          title: '创建时间',
+          width: 200,
+          dataIndex: 'created_at'
+        },
+        {
+          title: '最后修改时间',
+          width: 200,
+          dataIndex: 'updated_at'
         },
         {
           title: '操作',
           dataIndex: 'action',
           width: 150,
-          fixed: 'right',
           scopedSlots: { customRender: 'action' }
         }
       ],
       loadData: parameter => {
-        parameter.app_id = this.$store.state.app.name
+        parameter.app_id = this.$route.name.split('_')[0]
         parameter.page = parameter.pageNo
         parameter.page_size = parameter.pageSize
+        parameter.resource_type_id = this.currentType.id
         delete parameter.pageNo
         delete parameter.pageSize
         Object.assign(parameter, this.queryParam)
-        console.log('loadData.parameter', parameter)
-
         return searchResource(parameter)
           .then(res => {
             res.pageNo = res.page
@@ -158,8 +175,6 @@ export default {
             res.totalCount = res.numfound
             res.totalPage = Math.ceil(res.numfound / parameter.pageSize)
             res.data = res.resources
-
-            console.log('loadData.res', res)
             this.allResources = res.resources
             return res
           })
@@ -190,7 +205,6 @@ export default {
   },
 
   computed: {
-
     formItemLayout () {
       const { formLayout } = this
       return formLayout === 'horizontal' ? {
@@ -215,10 +229,26 @@ export default {
   },
   mounted () {
     this.setScrollY()
+    this.getAllResourceTypes()
   },
   inject: ['reload'],
 
   methods: {
+    getAllResourceTypes () {
+      searchResourceType({ page_size: 9999, app_id: this.$route.name.split('_')[0] }).then(res => {
+        this.allResourceTypes = res.groups
+        this.loadCurrentType(res.groups[0])
+      })
+    },
+    handlePermManage (record) {
+      this.$refs.resourcePermManageForm.editPerm(record)
+    },
+    loadCurrentType (rtype) {
+      if (rtype) {
+        this.currentType = rtype
+      }
+      this.$refs.table.refresh()
+    },
     handleSearch (selectedKeys, confirm, column) {
       confirm()
       this.columnSearchText[column.dataIndex] = selectedKeys[0]
@@ -234,11 +264,6 @@ export default {
     setScrollY () {
       this.scroll.y = window.innerHeight - this.$refs.table.$el.offsetTop - 200
     },
-
-    handleEdit (record) {
-      this.$refs.resourceForm.handleEdit(record)
-    },
-
     handlePerm (record) {
       this.$refs.resourcePermForm.handlePerm(record)
     },
@@ -250,7 +275,7 @@ export default {
     },
 
     handleCreate () {
-      this.$refs.resourceForm.handleCreate()
+      this.$refs.resourceForm.handleCreate(this.currentType)
     },
 
     deleteResource (id) {
@@ -284,6 +309,10 @@ export default {
     width: calc(100% - 216px);
     display: inline-block
   }
+  .bottom-border {
+  border-bottom: cornflowerblue 2px solid;
+  z-index: 1;
+}
 
   .operator {
     margin-bottom: 18px;

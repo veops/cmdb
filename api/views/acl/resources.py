@@ -39,9 +39,10 @@ class ResourceTypeView(APIView):
     def post(self):
         name = request.values.get('name')
         app_id = request.values.get('app_id')
+        description = request.values.get('description', '')
         perms = request.values.get('perms')
 
-        rt = ResourceTypeCRUD.add(app_id, name, perms)
+        rt = ResourceTypeCRUD.add(app_id, name, description, perms)
 
         return self.jsonify(rt.to_dict())
 

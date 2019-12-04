@@ -64,7 +64,7 @@
 
 <script>
 import { STable } from '@/components'
-import { addResource, updateResourceById, searchResourceType } from '@/api/acl/resource'
+import { addResource, searchResourceType } from '@/api/acl/resource'
 
 export default {
   name: 'ResourceForm',
@@ -116,40 +116,31 @@ export default {
   },
   methods: {
     getAllResourceTypes () {
-      searchResourceType({ page_size: 9999, app_id: this.$store.state.app.name }).then(res => {
+      searchResourceType({ page_size: 9999, app_id: this.$route.name.split('_')[0] }).then(res => {
         this.allTypes = res.groups
       })
     },
-    handleCreate () {
+    handleCreate (defaultType) {
       this.drawerVisible = true
+      this.$nextTick(() => {
+        this.form.setFieldsValue({ type_id: defaultType.id })
+      })
     },
     onClose () {
       this.form.resetFields()
       this.drawerVisible = false
+      this.$emit('fresh')
     },
     onChange (e) {
       console.log(`checked = ${e}`)
     },
-
-    handleEdit (record) {
-      this.drawerVisible = true
-      console.log(record)
-      this.$nextTick(() => {
-        this.form.setFieldsValue({
-          id: record.id,
-          name: record.name,
-          type_id: record.resource_type_id
-        })
-      })
-    },
-
     handleSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
           console.log('Received values of form: ', values)
 
-          values.app_id = this.$store.state.app.name
+          values.app_id = this.$route.name.split('_')[0]
           if (values.id) {
             this.updateResource(values.id, values)
           } else {
@@ -158,20 +149,10 @@ export default {
         }
       })
     },
-    updateResource (id, data) {
-      updateResourceById(id, data)
-        .then(res => {
-          this.$message.success(`更新成功`)
-          this.handleOk()
-          this.onClose()
-        }).catch(err => this.requestFailed(err))
-    },
-
     createResource (data) {
       addResource(data)
         .then(res => {
           this.$message.success(`添加成功`)
-          this.handleOk()
           this.onClose()
         })
         .catch(err => this.requestFailed(err))
@@ -182,13 +163,6 @@ export default {
       this.$message.error(`${msg}`)
     }
 
-  },
-  watch: {},
-  props: {
-    handleOk: {
-      type: Function,
-      default: null
-    }
   }
 
 }

@@ -3,52 +3,47 @@
 import functools
 
 import six
-
 from flask import current_app, g, request
 from flask import session, abort
 
-from api.extensions import cache
-
-
-def get_access_token():
-    return
-
-
-class AccessTokenCache(object):
-    @classmethod
-    def get(cls):
-        if cache.get("AccessToken") is not None:
-            return cache.get("AccessToken")
-
-        res = get_access_token() or ""
-
-        cache.set("AccessToken", res, timeout=60 * 60)
-        return res
-
-    @classmethod
-    def clean(cls):
-        cache.clear("AccessToken")
+from api.lib.perm.acl.cache import AppCache
+from api.models.acl import ResourceType
+from api.models.acl import Resource
+from api.lib.perm.acl.resource import ResourceCRUD
 
 
 class ACLManager(object):
     def __init__(self):
-        self.access_token = AccessTokenCache.get()
-        self.acl_session = dict(uid=session.get("uid"),
-                                token=self.access_token)
-
         self.user_info = session["acl"] if "acl" in session else {}
+        self.app_id = AppCache.get('cmdb')
+        if not self.app_id:
+            raise Exception("cmdb not in acl apps")
+        self.app_id = self.app_id.id
 
     def add_resource(self, name, resource_type_name=None):
-        pass
+        resource_type = ResourceType.get_by(name=resource_type_name, first=True, to_dict=False)
+        if resource_type:
+            return abort(400, "ResourceType <{0}> cannot be found".format(resource_type_name))
+
+        ResourceCRUD.add(name, resource_type.id, self.app_id)
 
     def grant_resource_to_role(self, name, role, resource_type_name=None):
-        pass
+        resource_type = ResourceType.get_by(name=resource_type_name, first=True, to_dict=False)
+        if resource_type:
+            return abort(400, "ResourceType <{0}> cannot be found".format(resource_type_name))
 
     def del_resource(self, name, resource_type_name=None):
-        pass
+        resource_type = ResourceType.get_by(name=resource_type_name, first=True, to_dict=False)
+        if resource_type:
+            return abort(400, "ResourceType <{0}> cannot be found".format(resource_type_name))
 
-    def get_user_info(self, username):
-        return dict()
+        resource = Resource.get_by(resource_type_id=resource_type.id,
+                                   app_id=self.app_id,
+                                   name=name,
+                                   first=True,
+                                   to_dict=False)
+        if resource:
+            ResourceCRUD.delete(resource.id)
 
     def get_resources(self, resource_type_name=None):
         if "acl" not in session:
@@ -87,7 +82,9 @@ def can_access_resources(resource_type):
                 else:
                     g.resources = {resource_type: result}
             return func(*args, **kwargs)
+
         return wrapper_can_access_resources
+
     return decorator_can_access_resources
 
 
@@ -102,7 +99,9 @@ def has_perm(resources, resource_type, perm):
                 validate_permission(resources, resource_type, perm)
 
             return func(*args, **kwargs)
+
         return wrapper_has_perm
+
     return decorator_has_perm
 
 
@@ -120,7 +119,9 @@ def has_perm_from_args(arg_name, resource_type, perm, callback=None):
                 validate_permission(resource, resource_type, perm)
 
             return func(*args, **kwargs)
+
         return wrapper_has_perm
+
     return decorator_has_perm
 
 
@@ -135,5 +136,7 @@ def role_required(role_name):
                 if role_name not in session.get("acl", {}).get("parentRoles", []):
                     return abort(403, "Role {0} is required".format(role_name))
             return func(*args, **kwargs)
+
         return wrapper_role_required
+
     return decorator_role_required

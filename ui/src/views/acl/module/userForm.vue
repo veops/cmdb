@@ -31,6 +31,17 @@
           v-decorator="['nickname', {rules: []} ]"
         />
       </a-form-item>
+      <a-form-item
+        :label-col="formItemLayout.labelCol"
+        :wrapper-col="formItemLayout.wrapperCol"
+        label="密码"
+      >
+        <a-input
+          type="password"
+          name="password"
+          v-decorator="['password', {rules: []} ]"
+        />
+      </a-form-item>
 
       <a-form-item
         :label-col="formItemLayout.labelCol"
@@ -61,7 +72,21 @@
       >
         <a-input
           name="email"
-          v-decorator="['email', {rules: [{ required: true, message: '请输入邮箱'},{message: '请输入正确的邮箱', pattern: /^\w+\@\w+(\.\w+)+$/}]} ]"
+          v-decorator="[
+            'email',
+            {
+              rules: [
+                {
+                  type: 'email',
+                  message: '请输入正确的邮箱！',
+                },
+                {
+                  required: true,
+                  message: '请输入邮箱',
+                },
+              ],
+            },
+          ]"
         />
       </a-form-item>
 
@@ -186,6 +211,7 @@ export default {
           id: record.uid,
           username: record.username,
           nickname: record.nickname,
+          password: record.password,
           department: record.department,
           catalog: record.catalog,
           email: record.email,

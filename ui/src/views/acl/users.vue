@@ -17,7 +17,6 @@
       :pageSize="25"
       ref="table"
       size="middle"
-
     >
       <div slot="filterDropdown" slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }" class="custom-filter-dropdown">
         <a-input
@@ -66,6 +65,9 @@
       <span slot="is_check" slot-scope="text">
         <a-icon type="check" v-if="text"/>
       </span>
+      <span slot="block" slot-scope="text">
+        <a-icon type="lock" v-if="text"/>
+      </span>
 
       <span slot="action" slot-scope="text, record">
         <template>
@@ -103,7 +105,7 @@ export default {
   },
   data () {
     return {
-      scroll: { x: 1000, y: 500 },
+      scroll: { x: 1300, y: 500 },
       btnName: '新增用户',
 
       CITypeName: this.$route.params.CITypeName,
@@ -160,7 +162,7 @@ export default {
         {
           title: '部门',
           dataIndex: 'department',
-          width: 200,
+          width: 100,
           sorter: false,
           scopedSlots: { customRender: 'department' }
 
@@ -169,7 +171,7 @@ export default {
           title: '小组',
           dataIndex: 'catalog',
           sorter: false,
-          width: 200,
+          width: 100,
           scopedSlots: { customRender: 'catalog' }
 
         },
@@ -185,30 +187,28 @@ export default {
           title: '手机',
           dataIndex: 'mobile',
           sorter: false,
-          width: 200,
+          width: 150,
           scopedSlots: { customRender: 'mobile' }
-
-        },
-        {
-          title: '锁定',
-          dataIndex: 'block',
-          sorter: false,
-          width: 100,
-          scopedSlots: { customRender: 'block' }
 
         },
         {
           title: '加入时间',
           dataIndex: 'date_joined',
           sorter: false,
+          width: 200,
           scopedSlots: { customRender: 'date_joined' }
 
+        },
+        {
+          title: '锁定',
+          dataIndex: 'block',
+          width: 100,
+          scopedSlots: { customRender: 'block' }
         },
         {
           title: '操作',
           dataIndex: 'action',
           width: 150,
-          fixed: 'right',
           scopedSlots: { customRender: 'action' }
         }
       ],
@@ -233,17 +233,14 @@ export default {
             return res
           })
       },
-
       mdl: {},
       // 高级搜索 展开/关闭
       advanced: false,
       // 查询参数
       queryParam: {},
       // 表头
-
       selectedRowKeys: [],
       selectedRows: [],
-
       // custom table alert & rowSelection
       options: {
         alert: false,
@@ -253,11 +250,9 @@ export default {
 
     }
   },
-
   beforeCreate () {
     this.form = this.$form.createForm(this)
   },
-
   computed: {
 
     formItemLayout () {
@@ -343,12 +338,6 @@ export default {
   .search {
     margin-bottom: 54px;
   }
-
-  .fold {
-    width: calc(100% - 216px);
-    display: inline-block
-  }
-
   .operator {
     margin-bottom: 18px;
   }
@@ -361,14 +350,14 @@ export default {
     background: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
   }
-
   .highlight {
     background-color: rgb(255, 192, 105);
-    padding: 0px;
+    padding: 0;
   }
-  @media screen and (max-width: 900px) {
-    .fold {
-      width: 100%;
-    }
+  .ant-table-body {
+  overflow: auto;
+  }
+  .ant-table-content{
+    overflow: auto;
   }
 </style>

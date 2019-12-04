@@ -23,8 +23,8 @@ class RoleRelationCRUD(object):
         if uids is not None:
             uids = [uids] if isinstance(uids, six.integer_types) else uids
             rids = db.session.query(Role).filter(Role.deleted.is_(False)).filter(Role.uid.in_(uids))
-            rid2uid = {i.rid: i.uid for i in rids}
-            rids = [i.rid for i in rids]
+            rid2uid = {i.id: i.uid for i in rids}
+            rids = [i.id for i in rids]
         else:
             rids = [rids] if isinstance(rids, six.integer_types) else rids
 
@@ -98,9 +98,12 @@ class RoleRelationCRUD(object):
 
 class RoleCRUD(object):
     @staticmethod
-    def search(q, app_id, page=1, page_size=None):
-        query = db.session.query(Role).filter(Role.deleted.is_(False)).filter(
-            Role.app_id == app_id).filter(Role.uid.is_(None))
+    def search(q, app_id, page=1, page_size=None, user_role=False):
+        query = db.session.query(Role).filter(Role.deleted.is_(False)).filter(Role.app_id == app_id)
+
+        if not user_role:
+            query = query.filter(Role.uid.is_(None))
+
         if q:
             query = query.filter(Role.name.ilike('%{0}%'.format(q)))
 
@@ -109,7 +112,7 @@ class RoleCRUD(object):
         return numfound, query.offset((page - 1) * page_size).limit(page_size)
 
     @staticmethod
-    def add_role(name, app_id, is_app_admin=False, uid=None):
+    def add_role(name, app_id=None, is_app_admin=False, uid=None):
         Role.get_by(name=name, app_id=app_id) and abort(400, "Role <{0}> is already existed".format(name))
 
         return Role.create(name=name,

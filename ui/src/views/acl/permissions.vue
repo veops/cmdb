@@ -149,7 +149,7 @@ export default {
         }
       ],
       loadData: parameter => {
-        parameter.app_id = this.$store.state.app.name
+        parameter.app_id = this.$route.name.split('_')[0]
         parameter.page = parameter.pageNo
         parameter.page_size = parameter.pageSize
         delete parameter.pageNo
