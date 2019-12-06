@@ -7,6 +7,7 @@ from flask import abort
 from flask import current_app
 from flask import request
 
+from api.lib.cmdb.cache import RelationTypeCache
 from api.lib.cmdb.ci import CIRelationManager
 from api.lib.cmdb.search import SearchError
 from api.lib.cmdb.search.ci_relation.search import Search
@@ -83,11 +84,15 @@ class GetSecondCIsView(APIView):
     def get(self, first_ci_id):
         page = get_page(request.values.get("page", 1))
         count = get_page_size(request.values.get("count"))
-        relation_type = request.values.get("relation_type", "contain")
+        relation_type = request.values.get("relation_type")
+        try:
+            relation_type_id = RelationTypeCache.get(relation_type).id if relation_type else None
+        except AttributeError:
+            return abort(400, "invalid relation type <{0}>".format(relation_type))
 
         manager = CIRelationManager()
         numfound, total, second_cis = manager.get_second_cis(
-            first_ci_id, page=page, per_page=count, relation_type=relation_type)
+            first_ci_id, page=page, per_page=count, relation_type_id=relation_type_id)
 
         return self.jsonify(numfound=numfound,
                             total=total,

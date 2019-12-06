@@ -10,6 +10,7 @@ from api.lib.perm.acl.cache import RoleRelationCache
 from api.lib.perm.acl.const import ACL_QUEUE
 from api.models.acl import Resource
 from api.models.acl import ResourceGroupItems
+from api.models.acl import ResourceType
 from api.models.acl import Role
 from api.models.acl import RolePermission
 from api.models.acl import RoleRelation
@@ -44,7 +45,7 @@ class RoleRelationCRUD(object):
 
     @staticmethod
     def get_child_ids(rid):
-        res = RoleRelation.get_by(child_id=rid, to_dict=False)
+        res = RoleRelation.get_by(parent_id=rid, to_dict=False)
 
         return [i.parent_id for i in res]
 
@@ -82,27 +83,37 @@ class RoleRelationCRUD(object):
 
         return RoleRelation.create(parent_id=parent_id, child_id=child_id)
 
-    @staticmethod
-    def delete(_id):
+    @classmethod
+    def delete(cls, _id):
         existed = RoleRelation.get_by_id(_id) or abort(400, "RoleRelation <{0}> does not exist".format(_id))
+
+        child_ids = cls.recursive_child_ids(existed.child_id)
+        for child_id in child_ids:
+            role_rebuild.apply_async(args=(child_id,), queue=ACL_QUEUE)
 
         existed.soft_delete()
 
-    @staticmethod
-    def delete2(parent_id, child_id):
+    @classmethod
+    def delete2(cls, parent_id, child_id):
         existed = RoleRelation.get_by(parent_id=parent_id, child_id=child_id, first=True, to_dict=False)
         existed or abort(400, "RoleRelation < {0} -> {1} > does not exist".format(parent_id, child_id))
+
+        child_ids = cls.recursive_child_ids(existed.child_id)
+        for child_id in child_ids:
+            role_rebuild.apply_async(args=(child_id,), queue=ACL_QUEUE)
 
         existed.soft_delete()
 
 
 class RoleCRUD(object):
     @staticmethod
-    def search(q, app_id, page=1, page_size=None, user_role=False):
-        query = db.session.query(Role).filter(Role.deleted.is_(False)).filter(Role.app_id == app_id)
+    def search(q, app_id, page=1, page_size=None, user_role=True):
+        query = db.session.query(Role).filter(Role.deleted.is_(False))
+        query = query.filter(Role.app_id == app_id).filter(Role.uid.is_(None))
 
-        if not user_role:
-            query = query.filter(Role.uid.is_(None))
+        if user_role:
+            query1 = db.session.query(Role).filter(Role.deleted.is_(False)).filter(Role.uid.isnot(None))
+            query = query.union(query1)
 
         if q:
             query = query.filter(Role.name.ilike('%{0}%'.format(q)))
@@ -134,9 +145,6 @@ class RoleCRUD(object):
     def delete_role(cls, rid):
         role = Role.get_by_id(rid) or abort(404, "Role <{0}> does not exist".format(rid))
 
-        parent_ids = RoleRelationCRUD.get_parent_ids(rid)
-        child_ids = RoleRelationCRUD.get_child_ids(rid)
-
         for i in RoleRelation.get_by(parent_id=rid, to_dict=False):
             i.soft_delete()
         for i in RoleRelation.get_by(child_id=rid, to_dict=False):
@@ -145,7 +153,7 @@ class RoleCRUD(object):
         for i in RolePermission.get_by(rid=rid, to_dict=False):
             i.soft_delete()
 
-        role_rebuild.apply_async(args=(parent_ids + child_ids,), queue=ACL_QUEUE)
+        role_rebuild.apply_async(args=(list(RoleRelationCRUD.recursive_child_ids(rid)), ), queue=ACL_QUEUE)
 
         RoleCache.clean(rid)
         RoleRelationCache.clean(rid)
@@ -166,20 +174,21 @@ class RoleCRUD(object):
 
     @staticmethod
     def get_group_ids(resource_id):
-        return [i.group_id for i in ResourceGroupItems.get_by(resource_id, to_dict=False)]
+        return [i.group_id for i in ResourceGroupItems.get_by(resource_id=resource_id, to_dict=False)]
 
     @classmethod
-    def has_permission(cls, rid, resource_name, perm):
-        resource = Resource.get_by(name=resource_name, first=True, to_dict=False)
+    def has_permission(cls, rid, resource_name, resource_type, app_id, perm):
+        resource_type = ResourceType.get_by(app_id=app_id, name=resource_type, first=True, to_dict=False)
+        resource_type or abort(404, "ResourceType <{0}> is not found".format(resource_type))
+        type_id = resource_type.id
+        resource = Resource.get_by(name=resource_name, resource_type_id=type_id, first=True, to_dict=False)
         resource = resource or abort(403, "Resource <{0}> is not in ACL".format(resource_name))
 
         parent_ids = RoleRelationCRUD.recursive_parent_ids(rid)
 
         group_ids = cls.get_group_ids(resource.id)
-
         for parent_id in parent_ids:
             id2perms = RoleRelationCache.get_resources(parent_id)
-
             perms = id2perms['id2perms'].get(resource.id, [])
             if perms and {perm}.issubset(set(perms)):
                 return True

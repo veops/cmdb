@@ -4,11 +4,14 @@
 from flask import abort
 
 from api.extensions import db
+from api.lib.perm.acl.const import ACL_QUEUE
 from api.models.acl import Permission
 from api.models.acl import Resource
 from api.models.acl import ResourceGroup
 from api.models.acl import ResourceGroupItems
 from api.models.acl import ResourceType
+from api.models.acl import RolePermission
+from api.tasks.acl import role_rebuild
 
 
 class ResourceTypeCRUD(object):
@@ -134,6 +137,10 @@ class ResourceGroupCRUD(object):
         for item in items:
             item.soft_delete()
 
+        for i in RolePermission.get_by(group_id=rg_id, to_dict=False):
+            i.soft_delete()
+            role_rebuild.apply_async(args=(i.rid,), queue=ACL_QUEUE)
+
 
 class ResourceCRUD(object):
     @staticmethod
@@ -173,3 +180,7 @@ class ResourceCRUD(object):
         resource = Resource.get_by_id(_id) or abort(404, "Resource <{0}> is not found".format(_id))
 
         resource.soft_delete()
+
+        for i in RolePermission.get_by(resource_id=_id, to_dict=False):
+            i.soft_delete()
+            role_rebuild.apply_async(args=(i.rid,), queue=ACL_QUEUE)

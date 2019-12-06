@@ -6,54 +6,83 @@ import six
 from flask import current_app, g, request
 from flask import session, abort
 
+from api.lib.cmdb.const import ResourceTypeEnum as CmdbResourceType
+from api.lib.cmdb.const import RoleEnum
 from api.lib.perm.acl.cache import AppCache
-from api.models.acl import ResourceType
-from api.models.acl import Resource
+from api.lib.perm.acl.cache import UserCache
+from api.lib.perm.acl.permission import PermissionCRUD
 from api.lib.perm.acl.resource import ResourceCRUD
+from api.lib.perm.acl.role import RoleCRUD
+from api.models.acl import Resource
+from api.models.acl import ResourceGroup
+from api.models.acl import ResourceType
+from api.models.acl import Role
+
+CMDB_RESOURCE_TYPES = CmdbResourceType.all()
 
 
 class ACLManager(object):
     def __init__(self):
-        self.user_info = session["acl"] if "acl" in session else {}
         self.app_id = AppCache.get('cmdb')
         if not self.app_id:
             raise Exception("cmdb not in acl apps")
         self.app_id = self.app_id.id
 
+    def _get_resource(self, name, resource_type_name):
+        resource_type = ResourceType.get_by(name=resource_type_name, first=True, to_dict=False)
+        resource_type or abort(404, "ResourceType <{0}> cannot be found".format(resource_type_name))
+
+        return Resource.get_by(resource_type_id=resource_type.id,
+                               app_id=self.app_id,
+                               name=name,
+                               first=True,
+                               to_dict=False)
+
+    def _get_resource_group(self, name):
+        return ResourceGroup.get_by(
+            app_id=self.app_id,
+            name=name,
+            first=True,
+            to_dict=False
+        )
+
+    def _get_role(self, name):
+        user = UserCache.get(name)
+        if user:
+            return Role.get_by(name=name, uid=user.uid, first=True, to_dict=False)
+
+        return Role.get_by(name=name, app_id=self.app_id, first=True, to_dict=False)
+
     def add_resource(self, name, resource_type_name=None):
         resource_type = ResourceType.get_by(name=resource_type_name, first=True, to_dict=False)
-        if resource_type:
-            return abort(400, "ResourceType <{0}> cannot be found".format(resource_type_name))
+        resource_type or abort(404, "ResourceType <{0}> cannot be found".format(resource_type_name))
 
         ResourceCRUD.add(name, resource_type.id, self.app_id)
 
-    def grant_resource_to_role(self, name, role, resource_type_name=None):
-        resource_type = ResourceType.get_by(name=resource_type_name, first=True, to_dict=False)
-        if resource_type:
-            return abort(400, "ResourceType <{0}> cannot be found".format(resource_type_name))
+    def grant_resource_to_role(self, name, role, resource_type_name=None, permissions=None):
+        resource = self._get_resource(name, resource_type_name)
+
+        role = self._get_role(role)
+
+        if resource:
+            PermissionCRUD.grant(role.id, permissions, resource_id=resource.id)
+        else:
+            group = self._get_resource_group(name)
+            if group:
+                PermissionCRUD.grant(role.id, permissions, group_id=group.id)
 
     def del_resource(self, name, resource_type_name=None):
-        resource_type = ResourceType.get_by(name=resource_type_name, first=True, to_dict=False)
-        if resource_type:
-            return abort(400, "ResourceType <{0}> cannot be found".format(resource_type_name))
-
-        resource = Resource.get_by(resource_type_id=resource_type.id,
-                                   app_id=self.app_id,
-                                   name=name,
-                                   first=True,
-                                   to_dict=False)
+        resource = self._get_resource(name, resource_type_name)
         if resource:
             ResourceCRUD.delete(resource.id)
 
-    def get_resources(self, resource_type_name=None):
-        if "acl" not in session:
-            abort(405)
-        return []
-
     def has_permission(self, resource_name, resource_type, perm):
-        if "acl" not in session:
-            abort(405)
-        return True
+
+        role = self._get_role(g.user.username)
+
+        role or abort(404, "Role <{0}> is not found".format(g.user.username))
+
+        return RoleCRUD.has_permission(role.id, resource_name, resource_type, self.app_id, perm)
 
 
 def validate_permission(resources, resource_type, perm):
@@ -70,24 +99,6 @@ def validate_permission(resources, resource_type, perm):
                 return abort(403, "has no permission")
 
 
-def can_access_resources(resource_type):
-    def decorator_can_access_resources(func):
-        @functools.wraps(func)
-        def wrapper_can_access_resources(*args, **kwargs):
-            if current_app.config.get("USE_ACL"):
-                res = ACLManager().get_resources(resource_type)
-                result = {i.get("name"): i.get("permissions") for i in res}
-                if hasattr(g, "resources"):
-                    g.resources.update({resource_type: result})
-                else:
-                    g.resources = {resource_type: result}
-            return func(*args, **kwargs)
-
-        return wrapper_can_access_resources
-
-    return decorator_can_access_resources
-
-
 def has_perm(resources, resource_type, perm):
     def decorator_has_perm(func):
         @functools.wraps(func)
@@ -96,6 +107,9 @@ def has_perm(resources, resource_type, perm):
                 return
 
             if current_app.config.get("USE_ACL"):
+                if is_app_admin():
+                    return func(*args, **kwargs)
+
                 validate_permission(resources, resource_type, perm)
 
             return func(*args, **kwargs)
@@ -103,6 +117,13 @@ def has_perm(resources, resource_type, perm):
         return wrapper_has_perm
 
     return decorator_has_perm
+
+
+def is_app_admin():
+    if RoleEnum.CONFIG in session.get("acl", {}).get("parentRoles", []):
+        return True
+
+    return False
 
 
 def has_perm_from_args(arg_name, resource_type, perm, callback=None):
@@ -116,6 +137,9 @@ def has_perm_from_args(arg_name, resource_type, perm, callback=None):
                 resource = callback(resource)
 
             if current_app.config.get("USE_ACL") and resource:
+                if is_app_admin():
+                    return func(*args, **kwargs)
+
                 validate_permission(resource, resource_type, perm)
 
             return func(*args, **kwargs)

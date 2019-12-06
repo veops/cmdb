@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 
+from flask import current_app
 from flask import request
 
 from api.lib.decorator import args_required
@@ -21,7 +22,8 @@ class RoleView(APIView):
         page_size = get_page_size(request.values.get("page_size"))
         q = request.values.get('q')
         app_id = request.values.get('app_id')
-        user_role = request.values.get('user_role', False)
+        user_role = request.values.get('user_role', True)
+        user_role = True if user_role in current_app.config.get("BOOL_TRUE") else False
 
         numfound, roles = RoleCRUD.search(q, app_id, page, page_size, user_role)
 
