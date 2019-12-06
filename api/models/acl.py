@@ -136,9 +136,6 @@ class RoleRelation(Model):
     parent_id = db.Column(db.Integer, db.ForeignKey('acl_roles.id'))
     child_id = db.Column(db.Integer, db.ForeignKey('acl_roles.id'))
 
-    __table_args__ = (
-        db.UniqueConstraint("parent_id", "child_id", name="role_relation_unique"),)
-
 
 class ResourceType(Model):
     __tablename__ = "acl_resource_types"
@@ -156,8 +153,6 @@ class ResourceGroup(Model):
 
     app_id = db.Column(db.Integer, db.ForeignKey('acl_apps.id'))
 
-    __table_args__ = (db.UniqueConstraint("name", "resource_type_id", "app_id", name="resource_group_app_unique"),)
-
 
 class Resource(Model):
     __tablename__ = "acl_resources"
@@ -166,8 +161,6 @@ class Resource(Model):
     resource_type_id = db.Column(db.Integer, db.ForeignKey("acl_resource_types.id"))
 
     app_id = db.Column(db.Integer, db.ForeignKey("acl_apps.id"))
-
-    __table_args__ = (db.UniqueConstraint("name", "resource_type_id", "app_id", name="resource_name_app_unique"),)
 
 
 class ResourceGroupItems(Model):
@@ -184,8 +177,6 @@ class Permission(Model):
     resource_type_id = db.Column(db.Integer, db.ForeignKey("acl_resource_types.id"))
 
     app_id = db.Column(db.Integer, db.ForeignKey("acl_apps.id"))
-
-    __table_args__ = (db.UniqueConstraint("name", "resource_type_id", "app_id", name="perm_name_app_unique"),)
 
 
 class RolePermission(Model):

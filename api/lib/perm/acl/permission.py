@@ -3,7 +3,9 @@
 
 from api.lib.perm.acl.cache import PermissionCache
 from api.lib.perm.acl.cache import RoleCache
+from api.lib.perm.acl.const import ACL_QUEUE
 from api.models.acl import RolePermission
+from api.tasks.acl import role_rebuild
 
 
 class PermissionCRUD(object):
@@ -29,6 +31,8 @@ class PermissionCRUD(object):
             existed = RolePermission.get_by(rid=rid, perm_id=perm.id, group_id=group_id, resource_id=resource_id)
             existed or RolePermission.create(rid=rid, perm_id=perm.id, group_id=group_id, resource_id=resource_id)
 
+        role_rebuild.apply_async(args=(rid,), queue=ACL_QUEUE)
+
     @staticmethod
     def revoke(rid, perms, resource_id=None, group_id=None):
         for perm in perms:
@@ -40,3 +44,5 @@ class PermissionCRUD(object):
                                             first=True,
                                             to_dict=False)
             existed and existed.soft_delete()
+
+        role_rebuild.apply_async(args=(rid,), queue=ACL_QUEUE)

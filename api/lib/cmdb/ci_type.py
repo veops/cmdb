@@ -69,6 +69,15 @@ class CITypeManager(object):
 
         CITypeCache.clean(ci_type.name)
 
+        if current_app.config.get("USE_ACL"):
+            from api.lib.perm.acl.acl import ACLManager
+            from api.lib.cmdb.const import ResourceTypeEnum, RoleEnum, PermEnum
+            ACLManager().add_resource(ci_type.name, ResourceTypeEnum.CI)
+            ACLManager().grant_resource_to_role(ci_type.name,
+                                                RoleEnum.CMDB_READ_ALL,
+                                                ResourceTypeEnum.CI,
+                                                permissions=[PermEnum.READ])
+
         return ci_type.id
 
     @classmethod

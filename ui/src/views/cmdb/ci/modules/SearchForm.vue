@@ -73,8 +73,8 @@
             class="table-page-search-submitButtons"
             :style="advanced && { float: 'right', overflow: 'hidden' } || {} "
           >
-            <a-button type="primary" @click="$emit('refresh', true)">查询</a-button>
-            <a-button style="margin-left: 8px" @click="() => queryParam = {}">重置</a-button>
+            <a-button type="primary" @click="$emit('refresh', true)" v-if="preferenceAttrList.length">查询</a-button>
+            <a-button style="margin-left: 8px" @click="() => queryParam = {}" v-if="preferenceAttrList.length">重置</a-button>
             <a
               @click="toggleAdvanced"
               style="margin-left: 8px"

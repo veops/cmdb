@@ -6,12 +6,15 @@ import jwt
 from flask import abort
 from flask import current_app
 from flask import request
+from flask import session
 from flask_login import login_user, logout_user
 
 from api.lib.decorator import args_required
 from api.lib.perm.auth import auth_abandoned
-from api.models.acl import User
+from api.models.acl import User, Role
 from api.resource import APIView
+from api.lib.perm.acl.role import RoleRelationCRUD
+from api.lib.perm.acl.cache import RoleCache
 
 
 class LoginView(APIView):
@@ -36,6 +39,18 @@ class LoginView(APIView):
             'iat': datetime.datetime.now(),
             'exp': datetime.datetime.now() + datetime.timedelta(minutes=24 * 60 * 7)},
             current_app.config['SECRET_KEY'])
+
+        role = Role.get_by(uid=user.uid, first=True, to_dict=False)
+        if role:
+            parent_ids = RoleRelationCRUD.recursive_parent_ids(role.id)
+            parent_roles = [RoleCache.get(i).name for i in parent_ids]
+        else:
+            parent_roles = []
+        session["acl"] = dict(uid=user.uid,
+                              avatar=user.avatar,
+                              userName=user.username,
+                              nickName=user.nickname,
+                              parentRoles=parent_roles)
 
         return self.jsonify(token=token.decode())
 

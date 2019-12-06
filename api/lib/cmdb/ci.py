@@ -12,7 +12,6 @@ from api.extensions import db
 from api.extensions import rd
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeCache
-from api.lib.cmdb.cache import RelationTypeCache
 from api.lib.cmdb.ci_type import CITypeAttributeManager
 from api.lib.cmdb.ci_type import CITypeManager
 from api.lib.cmdb.const import CMDB_QUEUE
@@ -32,6 +31,7 @@ from api.lib.utils import handle_arg_list
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
 from api.models.cmdb import CITypeAttribute
+from api.models.cmdb import CITypeRelation
 from api.tasks.cmdb import ci_cache
 from api.tasks.cmdb import ci_delete
 from api.tasks.cmdb import ci_relation_cache
@@ -52,7 +52,7 @@ class CIManager(object):
 
     @staticmethod
     def confirm_ci_existed(ci_id):
-        CI.get_by_id(ci_id) or abort(404, "CI <{0}> is not existed".format(ci_id))
+        return CI.get_by_id(ci_id) or abort(404, "CI <{0}> is not existed".format(ci_id))
 
     @classmethod
     def get_ci_by_id(cls, ci_id, ret_key=RetKey.NAME, fields=None, need_children=True):
@@ -408,10 +408,6 @@ class CIRelationManager(object):
     def __init__(self):
         pass
 
-    @staticmethod
-    def _get_default_relation_type():
-        return RelationTypeCache.get("contain").id  # FIXME
-
     @classmethod
     def get_children(cls, ci_id, ret_key=RetKey.NAME):
         second_cis = CIRelation.get_by(first_ci_id=ci_id, to_dict=False)
@@ -428,16 +424,14 @@ class CIRelationManager(object):
             res[ci_type.name] = children
         return res
 
-    def get_second_cis(self, first_ci_id, relation_type_id=None, page=1, per_page=None, **kwargs):
+    @staticmethod
+    def get_second_cis(first_ci_id, relation_type_id=None, page=1, per_page=None):
         second_cis = db.session.query(CI.id).filter(CI.deleted.is_(False)).join(
             CIRelation, CIRelation.second_ci_id == CI.id).filter(
             CIRelation.first_ci_id == first_ci_id).filter(CIRelation.deleted.is_(False))
 
         if relation_type_id is not None:
             second_cis = second_cis.filter(CIRelation.relation_type_id == relation_type_id)
-
-        if kwargs:  # TODO: special for devices
-            second_cis = self._query_wrap_for_device(second_cis, **kwargs)
 
         numfound = second_cis.count()
         if per_page != "all":
@@ -473,33 +467,6 @@ class CIRelationManager(object):
 
         return query_sql
 
-    def _query_wrap_for_device(self, query_sql, **kwargs):
-        _type = kwargs.pop("_type", False) or kwargs.pop("type", False) or kwargs.pop("ci_type", False)
-        if _type:
-            ci_type = CITypeCache.get(_type)
-            if ci_type is None:
-                return
-            query_sql = query_sql.filter(CI.type_id == ci_type.id)
-
-        for k, v in kwargs.items():
-            attr = AttributeCache.get(k)
-            if attr is None:
-                continue
-
-            value_table = TableMap(attr_name=k).table
-            ci_table = query_sql.subquery()
-            query_sql = db.session.query(ci_table.c.id).join(
-                value_table, value_table.ci_id == ci_table.c.id).filter(
-                value_table.attr_id == attr.id).filter(ci_table.deleted.is_(False)).filter(
-                value_table.value.ilike(v.replace("*", "%")))
-
-        # current_app.logger.debug(query_sql)
-        sort_by = kwargs.pop("sort", "")
-        if sort_by:
-            query_sql = self._sort_handler(sort_by, query_sql)
-
-        return query_sql
-
     @classmethod
     def get_first_cis(cls, second_ci, relation_type_id=None, page=1, per_page=None):
         first_cis = db.session.query(CIRelation.first_ci_id).filter(
@@ -519,10 +486,8 @@ class CIRelationManager(object):
     @classmethod
     def add(cls, first_ci_id, second_ci_id, more=None, relation_type_id=None):
 
-        relation_type_id = relation_type_id or cls._get_default_relation_type()
-
-        CIManager.confirm_ci_existed(first_ci_id)
-        CIManager.confirm_ci_existed(second_ci_id)
+        first_ci = CIManager.confirm_ci_existed(first_ci_id)
+        second_ci = CIManager.confirm_ci_existed(second_ci_id)
 
         existed = CIRelation.get_by(first_ci_id=first_ci_id,
                                     second_ci_id=second_ci_id,
@@ -531,11 +496,22 @@ class CIRelationManager(object):
         if existed is not None:
             if existed.relation_type_id != relation_type_id:
                 existed.update(relation_type_id=relation_type_id)
+
                 CIRelationHistoryManager().add(existed, OperateType.UPDATE)
         else:
+            if relation_type_id is None:
+                type_relation = CITypeRelation.get_by(parent_id=first_ci.type_id,
+                                                      child_id=second_ci.type_id,
+                                                      first=True,
+                                                      to_dict=False)
+                relation_type_id = type_relation and type_relation.relation_type_id
+                relation_type_id or abort(404, "Relation {0} <-> {1} is not found".format(
+                    first_ci.ci_type.name, second_ci.ci_type.name))
+
             existed = CIRelation.create(first_ci_id=first_ci_id,
                                         second_ci_id=second_ci_id,
                                         relation_type_id=relation_type_id)
+
             CIRelationHistoryManager().add(existed, OperateType.ADD)
 
             ci_relation_cache.apply_async(args=(first_ci_id, second_ci_id), queue=CMDB_QUEUE)

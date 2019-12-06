@@ -7,6 +7,7 @@ import json
 import six
 import toposort
 from flask import abort
+from flask import current_app
 from flask import g
 
 from api.extensions import db
@@ -19,6 +20,8 @@ from api.models.cmdb import CITypeRelation
 from api.models.cmdb import PreferenceRelationView
 from api.models.cmdb import PreferenceShowAttributes
 from api.models.cmdb import PreferenceTreeView
+from api.lib.perm.acl.acl import ACLManager
+from api.lib.cmdb.const import ResourceTypeEnum, RoleEnum, PermEnum
 
 
 class PreferenceManager(object):
@@ -116,6 +119,11 @@ class PreferenceManager(object):
     @staticmethod
     def get_relation_view():
         views = PreferenceRelationView.get_by(to_dict=True)
+        if current_app.config.get("USE_ACL"):
+            views = [i for i in views if ACLManager().has_permission(i.get('name'),
+                                                                     ResourceTypeEnum.RELATION_VIEW,
+                                                                     PermEnum.READ)]
+
         view2cr_ids = dict()
         result = dict()
         name2id = list()
@@ -169,6 +177,13 @@ class PreferenceManager(object):
         existed = PreferenceRelationView.get_by(name=name, to_dict=False, first=True)
         if existed is None:
             PreferenceRelationView.create(name=name, cr_ids=json.dumps(cr_ids))
+
+            if current_app.config.get("USE_ACL"):
+                ACLManager().add_resource(name, ResourceTypeEnum.RELATION_VIEW)
+                ACLManager().grant_resource_to_role(name,
+                                                    RoleEnum.CMDB_READ_ALL,
+                                                    ResourceTypeEnum.RELATION_VIEW,
+                                                    permissions=[PermEnum.READ])
 
         return cls.get_relation_view()
 

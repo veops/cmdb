@@ -13,4 +13,4 @@ def role_rebuild(rids):
     for rid in rids:
         RoleRelationCache.rebuild(rid)
 
-    current_app.logger.info("%d rebuild.........." % rids)
+    current_app.logger.info("Role {0} rebuild..........".format(rids))
