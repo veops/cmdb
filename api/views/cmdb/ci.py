@@ -10,7 +10,7 @@ from flask import request
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci import CIManager
 from api.lib.cmdb.const import ExistPolicy
-from api.lib.cmdb.const import ResourceType, PermEnum
+from api.lib.cmdb.const import ResourceTypeEnum, PermEnum
 from api.lib.cmdb.const import RetKey
 from api.lib.cmdb.search import SearchError
 from api.lib.cmdb.search.ci.db.search import Search as SearchFromDB
@@ -73,7 +73,7 @@ class CIView(APIView):
                 ci_dict[k] = v.strip() if isinstance(v, six.string_types) else v
         return ci_dict
 
-    @has_perm_from_args("ci_type", ResourceType.CI, PermEnum.ADD)
+    @has_perm_from_args("ci_type", ResourceTypeEnum.CI, PermEnum.ADD)
     def post(self):
         ci_type = request.values.get("ci_type")
         _no_attribute_policy = request.values.get("_no_attribute_policy", ExistPolicy.IGNORE)
@@ -87,7 +87,7 @@ class CIView(APIView):
                             _no_attribute_policy=_no_attribute_policy, **ci_dict)
         return self.jsonify(ci_id=ci_id)
 
-    @has_perm_from_args("ci_id", ResourceType.CI, PermEnum.UPDATE, CIManager.get_type_name)
+    @has_perm_from_args("ci_id", ResourceTypeEnum.CI, PermEnum.UPDATE, CIManager.get_type_name)
     def put(self, ci_id=None):
         args = request.values
         ci_type = args.get("ci_type")
@@ -104,7 +104,7 @@ class CIView(APIView):
                                 **ci_dict)
         return self.jsonify(ci_id=ci_id)
 
-    @has_perm_from_args("ci_id", ResourceType.CI, PermEnum.DELETE, CIManager.get_type_name)
+    @has_perm_from_args("ci_id", ResourceTypeEnum.CI, PermEnum.DELETE, CIManager.get_type_name)
     def delete(self, ci_id):
         manager = CIManager()
         manager.delete(ci_id)
@@ -163,7 +163,7 @@ class CISearchView(APIView):
 class CIUnique(APIView):
     url_prefix = "/ci/<int:ci_id>/unique"
 
-    @has_perm_from_args("ci_id", ResourceType.CI, PermEnum.UPDATE, CIManager.get_type_name)
+    @has_perm_from_args("ci_id", ResourceTypeEnum.CI, PermEnum.UPDATE, CIManager.get_type_name)
     def put(self, ci_id):
         params = request.values
         unique_name = params.keys()[0]

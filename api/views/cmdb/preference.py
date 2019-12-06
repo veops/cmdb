@@ -4,7 +4,7 @@
 from flask import request
 
 from api.lib.cmdb.ci_type import CITypeManager
-from api.lib.cmdb.const import ResourceType, PermEnum, RoleEnum
+from api.lib.cmdb.const import ResourceTypeEnum, PermEnum, RoleEnum
 from api.lib.cmdb.preference import PreferenceManager
 from api.lib.decorator import args_required
 from api.lib.perm.acl.acl import has_perm_from_args
@@ -31,7 +31,7 @@ class PreferenceShowAttributesView(APIView):
 
         return self.jsonify(attributes=attributes, is_subscribed=is_subscribed)
 
-    @has_perm_from_args("id_or_name", ResourceType.CI, PermEnum.READ, CITypeManager.get_name_by_id)
+    @has_perm_from_args("id_or_name", ResourceTypeEnum.CI, PermEnum.READ, CITypeManager.get_name_by_id)
     @args_required("attr")
     def post(self, id_or_name):
         id_or_name = int(id_or_name)
@@ -42,7 +42,7 @@ class PreferenceShowAttributesView(APIView):
         return self.jsonify(type_id=id_or_name,
                             attr_order=list(zip(attr_list, orders)))
 
-    @has_perm_from_args("id_or_name", ResourceType.CI, PermEnum.READ, CITypeManager.get_name_by_id)
+    @has_perm_from_args("id_or_name", ResourceTypeEnum.CI, PermEnum.READ, CITypeManager.get_name_by_id)
     def put(self, id_or_name):
         return self.post(id_or_name)
 
@@ -53,7 +53,7 @@ class PreferenceTreeApiView(APIView):
     def get(self):
         return self.jsonify(PreferenceManager.get_tree_view())
 
-    @has_perm_from_args("type_id", ResourceType.CI, PermEnum.READ, CITypeManager.get_name_by_id)
+    @has_perm_from_args("type_id", ResourceTypeEnum.CI, PermEnum.READ, CITypeManager.get_name_by_id)
     @args_required("type_id")
     @args_required("levels")
     def post(self):
@@ -85,9 +85,11 @@ class PreferenceRelationApiView(APIView):
 
         return self.jsonify(views=views, id2type=id2type, name2id=name2id)
 
+    @role_required(RoleEnum.CONFIG)
     def put(self):
         return self.post()
 
+    @role_required(RoleEnum.CONFIG)
     @args_required("name")
     def delete(self):
         name = request.values.get("name")

@@ -37,8 +37,9 @@ class RetKey(BaseEnum):
     ALIAS = "alias"
 
 
-class ResourceType(BaseEnum):
+class ResourceTypeEnum(BaseEnum):
     CI = "CIType"
+    RELATION_VIEW = "RelationView"
 
 
 class PermEnum(BaseEnum):
@@ -50,6 +51,7 @@ class PermEnum(BaseEnum):
 
 class RoleEnum(BaseEnum):
     CONFIG = "admin"
+    CMDB_READ_ALL = "CMDB_READ_ALL"
 
 
 CMDB_QUEUE = "cmdb_async"

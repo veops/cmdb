@@ -17,9 +17,9 @@ class GetUserInfoView(APIView):
     url_prefix = "/users/info"
 
     def get(self):
-        name = session.get("acl", {}).get("nickName") or session.get("CAS_USERNAME") or current_user.nickname
-        role = dict(permissions=session.get("acl", {}).get("parentRoles", []) or ["admin"])
-        avatar = session.get("acl", {}).get("avatar") or current_user.avatar
+        name = session.get("CAS_USERNAME") or current_user.nickname
+        role = dict(permissions=session.get("acl", {}).get("parentRoles", []))
+        avatar = current_user.avatar
         return self.jsonify(result=dict(name=name,
                                         role=role,
                                         avatar=avatar))

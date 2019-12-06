@@ -50,8 +50,8 @@ def ci_relation_cache(parent_id, child_id):
     children = json.loads(children) if children is not None else {}
 
     cr = CIRelation.get_by(first_ci_id=parent_id, second_ci_id=child_id, first=True, to_dict=False)
-    if child_id not in children:
-        children[child_id] = cr.second_ci.type_id
+    if str(child_id) not in children:
+        children[str(child_id)] = cr.second_ci.type_id
 
     rd.create_or_update({parent_id: json.dumps(children)}, REDIS_PREFIX_CI_RELATION)
 
@@ -63,8 +63,8 @@ def ci_relation_delete(parent_id, child_id):
     children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
     children = json.loads(children) if children is not None else {}
 
-    if child_id in children:
-        children.pop(child_id)
+    if str(child_id) in children:
+        children.pop(str(child_id))
 
     rd.create_or_update({parent_id: json.dumps(children)}, REDIS_PREFIX_CI_RELATION)
 
