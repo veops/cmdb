@@ -29,8 +29,11 @@
         <a-select
           v-model="selectedParents"
           placeholder="可选择继承角色"
-          mode="multiple">
-          <a-select-option v-for="role in allRoles" v-if="current_id !== role.id" :key="role.id">{{ role.name }}</a-select-option>
+          mode="multiple"
+          :filterOption="filterOption">
+          <template v-for="role in allRoles">
+            <a-select-option v-if="current_id !== role.id" :key="role.id">{{ role.name }}</a-select-option>
+          </template>
         </a-select>
       </a-form-item>
       <a-form-item
@@ -120,10 +123,12 @@ export default {
     }
 
   },
-  mounted () {
-  },
   methods: {
-
+    filterOption (input, option) {
+      return (
+        option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
+      )
+    },
     handleCreate () {
       this.drawerTitle = '新增'
       this.drawerVisible = true
@@ -162,7 +167,6 @@ export default {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          console.log('Received values of form: ', values)
           values.app_id = this.$route.name.split('_')[0]
           if (values.id) {
             this.updateRole(values.id, values)
