@@ -9,6 +9,7 @@ from flask import session, abort
 from api.lib.cmdb.const import ResourceTypeEnum as CmdbResourceType
 from api.lib.cmdb.const import RoleEnum
 from api.lib.perm.acl.cache import AppCache
+from api.lib.perm.acl.cache import RoleCache
 from api.lib.perm.acl.cache import UserCache
 from api.lib.perm.acl.permission import PermissionCRUD
 from api.lib.perm.acl.resource import ResourceCRUD
@@ -122,6 +123,10 @@ def has_perm(resources, resource_type, perm):
 def is_app_admin():
     if RoleEnum.CONFIG in session.get("acl", {}).get("parentRoles", []):
         return True
+
+    for role in session.get("acl", {}).get("parentRoles", []):
+        if RoleCache.get(role).is_app_admin:
+            return True
 
     return False
 
