@@ -155,7 +155,6 @@ export default {
         delete parameter.pageNo
         delete parameter.pageSize
         Object.assign(parameter, this.queryParam)
-        console.log('loadData.parameter', parameter)
 
         return searchResourceType(parameter)
           .then(res => {
@@ -165,7 +164,6 @@ export default {
             res.totalPage = Math.ceil(res.numfound / parameter.pageSize)
             res.data = res.groups
             this.id2perms = res.id2perms
-            console.log('loadData.res', res)
             return res
           })
       },

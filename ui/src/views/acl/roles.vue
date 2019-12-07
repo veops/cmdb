@@ -155,7 +155,6 @@ export default {
         delete parameter.pageNo
         delete parameter.pageSize
         Object.assign(parameter, this.queryParam)
-        console.log('loadData.parameter', parameter)
 
         return searchRole(parameter)
           .then(res => {
@@ -165,7 +164,6 @@ export default {
             res.totalPage = Math.ceil(res.numfound / parameter.pageSize)
             res.data = res.roles
 
-            console.log('loadData.res', res)
             this.allRoles = res.roles
             this.id2parents = res.id2parents
             return res

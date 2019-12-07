@@ -132,7 +132,6 @@ export default {
 
     handleEdit (record) {
       this.drawerVisible = true
-      console.log(record)
       this.perms = record.perms
       this.$nextTick(() => {
         this.form.setFieldsValue({
@@ -147,8 +146,6 @@ export default {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          console.log('Received values of form: ', values)
-
           values.app_id = this.$route.name.split('_')[0]
           values.perms = this.perms
           if (values.id) {

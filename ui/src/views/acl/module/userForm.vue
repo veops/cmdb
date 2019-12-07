@@ -205,7 +205,6 @@ export default {
 
     handleEdit (record) {
       this.drawerVisible = true
-      console.log(record)
       this.$nextTick(() => {
         this.form.setFieldsValue({
           id: record.uid,
@@ -225,8 +224,6 @@ export default {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          console.log('Received values of form: ', values)
-
           if (values.id) {
             this.updateUser(values.id, values)
           } else {

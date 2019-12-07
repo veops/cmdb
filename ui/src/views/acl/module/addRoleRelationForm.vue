@@ -15,8 +15,10 @@
         :wrapper-col="formItemLayout.wrapperCol"
         label="角色列表"
       >
-        <a-select name="otherID" v-decorator="['otherID', {rules: [{ required: true, message: '请选择另一个角色'}]} ]">
-          <a-select-option v-for="role in allRoles" v-if="role.id != current_record.id" :key="role.id">{{ role.name }}</a-select-option>
+        <a-select name="otherID" :filterOption="filterOption" v-decorator="['otherID', {rules: [{ required: true, message: '请选择另一个角色'}]} ]">
+          <template v-for="role in allRoles">
+            <a-select-option  v-if="role.id != current_record.id" :key="role.id">{{ role.name }}</a-select-option>
+          </template>
         </a-select>
       </a-form-item>
 
@@ -98,9 +100,12 @@ export default {
     }
 
   },
-  mounted () {
-  },
   methods: {
+    filterOption (input, option) {
+      return (
+        option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
+      )
+    },
     onClose () {
       this.form.resetFields()
       this.drawerVisible = false

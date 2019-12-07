@@ -81,6 +81,9 @@ class RoleRelationCRUD(object):
     def add(parent_id, child_id):
         RoleRelation.get_by(parent_id=parent_id, child_id=child_id) and abort(400, "It's already existed")
 
+        RoleRelationCache.clean(parent_id)
+        RoleRelationCache.clean(child_id)
+
         return RoleRelation.create(parent_id=parent_id, child_id=child_id)
 
     @classmethod
@@ -90,6 +93,9 @@ class RoleRelationCRUD(object):
         child_ids = cls.recursive_child_ids(existed.child_id)
         for child_id in child_ids:
             role_rebuild.apply_async(args=(child_id,), queue=ACL_QUEUE)
+
+        RoleRelationCache.clean(existed.parent_id)
+        RoleRelationCache.clean(existed.child_id)
 
         existed.soft_delete()
 
@@ -101,6 +107,9 @@ class RoleRelationCRUD(object):
         child_ids = cls.recursive_child_ids(existed.child_id)
         for child_id in child_ids:
             role_rebuild.apply_async(args=(child_id,), queue=ACL_QUEUE)
+
+        RoleRelationCache.clean(existed.parent_id)
+        RoleRelationCache.clean(existed.child_id)
 
         existed.soft_delete()
 

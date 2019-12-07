@@ -62,7 +62,9 @@ export default {
       relationViews: {},
       levels: [],
       showTypeIds: [],
+      origShowTypeIds: [],
       showTypes: [],
+      origShowTypes: [],
       leaf2showTypes: {},
       node2ShowTypes: {},
       leaf: [],
@@ -84,7 +86,7 @@ export default {
         console.log(parameter, 'load instances')
         this.parameter = parameter
         const params = Object.assign(parameter || {}, this.$refs.search.queryParam)
-        let q = `q=_type:${this.currentTypeId[0]}`
+        let q = ''
         Object.keys(params).forEach(key => {
           if (!['pageNo', 'pageSize', 'sortField', 'sortOrder'].includes(key) && params[key] + '' !== '') {
             if (typeof params[key] === 'object' && params[key].length > 1) {
@@ -109,8 +111,13 @@ export default {
           }
           q += `&sort=${order}${params['sortField']}`
         }
+        if (q && q[0] === ',') {
+          q = q.slice(1)
+        }
 
         if (this.treeKeys.length === 0) {
+          this.judgeCITypes(q)
+          q = `q=_type:${this.currentTypeId[0]},` + q
           return searchCI(q).then(res => {
             const result = {}
             result.pageNo = res.page
@@ -123,7 +130,7 @@ export default {
               setTimeout(() => {
                 this.setColumnWidth()
                 console.log('set column')
-              }, 300)
+              }, 100)
             }
             this.loadRoot()
             return result
@@ -132,13 +139,6 @@ export default {
 
         q += `&root_id=${this.treeKeys[this.treeKeys.length - 1].split('_')[0]}`
         const typeId = parseInt(this.treeKeys[this.treeKeys.length - 1].split('_')[1])
-
-        this.showTypes = this.node2ShowTypes[typeId + '']
-        const showTypeIds = []
-        this.showTypes.forEach(item => {
-          showTypeIds.push(item.id)
-        })
-        this.showTypeIds = showTypeIds
 
         let level = []
         if (!this.leaf.includes(typeId)) {
@@ -160,9 +160,8 @@ export default {
           level = [1]
         }
         q += `&level=${level.join(',')}`
-        if (q[0] === '&') {
-          q = q.slice(1)
-        }
+        this.judgeCITypes(q)
+        q = `q=_type:${this.currentTypeId[0]},` + q
         return searchCIRelation(q).then(res => {
           const result = {}
           result.pageNo = res.page
@@ -176,7 +175,7 @@ export default {
             setTimeout(() => {
               this.setColumnWidth()
               console.log('set column')
-            }, 300)
+            }, 100)
             this.loadNoRoot(this.treeKeys[this.treeKeys.length - 1], level)
           }
           return result
@@ -210,6 +209,55 @@ export default {
       setTimeout(() => {
         this.refreshTable(true)
       }, 100)
+    },
+
+    async judgeCITypes (q) {
+      const showTypeIds = []
+      let _showTypes = []
+      let _showTypeIds = []
+
+      if (this.treeKeys.length) {
+        const typeId = parseInt(this.treeKeys[this.treeKeys.length - 1].split('_')[1])
+
+        _showTypes = this.node2ShowTypes[typeId + '']
+        _showTypes.forEach(item => {
+          _showTypeIds.push(item.id)
+        })
+      } else {
+        _showTypeIds = JSON.parse(JSON.stringify(this.origShowTypeIds))
+        _showTypes = JSON.parse(JSON.stringify(this.origShowTypes))
+      }
+
+      const promises = _showTypeIds.map(typeId => {
+        const _q = (`q=_type:${typeId},` + q).replace(/count=\d*/, 'count=1')
+        if (this.treeKeys.length === 0) {
+          return searchCI(_q).then(res => {
+            if (res.numfound !== 0) {
+              showTypeIds.push(typeId)
+            }
+          })
+        } else {
+          return searchCIRelation(_q).then(res => {
+            if (res.numfound !== 0) {
+              showTypeIds.push(typeId)
+            }
+          })
+        }
+      })
+      await Promise.all(promises)
+      if (showTypeIds.length && showTypeIds.length !== this.showTypeIds.length) {
+        const showTypes = []
+        _showTypes.forEach(item => {
+          if (showTypeIds.includes(item.id)) {
+            showTypes.push(item)
+          }
+        })
+        this.showTypes = showTypes
+        this.showTypeIds = showTypeIds
+        if (this.currentTypeId.length && !this.showTypeIds.includes(this.currentTypeId[0])) {
+          this.currentTypeId = this.showTypeIds[0]
+        }
+      }
     },
 
     async loadRoot () {
@@ -335,17 +383,17 @@ export default {
             }
           })
           this.levels = this.relationViews.views[this.viewName].topo
-          this.showTypes = this.relationViews.views[this.viewName].show_types
+          this.origShowTypes = this.relationViews.views[this.viewName].show_types
           const showTypeIds = []
-          this.showTypes.forEach(item => {
+          this.origShowTypes.forEach(item => {
             showTypeIds.push(item.id)
           })
-          this.showTypeIds = showTypeIds
+          this.origShowTypeIds = showTypeIds
           this.leaf2showTypes = this.relationViews.views[this.viewName].leaf2show_types
           this.node2ShowTypes = this.relationViews.views[this.viewName].node2show_types
           this.leaf = this.relationViews.views[this.viewName].leaf
           this.currentView = [this.viewId]
-          this.currentTypeId = [this.showTypeIds[0]]
+          this.currentTypeId = [this.origShowTypeIds[0]]
           this.typeId = this.levels[0][0]
           this.loadColumns()
           this.$refs.table && this.$refs.table.refresh(true)
