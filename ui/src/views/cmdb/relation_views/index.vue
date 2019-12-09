@@ -82,7 +82,7 @@ export default {
       scrollY: 0,
       preferenceAttrList: [],
 
-      loadInstances: parameter => {
+      loadInstances: async parameter => {
         console.log(parameter, 'load instances')
         this.parameter = parameter
         const params = Object.assign(parameter || {}, this.$refs.search.queryParam)
@@ -114,9 +114,8 @@ export default {
         if (q && q[0] === ',') {
           q = q.slice(1)
         }
-
         if (this.treeKeys.length === 0) {
-          this.judgeCITypes(q)
+          await this.judgeCITypes(q)
           q = `q=_type:${this.currentTypeId[0]},` + q
           return searchCI(q).then(res => {
             const result = {}
@@ -160,7 +159,7 @@ export default {
           level = [1]
         }
         q += `&level=${level.join(',')}`
-        this.judgeCITypes(q)
+        await this.judgeCITypes(q)
         q = `q=_type:${this.currentTypeId[0]},` + q
         return searchCIRelation(q).then(res => {
           const result = {}
@@ -170,7 +169,6 @@ export default {
           result.totalPage = Math.ceil(res.numfound / (params.pageSize || 25))
           result.data = Object.assign([], res.result)
           result.data.forEach((item, index) => (item.key = item.ci_id))
-
           if (res.numfound !== 0) {
             setTimeout(() => {
               this.setColumnWidth()
@@ -254,8 +252,9 @@ export default {
         })
         this.showTypes = showTypes
         this.showTypeIds = showTypeIds
-        if (this.currentTypeId.length && !this.showTypeIds.includes(this.currentTypeId[0])) {
-          this.currentTypeId = this.showTypeIds[0]
+        if (!this.currentTypeId.length || (this.currentTypeId.length && !this.showTypeIds.includes(this.currentTypeId[0]))) {
+          this.currentTypeId = [this.showTypeIds[0]]
+          this.loadColumns()
         }
       }
     },
@@ -288,7 +287,6 @@ export default {
 
     async loadNoRoot (rootIdAndTypeId, level) {
       const rootId = rootIdAndTypeId.split('_')[0]
-
       searchCIRelation(`root_id=${rootId}&level=1&count=10000`).then(async res => {
         const facet = []
         const ciIds = []
@@ -393,9 +391,7 @@ export default {
           this.node2ShowTypes = this.relationViews.views[this.viewName].node2show_types
           this.leaf = this.relationViews.views[this.viewName].leaf
           this.currentView = [this.viewId]
-          this.currentTypeId = [this.origShowTypeIds[0]]
           this.typeId = this.levels[0][0]
-          this.loadColumns()
           this.$refs.table && this.$refs.table.refresh(true)
         }
       })
