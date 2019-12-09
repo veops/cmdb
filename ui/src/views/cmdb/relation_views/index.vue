@@ -129,7 +129,7 @@ export default {
               setTimeout(() => {
                 this.setColumnWidth()
                 console.log('set column')
-              }, 100)
+              }, 200)
             }
             this.loadRoot()
             return result
@@ -206,7 +206,7 @@ export default {
       this.$refs.table.renderClear()
       setTimeout(() => {
         this.refreshTable(true)
-      }, 100)
+      }, 200)
     },
 
     async judgeCITypes (q) {
