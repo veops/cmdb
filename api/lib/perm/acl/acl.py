@@ -120,12 +120,15 @@ def has_perm(resources, resource_type, perm):
     return decorator_has_perm
 
 
-def is_app_admin():
+def is_app_admin(app=None):
     if RoleEnum.CONFIG in session.get("acl", {}).get("parentRoles", []):
         return True
 
+    app = app or 'cmdb'
+    app_id = AppCache.get(app).id
+
     for role in session.get("acl", {}).get("parentRoles", []):
-        if RoleCache.get(role).is_app_admin:
+        if RoleCache.get_by_name(app_id, role).is_app_admin:
             return True
 
     return False
@@ -162,7 +165,7 @@ def role_required(role_name):
                 return
 
             if current_app.config.get("USE_ACL"):
-                if role_name not in session.get("acl", {}).get("parentRoles", []):
+                if role_name not in session.get("acl", {}).get("parentRoles", []) and not is_app_admin():
                     return abort(403, "Role {0} is required".format(role_name))
             return func(*args, **kwargs)
 

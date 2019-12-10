@@ -112,7 +112,7 @@ class CITypeManager(object):
     def delete(cls, type_id):
         ci_type = cls.check_is_existed(type_id)
 
-        if CI.get_by(type_id=type_id, first=True, to_dict=False):
+        if CI.get_by(type_id=type_id, first=True, to_dict=False) is not None:
             return abort(400, "cannot delete, because CI instance exists")
 
         for item in CITypeRelation.get_by(parent_id=type_id, to_dict=False):
