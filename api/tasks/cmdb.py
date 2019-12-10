@@ -46,6 +46,8 @@ def ci_delete(ci_id):
 
 @celery.task(name="cmdb.ci_relation_cache", queue=CMDB_QUEUE)
 def ci_relation_cache(parent_id, child_id):
+    db.session.close()
+
     children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
     children = json.loads(children) if children is not None else {}
 
