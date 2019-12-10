@@ -174,8 +174,8 @@ export default {
               this.setColumnWidth()
               console.log('set column')
             }, 100)
-            this.loadNoRoot(this.treeKeys[this.treeKeys.length - 1], level)
           }
+          this.loadNoRoot(this.treeKeys[this.treeKeys.length - 1], level)
           return result
         })
       }
@@ -243,7 +243,7 @@ export default {
         }
       })
       await Promise.all(promises)
-      if (showTypeIds.length && showTypeIds.length !== this.showTypeIds.length) {
+      if (showTypeIds.length && showTypeIds.sort().join(',') !== this.showTypeIds.sort().join(',')) {
         const showTypes = []
         _showTypes.forEach(item => {
           if (showTypeIds.includes(item.id)) {
