@@ -14,8 +14,8 @@
 
 
 - 在线预览: [CMDB](http://121.42.12.46:8000)
-    - username: admin
-    - password: admin
+    - username: demo
+    - password: 123456
     
 > **重要提示**: `master` 分支在开发过程中可能处于 *不稳定的状态* 。
 请通过[releases](https://github.com/pycook/cmdb/releases)获取

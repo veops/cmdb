@@ -29,7 +29,7 @@ class UserQuery(BaseQuery):
 
     def authenticate(self, login, password):
         user = self.filter(db.or_(User.username == login,
-                                  User.email == login)).first()
+                                  User.email == login)).filter(User.deleted.is_(False)).first()
         if user:
             current_app.logger.info(user)
             authenticated = user.check_password(password)
@@ -39,7 +39,7 @@ class UserQuery(BaseQuery):
         return user, authenticated
 
     def authenticate_with_key(self, key, secret, args, path):
-        user = self.filter(User.key == key).filter(User.block == 0).first()
+        user = self.filter(User.key == key).filter(User.deleted.is_(False)).filter(User.block == 0).first()
         if not user:
             return None, False
         if user and hashlib.sha1('{0}{1}{2}'.format(
@@ -53,21 +53,21 @@ class UserQuery(BaseQuery):
     def search(self, key):
         query = self.filter(db.or_(User.email == key,
                                    User.nickname.ilike('%' + key + '%'),
-                                   User.username.ilike('%' + key + '%')))
+                                   User.username.ilike('%' + key + '%'))).filter(User.deleted.is_(False))
         return query
 
     def get_by_username(self, username):
-        user = self.filter(User.username == username).first()
+        user = self.filter(User.username == username).filter(User.deleted.is_(False)).first()
 
         return user
 
     def get_by_nickname(self, nickname):
-        user = self.filter(User.nickname == nickname).first()
+        user = self.filter(User.nickname == nickname).filter(User.deleted.is_(False)).first()
 
         return user
 
     def get(self, uid):
-        user = self.filter(User.uid == uid).first()
+        user = self.filter(User.uid == uid).filter(User.deleted.is_(False)).first()
 
         return copy.deepcopy(user)
 
