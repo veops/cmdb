@@ -10,7 +10,6 @@ from api.lib.cmdb.attribute import AttributeManager
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.const import ExistPolicy
 from api.lib.cmdb.const import OperateType
-from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.cmdb.history import AttributeHistoryManger
 from api.lib.cmdb.utils import TableMap
 from api.lib.cmdb.utils import ValueTypeMap
@@ -119,29 +118,33 @@ class AttributeValueManager(object):
                 return abort(400, 'attribute {0} does not exist'.format(key))
 
         value_table = TableMap(attr_name=attr.name).table
-        existed_attr = value_table.get_by(attr_id=attr.id,
-                                          ci_id=ci_id,
-                                          first=True,
-                                          to_dict=False)
-        existed_value = existed_attr and existed_attr.value
-        operate_type = OperateType.ADD if existed_attr is None else OperateType.UPDATE
 
-        value_list = handle_arg_list(value) if attr.is_list else [value]
-        if not isinstance(value, list):
-            value_list = [value]
+        if attr.is_list:
+            value_list = [self._validate(attr, i, value_table, ci_id) for i in handle_arg_list(value)]
+            existed_attrs = value_table.get_by(attr_id=attr.id,
+                                               ci_id=ci_id,
+                                               to_dict=False)
+            existed_values = [i.value for i in existed_attrs]
+            added = set(value_list) - set(existed_values)
+            deleted = set(existed_values) - set(value_list)
+            for v in added:
+                value_table.create(ci_id=ci_id, attr_id=attr.id, value=v)
+                self._write_change(ci_id, attr.id, OperateType.ADD, None, v)
 
-        for v in value_list:
-            v = self._validate(attr, v, value_table, ci_id)
-            if not v and attr.value_type != ValueTypeEnum.TEXT:
-                v = None
-
-            if operate_type == OperateType.ADD:
-                if v is not None:
-                    value_table.create(ci_id=ci_id, attr_id=attr.id, value=v)
-                    self._write_change(ci_id, attr.id, operate_type, None, v)
-            elif existed_attr.value != v:
-                if v is not None:
-                    existed_attr.update(value=v)
-                else:
-                    existed_attr.delete()
-                self._write_change(ci_id, attr.id, operate_type, existed_value, v)
+            for v in deleted:
+                existed_attr = existed_attrs[existed_values.index(v)]
+                existed_attr.delete()
+                self._write_change(ci_id, attr.id, OperateType.DELETE, v, None)
+        else:
+            value = self._validate(attr, value, value_table, ci_id)
+            existed_attr = value_table.get_by(attr_id=attr.id,
+                                              ci_id=ci_id,
+                                              first=True,
+                                              to_dict=False)
+            existed_value = existed_attr and existed_attr.value
+            if existed_value is None:
+                value_table.create(ci_id=ci_id, attr_id=attr.id, value=value)
+                self._write_change(ci_id, attr.id, OperateType.ADD, None, value)
+            else:
+                existed_attr.update(value=value)
+                self._write_change(ci_id, attr.id, OperateType.UPDATE, existed_value, value)
