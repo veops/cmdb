@@ -173,7 +173,7 @@ export default {
             setTimeout(() => {
               this.setColumnWidth()
               console.log('set column')
-            }, 100)
+            }, 200)
           }
           this.loadNoRoot(this.treeKeys[this.treeKeys.length - 1], level)
           return result
