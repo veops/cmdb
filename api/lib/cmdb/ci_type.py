@@ -131,6 +131,11 @@ class CITypeManager(object):
 
         CITypeCache.clean(type_id)
 
+        if current_app.config.get("USE_ACL"):
+            from api.lib.perm.acl.acl import ACLManager
+            from api.lib.cmdb.const import ResourceTypeEnum, RoleEnum, PermEnum
+            ACLManager().del_resource(ci_type.name, ResourceTypeEnum.CI)
+
 
 class CITypeGroupManager(object):
     @staticmethod
