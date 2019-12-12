@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""Create an application instance."""
 
 from flask import g
 from flask_login import current_user
