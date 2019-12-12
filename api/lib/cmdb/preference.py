@@ -192,4 +192,7 @@ class PreferenceManager(object):
         for existed in PreferenceRelationView.get_by(name=name, to_dict=False):
             existed.soft_delete()
 
+        if current_app.config.get("USE_ACL"):
+            ACLManager().del_resource(name, ResourceTypeEnum.RELATION_VIEW)
+
         return name
