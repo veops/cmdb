@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 
 from api.extensions import cache
+from api.extensions import db
 from api.models.acl import App
 from api.models.acl import Permission
 from api.models.acl import Role
@@ -139,7 +140,7 @@ class RoleRelationCache(object):
     @classmethod
     def rebuild(cls, rid):
         cls.clean(rid)
-
+        db.session.close()
         cls.get_parent_ids(rid)
         cls.get_child_ids(rid)
         cls.get_resources(rid)
