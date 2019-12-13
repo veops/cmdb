@@ -15,13 +15,14 @@ from api.lib.cmdb.attribute import AttributeManager
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributeCache
 from api.lib.cmdb.cache import CITypeCache
+from api.lib.cmdb.const import ResourceTypeEnum, RoleEnum, PermEnum
+from api.lib.exception import AbortException
+from api.lib.perm.acl.acl import ACLManager
 from api.models.cmdb import CITypeAttribute
 from api.models.cmdb import CITypeRelation
 from api.models.cmdb import PreferenceRelationView
 from api.models.cmdb import PreferenceShowAttributes
 from api.models.cmdb import PreferenceTreeView
-from api.lib.perm.acl.acl import ACLManager
-from api.lib.cmdb.const import ResourceTypeEnum, RoleEnum, PermEnum
 
 
 class PreferenceManager(object):
@@ -118,11 +119,19 @@ class PreferenceManager(object):
 
     @staticmethod
     def get_relation_view():
-        views = PreferenceRelationView.get_by(to_dict=True)
+        _views = PreferenceRelationView.get_by(to_dict=True)
+        views = []
         if current_app.config.get("USE_ACL"):
-            views = [i for i in views if ACLManager().has_permission(i.get('name'),
-                                                                     ResourceTypeEnum.RELATION_VIEW,
-                                                                     PermEnum.READ)]
+            for i in _views:
+                try:
+                    if ACLManager().has_permission(i.get('name'),
+                                                   ResourceTypeEnum.RELATION_VIEW,
+                                                   PermEnum.READ):
+                        views.append(i)
+                except AbortException:
+                    pass
+        else:
+            views = _views
 
         view2cr_ids = dict()
         result = dict()
@@ -175,6 +184,7 @@ class PreferenceManager(object):
             return abort(400, "Node must be selected")
 
         existed = PreferenceRelationView.get_by(name=name, to_dict=False, first=True)
+        current_app.logger.debug(existed)
         if existed is None:
             PreferenceRelationView.create(name=name, cr_ids=json.dumps(cr_ids))
 

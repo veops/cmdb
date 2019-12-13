@@ -6,7 +6,6 @@ import json
 import click
 from flask import current_app
 from flask.cli import with_appcontext
-from werkzeug.exceptions import BadRequest
 
 import api.lib.cmdb.ci
 from api.extensions import db
@@ -17,6 +16,7 @@ from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.const import ValueTypeEnum
+from api.lib.exception import AbortException
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.cache import AppCache
 from api.lib.perm.acl.resource import ResourceCRUD
@@ -96,17 +96,17 @@ def init_acl():
     for resource_type in ResourceTypeEnum.all():
         try:
             ResourceTypeCRUD.add(app_id, resource_type, '', PermEnum.all())
-        except BadRequest:
+        except AbortException:
             pass
 
     # 2. add role
     try:
         RoleCRUD.add_role(RoleEnum.CONFIG, app_id, True)
-    except BadRequest:
+    except AbortException:
         pass
     try:
         RoleCRUD.add_role(RoleEnum.CMDB_READ_ALL, app_id, False)
-    except BadRequest:
+    except AbortException:
         pass
 
     # 3. add resource and grant
@@ -115,7 +115,7 @@ def init_acl():
     for ci_type in ci_types:
         try:
             ResourceCRUD.add(ci_type.name, type_id, app_id)
-        except BadRequest:
+        except AbortException:
             pass
 
         ACLManager().grant_resource_to_role(ci_type.name,
@@ -128,7 +128,7 @@ def init_acl():
     for view in relation_views:
         try:
             ResourceCRUD.add(view.name, type_id, app_id)
-        except BadRequest:
+        except AbortException:
             pass
 
         ACLManager().grant_resource_to_role(view.name,
