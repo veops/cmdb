@@ -1,0 +1,146 @@
+{
+  "name": "vue-antd-pro",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "build:preview": "vue-cli-service build --mode preview",
+    "lint": "vue-cli-service lint",
+    "lint:nofix": "vue-cli-service lint --no-fix",
+    "test:unit": "vue-cli-service test:unit",
+    "postinstall": "opencollective-postinstall"
+  },
+  "dependencies": {
+    "@antv/data-set": "^0.10.2",
+    "@handsontable-pro/vue": "^3.1.1",
+    "@handsontable/vue": "^4.1.1",
+    "ant-design-vue": "^1.4.2",
+    "axios": "^0.19.0",
+    "core-js": "^3.1.2",
+    "enquire.js": "^2.1.6",
+    "handsontable": "^7.2.2",
+    "handsontable-pro": "^6.2.3",
+    "js-cookie": "^2.2.0",
+    "json2csv": "^4.5.2",
+    "lodash.get": "^4.4.2",
+    "lodash.pick": "^4.4.0",
+    "md5": "^2.2.1",
+    "moment": "^2.24.0",
+    "nprogress": "^0.2.0",
+    "vis-network": "^6.4.4",
+    "viser-vue": "^2.3.3",
+    "vue": "^2.6.10",
+    "vue-clipboard2": "^0.2.1",
+    "vue-cropper": "0.4.4",
+    "vue-json-excel": "^0.2.98",
+    "vue-ls": "^3.2.0",
+    "vue-quill-editor": "^3.0.6",
+    "vue-router": "^3.0.1",
+    "vue-svg-component-runtime": "^1.0.1",
+    "vuedraggable": "^2.23.0",
+    "vuex": "^3.1.1",
+    "wangeditor": "^3.1.1",
+    "xlsx": "latest",
+    "yarn": "^1.19.1"
+  },
+  "devDependencies": {
+    "@ant-design/colors": "^3.2.1",
+    "@vue/cli-plugin-babel": "^4.0.4",
+    "@vue/cli-plugin-eslint": "^4.0.4",
+    "@vue/cli-plugin-router": "^4.0.4",
+    "@vue/cli-plugin-unit-jest": "^4.0.4",
+    "@vue/cli-plugin-vuex": "^4.0.4",
+    "@vue/cli-service": "^4.0.4",
+    "@vue/eslint-config-standard": "^4.0.0",
+    "@vue/test-utils": "^1.0.0-beta.29",
+    "babel-eslint": "^10.0.1",
+    "babel-plugin-import": "^1.12.2",
+    "babel-plugin-transform-remove-console": "^6.9.4",
+    "eslint": "^5.16.0",
+    "eslint-plugin-html": "^5.0.0",
+    "eslint-plugin-vue": "^5.2.3",
+    "less": "^3.0.4",
+    "less-loader": "^5.0.0",
+    "vue-template-compiler": "^2.6.10",
+    "vue-svg-icon-loader": "^2.1.1",
+    "webpack-theme-color-replacer": "^1.2.17",
+    "opencollective": "^1.0.3",
+    "opencollective-postinstall": "^2.0.2"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/strongly-recommended",
+      "@vue/standard"
+    ],
+    "parserOptions": {
+      "parser": "babel-eslint"
+    },
+    "rules": {
+      "generator-star-spacing": "off",
+      "no-mixed-operators": 0,
+      "vue/max-attributes-per-line": [
+        2,
+        {
+          "singleline": 5,
+          "multiline": {
+            "max": 1,
+            "allowFirstLine": false
+          }
+        }
+      ],
+      "vue/attribute-hyphenation": 0,
+      "vue/html-self-closing": 0,
+      "vue/component-name-in-template-casing": 0,
+      "vue/html-closing-bracket-spacing": 0,
+      "vue/singleline-html-element-content-newline": 0,
+      "vue/no-unused-components": 0,
+      "vue/multiline-html-element-content-newline": 0,
+      "vue/no-use-v-if-with-v-for": 0,
+      "vue/html-closing-bracket-newline": 0,
+      "vue/no-parsing-error": 0,
+      "no-console": 0,
+      "no-tabs": 0,
+      "quotes": [
+        2,
+        "single",
+        {
+          "avoidEscape": true,
+          "allowTemplateLiterals": true
+        }
+      ],
+      "semi": [
+        2,
+        "never",
+        {
+          "beforeStatementContinuationChars": "never"
+        }
+      ],
+      "no-delete-var": 2,
+      "prefer-const": [
+        2,
+        {
+          "ignoreReadBeforeAssign": false
+        }
+      ]
+    }
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 10"
+  ],
+  "collective": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/ant-design-pro-vue"
+  }
+}

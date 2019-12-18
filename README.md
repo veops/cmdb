@@ -28,19 +28,19 @@ Overview
 3. 关系视图 - 模型之间的关系, 用树形图方式展示, **管理员可配置**
 
 ##### 资源视图
-![基础资源视图](https://raw.githubusercontent.com/pycook/cmdb/master/ui/public/cmdb-ci.jpeg) 
+![基础资源视图](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-ci.jpeg) 
 
 ##### 树形视图
-![树形视图](https://raw.githubusercontent.com/pycook/cmdb/master/ui/public/cmdb-tree.jpeg) 
+![树形视图](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-tree.jpeg) 
 
 ##### 关系视图
-![关系视图](https://raw.githubusercontent.com/pycook/cmdb/master/ui/public/cmdb-relation.jpeg) 
+![关系视图](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-relation.jpeg) 
 
 ##### 用户订阅
-![用户订阅](https://raw.githubusercontent.com/pycook/cmdb/master/ui/public/cmdb-preference.jpeg)
+![用户订阅](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-preference.jpeg)
 
 ##### 关系视图配置
-![关系视图配置](https://raw.githubusercontent.com/pycook/cmdb/master/ui/public/cmdb-relation-define.jpeg)
+![关系视图配置](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-relation-define.jpeg)
 
 Docker一键快速构建
 ----
@@ -66,24 +66,24 @@ Install
 ```bash
 git clone https://github.com/pycook/cmdb.git
 cd cmdb
-cp api/settings.py.example api/settings.py
+cp cmdb-api/settings.py.example cmdb-api/settings.py
 ```
-**设置api/settings.py里的database**
+**设置cmdb-api/settings.py里的database**
 
 - 安装库
-  - 后端: ```pipenv run pipenv install```
-  - 前端: ```cd ui && yarn install && cd ..```
+  - 后端: ```cd cmdb-api && pipenv run pipenv install && cd ..```
+  - 前端: ```cd cmdb-ui && yarn install && cd ..```
   
 - 创建数据库表 ```pipenv run flask db-setup && pipenv run flask init-cache```
-- 可以将docs/cmdb.sql导入到数据库里，登录用户和密码都是:admin
+- 可以将docs/cmdb.sql导入到数据库里，登录用户和密码分别是:demo/123456
   
 - 启动服务
-  - 后端: ```pipenv run flask run -h 0.0.0.0```
-  - 前端: ```cd ui && yarn run serve```
-  - worker: ```celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1```
+  - 后端: 进入**cmdb-api**目录执行 ```pipenv run flask run -h 0.0.0.0```
+  - 前端: 进入**cmdb-ui**目录执行```yarn run serve```
+  - worker: 进入**cmdb-api**目录执行 ```pipenv run celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1```
   
   - 浏览器打开:  [http://127.0.0.1:8000](http://127.0.0.1:8000)
-    - 如果是非本机访问, 要修改**ui/.env**里**VUE_APP_API_BASE_URL**里的IP地址为后端服务的ip地址
+    - 如果是非本机访问, 要修改**cmdb-ui/.env**里**VUE_APP_API_BASE_URL**里的IP地址为后端服务的ip地址
 
 
 Install by Makefile
@@ -95,9 +95,9 @@ Install by Makefile
 ```bash
 git clone https://github.com/pycook/cmdb.git
 cd cmdb
-cp api/settings.py.example api/settings.py
+cp cmdb-api/settings.py.example cmdb-api/settings.py
 ```
-**设置api/settings.py里的database**
+**cmdb-api/settings.py里的database**
 
 - 顺序在cmdb目录下执行
     - 环境: ```make env```
@@ -109,4 +109,4 @@ cp api/settings.py.example api/settings.py
 ----
 _**欢迎加入CMDB运维开发QQ群（336164978）**_
 
-![QQ群](ui/public/qr_code.jpg)
+![QQ群](cmdb-ui/public/qr_code.jpg)
