@@ -19,16 +19,16 @@ deps:
 	pipenv install --dev && \
 	pipenv run flask db-setup && \
 	pipenv run flask init-cache && \
-    cd ui && yarn install && cd ..
+    cd cmdb-ui && yarn install && cd ..
 
 api:
-	pipenv run flask run -h 0.0.0.0
+	cd cmdb-api && pipenv run flask run -h 0.0.0.0
 
 worker:
-	pipenv run celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1
+	cd cmdb-api && pipenv run celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1
 
 ui:
-	cd ui && yarn run serve
+	cd cmdb-ui && yarn run serve
 
 clean:
 	pipenv run flask clean
