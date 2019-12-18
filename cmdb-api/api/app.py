@@ -6,6 +6,7 @@ import sys
 from inspect import getmembers
 from logging.handlers import RotatingFileHandler
 
+from api.flask_cas import CAS
 from flask import Flask
 from flask import make_response, jsonify
 from flask.blueprints import Blueprint
@@ -23,8 +24,7 @@ from api.extensions import (
     rd,
     es
 )
-from api.flask_cas import CAS
-from api.models.acl import User
+from .models.acl import User
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir)
@@ -72,7 +72,7 @@ class ReverseProxy(object):
         return self.app(environ, start_response)
 
 
-def create_app(config_object="{0}.settings".format(API_PACKAGE)):
+def create_app(config_object="settings"):
     """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
 
     :param config_object: The configuration object to use.

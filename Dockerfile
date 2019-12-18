@@ -3,7 +3,7 @@ FROM node:alpine AS builder
 
 LABEL description="cmdb-ui"
 
-COPY ui /data/apps/cmdb-ui
+COPY cmdb-ui /data/apps/cmdb-ui
 
 WORKDIR /data/apps/cmdb-ui
 
@@ -22,7 +22,7 @@ FROM python:3.7-alpine AS cmdb-api
 
 LABEL description="Python3.7,cmdb"
 
-COPY . /data/apps/cmdb
+COPY cmdb-api /data/apps/cmdb
 
 WORKDIR /data/apps/cmdb
 
@@ -30,11 +30,11 @@ RUN apk add --no-cache tzdata gcc musl-dev libffi-dev
 
 ENV TZ=Asia/Shanghai
 
-RUN pip install  --no-cache-dir -r docs/requirements.txt \
-    && cp ./api/settings.py.example ./api/settings.py \
-    && sed -i "s#{user}:{password}@127.0.0.1:3306/{db}#cmdb:123456@mysql:3306/cmdb#g" api/settings.py \
-    && sed -i "s#redis://127.0.0.1#redis://redis#g" api/settings.py \
-    && sed -i 's#CACHE_REDIS_HOST = "127.0.0.1"#CACHE_REDIS_HOST = "redis"#g' api/settings.py
+RUN pip install  --no-cache-dir -r requirements.txt \
+    && cp ./settings.py.example settings.py \
+    && sed -i "s#{user}:{password}@127.0.0.1:3306/{db}#cmdb:123456@mysql:3306/cmdb#g" settings.py \
+    && sed -i "s#redis://127.0.0.1#redis://redis#g" settings.py \
+    && sed -i 's#CACHE_REDIS_HOST = "127.0.0.1"#CACHE_REDIS_HOST = "redis"#g' settings.py
 
 CMD ["bash", "-c", "flask run"]
 
