@@ -68,9 +68,10 @@ services:
         sed -i "s#USE_ES = False#USE_ES = True#g" settings.py
         sed -i "s#USE_ACL = False#USE_ACL = True#g" settings.py
         sed -i "s#ES_HOST = '127.0.0.1'#ES_HOST = 'cmdb-search'#g" settings.py
-        sleep 15
+        sleep 20
         gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000 -D
         flask init-cache
+        flask init-acl
         celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1
     depends_on:
       - cmdb-db
