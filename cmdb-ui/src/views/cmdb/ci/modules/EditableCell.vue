@@ -40,7 +40,7 @@ export default {
     joinList: function (itemValue) {
       if (typeof itemValue === 'object' && itemValue) {
         return itemValue.join(',')
-      } else if (itemValue !== null) {
+      } else if (itemValue !== null && itemValue !== 'undefined') {
         return itemValue + ''
       } else {
         return ''
