@@ -17,7 +17,7 @@
       >
         <a-select name="otherID" :filterOption="filterOption" v-decorator="['otherID', {rules: [{ required: true, message: '请选择另一个角色'}]} ]">
           <template v-for="role in allRoles">
-            <a-select-option  v-if="role.id != current_record.id" :key="role.id">{{ role.name }}</a-select-option>
+            <a-select-option v-if="role.id != current_record.id" :key="role.id">{{ role.name }}</a-select-option>
           </template>
         </a-select>
       </a-form-item>

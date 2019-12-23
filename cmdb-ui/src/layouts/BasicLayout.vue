@@ -11,7 +11,7 @@
     >
       <side-menu
         mode="inline"
-        :menus="menus"
+        :menus="sideBarMenu"
         :theme="navTheme"
         :collapsed="false"
         :collapsible="true"
@@ -86,8 +86,7 @@ export default {
   data () {
     return {
       production: config.production,
-      collapsed: false,
-      menus: []
+      collapsed: false
     }
   },
   computed: {
