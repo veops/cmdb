@@ -11,6 +11,7 @@ class ValueTypeEnum(BaseEnum):
     DATETIME = "3"
     DATE = "4"
     TIME = "5"
+    JSON = "6"
 
 
 class CIStatusEnum(BaseEnum):

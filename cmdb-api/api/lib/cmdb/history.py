@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*- 
 
 
+import json
+
 from flask import abort
 from flask import g
 
@@ -105,8 +107,8 @@ class AttributeHistoryManger(object):
         for attr_id, operate_type, old, new in history_list or []:
             AttributeHistory.create(attr_id=attr_id,
                                     operate_type=operate_type,
-                                    old=old,
-                                    new=new,
+                                    old=json.dumps(old) if isinstance(old, (dict, list)) else old,
+                                    new=json.dumps(new) if isinstance(new, (dict, list)) else new,
                                     ci_id=ci_id,
                                     record_id=record.id)
 
