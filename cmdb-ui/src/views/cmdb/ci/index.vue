@@ -349,7 +349,7 @@ export default {
           that.loadTip = '正在批量修改 ...'
           const payload = {}
           Object.keys(values).forEach(key => {
-            if (values[key]) {
+            if (values[key] || values[key] === 0) {
               payload[key] = values[key]
             }
           })
