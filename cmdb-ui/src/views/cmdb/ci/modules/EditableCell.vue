@@ -1,7 +1,7 @@
 <template>
   <div class="editable-cell">
     <div v-if="editable.x" class="editable-cell-input-wrapper">
-      <a-input :value="value" @change="handleChange" @pressEnter="check" />
+      <a-input :value="value | joinList" @change="handleChange" @pressEnter="check" />
       <a-icon type="check" class="editable-cell-icon-check" @click="check" />
     </div>
     <div v-else class="editable-cell-text-wrapper">
@@ -37,10 +37,25 @@ export default {
     }
   },
   filters: {
+    jsonDump: function (v) {
+      if (typeof v === 'object') {
+        return JSON.stringify(v)
+      } else {
+        return v
+      }
+    },
     joinList: function (itemValue) {
       if (typeof itemValue === 'object' && itemValue) {
-        return itemValue.join(',')
-      } else if (itemValue !== null && itemValue !== 'undefined') {
+        try {
+          if (typeof itemValue[0] !== 'object') {
+            return itemValue.join(',')
+          } else {
+            return JSON.stringify(itemValue)
+          }
+        } catch (e) {
+          return JSON.stringify(itemValue)
+        }
+      } else if (itemValue !== null && itemValue !== 'undefined' && itemValue !== undefined && itemValue !== 'null') {
         return itemValue + ''
       } else {
         return ''

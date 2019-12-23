@@ -250,6 +250,17 @@ class CIValueDateTime(Model):
     attr = db.relationship("Attribute", backref="c_value_datetime.attr_id")
 
 
+class CIValueJson(Model):
+    __tablename__ = "c_value_json"
+
+    ci_id = db.Column(db.Integer, db.ForeignKey('c_cis.id'), nullable=False)
+    attr_id = db.Column(db.Integer, db.ForeignKey('c_attributes.id'), nullable=False)
+    value = db.Column(db.JSON, nullable=False)
+
+    ci = db.relationship("CI", backref="c_value_json.ci_id")
+    attr = db.relationship("Attribute", backref="c_value_json.attr_id")
+
+
 # history
 class OperationRecord(Model):
     __tablename__ = "c_records"

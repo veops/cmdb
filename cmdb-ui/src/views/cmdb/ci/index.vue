@@ -94,7 +94,8 @@ var valueTypeMap = {
   '2': 'text',
   '3': 'datetime',
   '4': 'date',
-  '5': 'time'
+  '5': 'time',
+  '6': 'json'
 }
 
 export default {
@@ -270,6 +271,7 @@ export default {
           const col = {}
           col.title = item.alias
           col.dataIndex = item.name
+          col.value_type = item.value_type
           if (index !== prefAttrList.length - 1) {
             col.width = 100
           }

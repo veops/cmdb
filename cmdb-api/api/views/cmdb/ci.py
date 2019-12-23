@@ -73,7 +73,7 @@ class CIView(APIView):
                 ci_dict[k] = v.strip() if isinstance(v, six.string_types) else v
         return ci_dict
 
-    @has_perm_from_args("ci_type", ResourceTypeEnum.CI, PermEnum.ADD)
+    @has_perm_from_args("ci_type", ResourceTypeEnum.CI, PermEnum.ADD, lambda x: CITypeCache.get(x).name)
     def post(self):
         ci_type = request.values.get("ci_type")
         _no_attribute_policy = request.values.get("_no_attribute_policy", ExistPolicy.IGNORE)

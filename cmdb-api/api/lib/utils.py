@@ -1,5 +1,7 @@
 # -*- coding:utf-8 -*- 
 
+import json
+
 import redis
 import six
 from elasticsearch import Elasticsearch
@@ -26,6 +28,9 @@ def get_page_size(page_size):
 
 
 def handle_arg_list(arg):
+    if isinstance(arg, six.string_types) and arg.startswith('['):
+        return json.loads(arg)
+
     return list(filter(lambda x: x != "", arg.strip().split(","))) if isinstance(arg, six.string_types) else arg
 
 
