@@ -72,5 +72,4 @@ cmdb-ui/dist
 cmdb-ui/npm-debug.log*
 cmdb-ui/yarn-debug.log*
 cmdb-ui/yarn-error.log*
-cmdb-ui/yarn.lock
 cmdb-ui/package-lock.json
