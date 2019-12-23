@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import datetime
+import json
 
 import six
 from markupsafe import escape
@@ -33,15 +34,17 @@ class ValueTypeMap(object):
         ValueTypeEnum.TIME: lambda x: escape(x).encode('utf-8').decode('utf-8'),
         ValueTypeEnum.DATETIME: str2datetime,
         ValueTypeEnum.DATE: str2datetime,
+        ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) else x,
     }
 
     serialize = {
         ValueTypeEnum.INT: int,
         ValueTypeEnum.FLOAT: float,
-        ValueTypeEnum.TEXT: lambda x: x if isinstance(x, six.text_type) else str(x),
-        ValueTypeEnum.TIME: lambda x: x if isinstance(x, six.text_type) else str(x),
+        ValueTypeEnum.TEXT: lambda x: x if isinstance(x, six.string_types) else str(x),
+        ValueTypeEnum.TIME: lambda x: x if isinstance(x, six.string_types) else str(x),
         ValueTypeEnum.DATE: lambda x: x.strftime("%Y-%m-%d"),
         ValueTypeEnum.DATETIME: lambda x: x.strftime("%Y-%m-%d %H:%M:%S"),
+        ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) else x,
     }
 
     serialize2 = {
@@ -51,6 +54,7 @@ class ValueTypeMap(object):
         ValueTypeEnum.TIME: lambda x: x.decode() if not isinstance(x, six.string_types) else x,
         ValueTypeEnum.DATE: lambda x: x.decode() if not isinstance(x, six.string_types) else x,
         ValueTypeEnum.DATETIME: lambda x: x.decode() if not isinstance(x, six.string_types) else x,
+        ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) else x,
     }
 
     choice = {
@@ -66,12 +70,14 @@ class ValueTypeMap(object):
         ValueTypeEnum.DATE: model.CIValueDateTime,
         ValueTypeEnum.TIME: model.CIValueText,
         ValueTypeEnum.FLOAT: model.CIValueFloat,
+        ValueTypeEnum.JSON: model.CIValueJson,
         'index_{0}'.format(ValueTypeEnum.INT): model.CIIndexValueInteger,
         'index_{0}'.format(ValueTypeEnum.TEXT): model.CIIndexValueText,
         'index_{0}'.format(ValueTypeEnum.DATETIME): model.CIIndexValueDateTime,
         'index_{0}'.format(ValueTypeEnum.DATE): model.CIIndexValueDateTime,
         'index_{0}'.format(ValueTypeEnum.TIME): model.CIIndexValueText,
         'index_{0}'.format(ValueTypeEnum.FLOAT): model.CIIndexValueFloat,
+        'index_{0}'.format(ValueTypeEnum.JSON): model.CIValueJson,
     }
 
     table_name = {
@@ -81,12 +87,14 @@ class ValueTypeMap(object):
         ValueTypeEnum.DATE: 'c_value_datetime',
         ValueTypeEnum.TIME: 'c_value_texts',
         ValueTypeEnum.FLOAT: 'c_value_floats',
+        ValueTypeEnum.JSON: 'c_value_json',
         'index_{0}'.format(ValueTypeEnum.INT): 'c_value_index_integers',
         'index_{0}'.format(ValueTypeEnum.TEXT): 'c_value_index_texts',
         'index_{0}'.format(ValueTypeEnum.DATETIME): 'c_value_index_datetime',
         'index_{0}'.format(ValueTypeEnum.DATE): 'c_value_index_datetime',
         'index_{0}'.format(ValueTypeEnum.TIME): 'c_value_index_texts',
         'index_{0}'.format(ValueTypeEnum.FLOAT): 'c_value_index_floats',
+        'index_{0}'.format(ValueTypeEnum.JSON): 'c_value_json',
     }
 
     es_type = {
@@ -95,7 +103,8 @@ class ValueTypeMap(object):
         ValueTypeEnum.DATETIME: 'text',
         ValueTypeEnum.DATE: 'text',
         ValueTypeEnum.TIME: 'text',
-        ValueTypeEnum.FLOAT: 'float'
+        ValueTypeEnum.FLOAT: 'float',
+        ValueTypeEnum.JSON: 'object'
     }
 
 

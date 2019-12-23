@@ -97,7 +97,8 @@ var valueTypeMap = {
   '2': 'text',
   '3': 'datetime',
   '4': 'date',
-  '5': 'time'
+  '5': 'time',
+  '6': 'json'
 }
 
 export default {
