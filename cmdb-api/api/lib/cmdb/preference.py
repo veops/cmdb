@@ -13,7 +13,7 @@ from flask import g
 from api.extensions import db
 from api.lib.cmdb.attribute import AttributeManager
 from api.lib.cmdb.cache import AttributeCache
-from api.lib.cmdb.cache import CITypeAttributeCache
+from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.const import ResourceTypeEnum, RoleEnum, PermEnum
 from api.lib.exception import AbortException
@@ -100,7 +100,7 @@ class PreferenceManager(object):
 
     @staticmethod
     def create_or_update_tree_view(type_id, levels):
-        attrs = CITypeAttributeCache.get(type_id)
+        attrs = CITypeAttributesCache.get(type_id)
         for idx, i in enumerate(levels):
             for attr in attrs:
                 attr = AttributeCache.get(attr.attr_id)

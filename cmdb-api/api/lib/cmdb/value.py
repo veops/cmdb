@@ -8,6 +8,7 @@ from flask import abort
 from api.extensions import db
 from api.lib.cmdb.attribute import AttributeManager
 from api.lib.cmdb.cache import AttributeCache
+from api.lib.cmdb.cache import CITypeAttributeCache
 from api.lib.cmdb.const import ExistPolicy
 from api.lib.cmdb.const import OperateType
 from api.lib.cmdb.history import AttributeHistoryManger
@@ -77,23 +78,31 @@ class AttributeValueManager(object):
             return abort(400, "attribute value <{0}> is invalid".format(value))
 
     @staticmethod
-    def __check_is_choice(attr_id, value_type, value):
-        choice_values = AttributeManager.get_choice_values(attr_id, value_type)
+    def __check_is_choice(attr, value_type, value):
+        choice_values = AttributeManager.get_choice_values(attr.id, value_type)
         if value not in choice_values:
             return abort(400, "{0} does not existed in choice values".format(value))
 
     @staticmethod
-    def __check_is_unique(value_table, attr_id, ci_id, value):
+    def __check_is_unique(value_table, attr, ci_id, value):
         existed = db.session.query(value_table.attr_id).filter(
-            value_table.attr_id == attr_id).filter(value_table.deleted.is_(False)).filter(
+            value_table.attr_id == attr.id).filter(value_table.deleted.is_(False)).filter(
             value_table.value == value).filter(value_table.ci_id != ci_id).first()
-        existed and abort(400, "attribute <{0}> value {1} must be unique".format(attr_id, value))
+        existed and abort(400, "attribute <{0}> value {1} must be unique".format(attr.alias, value))
 
-    def _validate(self, attr, value, value_table, ci_id):
+    @staticmethod
+    def __check_is_required(type_id, attr, value):
+        type_attr = CITypeAttributeCache.get(type_id, attr.id)
+        if type_attr and type_attr.is_required and not value and value != 0:
+            return abort(400, "attribute <{0}> value is required".format(attr.alias))
+
+    def _validate(self, attr, value, value_table, ci):
         v = self.__deserialize_value(attr.value_type, value)
 
-        attr.is_choice and value and self.__check_is_choice(attr.id, attr.value_type, v)
-        attr.is_unique and self.__check_is_unique(value_table, attr.id, ci_id, v)
+        attr.is_choice and value and self.__check_is_choice(attr, attr.value_type, v)
+        attr.is_unique and self.__check_is_unique(value_table, attr, ci.id, v)
+
+        self.__check_is_required(ci.type_id, attr, v)
 
         return v
 
@@ -101,12 +110,12 @@ class AttributeValueManager(object):
     def _write_change(ci_id, attr_id, operate_type, old, new):
         AttributeHistoryManger.add(ci_id, [(attr_id, operate_type, old, new)])
 
-    def create_or_update_attr_value(self, key, value, ci_id, _no_attribute_policy=ExistPolicy.IGNORE):
+    def create_or_update_attr_value(self, key, value, ci, _no_attribute_policy=ExistPolicy.IGNORE):
         """
         add or update attribute value, then write history
         :param key: id, name or alias
         :param value:
-        :param ci_id:
+        :param ci: instance object
         :param _no_attribute_policy: ignore or reject
         :return:
         """
@@ -120,31 +129,34 @@ class AttributeValueManager(object):
         value_table = TableMap(attr_name=attr.name).table
 
         if attr.is_list:
-            value_list = [self._validate(attr, i, value_table, ci_id) for i in handle_arg_list(value)]
+            value_list = [self._validate(attr, i, value_table, ci) for i in handle_arg_list(value)]
+            if not value_list:
+                self.__check_is_required(ci.type_id, attr, '')
+
             existed_attrs = value_table.get_by(attr_id=attr.id,
-                                               ci_id=ci_id,
+                                               ci_id=ci.id,
                                                to_dict=False)
             existed_values = [i.value for i in existed_attrs]
             added = set(value_list) - set(existed_values)
             deleted = set(existed_values) - set(value_list)
             for v in added:
-                value_table.create(ci_id=ci_id, attr_id=attr.id, value=v)
-                self._write_change(ci_id, attr.id, OperateType.ADD, None, v)
+                value_table.create(ci_id=ci.id, attr_id=attr.id, value=v)
+                self._write_change(ci.id, attr.id, OperateType.ADD, None, v)
 
             for v in deleted:
                 existed_attr = existed_attrs[existed_values.index(v)]
                 existed_attr.delete()
-                self._write_change(ci_id, attr.id, OperateType.DELETE, v, None)
+                self._write_change(ci.id, attr.id, OperateType.DELETE, v, None)
         else:
-            value = self._validate(attr, value, value_table, ci_id)
+            value = self._validate(attr, value, value_table, ci)
             existed_attr = value_table.get_by(attr_id=attr.id,
-                                              ci_id=ci_id,
+                                              ci_id=ci.id,
                                               first=True,
                                               to_dict=False)
             existed_value = existed_attr and existed_attr.value
             if existed_value is None:
-                value_table.create(ci_id=ci_id, attr_id=attr.id, value=value)
-                self._write_change(ci_id, attr.id, OperateType.ADD, None, value)
+                value_table.create(ci_id=ci.id, attr_id=attr.id, value=value)
+                self._write_change(ci.id, attr.id, OperateType.ADD, None, value)
             else:
                 existed_attr.update(value=value)
-                self._write_change(ci_id, attr.id, OperateType.UPDATE, existed_value, value)
+                self._write_change(ci.id, attr.id, OperateType.UPDATE, existed_value, value)
