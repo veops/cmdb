@@ -34,7 +34,7 @@ class ValueTypeMap(object):
         ValueTypeEnum.TIME: lambda x: escape(x).encode('utf-8').decode('utf-8'),
         ValueTypeEnum.DATETIME: str2datetime,
         ValueTypeEnum.DATE: str2datetime,
-        ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) else x,
+        ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) and x else x,
     }
 
     serialize = {
@@ -44,7 +44,7 @@ class ValueTypeMap(object):
         ValueTypeEnum.TIME: lambda x: x if isinstance(x, six.string_types) else str(x),
         ValueTypeEnum.DATE: lambda x: x.strftime("%Y-%m-%d"),
         ValueTypeEnum.DATETIME: lambda x: x.strftime("%Y-%m-%d %H:%M:%S"),
-        ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) else x,
+        ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) and x else x,
     }
 
     serialize2 = {
@@ -54,7 +54,7 @@ class ValueTypeMap(object):
         ValueTypeEnum.TIME: lambda x: x.decode() if not isinstance(x, six.string_types) else x,
         ValueTypeEnum.DATE: lambda x: x.decode() if not isinstance(x, six.string_types) else x,
         ValueTypeEnum.DATETIME: lambda x: x.decode() if not isinstance(x, six.string_types) else x,
-        ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) else x,
+        ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) and x else x,
     }
 
     choice = {

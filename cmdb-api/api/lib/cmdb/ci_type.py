@@ -8,6 +8,7 @@ from api.extensions import db
 from api.lib.cmdb.attribute import AttributeManager
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributeCache
+from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.decorator import kwargs_required
 from api.models.cmdb import CI
@@ -18,8 +19,8 @@ from api.models.cmdb import CITypeAttributeGroupItem
 from api.models.cmdb import CITypeGroup
 from api.models.cmdb import CITypeGroupItem
 from api.models.cmdb import CITypeRelation
-from api.models.cmdb import PreferenceTreeView
 from api.models.cmdb import PreferenceShowAttributes
+from api.models.cmdb import PreferenceTreeView
 
 
 class CITypeManager(object):
@@ -201,11 +202,11 @@ class CITypeAttributeManager(object):
 
     @staticmethod
     def get_attr_names_by_type_id(type_id):
-        return [AttributeCache.get(attr.attr_id).name for attr in CITypeAttributeCache.get(type_id)]
+        return [AttributeCache.get(attr.attr_id).name for attr in CITypeAttributesCache.get(type_id)]
 
     @staticmethod
     def get_attributes_by_type_id(type_id):
-        attrs = CITypeAttributeCache.get(type_id)
+        attrs = CITypeAttributesCache.get(type_id)
         result = list()
         for attr in sorted(attrs, key=lambda x: (x.order, x.id)):
             attr_dict = AttributeManager().get_attribute(attr.attr_id)
@@ -247,7 +248,7 @@ class CITypeAttributeManager(object):
             current_app.logger.debug(attr_id)
             CITypeAttribute.create(type_id=type_id, attr_id=attr_id, **kwargs)
 
-        CITypeAttributeCache.clean(type_id)
+        CITypeAttributesCache.clean(type_id)
 
     @classmethod
     def update(cls, type_id, attributes):
@@ -269,7 +270,9 @@ class CITypeAttributeManager(object):
 
             existed.update(**attr)
 
-        CITypeAttributeCache.clean(type_id)
+            CITypeAttributeCache.clean(type_id, existed.attr_id)
+
+        CITypeAttributesCache.clean(type_id)
 
     @classmethod
     def delete(cls, type_id, attr_ids=None):
@@ -289,7 +292,9 @@ class CITypeAttributeManager(object):
             if existed is not None:
                 existed.soft_delete()
 
-        CITypeAttributeCache.clean(type_id)
+                CITypeAttributeCache.clean(type_id, attr_id)
+
+        CITypeAttributesCache.clean(type_id)
 
 
 class CITypeRelationManager(object):

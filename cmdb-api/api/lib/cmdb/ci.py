@@ -190,7 +190,7 @@ class CIManager(object):
         value_manager = AttributeValueManager()
         for p, v in ci_dict.items():
             try:
-                value_manager.create_or_update_attr_value(p, v, ci.id, _no_attribute_policy)
+                value_manager.create_or_update_attr_value(p, v, ci, _no_attribute_policy)
             except BadRequest as e:
                 if existed is None:
                     cls.delete(ci.id)
@@ -201,11 +201,12 @@ class CIManager(object):
         return ci.id
 
     def update(self, ci_id, **ci_dict):
-        self.confirm_ci_existed(ci_id)
+        ci = self.confirm_ci_existed(ci_id)
+
         value_manager = AttributeValueManager()
         for p, v in ci_dict.items():
             try:
-                value_manager.create_or_update_attr_value(p, v, ci_id)
+                value_manager.create_or_update_attr_value(p, v, ci)
             except BadRequest as e:
                 raise e
 
@@ -213,9 +214,9 @@ class CIManager(object):
 
     @staticmethod
     def update_unique_value(ci_id, unique_name, unique_value):
-        CI.get_by_id(ci_id) or abort(404, "CI <{0}> is not found".format(ci_id))
+        ci = CI.get_by_id(ci_id) or abort(404, "CI <{0}> is not found".format(ci_id))
 
-        AttributeValueManager().create_or_update_attr_value(unique_name, unique_value, ci_id)
+        AttributeValueManager().create_or_update_attr_value(unique_name, unique_value, ci)
 
         ci_cache.apply_async([ci_id], queue=CMDB_QUEUE)
 
