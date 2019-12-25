@@ -72,11 +72,7 @@ export default {
             if (typeof params[key] === 'object' && params[key].length > 1) {
               q += `,${key}:(${params[key].join(';')})`
             } else if (params[key]) {
-              q += `,${key}:${params[key]}`
-            }
-
-            if (typeof params[key] === 'string') {
-              q += '*'
+              q += `,${key}:*${params[key]}*`
             }
           }
         })
