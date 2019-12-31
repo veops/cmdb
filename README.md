@@ -83,7 +83,7 @@ There are various ways of installing CMDB.
   - worker: in **cmdb-api** directory: ```pipenv run celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1```
   
   - homepage:  [http://127.0.0.1:8000](http://127.0.0.1:8000)
-    - if not run localhost: please change ip address(**VUE_APP_API_BASE_URL**) in config file **cmdb-ui/.env** into backend your ip
+    - if not run localhost: please change ip address(**VUE_APP_API_BASE_URL**) in config file **cmdb-ui/.env** into your backend ip address
 
 ### Install by Makefile
 - start mysql,redis
