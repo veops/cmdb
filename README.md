@@ -1,6 +1,6 @@
 <h1 align="center">CMDB</h1>
 <div align="center">
-尽可能实现比较通用的运维资产数据的配置和管理
+尽可能实现比较通用的运维资源的配置和管理
 </div>
 
 <div align="center">
@@ -74,7 +74,7 @@ cp cmdb-api/settings.py.example cmdb-api/settings.py
   - 后端: ```cd cmdb-api && pipenv run pipenv install && cd ..```
   - 前端: ```cd cmdb-ui && yarn install && cd ..```
   
-- 创建数据库表 ```pipenv run flask db-setup && pipenv run flask init-cache```
+- 创建数据库表: 进入**cmdb-api**目录执行 ```pipenv run flask db-setup && pipenv run flask init-cache```
 - 可以将docs/cmdb.sql导入到数据库里，登录用户和密码分别是:demo/123456
   
 - 启动服务
