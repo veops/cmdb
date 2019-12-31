@@ -1,7 +1,7 @@
 <h1 align="center">CMDB</h1>
 <div align="center">
 
-As far as possible to achieve more universal g and maintenance of IT resources
+As far as possible to achieve more universal config and maintenance of IT resources
 </div>
 
 <div align="center">
