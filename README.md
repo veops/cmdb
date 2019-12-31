@@ -1,7 +1,7 @@
 <h1 align="center">CMDB</h1>
 <div align="center">
 
-As far as possible to achieve more universal config and maintenance of IT resources
+As far as possible to achieve more universal configuration and management of IT resources
 </div>
 
 <div align="center">
@@ -14,6 +14,15 @@ As far as possible to achieve more universal config and maintenance of IT resour
 
 
 [English](README.md) / [中文](README_cn.md)
+
+## DEMO ONLINE
+- preview online: [CMDB](http://121.42.12.46:8000)
+    - username: demo
+    - password: 123456
+    
+> **ATTENTION**: branch `master` may be unstable as the result of continued development, please pull code from  [releases](https://github.com/pycook/cmdb/releases)
+
+----
 ## Overview
 
 CMDB is a universal project that can define and manage almost all IT resource, even every resource as long as you want to, which treat all IT resources as resource objects. objects has both attributes  and relationship.
@@ -21,7 +30,11 @@ CMDB is a universal project that can define and manage almost all IT resource, e
 CMDB's main distinguishing features as compared to other resource systems are:
 - define attributes of resource objects dynamically，you don't need to define all the attributes at the beginning.
 - define relationship of resource objects dynamically and simply, even you can draw the relationship through the web.
-- three view：resource view,tree view,relational view
+- three view:
+    - resource view: model instance data that users can subscribe
+    - tree view: the model is hierarchical by field, shown in a tree diagram, and users can subscribe
+    - relational view: relationships between models, shown in a tree diagram, **are configurable by the administrator**
+
 - authority management
 
 
@@ -67,7 +80,7 @@ There are various ways of installing CMDB.
 - start service
   - backend: in **cmdb-api** directory: ```pipenv run flask run -h 0.0.0.0```
   - frontend: in **cmdb-ui** directory: ```yarn run serve```
-  - worker: in**cmdb-api**directory: ```pipenv run celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1```
+  - worker: in **cmdb-api** directory: ```pipenv run celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1```
   
   - homepage:  [http://127.0.0.1:8000](http://127.0.0.1:8000)
     - if not run localhost: please change ip address(**VUE_APP_API_BASE_URL**) in config file **cmdb-ui/.env** into backend your ip
@@ -106,15 +119,7 @@ There are various ways of installing CMDB.
 ##### define relationship view
 ![define relationship view](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-relation-define.jpeg)
 
-## DEMO ONLINE
-- preview online: [CMDB](http://121.42.12.46:8000)
-    - username: demo
-    - password: 123456
-    
-## ATTENTION
-> **ATTENTION**: branch `master` may be unstable as the result of continued development, please pull code from  [releases](https://github.com/pycook/cmdb/releases)
-
-----
+-----
 _**welcome to join us through QQ group（336164978）**_
 
 ![QQgroup](cmdb-ui/public/qr_code.jpg)

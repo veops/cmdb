@@ -97,7 +97,7 @@ git clone https://github.com/pycook/cmdb.git
 cd cmdb
 cp cmdb-api/settings.py.example cmdb-api/settings.py
 ```
-**cmdb-api/settings.py里的database**
+**设置cmdb-api/settings.py里的database**
 
 - 顺序在cmdb目录下执行
     - 环境: ```make env```
