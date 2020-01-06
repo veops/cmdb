@@ -16,7 +16,7 @@ from api.models.cmdb import CI
 
 class Search(object):
     def __init__(self, root_id,
-                 level=1,
+                 level=None,
                  query=None,
                  fl=None,
                  facet_field=None,
@@ -82,9 +82,10 @@ class Search(object):
                                 ci_ids=merge_ids).search()
 
     def statistics(self, type_ids):
+        _tmp = []
         ids = [self.root_id] if not isinstance(self.root_id, list) else self.root_id
         for l in range(0, int(self.level)):
-            if l == 0:
+            if not l:
                 _tmp = list(map(lambda x: list(json.loads(x).keys()),
                                 [i or '{}' for i in rd.get(ids, REDIS_PREFIX_CI_RELATION) or []]))
             else:
