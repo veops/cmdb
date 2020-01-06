@@ -1,5 +1,83 @@
 # CMDB API文档
 
+```
+Rule                                                               Endpoint
+------------------------------------------------------------------------------------------------------------
+/api/login                                                         account_api.loginview
+/api/logout                                                        account_api.logoutview
+/api/sso/login                                                     cas.login
+/api/sso/logout                                                    cas.logout
+/api/v0.1/attributes                                               cmdb_api_v01.attributeview
+/api/v0.1/attributes/<int:attr_id>                                 cmdb_api_v01.attributeview
+/api/v0.1/attributes/<string:attr_name>                            cmdb_api_v01.attributeview
+/api/v0.1/attributes/s                                             cmdb_api_v01.attributesearchview
+/api/v0.1/attributes/search                                        cmdb_api_v01.attributesearchview
+/api/v0.1/ci                                                       cmdb_api_v01.ciview
+/api/v0.1/ci/<int:ci_id>                                           cmdb_api_v01.ciview
+/api/v0.1/ci/<int:ci_id>/detail                                    cmdb_api_v01.cidetailview
+/api/v0.1/ci/<int:ci_id>/flush                                     cmdb_api_v01.ciflushview
+/api/v0.1/ci/<int:ci_id>/unique                                    cmdb_api_v01.ciunique
+/api/v0.1/ci/flush                                                 cmdb_api_v01.ciflushview
+/api/v0.1/ci/heartbeat                                             cmdb_api_v01.ciheartbeatview
+/api/v0.1/ci/heartbeat/<string:ci_type>/<string:unique>            cmdb_api_v01.ciheartbeatview
+/api/v0.1/ci/s                                                     cmdb_api_v01.cisearchview
+/api/v0.1/ci/search                                                cmdb_api_v01.cisearchview
+/api/v0.1/ci/type/<int:type_id>                                    cmdb_api_v01.cisbytypeview
+/api/v0.1/ci_relations/<int:cr_id>                                 cmdb_api_v01.deletecirelationview
+/api/v0.1/ci_relations/<int:first_ci_id>/<int:second_ci_id>        cmdb_api_v01.cirelationview
+/api/v0.1/ci_relations/<int:first_ci_id>/second_cis                cmdb_api_v01.getsecondcisview
+/api/v0.1/ci_relations/<int:second_ci_id>/first_cis                cmdb_api_v01.getfirstcisview
+/api/v0.1/ci_relations/s                                           cmdb_api_v01.cirelationsearchview
+/api/v0.1/ci_relations/search                                      cmdb_api_v01.cirelationsearchview
+/api/v0.1/ci_relations/statistics                                  cmdb_api_v01.cirelationstatisticsview
+/api/v0.1/ci_type_relations                                        cmdb_api_v01.cityperelationview
+/api/v0.1/ci_type_relations/<int:child_id>/parents                 cmdb_api_v01.getparentsview
+/api/v0.1/ci_type_relations/<int:ctr_id>                           cmdb_api_v01.cityperelationdelete2view
+/api/v0.1/ci_type_relations/<int:parent_id>/<int:child_id>         cmdb_api_v01.cityperelationview
+/api/v0.1/ci_type_relations/<int:parent_id>/children               cmdb_api_v01.getchildrenview
+/api/v0.1/ci_types                                                 cmdb_api_v01.citypeview
+/api/v0.1/ci_types/<int:type_id>                                   cmdb_api_v01.citypeview
+/api/v0.1/ci_types/<int:type_id>/attribute_groups                  cmdb_api_v01.citypeattributegroupview
+/api/v0.1/ci_types/<int:type_id>/attributes                        cmdb_api_v01.citypeattributeview
+/api/v0.1/ci_types/<int:type_id>/enable                            cmdb_api_v01.enablecitypeview
+/api/v0.1/ci_types/<string:type_name>                              cmdb_api_v01.citypeview
+/api/v0.1/ci_types/<string:type_name>/attributes                   cmdb_api_v01.citypeattributeview
+/api/v0.1/ci_types/attribute_groups/<int:group_id>                 cmdb_api_v01.citypeattributegroupview
+/api/v0.1/ci_types/groups                                          cmdb_api_v01.citypegroupview
+/api/v0.1/ci_types/groups/<int:gid>                                cmdb_api_v01.citypegroupview
+/api/v0.1/ci_types/query                                           cmdb_api_v01.citypequeryview
+/api/v0.1/history/ci/<int:ci_id>                                   cmdb_api_v01.cihistoryview
+/api/v0.1/history/records                                          cmdb_api_v01.recordview
+/api/v0.1/history/records/<int:record_id>                          cmdb_api_v01.recorddetailview
+/api/v0.1/preference/ci_types                                      cmdb_api_v01.preferenceshowcitypesview
+/api/v0.1/preference/ci_types/<id_or_name>/attributes              cmdb_api_v01.preferenceshowattributesview
+/api/v0.1/preference/relation/view                                 cmdb_api_v01.preferencerelationapiview
+/api/v0.1/preference/tree/view                                     cmdb_api_v01.preferencetreeapiview
+/api/v0.1/relation_types                                           cmdb_api_v01.relationtypeview
+/api/v0.1/relation_types/<int:rel_id>                              cmdb_api_v01.relationtypeview
+/api/v1/acl/resource_groups                                        acl_api_v1.resourcegroupview
+/api/v1/acl/resource_groups/<int:group_id>                         acl_api_v1.resourcegroupview
+/api/v1/acl/resource_groups/<int:group_id>/items                   acl_api_v1.resourcegroupitemsview
+/api/v1/acl/resource_groups/<int:group_id>/permissions             acl_api_v1.resourcepermissionview
+/api/v1/acl/resource_types                                         acl_api_v1.resourcetypeview
+/api/v1/acl/resource_types/<int:type_id>                           acl_api_v1.resourcetypeview
+/api/v1/acl/resource_types/<int:type_id>/perms                     acl_api_v1.resourcetypepermsview
+/api/v1/acl/resources                                              acl_api_v1.resourceview
+/api/v1/acl/resources/<int:resource_id>                            acl_api_v1.resourceview
+/api/v1/acl/resources/<int:resource_id>/permissions                acl_api_v1.resourcepermissionview
+/api/v1/acl/roles                                                  acl_api_v1.roleview
+/api/v1/acl/roles/<int:child_id>/parents                           acl_api_v1.rolerelationview
+/api/v1/acl/roles/<int:rid>                                        acl_api_v1.roleview
+/api/v1/acl/roles/<int:rid>/resource_groups/<int:group_id>/grant   acl_api_v1.rolepermissiongrantview
+/api/v1/acl/roles/<int:rid>/resource_groups/<int:group_id>/revoke  acl_api_v1.rolepermissionrevokeview
+/api/v1/acl/roles/<int:rid>/resources/<int:resource_id>/grant      acl_api_v1.rolepermissiongrantview
+/api/v1/acl/roles/<int:rid>/resources/<int:resource_id>/revoke     acl_api_v1.rolepermissionrevokeview
+/api/v1/acl/users                                                  acl_api_v1.userview
+/api/v1/acl/users/<int:uid>                                        acl_api_v1.userview
+/api/v1/acl/users/info                                             acl_api_v1.getuserinfoview
+/api/v1/acl/users/reset_key_secret                                 acl_api_v1.userresetkeysecretview
+```
+
 ## 状态返回码的定义
 * 200：成功
 * 400：失败
@@ -35,6 +113,32 @@
     * `RANGE`查询. eg. `hostname:[cmdb* _TO_ cmdb-web*]` `_TO_`分隔
     * `COMPARISON`查询. eg. `cpu_core_num:>5` 支持`>, >=, <, <=`
 
+### CI Relation搜索接口
+* GET `/api/v0.1/ci_relations/s`
+* 参数
+    * `int:root_id` 搜索的根节点的ci_id
+    * `int:level` 搜索的层级
+    * `string:_type` 搜索的ci_type，多个用分号隔开, 例如: _type:(docker;kvm)
+    * `string:q` 搜索表达式, 例如`q=hostname:cmdb*`
+    * `string:fl` 返回字段(id, attr_name, attr_alias均可)，英文半角逗号分隔
+    * `string:ret_key` 返回字段类型 `Enum("id", "name", "alias")` 默认 `name`
+    * `count` 指定一次返回CI数
+    * `facet` 属性字段，逗号分隔，返回属性字段对应的所有值
+    
+* 搜索表达式：
+    * 简单的字符串
+    * `attribute:value` 指定属性搜索， `attribute`可以是`id`,`attr_name`和`attr_alias`
+    * 以上的组合，逗号分隔
+    
+* 组合查询支持
+    * `AND`关系-`默认关系`
+    * `OR`关系 - eg.`-hostname:cmdb*`、
+    * `NOT`关系-属性字段前加`~`eg. `~hostname:cmdb*`
+    * `IN`查询. eg. `hostname:(cmdb*;cmdb-web*)` 小括号, 分号分隔
+    * `RANGE`查询. eg. `hostname:[cmdb* _TO_ cmdb-web*]` `_TO_`分隔
+    * `COMPARISON`查询. eg. `cpu_count:>5` 支持`>, >=, <, <=`
+    
+    
 ## api key 认证
 
 每个用户会自动生成一个 `api key` 和 一个`secret`, 通过API接口使用的时候，需要提供一个参数 `_key`值为您的`api key`， 以及参数`_secret`值为除`_key`以外的参数，按照**参数名的字典序**排列，并连接到`url path` + `secret`之后的`sha1`**十六进制**值。
@@ -43,7 +147,7 @@
 ## 管理接口
 
 ### Attribute管理接口
-* GET `/api/v0.1/attributes` 列出所有属性
+* GET `/api/v0.1/attributes/s` 列出所有属性
     * param
         * `string:q` 属性名称或者别名，允许为空
     * return
@@ -152,7 +256,7 @@
  
 #### CIType属性管理
  
- * GET `/api/v0.1/attributes/citype/<int:type_id>` 根据type_id查询固有属性列表
+ * GET `/api/v0.1/ci_types/<int:type_id>/attributes` 根据type_id查询固有属性列表
      * return
     
      ```
@@ -173,7 +277,7 @@
      }   
      ```
       
-* POST `/api/v0.1/attributes/citype/<int:type_id>` 根据`attr_id`增加CIType的属性
+* POST `/api/v0.1/ci_types/<int:type_id>/attributes` 根据`attr_id`增加CIType的属性
     * param
         * `string:attr_id` `,`分隔的`attr_id`
         * `int:is_required` 0或者1
@@ -191,7 +295,7 @@
         * `404` 属性不存在
         * `500` 增加失败
         
-* DELETE `/api/v0.1/attributes/citype/<int:type_id>` 删除CIType的属性
+* DELETE `/api/v0.1/ci_types/<int:type_id>/attributes` 删除CIType的属性
     * param
         * `string:attr_id` `,`分隔的`attr_id`
     
@@ -211,14 +315,14 @@
         
 ### CIType管理接口
 
-* `/api/v0.1/citypes` 列出所有CI类型
+* `/api/v0.1/ci_types` 列出所有CI类型
     * param `string:type_name` 类型名称，允许为空
     * return
      
     ```
     {
      "numfound": 2,
-     "citypes": [
+     "ci_types": [
         {
             "uniq_key": "sn",
             "type_name": "物理机",
@@ -238,8 +342,8 @@
     ```
     * error 无
     
-* GET `/api/v0.1/citypes/query` 查询CI类型
-    * param `string:type` 可以是type_id, type_name, type_alias
+* GET `/api/v0.1/ci_types/query` 查询CI类型
+    * param `string:q` 可以是type_id, type_name, type_alias
     * return
      
     ```
@@ -258,7 +362,7 @@
         * `400` message=输入参数缺失
         * `404` message='citype is not found'
     
-* POST `/api/v0.1/citypes` 增加新CIType
+* POST `/api/v0.1/ci_types` 增加新CIType
     * param (下列参数任意一个或多个)
         * `string:type_name` CIType名称
         *  `string:type_alias` 类型别名，可为空
@@ -281,7 +385,7 @@
         * `500` message=唯一属性不存在
         * `500` message=唯一属性不是唯一的 
                
-* PUT `/api/v0.1/citypes/<int:type_id>` 修改CIType
+* PUT `/api/v0.1/ci_types/<int:type_id>` 修改CIType
     * param (下列参数任意一个或多个)
         * `string:type_name` CIType名称
         *  `string:type_alias` 类型别名，可为空
@@ -304,7 +408,7 @@
         * `500` message=唯一属性不存在
         * `500` message=唯一属性不是唯一的
 
-* GET/POST `/api/v0.1/citypes/enable/<int:type_id>` 修改CIType
+* GET/POST `/api/v0.1/ci_types/<int:type_id>/enable` 修改CIType
     * param
         * `enabled` 0 or 1
     * return
@@ -319,7 +423,7 @@
         * `500` 设置失败
         * `404` CIType不存在
         
-* DELETE `/api/v0.1/citypes/<int:type_id>` 根据ID删除CIType
+* DELETE `/api/v0.1/ci_types/<int:type_id>` 根据ID删除CIType
     * return
     
     ```
@@ -333,17 +437,24 @@
         
 ### CITypeRelation管理接口
 
-* GET `/api/v0.1/cityperelations/types` 列出所有CIType关系类型名
+* GET `/api/v0.1/relation_types` 列出所有CIType关系类型名
     * return
           
     ```
-    {
-     "relation_types": ["连接", "位置", "附属", "部署"],
-    }
+    [
+      {
+        "created_at": null, 
+        "deleted": false, 
+        "deleted_at": null, 
+        "id": 1, 
+        "name": "contain", 
+        "updated_at": null
+      }
+    ]
     ```
     * error 无
     
-* GET `/api/v0.1/cityperelations/<int:parent>/children` 返回所有child id
+* GET `/api/v0.1/ci_type_relations/<int:parent_id>/children` 返回所有child id
     * return
      
     ```
@@ -363,7 +474,7 @@
     ```
     * error 无
     
-* GET `/api/v0.1/cityperelations/<int:child>/parents` 返回parent id
+* GET `/api/v0.1/ci_type_relations/<int:child_id>/parents` 返回parent id
     * return
      
     ```
@@ -374,26 +485,26 @@
     * error 无
     
 
-* POST `/api/v0.1/cityperelations/<int:parent>/<int:child>` 增加CIType关系
+* POST `/api/v0.1/ci_type_relations/<int:parent_id>/<int:child_id>` 增加CIType关系
     * param 
         * `string:relation_type` 类型名称
     * return
     
     ```
     {
-        "ctr_id":1
+        "ctr_id": 1
     }
     ``` 
     * error
         * `500` 增加失败
         * `404` CIType不存在
         
-* DELETE `/api/v0.1/cityperelations/<int:ctr_id>` 根据`ctr_id`删除CIType关系
+* DELETE `/api/v0.1/ci_type_relations/<int:ctr_id>` 根据`ctr_id`删除CIType关系
     * return
     
     ```
     {
-        "message":"CIType relation %s deleted" % type
+        "message": "CIType relation deleted"
     }
     ``` 
     * error
@@ -431,7 +542,7 @@
         ]
     }
     ```
-    * erorr
+    * error
         * `404` CIType不存在
         
 * GET `/api/v0.1/ci/<int:ci_id>` 查询CI
@@ -451,7 +562,7 @@
         "ci_id": 1
     }
     ```
-    * erorr 无
+    * error 无
     
     
         
@@ -465,10 +576,10 @@
     
     ```
     {
-        "ci_id":1,
+        "ci_id": 1,
     }
     ```
-    * erorr
+    * error
         * `500` 添加失败
         
 * PUT `/api/v0.1/ci` 修改CI
@@ -484,7 +595,7 @@
         "ci_id":1,
     }
     ```
-    * erorr
+    * error
         * `500` 添加失败
         
 * DELETE `/api/v0.1/ci/<int:ci_id>` 删除ci
@@ -495,23 +606,13 @@
         "message":"ok",
     }
     ```
-    * erorr
+    * error
         * `500` 删除失败
         
         
-## CIRelaiton管理接口
-
-* GET `/api/v0.1/cirelations/types` 列出所有CI关系类型名
-    * return
-     
-    ```
-    {
-     "relation_types": ["connect", "install", "deploy", "contain"],
-    }
-    ```
-    * error 无
+## CI Relation管理接口
     
-* GET `/api/v0.1/cirelations/<int:first_ci>/second_cis` 返回所有second id
+* GET `/api/v0.1/ci_relations/<int:first_ci_id>/second_cis` 返回所有second cis
     * return
      
     ```
@@ -530,7 +631,7 @@
     ```
     * error 无
     
-* GET `/api/v0.1/cirelations/<int:second_ci>/first_cis` 返回first ci id
+* GET `/api/v0.1/ci_relations/<int:second_ci_id>/first_cis` 返回first cis
     * return
      
     ```
@@ -550,7 +651,7 @@
     * error 无
     
 
-* POST `/api/v0.1/cirelations/<int:first_ci>/<int:second_ci>` 增加CI关系
+* POST `/api/v0.1/ci_relations/<int:first_ci_id>/<int:second_ci_id>` 增加CI关系
     * param 
         * `int: more`  more实例
         * `string:relation_type` 类型名称
@@ -565,12 +666,12 @@
         * `500` 增加失败
         * `404` CI不存在
         
-* DELETE `/api/v0.1/cirelations/delete/<int:cr_id>` 根据`cr_id`删除CI关系
+* DELETE `/api/v0.1/ci_relations/<int:cr_id>` 根据`cr_id`删除CI关系
     * return
     
     ```
     {
-        "message":"CIType relation %s deleted" % type
+        "message":"CIType relation deleted"
     }
     ``` 
     * error
@@ -580,7 +681,7 @@
                 
         
 ## 历史记录管理接口
-* GET `/api/v0.1/history/record` 查询历史记录
+* GET `/api/v0.1/history/records` 查询历史记录
     * param 
         * `int: page`  
         * `string: username` 变更用户
@@ -611,7 +712,7 @@
     ``` 
     * error 无
         
- * GET `/api/v0.1/history/<int:record_id>` 历史记录详情
+ * GET `/api/v0.1/history/records/<int:record_id>` 历史记录详情
     * return
     
     ```
