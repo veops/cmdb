@@ -10,6 +10,7 @@ from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributeCache
 from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.cache import CITypeCache
+from api.lib.cmdb.value import AttributeValueManager
 from api.lib.decorator import kwargs_required
 from api.models.cmdb import CI
 from api.models.cmdb import CIType
@@ -291,6 +292,9 @@ class CITypeAttributeManager(object):
                                              to_dict=False)
             if existed is not None:
                 existed.soft_delete()
+
+                for ci in CI.get_by(type_id=type_id, to_dict=False):
+                    AttributeValueManager.delete_attr_value(attr_id, ci.id)
 
                 CITypeAttributeCache.clean(type_id, attr_id)
 
