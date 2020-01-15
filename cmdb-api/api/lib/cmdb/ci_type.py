@@ -23,7 +23,6 @@ from api.models.cmdb import CITypeGroupItem
 from api.models.cmdb import CITypeRelation
 from api.models.cmdb import PreferenceShowAttributes
 from api.models.cmdb import PreferenceTreeView
-from api.tasks.cmdb import ci_cache
 
 
 class CITypeManager(object):
@@ -285,6 +284,8 @@ class CITypeAttributeManager(object):
         :param attr_ids: list
         :return: 
         """
+        from api.tasks.cmdb import ci_cache
+
         cls._check(type_id, attr_ids)
 
         for attr_id in attr_ids:
