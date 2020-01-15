@@ -10,6 +10,7 @@ from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributeCache
 from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.cache import CITypeCache
+from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.value import AttributeValueManager
 from api.lib.decorator import kwargs_required
 from api.models.cmdb import CI
@@ -22,6 +23,7 @@ from api.models.cmdb import CITypeGroupItem
 from api.models.cmdb import CITypeRelation
 from api.models.cmdb import PreferenceShowAttributes
 from api.models.cmdb import PreferenceTreeView
+from api.tasks.cmdb import ci_cache
 
 
 class CITypeManager(object):
@@ -295,6 +297,8 @@ class CITypeAttributeManager(object):
 
                 for ci in CI.get_by(type_id=type_id, to_dict=False):
                     AttributeValueManager.delete_attr_value(attr_id, ci.id)
+
+                    ci_cache.apply_async([ci.id], queue=CMDB_QUEUE)
 
                 CITypeAttributeCache.clean(type_id, attr_id)
 
