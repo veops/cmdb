@@ -11,6 +11,7 @@ from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributeCache
 from api.lib.cmdb.const import ExistPolicy
 from api.lib.cmdb.const import OperateType
+from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.cmdb.history import AttributeHistoryManger
 from api.lib.cmdb.utils import TableMap
 from api.lib.cmdb.utils import ValueTypeMap
@@ -156,7 +157,20 @@ class AttributeValueManager(object):
             existed_value = existed_attr and existed_attr.value
             if existed_value is None:
                 value_table.create(ci_id=ci.id, attr_id=attr.id, value=value)
+
                 self._write_change(ci.id, attr.id, OperateType.ADD, None, value)
             else:
-                existed_attr.update(value=value)
+                if not value and attr.value_type != ValueTypeEnum.TEXT:
+                    existed_attr.delete()
+                else:
+                    existed_attr.update(value=value)
+
                 self._write_change(ci.id, attr.id, OperateType.UPDATE, existed_value, value)
+
+    @staticmethod
+    def delete_attr_value(attr_id, ci_id):
+        attr = AttributeCache.get(attr_id)
+        if attr is not None:
+            value_table = TableMap(attr_name=attr.name).table
+            for item in value_table.get_by(attr_id=attr.id, ci_id=ci_id, to_dict=False):
+                item.delete()
