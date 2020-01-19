@@ -86,8 +86,7 @@
           v-model="CITypeGroup.attributes"
           group="properties"
           @start="drag=true"
-          @end="handleEnd"
-          @change="handleChange"
+          @change="(e)=>{handleChange(e, CITypeGroup.id)}"
           :filter="'.filter-empty'"
           :animation="100"
           tag="div"
@@ -164,8 +163,7 @@
         v-model="otherGroupAttributes"
         group="properties"
         @start="drag=true"
-        @end="handleEnd"
-        @change="handleChange"
+        @change="(e)=>{handleChange(e, -1)}"
         :animation="0"
         style="min-height: 2rem; width: 100%; display: flex; flex-flow: wrap">
 
@@ -251,14 +249,14 @@
 </template>
 
 <script>
-
+/* eslint-disable */
 import {
   deleteCITypeGroupById,
   getCITypeGroupById,
   createCITypeGroupById,
   updateCITypeGroupById
 } from '@/api/cmdb/CIType'
-import { getCITypeAttributesById, updateCITypeAttributesById } from '@/api/cmdb/CITypeAttr'
+import { getCITypeAttributesById, updateCITypeAttributesById, transferCITypeAttrIndex, transferCITypeGroupIndex } from '@/api/cmdb/CITypeAttr'
 import draggable from 'vuedraggable'
 
 export default {
@@ -272,6 +270,7 @@ export default {
       CITypeId: this.$route.params.CITypeId,
       CITypeName: this.$route.params.CITypeName,
       CITypeGroups: [],
+      addRemoveGroupFlag: {},
       attributes: [],
       otherGroupAttributes: [],
       addGroupBtnVisible: true,
@@ -312,7 +311,7 @@ export default {
         group.editable = false
         group.originOrder = group.order
         group.originName = group.name
-        group.attributes = group.attributes.sort((a, b) => a.order - b.order)
+        // group.attributes = group.attributes.sort((a, b) => a.order - b.order)
       })
 
       this.otherGroupAttributes = this.attributes.filter(x => !inGroupAttrKeys.includes(x.id)).sort((a, b) => a.order - b.order)
@@ -322,7 +321,7 @@ export default {
         attribute.originOrder = attribute.order
       })
 
-      console.log('setOtherGroupAttributes', this.CITypeGroups, this.otherGroupAttributes)
+      // console.log('setOtherGroupAttributes', this.CITypeGroups, this.otherGroupAttributes)
     },
     getCITypeGroupData () {
       const promises = [
@@ -387,13 +386,18 @@ export default {
     },
 
     handleMoveGroup (beforeIndex, afterIndex) {
-      const beforeGroup = this.CITypeGroups[beforeIndex]
-      this.CITypeGroups[beforeIndex] = this.CITypeGroups[afterIndex]
+      const fromGroupId = this.CITypeGroups[beforeIndex].id
+      const toGroupId = this.CITypeGroups[afterIndex].id
+      transferCITypeGroupIndex(this.CITypeId, { from: fromGroupId, to: toGroupId }).then(res => {
+        this.$message.success('操作成功')
+        const beforeGroup = this.CITypeGroups[beforeIndex]
+        this.CITypeGroups[beforeIndex] = this.CITypeGroups[afterIndex]
 
-      this.$set(this.CITypeGroups, beforeIndex, this.CITypeGroups[afterIndex])
-      this.$set(this.CITypeGroups, afterIndex, beforeGroup)
-
-      this.updatePropertyIndex()
+        this.$set(this.CITypeGroups, beforeIndex, this.CITypeGroups[afterIndex])
+        this.$set(this.CITypeGroups, afterIndex, beforeGroup)
+      }).catch(err => {
+        this.$httpError(err, '移动出错')
+      })
     },
     handleAddExistGroupAttr (index) {
       const group = this.CITypeGroups[index]
@@ -456,24 +460,50 @@ export default {
         })
         .catch(err => this.requestFailed(err))
     },
-    handleChange (e) {
-      console.log(e)
-      if (e.hasOwnProperty('moved')) {
-        this.shouldUpdatePropertyIndex = e.moved.newIndex !== e.moved.oldIndex
-      } else {
-        this.shouldUpdatePropertyIndex = true
+    handleChange (e, group) {
+      if (e.hasOwnProperty('moved') && e.moved.oldIndex !== e.moved.newIndex) {
+        if (group === -1) {
+          this.$message.error('更多属性不能进行排序, 如需排序需添加入其他分组中！')
+        } else {
+          transferCITypeAttrIndex(this.CITypeId,
+            {
+              from: { attr_id: e.moved.element.id, group_id: group > -1 ? group : null },
+              to: { order: e.moved.newIndex, group_id: group > -1 ? group : null }
+            }).then(res => this.$message.success('保存成功')).catch(err => {
+            this.$httpError(err)
+            this.abortDraggable()
+          })
+        }
+      }
+
+      if (e.hasOwnProperty('added')) {
+        this.addRemoveGroupFlag = { to: { group_id: group > -1 ? group : null, order: e.added.newIndex }, inited: true }
+      }
+
+      if (e.hasOwnProperty('removed')) {
+        this.$nextTick(() => {
+          transferCITypeAttrIndex(this.CITypeId,
+            {
+              from: { attr_id: e.removed.element.id, group_id: group > -1 ? group : null },
+              to: { group_id: this.addRemoveGroupFlag.to.group_id, order: this.addRemoveGroupFlag.to.order }
+            }).then(res => this.$message.success('保存成功')).catch(err => {
+            this.$httpError(err)
+            this.abortDraggable()
+          }).finally(() => {
+            this.addRemoveGroupFlag = {}
+          })
+        })
       }
     },
-    handleEnd (e) {
-      if (this.shouldUpdatePropertyIndex) {
-        this.updatePropertyIndex()
-        this.shouldUpdatePropertyIndex = false
-      }
+    abortDraggable () {
+      this.$nextTick(() => {
+        this.$router.push({name: 'ci_type'})
+      })
     },
     updatePropertyIndex () {
-      const attributes = []
-      let attributeOrder = 0
-      let groupOrder = 0
+      const attributes = []    // 全部属性
+      let attributeOrder = 0    // 属性组
+      let groupOrder = 0   // 组排序
       const promises = [
 
       ]
