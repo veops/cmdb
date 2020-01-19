@@ -122,3 +122,19 @@ export function deleteCITypeAttributesById (CITypeId, data) {
     data: data
   })
 }
+
+export function transferCITypeAttrIndex (CITypeId, data) {
+  return axios({
+    url: `/v0.1/ci_types/${CITypeId}/attributes/transfer`,
+    method: 'POST',
+    data: data
+  })
+}
+
+export function transferCITypeGroupIndex (CITypeId, data) {
+  return axios({
+    url: `/v0.1/ci_types/${CITypeId}/attribute_groups/transfer`,
+    method: 'POST',
+    data: data
+  })
+}
