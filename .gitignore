@@ -2,10 +2,7 @@
 .idea
 .vscode
 migrates
-*/logs/*
 config.cfg
-*.sql
-logs/*
 *.log
 *_packed.js
 *_packed.css
@@ -68,6 +65,7 @@ settings.py
 *.db
 
 # UI
+<<<<<<< HEAD
 ui/node_modules
 ui/dist
 
@@ -77,3 +75,13 @@ ui/yarn-debug.log*
 ui/yarn-error.log*
 ui/yarn.lock
 
+=======
+cmdb-ui/node_modules
+cmdb-ui/dist
+
+# Log files
+cmdb-ui/npm-debug.log*
+cmdb-ui/yarn-debug.log*
+cmdb-ui/yarn-error.log*
+cmdb-ui/package-lock.json
+>>>>>>> upstream/master
