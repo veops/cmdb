@@ -21,7 +21,7 @@ class CMDBTestClient(FlaskClient):
         headers.setdefault("User-Agent", "py.test")
         kwargs["headers"] = headers
 
-        json_data = kwargs.pop("json")
+        json_data = kwargs.pop("json", None)
         if json_data is not None:
             kwargs["data"] = json.dumps(json_data)
             if not kwargs.get("content_type"):
@@ -49,6 +49,7 @@ def app():
     _app.config['SECRET_KEY'] = CMDBTestClient.TEST_APP_SECRET
     _app.test_client_class = CMDBTestClient
     _app.response_class = CMDBTestResponse
+
     ctx = _app.test_request_context()
     ctx.push()
     yield _app
@@ -99,7 +100,6 @@ def clean_db():
         db.session.commit()
 
     if not User.get_by(email="test@xx.com"):
-        print("hello world xxxxx")
         u = User.create(
             flush=True,
             username="test",
