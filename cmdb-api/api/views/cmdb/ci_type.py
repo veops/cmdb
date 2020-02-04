@@ -164,6 +164,34 @@ class CITypeAttributeView(APIView):
         return self.jsonify(attributes=attr_id_list)
 
 
+class CITypeAttributeTransferView(APIView):
+    url_prefix = "/ci_types/<int:type_id>/attributes/transfer"
+
+    @args_required('from')
+    @args_required('to')
+    def post(self, type_id):
+        _from = request.values.get('from')  # {'attr_id': xx, 'group_id': xx}
+        _to = request.values.get('to')  # {'group_id': xx, 'order': xxx}
+
+        CITypeAttributeManager.transfer(type_id, _from, _to)
+
+        return self.jsonify(code=200)
+
+
+class CITypeAttributeGroupTransferView(APIView):
+    url_prefix = "/ci_types/<int:type_id>/attribute_groups/transfer"
+
+    @args_required('from')
+    @args_required('to')
+    def post(self, type_id):
+        _from = request.values.get('from')  # group_id
+        _to = request.values.get('to')  # group_id
+
+        CITypeAttributeGroupManager.transfer(type_id, _from, _to)
+
+        return self.jsonify(code=200)
+
+
 class CITypeAttributeGroupView(APIView):
     url_prefix = ("/ci_types/<int:type_id>/attribute_groups",
                   "/ci_types/attribute_groups/<int:group_id>")
