@@ -441,6 +441,8 @@ class CITypeAttributeGroupManager(object):
             return abort(400, "Group <{0}> duplicate".format(name))
         if name is not None:
             group.update(name=name)
+        else:
+            name = group.name
 
         cls.create_or_update(group.type_id, name, attr_order, group_order)
 
