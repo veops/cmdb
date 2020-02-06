@@ -15,13 +15,13 @@ from api.lib.database import Model
 class RelationType(Model):
     __tablename__ = "c_relation_types"
 
-    name = db.Column(db.String(16), index=True)
+    name = db.Column(db.String(16), index=True, nullable=False)
 
 
 class CITypeGroup(Model):
     __tablename__ = "c_ci_type_groups"
 
-    name = db.Column(db.String(32))
+    name = db.Column(db.String(32), nullable=False)
 
 
 class CITypeGroupItem(Model):
@@ -35,12 +35,12 @@ class CITypeGroupItem(Model):
 class CIType(Model):
     __tablename__ = "c_ci_types"
 
-    name = db.Column(db.String(32))
-    alias = db.Column(db.String(32))
+    name = db.Column(db.String(32), nullable=False)
+    alias = db.Column(db.String(32), nullable=False)
     unique_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"), nullable=False)
     enabled = db.Column(db.Boolean, default=True, nullable=False)
     is_attached = db.Column(db.Boolean, default=False, nullable=False)
-    icon_url = db.Column(db.String(256))
+    icon_url = db.Column(db.String(256), default='', nullable=False)
     order = db.Column(db.SmallInteger, default=0, nullable=False)
 
     unique_key = db.relationship("Attribute", backref="c_ci_types.unique_id")
@@ -89,7 +89,7 @@ class CITypeAttribute(Model):
 class CITypeAttributeGroup(Model):
     __tablename__ = "c_ci_type_attribute_groups"
 
-    name = db.Column(db.String(64))
+    name = db.Column(db.String(64), nullable=False)
     type_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)
     order = db.Column(db.SmallInteger, default=0)
 
@@ -266,8 +266,8 @@ class OperationRecord(Model):
     __tablename__ = "c_records"
 
     uid = db.Column(db.Integer, index=True, nullable=False)
-    origin = db.Column(db.String(32))
-    ticket_id = db.Column(db.String(32))
+    origin = db.Column(db.String(32), nullable=False)
+    ticket_id = db.Column(db.String(32), nullable=False)
     reason = db.Column(db.Text)
 
 
