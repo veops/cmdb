@@ -40,7 +40,9 @@ class CITypeManager(object):
 
     @staticmethod
     def check_is_existed(key):
-        return CITypeCache.get(key) or abort(404, "CIType <{0}> is not existed".format(key))
+        ci_type = CITypeCache.get(key) or abort(404, "CIType <{0}> is not existed".format(key))
+
+        return CIType.get_by_id(ci_type.id)
 
     @staticmethod
     def get_ci_types(type_name=None):
@@ -63,6 +65,9 @@ class CITypeManager(object):
         elif alias is not None:
             ci_type = CIType.get_by(alias=alias, first=True, to_dict=False)
         else:
+            return
+
+        if not ci_type:
             return
 
         if type_id is not None and ci_type.id != type_id:
