@@ -4,14 +4,20 @@
       <router-link
         v-if="item.name != name && index != 1"
         :to="{ path: item.path === '' ? '/' : item.path }"
-      >{{ item.meta.title }}</router-link>
-      <span v-else>{{ item.meta.title }}</span>
+      >{{ i18nRender(item.meta.title) }}</router-link>
+      <span v-else>{{ i18nRender(item.meta.title) }}</span>
     </a-breadcrumb-item>
   </a-breadcrumb>
 </template>
 
 <script>
 export default {
+  props: {
+    i18nRender: {
+      type: Function,
+      default: (r) => `${r}`
+    }
+  },
   data () {
     return {
       name: '',

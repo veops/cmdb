@@ -11,6 +11,7 @@
       :menu="menus"
       :theme="theme"
       :mode="mode"
+      :i18n-render="i18nRender"
       @select="onSelect"
       style="padding: 16px 0px;"></s-menu>
   </a-layout-sider>
@@ -20,6 +21,7 @@
 <script>
 import Logo from '@/components/tools/Logo'
 import SMenu from './index'
+import { i18nRender } from '@/locales'
 import { mixin, mixinDevice } from '@/utils/mixin'
 
 export default {
@@ -53,6 +55,7 @@ export default {
     }
   },
   methods: {
+    i18nRender,
     onSelect (obj) {
       this.$emit('menuSelect', obj)
     }
