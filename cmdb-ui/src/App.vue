@@ -7,11 +7,12 @@
 </template>
 
 <script>
-import zhCN from 'ant-design-vue/lib/locale-provider/zh_CN'
+import i18n from '@/locales'
 import { AppDeviceEnquire } from '@/utils/mixin'
+import { mixin } from '@/store/i18n-mixin'
 
 export default {
-  mixins: [AppDeviceEnquire],
+  mixins: [AppDeviceEnquire, mixin],
   provide () {
     return {
       reload: this.reload
@@ -19,11 +20,16 @@ export default {
   },
   data () {
     return {
-      locale: zhCN,
+      locale: {},
       alive: true
     }
   },
-  mounted () {},
+  created () {
+    this.$watch('currentLang', () => {
+      this.locale = i18n.getLocaleMessage(this.currentLang).antLocale
+    })
+  },
+
   methods: {
     reload () {
       this.alive = false

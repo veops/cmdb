@@ -1,7 +1,7 @@
 <template>
   <div class="page-header">
     <div class="page-header-index-wide">
-      <s-breadcrumb />
+      <s-breadcrumb :i18n-render="i18nRender" />
       <div class="detail">
         <div class="main" v-if="!$route.meta.hiddenHeaderContent">
           <div class="row">
@@ -32,7 +32,9 @@
 </template>
 
 <script>
+/* eslint-disable */
 import Breadcrumb from '@/components/tools/Breadcrumb'
+import { i18nRender } from '@/locales'
 
 export default {
   name: 'PageHeader',
@@ -58,6 +60,9 @@ export default {
   },
   data () {
     return {}
+  },
+  methods () {
+    i18nRender
   }
 }
 </script>
