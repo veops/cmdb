@@ -10,21 +10,21 @@ const cmdbRouter = [
     path: '/preference',
     component: () => import('@/views/cmdb/preference'),
     name: 'cmdb_preference',
-    meta: { title: '我的订阅', icon: 'book', keepAlive: true }
+    meta: { title: 'menu.preference', icon: 'book', keepAlive: true }
   },
   // relation views
   {
     path: '/relation_views',
     component: () => import('@/views/cmdb/relation_views'),
     name: 'cmdb_relation_views',
-    meta: { title: '关系视图', icon: 'link', keepAlive: true },
+    meta: { title: 'menu.relationViews', icon: 'link', keepAlive: true },
     hideChildrenInMenu: true,
     children: [
       {
         path: '/relation_views/:viewId',
         name: 'cmdb_relation_views_item',
         component: () => import('@/views/cmdb/relation_views'),
-        meta: { title: '关系视图', keepAlive: true },
+        meta: { title: 'menu.relationViews', keepAlive: true },
         hidden: true
       }]
   },
@@ -33,14 +33,14 @@ const cmdbRouter = [
     path: '/tree_views',
     component: () => import('@/views/cmdb/tree_views'),
     name: 'cmdb_tree_views',
-    meta: { title: '树形视图', icon: 'share-alt', keepAlive: true },
+    meta: { title: 'menu.treeViews', icon: 'share-alt', keepAlive: true },
     hideChildrenInMenu: true,
     children: [
       {
         path: '/tree_views/:typeId',
         name: 'cmdb_tree_views_item',
         component: () => import('@/views/cmdb/tree_views'),
-        meta: { title: '树形视图', keepAlive: true },
+        meta: { title: 'menu.treeViews', keepAlive: true },
         hidden: true
       }]
   },
@@ -49,14 +49,14 @@ const cmdbRouter = [
     path: '/batch',
     component: () => import('@/views/cmdb/batch'),
     name: 'cmdb_batch',
-    meta: { 'title': '批量导入', icon: 'upload', keepAlive: true }
+    meta: { 'title': 'menu.batch', icon: 'upload', keepAlive: true }
   },
   {
     path: '/config//ci_types',
     name: 'cmdb_ci_type',
     component: RouteView,
     redirect: '/ci_types',
-    meta: { title: '模型配置', icon: 'setting', permission: ['admin'] },
+    meta: { title: 'menu.ciType', icon: 'setting', permission: ['admin'] },
     children: [
       {
         path: '/config/ci_types',
@@ -101,7 +101,7 @@ const cmdbRouter = [
     name: 'cmdb_acl',
     component: RouteView,
     redirect: '/acl/users',
-    meta: { title: '权限管理', icon: 'safety-certificate', permission: ['admin'] },
+    meta: { title: 'menu.acl', icon: 'safety-certificate', permission: ['admin'] },
     children: [
       {
         path: '/acl/users',
