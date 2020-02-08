@@ -1,78 +1,126 @@
 <template>
-  <a-card :bordered="false">
-    <a-spin :tip="loadTip" :spinning="loading">
-      <search-form ref="search" @refresh="refreshTable" :preferenceAttrList="preferenceAttrList" />
+  <div>
+    <a-card :bordered="false">
+      <a-spin :tip="loadTip" :spinning="loading">
+        <search-form ref="search" @refresh="refreshTable" :preferenceAttrList="preferenceAttrList" />
 
-      <ci-detail ref="detail" :typeId="typeId" />
+        <ci-detail ref="detail" :typeId="typeId" />
 
-      <div class="table-operator">
-        <a-button
-          type="primary"
-          icon="plus"
-          @click="$refs.create.visible = true; $refs.create.action='create'"
-        >新建</a-button>
-        <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">
-          <a-menu slot="overlay">
-            <a-menu-item
-              key="batchUpdate"
-              @click="$refs.create.visible = true; $refs.create.action='update'"
-            >
-              <span @click="$refs.create.visible = true">
-                <a-icon type="edit" />&nbsp;修改
-              </span>
-            </a-menu-item>
-            <a-menu-item key="batchDownload" @click="batchDownload">
-              <json-excel :fetch="batchDownload" name="cmdb.xls">
-                <a-icon type="download" />&nbsp;下载
-              </json-excel>
-            </a-menu-item>
-            <a-menu-item key="batchDelete" @click="batchDelete">
-              <a-icon type="delete" />删除
-            </a-menu-item>
-          </a-menu>
-          <a-button style="margin-left: 8px">
-            批量操作
-            <a-icon type="down" />
-          </a-button>
-        </a-dropdown>
-      </div>
-      <s-table
-        bordered
-        ref="table"
-        size="middle"
-        rowKey="ci_id"
-        :columns="columns"
-        :data="loadInstances"
-        :alert="options.alert"
-        :rowSelection="options.rowSelection"
-        :scroll="{ x: scrollX, y: scrollY }"
-        :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条记录`, pageSizeOptions: pageSizeOptions}"
-        showPagination="auto"
-        :pageSize="25"
-      >
-        <template :slot="col.dataIndex" slot-scope="text, record" v-for="col in columns">
-          <editable-cell
-            :key="'edit_' + col.dataIndex"
-            :text="text"
-            @change="onCellChange(record.key, col.dataIndex, $event, record[col.dataIndex])"
-          />
-        </template>
-
-        <span slot="action" slot-scope="text, record">
-          <template>
-            <a
-              @click="$refs.detail.visible = true; $refs.detail.ciId = record.key; $refs.detail.create()"
-            >详情</a>
-
-            <a-divider type="vertical" />
-            <a @click="deleteCI(record)">删除</a>
+        <div class="table-operator">
+          <a-button
+            type="primary"
+            icon="plus"
+            @click="$refs.create.visible = true; $refs.create.action='create'"
+          >新建</a-button>
+          <a-button class="right" @click="showDrawer(typeId)">显示字段</a-button>
+          <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">
+            <a-menu slot="overlay">
+              <a-menu-item
+                key="batchUpdate"
+                @click="$refs.create.visible = true; $refs.create.action='update'"
+              >
+                <span @click="$refs.create.visible = true">
+                  <a-icon type="edit" />&nbsp;修改
+                </span>
+              </a-menu-item>
+              <a-menu-item key="batchDownload" @click="batchDownload">
+                <json-excel :fetch="batchDownload" name="cmdb.xls">
+                  <a-icon type="download" />&nbsp;下载
+                </json-excel>
+              </a-menu-item>
+              <a-menu-item key="batchDelete" @click="batchDelete">
+                <a-icon type="delete" />删除
+              </a-menu-item>
+            </a-menu>
+            <a-button style="margin-left: 8px">
+              批量操作
+              <a-icon type="down" />
+            </a-button>
+          </a-dropdown>
+        </div>
+        <s-table
+          bordered
+          ref="table"
+          size="middle"
+          rowKey="ci_id"
+          :columns="columns"
+          :data="loadInstances"
+          :alert="options.alert"
+          :rowSelection="options.rowSelection"
+          :scroll="{ x: scrollX, y: scrollY }"
+          :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条记录`, pageSizeOptions: pageSizeOptions}"
+          showPagination="auto"
+          :pageSize="25"
+        >
+          <template :slot="col.dataIndex" slot-scope="text, record" v-for="col in columns">
+            <editable-cell
+              :key="'edit_' + col.dataIndex"
+              :text="text"
+              @change="onCellChange(record.key, col.dataIndex, $event, record[col.dataIndex])"
+            />
           </template>
-        </span>
-      </s-table>
 
-      <create-instance-form @refresh="refreshTable" ref="create" @submit="batchUpdate" />
-    </a-spin>
-  </a-card>
+          <span slot="action" slot-scope="text, record">
+            <template>
+              <a
+                @click="$refs.detail.visible = true; $refs.detail.ciId = record.key; $refs.detail.create()"
+              >详情</a>
+
+              <a-divider type="vertical" />
+              <a @click="deleteCI(record)">删除</a>
+            </template>
+          </span>
+        </s-table>
+
+        <create-instance-form @refresh="refreshTable" ref="create" @submit="batchUpdate" />
+      </a-spin>
+    </a-card>
+
+    <template>
+      <div>
+        <a-drawer
+          title="显示字段定义"
+          :width="600"
+          @close="onClose"
+          :visible="visible"
+          :wrapStyle="{height: 'calc(100% - 108px)', overflow: 'auto', paddingBottom: '108px'}"
+        >
+          <template>
+            <a-transfer
+              :dataSource="attrList"
+              :showSearch="true"
+              :listStyle="{
+                width: '230px',
+                height: '500px',
+              }"
+              :titles="['未选属性','已选属性']"
+              :render="item=>item.title"
+              :targetKeys="selectedAttrList"
+              @change="handleChange"
+              @search="handleSearch"
+            >
+              <span slot="notFoundContent">没数据</span>
+            </a-transfer>
+          </template>
+          <div
+            :style="{
+              position: 'absolute',
+              left: 0,
+              bottom: 0,
+              width: '100%',
+              borderTop: '1px solid #e9e9e9',
+              padding: '10px 16px',
+              background: '#fff',
+              textAlign: 'right',
+            }"
+          >
+            <a-button :style="{marginRight: '8px'}" @click="onClose">取消</a-button>
+            <a-button @click="subInstanceSubmit" type="primary">提交</a-button>
+          </div>
+        </a-drawer>
+      </div>
+    </template>
+  </div>
 </template>
 
 <script>
@@ -85,8 +133,9 @@ import CreateInstanceForm from './modules/CreateInstanceForm'
 import EditableCell from './modules/EditableCell'
 import CiDetail from './modules/CiDetail'
 import { searchCI, updateCI, deleteCI } from '@/api/cmdb/ci'
-import { getSubscribeAttributes } from '@/api/cmdb/preference'
+import { getSubscribeAttributes, subscribeCIType } from '@/api/cmdb/preference'
 import { notification } from 'ant-design-vue'
+import { getCITypeAttributesByName } from '@/api/cmdb/CITypeAttr'
 
 var valueTypeMap = {
   '0': 'int',
@@ -122,6 +171,10 @@ export default {
       scrollY: 0,
 
       preferenceAttrList: [],
+
+      selectedAttrList: [],
+      attrList: [],
+      visible: false,
 
       instanceList: [],
       // 表头
@@ -202,6 +255,58 @@ export default {
   },
   inject: ['reload'],
   methods: {
+    showDrawer () {
+      this.getAttrList()
+    },
+    getAttrList () {
+      getCITypeAttributesByName(this.typeId).then(res => {
+        const attributes = res.attributes
+        getSubscribeAttributes(this.typeId).then(_res => {
+          const attrList = []
+          const selectedAttrList = []
+          const subAttributes = _res.attributes
+          this.instanceSubscribed = _res.is_subscribed
+          subAttributes.forEach(item => {
+            selectedAttrList.push(item.id.toString())
+          })
+
+          attributes.forEach(item => {
+            const data = {
+              key: item.id.toString(),
+              title: item.alias || item.name
+            }
+            attrList.push(data)
+          })
+
+          this.attrList = attrList
+          this.selectedAttrList = selectedAttrList
+          this.visible = true
+        })
+      })
+    },
+    onClose () {
+      this.visible = false
+      this.reload()
+    },
+    subInstanceSubmit () {
+      subscribeCIType(this.typeId, this.selectedAttrList)
+        .then(res => {
+          notification.success({
+            message: '修改成功'
+          })
+          this.reload()
+        })
+        .catch(e => {
+          notification.error({
+            message: e.response.data.message
+          })
+        })
+    },
+    handleChange (targetKeys, direction, moveKeys) {
+      this.selectedAttrList = targetKeys
+    },
+    handleSearch (dir, value) {},
+
     setColumnWidth () {
       let rows = []
       try {
@@ -445,15 +550,18 @@ export default {
 }
 </script>
 
-<style>
-.ant-table-thead > tr > th,
-.ant-table-tbody > tr > td {
+<style lang='less' scoped>
+/deep/ .ant-table-thead > tr > th,
+/deep/ .ant-table-tbody > tr > td {
   white-space: nowrap;
   overflow: hidden;
 }
-.spin-content {
+/deep/ .spin-content {
   border: 1px solid #91d5ff;
   background-color: #e6f7ff;
   padding: 30px;
+}
+.right {
+  float: right;
 }
 </style>
