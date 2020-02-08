@@ -56,7 +56,7 @@
           class="login-button"
           :loading="state.loginBtn"
           :disabled="state.loginBtn"
-        >确定</a-button>
+        >{{ $t('button.submit') }}</a-button>
       </a-form-item>
 
     </a-form>

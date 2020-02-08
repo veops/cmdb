@@ -7,7 +7,7 @@
     <a-row>
       <a-col :span="18">
         <a-card style="height: 605px">
-          <a-button class="ant-btn-primary" style="margin-left: 10px;" :disabled="uploadFlag" id="upload-button" @click="uploadData">上传</a-button>
+          <a-button class="ant-btn-primary" style="margin-left: 10px;" :disabled="uploadFlag" id="upload-button" @click="uploadData">{{ $t('button.upload') }}</a-button>
           <upload-file-form v-if="displayUpload" ref="fileEditor"></upload-file-form>
           <ci-table v-if="editorOnline" :ciTypeAttrs="ciTypeAttrs" ref="onlineEditor"></ci-table>
         </a-card>

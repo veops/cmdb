@@ -10,7 +10,7 @@
           type="primary"
           icon="plus"
           @click="$refs.create.visible = true; $refs.create.action='create'"
-        >新建</a-button>
+        >{{ $t('button.add') }}</a-button>
         <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">
           <a-menu slot="overlay">
             <a-menu-item
@@ -23,11 +23,11 @@
             </a-menu-item>
             <a-menu-item key="batchDownload" @click="batchDownload">
               <json-excel :fetch="batchDownload" name="cmdb.xls">
-                <a-icon type="download" />&nbsp;下载
+                <a-icon type="download" />&nbsp;{{ $t('tip.download') }}
               </json-excel>
             </a-menu-item>
             <a-menu-item key="batchDelete" @click="batchDelete">
-              <a-icon type="delete" />删除
+              <a-icon type="delete" />{{ $t('tip.delete') }}
             </a-menu-item>
           </a-menu>
           <a-button style="margin-left: 8px">
@@ -62,10 +62,10 @@
           <template>
             <a
               @click="$refs.detail.visible = true; $refs.detail.ciId = record.key; $refs.detail.create()"
-            >详情</a>
+            >{{ $t('tip.detail') }}</a>
 
             <a-divider type="vertical" />
-            <a @click="deleteCI(record)">删除</a>
+            <a @click="deleteCI(record)">{{ $t('tip.delete') }}</a>
           </template>
         </span>
       </s-table>

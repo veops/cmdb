@@ -8,6 +8,37 @@ export default {
     treeViews: 'Treeviews',
     batch: 'Batch',
     ciType: 'CiType',
-    acl: 'ACL'
+    acl: 'ACL',
+    ciModelManager: 'Model',
+    ciPropertyRep: 'Propertys',
+    ciRelationType: 'RelationType',
+    ciRelationViewDefine: 'RelationViewDefine',
+    aclUsersManager: 'Users',
+    aclRolesManager: 'Roles',
+    aclResourceManager: 'Resources',
+    aclResourceType: 'ResourceType'
+  },
+  button: {
+    cancel: 'Cancel',
+    submit: 'Submit',
+    query: 'Query',
+    add: 'Add',
+    delete: 'Delete',
+    yes: 'Yes',
+    no: 'No',
+    reset: 'Reset',
+    subscribe: 'Subscribe',
+    download: 'Download',
+    upload: 'Upload'
+  },
+  tip: {
+    subscribed: 'Subscribedu',
+    unsubscribed: 'Unsubscribed',
+    unfold: 'Unfold',
+    fold: 'Fold',
+    detail: 'Detail',
+    delete: 'Delete',
+    edit: 'Edit',
+    operate: 'Operate'
   }
 }
