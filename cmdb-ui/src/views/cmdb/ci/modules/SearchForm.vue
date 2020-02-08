@@ -73,14 +73,14 @@
             class="table-page-search-submitButtons"
             :style="advanced && { float: 'right', overflow: 'hidden' } || {} "
           >
-            <a-button type="primary" @click="$emit('refresh', true)" v-if="preferenceAttrList.length">查询</a-button>
-            <a-button style="margin-left: 8px" @click="() => queryParam = {}" v-if="preferenceAttrList.length">重置</a-button>
+            <a-button type="primary" @click="$emit('refresh', true)" v-if="preferenceAttrList.length">{{ $t('button.query') }}</a-button>
+            <a-button style="margin-left: 8px" @click="() => queryParam = {}" v-if="preferenceAttrList.length">{{ $t('button.reset') }}</a-button>
             <a
               @click="toggleAdvanced"
               style="margin-left: 8px"
               v-if="preferenceAttrList.length > 4"
             >
-              {{ advanced ? '收起' : '展开' }}
+              {{ advanced ? $t('tip.fold') : $t('tip.unfold') }}
               <a-icon :type="advanced ? 'up' : 'down'" />
             </a>
           </span>

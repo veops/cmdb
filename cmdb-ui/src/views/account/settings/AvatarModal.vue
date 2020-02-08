@@ -28,7 +28,7 @@
     </a-row>
 
     <template slot="footer">
-      <a-button key="back" @click="cancelHandel">取消</a-button>
+      <a-button key="back" @click="cancelHandel">{{ $t('button.cancel') }}</a-button>
       <a-button key="submit" type="primary" :loading="confirmLoading" @click="okHandel">保存</a-button>
     </template>
   </a-modal>

@@ -21,7 +21,7 @@
 
       <span slot="action" slot-scope="text, record">
         <template>
-          <a @click="handleDelete(record)">删除</a>
+          <a @click="handleDelete(record)">{{ $t('tip.delete') }}</a>
         </template>
       </span>
 
@@ -65,8 +65,8 @@
 
           }"
         >
-          <a-button @click="handleSubmit" type="primary" style="margin-right: 1rem">确定</a-button>
-          <a-button @click="onClose">取消</a-button>
+          <a-button @click="handleSubmit" type="primary" style="margin-right: 1rem">{{ $t('button.submit') }}</a-button>
+          <a-button @click="onClose">{{ $t('button.cancel') }}</a-button>
 
         </div>
       </a-form>
