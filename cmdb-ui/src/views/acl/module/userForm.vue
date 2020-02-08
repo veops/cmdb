@@ -133,8 +133,8 @@
 
         }"
       >
-        <a-button @click="handleSubmit" type="primary" style="margin-right: 1rem">确定</a-button>
-        <a-button @click="onClose">取消</a-button>
+        <a-button @click="handleSubmit" type="primary" style="margin-right: 1rem">{{ $t('button.submit') }}</a-button>
+        <a-button @click="onClose">{{ $t('button.cancel') }}</a-button>
 
       </div>
 

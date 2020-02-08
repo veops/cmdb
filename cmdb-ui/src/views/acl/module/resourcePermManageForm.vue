@@ -30,7 +30,7 @@
       </a-form-item>
       <div class="btn-group">
         <a-button @click="handleSubmit" type="primary" style="margin-right: 1rem">添加</a-button>
-        <a-button @click="closeForm">取消</a-button>
+        <a-button @click="closeForm">{{ $t('button.cancel') }}</a-button>
       </div>
 
     </a-form>

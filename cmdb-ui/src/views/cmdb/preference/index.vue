@@ -17,11 +17,11 @@
                 <span
                   :class="item.is_subscribed?'subscribe-success':'unsubscribe'"
                   slot="title"
-                >{{ item.is_subscribed ? "已订阅" : "未订阅" }}</span>
+                >{{ item.is_subscribed ?  $t('tip.subscribed') : $t('tip.unsubscribed') }}</span>
               </a-card-meta>
               <template class="ant-card-actions" slot="actions">
-                <a :disabled="!item.is_subscribed" @click="unsubscribe(item.id)">取消</a>
-                <a @click="showDrawer(item.id, item.alias || item.name)">订阅</a>
+                <a :disabled="!item.is_subscribed" @click="unsubscribe(item.id)">{{ $t('button.cancel') }}</a>
+                <a @click="showDrawer(item.id, item.alias || item.name)">{{ $t('button.subscribe') }}</a>
               </template>
             </a-card>
           </template>
@@ -43,8 +43,8 @@
               <span
                 v-if="treeSubscribed"
                 style="font-weight: 500; font-size: 12px; color: green"
-              >已订阅</span>
-              <span style="font-weight: 500; font-size: 12px; color: red" v-else>未订阅</span>
+              >{{ $t('tip.subscribed') }}</span>
+              <span style="font-weight: 500; font-size: 12px; color: red" v-else>{{ $t('tip.unsubscribed') }}</span>
             </a-divider>
             <a-select
               ref="tree"
@@ -60,7 +60,7 @@
               @click="subTreeSubmit"
               type="primary"
               :style="{float: 'right', marginTop: '10px'}"
-            >订阅</a-button>
+            >{{ $t('button.subscribe') }}</a-button>
             <br />
             <br />
 
@@ -101,8 +101,8 @@
                 textAlign: 'right',
               }"
             >
-              <a-button :style="{marginRight: '8px'}" @click="onClose">取消</a-button>
-              <a-button @click="subInstanceSubmit" type="primary">订阅</a-button>
+              <a-button :style="{marginRight: '8px'}" @click="onClose">{{ $t('button.cancel') }}</a-button>
+              <a-button @click="subInstanceSubmit" type="primary">{{ $t('button.subscribe') }}</a-button>
             </div>
           </a-drawer>
         </div>

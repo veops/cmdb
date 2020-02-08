@@ -19,7 +19,7 @@
               style="margin-left: 20px"
               :disabled="downLoadButtonDis"
               @click="downLoadExcel"
-            >下载模板</a-button>
+            >{{ $t('button.download') }}</a-button>
           </a-form-item>
         </a-col>
       </a-row>
