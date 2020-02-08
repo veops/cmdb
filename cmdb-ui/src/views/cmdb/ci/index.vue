@@ -286,7 +286,6 @@ export default {
     },
     onClose () {
       this.visible = false
-      this.reload()
     },
     subInstanceSubmit () {
       subscribeCIType(this.typeId, this.selectedAttrList)
