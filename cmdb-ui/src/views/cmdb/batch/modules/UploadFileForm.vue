@@ -5,8 +5,8 @@
         <p class="ant-upload-drag-icon">
           <a-icon type="inbox" />
         </p>
-        <p class="ant-upload-text">点击或拖拽文件至此上传！</p>
-        <p class="ant-upload-hint">支持文件类型：xls</p>
+        <p class="ant-upload-text">{{ $t('batch.dragFileHere') }}</p>
+        <p class="ant-upload-hint">{{ $t('batch.suportFileType') }} : xls</p>
       </a-upload-dragger>
     </a-form>
     <a-divider>or</a-divider>

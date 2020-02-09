@@ -14,7 +14,7 @@
       </a-col>
       <a-col :span="6">
         <div style="min-height: 604px; background: white">
-          <a-card title="上传结果">
+          <a-card :title="$t('batch.uploadResult')">
             <upload-result v-if="beginLoad" :upLoadData="needDataList" :ciType="ciType" :unique-field="uniqueField"></upload-result>
           </a-card>
         </div>
