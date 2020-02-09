@@ -3,16 +3,21 @@ import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 // default language
 import enUS from './lang/en-US'
+import zhCN from './lang/zh-CN'
 // change default accept-language
 import { axios } from '@/utils/request'
 
 Vue.use(VueI18n)
 
-export const defaultLang = 'en-US'
+export const defaultLang = 'zh-CN'
+export const showLocale = true
 
 const messages = {
   'en-US': {
     ...enUS
+  },
+  'zh-CN': {
+    ...zhCN
   }
 }
 
@@ -27,9 +32,6 @@ export default i18n
 const loadedLanguages = [defaultLang]
 
 // 从缓存設置中加载当前语言
-// if (Vue.ls.get('lang') !== null && defaultLang !== Vue.ls.get('lang')) {
-//   loadLanguageAsync(localStorage.lang)
-// }
 
 function setI18nLanguage (lang) {
   i18n.locale = lang
@@ -38,11 +40,6 @@ function setI18nLanguage (lang) {
   return lang
 }
 
-/**
- * i18n Render
- * @param key
- * @returns rendered string
- */
 export function i18nRender (key) {
   return i18n.t(key)
 }
@@ -64,3 +61,7 @@ export function loadLanguageAsync (lang = defaultLang) {
     return resolve(lang)
   })
 }
+
+// if (Vue.ls.get('lang') !== null && defaultLang !== Vue.ls.get('lang')) {
+//   loadLanguageAsync(localStorage.lang)
+// }
