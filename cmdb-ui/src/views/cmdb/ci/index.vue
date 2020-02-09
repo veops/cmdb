@@ -23,7 +23,7 @@
             </a-menu-item>
             <a-menu-item key="batchDownload" @click="batchDownload">
               <json-excel :fetch="batchDownload" name="cmdb.xls">
-                <a-icon type="download" />&nbsp;{{ $t('tip.download') }}
+                <a-icon type="download" />&nbsp;下载
               </json-excel>
             </a-menu-item>
             <a-menu-item key="batchDelete" @click="batchDelete">
@@ -31,7 +31,7 @@
             </a-menu-item>
           </a-menu>
           <a-button style="margin-left: 8px">
-            批量操作
+            {{ $t('ci.batchOperate') }}
             <a-icon type="down" />
           </a-button>
         </a-dropdown>

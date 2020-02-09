@@ -31,15 +31,15 @@
       <template>
         <div>
           <a-drawer
-            :title="'订阅模型: ' + typeName"
+            :title="$t('preference.subscribeModel') +':'+ typeName"
             :width="600"
             @close="onClose"
             :visible="visible"
             :wrapStyle="{height: 'calc(100% - 108px)', overflow: 'auto', paddingBottom: '108px'}"
           >
-            <a-alert message="既可以定义树形视图, 也可以订阅资源视图, 资源视图会在SideBar单独呈现" type="info" showIcon />
+            <a-alert :message="$t('preference.subFormTip')" type="info" showIcon />
             <a-divider>
-              树形视图
+              {{ $t('menu.treeViews') }}
               <span
                 v-if="treeSubscribed"
                 style="font-weight: 500; font-size: 12px; color: green"
@@ -65,12 +65,12 @@
             <br />
 
             <a-divider>
-              资源视图
+              {{ $t('preference.resourceView') }}
               <span
                 v-if="instanceSubscribed"
                 style="font-weight: 500; font-size: 12px; color: green"
-              >已订阅</span>
-              <span style="font-weight: 500; font-size: 12px; color: red" v-else>未订阅</span>
+              >{{ $t('tip.subscribed') }}</span>
+              <span style="font-weight: 500; font-size: 12px; color: red" v-else>{{ $t('tip.unsubscribed') }}</span>
             </a-divider>
             <template>
               <a-transfer
