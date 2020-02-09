@@ -32,6 +32,7 @@ export default {
     upload: 'Upload'
   },
   tip: {
+    sourceCode: 'view on',
     subscribed: 'Subscribed',
     unsubscribed: 'Unsubscribed',
     unfold: 'Unfold',

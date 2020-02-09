@@ -32,6 +32,7 @@ export default {
     upload: '上传'
   },
   tip: {
+    sourceCode: '源代码',
     subscribed: '已订阅',
     unsubscribed: '未订阅',
     unfold: '展开',
