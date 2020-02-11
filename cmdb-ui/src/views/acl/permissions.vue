@@ -39,7 +39,7 @@
           @click="() => handleReset(clearFilters, column)"
           size="small"
           style="width: 90px"
-        >重置</a-button>
+        >{{ $t('button.reset') }}</a-button>
       </div>
       <a-icon slot="filterIcon" slot-scope="filtered" type="search" :style="{ color: filtered ? '#108ee9' : undefined }" />
 
@@ -61,7 +61,7 @@
 
       <span slot="action" slot-scope="text, record">
         <template>
-          <a @click="handleEdit(record)">编辑</a>
+          <a @click="handleEdit(record)">{{ $t('tip.edit') }}</a>
           <a-divider type="vertical"/>
 
           <a-popconfirm
@@ -71,7 +71,7 @@
             okText="是"
             cancelText="否"
           >
-            <a>删除</a>
+            <a>{{ $t('tip.delete') }}</a>
           </a-popconfirm>
         </template>
       </span>

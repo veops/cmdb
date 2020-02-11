@@ -68,7 +68,7 @@
 
       <span slot="action" slot-scope="text, record">
         <template>
-          <a @click="handleEdit(record)">编辑</a>
+          <a @click="handleEdit(record)">{{ $t('tip.edit') }}</a>
           <a-divider type="vertical"/>
 
           <a-popconfirm
@@ -77,7 +77,7 @@
             okText="是"
             cancelText="否"
           >
-            <a>删除</a>
+            <a>{{ $t('tip.delete') }}</a>
           </a-popconfirm>
         </template>
       </span>
@@ -124,8 +124,8 @@
 
           }"
         >
-          <a-button @click="handleBatchUpdateSubmit" type="primary" style="margin-right: 1rem">确定</a-button>
-          <a-button @click="onBatchBindAttrActionClose">取消</a-button>
+          <a-button @click="handleBatchUpdateSubmit" type="primary" style="margin-right: 1rem">{{ $t('button.submit') }}</a-button>
+          <a-button @click="onBatchBindAttrActionClose">{{ $t('button.cancel') }}</a-button>
 
         </div>
       </a-form>

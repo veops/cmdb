@@ -12,7 +12,7 @@
             ref="addGroupInput"
             v-model.trim="newGroupName" />
           <a @click="handleCreateGroup" style="margin-right: 0.5rem">保存</a>
-          <a @click="handleCancelCreateGroup">取消</a>
+          <a @click="handleCancelCreateGroup">{{ $t('button.cancel') }}</a>
         </span>
       </template>
 
@@ -37,7 +37,7 @@
               ref="editGroupInput"
               v-model.trim="CITypeGroup.name" />
             <a @click="handleSaveGroupName(index, CITypeGroup)" style="margin-right: 0.5rem">保存</a>
-            <a @click="handleCancelGroupName(index, CITypeGroup)">取消</a>
+            <a @click="handleCancelGroupName(index, CITypeGroup)">{{ $t('button.cancel') }}</a>
           </span>
         </template>
 

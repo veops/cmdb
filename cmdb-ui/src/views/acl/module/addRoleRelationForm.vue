@@ -44,7 +44,7 @@
       >
         <a-button @click="handleAddParent" type="primary" style="margin-right: 1rem">关联父角色</a-button>
         <a-button @click="handleAddChild" type="primary" style="margin-right: 1rem">关联子角色</a-button>
-        <a-button @click="onClose">取消</a-button>
+        <a-button @click="onClose">{{ $t('button.cancel') }}</a-button>
 
       </div>
 

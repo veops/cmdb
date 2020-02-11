@@ -5,7 +5,8 @@ import Vue from 'vue'
 import EventBus from './EventBus'
 import App from './App.vue'
 import router from './router'
-import store from './store/'
+import store from './store'
+import i18n from './locales'
 import { VueAxios } from './utils/request'
 
 import bootstrap from './core/bootstrap'
@@ -22,6 +23,7 @@ Vue.use(VueAxios)
 new Vue({
   router,
   store,
+  i18n,
   created: bootstrap,
   render: h => h(App)
 }).$mount('#app')

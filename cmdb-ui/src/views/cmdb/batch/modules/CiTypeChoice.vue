@@ -3,9 +3,9 @@
     <a-form :form="form" style="max-width: 500px; margin: 30px auto 0;">
       <a-row>
         <a-col :span="18">
-          <a-form-item label="模板类型" :labelCol="labelCol" :wrapperCol="wrapperCol">
+          <a-form-item :label="$t('batch.modelType')" :labelCol="labelCol" :wrapperCol="wrapperCol">
             <a-select
-              placeholder="--请选择模板类型--"
+              :placeholder="$t('batch.pleaseSelectModelType')"
               v-decorator="['ciTypes', { rules: [{required: true, message: '模板类型必须选择'}] }]"
               @change="selectCiType"
             >
@@ -19,7 +19,7 @@
               style="margin-left: 20px"
               :disabled="downLoadButtonDis"
               @click="downLoadExcel"
-            >下载模板</a-button>
+            >{{ $t('button.download') }}</a-button>
           </a-form-item>
         </a-col>
       </a-row>
