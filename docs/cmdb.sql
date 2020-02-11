@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.18, for macos10.12 (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.21, for macos10.13 (x86_64)
 --
--- Host: localhost    Database: cmdb_test2
+-- Host: localhost    Database: cmdb
 -- ------------------------------------------------------
--- Server version	5.7.18
+-- Server version	5.7.21
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -278,6 +278,7 @@ CREATE TABLE `acl_role_relations` (
   PRIMARY KEY (`id`),
   KEY `child_id` (`child_id`),
   KEY `ix_acl_role_relations_deleted` (`deleted`),
+  KEY `acl_role_relations_ibfk_1` (`parent_id`),
   CONSTRAINT `acl_role_relations_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `acl_roles` (`id`),
   CONSTRAINT `acl_role_relations_ibfk_2` FOREIGN KEY (`child_id`) REFERENCES `acl_roles` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
@@ -588,7 +589,7 @@ CREATE TABLE `c_ci_type_attribute_groups` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(64) DEFAULT NULL,
+  `name` varchar(64) NOT NULL DEFAULT '',
   `type_id` int(11) NOT NULL,
   `order` smallint(6) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -692,7 +693,7 @@ CREATE TABLE `c_ci_type_groups` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(32) DEFAULT NULL,
+  `name` varchar(32) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `ix_c_ci_type_groups_deleted` (`deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -757,12 +758,12 @@ CREATE TABLE `c_ci_types` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(32) DEFAULT NULL,
-  `alias` varchar(32) DEFAULT NULL,
+  `name` varchar(32) NOT NULL DEFAULT '',
+  `alias` varchar(32) NOT NULL DEFAULT '',
   `unique_id` int(11) NOT NULL,
   `enabled` tinyint(1) NOT NULL,
   `is_attached` tinyint(1) NOT NULL,
-  `icon_url` varchar(256) DEFAULT NULL,
+  `icon_url` varchar(256) NOT NULL DEFAULT '',
   `order` smallint(6) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `unique_id` (`unique_id`),
@@ -777,7 +778,7 @@ CREATE TABLE `c_ci_types` (
 
 LOCK TABLES `c_ci_types` WRITE;
 /*!40000 ALTER TABLE `c_ci_types` DISABLE KEYS */;
-INSERT INTO `c_ci_types` VALUES (NULL,0,'2019-08-25 10:42:25',NULL,1,'bu','事业部',1,1,0,NULL,0),(NULL,0,'2019-08-25 10:45:39',NULL,2,'product','产品线',3,1,0,NULL,0),(NULL,0,'2019-08-25 10:46:08',NULL,3,'app','应用',4,1,0,NULL,0),(NULL,0,'2019-08-25 10:57:37',NULL,4,'server','服务器',5,1,0,NULL,0),(NULL,0,'2019-08-25 10:58:44',NULL,5,'docker','Docker',6,1,0,NULL,0),(NULL,0,'2019-08-25 11:04:12',NULL,6,'NIC','网卡',7,1,1,NULL,0),(NULL,0,'2019-08-25 11:04:24',NULL,7,'harddisk','硬盘',8,1,1,NULL,0),(NULL,0,'2019-08-25 11:04:45',NULL,8,'RAM','内存',9,1,1,NULL,0);
+INSERT INTO `c_ci_types` VALUES (NULL,0,'2019-08-25 10:42:25',NULL,1,'bu','事业部',1,1,0,'',0),(NULL,0,'2019-08-25 10:45:39',NULL,2,'product','产品线',3,1,0,'',0),(NULL,0,'2019-08-25 10:46:08',NULL,3,'app','应用',4,1,0,'',0),(NULL,0,'2019-08-25 10:57:37',NULL,4,'server','服务器',5,1,0,'',0),(NULL,0,'2019-08-25 10:58:44',NULL,5,'docker','Docker',6,1,0,'',0),(NULL,0,'2019-08-25 11:04:12',NULL,6,'NIC','网卡',7,1,1,'',0),(NULL,0,'2019-08-25 11:04:24',NULL,7,'harddisk','硬盘',8,1,1,'',0),(NULL,0,'2019-08-25 11:04:45',NULL,8,'RAM','内存',9,1,1,'',0);
 /*!40000 ALTER TABLE `c_ci_types` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1000,7 +1001,7 @@ CREATE TABLE `c_relation_types` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(16) DEFAULT NULL,
+  `name` varchar(16) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `ix_c_relation_types_name` (`name`),
   KEY `ix_c_relation_types_deleted` (`deleted`)
@@ -1344,4 +1345,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-12-11 12:10:16
+-- Dump completed on 2020-02-06 13:40:37
