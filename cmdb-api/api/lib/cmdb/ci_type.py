@@ -23,6 +23,7 @@ from api.models.cmdb import CITypeGroupItem
 from api.models.cmdb import CITypeRelation
 from api.models.cmdb import PreferenceShowAttributes
 from api.models.cmdb import PreferenceTreeView
+from api.tasks.cmdb import ci_type_attribute_order_rebuild
 
 
 class CITypeManager(object):
@@ -39,7 +40,9 @@ class CITypeManager(object):
 
     @staticmethod
     def check_is_existed(key):
-        return CITypeCache.get(key) or abort(404, "CIType <{0}> is not existed".format(key))
+        ci_type = CITypeCache.get(key) or abort(404, "CIType <{0}> is not existed".format(key))
+
+        return CIType.get_by_id(ci_type.id)
 
     @staticmethod
     def get_ci_types(type_name=None):
@@ -55,15 +58,34 @@ class CITypeManager(object):
         ci_type = CITypeCache.get(_type) or abort(404, "CIType <{0}> is not found".format(_type))
         return ci_type.to_dict()
 
+    @staticmethod
+    def _validate_unique(type_id=None, name=None, alias=None):
+        if name is not None:
+            ci_type = CIType.get_by(name=name, first=True, to_dict=False)
+        elif alias is not None:
+            ci_type = CIType.get_by(alias=alias, first=True, to_dict=False)
+        else:
+            return
+
+        if not ci_type:
+            return
+
+        if type_id is not None and ci_type.id != type_id:
+            return abort(400, "CIType <{0}> is already existed".format(name or alias))
+
+        if type_id is None and ci_type is not None:
+            return abort(400, "CIType <{0}> is already existed".format(name or alias))
+
     @classmethod
     @kwargs_required("name")
     def add(cls, **kwargs):
         unique_key = kwargs.pop("unique_key", None)
         unique_key = AttributeCache.get(unique_key) or abort(404, "Unique key is not defined")
 
-        CIType.get_by(name=kwargs['name']) and abort(404, "CIType <{0}> is already existed".format(kwargs.get("name")))
-
         kwargs["alias"] = kwargs["name"] if not kwargs.get("alias") else kwargs["alias"]
+
+        cls._validate_unique(name=kwargs['name'])
+        cls._validate_unique(alias=kwargs['alias'])
 
         kwargs["unique_id"] = unique_key.id
         ci_type = CIType.create(**kwargs)
@@ -87,6 +109,9 @@ class CITypeManager(object):
     def update(cls, type_id, **kwargs):
 
         ci_type = cls.check_is_existed(type_id)
+
+        cls._validate_unique(type_id=type_id, name=kwargs.get('name'))
+        cls._validate_unique(type_id=type_id, alias=kwargs.get('alias'))
 
         unique_key = kwargs.pop("unique_key", None)
         unique_key = AttributeCache.get(unique_key)
@@ -305,6 +330,31 @@ class CITypeAttributeManager(object):
 
         CITypeAttributesCache.clean(type_id)
 
+    @classmethod
+    def transfer(cls, type_id, _from, _to):
+        current_app.logger.info("[{0}] {1} -> {2}".format(type_id, _from, _to))
+        attr_id = _from.get('attr_id')
+        from_group_id = _from.get('group_id')
+        to_group_id = _to.get('group_id')
+        order = _to.get('order')
+
+        if from_group_id != to_group_id:
+            if from_group_id is not None:
+                CITypeAttributeGroupManager.delete_item(from_group_id, attr_id)
+
+            if to_group_id is not None:
+                CITypeAttributeGroupManager.add_item(to_group_id, attr_id, order)
+
+        elif from_group_id:
+            CITypeAttributeGroupManager.update_item(from_group_id, attr_id, order)
+
+        else:  # other attribute transfer
+            return abort(400, "invalid operation!!!")
+
+        CITypeAttributesCache.clean(type_id)
+
+        ci_type_attribute_order_rebuild.apply_async(args=(type_id,), queue=CMDB_QUEUE)
+
 
 class CITypeRelationManager(object):
     """
@@ -441,6 +491,8 @@ class CITypeAttributeGroupManager(object):
             return abort(400, "Group <{0}> duplicate".format(name))
         if name is not None:
             group.update(name=name)
+        else:
+            name = group.name
 
         cls.create_or_update(group.type_id, name, attr_order, group_order)
 
@@ -455,3 +507,86 @@ class CITypeAttributeGroupManager(object):
             item.soft_delete()
 
         return group_id
+
+    @classmethod
+    def add_item(cls, group_id, attr_id, order):
+        db.session.remove()
+
+        existed = CITypeAttributeGroupItem.get_by(group_id=group_id,
+                                                  attr_id=attr_id,
+                                                  first=True,
+                                                  to_dict=False)
+        if existed is not None:
+            existed.update(order=order)
+        else:
+            CITypeAttributeGroupItem.create(group_id=group_id, attr_id=attr_id, order=order)
+
+        gt_items = db.session.query(CITypeAttributeGroupItem).filter(
+            CITypeAttributeGroupItem.deleted.is_(False)).filter(CITypeAttributeGroupItem.order > order)
+        for _item in gt_items:
+            _order = _item.order
+            _item.update(order=_order + 1)
+
+    @classmethod
+    def update_item(cls, group_id, attr_id, order):
+        db.session.remove()
+
+        existed = CITypeAttributeGroupItem.get_by(group_id=group_id,
+                                                  attr_id=attr_id,
+                                                  first=True,
+                                                  to_dict=False)
+        existed or abort(404, "Group<{0}> - Attribute<{1}> is not found".format(group_id, attr_id))
+
+        if existed.order > order:  # forward, +1
+            items = db.session.query(CITypeAttributeGroupItem).filter(
+                CITypeAttributeGroupItem.deleted.is_(False)).filter(
+                CITypeAttributeGroupItem.order >= order).filter(
+                CITypeAttributeGroupItem.order < existed.order)
+            for item in items:
+                item.update(order=item.order + 1)
+
+        elif existed.order < order:  # backward, -1
+            items = db.session.query(CITypeAttributeGroupItem).filter(
+                CITypeAttributeGroupItem.deleted.is_(False)).filter(
+                CITypeAttributeGroupItem.order > existed.order).filter(
+                CITypeAttributeGroupItem.order <= order)
+            for item in items:
+                item.update(order=item.order - 1)
+
+        existed.update(order=order)
+
+    @classmethod
+    def delete_item(cls, group_id, attr_id):
+        db.session.remove()
+
+        item = CITypeAttributeGroupItem.get_by(group_id=group_id,
+                                               attr_id=attr_id,
+                                               first=True,
+                                               to_dict=False)
+
+        if item is not None:
+            item.soft_delete()
+            order = item.order
+            gt_items = db.session.query(CITypeAttributeGroupItem).filter(
+                CITypeAttributeGroupItem.deleted.is_(False)).filter(CITypeAttributeGroupItem.order > order)
+            for _item in gt_items:
+                _order = _item.order
+                _item.update(order=_order - 1)
+
+    @classmethod
+    def transfer(cls, type_id, _from, _to):
+        current_app.logger.info("CIType[{0}] {1} -> {2}".format(type_id, _from, _to))
+        from_group = CITypeAttributeGroup.get_by_id(_from)
+        from_group or abort(404, "Group <{0}> is not found".format(_from))
+
+        to_group = CITypeAttributeGroup.get_by_id(_to)
+        to_group or abort(404, "Group <{0}> is not found".format(_to))
+
+        from_order, to_order = from_group.order, to_group.order
+
+        from_group.update(order=to_order)
+        to_group.update(order=from_order)
+
+        CITypeAttributesCache.clean(type_id)
+
+        ci_type_attribute_order_rebuild.apply_async(args=(type_id,), queue=CMDB_QUEUE)

@@ -11,6 +11,7 @@ from api.extensions import celery
 from api.extensions import db
 from api.extensions import es
 from api.extensions import rd
+from api.lib.cmdb.cache import CITypeAttributeCache
 from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import REDIS_PREFIX_CI
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
@@ -71,3 +72,23 @@ def ci_relation_delete(parent_id, child_id):
     rd.create_or_update({parent_id: json.dumps(children)}, REDIS_PREFIX_CI_RELATION)
 
     current_app.logger.info("DELETE ci relation cache: {0} -> {1}".format(parent_id, child_id))
+
+
+@celery.task(name="cmdb.ci_type_attribute_order_rebuild", queue=CMDB_QUEUE)
+def ci_type_attribute_order_rebuild(type_id):
+    current_app.logger.info('rebuild attribute order')
+    db.session.remove()
+
+    from api.lib.cmdb.ci_type import CITypeAttributeGroupManager
+
+    attrs = CITypeAttributeCache.get(type_id)
+    id2attr = {attr.attr_id: attr for attr in attrs}
+
+    res = CITypeAttributeGroupManager.get_by_type_id(type_id, True)
+    order = 0
+    for group in res:
+        for _attr in group.get('attributes'):
+            if order != id2attr.get(_attr['id']) and id2attr.get(_attr['id']):
+                id2attr.get(_attr['id']).update(order=order)
+
+            order += 1
