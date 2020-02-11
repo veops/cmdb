@@ -47,7 +47,7 @@ def _auth_with_token():
 
     try:
         token = auth_headers
-        data = jwt.decode(token, current_app.config['SECRET_KEY'])
+        data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
         user = User.query.filter_by(email=data['sub']).first()
         if not user:
             return False

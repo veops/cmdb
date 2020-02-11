@@ -25,6 +25,9 @@ class FormatMixin(object):
 
 
 class CRUDMixin(FormatMixin):
+    def __init__(self, **kwargs):
+        super(CRUDMixin, self).__init__(**kwargs)
+
     @classmethod
     def create(cls, flush=False, **kwargs):
         return cls(**kwargs).save(flush=flush)
