@@ -15,7 +15,7 @@
           <div class="header-index-wide">
             <div class="header-index-left">
               <logo class="top-nav-header" :show-title="device !== 'mobile'"/>
-              <s-menu v-if="device !== 'mobile'" mode="horizontal" :menu="menus" :theme="theme" />
+              <s-menu v-if="device !== 'mobile'" mode="horizontal" :menu="menus" :theme="theme" :i18n-render="i18nRender" />
               <a-icon v-else class="trigger" :type="collapsed ? 'menu-fold' : 'menu-unfold'" @click="toggle" />
             </div>
             <top-menu></top-menu>
@@ -33,6 +33,7 @@ import TopMenu from '../tools/TopMenu'
 import SMenu from '../Menu/'
 import Logo from '../tools/Logo'
 import { mixin } from '@/utils/mixin'
+import { i18nRender } from '@/locales'
 
 export default {
   name: 'GlobalHeader',
@@ -79,6 +80,7 @@ export default {
     document.addEventListener('scroll', this.handleScroll, { passive: true })
   },
   methods: {
+    i18nRender,
     handleScroll () {
       if (!this.autoHideHeader) {
         return

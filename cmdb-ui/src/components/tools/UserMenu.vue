@@ -3,7 +3,7 @@
     <div class="content-box">
       <a href="https://github.com/pycook/cmdb" target="_blank">
         <span class="action">
-          源代码 -> <a-icon type="github" style="font-size: 20px; color: #002140"></a-icon>
+          {{ $t('tip.sourceCode') }} -> <a-icon type="github" style="font-size: 20px; color: #002140"></a-icon>
         </span>
       </a>
       <!-- <a href="https://pro.loacg.com/docs/getting-started" target="_blank">
@@ -39,6 +39,7 @@
           </a-menu-item>
         </a-menu>
       </a-dropdown>
+      <lang-select v-if="showLocale" />
     </div>
   </div>
 </template>
@@ -46,11 +47,18 @@
 <script>
 import NoticeIcon from '@/components/NoticeIcon'
 import { mapActions, mapGetters } from 'vuex'
+import LangSelect from '@/components/tools/LangSelect'
+import { showLocale } from '@/locales'
 
 export default {
   name: 'UserMenu',
   components: {
-    NoticeIcon
+    NoticeIcon, LangSelect
+  },
+  data () {
+    return {
+      showLocale: showLocale
+    }
   },
   methods: {
     ...mapActions(['Logout']),

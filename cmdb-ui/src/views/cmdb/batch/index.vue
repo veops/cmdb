@@ -7,14 +7,14 @@
     <a-row>
       <a-col :span="18">
         <a-card style="height: 605px">
-          <a-button class="ant-btn-primary" style="margin-left: 10px;" :disabled="uploadFlag" id="upload-button" @click="uploadData">上传</a-button>
+          <a-button class="ant-btn-primary" style="margin-left: 10px;" :disabled="uploadFlag" id="upload-button" @click="uploadData">{{ $t('button.upload') }}</a-button>
           <upload-file-form v-if="displayUpload" ref="fileEditor"></upload-file-form>
           <ci-table v-if="editorOnline" :ciTypeAttrs="ciTypeAttrs" ref="onlineEditor"></ci-table>
         </a-card>
       </a-col>
       <a-col :span="6">
         <div style="min-height: 604px; background: white">
-          <a-card title="上传结果">
+          <a-card :title="$t('batch.uploadResult')">
             <upload-result v-if="beginLoad" :upLoadData="needDataList" :ciType="ciType" :unique-field="uniqueField"></upload-result>
           </a-card>
         </div>

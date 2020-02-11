@@ -8,12 +8,20 @@ import notification from 'ant-design-vue/es/notification'
 import { setDocumentTitle, domTitle } from '@/utils/domUtil'
 import config from '@/config/defaultSettings'
 import { ACCESS_TOKEN } from './store/mutation-types'
+import i18n from '@/locales'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
 router.beforeEach((to, from, next) => {
   NProgress.start() // start progress bar
-  to.meta && (typeof to.meta.title !== 'undefined' && setDocumentTitle(`${to.meta.title} - ${domTitle}`))
+  var displayTitle
+
+  if (to.meta && to.meta.title && to.meta.title.split('.')[0] === 'menu') {
+    displayTitle = i18n.messages[i18n.locale].menu[to.meta.title.split('.')[1]]
+  } else if (to.meta && to.meta.title) {
+    displayTitle = to.meta.title
+  }
+  to.meta && (typeof to.meta.title !== 'undefined' && setDocumentTitle(`${displayTitle} - ${domTitle}`))
   if ((config.useSSO || (!config.useSSO && Vue.ls.get(ACCESS_TOKEN))) && store.getters.roles.length === 0) {
     store
       .dispatch('GetInfo')
