@@ -11,8 +11,8 @@
             type="primary"
             icon="plus"
             @click="$refs.create.visible = true; $refs.create.action='create'"
-          >新建</a-button>
-          <a-button class="right" @click="showDrawer(typeId)">显示字段</a-button>
+          >{{ $t('button.new') }}</a-button>
+          <a-button class="right" @click="showDrawer(typeId)">{{ $t('button.displayFields') }}</a-button>
           <a-dropdown v-action:edit v-if="selectedRowKeys.length > 0">
             <a-menu slot="overlay">
               <a-menu-item
@@ -20,20 +20,20 @@
                 @click="$refs.create.visible = true; $refs.create.action='update'"
               >
                 <span @click="$refs.create.visible = true">
-                  <a-icon type="edit" />&nbsp;修改
+                  <a-icon type="edit" />&nbsp;{{ $t('button.update') }}
                 </span>
               </a-menu-item>
               <a-menu-item key="batchDownload" @click="batchDownload">
                 <json-excel :fetch="batchDownload" name="cmdb.xls">
-                  <a-icon type="download" />&nbsp;下载
+                  <a-icon type="download" />&nbsp;{{ $t('button.download') }}
                 </json-excel>
               </a-menu-item>
               <a-menu-item key="batchDelete" @click="batchDelete">
-                <a-icon type="delete" />删除
+                <a-icon type="delete" />{{ $t('button.delete') }}
               </a-menu-item>
             </a-menu>
             <a-button style="margin-left: 8px">
-              批量操作
+              {{ $t('ci.batchOperate') }}
               <a-icon type="down" />
             </a-button>
           </a-dropdown>
@@ -48,7 +48,7 @@
           :alert="options.alert"
           :rowSelection="options.rowSelection"
           :scroll="{ x: scrollX, y: scrollY }"
-          :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条记录`, pageSizeOptions: pageSizeOptions}"
+          :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]}  ${total} records in total`, pageSizeOptions: pageSizeOptions}"
           showPagination="auto"
           :pageSize="25"
         >
@@ -64,10 +64,10 @@
             <template>
               <a
                 @click="$refs.detail.visible = true; $refs.detail.ciId = record.key; $refs.detail.create()"
-              >详情</a>
+              >{{ $t('tip.detail') }}</a>
 
               <a-divider type="vertical" />
-              <a @click="deleteCI(record)">删除</a>
+              <a @click="deleteCI(record)">{{ $t('tip.delete') }}</a>
             </template>
           </span>
         </s-table>
@@ -79,7 +79,7 @@
     <template>
       <div>
         <a-drawer
-          title="显示字段定义"
+          :title="$t('ci.displayFieldDefine')"
           :width="600"
           @close="onClose"
           :visible="visible"
@@ -93,13 +93,13 @@
                 width: '230px',
                 height: '500px',
               }"
-              :titles="['未选属性','已选属性']"
+              :titles="[$t('tip.unselectedAttribute'), $t('tip.selectedAttribute')]"
               :render="item=>item.title"
               :targetKeys="selectedAttrList"
               @change="handleChange"
               @search="handleSearch"
             >
-              <span slot="notFoundContent">没数据</span>
+              <span slot="notFoundContent">{{ $t('tip.noData') }}</span>
             </a-transfer>
           </template>
           <div
@@ -114,8 +114,8 @@
               textAlign: 'right',
             }"
           >
-            <a-button :style="{marginRight: '8px'}" @click="onClose">取消</a-button>
-            <a-button @click="subInstanceSubmit" type="primary">提交</a-button>
+            <a-button :style="{marginRight: '8px'}" @click="onClose">{{ $t('button.cancel') }}</a-button>
+            <a-button @click="subInstanceSubmit" type="primary">{{ $t('button.submit') }}</a-button>
           </div>
         </a-drawer>
       </div>
@@ -177,9 +177,7 @@ export default {
       visible: false,
 
       instanceList: [],
-      // 表头
       columns: [],
-      // 加载数据方法 必须为 Promise 对象
       loadInstances: parameter => {
         const params = Object.assign(parameter, this.$refs.search.queryParam)
         let q = `q=_type:${this.$router.currentRoute.meta.typeId}`
@@ -288,10 +286,11 @@ export default {
       this.visible = false
     },
     subInstanceSubmit () {
+      const that = this
       subscribeCIType(this.typeId, this.selectedAttrList)
         .then(res => {
           notification.success({
-            message: '修改成功'
+            message: that.$t('tip.updateSuccess')
           })
           this.reload()
         })
@@ -388,7 +387,7 @@ export default {
         })
 
         columns.push({
-          title: '操作',
+          title: this.$t('tip.operate'),
           key: 'operation',
           width: 100,
           fixed: 'right',
@@ -423,7 +422,7 @@ export default {
     },
     async batchDownload () {
       this.loading = true
-      this.loadTip = '正在下载 ...'
+      this.loadTip = this.$t('tip.downloading')
       const promises = this.selectedRowKeys.map(ciId => {
         return searchCI(`q=_id:${ciId}`).then(res => {
           const ciMap = {}
@@ -444,11 +443,11 @@ export default {
     batchUpdate (values) {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: '确认要批量修改吗 ?',
+        title: that.$t('tip.warning'),
+        content: that.$t('ci.confirmBatchUpdate'),
         onOk () {
           that.loading = true
-          that.loadTip = '正在批量修改 ...'
+          that.loadTip = that.$t('ci.batchUpdate')
           const payload = {}
           Object.keys(values).forEach(key => {
             if (values[key] || values[key] === 0) {
@@ -464,7 +463,7 @@ export default {
             .then(res => {
               that.loading = false
               notification.success({
-                message: '批量修改成功'
+                message: that.$t('ci.batchUpdateSuccess')
               })
               that.$refs.create.visible = false
 
@@ -490,11 +489,11 @@ export default {
     batchDelete () {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: '真的要删除吗 ?',
+        title: that.$t('tip.warning'),
+        content: that.$t('ci.confirmDelete'),
         onOk () {
           that.loading = true
-          that.loadTip = '正在删除 ...'
+          that.loadTip = that.$t('tip.deleting')
           const promises = that.selectedRowKeys.map(ciId => {
             return deleteCI(ciId).then(res => {
               return 'ok'
@@ -504,7 +503,7 @@ export default {
             .then(res => {
               that.loading = false
               notification.success({
-                message: '删除成功'
+                message: that.$t('tip.deleteSuccess')
               })
               that.$refs.table.clearSelected()
               setTimeout(() => {
@@ -527,8 +526,8 @@ export default {
     deleteCI (record) {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: '真的要删除吗 ?',
+        title: that.$t('tip.warning'),
+        content: that.$t('ci.confirmDelete'),
         onOk () {
           deleteCI(record.key)
             .then(res => {

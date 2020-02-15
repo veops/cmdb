@@ -1,5 +1,6 @@
 import T from 'ant-design-vue/es/table/Table'
 import get from 'lodash.get'
+import i18n from '@/locales'
 
 export default {
   data () {
@@ -232,7 +233,7 @@ export default {
         <a style="margin-left: 24px" onClick={() => {
           callback()
           this.clearSelected()
-        }}>清空</a>
+        }}>{ i18n.t('table.clear') }</a>
       )
     },
     renderAlert () {
@@ -254,7 +255,7 @@ export default {
       return (
         <a-alert showIcon={true} style="margin-bottom: 16px">
           <template slot="message">
-            <span style="margin-right: 12px">已选择: <a style="font-weight: 600">{this.selectedRows.length}</a></span>
+            <span style="margin-right: 12px">{ i18n.t('table.selected') }: <a style="font-weight: 600">{this.selectedRows.length}</a></span>
             {needTotalItems}
             {clearItem}
           </template>
