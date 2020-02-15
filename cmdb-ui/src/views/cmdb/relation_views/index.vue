@@ -7,7 +7,7 @@
         >{{ item[0] }}</router-link>
       </a-menu-item>
     </a-menu>
-    <a-alert message="管理员 还未配置关系视图, 或者你无权限访问!" banner v-else-if="relationViews.name2id && !relationViews.name2id.length"></a-alert>
+    <a-alert :message="$t('relationView.tip')" banner v-else-if="relationViews.name2id && !relationViews.name2id.length"></a-alert>
     <div style="clear: both; margin-top: 20px"></div>
     <template>
       <a-row :gutter="8">
@@ -30,7 +30,7 @@
             :columns="columns"
             :data="loadInstances"
             :scroll="{ x: scrollX, y: scrollY }"
-            :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条记录`, pageSizeOptions: pageSizeOptions}"
+            :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} ${total} records in total`, pageSizeOptions: pageSizeOptions}"
             :pageSize="25"
             showPagination="auto"
           ></s-table>

@@ -13,18 +13,17 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="属性名(英文)"
+        :label="$t('ciType.name')"
       >
         <a-input
           name="name"
-          placeholder="英文"
-          v-decorator="['name', {rules: [{ required: true, message: '请输入属性名'},{message: '不能以数字开头，可以是英文 数字以及下划线 (_)', pattern: RegExp('^(?!\\d)[a-zA-Z_0-9]+$')}]} ]"
+          v-decorator="['name', {rules: [{ required: true, message: $t('ciType.nameRequired')},{message: $t('ciType.nameValidate'), pattern: RegExp('^(?!\\d)[a-zA-Z_0-9]+$')}]} ]"
         />
       </a-form-item>
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="别名"
+        :label="$t('ciType.alias')"
       >
         <a-input
           name="alias"
@@ -35,7 +34,7 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="数据类型"
+        :label="$t('ciType.type')"
       >
 
         <a-select
@@ -51,7 +50,7 @@
       <a-form-item
         :label-col="horizontalFormItemLayout.labelCol"
         :wrapper-col="horizontalFormItemLayout.wrapperCol"
-        label="是否唯一"
+        :label="$t('ciType.isIt') + $t('ciType.unique')"
       >
         <a-switch
           @change="onChange"
@@ -63,7 +62,7 @@
       <a-form-item
         :label-col="horizontalFormItemLayout.labelCol"
         :wrapper-col="horizontalFormItemLayout.wrapperCol"
-        label="是否索引"
+        :label="$t('ciType.isIt') + $t('ciType.index')"
       >
         <a-switch
           @change="onChange"
@@ -75,7 +74,7 @@
       <a-form-item
         :label-col="horizontalFormItemLayout.labelCol"
         :wrapper-col="horizontalFormItemLayout.wrapperCol"
-        label="是否可排序"
+        :label="$t('ciType.isIt') + $t('ciType.sort')"
       >
         <a-switch
           @change="onChange"
@@ -86,7 +85,7 @@
       <a-form-item
         :label-col="horizontalFormItemLayout.labelCol"
         :wrapper-col="horizontalFormItemLayout.wrapperCol"
-        label="是否是链接"
+        :label="$t('ciType.isIt') + $t('ciType.link')"
       >
         <a-switch
           @change="onChange"
@@ -97,7 +96,7 @@
       <a-form-item
         :label-col="horizontalFormItemLayout.labelCol"
         :wrapper-col="horizontalFormItemLayout.wrapperCol"
-        label="是否是密码"
+        :label="$t('ciType.isIt') + $t('ciType.password')"
       >
         <a-switch
           @change="onChange"
@@ -108,7 +107,7 @@
       <a-form-item
         :label-col="horizontalFormItemLayout.labelCol"
         :wrapper-col="horizontalFormItemLayout.wrapperCol"
-        label="是否列表"
+        :label="$t('ciType.isIt') + $t('ciType.list')"
       >
         <a-switch
           @change="onChange"
@@ -119,12 +118,12 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="预定义值"
+        :label="$t('ciType.predefinedValue')"
       >
         <a-textarea
           :rows="5"
           name="choice_value"
-          placeholder="多个值使用换行分隔"
+          :placeholder="$t('ciType.predefinedValueTip')"
           v-decorator="['choice_value', {rules: []} ]"
         />
       </a-form-item>
@@ -171,7 +170,7 @@ export default {
   data () {
     return {
 
-      drawerTitle: '新增属性',
+      drawerTitle: this.$t('ciType.addAttribute'),
       drawerVisible: false,
       CITypeName: this.$route.params.CITypeName,
       CITypeId: this.$route.params.CITypeId,
@@ -271,7 +270,7 @@ export default {
     updateAttribute (attrId, data) {
       updateAttributeById(attrId, data)
         .then(res => {
-          this.$message.success(`更新成功`)
+          this.$message.success(this.$t('tip.updateSuccess'))
           this.handleOk()
           this.onClose()
         }).catch(err => this.requestFailed(err))
@@ -283,12 +282,12 @@ export default {
           if (this.CITypeId) {
             createCITypeAttributes(this.CITypeId, { attr_id: [res.attr_id] })
               .then(res => {
-                this.$message.success(`添加成功`)
+                this.$message.success(this.$t('tip.addSuccess'))
                 this.handleOk()
                 this.onClose()
               }).catch(err => this.requestFailed(err))
           } else {
-            this.$message.success(`添加成功`)
+            this.$message.success(this.$t('tip.addSuccess'))
             this.handleOk()
             this.onClose()
           }
@@ -297,7 +296,7 @@ export default {
     },
 
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     }
 

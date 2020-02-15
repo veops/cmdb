@@ -158,8 +158,8 @@ export default {
       form: this.$form.createForm(this),
       scroll: { x: 1030, y: 600 },
       singleAttrAction: {
-        btnName: '新增属性',
-        drawerTitle: '新增属性',
+        btnName: this.$t('ciType.addAttribute'),
+        drawerTitle: this.$t('ciType.addAttribute'),
         drawerVisible: false
       },
       batchBindAttrAction: {

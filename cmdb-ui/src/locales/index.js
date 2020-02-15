@@ -31,8 +31,6 @@ export default i18n
 
 const loadedLanguages = [defaultLang]
 
-// 从缓存設置中加载当前语言
-
 function setI18nLanguage (lang) {
   i18n.locale = lang
   axios.defaults.headers.common['Accept-Language'] = lang
@@ -46,7 +44,6 @@ export function i18nRender (key) {
 
 export function loadLanguageAsync (lang = defaultLang) {
   return new Promise(resolve => {
-    // 缓存语言设置
     Vue.ls.set('lang', lang)
     if (i18n.locale !== lang) {
       if (!loadedLanguages.includes(lang)) {

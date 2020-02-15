@@ -7,7 +7,7 @@
         >{{ ciType.alias || ciTypes.name }}</router-link>
       </a-menu-item>
     </a-menu>
-    <a-alert message="请先到 我的订阅 页面完成订阅!" banner v-else-if="ciTypes && !ciTypes.length"></a-alert>
+    <a-alert :message="$t('treeView.tip')" banner v-else-if="ciTypes && !ciTypes.length"></a-alert>
     <div style="clear: both; margin-top: 20px"></div>
     <template>
       <a-row :gutter="8">
@@ -25,7 +25,7 @@
             :columns="columns"
             :data="loadInstances"
             :scroll="{ x: scrollX, y: scrollY }"
-            :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条记录`, pageSizeOptions: pageSizeOptions}"
+            :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} ${total} records in total`, pageSizeOptions: pageSizeOptions}"
             :pageSize="25"
             showPagination="auto"
           ></s-table>

@@ -2,7 +2,7 @@
   <a-card :bordered="false">
 
     <div class="action-btn">
-      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem;">{{ btnName }}</a-button>
+      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem;">{{ $t('ciType.addAttribute') }}</a-button>
     </div>
 
     <s-table
@@ -12,7 +12,7 @@
       :rowKey="record=>record.id"
       :rowSelection="options.rowSelection"
       :scroll="scroll"
-      :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条记录`, pageSizeOptions: pageSizeOptions}"
+      :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} ${total} records in total`, pageSizeOptions: pageSizeOptions}"
       showPagination="auto"
       :pageSize="25"
       ref="table"
@@ -34,7 +34,7 @@
           icon="search"
           size="small"
           style="width: 90px; margin-right: 8px"
-        >搜索</a-button>
+        >{{ $t('button.query') }}</a-button>
         <a-button
           @click="() => handleReset(clearFilters, column)"
           size="small"
@@ -73,10 +73,10 @@
           <a-divider type="vertical"/>
 
           <a-popconfirm
-            title="确认删除?"
+            :title="$t('tip.confirmDelete')"
             @confirm="handleDelete(record)"
-            okText="是"
-            cancelText="否"
+            :okText="$t('button.yes')"
+            :cancelText="$t('button.no')"
           >
             <a>{{ $t('tip.delete') }}</a>
           </a-popconfirm>
@@ -104,7 +104,6 @@ export default {
   data () {
     return {
       scroll: { x: 1000, y: 500 },
-      btnName: '新增属性',
 
       CITypeName: this.$route.params.CITypeName,
       CITypeId: this.$route.params.CITypeId,
@@ -125,7 +124,7 @@ export default {
       },
       columns: [
         {
-          title: '名称',
+          title: this.$t('ciType.alias'),
           dataIndex: 'alias',
           sorter: false,
           width: 250,
@@ -144,7 +143,7 @@ export default {
           }
         },
         {
-          title: '英文名',
+          title: this.$t('ciType.name'),
           dataIndex: 'name',
           sorter: false,
           width: 250,
@@ -163,7 +162,7 @@ export default {
           }
         },
         {
-          title: '类型',
+          title: this.$t('ciType.type'),
           dataIndex: 'value_type',
           sorter: false,
           width: 80,
@@ -172,7 +171,7 @@ export default {
 
         },
         {
-          title: '唯一',
+          title: this.$t('ciType.unique'),
           dataIndex: 'is_unique',
           width: 50,
           sorter: false,
@@ -180,7 +179,7 @@ export default {
 
         },
         {
-          title: '索引',
+          title: this.$t('ciType.index'),
           dataIndex: 'is_index',
           sorter: false,
           width: 50,
@@ -188,7 +187,7 @@ export default {
 
         },
         {
-          title: '排序',
+          title: this.$t('ciType.sort'),
           dataIndex: 'is_sortable',
           sorter: false,
           width: 50,
@@ -196,7 +195,7 @@ export default {
 
         },
         {
-          title: '链接',
+          title: this.$t('ciType.link'),
           dataIndex: 'is_link',
           sorter: false,
           width: 50,
@@ -204,7 +203,7 @@ export default {
 
         },
         {
-          title: '密码',
+          title: this.$t('ciType.password'),
           dataIndex: 'is_password',
           sorter: false,
           width: 50,
@@ -212,7 +211,7 @@ export default {
 
         },
         {
-          title: '列表',
+          title: this.$t('ciType.list'),
           dataIndex: 'is_list',
           sorter: false,
           scopedSlots: { customRender: 'is_check' }
@@ -220,7 +219,7 @@ export default {
         },
 
         {
-          title: '操作',
+          title: this.$t('tip.operate'),
           dataIndex: 'action',
           width: 100,
           fixed: 'right',
@@ -248,11 +247,8 @@ export default {
       },
 
       mdl: {},
-      // 高级搜索 展开/关闭
       advanced: false,
-      // 查询参数
       queryParam: {},
-      // 表头
 
       selectedRowKeys: [],
       selectedRows: [],
@@ -340,13 +336,13 @@ export default {
     deleteAttribute (attrId) {
       deleteAttributesById(attrId)
         .then(res => {
-          this.$message.success(`删除成功`)
+          this.$message.success(this.$t('tip.deleteSuccess'))
           this.handleOk()
         })
         .catch(err => this.requestFailed(err))
     },
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     }
 
