@@ -7,7 +7,7 @@
     :visible="visible"
     :wrapStyle="{height: 'calc(100% - 108px)', overflow: 'auto', paddingBottom: '108px'}"
   >
-    <p v-if="action === 'update'">只需要填写需要修改的字段即可!</p>
+    <p v-if="action === 'update'">{{ $t('ci.batchUpdateTip') }}</p>
     <a-form :form="form" :layout="formLayout" @submit="createInstance">
       <a-button type="primary" @click="createInstance">Submit</a-button>
       <a-form-item
@@ -18,7 +18,7 @@
       >
         <a-select
           v-decorator="[ attr.name, { rules: [ { required: attr.is_required && action === 'create' ? true: false } ] } ]"
-          placeholder="请选择"
+          :placeholder="$t('tip.pleaseSelect')"
           v-if="attr.is_choice"
         >
           <a-select-option
@@ -92,7 +92,7 @@ export default {
   },
   computed: {
     title () {
-      return this.action === 'create' ? '创建 ' : '批量修改 '
+      return this.action === 'create' ? this.$t('tip.create') + ' ' : this.$t('ci.batchUpdate') + ' '
     }
   },
   watch: {
@@ -115,14 +115,6 @@ export default {
     getAttributeList () {
       getCITypeAttributesById(this.typeId).then(res => {
         const attrList = res.attributes
-        // res.attributes.forEach(item =>
-        //   attrList.push({
-        //     name: item.name,
-        //     alias: item.alias,
-        //     value_type: item.value_type,
-        //     is_required: item.is_required
-        //   })
-        // )
         this.attributeList = attrList.sort((x, y) => y.is_required - x.is_required)
       })
     },
@@ -144,7 +136,7 @@ export default {
           addCI(values)
             .then(res => {
               notification.success({
-                message: '新增成功'
+                message: this.$t('tip.addSuccess')
               })
             })
             .catch(e => {

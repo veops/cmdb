@@ -12,7 +12,7 @@
       :rowKey="record=>record.id"
       :rowSelection="options.rowSelection"
       :scroll="scroll"
-      :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条记录`, pageSizeOptions: pageSizeOptions}"
+      :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]}  ${total} records in total`, pageSizeOptions: pageSizeOptions}"
       showPagination="auto"
       :pageSize="25"
       ref="table"
