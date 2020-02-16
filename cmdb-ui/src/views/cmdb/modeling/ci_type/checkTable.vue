@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-button class="action-btn" @click="handleCreate" type="primary">批量修改</a-button>
+    <a-button class="action-btn" @click="handleCreate" type="primary">{{ $t('button.batchUpdate') }}</a-button>
     <s-table
       v-once
       :alert="options.alert"
@@ -41,7 +41,7 @@
           :render="item=>item.title"
           :selectedKeys="transferSelectedKeys"
           :targetKeys="transferTargetKeys"
-          :titles="['当前项', '已选项']"
+          :titles="[$t('tip.unselectedAttribute'), $t('tip.selectedAttribute')]"
           :listStyle="{
             height: '600px',
             width: '40%',
@@ -113,21 +113,21 @@ export default {
       showPagination: false,
       columns: [
         {
-          title: '属性名',
+          title: this.$t('ciType.alias'),
           dataIndex: 'alias',
           sorter: false,
           width: 200,
           scopedSlots: { customRender: 'alias' }
         },
         {
-          title: '属性英文名',
+          title: this.$t('ciType.name'),
           dataIndex: 'name',
           sorter: false,
           width: 200,
           scopedSlots: { customRender: 'name' }
         },
         {
-          title: '必须',
+          title: this.$t('ciType.required'),
           dataIndex: 'is_required',
           sorter: false,
           scopedSlots: { customRender: 'is_check' }
@@ -135,7 +135,7 @@ export default {
         },
 
         {
-          title: '操作',
+          title: this.$t('tip.operate'),
           dataIndex: 'action',
           width: 100,
           fixed: 'right',
@@ -156,9 +156,7 @@ export default {
       },
 
       mdl: {},
-      // 高级搜索 展开/关闭
       advanced: false,
-      // 查询参数
       queryParam: {},
 
       // custom table alert & rowSelection
@@ -259,7 +257,7 @@ export default {
 
       updateCITypeAttributesById(this.CITypeId, { attributes: [{ attr_id: record.id, is_required: false }] })
         .then(res => {
-          this.$message.success(`删除成功`)
+          this.$message.success(this.$t('tip.deleteSuccess'))
           this.handleOk()
         })
         .catch(err => this.requestFailed(err))
@@ -269,7 +267,7 @@ export default {
     },
 
     handleCreate () {
-      this.drawerTitle = '批量修改'
+      this.drawerTitle = this.$t('button.batchUpdate')
       this.visible = true
     },
 
@@ -300,7 +298,7 @@ export default {
 
         updateCITypeAttributesById(CITypeId, { attributes: requestData }).then(
           res => {
-            this.$message.success(`更新成功`)
+            this.$message.success(this.$t('tip.updateSuccess'))
             this.visible = false
             this.handleOk()
           }
@@ -311,7 +309,7 @@ export default {
     },
 
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     }
 

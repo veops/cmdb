@@ -1,8 +1,8 @@
 <template>
   <div>
-    <a-card :bordered="true" title="关系视图定义面板">
-      <a-card-meta description="方法1. 右键选择树节点(推荐)"></a-card-meta>
-      <a-card-meta description="方法2. 先打开右上角的开关，再选择树的节点"></a-card-meta>
+    <a-card :bordered="true" :title="$t('ciType.relationViewDefinePanel')">
+      <a-card-meta :description="$t('ciType.relationViewDefinePanelTip1')"></a-card-meta>
+      <a-card-meta :description="$t('ciType.relationViewDefinePanelTip2')"></a-card-meta>
       <a-switch
         slot="extra"
         @change="toggleSelect"
@@ -330,8 +330,8 @@ export default {
     deleteView (viewName) {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: '确认要删除吗 ?',
+        title: that.$t('tip.warning'),
+        content: that.$t('tip.confirmDelete'),
         onOk () {
           deleteRelationView(viewName).then(res => {
             that.create()

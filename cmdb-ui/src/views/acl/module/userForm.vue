@@ -13,18 +13,18 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="用户名(英文)"
+        :label="$t('acl.username')"
       >
         <a-input
           name="username"
-          placeholder="英文名"
-          v-decorator="['username', {rules: [{ required: true, message: '请输入用户名'}]} ]"
+          :placeholder="$t('acl.username')"
+          v-decorator="['username', {rules: [{ required: true, message: $t('acl.usernameRequired')}]} ]"
         />
       </a-form-item>
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="中文名"
+        :label="$t('acl.nickname')"
       >
         <a-input
           name="nickname"
@@ -34,7 +34,7 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="密码"
+        :label="$t('acl.password')"
       >
         <a-input
           type="password"
@@ -46,7 +46,7 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="部门"
+        :label="$t('acl.department')"
       >
         <a-input
           name="department"
@@ -57,7 +57,7 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="小组"
+        :label="$t('acl.catalog')"
       >
         <a-input
           name="catalog"
@@ -68,7 +68,7 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="邮箱"
+        :label="$t('acl.email')"
       >
         <a-input
           name="email"
@@ -78,11 +78,11 @@
               rules: [
                 {
                   type: 'email',
-                  message: '请输入正确的邮箱！',
+                  message: $t('acl.emailValidate'),
                 },
                 {
                   required: true,
-                  message: '请输入邮箱',
+                  message: $t('acl.emailRequired'),
                 },
               ],
             },
@@ -93,18 +93,18 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="手机号码"
+        :label="$t('acl.mobile')"
       >
         <a-input
           name="mobile"
-          v-decorator="['mobile', {rules: [{message: '请输入正确的手机号码', pattern: /^1\d{10}$/ }]} ]"
+          v-decorator="['mobile', {rules: [{message: $t('acl.mobileValidate'), pattern: /^1\d{10}$/ }]} ]"
         />
       </a-form-item>
 
       <a-form-item
         :label-col="horizontalFormItemLayout.labelCol"
         :wrapper-col="horizontalFormItemLayout.wrapperCol"
-        label="是否锁定"
+        :label="$t('acl.block')"
       >
         <a-switch
           @change="onChange"
@@ -154,7 +154,7 @@ export default {
   },
   data () {
     return {
-      drawerTitle: '新增用户',
+      drawerTitle: this.$t('acl.newUser'),
       drawerVisible: false,
       formLayout: 'vertical'
     }
@@ -235,7 +235,7 @@ export default {
     updateUser (attrId, data) {
       updateUserById(attrId, data)
         .then(res => {
-          this.$message.success(`更新成功`)
+          this.$message.success(this.$t('tip.updateSuccess'))
           this.handleOk()
           this.onClose()
         }).catch(err => this.requestFailed(err))
@@ -244,7 +244,7 @@ export default {
     createUser (data) {
       addUser(data)
         .then(res => {
-          this.$message.success(`添加成功`)
+          this.$message.success(this.$t('tip.addSuccess'))
           this.handleOk()
           this.onClose()
         })
@@ -252,7 +252,7 @@ export default {
     },
 
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     }
 

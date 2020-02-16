@@ -13,29 +13,29 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="类型名"
+        :label="$t('acl.name')"
       >
         <a-input
           name="name"
-          placeholder="类型名称"
-          v-decorator="['name', {rules: [{ required: true, message: '请输入类型名'}]} ]"
+          :placeholder="$t('acl.name')"
+          v-decorator="['name', {rules: [{ required: true, message: $t('acl.resourceTypeNameRequired')}]} ]"
         />
       </a-form-item>
 
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="描述"
+        :label="$t('acl.description')"
       >
-        <a-textarea placeholder="请输入描述信息..." name="description" :rows="4" v-decorator="['description', {rules: []} ]"/>
+        <a-textarea :placeholder="$t('acl.descriptionTip')" name="description" :rows="4" v-decorator="['description', {rules: []} ]"/>
       </a-form-item>
 
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="权限"
+        :label="$t('acl.permission')"
       >
-        <a-select mode="tags" v-model="perms" style="width: 100%" placeholder="请输入权限名...">
+        <a-select mode="tags" v-model="perms" style="width: 100%" :placeholder="$t('acl.permissionNameRequired')">
         </a-select>
 
       </a-form-item>
@@ -81,7 +81,7 @@ export default {
   },
   data () {
     return {
-      drawerTitle: '新增资源类型',
+      drawerTitle: this.$t('acl.newResourceType'),
       drawerVisible: false,
       formLayout: 'vertical',
       perms: []
@@ -159,7 +159,7 @@ export default {
     updateResourceType (id, data) {
       updateResourceTypeById(id, data)
         .then(res => {
-          this.$message.success(`更新成功`)
+          this.$message.success(this.$t('tip.updateSuccess'))
           this.handleOk()
           this.onClose()
         }).catch(err => this.requestFailed(err))
@@ -168,7 +168,7 @@ export default {
     createResourceType (data) {
       addResourceType(data)
         .then(res => {
-          this.$message.success(`添加成功`)
+          this.$message.success(this.$t('tip.addSuccess'))
           this.handleOk()
           this.onClose()
         })
@@ -176,7 +176,7 @@ export default {
     },
 
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     }
 

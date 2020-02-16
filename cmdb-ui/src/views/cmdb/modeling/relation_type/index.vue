@@ -2,14 +2,14 @@
   <a-card :bordered="false">
 
     <div class="action-btn">
-      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem;">{{ btnName }}</a-button>
+      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem;">{{ $t('ciType.newRelationType') }}</a-button>
     </div>
 
     <s-table
       :alert="options.alert"
       :columns="columns"
       :data="loadData"
-      :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条记录`, pageSizeOptions: pageSizeOptions}"
+      :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} ${total} records in total`, pageSizeOptions: pageSizeOptions}"
       :showPagination="false"
       :pageSize="25"
       :rowKey="record=>record.id"
@@ -34,7 +34,7 @@
           icon="search"
           size="small"
           style="width: 90px; margin-right: 8px"
-        >搜索</a-button>
+        >{{ $t('button.query') }}</a-button>
         <a-button
           @click="() => handleReset(clearFilters, column)"
           size="small"
@@ -61,11 +61,11 @@
           <a-divider type="vertical"/>
 
           <a-popconfirm
-            title="确认删除?"
+            :title="$t('tip.confirmDelete')"
             @confirm="handleDelete(record)"
             @cancel="cancel"
-            okText="是"
-            cancelText="否"
+            :okText="$t('button.yes')"
+            :cancelText="$t('button.no')"
           >
             <a>{{ $t('tip.delete') }}</a>
           </a-popconfirm>
@@ -92,7 +92,6 @@ export default {
   data () {
     return {
       scroll: { x: 1000, y: 500 },
-      btnName: '新增关系类型',
 
       formLayout: 'vertical',
 
@@ -104,7 +103,7 @@ export default {
       columns: [
         {
           width: 150,
-          title: '类型名',
+          title: this.$t('ciType.name'),
           dataIndex: 'name',
           sorter: false,
           scopedSlots: {
@@ -123,7 +122,7 @@ export default {
         },
         {
           width: 150,
-          title: '操作',
+          title: this.$t('tip.operate'),
           key: 'operation',
           scopedSlots: { customRender: 'action' }
         }
@@ -139,11 +138,8 @@ export default {
       },
 
       mdl: {},
-      // 高级搜索 展开/关闭
       advanced: false,
-      // 查询参数
       queryParam: {},
-      // 表头
 
       selectedRowKeys: [],
       selectedRows: [],
@@ -226,13 +222,13 @@ export default {
     deleteRelationType (id) {
       deleteRelationType(id)
         .then(res => {
-          this.$message.success(`删除成功`)
+          this.$message.success(this.$t('tip.deleteSuccess'))
           this.handleOk()
         })
         .catch(err => this.requestFailed(err))
     },
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     },
     cancel () {
