@@ -53,6 +53,7 @@ def _auth_with_token():
             return False
 
         login_user(user)
+        g.user = user
         return True
     except jwt.ExpiredSignatureError:
         return False
