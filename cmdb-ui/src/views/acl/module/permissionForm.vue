@@ -13,31 +13,31 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="类型名"
+        :label="$t('acl.name')"
       >
         <a-input
           name="name"
           placeholder=""
-          v-decorator="['name', {rules: [{ required: true, message: '请输入资源名'}]} ]"
+          v-decorator="['name', {rules: [{ required: true, message: $t('acl.resourceNameRequired') }]} ]"
         />
       </a-form-item>
 
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="描述"
+        :label="$t('acl.description')"
       >
-        <a-textarea placeholder="请输入描述信息..." name="description" :rows="4" />
+        <a-textarea :placeholder="$t('acl.descriptionTip')" name="description" :rows="4" />
       </a-form-item>
 
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="权限"
+        :label="$t('acl.permission')"
       >
         <div :style="{ borderBottom: '1px solid #E9E9E9' }">
           <a-checkbox :indeterminate="indeterminate" @change="onCheckAllChange" :checked="checkAll">
-            全选
+            {{ $t('tip.selectAll') }}
           </a-checkbox>
         </div>
         <br />
@@ -86,7 +86,7 @@ export default {
   },
   data () {
     return {
-      drawerTitle: '新增资源类型',
+      drawerTitle: this.$t('acl.newResourceType'),
       drawerVisible: false,
       formLayout: 'vertical',
       perms: ['1'],
@@ -177,7 +177,7 @@ export default {
     updateResourceType (id, data) {
       updateResourceTypeById(id, data)
         .then(res => {
-          this.$message.success(`更新成功`)
+          this.$message.success(this.$t('tip.updateSuccess'))
           this.handleOk()
           this.onClose()
         }).catch(err => this.requestFailed(err))
@@ -186,7 +186,7 @@ export default {
     createResourceType (data) {
       addResourceType(data)
         .then(res => {
-          this.$message.success(`添加成功`)
+          this.$message.success(this.$t('tip.addSuccess'))
           this.handleOk()
           this.onClose()
         })
@@ -194,7 +194,7 @@ export default {
     },
 
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     }
 

@@ -8,7 +8,7 @@
           </a>
         </div>
         <div class="desc">
-          运维资产数据管理
+          {{ $t('login.subTitle') }}
         </div>
       </div>
 

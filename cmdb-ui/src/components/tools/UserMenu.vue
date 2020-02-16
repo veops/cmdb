@@ -34,7 +34,7 @@
           <a-menu-item key="3">
             <a href="javascript:;" @click="handleLogout">
               <a-icon type="logout"/>
-              <span>退出登录</span>
+              <span>{{ $t('login.logout') }}</span>
             </a>
           </a-menu-item>
         </a-menu>
@@ -67,8 +67,8 @@ export default {
       const that = this
 
       this.$confirm({
-        title: '提示',
-        content: '真的要注销登录吗 ?',
+        title: this.$t('tip.warning'),
+        content: this.$t('login.confirmLogout'),
         onOk () {
           return that.Logout()
         },

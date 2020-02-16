@@ -2,27 +2,27 @@
   <a-card :bordered="false">
 
     <a-tabs defaultActiveKey="1">
-      <a-tab-pane key="1" tab="模型属性">
+      <a-tab-pane key="1" :tab="$t('ciType.typeAttribute')">
 
         <AttributesTable></AttributesTable>
 
       </a-tab-pane>
-      <a-tab-pane forceRender key="2" tab="模型关联">
+      <a-tab-pane forceRender key="2" :tab="$t('ciType.typeRelation')">
         <RelationTable :CITypeId="CITypeId" :CITypeName="CITypeName"></RelationTable>
 
       </a-tab-pane>
 
-      <a-tab-pane forceRender key="3" tab="必须校验">
+      <a-tab-pane forceRender key="3" :tab="$t('ciType.requiredCheck')">
         <CheckTable></CheckTable>
 
       </a-tab-pane>
 
-      <a-tab-pane forceRender key="4" tab="默认显示属性">
+      <a-tab-pane forceRender key="4" :tab="$t('ciType.defaultShowAttribute')">
         <DefaultShowTable></DefaultShowTable>
 
       </a-tab-pane>
 
-      <a-tab-pane forceRender key="5" tab="属性分组 & 排序">
+      <a-tab-pane forceRender key="5" :tab="$t('ciType.attributeGroup')">
         <Group></Group>
 
       </a-tab-pane>

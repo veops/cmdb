@@ -1,7 +1,7 @@
 <template>
   <div>
     <div style="margin-bottom: 2rem">
-      <a-button type="primary" v-if="addGroupBtnVisible" @click="handleAddGroup">添加分组</a-button>
+      <a-button type="primary" v-if="addGroupBtnVisible" @click="handleAddGroup">{{ $t('ciType.addGroup') }}</a-button>
 
       <template v-else>
         <span>
@@ -11,7 +11,7 @@
             style="width: 10rem;margin-right: 0.5rem"
             ref="addGroupInput"
             v-model.trim="newGroupName" />
-          <a @click="handleCreateGroup" style="margin-right: 0.5rem">保存</a>
+          <a @click="handleCreateGroup" style="margin-right: 0.5rem">{{ $t('button.save') }}</a>
           <a @click="handleCancelCreateGroup">{{ $t('button.cancel') }}</a>
         </span>
       </template>
@@ -36,7 +36,7 @@
               style="width: 15%;margin-right: 0.5rem"
               ref="editGroupInput"
               v-model.trim="CITypeGroup.name" />
-            <a @click="handleSaveGroupName(index, CITypeGroup)" style="margin-right: 0.5rem">保存</a>
+            <a @click="handleSaveGroupName(index, CITypeGroup)" style="margin-right: 0.5rem">{{ $t('button.save') }}</a>
             <a @click="handleCancelGroupName(index, CITypeGroup)">{{ $t('button.cancel') }}</a>
           </span>
         </template>
@@ -46,27 +46,27 @@
           <a-button-group size="small">
             <a-tooltip>
               <template slot="title">
-                上移
+                {{ $t('ciType.up') }}
               </template>
               <a-button icon="arrow-up" size="small" @click="handleMoveGroup(index, index-1)" :disabled="index===0"/>
             </a-tooltip>
 
             <a-tooltip>
               <template slot="title">
-                下移
+                {{ $t('ciType.down') }}
               </template>
               <a-button icon="arrow-down" size="small" @click="handleMoveGroup(index, index+1)" :disabled="index===CITypeGroups.length-1" />
             </a-tooltip>
 
             <a-tooltip>
               <template slot="title">
-                添加属性
+                {{ $t('ciType.addAttribute1') }}
               </template>
               <a-button icon="plus" size="small" @click="handleAddExistGroupAttr(index)"/>
             </a-tooltip>
             <a-tooltip>
               <template slot="title">
-                删除分组
+                {{ $t('ciType.deleteGroup') }}
               </template>
               <a-button icon="delete" size="small" @click="handleDeleteGroup(CITypeGroup.id)" :disabled="CITypeGroup.attributes.length!==0" />
 
@@ -108,7 +108,7 @@
             <li
               class="property-item-empty"
               @click="handleAddExistGroupAttr(index)"
-              style="">添加属性</li>
+              style="">{{ $t('ciType.addAttribute1') }}</li>
 
           </template>
 
@@ -121,34 +121,34 @@
 
       <template>
 
-        <span style="margin-right: 0.2rem">更多属性</span>
+        <span style="margin-right: 0.2rem">{{ $t('ciType.moreAttribute') }}</span>
         <span style="color: #c3cdd7; margin-right: 0.5rem">({{ otherGroupAttributes.length }})</span>
       </template>
       <div style="float: right">
         <a-button-group size="small">
           <a-tooltip>
             <template slot="title">
-              上移
+              {{ $t('ciType.up') }}
             </template>
             <a-button icon="arrow-up" size="small" disabled/>
           </a-tooltip>
 
           <a-tooltip>
             <template slot="title">
-              下移
+              {{ $t('ciType.down') }}
             </template>
             <a-button icon="arrow-down" size="small" disabled />
           </a-tooltip>
 
           <a-tooltip>
             <template slot="title">
-              添加属性
+              {{ $t('ciType.addAttribute1') }}
             </template>
             <a-button icon="plus" size="small" @click="handleAddOtherGroupAttr"/>
           </a-tooltip>
           <a-tooltip>
             <template slot="title">
-              删除分组
+              {{ $t('ciType.deleteGroup') }}
             </template>
             <a-button icon="delete" size="small" disabled />
 
@@ -182,14 +182,14 @@
           <li
             class="property-item-empty"
             @click="handleAddOtherGroupAttr"
-            style="">添加属性</li>
+            style="">{{ $t('ciType.addAttribute1') }}</li>
 
         </template>
 
       </draggable>
     </div>
     <a-modal
-      title="添加字段"
+      :title="$t('ciType.addAttribute1')"
       :width="'80%'"
       v-model="modalVisible"
       @ok="handleSubmit"
@@ -344,13 +344,13 @@ export default {
       if (CITypeGroup.name === CITypeGroup.originName) {
         this.handleCancelGroupName(index, CITypeGroup)
       } else if (this.CITypeGroups.map(x => x.originName).includes(CITypeGroup.name)) {
-        this.$message.error('分组名称已存在')
+        this.$message.error(this.$t('ciType.groupNameExisted'))
       } else {
         updateCITypeGroupById(CITypeGroup.id, { name: CITypeGroup.name, attributes: CITypeGroup.attributes.map(x => x.id), order: CITypeGroup.order })
           .then(res => {
             CITypeGroup.editable = false
             this.$set(this.CITypeGroups, index, CITypeGroup)
-            this.$message.success('修改成功')
+            this.$message.success(this.$t('tip.updateSuccess'))
           })
           .catch(err => this.requestFailed(err))
       }
@@ -389,14 +389,14 @@ export default {
       const fromGroupId = this.CITypeGroups[beforeIndex].id
       const toGroupId = this.CITypeGroups[afterIndex].id
       transferCITypeGroupIndex(this.CITypeId, { from: fromGroupId, to: toGroupId }).then(res => {
-        this.$message.success('操作成功')
+        this.$message.success(this.$t('ciType.moveSuccess'))
         const beforeGroup = this.CITypeGroups[beforeIndex]
         this.CITypeGroups[beforeIndex] = this.CITypeGroups[afterIndex]
 
         this.$set(this.CITypeGroups, beforeIndex, this.CITypeGroups[afterIndex])
         this.$set(this.CITypeGroups, afterIndex, beforeGroup)
       }).catch(err => {
-        this.$httpError(err, '移动出错')
+        this.$httpError(err, this.$t('ciType.moveFailed'))
       })
     },
     handleAddExistGroupAttr (index) {
@@ -463,13 +463,13 @@ export default {
     handleChange (e, group) {
       if (e.hasOwnProperty('moved') && e.moved.oldIndex !== e.moved.newIndex) {
         if (group === -1) {
-          this.$message.error('更多属性不能进行排序, 如需排序需添加入其他分组中！')
+          this.$message.error(this.$t('ciType.moreAttributeCannotSort'))
         } else {
           transferCITypeAttrIndex(this.CITypeId,
             {
               from: { attr_id: e.moved.element.id, group_id: group > -1 ? group : null },
               to: { order: e.moved.newIndex, group_id: group > -1 ? group : null }
-            }).then(res => this.$message.success('保存成功')).catch(err => {
+            }).then(res => this.$message.success(this.$t('tip.saveSuccess'))).catch(err => {
             this.$httpError(err)
             this.abortDraggable()
           })
@@ -486,7 +486,7 @@ export default {
             {
               from: { attr_id: e.removed.element.id, group_id: group > -1 ? group : null },
               to: { group_id: this.addRemoveGroupFlag.to.group_id, order: this.addRemoveGroupFlag.to.order }
-            }).then(res => this.$message.success('保存成功')).catch(err => {
+            }).then(res => this.$message.success(this.$t('tip.saveSuccess'))).catch(err => {
             this.$httpError(err)
             this.abortDraggable()
           }).finally(() => {
@@ -501,9 +501,9 @@ export default {
       })
     },
     updatePropertyIndex () {
-      const attributes = []    // 全部属性
-      let attributeOrder = 0    // 属性组
-      let groupOrder = 0   // 组排序
+      const attributes = []      // all attributes
+      let attributeOrder = 0    // attribute group
+      let groupOrder = 0   // sort by group
       const promises = [
 
       ]
@@ -548,14 +548,14 @@ export default {
       const that = this
       Promise.all(promises)
         .then(values => {
-          that.$message.success(`修改成功`)
+          that.$message.success(this.$t('tip.updateSuccess'))
           that.getCITypeGroupData()
           that.modalVisible = false
         })
         .catch(err => that.requestFailed(err))
     },
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     }
   },
