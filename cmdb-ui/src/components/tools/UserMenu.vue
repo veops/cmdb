@@ -48,7 +48,7 @@
 import NoticeIcon from '@/components/NoticeIcon'
 import { mapActions, mapGetters } from 'vuex'
 import LangSelect from '@/components/tools/LangSelect'
-import { showLocale } from '@/locales'
+import config from '@/config/defaultSettings'
 
 export default {
   name: 'UserMenu',
@@ -57,7 +57,7 @@ export default {
   },
   data () {
     return {
-      showLocale: showLocale
+      showLocale: config.showLocale
     }
   },
   methods: {
