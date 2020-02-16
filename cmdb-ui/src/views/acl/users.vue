@@ -2,7 +2,7 @@
   <a-card :bordered="false">
 
     <div class="action-btn">
-      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem;">{{ btnName }}</a-button>
+      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem;">{{ $t('acl.newUser') }}</a-button>
     </div>
 
     <s-table
@@ -12,7 +12,7 @@
       :rowKey="record=>record.uid"
       :rowSelection="options.rowSelection"
       :scroll="scroll"
-      :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条记录`, pageSizeOptions: pageSizeOptions}"
+      :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} ${total} records in total`, pageSizeOptions: pageSizeOptions}"
       showPagination="auto"
       :pageSize="25"
       ref="table"
@@ -33,7 +33,7 @@
           icon="search"
           size="small"
           style="width: 90px; margin-right: 8px"
-        >搜索</a-button>
+        >{{ $t('button.query') }}</a-button>
         <a-button
           @click="() => handleReset(clearFilters, column)"
           size="small"
@@ -75,11 +75,11 @@
           <a-divider type="vertical"/>
 
           <a-popconfirm
-            title="确认删除?"
+            :title="$t('tip.confirmDelete')"
             @confirm="handleDelete(record)"
             @cancel="cancel"
-            okText="是"
-            cancelText="否"
+            :okText="$t('button.yes')"
+            :cancelText="$t('button.no')"
           >
             <a>{{ $t('tip.delete') }}</a>
           </a-popconfirm>
@@ -106,7 +106,6 @@ export default {
   data () {
     return {
       scroll: { x: 1300, y: 500 },
-      btnName: '新增用户',
 
       CITypeName: this.$route.params.CITypeName,
       CITypeId: this.$route.params.CITypeId,
@@ -122,7 +121,7 @@ export default {
       },
       columns: [
         {
-          title: '用户名',
+          title: this.$t('acl.username'),
           dataIndex: 'username',
           sorter: false,
           width: 150,
@@ -141,7 +140,7 @@ export default {
           }
         },
         {
-          title: '中文名',
+          title: this.$t('acl.nickname'),
           dataIndex: 'nickname',
           sorter: false,
           width: 150,
@@ -160,7 +159,7 @@ export default {
           }
         },
         {
-          title: '部门',
+          title: this.$t('acl.department'),
           dataIndex: 'department',
           width: 100,
           sorter: false,
@@ -168,7 +167,7 @@ export default {
 
         },
         {
-          title: '小组',
+          title: this.$t('acl.catalog'),
           dataIndex: 'catalog',
           sorter: false,
           width: 100,
@@ -176,7 +175,7 @@ export default {
 
         },
         {
-          title: '邮箱',
+          title: this.$t('acl.email'),
           dataIndex: 'email',
           sorter: false,
           width: 200,
@@ -184,7 +183,7 @@ export default {
 
         },
         {
-          title: '手机',
+          title: this.$t('acl.mobile'),
           dataIndex: 'mobile',
           sorter: false,
           width: 150,
@@ -192,7 +191,7 @@ export default {
 
         },
         {
-          title: '加入时间',
+          title: this.$t('acl.joinedAt'),
           dataIndex: 'date_joined',
           sorter: false,
           width: 200,
@@ -200,13 +199,13 @@ export default {
 
         },
         {
-          title: '锁定',
+          title: this.$t('acl.block'),
           dataIndex: 'block',
           width: 100,
           scopedSlots: { customRender: 'block' }
         },
         {
-          title: '操作',
+          title: this.$t('tip.operate'),
           dataIndex: 'action',
           width: 150,
           scopedSlots: { customRender: 'action' }
@@ -232,11 +231,8 @@ export default {
           })
       },
       mdl: {},
-      // 高级搜索 展开/关闭
       advanced: false,
-      // 查询参数
       queryParam: {},
-      // 表头
       selectedRowKeys: [],
       selectedRows: [],
       // custom table alert & rowSelection
@@ -316,13 +312,13 @@ export default {
     deleteUser (attrId) {
       deleteUserById(attrId)
         .then(res => {
-          this.$message.success(`删除成功`)
+          this.$message.success(this.$t('tip.deleteSuccess'))
           this.handleOk()
         })
         .catch(err => this.requestFailed(err))
     },
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     }
 

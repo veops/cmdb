@@ -2,7 +2,7 @@
   <a-card :bordered="false">
 
     <div class="action-btn">
-      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem;">{{ btnName }}</a-button>
+      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem;">{{ $t('acl.newRole') }}</a-button>
     </div>
 
     <s-table
@@ -11,7 +11,7 @@
       :data="loadData"
       :rowKey="record=>record.id"
       :rowSelection="options.rowSelection"
-      :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条记录`, pageSizeOptions: pageSizeOptions}"
+      :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} ${total} records in total`, pageSizeOptions: pageSizeOptions}"
       showPagination="auto"
       :pageSize="25"
       ref="table"
@@ -32,7 +32,7 @@
           icon="search"
           size="small"
           style="width: 90px; margin-right: 8px"
-        >搜索</a-button>
+        >{{ $t('button.query') }}</a-button>
         <a-button
           @click="() => handleReset(clearFilters, column)"
           size="small"
@@ -61,14 +61,14 @@
 
       <span slot="action" slot-scope="text, record">
         <template>
-          <a @click="handleEdit(record)">修改</a>
+          <a @click="handleEdit(record)">{{ $t('button.update') }}</a>
           <a-divider type="vertical"/>
           <a-popconfirm
-            title="确认删除?"
+            :title="$t('tip.confirmDelete')"
             @confirm="handleDelete(record)"
             @cancel="cancel"
-            okText="是"
-            cancelText="否"
+            :okText="$t('button.yes')"
+            :cancelText="$t('button.no')"
           >
             <a>{{ $t('tip.delete') }}</a>
           </a-popconfirm>
@@ -93,7 +93,6 @@ export default {
   data () {
     return {
       scroll: { x: 1000, y: 500 },
-      btnName: '新增角色',
 
       formLayout: 'vertical',
 
@@ -107,7 +106,7 @@ export default {
       },
       columns: [
         {
-          title: '角色名',
+          title: this.$t('acl.roleName'),
           dataIndex: 'name',
           sorter: false,
           width: 150,
@@ -126,7 +125,7 @@ export default {
           }
         },
         {
-          title: '是否管理员',
+          title: this.$t('acl.isAppAdmin'),
           dataIndex: 'is_app_admin',
           width: 100,
           sorter: false,
@@ -134,7 +133,7 @@ export default {
 
         },
         {
-          title: '继承自',
+          title: this.$t('acl.inheritedFrom'),
           dataIndex: 'id',
           sorter: false,
           width: 250,
@@ -142,7 +141,7 @@ export default {
 
         },
         {
-          title: '操作',
+          title: this.$t('tip.operate'),
           dataIndex: 'action',
           width: 150,
           scopedSlots: { customRender: 'action' }
@@ -171,11 +170,8 @@ export default {
       },
 
       mdl: {},
-      // 高级搜索 展开/关闭
       advanced: false,
-      // 查询参数
       queryParam: {},
-      // 表头
 
       selectedRowKeys: [],
       selectedRows: [],
@@ -256,13 +252,13 @@ export default {
     deleteRole (id) {
       deleteRoleById(id)
         .then(res => {
-          this.$message.success(`删除成功`)
+          this.$message.success(this.$t('tip.deleteSuccess'))
           this.handleOk()
         })
         .catch(err => this.requestFailed(err))
     },
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     },
     cancel (e) {

@@ -1,7 +1,7 @@
 import { axios } from '@/utils/request'
 
 /**
- * 获取 ci_type 的属性
+ * Get CI Type attributes
  * @param CITypeName
  * @param parameter
  * @returns {AxiosPromise}
@@ -16,7 +16,7 @@ export function getCITypeAttributesByName (CITypeName, parameter) {
 }
 
 /**
- * 获取 ci_type 的属性
+ * Get CI Type attributes
  * @param CITypeId
  * @param parameter
  * @returns {AxiosPromise}
@@ -30,7 +30,7 @@ export function getCITypeAttributesById (CITypeId, parameter) {
 }
 
 /**
- * 更新属性
+ * update attribute
  * @param attrId
  * @param data
  * @returns {AxiosPromise}
@@ -44,7 +44,7 @@ export function updateAttributeById (attrId, data) {
 }
 
 /**
- * 添加属性
+ * add attribute
  * @param data
  * @returns {AxiosPromise}
  */
@@ -57,7 +57,7 @@ export function createAttribute (data) {
 }
 
 /**
- * 搜索属性/ 获取所有的属性
+ * search attributes or get all attributes
  * @param data
  * @returns {AxiosPromise}
  */
@@ -70,7 +70,7 @@ export function searchAttributes (params) {
 }
 
 /**
- * 删除属性
+ * delete attribute
  * @param attrId
  * @returns {AxiosPromise}
  */
@@ -82,7 +82,7 @@ export function deleteAttributesById (attrId) {
 }
 
 /**
- * 绑定ci_type 属性
+ * bind attribute
  * @param CITypeId
  * @param data
  * @returns {AxiosPromise}
@@ -96,7 +96,7 @@ export function createCITypeAttributes (CITypeId, data) {
 }
 
 /**
- * 更新ci_type 属性
+ * update CI Type attribute
  * @param CITypeId
  * @param data
  * @returns {AxiosPromise}
@@ -110,7 +110,7 @@ export function updateCITypeAttributesById (CITypeId, data) {
 }
 
 /**
- * 删除ci_type 属性
+ * delete CI Type attribute
  * @param CITypeId
  * @param data
  * @returns {AxiosPromise}

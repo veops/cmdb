@@ -5,7 +5,7 @@
     width="50%"
   >
     <template slot="footer">
-      <a-button key="back" @click="handleCancel">关闭</a-button>
+      <a-button key="back" @click="handleCancel">{{ $t('tip.close') }}</a-button>
     </template>
 
     <template>
@@ -40,7 +40,7 @@ export default {
   },
   data () {
     return {
-      drawerTitle: '权限列表',
+      drawerTitle: this.$t('acl.permList'),
       drawerVisible: false,
       record: null,
       allPerms: [],
@@ -80,7 +80,7 @@ export default {
     },
     deletePerm (roleID, permName) {
       deleteRoleResourcePerm(roleID, this.record.id, { perms: [permName] }).then(res => {
-        this.$message.success(`删除成功`)
+        this.$message.success(this.$t('tip.deleteSuccess'))
       }).catch(err => this.requestFailed(err))
     },
     handleCancel (e) {
@@ -88,7 +88,7 @@ export default {
     },
     requestFailed (err) {
       console.log(err)
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     }
 
