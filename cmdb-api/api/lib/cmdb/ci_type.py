@@ -23,7 +23,6 @@ from api.models.cmdb import CITypeGroupItem
 from api.models.cmdb import CITypeRelation
 from api.models.cmdb import PreferenceShowAttributes
 from api.models.cmdb import PreferenceTreeView
-from api.tasks.cmdb import ci_type_attribute_order_rebuild
 
 
 class CITypeManager(object):
@@ -353,6 +352,7 @@ class CITypeAttributeManager(object):
 
         CITypeAttributesCache.clean(type_id)
 
+        from api.tasks.cmdb import ci_type_attribute_order_rebuild
         ci_type_attribute_order_rebuild.apply_async(args=(type_id,), queue=CMDB_QUEUE)
 
 
@@ -589,4 +589,5 @@ class CITypeAttributeGroupManager(object):
 
         CITypeAttributesCache.clean(type_id)
 
+        from api.tasks.cmdb import ci_type_attribute_order_rebuild
         ci_type_attribute_order_rebuild.apply_async(args=(type_id,), queue=CMDB_QUEUE)
