@@ -27,9 +27,11 @@ export default {
   data () {
     return {}
   },
+  inject: ['reload'],
   methods: {
     SwitchLang (row) {
       this.setLang(row.key)
+      this.reload()
     }
   }
 }

@@ -13,9 +13,9 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="角色列表"
+        :label="$t('acl.roleList')"
       >
-        <a-select name="otherID" :filterOption="filterOption" v-decorator="['otherID', {rules: [{ required: true, message: '请选择另一个角色'}]} ]">
+        <a-select name="otherID" :filterOption="filterOption" v-decorator="['otherID', {rules: [{ required: true, message: $t('acl.selectOtherRole')}]} ]">
           <template v-for="role in allRoles">
             <a-select-option v-if="role.id != current_record.id" :key="role.id">{{ role.name }}</a-select-option>
           </template>
@@ -42,8 +42,8 @@
 
         }"
       >
-        <a-button @click="handleAddParent" type="primary" style="margin-right: 1rem">关联父角色</a-button>
-        <a-button @click="handleAddChild" type="primary" style="margin-right: 1rem">关联子角色</a-button>
+        <a-button @click="handleAddParent" type="primary" style="margin-right: 1rem">{{ $t('acl.associatedParentRole') }}</a-button>
+        <a-button @click="handleAddChild" type="primary" style="margin-right: 1rem">{{ $t('acl.associatedChildRole') }}</a-button>
         <a-button @click="onClose">{{ $t('button.cancel') }}</a-button>
 
       </div>
@@ -64,7 +64,7 @@ export default {
   },
   data () {
     return {
-      drawerTitle: '角色关联',
+      drawerTitle: this.$t('acl.associatedRole'),
       drawerVisible: false,
       formLayout: 'vertical',
       allRoles: [],
@@ -144,7 +144,7 @@ export default {
     addParent (id, otherID) {
       addParentRole(id, otherID)
         .then(res => {
-          this.$message.success(`关联父角色成功`)
+          this.$message.success(this.$t('acl.associatedSuccess'))
           this.handleOk()
           this.onClose()
         }).catch(err => this.requestFailed(err))
@@ -153,7 +153,7 @@ export default {
     addChild (id, otherID) {
       addChildRole(id, otherID)
         .then(res => {
-          this.$message.success(`关联子角色成功`)
+          this.$message.success(this.$t('acl.associatedSuccess'))
           this.handleOk()
           this.onClose()
         })
@@ -161,7 +161,7 @@ export default {
     },
 
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     }
 

@@ -2,7 +2,7 @@
   <a-card :bordered="false">
 
     <div class="action-btn">
-      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem;">{{ btnName }}</a-button>
+      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem;">{{ $t('acl.newResourceType') }}</a-button>
     </div>
 
     <s-table
@@ -34,7 +34,7 @@
           icon="search"
           size="small"
           style="width: 90px; margin-right: 8px"
-        >搜索</a-button>
+        >{{ $t('button.query') }}</a-button>
         <a-button
           @click="() => handleReset(clearFilters, column)"
           size="small"
@@ -65,11 +65,11 @@
           <a-divider type="vertical"/>
 
           <a-popconfirm
-            title="确认删除?"
+            :title="$t('tip.confirmDelete')"
             @confirm="handleDelete(record)"
             @cancel="cancel"
-            okText="是"
-            cancelText="否"
+            :okText="$t('button.yes')"
+            :cancelText="$t('button.no')"
           >
             <a>{{ $t('tip.delete') }}</a>
           </a-popconfirm>
@@ -97,7 +97,6 @@ export default {
     return {
       id2perms: {},
       scroll: { x: 1000, y: 500 },
-      btnName: '新增资源类型',
 
       formLayout: 'vertical',
 
@@ -109,7 +108,7 @@ export default {
       },
       columns: [
         {
-          title: '类型名',
+          title: this.$t('acl.typeName'),
           dataIndex: 'name',
           sorter: false,
           width: 50,
@@ -128,20 +127,20 @@ export default {
           }
         },
         {
-          title: '描述',
+          title: this.$t('acl.description'),
           dataIndex: 'description',
           width: 250,
           sorter: false,
           scopedSlots: { customRender: 'description' }
         },
         {
-          title: '权限',
+          title: this.$t('acl.permission'),
           dataIndex: 'id',
           sorter: false,
           scopedSlots: { customRender: 'id' }
         },
         {
-          title: '操作',
+          title: this.$t('tip.operate'),
           dataIndex: 'action',
           width: 150,
           fixed: 'right',
@@ -169,11 +168,8 @@ export default {
       },
 
       mdl: {},
-      // 高级搜索 展开/关闭
       advanced: false,
-      // 查询参数
       queryParam: {},
-      // 表头
 
       selectedRowKeys: [],
       selectedRows: [],
@@ -255,13 +251,13 @@ export default {
     deleteResourceType (id) {
       deleteResourceTypeById(id)
         .then(res => {
-          this.$message.success(`删除成功`)
+          this.$message.success(this.$t('tip.deleteSuccess'))
           this.handleOk()
         })
         .catch(err => this.requestFailed(err))
     },
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     },
     cancel () {

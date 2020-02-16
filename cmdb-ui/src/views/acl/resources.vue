@@ -18,7 +18,7 @@
     </div>
     <a-divider style="margin-top: -16px" />
     <div class="action-btn">
-      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem;">{{ btnName }}</a-button>
+      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem;">{{ $t('acl.newResource') }}</a-button>
     </div>
 
     <s-table
@@ -28,7 +28,7 @@
       :rowKey="record=>record.id"
       :rowSelection="options.rowSelection"
       :scroll="scroll"
-      :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条记录`, pageSizeOptions: pageSizeOptions}"
+      :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} ${total} records in total`, pageSizeOptions: pageSizeOptions}"
       showPagination="auto"
       :pageSize="25"
       ref="table"
@@ -50,7 +50,7 @@
           icon="search"
           size="small"
           style="width: 90px; margin-right: 8px"
-        >搜索</a-button>
+        >{{ $t('button.query') }}</a-button>
         <a-button
           @click="() => handleReset(clearFilters, column)"
           size="small"
@@ -70,16 +70,16 @@
       </template>
       <span slot="action" slot-scope="text, record">
         <template>
-          <a @click="handlePerm(record)">查看授权</a>
+          <a @click="handlePerm(record)">{{ $t('acl.viewAuthorization') }}</a>
           <a-divider type="vertical"/>
-          <a @click="handlePermManage(record)">授权</a>
+          <a @click="handlePermManage(record)">{{ $t('acl.authorization') }}</a>
           <a-divider type="vertical"/>
           <a-popconfirm
-            title="确认删除?"
+            :title="$t('tip.confirmDelete')"
             @confirm="handleDelete(record)"
             @cancel="cancel"
-            okText="是"
-            cancelText="否"
+            :okText="$t('button.yes')"
+            :cancelText="$t('button.no')"
           >
             <a>{{ $t('tip.delete') }}</a>
           </a-popconfirm>
@@ -111,7 +111,6 @@ export default {
   data () {
     return {
       scroll: { x: 1000, y: 500 },
-      btnName: '新增资源',
       allResourceTypes: [],
       currentType: { id: 0 },
       formLayout: 'vertical',
@@ -125,7 +124,7 @@ export default {
       },
       columns: [
         {
-          title: '资源名',
+          title: this.$t('acl.resourceName'),
           dataIndex: 'name',
           sorter: false,
           width: 250,
@@ -144,17 +143,17 @@ export default {
           }
         },
         {
-          title: '创建时间',
+          title: this.$t('acl.createdAt'),
           width: 200,
           dataIndex: 'created_at'
         },
         {
-          title: '最后修改时间',
+          title: this.$t('acl.updatedAt'),
           width: 200,
           dataIndex: 'updated_at'
         },
         {
-          title: '操作',
+          title: this.$t('tip.operate'),
           dataIndex: 'action',
           width: 150,
           scopedSlots: { customRender: 'action' }
@@ -181,11 +180,8 @@ export default {
       },
 
       mdl: {},
-      // 高级搜索 展开/关闭
       advanced: false,
-      // 查询参数
       queryParam: {},
-      // 表头
 
       selectedRowKeys: [],
       selectedRows: [],
@@ -281,13 +277,13 @@ export default {
     deleteResource (id) {
       deleteResourceById(id)
         .then(res => {
-          this.$message.success(`删除成功`)
+          this.$message.success(this.$t('tip.deleteSuccess'))
           this.handleOk()
         })
         .catch(err => this.requestFailed(err))
     },
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     },
     cancel () {

@@ -13,22 +13,22 @@
       <a-form-item
         :label-col="{span:6}"
         :wrapper-col="{span:12}"
-        label="角色名"
+        :label="$t('acl.roleName')"
       >
         <a-input
           name="name"
           placeholder=""
-          v-decorator="['name', {rules: [{ required: true, message: '请输入角色名'}]} ]"
+          v-decorator="['name', {rules: [{ required: true, message: $t('acl.roleNameRequired')}]} ]"
         />
       </a-form-item>
       <a-form-item
         :label-col="{span:6}"
         :wrapper-col="{span:12}"
-        label="继承自"
+        :label="$t('acl.inheritedFrom')"
       >
         <a-select
           v-model="selectedParents"
-          placeholder="可选择继承角色"
+          :placeholder="$t('acl.selectInheritedRoles')"
           mode="multiple"
           :filterOption="filterOption">
           <template v-for="role in allRoles">
@@ -39,7 +39,7 @@
       <a-form-item
         :label-col="{span:8}"
         :wrapper-col="{span:10}"
-        label="是否应用管理员"
+        :label="$t('acl.isAppAdmin')"
       >
         <a-switch
           @change="onChange"
@@ -86,7 +86,7 @@ export default {
   },
   data () {
     return {
-      drawerTitle: '新增角色',
+      drawerTitle: this.$t('acl.newRole'),
       current_id: 0,
       drawerVisible: false,
       formLayout: 'vertical',
@@ -130,7 +130,7 @@ export default {
       )
     },
     handleCreate () {
-      this.drawerTitle = '新增'
+      this.drawerTitle = this.$t('button.add')
       this.drawerVisible = true
     },
     onClose () {
@@ -144,7 +144,7 @@ export default {
     },
 
     handleEdit (record) {
-      this.drawerTitle = '编辑'
+      this.drawerTitle = this.$t('button.update')
       this.drawerVisible = true
       this.current_id = record.id
       const _parents = this.id2parents[record.id]
@@ -180,7 +180,7 @@ export default {
       this.updateParents(id)
       updateRoleById(id, data)
         .then(res => {
-          this.$message.success(`更新成功`)
+          this.$message.success(this.$t('tip.updateSuccess'))
           this.handleOk()
           this.onClose()
         }).catch(err => this.requestFailed(err))
@@ -189,7 +189,7 @@ export default {
     createRole (data) {
       addRole(data)
         .then(res => {
-          this.$message.success(`添加成功`)
+          this.$message.success(this.$t('tip.addSuccess'))
           this.updateParents(res.id)
           this.handleOk()
           this.onClose()
@@ -209,7 +209,7 @@ export default {
       })
     },
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     }
 

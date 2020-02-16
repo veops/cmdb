@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-button class="action-btn" @click="handleCreate" type="primary">新增关系</a-button>
+    <a-button class="action-btn" @click="handleCreate" type="primary">{{ $t('ciType.newRelation') }}</a-button>
     <s-table
       :alert="options.alert"
       :columns="columns"
@@ -38,21 +38,23 @@
         <a-form-item
           :label-col="formItemLayout.labelCol"
           :wrapper-col="formItemLayout.wrapperCol"
-          label="源模型"
+          :label="$t('ciType.sourceCIType')"
         >
           <a-select
             name="source_ci_type_id"
             style="width: 120px"
             v-decorator="['source_ci_type_id', {rules: [], } ]"
           >
-            <a-select-option :value="CIType.id" :key="CIType.id" v-for="CIType in CITypes" v-if="CITypeId === CIType.id">{{ CIType.alias }}</a-select-option>
+            <template v-for="CIType in CITypes">
+              <a-select-option :value="CIType.id" :key="CIType.id" v-if="CITypeId == CIType.id">{{ CIType.alias }}</a-select-option>
+            </template>
           </a-select>
 
         </a-form-item>
         <a-form-item
           :label-col="formItemLayout.labelCol"
           :wrapper-col="formItemLayout.wrapperCol"
-          label="目标模型"
+          :label="$t('ciType.targetCIType')"
         >
           <a-select
             name="ci_type_id"
@@ -66,7 +68,7 @@
         <a-form-item
           :label-col="formItemLayout.labelCol"
           :wrapper-col="formItemLayout.wrapperCol"
-          label="关联关系"
+          :label="$t('ciType.relationType')"
         >
           <a-select
             name="relation_type_id"
@@ -138,27 +140,27 @@ export default {
       showPagination: false,
       columns: [
         {
-          title: '源模型英文名',
+          title: this.$t('ciType.sourceCIType') + this.$t('ciType.name'),
           dataIndex: 'source_ci_type_name',
           sorter: false,
           width: 200,
           scopedSlots: { customRender: 'source_ci_type_name' }
         },
         {
-          title: '关联类型',
+          title: this.$t('ciType.relationType'),
           dataIndex: 'relation_type',
           sorter: false,
           width: 100,
           scopedSlots: { customRender: 'name' }
         },
         {
-          title: '目标模型名',
+          title: this.$t('ciType.targetCIType') + this.$t('ciType.alias'),
           dataIndex: 'alias',
           sorter: false,
           scopedSlots: { customRender: 'alias' }
         },
         {
-          title: '操作',
+          title: this.$t('tip.operate'),
           dataIndex: 'action',
           width: 100,
           fixed: 'right',
@@ -189,9 +191,7 @@ export default {
       },
 
       mdl: {},
-      // 高级搜索 展开/关闭
       advanced: false,
-      // 查询参数
       queryParam: {},
       // custom table alert & rowSelection
       options: {
@@ -254,7 +254,7 @@ export default {
 
       deleteRelation(record.source_ci_type_id, record.id)
         .then(res => {
-          this.$message.success(`删除成功`)
+          this.$message.success(this.$t('tip.deleteSuccess'))
 
           this.handleOk()
         }).catch(err => this.requestFailed(err))
@@ -264,7 +264,7 @@ export default {
     },
 
     handleCreate () {
-      this.drawerTitle = '新增关系'
+      this.drawerTitle = this.$t('ciType.newRelation')
       this.visible = true
       this.$nextTick(() => {
         this.form.setFieldsValue({
@@ -292,7 +292,7 @@ export default {
 
           createRelation(values.source_ci_type_id, values.ci_type_id, values.relation_type_id)
             .then(res => {
-              this.$message.success(`添加成功`)
+              this.$message.success(this.$t('tip.addSuccess'))
               this.onClose()
               this.handleOk()
             }).catch(err => this.requestFailed(err))
@@ -301,7 +301,7 @@ export default {
     },
 
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     }
 

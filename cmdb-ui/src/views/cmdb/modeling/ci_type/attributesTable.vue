@@ -72,10 +72,10 @@
           <a-divider type="vertical"/>
 
           <a-popconfirm
-            title="确认删除?"
+            :title="$t('tip.confirmDelete')"
             @confirm="handleDelete(record)"
-            okText="是"
-            cancelText="否"
+            :okText="$t('button.yes')"
+            :cancelText="$t('button.no')"
           >
             <a>{{ $t('tip.delete') }}</a>
           </a-popconfirm>
@@ -100,7 +100,7 @@
           :render="item=>item.title"
           :selectedKeys="transferSelectedKeys"
           :targetKeys="transferTargetKeys"
-          :titles="['当前项', '已选项']"
+          :titles="[$t('tip.unselectedAttribute'), $t('tip.selectedAttribute')]"
           :listStyle="{
             height: '600px',
             width: '40%',
@@ -163,8 +163,8 @@ export default {
         drawerVisible: false
       },
       batchBindAttrAction: {
-        btnName: '绑定属性',
-        drawerTitle: '绑定属性',
+        btnName: this.$t('ciType.bindAttribute'),
+        drawerTitle: this.$t('ciType.bindAttribute'),
         drawerVisible: false
       },
 
@@ -191,7 +191,7 @@ export default {
       },
       columns: [
         {
-          title: '名称',
+          title: this.$t('ciType.alias'),
           dataIndex: 'alias',
           sorter: false,
           width: 200,
@@ -210,7 +210,7 @@ export default {
           }
         },
         {
-          title: '英文名',
+          title: this.$t('ciType.name'),
           dataIndex: 'name',
           sorter: false,
           width: 200,
@@ -229,7 +229,7 @@ export default {
           }
         },
         {
-          title: '类型',
+          title: this.$t('ciType.type'),
           dataIndex: 'value_type',
           sorter: false,
           width: 100,
@@ -238,7 +238,7 @@ export default {
 
         },
         {
-          title: '唯一',
+          title: this.$t('ciType.unique'),
           dataIndex: 'is_unique',
           width: 50,
           sorter: false,
@@ -246,7 +246,7 @@ export default {
 
         },
         {
-          title: '索引',
+          title: this.$t('ciType.index'),
           dataIndex: 'is_index',
           sorter: false,
           width: 50,
@@ -254,7 +254,7 @@ export default {
 
         },
         {
-          title: '排序',
+          title: this.$t('ciType.sort'),
           dataIndex: 'is_sortable',
           sorter: false,
           width: 50,
@@ -262,7 +262,7 @@ export default {
 
         },
         {
-          title: '链接',
+          title: this.$t('ciType.link'),
           dataIndex: 'is_link',
           sorter: false,
           width: 50,
@@ -270,7 +270,7 @@ export default {
 
         },
         {
-          title: '密码',
+          title: this.$t('ciType.password'),
           dataIndex: 'is_password',
           sorter: false,
           width: 50,
@@ -278,7 +278,7 @@ export default {
 
         },
         {
-          title: '列表',
+          title: this.$t('ciType.list'),
           dataIndex: 'is_list',
           sorter: false,
           width: 50,
@@ -286,7 +286,7 @@ export default {
 
         },
         {
-          title: '必须',
+          title: this.$t('ciType.required'),
           dataIndex: 'is_required',
           sorter: false,
           width: 50,
@@ -294,14 +294,14 @@ export default {
 
         },
         {
-          title: '默认显示',
+          title: this.$t('ciType.defaultShow'),
           dataIndex: 'default_show',
           sorter: false,
           scopedSlots: { customRender: 'is_check' }
 
         },
         {
-          title: '操作',
+          title: this.$t('tip.operate'),
           dataIndex: 'action',
           width: 100,
           fixed: 'right',
@@ -323,11 +323,8 @@ export default {
       },
 
       mdl: {},
-      // 高级搜索 展开/关闭
       advanced: false,
-      // 查询参数
       queryParam: {},
-      // 表头
 
       selectedRowKeys: [],
       selectedRows: [],
@@ -448,7 +445,7 @@ export default {
     handleDelete (record) {
       this.unbindAttribute([record.id])
         .then(res => {
-          this.$message.success(`删除成功`)
+          this.$message.success(this.$t('tip.deleteSuccess'))
           this.handleOk()
         }).catch(err => this.requestFailed(err))
     },
@@ -486,7 +483,7 @@ export default {
       const that = this
       Promise.all(p).then(function (values) {
         console.log(values)
-        that.$message.success(`修改成功`)
+        that.$message.success(that.$t('tip.updateSuccess'))
         that.handleOk()
         that.onBatchBindAttrActionClose()
       }).catch(err => that.requestFailed(err))
@@ -500,7 +497,7 @@ export default {
     },
 
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     }
 
