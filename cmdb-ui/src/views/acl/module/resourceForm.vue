@@ -13,19 +13,19 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="资源名"
+        :label="$t('acl.name')"
       >
         <a-input
           name="name"
           placeholder=""
-          v-decorator="['name', {rules: [{ required: true, message: '请输入资源名'}]} ]"
+          v-decorator="['name', {rules: [{ required: true, message: $t('acl.resourceNameRequired')}]} ]"
         />
       </a-form-item>
 
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="资源类型"
+        :label="$t('acl.resourceType')"
       >
         <a-select name="type_id" v-decorator="['type_id', {rules: []} ]">
           <a-select-option v-for="type in allTypes" :key="type.id">{{ type.name }}</a-select-option>
@@ -73,7 +73,7 @@ export default {
   },
   data () {
     return {
-      drawerTitle: '新增资源',
+      drawerTitle: this.$t('acl.newResource'),
       drawerVisible: false,
       formLayout: 'vertical',
       allTypes: []
@@ -150,14 +150,14 @@ export default {
     createResource (data) {
       addResource(data)
         .then(res => {
-          this.$message.success(`添加成功`)
+          this.$message.success(this.$t('tip.addSuccess'))
           this.onClose()
         })
         .catch(err => this.requestFailed(err))
     },
 
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     }
 
