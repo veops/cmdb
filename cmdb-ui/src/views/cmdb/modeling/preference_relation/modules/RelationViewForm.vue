@@ -13,12 +13,12 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="关系视图名"
+        :label="$t('ciType.RealtionViewName')"
       >
         <a-input
           name="name"
           placeholder=""
-          v-decorator="['name', {rules: [{ required: true, message: '请输入 关系视图名'}]} ]"
+          v-decorator="['name', {rules: [{ required: true, message: $t('ciType.RealtionViewNameRequired')}]} ]"
         />
       </a-form-item>
 
@@ -59,7 +59,7 @@ export default {
   name: 'RelationViewForm',
   data () {
     return {
-      drawerTitle: '新增关系视图',
+      drawerTitle: this.$t('ciType.newRealtionView'),
       drawerVisible: false,
       formLayout: 'vertical',
       crIds: []
@@ -117,7 +117,7 @@ export default {
       data.cr_ids = this.crIds
       subscribeRelationView(data)
         .then(res => {
-          this.$message.success(`添加成功`)
+          this.$message.success(this.$t('tip.addSuccess'))
           this.onClose()
           this.$emit('refresh')
         })
@@ -126,7 +126,7 @@ export default {
 
     requestFailed (err) {
       console.log(err, 'error')
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     }
 
