@@ -13,12 +13,12 @@
       <a-form-item
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
-        label="类型名"
+        :label="$t('ciType.name')"
       >
         <a-input
           name="name"
           placeholder=""
-          v-decorator="['name', {rules: [{ required: true, message: '请输入类型名'}]} ]"
+          v-decorator="['name', {rules: [{ required: true, message: $t('ciType.relationTypeNameRequired')}]} ]"
         />
       </a-form-item>
 
@@ -59,7 +59,7 @@ export default {
   name: 'RelationTypeForm',
   data () {
     return {
-      drawerTitle: '新增关系类型',
+      drawerTitle: this.$t('ciType.newRelationType'),
       drawerVisible: false,
       formLayout: 'vertical'
     }
@@ -134,7 +134,7 @@ export default {
     updateRelationType (id, data) {
       updateRelationType(id, data)
         .then(res => {
-          this.$message.success(`更新成功`)
+          this.$message.success(this.$t('tip.updateSuccess'))
           this.handleOk()
           this.onClose()
         }).catch(err => this.requestFailed(err))
@@ -143,7 +143,7 @@ export default {
     createRelationType (data) {
       addRelationType(data)
         .then(res => {
-          this.$message.success(`添加成功`)
+          this.$message.success(this.$t('tip.addSuccess'))
           this.handleOk()
           this.onClose()
         })
@@ -151,7 +151,7 @@ export default {
     },
 
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requsetFailed')
       this.$message.error(`${msg}`)
     }
 
