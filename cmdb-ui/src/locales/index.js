@@ -6,11 +6,9 @@ import enUS from './lang/en-US'
 import zhCN from './lang/zh-CN'
 // change default accept-language
 import { axios } from '@/utils/request'
+import config from '@/config/defaultSettings'
 
 Vue.use(VueI18n)
-
-export const defaultLang = 'zh-CN'
-export const showLocale = true
 
 const messages = {
   'en-US': {
@@ -22,14 +20,14 @@ const messages = {
 }
 
 const i18n = new VueI18n({
-  locale: defaultLang,
-  fallbackLocale: defaultLang,
+  locale: config.defaultLang,
+  fallbackLocale: config.defaultLang,
   messages
 })
 
 export default i18n
 
-const loadedLanguages = [defaultLang]
+const loadedLanguages = [config.defaultLang]
 
 function setI18nLanguage (lang) {
   i18n.locale = lang
@@ -42,9 +40,9 @@ export function i18nRender (key) {
   return i18n.t(key)
 }
 
-export function loadLanguageAsync (lang = defaultLang) {
+export function loadLanguageAsync (lang = config.defaultLang) {
   return new Promise(resolve => {
-    Vue.ls.set('lang', lang)
+    localStorage.setItem('lang', lang)
     if (i18n.locale !== lang) {
       if (!loadedLanguages.includes(lang)) {
         return import(/* webpackChunkName: "lang-[request]" */ `./lang/${lang}`).then(msg => {
@@ -59,6 +57,6 @@ export function loadLanguageAsync (lang = defaultLang) {
   })
 }
 
-// if (Vue.ls.get('lang') !== null && defaultLang !== Vue.ls.get('lang')) {
-//   loadLanguageAsync(localStorage.lang)
-// }
+if (localStorage.getItem('lang') !== null && config.defaultLang !== localStorage.getItem('lang')) {
+  loadLanguageAsync(localStorage.lang)
+}
