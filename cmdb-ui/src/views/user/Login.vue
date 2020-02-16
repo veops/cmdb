@@ -12,15 +12,15 @@
         :tabBarStyle="{ textAlign: 'center', borderBottom: 'unset' }"
         @change="handleTabClick"
       >
-        <a-tab-pane key="tab1" tab="账号密码登录">
+        <a-tab-pane key="tab1" :tab="$t('login.loginHeader')">
           <a-form-item>
             <a-input
               size="large"
               type="text"
-              placeholder="用户名或者邮箱"
+              :placeholder="$t('login.loginName')"
               v-decorator="[
                 'username',
-                {rules: [{ required: true, message: '请输入帐户名或邮箱地址' }, { validator: handleUsernameOrEmail }], validateTrigger: 'change'}
+                {rules: [{ required: true, message: $t('login.loginNameRequired') }, { validator: handleUsernameOrEmail }], validateTrigger: 'change'}
               ]"
             >
               <a-icon slot="prefix" type="user" :style="{ color: 'rgba(0,0,0,.25)' }"/>
@@ -32,10 +32,10 @@
               size="large"
               type="password"
               autocomplete="false"
-              placeholder="密码"
+              :placeholder="$t('login.password')"
               v-decorator="[
                 'password',
-                {rules: [{ required: true, message: '请输入密码' }], validateTrigger: 'blur'}
+                {rules: [{ required: true, message: $t('login.passwordRequired') }], validateTrigger: 'blur'}
               ]"
             >
               <a-icon slot="prefix" type="lock" :style="{ color: 'rgba(0,0,0,.25)' }"/>
@@ -45,7 +45,7 @@
       </a-tabs>
 
       <a-form-item>
-        <a-checkbox v-decorator="['rememberMe']">自动登录</a-checkbox>
+        <a-checkbox v-decorator="['rememberMe']">{{ $t('login.autoLogin') }}</a-checkbox>
       </a-form-item>
 
       <a-form-item style="margin-top:24px">
@@ -142,18 +142,17 @@ export default {
 
     loginSuccess (res) {
       this.$router.push({ path: this.$route.query.redirect })
-      // 延迟 1 秒显示欢迎信息
       setTimeout(() => {
         this.$notification.success({
-          message: '欢迎',
-          description: `${timeFix()}，欢迎回来`
+          message: this.$t('login.welcome'),
+          description: `${timeFix()}，` + this.$t('login.welcomeBack')
         })
       }, 1000)
     },
     requestFailed (err) {
       this.$notification['error']({
-        message: '错误',
-        description: ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试',
+        message: this.$t('tip.error'),
+        description: ((err.response || {}).data || {}).message || this.$t('tip.requestFailed'),
         duration: 4
       })
     }
