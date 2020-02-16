@@ -13,7 +13,7 @@
         <template v-if="Object.keys(item).length === 0">
           <a-button class="new-btn" type="dashed" @click="handleCreate">
             <a-icon type="plus"/>
-            新增
+            {{ $t('ciType.add') }}
           </a-button>
         </template>
         <template v-else>
@@ -28,7 +28,7 @@
                 <a-icon type="setting" />
               </router-link>
               <a-icon type="edit" @click="handleEdit(item)"/>
-              <a-popconfirm title="确认删除" @confirm="handleDelete(item)" okText="是" cancelText="否">
+              <a-popconfirm :title="$t('tip.confirmDelete')" @confirm="handleDelete(item)" :okText="$t('button.yes')" :cancelText="$t('button.no')">
                 <a-icon type="delete"/>
               </a-popconfirm>
             </template>
@@ -66,18 +66,17 @@
         <a-form-item
           :label-col="formItemLayout.labelCol"
           :wrapper-col="formItemLayout.wrapperCol"
-          label="模型名(英文)"
+          :label="$t('ciType.name')"
         >
           <a-input
             name="name"
-            placeholder="英文"
-            v-decorator="['name', {rules: [{ required: true, message: '请输入属性名'},{message: '不能以数字开头，可以是英文 数字以及下划线 (_)', pattern: RegExp('^(?!\\d)[a-zA-Z_0-9]+$')}]} ]"
+            v-decorator="['name', {rules: [{ required: true, message: $t('ciType.nameRequired')},{message: $t('ciType.nameValidate'), pattern: RegExp('^(?!\\d)[a-zA-Z_0-9]+$')}]} ]"
           />
         </a-form-item>
         <a-form-item
           :label-col="formItemLayout.labelCol"
           :wrapper-col="formItemLayout.wrapperCol"
-          label="别名"
+          :label="$t('ciType.alias')"
         >
           <a-input
             name="alias"
@@ -88,7 +87,7 @@
         <a-form-item
           :label-col="formItemLayout.labelCol"
           :wrapper-col="formItemLayout.wrapperCol"
-          label="唯一标识*"
+          :label="$t('ciType.unique') + '*'"
         >
 
           <a-select
@@ -203,7 +202,7 @@ export default {
       })
     },
     handleCreate () {
-      this.drawerTitle = '新增模型'
+      this.drawerTitle = this.$t('ciType.newCIType')
       this.drawerVisible = true
     },
     onClose () {
@@ -211,7 +210,7 @@ export default {
       this.drawerVisible = false
     },
     handleEdit (record) {
-      this.drawerTitle = '编辑模型'
+      this.drawerTitle = this.$t('ciType.editCIType')
       this.drawerVisible = true
 
       this.$nextTick(() => {
@@ -228,7 +227,7 @@ export default {
     handleDelete (record) {
       deleteCIType(record.id)
         .then(res => {
-          this.$message.success(`删除成功`)
+          this.$message.success(this.$t('tip.deleteSuccess'))
           this.getCITypes()
         })
         .catch(err => this.requestFailed(err))
@@ -252,7 +251,7 @@ export default {
     createCIType (data) {
       createCIType(data)
         .then(res => {
-          this.$message.success(`添加成功`)
+          this.$message.success(this.$t('tip.addSuccess'))
           this.drawerVisible = false
           this.getCITypes()
         })
@@ -262,14 +261,14 @@ export default {
     updateCIType (CITypeId, data) {
       updateCIType(CITypeId, data)
         .then(res => {
-          this.$message.success(`修改成功`)
+          this.$message.success(this.$t('tip.updateSuccess'))
           this.drawerVisible = false
           this.getCITypes()
         })
         .catch(err => this.requestFailed(err))
     },
     requestFailed (err) {
-      const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
+      const msg = ((err.response || {}).data || {}).message || this.$t('tip.requestFailed')
       this.$message.error(`${msg}`)
     }
 
