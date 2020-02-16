@@ -266,8 +266,8 @@ class OperationRecord(Model):
     __tablename__ = "c_records"
 
     uid = db.Column(db.Integer, index=True, nullable=False)
-    origin = db.Column(db.String(32), nullable=False)
-    ticket_id = db.Column(db.String(32), nullable=False)
+    origin = db.Column(db.String(32), nullable=True)
+    ticket_id = db.Column(db.String(32), nullable=True)
     reason = db.Column(db.Text)
 
 
