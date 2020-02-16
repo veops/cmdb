@@ -9,7 +9,7 @@ from flask.testing import FlaskClient
 from werkzeug.datastructures import Headers
 
 from api.app import create_app
-from api.extensions import db
+from api.extensions import db, cache
 from api.models.acl import User
 
 
@@ -75,6 +75,7 @@ def database(app):
 def session(database, app):
     with app.app_context():
         clean_db()
+        clean_cache()
         yield database.session
         database.session.rollback()
 
@@ -89,6 +90,10 @@ def teardown_db():
     db.session.remove()
     db.drop_all()
     db.session.bind.dispose()
+
+
+def clean_cache():
+    cache.clear()
 
 
 def clean_db():
