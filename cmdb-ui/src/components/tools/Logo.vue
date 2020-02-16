@@ -1,7 +1,7 @@
 <template>
   <div class="logo">
     <router-link :to="{name:'cmdb'}">
-      <div style="text-align: center; margin-right: 24px">
+      <div style="margin-right: 24px">
         <div style="display: inline-block;">
           <img src="@/assets/cmdb.png" width="50px" height="50px" style="margin:0; padding:0" />
         </div>
