@@ -5,12 +5,13 @@ import { UserLayout, BasicLayout, RouteView } from '@/layouts'
 import { getPreference } from '@/api/cmdb/preference'
 
 const cmdbRouter = [
-  // preference
+  // resource views
   {
-    path: '/preference',
-    component: () => import('@/views/cmdb/preference'),
-    name: 'cmdb_preference',
-    meta: { title: 'menu.preference', icon: 'book', keepAlive: true }
+    path: '/resource_views',
+    component: RouteView,
+    name: 'cmdb_resource_views',
+    meta: { title: 'menu.resourceViews', icon: 'hdd', keepAlive: true },
+    children: []
   },
   // relation views
   {
@@ -44,6 +45,13 @@ const cmdbRouter = [
         hidden: true
       }]
   },
+  // preference
+  {
+    path: '/preference',
+    component: () => import('@/views/cmdb/preference'),
+    name: 'cmdb_preference',
+    meta: { title: 'menu.preference', icon: 'star', keepAlive: true }
+  },
   // batch
   {
     path: '/batch',
@@ -52,7 +60,7 @@ const cmdbRouter = [
     meta: { 'title': 'menu.batch', icon: 'upload', keepAlive: true }
   },
   {
-    path: '/config//ci_types',
+    path: '/config/ci_types',
     name: 'cmdb_ci_type',
     component: RouteView,
     redirect: '/ci_types',
@@ -147,20 +155,21 @@ function copyArray (arr) {
 
 export const generatorDynamicRouter = () => {
   return new Promise((resolve, reject) => {
-    // cmdb 订阅的模型
+    // sub menu of the resource view
     getPreference().then(res => {
       const routers = copyArray(asyncRouterMap)
       routers[0].children = copyArray(cmdbRouter)
-      for (let i = 0; i < res.length; i++) {
-        const item = res[i]
-        routers[0].children.unshift({
+      let resourceMenus = []
+      res.forEach(item => {
+        resourceMenus.push({
           path: `/instances/types/${item.id}`,
           component: () => import(`@/views/cmdb/ci/index`),
           name: `cmdb_${item.id}`,
           meta: { title: item.alias, icon: 'table', keepAlive: true, typeId: item.id },
           hideChildrenInMenu: true
         })
-      }
+      });
+      routers[0].children[0].children = resourceMenus
 
       resolve(routers)
     })
@@ -183,7 +192,7 @@ const asyncRouterMap = [
 ]
 
 /**
- * 基础路由
+ * basic route
  * @type { *[] }
  */
 export const constantRouterMap = [
