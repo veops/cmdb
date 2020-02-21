@@ -30,7 +30,7 @@ export function getCITypeAttributesById (CITypeId, parameter) {
 }
 
 /**
- * update attribute
+ * Update attribute
  * @param attrId
  * @param data
  * @returns {AxiosPromise}
@@ -44,7 +44,7 @@ export function updateAttributeById (attrId, data) {
 }
 
 /**
- * add attribute
+ * Add attribute
  * @param data
  * @returns {AxiosPromise}
  */
@@ -57,7 +57,7 @@ export function createAttribute (data) {
 }
 
 /**
- * search attributes or get all attributes
+ * Search attributes or get all attributes
  * @param data
  * @returns {AxiosPromise}
  */
@@ -70,7 +70,7 @@ export function searchAttributes (params) {
 }
 
 /**
- * delete attribute
+ * Delete attribute
  * @param attrId
  * @returns {AxiosPromise}
  */
@@ -82,7 +82,7 @@ export function deleteAttributesById (attrId) {
 }
 
 /**
- * bind attribute
+ * Bind attribute
  * @param CITypeId
  * @param data
  * @returns {AxiosPromise}
@@ -96,7 +96,7 @@ export function createCITypeAttributes (CITypeId, data) {
 }
 
 /**
- * update CI Type attribute
+ * Update CI Type attribute
  * @param CITypeId
  * @param data
  * @returns {AxiosPromise}
@@ -110,7 +110,7 @@ export function updateCITypeAttributesById (CITypeId, data) {
 }
 
 /**
- * delete CI Type attribute
+ * Delete CI Type attribute
  * @param CITypeId
  * @param data
  * @returns {AxiosPromise}

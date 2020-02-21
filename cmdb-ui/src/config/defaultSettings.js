@@ -1,15 +1,18 @@
 /**
- * 项目默认配置项
- * primaryColor - 默认主题色, 如果修改颜色不生效，请清理 localStorage
- * navTheme - sidebar theme ['dark', 'light'] 两种主题
- * colorWeak - 色盲模式
- * layout - 整体布局方式 ['sidemenu', 'topmenu'] 两种布局
- * fixedHeader - 固定 Header : boolean
- * fixSiderbar - 固定左侧菜单栏 ： boolean
- * autoHideHeader - 向下滚动时，隐藏 Header : boolean
- * contentWidth - 内容区布局： 流式 |  固定
+ * Project default configuration items
+ * showLocale - Whether to display the Chinese and English switch buttons: boolean
+ * defaultLang - Default display language: zh-CN | en-US
+ * useSSO - Whether to use single sign-on: boolean
+ * primaryColor - Default theme color, clean up localStorage if changing color does not take effect
+ * navTheme - sidebar theme ['dark', 'light']
+ * colorWeak - Color blindness mode
+ * layout - Overall layout ['sidemenu', 'topmenu']
+ * fixedHeader - Fix Header: boolean
+ * fixSiderbar - Fix the left menu bar: boolean
+ * autoHideHeader - Hide header as you scroll down: boolean
+ * contentWidth - Content area layout: streaming | fixed
  *
- * storageOptions: {} - Vue-ls 插件配置项 (localStorage/sessionStorage)
+ * storageOptions: {} - Vue-ls Plug-in configuration item (localStorage/sessionStorage)
  *
  */
 
