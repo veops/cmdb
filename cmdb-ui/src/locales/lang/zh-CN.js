@@ -4,6 +4,7 @@ export default {
   antLocale: zhCN,
   menu: {
     preference: '我的订阅',
+    resourceViews: '资源视图',
     relationViews: '关系视图',
     treeViews: '树状视图',
     batch: '批量导入',
