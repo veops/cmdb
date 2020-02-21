@@ -159,7 +159,7 @@ export const generatorDynamicRouter = () => {
     getPreference().then(res => {
       const routers = copyArray(asyncRouterMap)
       routers[0].children = copyArray(cmdbRouter)
-      let resourceMenus = []
+      const resourceMenus = []
       res.forEach(item => {
         resourceMenus.push({
           path: `/instances/types/${item.id}`,
@@ -168,7 +168,7 @@ export const generatorDynamicRouter = () => {
           meta: { title: item.alias, icon: 'table', keepAlive: true, typeId: item.id },
           hideChildrenInMenu: true
         })
-      });
+      })
       routers[0].children[0].children = resourceMenus
 
       resolve(routers)
