@@ -1,7 +1,7 @@
 import { generatorDynamicRouter, constantRouterMap } from '@/config/router.config'
 
 /**
- * 过滤账户是否拥有某一个权限，并将菜单从加载列表移除
+ * Filters if the account has a permission and removes the menu from the load list
  *
  * @param permission
  * @param route

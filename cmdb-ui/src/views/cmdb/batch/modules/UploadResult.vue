@@ -1,11 +1,10 @@
 <template>
   <div>
-    <h4>共&nbsp;<span style="color: blue">{{ total }}</span> 条,已完成 <span style="color: lightgreen">{{ complete }}</span> 条
-      ,失败 <span style="color: red">{{ errorNum }} </span>条</h4>
+    <h4>A total of <span style="color: blue">{{ total }}</span>, <span style="color: lightgreen">{{ complete }}</span> completed, <span style="color: red">{{ errorNum }} </span>failed</h4>
 
     <a-progress :percent="mPercent"/>
     <div class="my-box">
-      <span>错误信息：</span>
+      <span>Error message:</span>
       <ol>
         <li :key="item" v-for="item in errorItems">{{ item }}</li>
       </ol>
@@ -73,7 +72,7 @@ export default {
         }).catch(err => {
           this.errorNum += 1
           console.log(err)
-          this.errorItems.push(itemUniqueName + ': ' + (((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'))
+          this.errorItems.push(itemUniqueName + ': ' + (((err.response || {}).data || {}).message || this.$t('tip.requestFailed')))
         })
         this.complete += 1
       }

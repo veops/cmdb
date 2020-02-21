@@ -42,26 +42,25 @@ export function writeExcel (columns, name) {
   return s
 }
 
-// 判断一个数组元素是否都为空的
+// Determines whether an array element is empty
 export function any (ArrayList) {
   let flag = false
-  for (let i = 0; i < ArrayList.length; i++) {
-    if (ArrayList[i]) {
+  ArrayList.forEach(item => {
+    if (item) {
       flag = true
       return flag
     }
-  }
+  })
   return false
 }
 
-// 去除一个二维数组 底下为空的部分
 export function filterNull (twoDimArray) {
   console.log(twoDimArray)
   const newArray = []
-  for (let i = 0; i < twoDimArray.length; i++) {
-    if (any(twoDimArray[i])) {
-      newArray.push(twoDimArray[i])
+  twoDimArray.forEach(item => {
+    if (any(item)) {
+      newArray.push(item)
     }
-  }
+  })
   return newArray
 }

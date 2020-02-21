@@ -36,42 +36,35 @@ export default {
         maxRows: 90,
         maxCols: 90,
         rowHeaders: true,
-        // minSpareCols: 2, //列留白
+        // minSpareCols: 2,
         colHeaders: aliasList,
-        minSpareRows: 2, // 行留白
-        // autoWrapRow: true, // 自动换行
-        // 自定义右键菜单，可汉化，默认布尔值
+        minSpareRows: 2,
+        // autoWrapRow: true,
         contextMenu: {
           items: {
             row_above: {
-              name: '上方插入一行'
+              name: 'insert a line at the top'
             },
             row_below: {
-              name: '下方插入一行'
+              name: 'insert a line at the bottom'
             },
             moverow: {
-              name: '删除行'
+              name: 'Delete rows'
             },
             unfreeze_column: {
-              name: '取消列固定'
+              name: 'Uncolumn fixation'
             },
-            hsep1: '---------', // 提供分隔线
+            hsep1: '---------',
             hsep2: '---------'
           }
         },
-        // width: '100%',
-        // fillHandle: true, // 选中拖拽复制 possible values: true, false, "horizontal", "vertical"
-        fixedColumnsLeft: 0, // 固定左边列数
-        fixedRowsTop: 0, // 固定上边列数
-        manualColumnFreeze: true, // 手动固定列
-        // manualColumnMove: true, // 手动移动列
-        // manualRowMove: true, // 手动移动行
-        // manualColumnResize: true, // 手工更改列距
-        // manualRowResize: true, // 手动更改行距
-        comments: true, // 添加注释
-        customBorders: [], // 添加边框
-        columnSorting: true, // 排序
-        stretchH: 'all', // 根据宽度横向扩展，last:只扩展最后一列，none：默认不扩展
+        fixedColumnsLeft: 0,
+        fixedRowsTop: 0,
+        manualColumnFreeze: true,
+        comments: true,
+        customBorders: [],
+        columnSorting: true,
+        stretchH: 'all',
         afterChange: function (changes, source) {
           if (changes !== null) {
             document.getElementById('upload-button').disabled = false
