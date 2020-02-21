@@ -32,7 +32,7 @@ export function deleteCI (ciId) {
   })
 }
 
-//  获取单个ci实例
+//  Get a single CI instance
 export function getCIById (ciId) {
   return axios({
     url: urlPrefix + `/ci/${ciId}`,

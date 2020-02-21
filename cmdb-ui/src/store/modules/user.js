@@ -33,7 +33,7 @@ const user = {
   },
 
   actions: {
-    // 登录
+    // login
     Login ({ commit }, userInfo) {
       return new Promise((resolve, reject) => {
         login(userInfo).then(response => {
@@ -46,7 +46,7 @@ const user = {
       })
     },
 
-    // 获取用户信息
+    // get user info
     GetInfo ({ commit }) {
       return new Promise((resolve, reject) => {
         getInfo().then(response => {
@@ -73,7 +73,7 @@ const user = {
       })
     },
 
-    // 登出
+    // logout
     Logout ({ commit, state }) {
       return new Promise((resolve) => {
         commit('SET_TOKEN', '')

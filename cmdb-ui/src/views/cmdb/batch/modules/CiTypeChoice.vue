@@ -6,7 +6,7 @@
           <a-form-item :label="$t('batch.modelType')" :labelCol="labelCol" :wrapperCol="wrapperCol">
             <a-select
               :placeholder="$t('batch.pleaseSelectModelType')"
-              v-decorator="['ciTypes', { rules: [{required: true, message: '模板类型必须选择'}] }]"
+              v-decorator="['ciTypes', { rules: [{required: true, message: 'CI Type must be selected'}] }]"
               @change="selectCiType"
             >
               <a-select-option v-for="ciType in ciTypeList" :key="ciType.name" :value="ciType.id">{{ ciType.alias }}</a-select-option>
@@ -54,7 +54,6 @@ export default {
   },
   methods: {
     selectCiType (el) {
-      // 当选择好模板类型时的回调函数
       this.downLoadButtonDis = false
       this.selectNum = el
       getCITypeAttributesById(el).then(res => {

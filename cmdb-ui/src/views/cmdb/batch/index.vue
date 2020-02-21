@@ -64,7 +64,7 @@ export default {
     },
     uploadData () {
       if (this.ciType < 0) {
-        alert('尚未选择模板类型！')
+        alert('CI Type not yet selected!')
         return
       }
       this.beginLoad = false

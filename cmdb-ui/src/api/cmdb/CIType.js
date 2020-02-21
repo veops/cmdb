@@ -1,7 +1,7 @@
 import { axios } from '@/utils/request'
 
 /**
- * 获取 所有的 ci_types
+ * get all CI Type
  * @param parameter
  * @returns {AxiosPromise}
  */
@@ -14,7 +14,7 @@ export function getCITypes (parameter) {
 }
 
 /**
- * 获取 某个 ci_types
+ * get a CI Type
  * @param CITypeName
  * @param parameter
  * @returns {AxiosPromise}
@@ -28,7 +28,7 @@ export function getCIType (CITypeName, parameter) {
 }
 
 /**
- * 创建 ci_type
+ * Create CI Type
  * @param data
  * @returns {AxiosPromise}
  */
@@ -41,7 +41,7 @@ export function createCIType (data) {
 }
 
 /**
- * 更新 ci_type
+ * Update CI Type
  * @param CITypeId
  * @param data
  * @returns {AxiosPromise}
@@ -55,7 +55,7 @@ export function updateCIType (CITypeId, data) {
 }
 
 /**
- * 删除 ci_type
+ * Delete CI Type
  * @param CITypeId
  * @returns {AxiosPromise}
  */
@@ -67,7 +67,7 @@ export function deleteCIType (CITypeId) {
 }
 
 /**
- * 获取 某个 ci_type 的分组
+ * Gets a grouping of a CI Type
  * @param CITypeId
  * @param data
  * @returns {AxiosPromise}
@@ -81,7 +81,7 @@ export function getCITypeGroupById (CITypeId, data) {
 }
 
 /**
- * 保存 某个 ci_type 的分组
+ * Save a group of CI Type
  * @param CITypeId
  * @param data
  * @returns {AxiosPromise}
@@ -95,7 +95,7 @@ export function createCITypeGroupById (CITypeId, data) {
 }
 
 /**
- * 修改 某个 ci_type 的分组
+ * Changes the grouping of a CI Type
  * @param groupId
  * @param data
  * @returns {AxiosPromise}
@@ -109,7 +109,7 @@ export function updateCITypeGroupById (groupId, data) {
 }
 
 /**
- * 删除 某个 ci_type 的分组
+ * Removes a group for a CI Type
  * @param groupId
  * @param data
  * @returns {AxiosPromise}
