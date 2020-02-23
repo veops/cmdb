@@ -828,7 +828,7 @@ CREATE TABLE `c_preference_relation_views` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(8) NOT NULL,
+  `name` varchar(64) NOT NULL,
   `cr_ids` text,
   PRIMARY KEY (`id`),
   KEY `ix_c_preference_relation_views_deleted` (`deleted`),
