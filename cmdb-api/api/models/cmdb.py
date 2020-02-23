@@ -317,5 +317,5 @@ class PreferenceTreeView(Model):
 class PreferenceRelationView(Model):
     __tablename__ = "c_preference_relation_views"
 
-    name = db.Column(db.String(8), index=True, nullable=False)
+    name = db.Column(db.String(64), index=True, nullable=False)
     cr_ids = db.Column(db.TEXT)  # [{parent_id: x, child_id: y}] TODO: JSON
