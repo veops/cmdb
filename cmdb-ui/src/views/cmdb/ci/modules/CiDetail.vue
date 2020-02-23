@@ -79,6 +79,7 @@
 </template>
 
 <script>
+import i18n from '@/locales'
 import DescriptionList from '@/components/DescriptionList'
 
 import { getCITypeGroupById } from '@/api/cmdb/CIType'
@@ -184,9 +185,9 @@ export default {
   filters: {
     operateTypeFilter (operateType) {
       const operateTypeMap = {
-        '0': this.$t('button.add'),
-        '1': this.$t('button.delete'),
-        '2': this.$t('button.update')
+        '0': i18n.t('button.add'),
+        '1': i18n.t('button.delete'),
+        '2': i18n.t('button.update')
       }
       return operateTypeMap[operateType]
     }

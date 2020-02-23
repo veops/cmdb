@@ -44,13 +44,11 @@ export function writeExcel (columns, name) {
 
 // Determines whether an array element is empty
 export function any (ArrayList) {
-  let flag = false
-  ArrayList.forEach(item => {
-    if (item) {
-      flag = true
-      return flag
+  for (let i = 0; i < ArrayList.length; i++) {
+    if (ArrayList[i]) {
+      return true
     }
-  })
+  }
   return false
 }
 

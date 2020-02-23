@@ -1259,6 +1259,40 @@ LOCK TABLES `c_value_integers` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `c_value_json`
+--
+
+DROP TABLE IF EXISTS `c_value_json`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `c_value_json` (
+  `deleted_at` datetime DEFAULT NULL,
+  `deleted` tinyint(1) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ci_id` int(11) NOT NULL,
+  `attr_id` int(11) NOT NULL,
+  `value` json NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ci_id` (`ci_id`),
+  KEY `attr_id` (`attr_id`),
+  KEY `ix_c_value_json_deleted` (`deleted`),
+  CONSTRAINT `c_value_json_ibfk_1` FOREIGN KEY (`ci_id`) REFERENCES `c_cis` (`id`),
+  CONSTRAINT `c_value_json_ibfk_2` FOREIGN KEY (`attr_id`) REFERENCES `c_attributes` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `c_value_json`
+--
+
+LOCK TABLES `c_value_json` WRITE;
+/*!40000 ALTER TABLE `c_value_json` DISABLE KEYS */;
+/*!40000 ALTER TABLE `c_value_json` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `c_value_texts`
 --
 
@@ -1345,4 +1379,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-02-06 13:40:37
+-- Dump completed on 2020-02-23 18:39:52

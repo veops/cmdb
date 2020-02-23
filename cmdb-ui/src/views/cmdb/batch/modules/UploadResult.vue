@@ -44,7 +44,7 @@ export default {
     this.upload2Server()
   },
   computed: {
-    mpercent () {
+    mPercent () {
       return Math.round(this.complete / this.total * 10000) / 100
     },
     progressStatus () {
