@@ -28,16 +28,15 @@ router.beforeEach((to, from, next) => {
       .then(res => {
         const roles = res.result && res.result.role
         store.dispatch('GenerateRoutes', { roles }).then(() => {
-          // 根据roles权限生成可访问的路由表
-          // 动态添加可访问路由表
+          // Generate an accessible routing table based on the roles permissions
+          // Dynamically add accessible routing tables
           router.addRoutes(store.getters.addRouters)
-
           const redirect = decodeURIComponent(from.query.redirect || to.path)
           if (to.path === redirect) {
-            // hack方法 确保addRoutes已完成 ,set the replace: true so the navigation will not leave a history record
+            // set the replace: true so the navigation will not leave a history record
             next({ ...to, replace: true })
           } else {
-            // 跳转到目的路由
+            // Jump to destination route
             next({ path: redirect })
           }
         })
@@ -45,8 +44,8 @@ router.beforeEach((to, from, next) => {
       .catch((e) => {
         console.log(e)
         notification.error({
-          message: '错误',
-          description: '请求用户信息失败，请重试'
+          message: this.$t('tip.error'),
+          description: 'Failed to request user information. Please try again!'
         })
         setTimeout(() => {
           store.dispatch('Logout')

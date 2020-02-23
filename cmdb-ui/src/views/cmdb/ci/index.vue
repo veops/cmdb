@@ -389,7 +389,7 @@ export default {
         columns.push({
           title: this.$t('tip.operate'),
           key: 'operation',
-          width: 100,
+          width: 115,
           fixed: 'right',
           scopedSlots: { customRender: 'action' }
         })

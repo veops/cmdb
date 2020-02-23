@@ -346,7 +346,6 @@ export default {
         scrollX += columns[i].width
       }
       this.columns = columns
-
       this.scrollX = scrollX
       this.scrollY = window.innerHeight - this.$refs.table.$el.offsetTop - 300
     },
@@ -424,14 +423,17 @@ export default {
 }
 </script>
 
-<style lang='less'>
-.ant-menu-horizontal {
+<style lang='less' scoped>
+/deep/ .ant-table-thead > tr > th,
+/deep/ .ant-table-tbody > tr > td {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/deep/ .ant-menu-horizontal {
   border-bottom: 1px solid #ebedf0 !important;
 }
-.ant-menu-horizontal {
-  border-bottom: 1px solid #ebedf0 !important;
-}
-.relation-card > .ant-card-body {
+/deep/ .relation-card > .ant-card-body {
   padding-top: 0 !important;
 }
 </style>
