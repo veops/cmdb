@@ -8,6 +8,7 @@ const cmdbRouter = [
   // resource views
   {
     path: '/resource_views',
+    redirect: '/relation_views',
     component: RouteView,
     name: 'cmdb_resource_views',
     meta: { title: 'menu.resourceViews', icon: 'hdd', keepAlive: true },
