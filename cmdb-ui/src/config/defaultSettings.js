@@ -18,7 +18,7 @@
 
 export default {
   showLocale: true,
-  defaultLang: 'zh-CN',
+  defaultLang: 'en-US', // zh-CN | en-US
   useSSO: false,
   primaryColor: '#1890ff', // primary color of ant design
   navTheme: 'dark', // theme for nav menu
