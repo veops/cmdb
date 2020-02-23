@@ -11,6 +11,16 @@ from api.models.cmdb import (
     CITypeRelation,
     RelationType
 )
+from api.models.acl import User
+
+from api.lib.cmdb.ci_type import CITypeAttributeManager
+from api.lib.cmdb.ci import CIManager, CIRelationManager
+
+
+def force_add_user():
+    from flask import g
+    if not getattr(g, "user", None):
+        g.user = User.query.first()
 
 
 def init_attributes(num=1):
@@ -88,3 +98,38 @@ def fake_attr_value(attr_dict):
         return {attr_name: random.randint(0, 1000) / 3.0}
     elif attr_type == "2":
         return {attr_name: uuid.uuid4().hex[:8]}
+
+
+def init_ci(num=1):
+    # store ci need has user
+    force_add_user()
+    ci_type = init_ci_types(1)[0]
+    attrs = CITypeAttributeManager.get_attributes_by_type_id(ci_type.id)
+    manager = CIManager()
+    result = []
+
+    for i in range(num):
+        ci_id = manager.add(ci_type.name, **fake_attr_value(attrs[0]))
+        result.append(manager.get_ci_by_id_from_db(ci_id))
+
+    return result
+
+
+def init_ci_with_type(ci_types):
+    force_add_user()
+    cis = []
+    manager = CIManager()
+    for ci_type in ci_types:
+        attrs = CITypeAttributeManager.get_attributes_by_type_id(ci_type.id)
+        ci_id = manager.add(ci_type.name, **fake_attr_value(attrs[0]))
+        cis.append(manager.get_ci_by_id_from_db(ci_id))
+    return cis
+
+
+def init_ci_relation():
+    init_ci_type_relation(1)
+    ci_types = CIType.query.all()
+    cis = init_ci_with_type(ci_types)
+    manager = CIRelationManager()
+    cir_id = manager.add(cis[0]['ci_id'], cis[1]['ci_id'])
+    return cir_id
