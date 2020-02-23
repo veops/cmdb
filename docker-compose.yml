@@ -12,7 +12,7 @@ services:
       MYSQL_PASSWORD: '123456'
     volumes:
       - db-data:/var/lib/mysql
-      - ./docs/cmdb.sql:/docker-entrypoint-initdb.d/cmdb.sql
+      - ./docs/cmdb_en.sql:/docker-entrypoint-initdb.d/cmdb.sql
     networks:
       new:
         aliases:
@@ -54,7 +54,7 @@ services:
           - cmdb-search
 
   cmdb-api:
-    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-api:2.0
+    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-api:2.1
 #    build:
 #      context: .
 #      target: cmdb-api
@@ -83,7 +83,7 @@ services:
           - cmdb-api
 
   cmdb-ui:
-    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-ui:2.0
+    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-ui:2.1
 #    build:
 #      context: .
 #      target: cmdb-ui
