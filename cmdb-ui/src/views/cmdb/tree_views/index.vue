@@ -244,11 +244,14 @@ export default {
 }
 </script>
 
-<style scoped>
-.ant-menu-horizontal {
-  border-bottom: 1px solid #ebedf0 !important;
+<style lang='less' scoped>
+/deep/ .ant-table-thead > tr > th,
+/deep/ .ant-table-tbody > tr > td {
+  white-space: nowrap;
+  overflow: hidden;
 }
-.ant-menu-horizontal {
+
+/deep/ .ant-menu-horizontal {
   border-bottom: 1px solid #ebedf0 !important;
 }
 </style>
