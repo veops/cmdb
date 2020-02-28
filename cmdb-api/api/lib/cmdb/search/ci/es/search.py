@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 
+import six
 from flask import current_app
 
 from api.extensions import es
@@ -129,7 +130,7 @@ class Search(object):
         if "*" in v:
             self._operator2query(operator).append({
                 "wildcard": {
-                    attr: v
+                    attr: v.lower() if isinstance(v, six.string_types) else v
                 }
             })
         else:
@@ -137,7 +138,7 @@ class Search(object):
                 attr = "type_id"
             self._operator2query(operator).append({
                 "term": {
-                    attr: v
+                    attr: v.lower() if isinstance(v, six.string_types) else v
                 }
             })
 
