@@ -16,7 +16,7 @@ As far as possible to achieve more universal configuration and management of IT 
 [English](README.md) / [中文](README_cn.md)
 
 ## DEMO ONLINE
-- preview online: [CMDB](http://121.42.12.46:8000)
+- Preview online: [CMDB](http://121.42.12.46:8000)
     - username: demo
     - password: 123456
     
@@ -25,17 +25,17 @@ As far as possible to achieve more universal configuration and management of IT 
 ----
 ## Overview
 
-CMDB is a universal project that can define and manage almost all IT resource, even every resource as long as you want to, which treat all IT resources as resource objects. objects has both attributes  and relationship.
+The CMDB is a universal project that can define and manage almost all IT resources, even every resource as long as you want to, which treat all IT resources as resource objects. Objects has both attributes  and relationship.
 
 CMDB's main distinguishing features as compared to other resource systems are:
-- define attributes of resource objects dynamically，you don't need to define all the attributes at the beginning.
-- define relationship of resource objects dynamically and simply, even you can draw the relationship through the web.
-- three view:
-    - resource view: model instance data that users can subscribe
-    - tree view: the model is hierarchical by field, shown in a tree diagram, and users can subscribe
-    - relational view: relationships between models, shown in a tree diagram, **are configurable by the administrator**
+- Define attributes of resource objects dynamically，you don't need to define all the attributes at the beginning.
+- Define relationship of resource objects dynamically and simply, even you can draw the relationship through the web.
+- Three view:
+    - Resource view: model instance data that users can subscribe
+    - Tree view: the model is hierarchical by field, shown in a tree diagram, and users can subscribe
+    - Relational view: relationships between models, shown in a tree diagram, **are configurable by the administrator**
 
-- authority management
+- Authority management
 
 
 ## Install
@@ -43,12 +43,12 @@ CMDB's main distinguishing features as compared to other resource systems are:
 There are various ways of installing CMDB.
 
 ### Install by Docker
-- prepare: install docker and docker-compose
-- in directory cmdb
+- Prepare: install docker and docker-compose
+- In directory cmdb
     ```
         docker-compose up -d
     ```
-- view: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- View: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
 ### Environment and dependency
 - database: mysql
@@ -56,9 +56,9 @@ There are various ways of installing CMDB.
 - python: python2.7, >=python3.6
 
 ### install
-- start mysql, redis
-- create mysql database: cmdb
-- pull code
+- Start mysql, redis
+- Create mysql database: cmdb
+- Pull code
     ```bash
     git clone https://github.com/pycook/cmdb.git
     cd cmdb
@@ -66,18 +66,18 @@ There are various ways of installing CMDB.
     ```
     **set database in config file cmdb-api/settings.py**
 
-- install library
+- Install library
   - backend: ```cd cmdb-api && pipenv run pipenv install && cd ..```
   - frontend: ```cd cmdb-ui && yarn install && cd ..```
   
-- create tables of cmdb database:
+- Create tables of cmdb database:
     
   in **cmdb-api** directory: ```pipenv run flask db-setup && pipenv run flask init-cache```
-- suggest step: (default:  user:demo,password:123456)
+- Suggest step: (default:  user:demo,password:123456)
 
     ``` source docs/cmdb.sql```
 
-- start service
+- Start service
   - backend: in **cmdb-api** directory: ```pipenv run flask run -h 0.0.0.0```
   - frontend: in **cmdb-ui** directory: ```yarn run serve```
   - worker: in **cmdb-api** directory: ```pipenv run celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1```
@@ -86,9 +86,9 @@ There are various ways of installing CMDB.
     - if not run localhost: please change ip address(**VUE_APP_API_BASE_URL**) in config file **cmdb-ui/.env** into your backend ip address
 
 ### Install by Makefile
-- start mysql,redis
-- create mysql database: cmdb
-- pull code
+- Start mysql,redis
+- Create mysql database: cmdb
+- Pull code
     ```bash
     git clone https://github.com/pycook/cmdb.git
     cd cmdb
@@ -96,7 +96,7 @@ There are various ways of installing CMDB.
     ```
     **set database in config file cmdb-api/settings.py**
 
-- in cmdb directory,start in order as follows:
+- In cmdb directory,start in order as follows:
     - enviroment: ```make env```
     - start API: ```make api```
     - start UI: ```make ui```
@@ -120,6 +120,6 @@ There are various ways of installing CMDB.
 ![define relationship view](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-relation-define.jpeg)
 
 -----
-_**welcome to join us through QQ group（336164978）**_
+_**Welcome to join us through QQ group（336164978）**_
 
 ![QQgroup](cmdb-ui/public/qr_code.jpg)
