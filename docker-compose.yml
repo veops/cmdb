@@ -61,6 +61,7 @@ services:
     container_name: cmdb-api
     environment:
       TZ: Asia/Shanghai
+      WAIT_HOSTS: cmdb-db:3306, cmdb-cache:6379, cmdb-search:9200
     command:
       - /bin/sh
       - -c
@@ -68,10 +69,12 @@ services:
         sed -i "s#USE_ES = False#USE_ES = True#g" settings.py
         sed -i "s#USE_ACL = False#USE_ACL = True#g" settings.py
         sed -i "s#ES_HOST = '127.0.0.1'#ES_HOST = 'cmdb-search'#g" settings.py
-        sleep 20
+        /wait
+        sleep 5
         gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000 -D
         flask init-cache
         flask init-acl
+        
         celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1
     depends_on:
       - cmdb-db
