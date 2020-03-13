@@ -68,6 +68,9 @@ class ResourceTypeCRUD(object):
     def delete(cls, rt_id):
         rt = ResourceType.get_by_id(rt_id) or abort(404, "ResourceType <{0}> is not found".format(rt_id))
 
+        if Resource.get_by(resource_type_id=rt_id):
+            return abort(400, "At least one instance of this type exists and cannot be deleted")
+
         cls.update_perms(rt_id, [], rt.app_id)
 
         rt.soft_delete()
