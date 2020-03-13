@@ -55,7 +55,7 @@ There are various ways of installing CMDB.
 - cache: redis
 - python: python2.7, >=python3.6
 
-### install
+### Install
 - Start mysql, redis
 - Create mysql database: cmdb
 - Pull code
@@ -101,6 +101,14 @@ There are various ways of installing CMDB.
     - start API: ```make api```
     - start UI: ```make ui```
     - start worker: ```make worker```
+    
+## Contributing
+
+1. Fork it
+1. Create your feature branch (`git checkout -b my-feature`)
+1. Commit your changes (`git commit -am 'Add some feature'`)
+1. Push to the branch (`git push origin my-feature`)
+1. Create new Pull Request
 
 
 ## DEMO

@@ -75,6 +75,9 @@ class UserCRUD(object):
 
     @classmethod
     def delete(cls, uid):
+        if uid == g.user.uid:
+            return abort(400, "You cannot delete yourself")
+
         user = User.get_by(uid=uid, to_dict=False, first=True) or abort(404, "User <{0}> does not exist".format(uid))
 
         UserCache.clean(user)
