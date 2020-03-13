@@ -47,7 +47,7 @@ class RoleRelationCRUD(object):
     def get_child_ids(rid):
         res = RoleRelation.get_by(parent_id=rid, to_dict=False)
 
-        return [i.parent_id for i in res]
+        return [i.child_id for i in res]
 
     @classmethod
     def recursive_parent_ids(cls, rid):
@@ -77,9 +77,12 @@ class RoleRelationCRUD(object):
 
         return all_child_ids
 
-    @staticmethod
-    def add(parent_id, child_id):
+    @classmethod
+    def add(cls, parent_id, child_id):
         RoleRelation.get_by(parent_id=parent_id, child_id=child_id) and abort(400, "It's already existed")
+
+        if parent_id in cls.recursive_child_ids(child_id):
+            return abort(400, "Circulation inheritance!!!")
 
         RoleRelationCache.clean(parent_id)
         RoleRelationCache.clean(child_id)
