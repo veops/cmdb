@@ -10,6 +10,7 @@ from api.lib.cmdb.utils import ValueTypeMap
 from api.lib.decorator import kwargs_required
 from api.models.cmdb import Attribute
 from api.models.cmdb import CITypeAttribute
+from api.models.cmdb import CITypeAttributeGroupItem
 from api.models.cmdb import PreferenceShowAttributes
 
 
@@ -37,6 +38,13 @@ class AttributeManager(object):
         for v in choice_values:
             table = choice_table(attr_id=_id, value=v)
             db.session.add(table)
+        db.session.flush()
+
+    @staticmethod
+    def _del_choice_values(_id, value_type):
+        choice_table = ValueTypeMap.choice.get(value_type)
+
+        db.session.query(choice_table).filter(choice_table.attr_id == _id).delete()
         db.session.flush()
 
     @classmethod
@@ -150,11 +158,14 @@ class AttributeManager(object):
 
         choice_value = kwargs.pop("choice_value", False)
         is_choice = True if choice_value else False
+        kwargs['is_choice'] = is_choice
 
         attr.update(flush=True, **kwargs)
 
         if is_choice:
             self._add_choice_values(attr.id, attr.value_type, choice_value)
+        else:
+            self._del_choice_values(attr.id, attr.value_type)
 
         try:
             db.session.commit()
@@ -185,6 +196,9 @@ class AttributeManager(object):
             i.soft_delete()
 
         for i in PreferenceShowAttributes.get_by(attr_id=_id, to_dict=False):
+            i.soft_delete()
+
+        for i in CITypeAttributeGroupItem.get_by(attr_id=_id, to_dict=False):
             i.soft_delete()
 
         return name
