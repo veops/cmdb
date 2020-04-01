@@ -74,6 +74,7 @@ export default {
     batchOperate: '批量操作',
     confirmBatchUpdate: '确认要批量修改吗 ?',
     batchUpdate: '批量修改',
+    batchUpdateRelation: '创建|修改 关系',
     batchUpdateSuccess: '批量修改成功',
     confirmDelete: '真的要删除吗 ?',
     attribute: '属性',

@@ -74,6 +74,7 @@ export default {
     batchOperate: 'Batch operation',
     confirmBatchUpdate: 'Confirm batch modification?',
     batchUpdate: 'Batch update',
+    batchUpdateRelation: 'Create or update relation',
     batchUpdateSuccess: 'Batch update successfully',
     confirmDelete: 'Confirm deleting ?',
     attribute: 'Attributes',

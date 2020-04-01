@@ -11,6 +11,7 @@ from api.lib.cmdb.cache import RelationTypeCache
 from api.lib.cmdb.ci import CIRelationManager
 from api.lib.cmdb.search import SearchError
 from api.lib.cmdb.search.ci_relation.search import Search
+from api.lib.decorator import args_required
 from api.lib.perm.auth import auth_abandoned
 from api.lib.utils import get_page
 from api.lib.utils import get_page_size
@@ -122,11 +123,13 @@ class CIRelationView(APIView):
     def post(self, first_ci_id, second_ci_id):
         manager = CIRelationManager()
         res = manager.add(first_ci_id, second_ci_id)
+
         return self.jsonify(cr_id=res)
 
     def delete(self, first_ci_id, second_ci_id):
         manager = CIRelationManager()
         manager.delete_2(first_ci_id, second_ci_id)
+
         return self.jsonify(message="CIType Relation is deleted")
 
 
@@ -136,4 +139,24 @@ class DeleteCIRelationView(APIView):
     def delete(self, cr_id):
         manager = CIRelationManager()
         manager.delete(cr_id)
+
         return self.jsonify(message="CIType Relation is deleted")
+
+
+class BatchCreateOrUpdateCIRelationView(APIView):
+    url_prefix = "/ci_relations/batch"
+
+    @args_required('ci_ids')
+    @args_required('parents')
+    def post(self):
+        ci_ids = request.values.get('ci_ids')
+        parents = request.values.get('parents')
+
+        CIRelationManager.batch_update(ci_ids, parents)
+
+        return self.jsonify(code=200)
+
+    @args_required('ci_ids')
+    @args_required('parents')
+    def put(self):
+        return self.post()

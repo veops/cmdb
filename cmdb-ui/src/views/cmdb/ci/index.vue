@@ -20,12 +20,20 @@
                 @click="$refs.create.visible = true; $refs.create.action='update'"
               >
                 <span @click="$refs.create.visible = true">
-                  <a-icon type="edit" />&nbsp;{{ $t('button.update') }}
+                  <a-icon type="edit" />{{ $t('button.update') }}
+                </span>
+              </a-menu-item>
+              <a-menu-item
+                key="batchUpdateRelation"
+                @click="$refs.batchUpdateRelation.visible = true"
+              >
+                <span @click="$refs.batchUpdateRelation.visible = true">
+                  <a-icon type="link" />{{ $t('ci.batchUpdateRelation') }}
                 </span>
               </a-menu-item>
               <a-menu-item key="batchDownload" @click="batchDownload">
                 <json-excel :fetch="batchDownload" name="cmdb.xls">
-                  <a-icon type="download" />&nbsp;{{ $t('button.download') }}
+                  <a-icon type="download" />&nbsp;&nbsp;&nbsp;&nbsp;{{ $t('button.download') }}
                 </json-excel>
               </a-menu-item>
               <a-menu-item key="batchDelete" @click="batchDelete">
@@ -73,6 +81,7 @@
         </s-table>
 
         <create-instance-form @refresh="refreshTable" ref="create" @submit="batchUpdate" />
+        <batch-update-relation :typeId="typeId" ref="batchUpdateRelation" @submit="batchUpdateRelation" />
       </a-spin>
     </a-card>
 
@@ -130,9 +139,11 @@ import JsonExcel from 'vue-json-excel'
 
 import SearchForm from './modules/SearchForm'
 import CreateInstanceForm from './modules/CreateInstanceForm'
+import BatchUpdateRelation from './modules/BatchUpdateRelation'
 import EditableCell from './modules/EditableCell'
 import CiDetail from './modules/CiDetail'
 import { searchCI, updateCI, deleteCI } from '@/api/cmdb/ci'
+import { batchUpdateCIRelation } from '@/api/cmdb/CIRelation'
 import { getSubscribeAttributes, subscribeCIType } from '@/api/cmdb/preference'
 import { notification } from 'ant-design-vue'
 import { getCITypeAttributesByName } from '@/api/cmdb/CITypeAttr'
@@ -155,6 +166,7 @@ export default {
     JsonExcel,
     SearchForm,
     CreateInstanceForm,
+    BatchUpdateRelation,
     CiDetail
   },
   data () {
@@ -482,6 +494,38 @@ export default {
               setTimeout(() => {
                 that.$refs.table.refresh(true)
               }, 1000)
+            })
+        }
+      })
+    },
+    batchUpdateRelation (values) {
+      const that = this
+      this.$confirm({
+        title: that.$t('tip.warning'),
+        content: that.$t('ci.confirmBatchUpdate'),
+        onOk () {
+          that.loading = true
+          that.loadTip = that.$t('ci.batchUpdate')
+          const payload = {}
+          Object.keys(values).forEach(key => {
+            if (values[key] || values[key] === 0) {
+              payload[key] = values[key]
+            }
+          })
+          batchUpdateCIRelation(that.selectedRowKeys, payload).then(() => {
+            that.loading = false
+              notification.success({
+                message: that.$t('ci.batchUpdateSuccess')
+              })
+              that.$refs.create.visible = false
+
+              that.$refs.table.clearSelected()
+          }).catch(e => {
+              console.log(e)
+              that.loading = false
+              notification.error({
+                message: e.response.data.message
+              })
             })
         }
       })
