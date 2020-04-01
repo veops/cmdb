@@ -26,7 +26,7 @@ COPY cmdb-api /data/apps/cmdb
 
 WORKDIR /data/apps/cmdb
 
-RUN apk add --no-cache tzdata gcc musl-dev libffi-dev
+RUN apk add --no-cache tzdata gcc musl-dev libffi-dev openldap-dev
 
 ENV TZ=Asia/Shanghai
 
