@@ -778,7 +778,7 @@ CREATE TABLE `c_ci_types` (
 
 LOCK TABLES `c_ci_types` WRITE;
 /*!40000 ALTER TABLE `c_ci_types` DISABLE KEYS */;
-INSERT INTO `c_ci_types` VALUES (NULL,0,'2019-08-25 10:42:25',NULL,1,'bu','BU',1,1,0,'',0),(NULL,0,'2019-08-25 10:45:39',NULL,2,'product','Product',3,1,0,'',0),(NULL,0,'2019-08-25 10:46:08',NULL,3,'app','Application',4,1,0,'',0),(NULL,0,'2019-08-25 10:57:37',NULL,4,'server','Server',5,1,0,'',0),(NULL,0,'2019-08-25 10:58:44',NULL,5,'docker','Docker',6,1,0,'',0),(NULL,0,'2019-08-25 11:04:12',NULL,6,'NIC','NIC',7,1,1,'',0),(NULL,0,'2019-08-25 11:04:24',NULL,7,'harddisk','harddisk',8,1,1,'',0),(NULL,0,'2019-08-25 11:04:45',NULL,8,'RAM','RAM',9,1,1,'',0);
+INSERT INTO `c_ci_types` VALUES (NULL,0,'2019-08-25 10:42:25',NULL,1,'bu','BU',1,1,0,'',0),(NULL,0,'2019-08-25 10:45:39',NULL,2,'product','Product',3,1,0,'',0),(NULL,0,'2019-08-25 10:46:08',NULL,3,'app','Application',4,1,0,'',0),(NULL,0,'2019-08-25 10:57:37',NULL,4,'server','Server',5,1,0,'',0),(NULL,0,'2019-08-25 10:58:44',NULL,5,'docker','Docker',6,1,0,'',0),(NULL,0,'2019-08-25 11:04:12',NULL,6,'NIC','NIC',7,1,0,'',0),(NULL,0,'2019-08-25 11:04:24',NULL,7,'harddisk','harddisk',8,1,0,'',0),(NULL,0,'2019-08-25 11:04:45',NULL,8,'RAM','RAM',9,1,0,'',0);
 /*!40000 ALTER TABLE `c_ci_types` ENABLE KEYS */;
 UNLOCK TABLES;
 
