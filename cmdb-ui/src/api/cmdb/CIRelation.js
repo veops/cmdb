@@ -28,3 +28,11 @@ export function statisticsCIRelation (params) {
     params: params
   })
 }
+
+export function batchUpdateCIRelation (ciIds, parents) {
+  return axios({
+    url: '/v0.1/ci_relations/batch',
+    method: 'POST',
+    data: { ci_ids: ciIds, parents: parents }
+  })
+}
