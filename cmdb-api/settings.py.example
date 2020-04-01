@@ -69,6 +69,11 @@ CAS_VALIDATE_ROUTE = "/cas/serviceValidate"
 CAS_AFTER_LOGIN = "/"
 DEFAULT_SERVICE = "http://127.0.0.1:8000"
 
+# # ldap
+AUTH_WITH_LDAP = False
+LDAP_SERVER = ''
+LDAP_DOMAIN = ''
+
 # # pagination
 DEFAULT_PAGE_COUNT = 50
 
