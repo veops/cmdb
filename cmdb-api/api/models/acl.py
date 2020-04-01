@@ -5,6 +5,7 @@ import copy
 import hashlib
 from datetime import datetime
 
+import ldap
 from flask import current_app
 from flask_sqlalchemy import BaseQuery
 
@@ -49,6 +50,32 @@ class UserQuery(BaseQuery):
             authenticated = False
 
         return user, authenticated
+
+    def authenticate_with_ldap(self, username, password):
+        ldap_conn = ldap.initialize(current_app.config.get('LDAP_SERVER'))
+        ldap_conn.protocol_version = 3
+        ldap_conn.set_option(ldap.OPT_REFERRALS, 0)
+        if '@' in username:
+            who = '{0}@{1}'.format(username.split('@')[0], current_app.config.get('LDAP_DOMAIN'))
+        else:
+            who = '{0}@{1}'.format(username, current_app.config.get('LDAP_DOMAIN'))
+
+        username = username.split('@')[0]
+        user = self.get_by_username(username)
+        try:
+
+            if not password:
+                raise ldap.INVALID_CREDENTIALS
+
+            ldap_conn.simple_bind_s(who, password)
+
+            if not user:
+                from api.lib.perm.acl.user import UserCRUD
+                user = UserCRUD.add(username=username, email=who)
+
+            return user, True
+        except ldap.INVALID_CREDENTIALS:
+            return user, False
 
     def search(self, key):
         query = self.filter(db.or_(User.email == key,

@@ -26,7 +26,10 @@ class LoginView(APIView):
     def post(self):
         username = request.values.get("username") or request.values.get("email")
         password = request.values.get("password")
-        user, authenticated = User.query.authenticate(username, password)
+        if current_app.config.get('AUTH_WITH_LDAP'):
+            user, authenticated = User.query.authenticate_with_ldap(username, password)
+        else:
+            user, authenticated = User.query.authenticate(username, password)
         if not user:
             return abort(403, "User <{0}> does not exist".format(username))
         if not authenticated:

@@ -25,6 +25,7 @@ supervisor = "==4.0.3"
 Flask-Login = "==0.4.1"
 Flask-Bcrypt = "==0.7.1"
 Flask-Cors = ">=3.0.8"
+python-ldap = "==3.2.0"
 # Caching
 Flask-Caching = ">=1.0.0"
 # Environment variable parsing
