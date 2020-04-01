@@ -11,7 +11,7 @@ from api.extensions import celery
 from api.extensions import db
 from api.extensions import es
 from api.extensions import rd
-from api.lib.cmdb.cache import CITypeAttributeCache
+from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import REDIS_PREFIX_CI
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
@@ -81,7 +81,7 @@ def ci_type_attribute_order_rebuild(type_id):
 
     from api.lib.cmdb.ci_type import CITypeAttributeGroupManager
 
-    attrs = CITypeAttributeCache.get(type_id)
+    attrs = CITypeAttributesCache.get(type_id)
     id2attr = {attr.attr_id: attr for attr in attrs}
 
     res = CITypeAttributeGroupManager.get_by_type_id(type_id, True)

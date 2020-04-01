@@ -485,7 +485,7 @@ class CIRelationManager(object):
         return numfound, len(first_ci_ids), result
 
     @classmethod
-    def add(cls, first_ci_id, second_ci_id, more=None, relation_type_id=None):
+    def add(cls, first_ci_id, second_ci_id, more=None, relation_type_id=None, many_to_one=False):
 
         first_ci = CIManager.confirm_ci_existed(first_ci_id)
         second_ci = CIManager.confirm_ci_existed(second_ci_id)
@@ -495,7 +495,7 @@ class CIRelationManager(object):
                                     to_dict=False,
                                     first=True)
         if existed is not None:
-            if existed.relation_type_id != relation_type_id:
+            if existed.relation_type_id != relation_type_id and relation_type_id is not None:
                 existed.update(relation_type_id=relation_type_id)
 
                 CIRelationHistoryManager().add(existed, OperateType.UPDATE)
@@ -508,6 +508,16 @@ class CIRelationManager(object):
                 relation_type_id = type_relation and type_relation.relation_type_id
                 relation_type_id or abort(404, "Relation {0} <-> {1} is not found".format(
                     first_ci.ci_type.name, second_ci.ci_type.name))
+
+            if many_to_one:
+                for item in CIRelation.get_by(second_ci_id=second_ci_id,
+                                              relation_type_id=relation_type_id,
+                                              to_dict=False):
+                    item.soft_delete()
+                    his_manager = CIRelationHistoryManager()
+                    his_manager.add(item, operate_type=OperateType.DELETE)
+
+                    ci_relation_delete.apply_async(args=(item.first_ci_id, item.second_ci_id), queue=CMDB_QUEUE)
 
             existed = CIRelation.create(first_ci_id=first_ci_id,
                                         second_ci_id=second_ci_id,
@@ -544,3 +554,25 @@ class CIRelationManager(object):
         ci_relation_delete.apply_async(args=(first_ci_id, second_ci_id), queue=CMDB_QUEUE)
 
         return cls.delete(cr.id)
+
+    @classmethod
+    def batch_update(cls, ci_ids, parents):
+        """
+        only for many to one
+        :param ci_ids: 
+        :param parents: 
+        :return: 
+        """
+        from api.lib.cmdb.utils import TableMap
+
+        if parents is not None and isinstance(parents, dict):
+            for attr_name in parents:
+                if parents[attr_name]:
+                    attr = AttributeCache.get(attr_name)
+                    value_table = TableMap(attr_name=attr.name).table
+                    parent = value_table.get_by(attr_id=attr.id, value=parents[attr_name], first=True, to_dict=False)
+                    if not parent:
+                        return abort(404, "{0}: {1} is not found".format(attr_name, parents[attr_name]))
+                    parent_id = parent.ci_id
+                    for ci_id in ci_ids:
+                        cls.add(parent_id, ci_id, many_to_one=True)
