@@ -1,4 +1,4 @@
-# -*- coding:utf-8 -*- 
+# -*- coding:utf-8 -*-
 
 
 import json
@@ -83,7 +83,7 @@ class AttributeHistoryManger(object):
 
         username = UserCache.get(record.uid).nickname or UserCache.get(record.uid).username
         timestamp = record.created_at.strftime("%Y-%m-%d %H:%M:%S")
-        attr_history = AttributeHistory.get_By(record_id=record_id, to_dict=False)
+        attr_history = AttributeHistory.get_by(record_id=record_id, to_dict=False)
         rel_history = CIRelationHistory.get_by(record_id=record_id, to_dict=False)
 
         attr_dict, rel_dict = dict(), {"add": [], "delete": []}
