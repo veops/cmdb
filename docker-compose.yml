@@ -54,7 +54,7 @@ services:
           - cmdb-search
 
   cmdb-api:
-    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-api:2.1
+    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-api:2.2
 #    build:
 #      context: .
 #      target: cmdb-api
@@ -74,7 +74,7 @@ services:
         gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000 -D
         flask init-cache
         flask init-acl
-        
+
         celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1
     depends_on:
       - cmdb-db
@@ -86,7 +86,7 @@ services:
           - cmdb-api
 
   cmdb-ui:
-    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-ui:2.1
+    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-ui:2.2
 #    build:
 #      context: .
 #      target: cmdb-ui
