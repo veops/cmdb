@@ -127,8 +127,9 @@ def is_app_admin(app=None):
     app = app or 'cmdb'
     app_id = AppCache.get(app).id
 
-    for role in session.get("acl", {}).get("parentRoles", []):
-        if RoleCache.get_by_name(app_id, role).is_app_admin:
+    for role_name in session.get("acl", {}).get("parentRoles", []):
+        role = RoleCache.get_by_name(app_id, role_name)
+        if role and role.is_app_admin:
             return True
 
     return False
