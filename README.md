@@ -24,6 +24,10 @@ As far as possible to achieve more universal configuration and management of IT 
 
 ----
 ## Overview
+### Documents
+- [Design document](https://zhuanlan.zhihu.com/p/98453732)
+- [API document](https://github.com/pycook/cmdb/tree/master/docs)
+- [Tree view practice](https://mp.weixin.qq.com/s/EflmmJ-qdUkddTx2hRt3pA)
 
 The CMDB is a universal project that can define and manage almost all IT resources, even every resource as long as you want to, which treat all IT resources as resource objects. Objects has both attributes  and relationship.
 
