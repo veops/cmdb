@@ -22,6 +22,11 @@
     
 Overview
 ----
+### 相关文档
+- [设计文档](https://zhuanlan.zhihu.com/p/98453732)
+- [API文档](https://github.com/pycook/cmdb/tree/master/docs)
+- [树形视图实践](https://mp.weixin.qq.com/s/EflmmJ-qdUkddTx2hRt3pA)
+
 ### 3种类型视图
 1. 资源视图 - 模型的实例数据, 用户可订阅
 2. 树形视图 - 模型按字段分级, 用树形图方式展示, 用户可订阅
