@@ -1,7 +1,6 @@
 <h1 align="center">CMDB</h1>
 <div align="center">
-
-As far as possible to achieve more universal configuration and management of IT resources
+尽可能实现比较通用的运维资源的配置和管理
 </div>
 
 <div align="center">
@@ -12,126 +11,107 @@ As far as possible to achieve more universal configuration and management of IT 
 
 </div>
 
+[English](README_en.md) / [中文](README.md)
 
-[English](README.md) / [中文](README_cn.md)
-
-## DEMO ONLINE
-- Preview online: [CMDB](http://121.42.12.46:8000)
+- 在线预览: [CMDB](http://121.42.12.46:8000)
     - username: demo
     - password: 123456
     
-> **ATTENTION**: branch `master` may be unstable as the result of continued development, please pull code from  [releases](https://github.com/pycook/cmdb/releases)
+> **重要提示**: `master` 分支在开发过程中可能处于 *不稳定的状态* 。
+请通过[releases](https://github.com/pycook/cmdb/releases)获取
+    
+Overview
+----
+### 相关文档
+- [设计文档](https://zhuanlan.zhihu.com/p/98453732)
+- [API文档](https://github.com/pycook/cmdb/tree/master/docs)
+- [树形视图实践](https://mp.weixin.qq.com/s/EflmmJ-qdUkddTx2hRt3pA)
+
+### 3种类型视图
+1. 资源视图 - 模型的实例数据, 用户可订阅
+2. 树形视图 - 模型按字段分级, 用树形图方式展示, 用户可订阅
+3. 关系视图 - 模型之间的关系, 用树形图方式展示, **管理员可配置**
+
+##### 资源视图
+![基础资源视图](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-ci.jpeg) 
+
+##### 树形视图
+![树形视图](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-tree.jpeg) 
+
+##### 关系视图
+![关系视图](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-relation.jpeg) 
+
+##### 用户订阅
+![用户订阅](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-preference.jpeg)
+
+##### 关系视图配置
+![关系视图配置](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-relation-define.jpeg)
+
+Docker一键快速构建
+----
+- 进入主目录（先安装docker环境）
+```
+    docker-compose up -d
+```
+
+- 浏览器打开: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+
+本地搭建: 环境和依赖
+----
+- 存储: mysql, redis
+- python版本: python2.7, >=python3.6
+
+Install
+----
+- 启动mysql服务, redis服务
+
+- 创建数据库cmdb
+- 拉取代码
+```bash
+git clone https://github.com/pycook/cmdb.git
+cd cmdb
+cp cmdb-api/settings.py.example cmdb-api/settings.py
+```
+**设置cmdb-api/settings.py里的database**
+
+- 安装库
+  - 后端: ```cd cmdb-api && pipenv run pipenv install && cd ..```
+  - 前端: ```cd cmdb-ui && yarn install && cd ..```
+  
+- 创建数据库表: 进入**cmdb-api**目录执行 ```pipenv run flask db-setup && pipenv run flask init-cache```
+- 可以将docs/cmdb.sql导入到数据库里，登录用户和密码分别是:demo/123456
+  
+- 启动服务
+  - 后端: 进入**cmdb-api**目录执行 ```pipenv run flask run -h 0.0.0.0```
+  - 前端: 进入**cmdb-ui**目录执行```yarn run serve```
+  - worker: 进入**cmdb-api**目录执行 ```pipenv run celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1```
+  
+  - 浏览器打开:  [http://127.0.0.1:8000](http://127.0.0.1:8000)
+    - 如果是非本机访问, 要修改**cmdb-ui/.env**里**VUE_APP_API_BASE_URL**里的IP地址为后端服务的ip地址
+
+
+Install by Makefile
+----
+- 启动mysql服务, redis服务
+
+- 创建数据库cmdb
+- 拉取代码
+```bash
+git clone https://github.com/pycook/cmdb.git
+cd cmdb
+cp cmdb-api/settings.py.example cmdb-api/settings.py
+```
+**设置cmdb-api/settings.py里的database**
+
+- 顺序在cmdb目录下执行
+    - 环境: ```make env```
+    - 启动API: ```make api```
+    - 启动UI: ```make ui```
+    - 启动worker: ```make worker```
+
 
 ----
-## Overview
-### Documents
-- [Design document](https://zhuanlan.zhihu.com/p/98453732)
-- [API document](https://github.com/pycook/cmdb/tree/master/docs)
-- [Tree view practice](https://mp.weixin.qq.com/s/EflmmJ-qdUkddTx2hRt3pA)
+_**欢迎加入CMDB运维开发QQ群（336164978）**_
 
-The CMDB is a universal project that can define and manage almost all IT resources, even every resource as long as you want to, which treat all IT resources as resource objects. Objects has both attributes  and relationship.
-
-CMDB's main distinguishing features as compared to other resource systems are:
-- Define attributes of resource objects dynamically，you don't need to define all the attributes at the beginning.
-- Define relationship of resource objects dynamically and simply, even you can draw the relationship through the web.
-- Three view:
-    - Resource view: model instance data that users can subscribe
-    - Tree view: the model is hierarchical by field, shown in a tree diagram, and users can subscribe
-    - Relational view: relationships between models, shown in a tree diagram, **are configurable by the administrator**
-
-- Authority management
-
-
-## Install
-
-There are various ways of installing CMDB.
-
-### Install by Docker
-- Prepare: install docker and docker-compose
-- In directory cmdb
-    ```
-        docker-compose up -d
-    ```
-- View: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-
-### Environment and dependency
-- database: mysql
-- cache: redis
-- python: python2.7, >=python3.6
-
-### Install
-- Start mysql, redis
-- Create mysql database: cmdb
-- Pull code
-    ```bash
-    git clone https://github.com/pycook/cmdb.git
-    cd cmdb
-    cp cmdb-api/settings.py.example cmdb-api/settings.py
-    ```
-    **set database in config file cmdb-api/settings.py**
-
-- Install library
-  - backend: ```cd cmdb-api && pipenv run pipenv install && cd ..```
-  - frontend: ```cd cmdb-ui && yarn install && cd ..```
-  
-- Create tables of cmdb database:
-    
-  in **cmdb-api** directory: ```pipenv run flask db-setup && pipenv run flask init-cache```
-- Suggest step: (default:  user:demo,password:123456)
-
-    ``` source docs/cmdb.sql```
-
-- Start service
-  - backend: in **cmdb-api** directory: ```pipenv run flask run -h 0.0.0.0```
-  - frontend: in **cmdb-ui** directory: ```yarn run serve```
-  - worker: in **cmdb-api** directory: ```pipenv run celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1```
-  
-  - homepage:  [http://127.0.0.1:8000](http://127.0.0.1:8000)
-    - if not run localhost: please change ip address(**VUE_APP_API_BASE_URL**) in config file **cmdb-ui/.env** into your backend ip address
-
-### Install by Makefile
-- Start mysql,redis
-- Create mysql database: cmdb
-- Pull code
-    ```bash
-    git clone https://github.com/pycook/cmdb.git
-    cd cmdb
-    cp cmdb-api/settings.py.example cmdb-api/settings.py
-    ```
-    **set database in config file cmdb-api/settings.py**
-
-- In cmdb directory,start in order as follows:
-    - enviroment: ```make env```
-    - start API: ```make api```
-    - start UI: ```make ui```
-    - start worker: ```make worker```
-    
-## Contributing
-
-1. Fork it
-1. Create your feature branch (`git checkout -b my-feature`)
-1. Commit your changes (`git commit -am 'Add some feature'`)
-1. Push to the branch (`git push origin my-feature`)
-1. Create new Pull Request
-
-
-## DEMO
-##### resource view
-![resource view](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-ci.jpeg) 
-
-##### tree view
-![tree view](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-tree.jpeg) 
-
-##### relationship view
-![relationship view](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-relation.jpeg) 
-
-##### user subscription
-![user subscription](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-preference.jpeg)
-
-##### define relationship view
-![define relationship view](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-relation-define.jpeg)
-
------
-_**Welcome to join us through QQ group（336164978）**_
-
-![QQgroup](cmdb-ui/public/qr_code.jpg)
+![QQ群](cmdb-ui/public/qr_code.jpg)
