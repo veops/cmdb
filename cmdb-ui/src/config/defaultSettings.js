@@ -18,8 +18,10 @@
 
 export default {
   showLocale: true,
-  defaultLang: 'en-US', // zh-CN | en-US
+  defaultLang: 'zh-CN', // zh-CN | en-US
   useSSO: false,
+  ssoLogoutRedirectUrl: 'https://xxx.yyy.com/zzz/logout',
+  ssoLoginRedirectUrl: 'https://xxx.yyy.com/zzz/login',
   primaryColor: '#1890ff', // primary color of ant design
   navTheme: 'dark', // theme for nav menu
   layout: 'sidemenu', // nav menu position: sidemenu or topmenu
