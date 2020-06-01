@@ -42,13 +42,13 @@ router.beforeEach((to, from, next) => {
         })
       })
       .catch((e) => {
-        console.log(e)
         notification.error({
-          message: this.$t('tip.error'),
+          message: e.message,
           description: 'Failed to request user information. Please try again!'
         })
         setTimeout(() => {
-          store.dispatch('Logout')
+          console.log('should re-login')
+          store.dispatch('Login')
         }, 3000)
       })
   } else if (to.path === '/user/login' && !config.useSSO && store.getters.roles.length !== 0) {

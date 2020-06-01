@@ -75,18 +75,10 @@ const user = {
 
     // logout
     Logout ({ commit, state }) {
-      return new Promise((resolve) => {
-        commit('SET_TOKEN', '')
-        commit('SET_ROLES', [])
-        Vue.ls.remove(ACCESS_TOKEN)
-
-        logout(state.token).then(() => {
-          window.location.reload()
-          resolve()
-        }).catch(() => {
-          resolve()
-        })
-      })
+      commit('SET_TOKEN', '')
+      commit('SET_ROLES', [])
+      Vue.ls.remove(ACCESS_TOKEN)
+      return logout(state.token)
     }
 
   }
