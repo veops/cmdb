@@ -1,8 +1,8 @@
 import config from '@/config/defaultSettings'
 
 const api = {
-  Login: config.useSSO ? '/api/sso/login' : '/login',
-  Logout: config.useSSO ? '/api/sso/logout' : '/logout',
+  Login: config.useSSO ? config.ssoLoginRedirectUrl : '/login',
+  Logout: config.useSSO ? config.ssoLogoutRedirectUrl : '/logout',
   ForgePassword: '/auth/forge-password',
   Register: '/auth/register',
   twoStepCode: '/auth/2step-code',

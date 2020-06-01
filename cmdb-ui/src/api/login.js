@@ -39,9 +39,10 @@ export function getInfo () {
 }
 
 export function logout () {
-  console.log('logout........')
+  console.log('logout........', config.useSSO)
   if (config.useSSO) {
-    window.location.replace(api.Logout)
+    window.location.href = api.Logout
+    return Promise.resolve()
   } else {
     return axios({
       url: api.Logout,
