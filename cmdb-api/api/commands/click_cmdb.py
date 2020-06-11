@@ -22,6 +22,8 @@ from api.lib.perm.acl.cache import AppCache
 from api.lib.perm.acl.resource import ResourceCRUD
 from api.lib.perm.acl.resource import ResourceTypeCRUD
 from api.lib.perm.acl.role import RoleCRUD
+from api.lib.perm.acl.user import UserCRUD
+from api.models.acl import App
 from api.models.acl import ResourceType
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
@@ -91,7 +93,9 @@ def init_cache():
 @click.command()
 @with_appcontext
 def init_acl():
-    app_id = AppCache.get('cmdb').id
+    _app = AppCache.get('cmdb') or App.create(name='cmdb')
+    app_id = _app.id
+
     # 1. add resource type
     for resource_type in ResourceTypeEnum.all():
         try:
@@ -135,3 +139,59 @@ def init_acl():
                                             RoleEnum.CMDB_READ_ALL,
                                             ResourceTypeEnum.RELATION_VIEW,
                                             [PermEnum.READ])
+
+
+@click.command()
+@click.option(
+    '-u',
+    '--user',
+    help='username'
+)
+@click.option(
+    '-p',
+    '--password',
+    help='password'
+)
+@click.option(
+    '-m',
+    '--mail',
+    help='mail'
+)
+@click.option(
+    '--is_admin',
+    is_flag=True
+)
+@with_appcontext
+def add_user(user, password, mail, is_admin):
+    """
+    create a user
+
+    is_admin: default is False
+
+    Example:  flask add-user -u <username> -p <password> -m <mail>  [--is_admin]
+    """
+    assert user is not None
+    assert password is not None
+    assert mail is not None
+    print((user, password, is_admin))
+    UserCRUD.add(username=user, password=password, email=mail, is_admin=is_admin)
+
+
+@click.command()
+@click.option(
+    '-u',
+    '--user',
+    help='username'
+)
+@with_appcontext
+def del_user(user):
+    """
+    delete a user
+
+    Example:  flask del-user -u <username>
+    """
+    assert user is not None
+    from api.models.acl import User
+
+    u = User.get_by(username=user, first=True, to_dict=False)
+    u and UserCRUD.delete(u.uid)
