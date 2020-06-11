@@ -38,13 +38,22 @@ class UserCRUD(object):
         existed = User.get_by(username=kwargs['username'], email=kwargs['email'])
         existed and abort(400, "User <{0}> is already existed".format(kwargs['username']))
 
+        is_admin = kwargs.pop('is_admin', False)
         kwargs['nickname'] = kwargs.get('nickname') or kwargs['username']
         kwargs['block'] = 0
         kwargs['key'], kwargs['secret'] = cls._gen_key_secret()
 
         user = User.create(**kwargs)
 
-        RoleCRUD.add_role(user.username, uid=user.uid)
+        role = RoleCRUD.add_role(user.username, uid=user.uid)
+
+        if is_admin:
+            from api.lib.perm.acl.cache import AppCache
+            from api.lib.perm.acl.role import RoleRelationCRUD
+            admin_r = Role.get_by(name='admin', first=True, to_dict=False) or \
+                      RoleCRUD.add_role('admin', AppCache.get('cmdb').id, True)
+
+            RoleRelationCRUD.add(admin_r.id, role.id)
 
         return user
 
@@ -75,11 +84,14 @@ class UserCRUD(object):
 
     @classmethod
     def delete(cls, uid):
-        if uid == g.user.uid:
+        if hasattr(g, 'user') and uid == g.user.uid:
             return abort(400, "You cannot delete yourself")
 
         user = User.get_by(uid=uid, to_dict=False, first=True) or abort(404, "User <{0}> does not exist".format(uid))
 
         UserCache.clean(user)
 
-        user.soft_delete()
+        for i in Role.get_by(uid=uid, to_dict=False):
+            i.delete()
+
+        user.delete()
