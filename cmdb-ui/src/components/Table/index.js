@@ -20,6 +20,10 @@ export default {
       type: [String, Function],
       default: 'key'
     },
+    loaded: {
+      type: Boolean,
+      default: true
+    },
     data: {
       type: Function,
       required: true
@@ -265,6 +269,14 @@ export default {
   },
 
   render () {
+    if (!this.loaded) {
+      return (
+        <div style="width: 100%; height:160px; text-align: center; line-height:160px">
+          <a-spin tip="Loading...">
+          </a-spin>
+        </div>
+      )
+    }
     const props = {}
     const localKeys = Object.keys(this.$data)
     const showAlert = (typeof this.alert === 'object' && this.alert !== null && this.alert.show) && typeof this.rowSelection.selectedRowKeys !== 'undefined' || this.alert
