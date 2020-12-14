@@ -51,6 +51,7 @@
           ref="table"
           size="middle"
           rowKey="ci_id"
+          :loaded="tableLoaded"
           :columns="columns"
           :data="loadInstances"
           :alert="options.alert"
@@ -172,6 +173,7 @@ export default {
   data () {
     return {
       loading: false,
+      tableLoaded: false,
       loadTip: '',
       pageSizeOptions: ['10', '25', '50', '100'],
       form: this.$form.createForm(this),
@@ -191,6 +193,7 @@ export default {
       instanceList: [],
       columns: [],
       loadInstances: parameter => {
+        this.tableLoaded = false
         const params = Object.assign(parameter, this.$refs.search.queryParam)
         let q = `q=_type:${this.$router.currentRoute.meta.typeId}`
         Object.keys(params).forEach(key => {
@@ -219,6 +222,10 @@ export default {
           result.totalPage = Math.ceil(res.numfound / params.pageSize)
           result.data = Object.assign([], res.result)
           result.data.forEach((item, index) => (item.key = item.ci_id))
+          this.$nextTick(() => {
+            this.tableLoaded = true
+          })
+
           if (res.numfound) {
             setTimeout(() => {
               this.setColumnWidth()
