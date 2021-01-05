@@ -16,7 +16,7 @@
     "@handsontable-pro/vue": "^3.1.1",
     "@handsontable/vue": "^4.1.1",
     "ant-design-vue": "^1.6.2",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "core-js": "^3.1.2",
     "enquire.js": "^2.1.6",
     "handsontable": "^7.2.2",
