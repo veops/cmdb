@@ -161,7 +161,7 @@ class AttributeValueManager(object):
                 self._write_change(ci.id, attr.id, OperateType.ADD, None, value)
             else:
                 if existed_value != value:
-                    if value is not 0 and not value and attr.value_type != ValueTypeEnum.TEXT:
+                    if value == 0 and not value and attr.value_type != ValueTypeEnum.TEXT:
                         existed_attr.delete()
                     else:
                         existed_attr.update(value=value)
