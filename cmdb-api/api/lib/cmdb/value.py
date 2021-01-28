@@ -160,12 +160,13 @@ class AttributeValueManager(object):
 
                 self._write_change(ci.id, attr.id, OperateType.ADD, None, value)
             else:
-                if not value and attr.value_type != ValueTypeEnum.TEXT:
-                    existed_attr.delete()
-                else:
-                    existed_attr.update(value=value)
+                if existed_value != value:
+                    if value is not 0 and not value and attr.value_type != ValueTypeEnum.TEXT:
+                        existed_attr.delete()
+                    else:
+                        existed_attr.update(value=value)
 
-                self._write_change(ci.id, attr.id, OperateType.UPDATE, existed_value, value)
+                    AttributeValueManager._write_change(ci.id, attr.id, OperateType.UPDATE, existed_value, value)
 
     @staticmethod
     def delete_attr_value(attr_id, ci_id):
