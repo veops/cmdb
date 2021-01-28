@@ -166,7 +166,7 @@ class AttributeValueManager(object):
                     else:
                         existed_attr.update(value=value)
 
-                    AttributeValueManager._write_change(ci.id, attr.id, OperateType.UPDATE, existed_value, value)
+                    self._write_change(ci.id, attr.id, OperateType.UPDATE, existed_value, value)
 
     @staticmethod
     def delete_attr_value(attr_id, ci_id):
