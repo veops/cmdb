@@ -141,7 +141,7 @@ class CITypeAttributeView(APIView):
         :param type_id: 
         :return: 
         """
-        attributes = request.values.get("attributes")
+        attributes = request.json.get("attributes")
         current_app.logger.debug(attributes)
         if not isinstance(attributes, list):
             return abort(400, "attributes must be list")
