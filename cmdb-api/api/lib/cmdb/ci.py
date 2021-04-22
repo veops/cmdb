@@ -206,9 +206,13 @@ class CIManager(object):
 
     def update(self, ci_id, **ci_dict):
         ci = self.confirm_ci_existed(ci_id)
-
+        
+        ci_type_attrs_name = [attr["name"] for attr in CITypeAttributeManager().get_attributes_by_type_id(ci.type_id)]
         value_manager = AttributeValueManager()
         for p, v in ci_dict.items():
+            if p not in ci_type_attrs_name:
+                current_app.logger.warning('ci_type: {0} not has attribute {1}, please check!'.format(ci.type_id, p))
+                continue
             try:
                 value_manager.create_or_update_attr_value(p, v, ci)
             except BadRequest as e:
