@@ -242,7 +242,7 @@ class Search(object):
             _query_sql = ""
             if ":" in q:
                 k = q.split(":")[0].strip()
-                v = ":".join(q.split(":")[1:]).strip()
+                v = "\:".join(q.split(":")[1:]).strip()
                 current_app.logger.debug(v)
                 field, field_type, operator, attr = self._attr_name_proc(k)
                 if field == "_type":
