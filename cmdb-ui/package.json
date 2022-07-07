@@ -27,7 +27,7 @@
     "lodash.get": "^4.4.2",
     "lodash.pick": "^4.4.0",
     "md5": "^2.2.1",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "node-fetch": "^2.6.1",
     "node-forge": "^0.10.0",
     "nprogress": "^0.2.0",
