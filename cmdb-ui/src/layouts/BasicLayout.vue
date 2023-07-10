@@ -23,12 +23,15 @@
       v-else-if="isSideMenu()"
       mode="inline"
       :menus="sideBarMenu"
-      :theme="navTheme"
+      theme="light"
       :collapsed="collapsed"
       :collapsible="true"
     ></side-menu>
 
-    <a-layout :class="[layoutMode, `content-width-${contentWidth}`]" :style="{ paddingLeft: contentPaddingLeft, minHeight: '100vh' }">
+    <a-layout
+      :class="[layoutMode, `content-width-${contentWidth}`]"
+      :style="{ paddingLeft: contentPaddingLeft, minHeight: '100vh' }"
+    >
       <!-- layout header -->
       <global-header
         :mode="layoutMode"
@@ -40,30 +43,21 @@
       />
 
       <!-- layout content -->
-      <a-layout-content :style="{ height: '100%', margin: '24px 24px 0', paddingTop: fixedHeader ? '64px' : '0' }">
+      <a-layout-content :style="{ height: '100%', paddingBottom: '24px', paddingTop: fixedHeader ? '64px' : '0' }">
         <multi-tab v-if="multiTab"></multi-tab>
         <transition name="page-transition">
-          <route-view/>
+          <router-view v-if="alive" />
         </transition>
       </a-layout-content>
-
-      <!-- layout footer -->
-      <!-- <a-layout-footer>
-        <global-footer />
-      </a-layout-footer> -->
-
-      <!-- Setting Drawer (show in development mode) -->
-      <!--      <setting-drawer v-if="!production"></setting-drawer>-->
     </a-layout>
   </a-layout>
-
 </template>
 
 <script>
 import { triggerWindowResizeEvent } from '@/utils/util'
 import { mapState, mapActions } from 'vuex'
 import { mixin, mixinDevice } from '@/utils/mixin'
-import config from '@/config/defaultSettings'
+import config from '@/config/setting'
 
 import RouteView from './RouteView'
 import MultiTab from '@/components/MultiTab'
@@ -81,47 +75,53 @@ export default {
     SideMenu,
     GlobalHeader,
     GlobalFooter,
-    SettingDrawer
+    SettingDrawer,
   },
-  data () {
+  data() {
     return {
       production: config.production,
-      collapsed: false
+      collapsed: false,
+      alive: true,
     }
   },
   computed: {
     ...mapState({
       // 动态主路由
-      mainMenu: state => state.permission.addRouters
+      mainMenu: state => state.routes.appRoutes,
     }),
-    contentPaddingLeft () {
+    contentPaddingLeft() {
       if (!this.fixSidebar || this.isMobile()) {
         return '0'
       }
       if (this.sidebarOpened) {
-        return '256px'
+        return '200px'
       }
       return '80px'
     },
-    sideBarMenu () {
+    sideBarMenu() {
       const sideMenus = this.mainMenu.filter(item => this.$route.path.startsWith(item.path))
       if (sideMenus.length > 1) {
         return sideMenus.find(item => item.path !== '/').children
       } else {
         return sideMenus[0].children
       }
+    },
+  },
+  provide() {
+    return {
+      reloadBoard: this.reload,
     }
   },
   watch: {
-    sidebarOpened (val) {
+    sidebarOpened(val) {
       this.collapsed = !val
-    }
+    },
   },
-  created () {
+  created() {
     this.setMenuData()
     this.collapsed = !this.sidebarOpened
   },
-  mounted () {
+  mounted() {
     const userAgent = navigator.userAgent
     if (userAgent.indexOf('Edge') > -1) {
       this.$nextTick(() => {
@@ -134,37 +134,41 @@ export default {
   },
   methods: {
     ...mapActions(['setSidebar']),
-    toggle () {
+    toggle() {
       this.collapsed = !this.collapsed
       this.setSidebar(!this.collapsed)
       triggerWindowResizeEvent()
     },
-    setMenuData () {
-
+    setMenuData() {},
+    reload() {
+      this.alive = false
+      this.$nextTick(() => {
+        this.alive = true
+      })
     },
-    paddingCalc () {
+    paddingCalc() {
       let left = ''
       if (this.sidebarOpened) {
-        left = this.isDesktop() ? '256px' : '80px'
+        left = this.isDesktop() ? '200px' : '80px'
       } else {
-        left = (this.isMobile() && '0') || ((this.fixSidebar && '80px') || '0')
+        left = (this.isMobile() && '0') || (this.fixSidebar && '80px') || '0'
       }
       return left
     },
-    menuSelect () {
+    menuSelect() {
       if (!this.isDesktop()) {
         this.collapsed = false
       }
     },
-    drawerClose () {
+    drawerClose() {
       this.collapsed = false
-    }
-  }
+    },
+  },
 }
 </script>
 
 <style lang="less">
-@import url('../components/global.less');
+@import url('../style/global.less');
 
 /*
  * The following styles are auto-applied to elements with

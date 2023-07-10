@@ -6,9 +6,9 @@ from flask import current_app
 from flask import request
 
 from api.lib.cmdb.attribute import AttributeManager
-from api.lib.cmdb.const import RoleEnum
+from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.decorator import args_required
-from api.lib.perm.acl.acl import role_required
+from api.lib.decorator import args_validate
 from api.lib.utils import get_page
 from api.lib.utils import get_page_size
 from api.lib.utils import handle_arg_list
@@ -42,24 +42,30 @@ class AttributeView(APIView):
             attr_dict = attr_manager.get_attribute_by_name(attr_name)
             if attr_dict is None:
                 attr_dict = attr_manager.get_attribute_by_alias(attr_name)
+
+            if not attr_dict:
+                return abort(404, ErrFormat.attribute_not_found.format("name={}".format(attr_name)))
         elif attr_id is not None:
             attr_dict = attr_manager.get_attribute_by_id(attr_id)
-        if attr_dict is not None:
-            return self.jsonify(attribute=attr_dict)
-        abort(404, "Attribute is not found")
 
-    @role_required(RoleEnum.CONFIG)
+            if not attr_dict:
+                return abort(404, ErrFormat.attribute_not_found.format("name={}".format(attr_name)))
+
+        return self.jsonify(attribute=attr_dict)
+
     @args_required("name")
+    @args_validate(AttributeManager.cls)
     def post(self):
         choice_value = handle_arg_list(request.values.get("choice_value"))
         params = request.values
         params["choice_value"] = choice_value
+
         current_app.logger.debug(params)
 
         attr_id = AttributeManager.add(**params)
         return self.jsonify(attr_id=attr_id)
 
-    @role_required(RoleEnum.CONFIG)
+    @args_validate(AttributeManager.cls)
     def put(self, attr_id):
         choice_value = handle_arg_list(request.values.get("choice_value"))
         params = request.values
@@ -68,7 +74,6 @@ class AttributeView(APIView):
         AttributeManager().update(attr_id, **params)
         return self.jsonify(attr_id=attr_id)
 
-    @role_required(RoleEnum.CONFIG)
     def delete(self, attr_id):
         attr_name = AttributeManager.delete(attr_id)
         return self.jsonify(message="attribute {0} deleted".format(attr_name))
