@@ -1,11 +1,11 @@
 <template>
   <div class="page-header">
     <div class="page-header-index-wide">
-      <s-breadcrumb :i18n-render="i18nRender" />
+      <s-breadcrumb v-if="isShowBreadcrumb"/>
       <div class="detail">
         <div class="main" v-if="!$route.meta.hiddenHeaderContent">
           <div class="row">
-            <img v-if="logo" :src="logo" class="logo"/>
+            <img v-if="logo" :src="logo" class="logo" />
             <h1 v-if="title" class="title">{{ title }}</h1>
             <div class="action">
               <slot name="action"></slot>
@@ -32,38 +32,37 @@
 </template>
 
 <script>
-/* eslint-disable */
 import Breadcrumb from '@/components/tools/Breadcrumb'
-import { i18nRender } from '@/locales'
 
 export default {
   name: 'PageHeader',
   components: {
-    's-breadcrumb': Breadcrumb
+    's-breadcrumb': Breadcrumb,
   },
   props: {
     title: {
       type: [String, Boolean],
       default: true,
-      required: false
+      required: false,
     },
     logo: {
       type: String,
       default: '',
-      required: false
+      required: false,
     },
     avatar: {
       type: String,
       default: '',
-      required: false
-    }
+      required: false,
+    },
+    isShowBreadcrumb: {
+      type: Boolean,
+      default: true,
+    },
   },
-  data () {
+  data() {
     return {}
   },
-  methods () {
-    i18nRender
-  }
 }
 </script>
 

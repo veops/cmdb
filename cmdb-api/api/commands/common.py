@@ -78,7 +78,7 @@ def clean():
     """
     for dirpath, dirnames, filenames in os.walk("."):
         for filename in filenames:
-            if filename.endswith(".pyc") or filename.endswith(".pyo"):
+            if filename.endswith(".pyc") or filename.endswith(".pyo") or filename.endswith(".c"):
                 full_pathname = os.path.join(dirpath, filename)
                 click.echo("Removing {}".format(full_pathname))
                 os.remove(full_pathname)
@@ -110,7 +110,7 @@ def urls(url, order):
             column_length = 1
     else:
         rules = sorted(
-            current_app.url_map.iter_rules(), key=lambda x: getattr(x, order)
+            current_app.url_map.iter_rules(), key=lambda rule: getattr(rule, order)
         )
         for rule in rules:
             rows.append((rule.rule, rule.endpoint, None))

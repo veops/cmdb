@@ -3,11 +3,16 @@
 
 import datetime
 
+from sqlalchemy.dialects.mysql import DOUBLE
+
 from api.extensions import db
+from api.lib.cmdb.const import AutoDiscoveryType
 from api.lib.cmdb.const import CIStatusEnum
+from api.lib.cmdb.const import CITypeOperateType
+from api.lib.cmdb.const import ConstraintEnum
 from api.lib.cmdb.const import OperateType
 from api.lib.cmdb.const import ValueTypeEnum
-from api.lib.database import Model
+from api.lib.database import Model, Model2
 
 
 # template
@@ -22,6 +27,7 @@ class CITypeGroup(Model):
     __tablename__ = "c_ci_type_groups"
 
     name = db.Column(db.String(32), nullable=False)
+    order = db.Column(db.Integer, default=0)
 
 
 class CITypeGroupItem(Model):
@@ -40,18 +46,22 @@ class CIType(Model):
     unique_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"), nullable=False)
     enabled = db.Column(db.Boolean, default=True, nullable=False)
     is_attached = db.Column(db.Boolean, default=False, nullable=False)
-    icon_url = db.Column(db.String(256), default='', nullable=False)
+    icon = db.Column(db.Text)
     order = db.Column(db.SmallInteger, default=0, nullable=False)
+    default_order_attr = db.Column(db.String(33))
 
     unique_key = db.relationship("Attribute", backref="c_ci_types.unique_id")
+
+    uid = db.Column(db.Integer, index=True)
 
 
 class CITypeRelation(Model):
     __tablename__ = "c_ci_type_relations"
 
-    parent_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)
-    child_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)
+    parent_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)  # source
+    child_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)  # dst
     relation_type_id = db.Column(db.Integer, db.ForeignKey("c_relation_types.id"), nullable=False)
+    constraint = db.Column(db.Enum(*ConstraintEnum.all()), default=ConstraintEnum.One2Many)
 
     parent = db.relationship("CIType", primaryjoin="CIType.id==CITypeRelation.parent_id")
     child = db.relationship("CIType", primaryjoin="CIType.id==CITypeRelation.child_id")
@@ -72,6 +82,18 @@ class Attribute(Model):
     is_link = db.Column(db.Boolean, default=False)
     is_password = db.Column(db.Boolean, default=False)
     is_sortable = db.Column(db.Boolean, default=False)
+
+    default = db.Column(db.JSON)  # {"default": None}
+
+    is_computed = db.Column(db.Boolean, default=False)
+    compute_expr = db.Column(db.Text)
+    compute_script = db.Column(db.Text)
+
+    choice_web_hook = db.Column(db.JSON)
+
+    uid = db.Column(db.Integer, index=True)
+
+    option = db.Column(db.JSON)
 
 
 class CITypeAttribute(Model):
@@ -102,6 +124,23 @@ class CITypeAttributeGroupItem(Model):
     order = db.Column(db.SmallInteger, default=0)
 
 
+class CITypeTrigger(Model):
+    # __tablename__ = "c_ci_type_triggers"
+    __tablename__ = "c_c_t_t"
+
+    type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'), nullable=False)
+    attr_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"), nullable=False)
+    notify = db.Column(db.JSON)  # {subject: x, body: x, wx_to: [], mail_to: [], before_days: 0, notify_at: 08:00}
+
+
+class CITypeUniqueConstraint(Model):
+    # __tablename__ = "c_ci_type_unique_constraints"
+    __tablename__ = "c_c_t_u_c"
+
+    type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'), nullable=False)
+    attr_ids = db.Column(db.JSON)  # [attr_id, ]
+
+
 # instance
 
 class CI(Model):
@@ -110,6 +149,7 @@ class CI(Model):
     type_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)
     status = db.Column(db.Enum(*CIStatusEnum.all(), name="status"))
     heartbeat = db.Column(db.DateTime, default=lambda: datetime.datetime.now())
+    is_auto_discovery = db.Column('a', db.Boolean, default=False)
 
     ci_type = db.relationship("CIType", backref="c_cis.type_id")
 
@@ -132,6 +172,7 @@ class IntegerChoice(Model):
 
     attr_id = db.Column(db.Integer, db.ForeignKey('c_attributes.id'), nullable=False)
     value = db.Column(db.Integer, nullable=False)
+    option = db.Column(db.JSON)
 
     attr = db.relationship("Attribute", backref="c_choice_integers.attr_id")
 
@@ -140,7 +181,8 @@ class FloatChoice(Model):
     __tablename__ = 'c_choice_floats'
 
     attr_id = db.Column(db.Integer, db.ForeignKey('c_attributes.id'), nullable=False)
-    value = db.Column(db.Float, nullable=False)
+    value = db.Column(DOUBLE, nullable=False)
+    option = db.Column(db.JSON)
 
     attr = db.relationship("Attribute", backref="c_choice_floats.attr_id")
 
@@ -150,6 +192,7 @@ class TextChoice(Model):
 
     attr_id = db.Column(db.Integer, db.ForeignKey('c_attributes.id'), nullable=False)
     value = db.Column(db.Text, nullable=False)
+    option = db.Column(db.JSON)
 
     attr = db.relationship("Attribute", backref="c_choice_texts.attr_id")
 
@@ -172,7 +215,7 @@ class CIIndexValueFloat(Model):
 
     ci_id = db.Column(db.Integer, db.ForeignKey('c_cis.id'), nullable=False)
     attr_id = db.Column(db.Integer, db.ForeignKey('c_attributes.id'), nullable=False)
-    value = db.Column(db.Float, nullable=False)
+    value = db.Column(DOUBLE, nullable=False)
 
     ci = db.relationship("CI", backref="c_value_index_floats.ci_id")
     attr = db.relationship("Attribute", backref="c_value_index_floats.attr_id")
@@ -222,7 +265,7 @@ class CIValueFloat(Model):
 
     ci_id = db.Column(db.Integer, db.ForeignKey('c_cis.id'), nullable=False)
     attr_id = db.Column(db.Integer, db.ForeignKey('c_attributes.id'), nullable=False)
-    value = db.Column(db.Float, nullable=False)
+    value = db.Column(DOUBLE, nullable=False)
 
     ci = db.relationship("CI", backref="c_value_floats.ci_id")
     attr = db.relationship("Attribute", backref="c_value_floats.attr_id")
@@ -262,13 +305,15 @@ class CIValueJson(Model):
 
 
 # history
-class OperationRecord(Model):
+class OperationRecord(Model2):
     __tablename__ = "c_records"
 
     uid = db.Column(db.Integer, index=True, nullable=False)
     origin = db.Column(db.String(32), nullable=True)
     ticket_id = db.Column(db.String(32), nullable=True)
     reason = db.Column(db.Text)
+
+    type_id = db.Column(db.Integer, index=True)
 
 
 class AttributeHistory(Model):
@@ -293,29 +338,151 @@ class CIRelationHistory(Model):
     relation_id = db.Column(db.Integer, nullable=False)
 
 
+class CITypeHistory(Model):
+    __tablename__ = "c_ci_type_histories"
+
+    operate_type = db.Column(db.Enum(*CITypeOperateType.all(), name="operate_type"))
+    type_id = db.Column(db.Integer, index=True, nullable=False)
+
+    attr_id = db.Column(db.Integer)
+    trigger_id = db.Column(db.Integer)
+    unique_constraint_id = db.Column(db.Integer)
+
+    uid = db.Column(db.Integer, index=True)
+    change = db.Column(db.JSON)
+
+
 # preference
 class PreferenceShowAttributes(Model):
-    __tablename__ = "c_preference_show_attributes"
+    # __tablename__ = "c_preference_show_attributes"
+    __tablename__ = "c_psa"
 
     uid = db.Column(db.Integer, index=True, nullable=False)
     type_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)
     attr_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"))
     order = db.Column(db.SmallInteger, default=0)
+    is_fixed = db.Column(db.Boolean, default=False)
 
-    ci_type = db.relationship("CIType", backref="c_preference_show_attributes.type_id")
-    attr = db.relationship("Attribute", backref="c_preference_show_attributes.attr_id")
+    ci_type = db.relationship("CIType", backref="c_psa.type_id")
+    attr = db.relationship("Attribute", backref="c_psa.attr_id")
 
 
 class PreferenceTreeView(Model):
-    __tablename__ = "c_preference_tree_views"
+    # __tablename__ = "c_preference_tree_views"
+    __tablename__ = "c_ptv"
 
     uid = db.Column(db.Integer, index=True, nullable=False)
     type_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)
-    levels = db.Column(db.Text)  # TODO: JSON
+    levels = db.Column(db.JSON)
 
 
 class PreferenceRelationView(Model):
-    __tablename__ = "c_preference_relation_views"
+    # __tablename__ = "c_preference_relation_views"
+    __tablename__ = "c_prv"
 
+    uid = db.Column(db.Integer, index=True, nullable=False)
     name = db.Column(db.String(64), index=True, nullable=False)
-    cr_ids = db.Column(db.TEXT)  # [{parent_id: x, child_id: y}] TODO: JSON
+    cr_ids = db.Column(db.JSON)  # [{parent_id: x, child_id: y}]
+    is_public = db.Column(db.Boolean, default=False)
+
+
+class PreferenceSearchOption(Model):
+    __tablename__ = "c_pso"
+
+    name = db.Column(db.String(64))
+
+    prv_id = db.Column(db.Integer, db.ForeignKey("c_prv.id"))
+    ptv_id = db.Column(db.Integer, db.ForeignKey("c_ptv.id"))
+    type_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"))
+
+    uid = db.Column(db.Integer, index=True)
+
+    option = db.Column(db.JSON)
+
+
+# custom
+class CustomDashboard(Model):
+    __tablename__ = "c_c_d"
+
+    name = db.Column(db.String(64))
+    category = db.Column(db.SmallInteger)  # 0: 总数统计, 1: 字段值统计, 2: 关系统计
+    enabled = db.Column(db.Boolean, default=False)
+    order = db.Column(db.Integer, default=0)
+
+    type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'))
+    attr_id = db.Column(db.Integer, db.ForeignKey('c_attributes.id'))
+    level = db.Column(db.Integer)
+
+    options = db.Column(db.JSON)
+
+
+class SystemConfig(Model):
+    __tablename__ = "c_sc"
+
+    name = db.Column(db.String(64), index=True)
+    option = db.Column(db.JSON)
+
+
+# auto discovery
+class AutoDiscoveryRule(Model):
+    __tablename__ = "c_ad_rules"
+
+    name = db.Column(db.String(32))
+    type = db.Column(db.Enum(*AutoDiscoveryType.all()), index=True)
+    is_inner = db.Column(db.Boolean, default=False, index=True)
+    owner = db.Column(db.Integer, index=True)
+
+    option = db.Column(db.JSON)  # layout
+    attributes = db.Column(db.JSON)
+
+    is_plugin = db.Column(db.Boolean, default=False)
+    plugin_script = db.Column(db.Text)
+    unique_key = db.Column(db.String(64))
+
+
+class AutoDiscoveryCIType(Model):
+    __tablename__ = "c_ad_ci_types"
+
+    type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'))
+    adr_id = db.Column(db.Integer, db.ForeignKey('c_ad_ci_types.id'))
+
+    attributes = db.Column(db.JSON)  # {ad_key: cmdb_key}
+
+    relation = db.Column(db.JSON)  # [{ad_key: {type_id: x, attr_id: x}}]
+
+    auto_accept = db.Column(db.Boolean, default=False)
+
+    agent_id = db.Column(db.String(8), index=True)
+    query_expr = db.Column(db.Text)
+
+    interval = db.Column(db.Integer)  # seconds
+    cron = db.Column(db.String(128))
+
+    extra_option = db.Column(db.JSON)
+    uid = db.Column(db.Integer, index=True)
+
+
+class AutoDiscoveryCI(Model):
+    __tablename__ = "c_ad_ci"
+
+    type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'))
+    adt_id = db.Column(db.Integer, db.ForeignKey('c_ad_ci_types.id'))
+    unique_value = db.Column(db.String(128), index=True)
+    instance = db.Column(db.JSON)
+
+    ci_id = db.Column(db.Integer, index=True)
+
+    is_accept = db.Column(db.Boolean, default=False)
+    accept_by = db.Column(db.String(64), index=True)
+    accept_time = db.Column(db.DateTime)
+
+
+class CIFilterPerms(Model):
+    __tablename__ = "c_ci_filter_perms"
+
+    name = db.Column(db.String(64), index=True)
+    type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'))
+    ci_filter = db.Column(db.Text)
+    attr_filter = db.Column(db.Text)
+
+    rid = db.Column(db.Integer, index=True)

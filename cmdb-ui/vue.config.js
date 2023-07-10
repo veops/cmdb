@@ -3,12 +3,13 @@ const webpack = require('webpack')
 const ThemeColorReplacer = require('webpack-theme-color-replacer')
 const generate = require('@ant-design/colors/lib/generate').default
 
-function resolve (dir) {
+function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
 // vue.config.js
 module.exports = {
+  // runtimeCompiler: true,
   configureWebpack: {
     plugins: [
       // Ignore all locale files of moment.js
@@ -19,7 +20,7 @@ module.exports = {
         fileName: 'css/theme-colors-[contenthash:8].css',
         matchColors: getAntdSerials('#1890ff'), // 主色系列
         // 改变样式选择器，解决样式覆盖问题
-        changeSelector (selector) {
+        changeSelector(selector) {
           switch (selector) {
             case '.ant-calendar-today .ant-calendar-date':
               return ':not(.ant-calendar-selected-date):not(.ant-calendar-selected-day)' + selector
@@ -36,7 +37,7 @@ module.exports = {
               return ':not(.ant-menu-horizontal)' + selector
             case '.ant-menu-horizontal > .ant-menu-item > a:hover':
               return ':not(.ant-menu-horizontal)' + selector
-            default :
+            default:
               return selector
           }
         }
@@ -96,17 +97,8 @@ module.exports = {
   },
 
   devServer: {
-    // development server port 8000
     disableHostCheck: true,
-    port: 8000
-    // proxy: {
-    //   '/api': {
-    //     // target: 'https://mock.ihx.me/mock/5baf3052f7da7e07e04a5116/antd-pro',
-    //     target: 'https://mock.ihx.me/mock/5baf3052f7da7e07e04a5116/antd-pro',
-    //     ws: false,
-    //     changeOrigin: true
-    //   }
-    // }
+    port: process.env.DEV_PORT || 8000
   },
 
   // disable source map in production
@@ -116,7 +108,7 @@ module.exports = {
   transpileDependencies: []
 }
 
-function getAntdSerials (color) {
+function getAntdSerials(color) {
   // 淡化（即less的tint）
   const lightens = new Array(9).fill().map((t, i) => {
     return ThemeColorReplacer.varyColor.lighten(color, i / 10)

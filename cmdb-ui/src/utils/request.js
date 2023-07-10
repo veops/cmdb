@@ -1,8 +1,12 @@
+/* eslint-dsiable */
 import Vue from 'vue'
 import axios from 'axios'
 import store from '@/store'
 import { VueAxios } from './axios'
-import { ACCESS_TOKEN } from '@/store/mutation-types'
+import config from '@/config/setting'
+import message from 'ant-design-vue/es/message'
+import notification from 'ant-design-vue/es/notification'
+import { ACCESS_TOKEN } from '@/store/global/mutation-types'
 
 // 创建 axios 实例
 const service = axios.create({
@@ -13,9 +17,43 @@ const service = axios.create({
 })
 
 const err = (error) => {
+  console.log(error)
+  const reg = /5\d{2}/g
+  if (error.response && reg.test(error.response.status)) {
+    message.error('服务端未知错误, 请联系管理员！')
+  } else if (error.response.status === 412) {
+    let seconds = 5
+    notification.warning({
+      key: 'notification',
+      message: 'WARNING',
+      description:
+        '修改已提交，请等待审核（5s）',
+      duration: 5,
+    })
+    let interval = setInterval(() => {
+      seconds -= 1
+      if (seconds === 0) {
+        clearInterval(interval)
+        interval = null
+        return
+      }
+      notification.warning({
+        key: 'notification',
+        message: 'WARNING',
+        description:
+          `修改已提交，请等待审核（${seconds}s）`,
+        duration: seconds
+      })
+    }, 1000)
+  } else if (error.config.url === '/api/v0.1/ci_types/can_define_computed' || error.config.isShowMessage === false) {
+  } else {
+    const errorMsg = ((error.response || {}).data || {}).message || '出现错误，请稍后再试'
+    message.error(`${errorMsg}`)
+  }
   if (error.response) {
-    if (error.response.status === 401) {
-      store.dispatch('Logout')
+    console.log(error.config.url)
+    if (error.response.status === 401 && config.useSSO) {
+      store.dispatch('Login')
     }
   }
   return Promise.reject(error)
@@ -37,7 +75,7 @@ service.interceptors.response.use((response) => {
 
 const installer = {
   vm: {},
-  install (Vue) {
+  install(Vue) {
     Vue.use(VueAxios, service)
   }
 }

@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 """The app module, containing the app factory function."""
+import datetime
+import decimal
 import logging
 import os
 import sys
 from inspect import getmembers
 from logging.handlers import RotatingFileHandler
 
-from api.flask_cas import CAS
 from flask import Flask
 from flask import make_response, jsonify
 from flask.blueprints import Blueprint
 from flask.cli import click
+from flask.json import JSONEncoder
 
-import api.views
+import api.views.entry
 from api.extensions import (
     bcrypt,
     cors,
@@ -22,9 +24,10 @@ from api.extensions import (
     migrate,
     celery,
     rd,
-    es
+    es,
 )
-from .models.acl import User
+from api.flask_cas import CAS
+from api.models.acl import User
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir)
@@ -34,7 +37,7 @@ API_PACKAGE = "api"
 @login_manager.user_loader
 def load_user(user_id):
     """Load user by ID."""
-    return User.get_by(uid=int(user_id), first=True, to_dict=False)
+    return User.get_by_id(int(user_id))
 
 
 class ReverseProxy(object):
@@ -72,22 +75,57 @@ class ReverseProxy(object):
         return self.app(environ, start_response)
 
 
+class MyJSONEncoder(JSONEncoder):
+    def default(self, o):
+        if isinstance(o, (decimal.Decimal, datetime.date, datetime.time)):
+            return str(o)
+
+        if isinstance(o, datetime.datetime):
+            return o.strftime('%Y-%m-%d %H:%M:%S')
+
+        return o
+
+
+def create_acl_app(config_object="settings"):
+    app = Flask(__name__.split(".")[0])
+    app.config.from_object(config_object)
+
+    register_extensions(app)
+
+    return app
+
+
 def create_app(config_object="settings"):
     """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
 
     :param config_object: The configuration object to use.
     """
     app = Flask(__name__.split(".")[0])
+
     app.config.from_object(config_object)
+    app.json_encoder = MyJSONEncoder
+    configure_logger(app)
     register_extensions(app)
     register_blueprints(app)
     register_error_handlers(app)
     register_shell_context(app)
     register_commands(app)
-    configure_logger(app)
     CAS(app)
     app.wsgi_app = ReverseProxy(app.wsgi_app)
+    configure_upload_dir(app)
+
     return app
+
+
+def configure_upload_dir(app):
+    upload_dir = app.config.get('UPLOAD_DIRECTORY', 'uploaded_files')
+    common_setting_path = os.path.join(HERE, upload_dir)
+    for path in [common_setting_path]:
+        if not os.path.exists(path):
+            app.logger.warning(f"{path}, not exist, create...")
+            os.makedirs(path)
+
+    app.config['UPLOAD_DIRECTORY_FULL'] = common_setting_path
 
 
 def register_extensions(app):
@@ -99,13 +137,13 @@ def register_extensions(app):
     login_manager.init_app(app)
     migrate.init_app(app, db)
     rd.init_app(app)
-    if app.config.get("USE_ES"):
+    if app.config.get('USE_ES'):
         es.init_app(app)
     celery.conf.update(app.config)
 
 
 def register_blueprints(app):
-    for item in getmembers(api.views):
+    for item in getmembers(api.views.entry):
         if item[0].startswith("blueprint") and isinstance(item[1], Blueprint):
             app.register_blueprint(item[1])
 
@@ -118,10 +156,16 @@ def register_error_handlers(app):
         import traceback
         app.logger.error(traceback.format_exc())
         error_code = getattr(error, "code", 500)
-        return make_response(jsonify(message=str(error)), error_code)
+        if not str(error_code).isdigit():
+            error_code = 400
+        if error_code != 500:
+            return make_response(jsonify(message=str(error)), error_code)
+        else:
+            return make_response(jsonify(message=traceback.format_exc(-1)), error_code)
 
     for errcode in app.config.get("ERROR_CODES") or [400, 401, 403, 404, 405, 500, 502]:
         app.errorhandler(errcode)(render_error)
+
     app.handle_exception = render_error
 
 

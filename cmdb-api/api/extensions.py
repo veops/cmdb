@@ -14,7 +14,7 @@ from api.lib.utils import RedisHandler
 
 bcrypt = Bcrypt()
 login_manager = LoginManager()
-db = SQLAlchemy()
+db = SQLAlchemy(session_options={"autoflush": False})
 migrate = Migrate()
 cache = Cache()
 celery = Celery()

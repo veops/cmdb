@@ -1,0 +1,44 @@
+@border-radius-base: 2px; // 组件/浮层圆角
+@primary-color: #2f54eb; // 全局主色
+
+// @layout-header-background: #1a3652;
+@layout-header-background: #fff;
+@layout-header-height: 40px;
+@layout-header-icon-height: 34px;
+@layout-header-font-color: #020000;
+@layout-header-font-selected-color: #2857bc;
+
+//dark
+@layout-background-color: #182132;
+@layout-background-color-light: #262f40;
+//light
+@layout-background-light-color: #fafafa;
+@layout-background-light-color-light: #f0f0f0;
+
+#custom_colors() {
+  color_1: #2f54eb;
+  color_2: #f0f5ff;
+  color_3: #D2E2FF;
+}
+
+.ops_display_wrapper(@backgroundColor:#f0f5ff) {
+  cursor: pointer;
+  padding: 5px 8px;
+  background-color: @backgroundColor;
+  border-radius: 5px;
+  height: 30px;
+  color: rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+}
+
+.ops_popover_item() {
+  cursor: pointer;
+  padding: 5px 10px;
+  &:hover {
+    background-color: #custom_colors[color_2];
+  }
+}
+.ops_popover_item_selected() {
+  background-color: #custom_colors[color_2];
+  color: #custom_colors[color_1];
+}
