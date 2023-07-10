@@ -52,8 +52,10 @@
 
 ### 更多功能
 
-
 > 也欢迎移步[维易科技官网](https://www.veops.cn)，发现更多免费运维系统。
+
+## 推荐项目
+[Spug - 开源轻量自动化运维平台](https://github.com/openspug/spug)
 
 安装
 ----
