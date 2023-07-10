@@ -32,7 +32,7 @@ export default {
   },
   methods: {
     handleToHome () {
-      this.$router.push({ name: 'cmdb_preference' })
+      this.$router.push('/')
     }
   }
 }

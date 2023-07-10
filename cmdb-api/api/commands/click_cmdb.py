@@ -1,7 +1,10 @@
 # -*- coding:utf-8 -*-
 
 
+import copy
+import datetime
 import json
+import time
 
 import click
 from flask import current_app
@@ -10,6 +13,7 @@ from flask.cli import with_appcontext
 import api.lib.cmdb.ci
 from api.extensions import db
 from api.extensions import rd
+from api.lib.cmdb.ci_type import CITypeTriggerManager
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import REDIS_PREFIX_CI
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
@@ -28,12 +32,13 @@ from api.models.acl import ResourceType
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
 from api.models.cmdb import CIType
+from api.models.cmdb import CITypeTrigger
 from api.models.cmdb import PreferenceRelationView
 
 
 @click.command()
 @with_appcontext
-def init_cache():
+def cmdb_init_cache():
     db.session.remove()
 
     if current_app.config.get("USE_ES"):
@@ -92,7 +97,7 @@ def init_cache():
 
 @click.command()
 @with_appcontext
-def init_acl():
+def cmdb_init_acl():
     _app = AppCache.get('cmdb') or App.create(name='cmdb')
     app_id = _app.id
 
@@ -173,7 +178,6 @@ def add_user(user, password, mail, is_admin):
     assert user is not None
     assert password is not None
     assert mail is not None
-    print((user, password, is_admin))
     UserCRUD.add(username=user, password=password, email=mail, is_admin=is_admin)
 
 
@@ -195,3 +199,67 @@ def del_user(user):
 
     u = User.get_by(username=user, first=True, to_dict=False)
     u and UserCRUD.delete(u.uid)
+
+
+@click.command()
+@with_appcontext
+def cmdb_counter():
+    from api.lib.cmdb.cache import CMDBCounterCache
+
+    while True:
+        try:
+            db.session.remove()
+
+            CMDBCounterCache.reset()
+        except:
+            import traceback
+            print(traceback.format_exc())
+
+        time.sleep(60)
+
+
+@click.command()
+@with_appcontext
+def cmdb_trigger():
+    current_day = datetime.datetime.today().strftime("%Y-%m-%d")
+    trigger2cis = dict()
+    trigger2completed = dict()
+
+    i = 0
+    while True:
+        db.session.remove()
+        if datetime.datetime.today().strftime("%Y-%m-%d") != current_day:
+            trigger2cis = dict()
+            trigger2completed = dict()
+            current_day = datetime.datetime.today().strftime("%Y-%m-%d")
+
+        if i == 360 or i == 0:
+            i = 0
+            try:
+                triggers = CITypeTrigger.get_by(to_dict=False)
+
+                for trigger in triggers:
+                    ready_cis = CITypeTriggerManager.waiting_cis(trigger)
+                    if trigger.id not in trigger2cis:
+                        trigger2cis[trigger.id] = (trigger, ready_cis)
+                    else:
+                        cur = trigger2cis[trigger.id]
+                        cur_ci_ids = {i.ci_id for i in cur[1]}
+                        trigger2cis[trigger.id] = (trigger, cur[1] + [i for i in ready_cis if i.ci_id not in cur_ci_ids
+                                                                      and i.ci_id not in trigger2completed[trigger.id]])
+
+            except Exception as e:
+                print(e)
+
+        for tid in trigger2cis:
+            trigger, cis = trigger2cis[tid]
+            for ci in copy.deepcopy(cis):
+                if CITypeTriggerManager.trigger_notify(trigger, ci):
+                    trigger2completed.setdefault(trigger.id, set()).add(ci.ci_id)
+
+                    for _ci in cis:
+                        if _ci.ci_id == ci.ci_id:
+                            cis.remove(_ci)
+
+        i += 1
+        time.sleep(10)

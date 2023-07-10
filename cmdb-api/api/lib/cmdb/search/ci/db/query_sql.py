@@ -2,7 +2,6 @@
 
 from __future__ import unicode_literals
 
-
 QUERY_CIS_BY_VALUE_TABLE = """
     SELECT attr.name AS attr_name,
           attr.alias AS attr_alias,
@@ -58,9 +57,51 @@ QUERY_CI_BY_ATTR_NAME = """
       AND {0}.value {2}
 """
 
+QUERY_CI_BY_ID = """
+    SELECT c_cis.id as ci_id
+    FROM c_cis
+    WHERE c_cis.id={}
+"""
+
 QUERY_CI_BY_TYPE = """
     SELECT c_cis.id AS ci_id
     FROM c_cis
     WHERE c_cis.type_id in ({0})
 """
 
+QUERY_UNION_CI_ATTRIBUTE_IS_NULL = """
+    SELECT *
+    FROM (
+      SELECT c_cis.id AS ci_id
+      FROM c_cis
+      WHERE c_cis.type_id IN ({0})
+    ) {3}
+      LEFT JOIN (
+        SELECT {1}.ci_id
+        FROM {1}
+        WHERE {1}.attr_id = {2}
+          AND {1}.value LIKE "%"
+      ) {4} USING (ci_id)
+    WHERE {4}.ci_id IS NULL
+"""
+
+QUERY_CI_BY_NO_ATTR = """
+SELECT *
+FROM 
+    (SELECT c_value_index_texts.ci_id
+    FROM c_value_index_texts
+    WHERE c_value_index_texts.value LIKE "{0}"
+    UNION
+    SELECT c_value_index_integers.ci_id
+    FROM c_value_index_integers
+    WHERE c_value_index_integers.value LIKE "{0}"
+    UNION
+    SELECT c_value_index_floats.ci_id
+    FROM c_value_index_floats
+    WHERE c_value_index_floats.value LIKE "{0}"
+    UNION
+    SELECT c_value_index_datetime.ci_id
+    FROM c_value_index_datetime
+    WHERE c_value_index_datetime.value LIKE "{0}") AS {1}
+GROUP BY  {1}.ci_id
+"""

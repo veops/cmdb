@@ -1,6 +1,6 @@
 import api from './index'
 import { axios } from '@/utils/request'
-import config from '@/config/defaultSettings'
+import config from '@/config/setting'
 /**
  * login func
  * parameter: {
@@ -12,15 +12,19 @@ import config from '@/config/defaultSettings'
  * @param parameter
  * @returns {*}
  */
-export function login (parameter) {
-  return axios({
-    url: api.Login,
-    method: 'post',
-    data: parameter
-  })
+export function login(data) {
+  if (config.useSSO) {
+    window.location.href = config.ssoLoginUrl
+  } else {
+    return axios({
+      url: api.Login,
+      method: 'POST',
+      data: data
+    })
+  }
 }
 
-export function getSmsCaptcha (parameter) {
+export function getSmsCaptcha(parameter) {
   return axios({
     url: api.SendSms,
     method: 'post',
@@ -28,7 +32,7 @@ export function getSmsCaptcha (parameter) {
   })
 }
 
-export function getInfo () {
+export function getInfo() {
   return axios({
     url: api.UserInfo,
     method: 'get',
@@ -38,11 +42,9 @@ export function getInfo () {
   })
 }
 
-export function logout () {
-  console.log('logout........', config.useSSO)
+export function logout() {
   if (config.useSSO) {
-    window.location.href = api.Logout
-    return Promise.resolve()
+    window.location.replace(api.Logout)
   } else {
     return axios({
       url: api.Logout,
@@ -58,10 +60,18 @@ export function logout () {
  * get user 2step code open?
  * @param parameter {*}
  */
-export function get2step (parameter) {
+export function get2step(parameter) {
   return axios({
     url: api.twoStepCode,
     method: 'post',
     data: parameter
+  })
+}
+
+export function getAllUsers(params) {
+  return axios({
+    url: '/v1/acl/users',
+    method: 'GET',
+    params
   })
 }

@@ -1,0 +1,84 @@
+.ci-detail-relation-topo {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  .butterfly-wrapper {
+    .butterflies-link:hover {
+      stroke: #bfbfbf;
+    }
+    .butterflie-circle-endpoint {
+      width: 0;
+      height: 0;
+      border: none;
+    }
+    .ci-detail-relation-topo-node {
+      position: absolute;
+      background: #fff;
+      border: 1px solid #d9d9d9;
+      border-radius: 10px;
+      padding: 4px 8px;
+      width: 100px;
+      text-align: center;
+      .title {
+        font-size: 16px;
+        color: #222;
+        width: calc(100% - 20px);
+        margin-left: 20px;
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .icon {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        left: 6px;
+        width: 16px;
+        height: 16px;
+      }
+      .icon-default {
+        background-color: #d3d3d3;
+        border-radius: 50%;
+        color: #fff;
+        line-height: 16px;
+        font-size: 12px;
+      }
+      .unique {
+        font-size: 12px;
+        position: absolute;
+        white-space: nowrap;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: -20px;
+      }
+      .add-icon-right,
+      .add-icon-left {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        &:hover {
+          color: #2f54eb;
+        }
+      }
+      .add-icon-right {
+        right: -20px;
+      }
+      .add-icon-left {
+        left: -20px;
+      }
+    }
+    .root {
+      width: 100px;
+      background: #2f54eb;
+      border: none;
+      border-radius: 5px;
+      font-weight: 500;
+      padding: 4px 8px;
+      .title {
+        color: #fff;
+      }
+    }
+  }
+}

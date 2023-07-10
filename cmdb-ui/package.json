@@ -1,6 +1,6 @@
 {
-  "name": "vue-antd-pro",
-  "version": "3.0.0",
+  "name": "oneops",
+  "version": "0.0.9",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -8,144 +8,76 @@
     "build:preview": "vue-cli-service build --mode preview",
     "lint": "vue-cli-service lint",
     "lint:nofix": "vue-cli-service lint --no-fix",
-    "test:unit": "vue-cli-service test:unit",
-    "postinstall": "opencollective-postinstall"
+    "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "@antv/data-set": "^0.10.2",
-    "@handsontable-pro/vue": "^3.1.1",
-    "@handsontable/vue": "^4.1.1",
-    "ant-design-vue": "^1.6.2",
-    "axios": "^0.19.0",
-    "core-js": "^3.1.2",
-    "enquire.js": "^2.1.6",
-    "handsontable": "^7.2.2",
-    "handsontable-pro": "^6.2.3",
-    "http-proxy": "^1.18.1",
+    "@antv/data-set": "^0.11.8",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.18.6",
+    "@babel/plugin-proposal-optional-chaining": "^7.18.9",
+    "@babel/plugin-syntax-import-meta": "^7.10.4",
+    "@riophae/vue-treeselect": "^0.4.0",
+    "@vue/composition-api": "^1.7.1",
+    "ant-design-vue": "^1.6.5",
+    "axios": "0.18.0",
+    "babel-eslint": "^8.2.2",
+    "butterfly-dag": "^4.3.26",
+    "codemirror": "^5.65.13",
+    "core-js": "^3.31.0",
+    "echarts": "^5.3.2",
+    "element-ui": "^2.15.10",
+    "exceljs": "^4.3.0",
+    "html2canvas": "^1.0.0-rc.5",
+    "is-buffer": "^2.0.5",
+    "jquery": "^3.6.0",
     "js-cookie": "^2.2.0",
     "json2csv": "^4.5.2",
     "lodash.get": "^4.4.2",
     "lodash.pick": "^4.4.0",
     "md5": "^2.2.1",
     "moment": "^2.24.0",
-    "node-fetch": "^2.6.1",
-    "node-forge": "^0.10.0",
     "nprogress": "^0.2.0",
-    "serialize-javascript": "^3.1.0",
-    "vis-network": "^6.4.4",
-    "viser-vue": "^2.3.3",
-    "vue": "^2.6.10",
-    "vue-clipboard2": "^0.2.1",
-    "vue-cropper": "0.4.9",
-    "vue-i18n": "^8.15.3",
-    "vue-json-excel": "^0.2.98",
+    "relation-graph": "^1.1.0",
+    "sortablejs": "1.9.0",
+    "viser-vue": "^2.4.8",
+    "vue": "2.6.11",
+    "vue-clipboard2": "^0.3.3",
+    "vue-codemirror": "^4.0.6",
+    "vue-cropper": "^0.6.2",
+    "vue-grid-layout": "2.3.12",
+    "vue-infinite-scroll": "^2.0.2",
+    "vue-json-editor": "^1.4.3",
     "vue-ls": "^3.2.1",
-    "vue-quill-editor": "^3.0.6",
     "vue-router": "^3.1.2",
     "vue-svg-component-runtime": "^1.0.1",
+    "vue-template-compiler": "2.6.11",
     "vuedraggable": "^2.23.0",
-    "vuex": "^3.1.2",
-    "wangeditor": "^3.1.1",
-    "xlsx": "latest",
-    "yarn": "^1.22.0"
+    "vuex": "^3.1.1",
+    "vxe-table": "3.6.9",
+    "vxe-table-plugin-export-xlsx": "^3.0.4",
+    "xe-utils": "3",
+    "xlsx": "0.15.0",
+    "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {
-    "@ant-design/colors": "^3.2.1",
-    "@vue/cli-plugin-babel": "^4.0.4",
-    "@vue/cli-plugin-eslint": "^4.0.4",
-    "@vue/cli-plugin-router": "^4.0.4",
-    "@vue/cli-plugin-unit-jest": "^4.0.4",
-    "@vue/cli-plugin-vuex": "^4.0.4",
-    "@vue/cli-service": "^4.0.4",
+    "@ant-design/colors": "^3.2.2",
+    "@babel/polyfill": "^7.2.5",
+    "@vue/cli-plugin-babel": "4.5.17",
+    "@vue/cli-plugin-eslint": "^4.0.5",
+    "@vue/cli-plugin-unit-jest": "^4.0.5",
+    "@vue/cli-service": "^4.0.5",
     "@vue/eslint-config-standard": "^4.0.0",
-    "@vue/test-utils": "^1.0.0-beta.29",
-    "babel-eslint": "^10.0.1",
-    "babel-plugin-import": "^1.12.2",
+    "@vue/test-utils": "^1.0.0-beta.30",
+    "babel-core": "7.0.0-bridge.0",
+    "babel-jest": "^23.6.0",
+    "babel-plugin-import": "^1.11.0",
     "babel-plugin-transform-remove-console": "^6.9.4",
-    "eslint": "^5.16.0",
+    "eslint": "^5.8.0",
     "eslint-plugin-html": "^5.0.0",
-    "eslint-plugin-vue": "^5.2.3",
-    "less": "^3.0.4",
-    "less-loader": "^5.0.0",
-    "opencollective": "^1.0.3",
-    "opencollective-postinstall": "^2.0.2",
+    "eslint-plugin-vue": "^5.0.0",
+    "less": "^3.8.1",
+    "less-loader": "^4.1.0",
+    "true-case-path": "^2.2.1",
     "vue-svg-icon-loader": "^2.1.1",
-    "vue-template-compiler": "^2.6.10",
     "webpack-theme-color-replacer": "^1.2.17"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/strongly-recommended",
-      "@vue/standard"
-    ],
-    "parserOptions": {
-      "parser": "babel-eslint"
-    },
-    "rules": {
-      "generator-star-spacing": "off",
-      "no-mixed-operators": 0,
-      "vue/max-attributes-per-line": [
-        2,
-        {
-          "singleline": 5,
-          "multiline": {
-            "max": 1,
-            "allowFirstLine": false
-          }
-        }
-      ],
-      "vue/attribute-hyphenation": 0,
-      "vue/html-self-closing": 0,
-      "vue/component-name-in-template-casing": 0,
-      "vue/html-closing-bracket-spacing": 0,
-      "vue/singleline-html-element-content-newline": 0,
-      "vue/no-unused-components": 0,
-      "vue/multiline-html-element-content-newline": 0,
-      "vue/no-use-v-if-with-v-for": 0,
-      "vue/html-closing-bracket-newline": 0,
-      "vue/no-parsing-error": 0,
-      "no-console": 0,
-      "no-tabs": 0,
-      "quotes": [
-        2,
-        "single",
-        {
-          "avoidEscape": true,
-          "allowTemplateLiterals": true
-        }
-      ],
-      "semi": [
-        2,
-        "never",
-        {
-          "beforeStatementContinuationChars": "never"
-        }
-      ],
-      "no-delete-var": 2,
-      "prefer-const": [
-        2,
-        {
-          "ignoreReadBeforeAssign": false
-        }
-      ]
-    }
-  },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 10"
-  ],
-  "collective": {
-    "type": "opencollective",
-    "url": "https://opencollective.com/ant-design-pro-vue"
   }
 }

@@ -1,0 +1,48 @@
+.split-pane {
+  height: 100%;
+  display: flex;
+}
+
+.split-pane .pane-two {
+  flex: 1;
+}
+
+.split-pane .pane-trigger {
+  user-select: none;
+}
+
+.split-pane.row .pane-one {
+  width: 20%;
+  height: 100%;
+  // overflow-y: auto;
+}
+
+.split-pane.column .pane {
+  width: 100%;
+}
+
+.split-pane.row .pane-trigger {
+  width: 8px;
+  height: 100%;
+  cursor: e-resize;
+  background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAPCAYAAADDNm69AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAAeSURBVBhXY/4PBMzMzA379u1rANFMDGhgGAswMAAAn6EH6K9ktYAAAAAASUVORK5CYII=')
+    1px 50% no-repeat #f0f2f5;
+}
+
+.split-pane .collapse-btn {
+  width: 25px;
+  height: 70px;
+  position: absolute;
+  right: 8px;
+  top: calc(50% - 35px);
+  background-color: #f0f2f5;
+  border-color: transparent;
+  border-radius: 8px 0px 0px 8px;
+  .anticon {
+    color: #7cb0fe;
+  }
+}
+
+.split-pane .spliter-wrap {
+  position: relative;
+}

@@ -4,11 +4,12 @@
       <div class="top">
         <div class="header">
           <a href="/">
-            <span class="title">CMDB</span>
+            <img src="~@/assets/logo.png" class="logo" alt="logo">
+            <span class="title">OneOps</span>
           </a>
         </div>
         <div class="desc">
-          {{ $t('login.subTitle') }}
+          自动化统一运维平台
         </div>
       </div>
 

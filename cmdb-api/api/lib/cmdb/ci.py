@@ -1,32 +1,44 @@
-# -*- coding:utf-8 -*- 
+# -*- coding:utf-8 -*-
 
 
+import copy
 import datetime
 import json
 
 from flask import abort
 from flask import current_app
+from flask import g
 from werkzeug.exceptions import BadRequest
 
 from api.extensions import db
 from api.extensions import rd
 from api.lib.cmdb.cache import AttributeCache
+from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci_type import CITypeAttributeManager
 from api.lib.cmdb.ci_type import CITypeManager
+from api.lib.cmdb.ci_type import CITypeRelationManager
+from api.lib.cmdb.ci_type import CITypeUniqueConstraintManager
+from api.lib.cmdb.const import AttributeDefaultValueEnum
 from api.lib.cmdb.const import CMDB_QUEUE
+from api.lib.cmdb.const import ConstraintEnum
 from api.lib.cmdb.const import ExistPolicy
 from api.lib.cmdb.const import OperateType
 from api.lib.cmdb.const import REDIS_PREFIX_CI
+from api.lib.cmdb.const import ResourceTypeEnum, PermEnum
 from api.lib.cmdb.const import RetKey
 from api.lib.cmdb.history import AttributeHistoryManger
 from api.lib.cmdb.history import CIRelationHistoryManager
-from api.lib.cmdb.search.ci.db.query_sql import QUERY_CIS_BY_IDS
-from api.lib.cmdb.search.ci.db.query_sql import QUERY_CIS_BY_VALUE_TABLE
+from api.lib.cmdb.perms import CIFilterPermsCRUD
+from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.utils import TableMap
 from api.lib.cmdb.utils import ValueTypeMap
 from api.lib.cmdb.value import AttributeValueManager
 from api.lib.decorator import kwargs_required
+from api.lib.perm.acl.acl import ACLManager
+from api.lib.perm.acl.acl import is_app_admin
+from api.lib.perm.acl.acl import validate_permission
+from api.lib.utils import Lock
 from api.lib.utils import handle_arg_list
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
@@ -46,26 +58,35 @@ class CIManager(object):
         pass
 
     @staticmethod
+    def get_by_id(ci_id):
+        return CI.get_by_id(ci_id)
+
+    @staticmethod
     def get_type_name(ci_id):
-        ci = CI.get_by_id(ci_id) or abort(404, "CI <{0}> is not existed".format(ci_id))
+        ci = CI.get_by_id(ci_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(ci_id)))
         return CITypeCache.get(ci.type_id).name
 
     @staticmethod
+    def get_type(ci_id):
+        ci = CI.get_by_id(ci_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(ci_id)))
+        return CITypeCache.get(ci.type_id)
+
+    @staticmethod
     def confirm_ci_existed(ci_id):
-        return CI.get_by_id(ci_id) or abort(404, "CI <{0}> is not existed".format(ci_id))
+        return CI.get_by_id(ci_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(ci_id)))
 
     @classmethod
     def get_ci_by_id(cls, ci_id, ret_key=RetKey.NAME, fields=None, need_children=True):
         """
-        
-        :param ci_id: 
+
+        :param ci_id:
         :param ret_key: name, id, or alias
         :param fields:  attribute list
-        :param need_children: 
-        :return: 
+        :param need_children:
+        :return:
         """
 
-        ci = CI.get_by_id(ci_id) or abort(404, "CI <{0}> is not existed".format(ci_id))
+        ci = CI.get_by_id(ci_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(ci_id)))
 
         res = dict()
 
@@ -83,19 +104,63 @@ class CIManager(object):
 
         return res
 
-    @staticmethod
-    def get_ci_by_id_from_db(ci_id, ret_key=RetKey.NAME, fields=None, need_children=True, use_master=False):
-        """
-        
-        :param ci_id: 
-        :param ret_key: name, id or alias
-        :param fields: list
-        :param need_children: 
-        :param use_master: whether to use master db
-        :return: 
+    @classmethod
+    def valid_ci_only_read(cls, ci):
+        if is_app_admin("cmdb"):
+            return
+
+        validate_permission(CIManager.get_type_name(ci.id), ResourceTypeEnum.CI, PermEnum.READ, "cmdb")
+
+        acl = ACLManager('cmdb')
+        res = acl.get_resources(ResourceTypeEnum.CI_FILTER)
+
+        if res and ci.type_id in CIFilterPermsCRUD().get_by_ids(list(map(int, [i['name'] for i in res]))):
+            return abort(403, ErrFormat.no_permission2)
+
+    @classmethod
+    def _valid_ci_for_no_read(cls, ci, ci_type=None):
+        type_id = ci.type_id if ci else ci_type.id
+
+        acl = ACLManager('cmdb')
+        res = acl.get_resources(ResourceTypeEnum.CI_FILTER)
+
+        type2filters = CIFilterPermsCRUD().get_by_ids(list(map(int, [i['name'] for i in res])), type_id=type_id)
+        if res and type_id in type2filters:
+            if type2filters[type_id].get('ci_filter') and ci:
+                from api.lib.cmdb.search import SearchError
+                from api.lib.cmdb.search.ci import search
+
+                query = "_id:{},{}".format(ci.id, type2filters[type_id].get('ci_filter'))
+                s = search(query)
+                try:
+                    response, _, _, _, _, _ = s.search()
+                except SearchError as e:
+                    current_app.logger.warning(e)
+                    return abort(400, str(e))
+
+                if not response:
+                    return abort(403, ErrFormat.ci_filter_perm_ci_no_permission)
+
+            return type2filters[type_id].get('attr_filter') or []
+
+    @classmethod
+    def get_ci_by_id_from_db(cls, ci_id, ret_key=RetKey.NAME, fields=None, need_children=True, use_master=False,
+                             valid=False):
         """
 
-        ci = CI.get_by_id(ci_id) or abort(404, "CI <{0}> is not existed".format(ci_id))
+        :param ci_id:
+        :param ret_key: name, id or alias
+        :param fields: list
+        :param need_children:
+        :param use_master: whether to use master db
+        :param valid:
+        :return:
+        """
+
+        ci = CI.get_by_id(ci_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(ci_id)))
+
+        if valid:
+            cls.valid_ci_only_read(ci)
 
         res = dict()
 
@@ -115,8 +180,9 @@ class CIManager(object):
                                                        use_master=use_master)
         res.update(_res)
 
-        res['type_id'] = ci_type.id
-        res['ci_id'] = ci_id
+        res['_type'] = ci_type.id
+        res['ci_type_alias'] = ci_type.alias
+        res['_id'] = ci_id
 
         return res
 
@@ -134,19 +200,33 @@ class CIManager(object):
 
         return numfound, page, res
 
+    @classmethod
+    def get_ad_statistics(cls):
+        res = CI.get_by(to_dict=False)
+        result = dict()
+        for i in res:
+            result.setdefault(i.type_id, dict(total=0, auto_discovery=0))
+            result[i.type_id]['total'] += 1
+            if i.is_auto_discovery:
+                result[i.type_id]['auto_discovery'] += 1
+
+        return result
+
     @staticmethod
-    def ci_is_exist(unique_key, unique_value):
+    def ci_is_exist(unique_key, unique_value, type_id):
         """
-        
+
         :param unique_key: is a attribute
-        :param unique_value: 
-        :return: 
+        :param unique_value:
+        :param type_id:
+        :return:
         """
-        value_table = TableMap(attr_name=unique_key.name).table
-        unique = value_table.get_by(attr_id=unique_key.id,
-                                    value=unique_value,
-                                    to_dict=False,
-                                    first=True)
+        value_table = TableMap(attr=unique_key).table
+
+        unique = db.session.query(value_table).join(CI, CI.id == value_table.ci_id).filter(
+            value_table.attr_id == unique_key.id).filter(value_table.value == unique_value).filter(
+            CI.type_id == type_id).filter(CI.deleted.is_(False)).filter(value_table.deleted.is_(False)).first()
+
         if unique:
             return CI.get_by_id(unique.ci_id)
 
@@ -155,82 +235,218 @@ class CIManager(object):
         ci = CI.get_by_id(ci_id)
         ci.delete()  # TODO: soft delete
 
+    @staticmethod
+    def _valid_unique_constraint(type_id, ci_dict, ci_id=None):
+        unique_constraints = CITypeUniqueConstraintManager.get_by_type_id(type_id)
+        if not unique_constraints:
+            return
+
+        attr_ids = []
+        for i in unique_constraints:
+            attr_ids.extend(i.attr_ids)
+
+        attrs = [AttributeCache.get(i) for i in list(set(attr_ids))]
+        id2name = {i.id: i.name for i in attrs if i}
+        not_existed_fields = list(set(id2name.values()) - set(ci_dict.keys()))
+        if not_existed_fields and ci_id is not None:
+            ci_dict = copy.deepcopy(ci_dict)
+            ci_dict.update(AttributeValueManager().get_attr_values(not_existed_fields, ci_id))
+
+        for constraint in unique_constraints:
+            ci_ids = None
+            for attr_id in constraint.attr_ids:
+                value_table = TableMap(attr_name=id2name[attr_id]).table
+
+                _ci_ids = set([i.ci_id for i in value_table.get_by(attr_id=attr_id,
+                                                                   to_dict=False,
+                                                                   value=ci_dict.get(id2name[attr_id]) or None)])
+                if ci_ids is None:
+                    ci_ids = _ci_ids
+                else:
+                    ci_ids &= _ci_ids
+
+            if ci_ids - (ci_id and {ci_id} or set()):
+                return abort(400, ErrFormat.unique_constraint.format(
+                    " - ".join([id2name[i] for i in constraint.attr_ids])))
+
+    @staticmethod
+    def _auto_inc_id(attr):
+        db.session.remove()
+
+        value_table = TableMap(attr_name=attr.name).table
+        with Lock("auto_inc_id_{}".format(attr.name), need_lock=True):
+            max_v = value_table.get_by(attr_id=attr.id, only_query=True).order_by(
+                getattr(value_table, 'value').desc()).first()
+            if max_v is not None:
+                return int(max_v.value) + 1
+
+            return 1
+
     @classmethod
-    def add(cls, ci_type_name, exist_policy=ExistPolicy.REPLACE, _no_attribute_policy=ExistPolicy.IGNORE, **ci_dict):
+    def add(cls, ci_type_name,
+            exist_policy=ExistPolicy.REPLACE,
+            _no_attribute_policy=ExistPolicy.IGNORE,
+            is_auto_discovery=False,
+            _is_admin=False,
+            **ci_dict):
         """
-        
-        :param ci_type_name: 
+
+        :param ci_type_name:
         :param exist_policy: replace or reject or need
         :param _no_attribute_policy: ignore or reject
-        :param ci_dict: 
-        :return: 
+        :param is_auto_discovery: default is False
+        :param _is_admin: default is False
+        :param ci_dict:
+        :return:
         """
-
+        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ci_type = CITypeManager.check_is_existed(ci_type_name)
 
-        unique_key = AttributeCache.get(ci_type.unique_id) or abort(400, 'illegality unique attribute')
+        unique_key = AttributeCache.get(ci_type.unique_id) or abort(
+            400, ErrFormat.unique_value_not_found.format("unique_id={}".format(ci_type.unique_id)))
 
         unique_value = ci_dict.get(unique_key.name)
         unique_value = unique_value or ci_dict.get(unique_key.alias)
         unique_value = unique_value or ci_dict.get(unique_key.id)
-        unique_value = unique_value or abort(400, '{0} missing'.format(unique_key.name))
+        unique_value = unique_value or abort(400, ErrFormat.unique_key_required.format(unique_key.name))
 
-        existed = cls.ci_is_exist(unique_key, unique_value)
-        if existed is not None:
-            if exist_policy == ExistPolicy.REJECT:
-                return abort(400, 'CI is already existed')
-            if existed.type_id != ci_type.id:
-                existed.update(type_id=ci_type.id)
-            ci = existed
-        else:
-            if exist_policy == ExistPolicy.NEED:
-                return abort(404, 'CI <{0}> does not exist'.format(unique_value))
-            ci = CI.create(type_id=ci_type.id)
+        attrs = CITypeAttributesCache.get2(ci_type_name)
+        ci_type_attrs_name = {attr.name: attr for _, attr in attrs}
+        ci_type_attrs_alias = {attr.alias: attr for _, attr in attrs}
+        ci_attr2type_attr = {type_attr.attr_id: type_attr for type_attr, _ in attrs}
 
-        ci_type_attrs_name = [attr["name"] for attr in CITypeAttributeManager().get_attributes_by_type_id(ci_type.id)]
-        value_manager = AttributeValueManager()
-        for p, v in ci_dict.items():
-            if p not in ci_type_attrs_name:
-                current_app.logger.warning('ci_type: {0} not has attribute {1}, please check!'.format(ci_type_name, p))
-                continue
+        ci = None
+        need_lock = g.user.username not in ("worker", "cmdb_agent", "agent")
+        with Lock(ci_type_name, need_lock=need_lock):
+            existed = cls.ci_is_exist(unique_key, unique_value, ci_type.id)
+            if existed is not None:
+                if exist_policy == ExistPolicy.REJECT:
+                    return abort(400, ErrFormat.ci_is_already_existed)
+
+                if existed.type_id != ci_type.id:
+                    existed.update(type_id=ci_type.id)
+                ci = existed
+            else:
+                if exist_policy == ExistPolicy.NEED:
+                    return abort(404, ErrFormat.ci_not_found.format("{}={}".format(unique_key.name, unique_value)))
+
+                from api.lib.cmdb.const import L_CI
+                if L_CI and len(CI.get_by(type_id=ci_type.id)) > L_CI * 2:
+                    return abort(400, ErrFormat.limit_ci.format(L_CI * 2))
+
+            limit_attrs = cls._valid_ci_for_no_read(ci, ci_type) if not _is_admin else {}
+
+            if existed is None:  # set default
+                for type_attr, attr in attrs:
+                    if attr.default and attr.default.get('default') is not None:
+                        if attr.default.get('default') and attr.default.get('default') in (
+                                AttributeDefaultValueEnum.CREATED_AT, AttributeDefaultValueEnum.UPDATED_AT):
+                            ci_dict[attr.name] = now
+                        elif attr.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID:
+                            ci_dict[attr.name] = cls._auto_inc_id(attr)
+                        elif ((attr.name not in ci_dict and attr.alias not in ci_dict) or (
+                                ci_dict.get(attr.name) is None and ci_dict.get(attr.alias) is None)):
+                            ci_dict[attr.name] = attr.default.get('default')
+
+                    if type_attr.is_required and (attr.name not in ci_dict and attr.alias not in ci_dict):
+                        return abort(400, ErrFormat.attribute_value_required.format(attr.name))
+            else:
+                for type_attr, attr in attrs:
+                    if attr.default and attr.default.get('default') == AttributeDefaultValueEnum.UPDATED_AT:
+                        ci_dict[attr.name] = now
+
+            computed_attrs = [attr.to_dict() for _, attr in attrs if attr.is_computed] or None
+
+            value_manager = AttributeValueManager()
+
+            if computed_attrs:
+                value_manager.handle_ci_compute_attributes(ci_dict, computed_attrs, ci)
+
+            cls._valid_unique_constraint(ci_type.id, ci_dict, ci and ci.id)
+
+            for k in ci_dict:
+                if k not in ci_type_attrs_name and k not in ci_type_attrs_alias and \
+                        _no_attribute_policy == ExistPolicy.REJECT:
+                    return abort(400, ErrFormat.attribute_not_found.format(k))
+
+                if limit_attrs and ci_type_attrs_name.get(k) not in limit_attrs and \
+                        ci_type_attrs_alias.get(k) not in limit_attrs:
+                    return abort(403, ErrFormat.ci_filter_perm_attr_no_permission.format(k))
+
+            ci_dict = {k: v for k, v in ci_dict.items() if k in ci_type_attrs_name or k in ci_type_attrs_alias}
+
+            key2attr = value_manager.valid_attr_value(ci_dict, ci_type.id, ci and ci.id,
+                                                      ci_type_attrs_name, ci_type_attrs_alias, ci_attr2type_attr)
+
             try:
-                value_manager.create_or_update_attr_value(p, v, ci, _no_attribute_policy)
+                ci = ci or CI.create(type_id=ci_type.id, is_auto_discovery=is_auto_discovery)
+                record_id = value_manager.create_or_update_attr_value2(ci, ci_dict, key2attr)
             except BadRequest as e:
                 if existed is None:
                     cls.delete(ci.id)
                 raise e
 
-        ci_cache.apply_async([ci.id], queue=CMDB_QUEUE)
+        if record_id:  # has change
+            ci_cache.apply_async([ci.id], queue=CMDB_QUEUE)
 
         return ci.id
 
-    def update(self, ci_id, **ci_dict):
+    def update(self, ci_id, _is_admin=False, **ci_dict):
+        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ci = self.confirm_ci_existed(ci_id)
-        
-        ci_type_attrs_name = [attr["name"] for attr in CITypeAttributeManager().get_attributes_by_type_id(ci.type_id)]
+
+        attrs = CITypeAttributesCache.get2(ci.type_id)
+        ci_type_attrs_name = {attr.name: attr for _, attr in attrs}
+        ci_attr2type_attr = {type_attr.attr_id: type_attr for type_attr, _ in attrs}
+        for _, attr in attrs:
+            if attr.default and attr.default.get('default') == AttributeDefaultValueEnum.UPDATED_AT:
+                ci_dict[attr.name] = now
+
+        computed_attrs = [attr.to_dict() for _, attr in attrs if attr.is_computed] or None
+
         value_manager = AttributeValueManager()
-        for p, v in ci_dict.items():
-            if p not in ci_type_attrs_name:
-                current_app.logger.warning('ci_type: {0} not has attribute {1}, please check!'.format(ci.type_id, p))
-                continue
+
+        if computed_attrs:
+            value_manager.handle_ci_compute_attributes(ci_dict, computed_attrs, ci)
+
+        limit_attrs = self._valid_ci_for_no_read(ci) if not _is_admin else {}
+
+        need_lock = g.user.username not in ("worker", "cmdb_agent", "agent")
+        with Lock(ci.ci_type.name, need_lock=need_lock):
+            self._valid_unique_constraint(ci.type_id, ci_dict, ci_id)
+
+            ci_dict = {k: v for k, v in ci_dict.items() if k in ci_type_attrs_name}
+            key2attr = value_manager.valid_attr_value(ci_dict, ci.type_id, ci.id, ci_type_attrs_name,
+                                                      ci_attr2type_attr=ci_attr2type_attr)
+            if limit_attrs:
+                for k in ci_dict:
+                    if k not in limit_attrs:
+                        return abort(403, ErrFormat.ci_filter_perm_attr_no_permission.format(k))
+
             try:
-                value_manager.create_or_update_attr_value(p, v, ci)
+                record_id = value_manager.create_or_update_attr_value2(ci, ci_dict, key2attr)
             except BadRequest as e:
                 raise e
 
-        ci_cache.apply_async([ci_id], queue=CMDB_QUEUE)
+        if record_id:  # has change
+            ci_cache.apply_async([ci_id], queue=CMDB_QUEUE)
 
     @staticmethod
     def update_unique_value(ci_id, unique_name, unique_value):
-        ci = CI.get_by_id(ci_id) or abort(404, "CI <{0}> is not found".format(ci_id))
+        ci = CI.get_by_id(ci_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(ci_id)))
 
         AttributeValueManager().create_or_update_attr_value(unique_name, unique_value, ci)
 
         ci_cache.apply_async([ci_id], queue=CMDB_QUEUE)
 
-    @staticmethod
-    def delete(ci_id):
-        ci = CI.get_by_id(ci_id) or abort(404, "CI <{0}> is not found".format(ci_id))
+    @classmethod
+    def delete(cls, ci_id):
+        ci = CI.get_by_id(ci_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(ci_id)))
+
+        cls._valid_ci_for_no_read(ci)
+
+        ci_dict = cls.get_cis_by_ids([ci_id])
+        ci_dict = ci_dict and ci_dict[0]
 
         attrs = CITypeAttribute.get_by(type_id=ci.type_id, to_dict=False)
         attr_names = set([AttributeCache.get(attr.attr_id).name for attr in attrs])
@@ -249,7 +465,7 @@ class CIManager(object):
 
         ci.delete()  # TODO: soft delete
 
-        AttributeHistoryManger.add(ci_id, [(None, OperateType.DELETE, None, None)])
+        AttributeHistoryManger.add(None, ci_id, [(None, OperateType.DELETE, ci_dict, None)], ci.type_id)
 
         ci_delete.apply_async([ci.id], queue=CMDB_QUEUE)
 
@@ -260,15 +476,15 @@ class CIManager(object):
         ci_type = CITypeManager().check_is_existed(ci_type)
 
         unique_key = AttributeCache.get(ci_type.unique_id)
-        value_table = TableMap(attr_name=unique_key.name).table
+        value_table = TableMap(attr=unique_key).table
 
         v = value_table.get_by(attr_id=unique_key.id,
                                value=unique_value,
                                to_dict=False,
                                first=True) \
-            or abort(404, "not found")
+            or abort(404, ErrFormat.not_found)
 
-        ci = CI.get_by_id(v.ci_id) or abort(404, "CI <{0}> is not found".format(v.ci_id))
+        ci = CI.get_by_id(v.ci_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(v.ci_id)))
 
         ci.update(heartbeat=datetime.datetime.now())
 
@@ -315,25 +531,38 @@ class CIManager(object):
         return numfound, result
 
     @staticmethod
-    def _get_cis_from_cache(ci_ids, ret_key=RetKey.NAME, fields=None):
+    def _get_cis_from_cache(ci_ids, ret_key=RetKey.NAME, fields=None, unique_required=False, excludes=None):
         res = rd.get(ci_ids, REDIS_PREFIX_CI)
         if res is not None and None not in res and ret_key == RetKey.NAME:
             res = list(map(json.loads, res))
-            if not fields:
+            if not fields and not excludes:
                 return res
-            else:
+            elif fields:
                 _res = []
                 for d in res:
                     _d = dict()
                     _d["_id"], _d["_type"] = d.get("_id"), d.get("_type")
                     _d["ci_type"] = d.get("ci_type")
-                    for field in fields:
+                    if unique_required:
+                        _d[d.get('unique')] = d.get(d.get('unique'))
+
+                    for field in fields + ['ci_type_alias', 'unique', 'unique_alias']:
                         _d[field] = d.get(field)
                     _res.append(_d)
                 return _res
+            else:
+                excludes = set(excludes)
+                for i in res:
+                    for e in excludes:
+                        i.pop(e, None)
+
+                return res
 
     @staticmethod
-    def _get_cis_from_db(ci_ids, ret_key=RetKey.NAME, fields=None, value_tables=None):
+    def _get_cis_from_db(ci_ids, ret_key=RetKey.NAME, fields=None, value_tables=None, excludes=None):
+        from api.lib.cmdb.search.ci.db.query_sql import QUERY_CIS_BY_IDS
+        from api.lib.cmdb.search.ci.db.query_sql import QUERY_CIS_BY_VALUE_TABLE
+
         if not fields:
             filter_fields_sql = ""
         else:
@@ -344,7 +573,7 @@ class CIManager(object):
                     _fields.append(str(attr.id))
             filter_fields_sql = "WHERE A.attr_id in ({0})".format(",".join(_fields))
 
-        ci_ids = ",".join(ci_ids)
+        ci_ids = ",".join(map(str, ci_ids))
         if value_tables is None:
             value_tables = ValueTypeMap.table_name.values()
 
@@ -356,14 +585,23 @@ class CIManager(object):
         ci_set = set()
         res = list()
         ci_dict = dict()
+        unique_id2obj = dict()
+        excludes = excludes and set(excludes)
         for ci_id, type_id, attr_id, attr_name, attr_alias, value, value_type, is_list in cis:
+            if not fields and excludes and (attr_name in excludes or attr_alias in excludes):
+                continue
+
             if ci_id not in ci_set:
                 ci_dict = dict()
                 ci_type = CITypeCache.get(type_id)
-                ci_dict["ci_id"] = ci_id
-                ci_dict["ci_type"] = type_id
+                ci_dict["_id"] = ci_id
+                ci_dict["_type"] = type_id
                 ci_dict["ci_type"] = ci_type.name
                 ci_dict["ci_type_alias"] = ci_type.alias
+                if ci_type.unique_id not in unique_id2obj:
+                    unique_id2obj[ci_type.unique_id] = AttributeCache.get(ci_type.unique_id)
+                ci_dict["unique"] = unique_id2obj[ci_type.unique_id] and unique_id2obj[ci_type.unique_id].name
+                ci_dict["unique_alias"] = unique_id2obj[ci_type.unique_id] and unique_id2obj[ci_type.unique_id].alias
                 ci_set.add(ci_id)
                 res.append(ci_dict)
 
@@ -374,7 +612,7 @@ class CIManager(object):
             elif ret_key == RetKey.ID:
                 attr_key = attr_id
             else:
-                return abort(400, "invalid ret key")
+                return abort(400, ErrFormat.argument_invalid.format("ret_key"))
 
             value = ValueTypeMap.serialize2[value_type](value)
             if is_list:
@@ -385,14 +623,17 @@ class CIManager(object):
         return res
 
     @classmethod
-    def get_cis_by_ids(cls, ci_ids, ret_key=RetKey.NAME, fields=None, value_tables=None):
+    def get_cis_by_ids(cls, ci_ids, ret_key=RetKey.NAME,
+                       fields=None, value_tables=None, unique_required=False, excludes=None):
         """
 
         :param ci_ids: list of CI instance ID, eg. ['1', '2']
         :param ret_key: name, id or alias
-        :param fields: 
-        :param value_tables: 
-        :return: 
+        :param fields:
+        :param value_tables:
+        :param unique_required:
+        :param excludes: exclude field list
+        :return:
         """
 
         if not ci_ids:
@@ -401,12 +642,12 @@ class CIManager(object):
         fields = [] if fields is None or not isinstance(fields, list) else fields
 
         ci_id_tuple = tuple(map(int, ci_ids))
-        res = cls._get_cis_from_cache(ci_id_tuple, ret_key, fields)
+        res = cls._get_cis_from_cache(ci_id_tuple, ret_key, fields, unique_required, excludes=excludes)
         if res is not None:
             return res
 
         current_app.logger.warning("cache not hit...............")
-        return cls._get_cis_from_db(ci_ids, ret_key, fields, value_tables)
+        return cls._get_cis_from_db(ci_ids, ret_key, fields, value_tables, excludes=excludes)
 
 
 class CIRelationManager(object):
@@ -493,7 +734,29 @@ class CIRelationManager(object):
         return numfound, len(first_ci_ids), result
 
     @classmethod
-    def add(cls, first_ci_id, second_ci_id, more=None, relation_type_id=None, many_to_one=False):
+    def get_ancestor_ids(cls, ci_ids, level=1):
+        for _ in range(level):
+            cis = db.session.query(CIRelation.first_ci_id).filter(
+                CIRelation.second_ci_id.in_(ci_ids)).filter(CIRelation.deleted.is_(False))
+            ci_ids = [i.first_ci_id for i in cis]
+
+        return ci_ids
+
+    @staticmethod
+    def _check_constraint(first_ci_id, second_ci_id, type_relation):
+        if type_relation.constraint == ConstraintEnum.Many2Many:
+            return
+
+        first_existed = CIRelation.get_by(first_ci_id=first_ci_id, relation_type_id=type_relation.relation_type_id)
+        second_existed = CIRelation.get_by(second_ci_id=second_ci_id, relation_type_id=type_relation.relation_type_id)
+        if type_relation.constraint == ConstraintEnum.One2One and (first_existed or second_existed):
+            return abort(400, ErrFormat.relation_constraint.format("1对1"))
+
+        if type_relation.constraint == ConstraintEnum.One2Many and second_existed:
+            return abort(400, ErrFormat.relation_constraint.format("1对多"))
+
+    @classmethod
+    def add(cls, first_ci_id, second_ci_id, more=None, relation_type_id=None):
 
         first_ci = CIManager.confirm_ci_existed(first_ci_id)
         second_ci = CIManager.confirm_ci_existed(second_ci_id)
@@ -514,18 +777,22 @@ class CIRelationManager(object):
                                                       first=True,
                                                       to_dict=False)
                 relation_type_id = type_relation and type_relation.relation_type_id
-                relation_type_id or abort(404, "Relation {0} <-> {1} is not found".format(
-                    first_ci.ci_type.name, second_ci.ci_type.name))
+                relation_type_id or abort(404, ErrFormat.relation_not_found.format("{} -> {}".format(
+                    first_ci.ci_type.name, second_ci.ci_type.name)))
 
-            if many_to_one:
-                for item in CIRelation.get_by(second_ci_id=second_ci_id,
-                                              relation_type_id=relation_type_id,
-                                              to_dict=False):
-                    item.soft_delete()
-                    his_manager = CIRelationHistoryManager()
-                    his_manager.add(item, operate_type=OperateType.DELETE)
+                if current_app.config.get('USE_ACL'):
+                    resource_name = CITypeRelationManager.acl_resource_name(first_ci.ci_type.name,
+                                                                            second_ci.ci_type.name)
+                    if not ACLManager().has_permission(
+                            resource_name,
+                            ResourceTypeEnum.CI_TYPE_RELATION,
+                            PermEnum.ADD):
+                        return abort(403, ErrFormat.no_permission.format(resource_name, PermEnum.ADD))
 
-                    ci_relation_delete.apply_async(args=(item.first_ci_id, item.second_ci_id), queue=CMDB_QUEUE)
+            else:
+                type_relation = CITypeRelation.get_by_id(relation_type_id)
+
+            cls._check_constraint(first_ci_id, second_ci_id, type_relation)
 
             existed = CIRelation.create(first_ci_id=first_ci_id,
                                         second_ci_id=second_ci_id,
@@ -542,7 +809,16 @@ class CIRelationManager(object):
 
     @staticmethod
     def delete(cr_id):
-        cr = CIRelation.get_by_id(cr_id) or abort(404, "CIRelation <{0}> is not existed".format(cr_id))
+        cr = CIRelation.get_by_id(cr_id) or abort(404, ErrFormat.relation_not_found.format("id={}".format(cr_id)))
+
+        if current_app.config.get('USE_ACL'):
+            resource_name = CITypeRelationManager.acl_resource_name(cr.first_ci.ci_type.name, cr.second_ci.ci_type.name)
+            if not ACLManager().has_permission(
+                    resource_name,
+                    ResourceTypeEnum.CI_TYPE_RELATION,
+                    PermEnum.DELETE):
+                return abort(403, ErrFormat.no_permission.format(resource_name, PermEnum.DELETE))
+
         cr.delete()
 
         his_manager = CIRelationHistoryManager()
@@ -564,23 +840,34 @@ class CIRelationManager(object):
         return cls.delete(cr.id)
 
     @classmethod
-    def batch_update(cls, ci_ids, parents):
+    def batch_update(cls, ci_ids, parents, children):
         """
         only for many to one
-        :param ci_ids: 
-        :param parents: 
-        :return: 
+        :param ci_ids:
+        :param parents:
+        :param children:
+        :return:
         """
-        from api.lib.cmdb.utils import TableMap
+        if parents is not None and isinstance(parents, list):
+            for parent_id in parents:
+                for ci_id in ci_ids:
+                    cls.add(parent_id, ci_id)
 
-        if parents is not None and isinstance(parents, dict):
-            for attr_name in parents:
-                if parents[attr_name]:
-                    attr = AttributeCache.get(attr_name)
-                    value_table = TableMap(attr_name=attr.name).table
-                    parent = value_table.get_by(attr_id=attr.id, value=parents[attr_name], first=True, to_dict=False)
-                    if not parent:
-                        return abort(404, "{0}: {1} is not found".format(attr_name, parents[attr_name]))
-                    parent_id = parent.ci_id
-                    for ci_id in ci_ids:
-                        cls.add(parent_id, ci_id, many_to_one=True)
+        if children is not None and isinstance(children, list):
+            for child_id in children:
+                for ci_id in ci_ids:
+                    cls.add(ci_id, child_id)
+
+    @classmethod
+    def batch_delete(cls, ci_ids, parents):
+        """
+        only for many to one
+        :param ci_ids:
+        :param parents:
+        :return:
+        """
+
+        if parents is not None and isinstance(parents, list):
+            for parent_id in parents:
+                for ci_id in ci_ids:
+                    cls.delete_2(parent_id, ci_id)

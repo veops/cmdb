@@ -1,25 +1,28 @@
+const IS_PROD = ['production', 'prod'].includes(process.env.NODE_ENV)
+
+const plugins = ['@babel/plugin-syntax-import-meta', '@babel/plugin-proposal-optional-chaining', '@babel/plugin-proposal-nullish-coalescing-operator']
+if (IS_PROD) {
+  plugins.push('transform-remove-console')
+}
+
+// lazy load ant-design-vue
+// if your use import on Demand, Use this code
+// plugins.push(['import', {
+//   'libraryName': 'ant-design-vue',
+//   'libraryDirectory': 'es',
+//   'style': true // `style: true` 会加载 less 文件
+// }])
+
 module.exports = {
   presets: [
-    '@vue/app',
+    '@vue/cli-plugin-babel/preset',
     [
       '@babel/preset-env',
       {
-        'useBuiltIns': 'usage', // "usage" | "entry" | false, defaults to false.
-        'corejs': '3.1.2',
-        'targets': {
-          'esmodules': true,
-          'ie': '11'
-        }
+        'useBuiltIns': 'entry',
+        'corejs': 3
       }
     ]
-  ]
-  // if your use import on Demand, Use this code
-  // ,
-  // plugins: [
-  //   [ 'import', {
-  //     'libraryName': 'ant-design-vue',
-  //     'libraryDirectory': 'es',
-  //     'style': true // `style: true` 会加载 less 文件
-  //   } ]
-  // ]
+  ],
+  plugins
 }

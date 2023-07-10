@@ -1,0 +1,32 @@
+本地搭建: 环境和依赖
+----
+- 存储: mysql, redis
+- python版本: >=python3.8
+
+Install
+----
+- 启动mysql服务, redis服务
+
+- 创建数据库cmdb
+- 拉取代码
+```bash
+git clone https://github.com/veops/cmdb.git
+cd cmdb
+cp cmdb-api/settings.example.py cmdb-api/settings.py
+```
+**设置cmdb-api/settings.py里的database**
+
+- 安装库
+  - 后端: ```cd cmdb-api && pipenv run pipenv install && cd ..```
+  - 前端: ```cd cmdb-ui && yarn install && cd ..```
+  
+- 创建数据库表: 进入**cmdb-api**目录执行 ```pipenv run flask db-setup && pipenv run flask init-cache```
+- 可以将docs/cmdb.sql导入到数据库里，登录用户和密码分别是:demo/123456
+  
+- 启动服务
+  - 后端: 进入**cmdb-api**目录执行 ```pipenv run flask run -h 0.0.0.0```
+  - 前端: 进入**cmdb-ui**目录执行```yarn run serve```
+  - worker: 进入**cmdb-api**目录执行 ```pipenv run celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1```
+  
+  - 浏览器打开:  [http://127.0.0.1:8000](http://127.0.0.1:8000)
+    - 如果是非本机访问, 要修改**cmdb-ui/.env**里**VUE_APP_API_BASE_URL**里的IP地址为后端服务的ip地址
