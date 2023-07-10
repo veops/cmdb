@@ -10,6 +10,7 @@ from api.extensions import es
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.const import RetKey
 from api.lib.cmdb.const import ValueTypeEnum
+from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.search import SearchError
 from api.lib.utils import handle_arg_list
 
@@ -22,9 +23,11 @@ class Search(object):
                  ret_key=RetKey.NAME,
                  count=1,
                  sort=None,
-                 ci_ids=None):
+                 ci_ids=None,
+                 excludes=None):
         self.orig_query = query
-        self.fl = fl
+        self.fl = fl or []
+        self.excludes = excludes or []
         self.facet_field = facet_field
         self.page = page
         self.ret_key = ret_key
@@ -39,6 +42,9 @@ class Search(object):
         operator = "&"
         if key.startswith("+"):
             key = key[1:].strip()
+        elif key.startswith("-~"):
+            operator = "|~"
+            key = key[2:].strip()
         elif key.startswith("-"):
             operator = "|"
             key = key[1:].strip()
@@ -52,6 +58,8 @@ class Search(object):
         if operator == "&":
             return self.query['query']['bool']['must']
         elif operator == "|":
+            return self.query['query']['bool']['should']
+        elif operator == "|~":
             return self.query['query']['bool']['should']
         else:
             return self.query['query']['bool']['must_not']
@@ -69,9 +77,9 @@ class Search(object):
         if attr:
             return attr.name, attr.value_type, operator
         else:
-            raise SearchError("{0} is not existed".format(key))
+            raise SearchError(ErrFormat.attribute_not_found.format(key))
 
-    def _in_query_handle(self, attr, v):
+    def _in_query_handle(self, attr, v, is_not):
         terms = v[1:-1].split(";")
         operator = "|"
         if attr in ('_type', 'ci_type', 'type_id') and terms and terms[0].isdigit():
@@ -79,11 +87,27 @@ class Search(object):
             terms = map(int, terms)
         current_app.logger.warning(terms)
         for term in terms:
-            self._operator2query(operator).append({
-                "term": {
-                    attr: term
-                }
-            })
+            if is_not:
+                self._operator2query(operator).append({
+                    "bool": {
+                        "must_not": [
+                            {
+                                "term": {
+                                    attr: term
+                                }
+                            }
+
+                        ]
+                    }
+
+                })
+
+            else:
+                self._operator2query(operator).append({
+                    "term": {
+                        attr: term
+                    }
+                })
 
     def _filter_ids(self):
         if self.ci_ids:
@@ -95,18 +119,36 @@ class Search(object):
             return int(float(s))
         return s
 
-    def _range_query_handle(self, attr, v, operator):
+    def _range_query_handle(self, attr, v, operator, is_not):
         left, right = v.split("_TO_")
         left, right = left.strip()[1:], right.strip()[:-1]
-        self._operator2query(operator).append({
-            "range": {
-                attr: {
-                    "lte": self._digit(right),
-                    "gte": self._digit(left),
-                    "boost": 2.0
+        if is_not:
+            self._operator2query(operator).append({
+                "bool": {
+                    "must_not": [
+                        {
+                            "range": {
+                                attr: {
+                                    "lte": self._digit(right),
+                                    "gte": self._digit(left),
+                                    "boost": 2.0
+                                }
+                            }
+                        }
+                    ]
                 }
-            }
-        })
+
+            })
+        else:
+            self._operator2query(operator).append({
+                "range": {
+                    attr: {
+                        "lte": self._digit(right),
+                        "gte": self._digit(left),
+                        "boost": 2.0
+                    }
+                }
+            })
 
     def _comparison_query_handle(self, attr, v, operator):
         if v.startswith(">="):
@@ -126,21 +168,50 @@ class Search(object):
             }
         })
 
-    def _match_query_handle(self, attr, v, operator):
+    def _match_query_handle(self, attr, v, operator, is_not):
         if "*" in v:
-            self._operator2query(operator).append({
-                "wildcard": {
-                    attr: v.lower() if isinstance(v, six.string_types) else v
-                }
-            })
+            if is_not:
+                self._operator2query(operator).append({
+                    "bool": {
+                        "must_not": [
+                            {
+                                "wildcard": {
+                                    attr: v.lower() if isinstance(v, six.string_types) else v
+                                }
+                            }
+                        ]
+                    }
+
+                })
+            else:
+                self._operator2query(operator).append({
+                    "wildcard": {
+                        attr: v.lower() if isinstance(v, six.string_types) else v
+                    }
+                })
         else:
             if attr == "ci_type" and v.isdigit():
                 attr = "type_id"
-            self._operator2query(operator).append({
-                "term": {
-                    attr: v.lower() if isinstance(v, six.string_types) else v
-                }
-            })
+
+            if is_not:
+                self._operator2query(operator).append({
+                    "bool": {
+                        "must_not": [
+                            {
+                                "term": {
+                                    attr: v.lower() if isinstance(v, six.string_types) else v
+                                }
+                            }
+                        ]
+                    }
+
+                })
+            else:
+                self._operator2query(operator).append({
+                    "term": {
+                        attr: v.lower() if isinstance(v, six.string_types) else v
+                    }
+                })
 
     def __query_build_by_field(self, queries):
 
@@ -150,21 +221,23 @@ class Search(object):
                 v = ":".join(q.split(":")[1:]).strip()
                 field_name, field_type, operator = self._attr_name_proc(k)
                 if field_name:
+                    is_not = True if operator == "|~" else False
+
                     # in query
                     if v.startswith("(") and v.endswith(")"):
-                        self._in_query_handle(field_name, v)
+                        self._in_query_handle(field_name, v, is_not)
                     # range query
                     elif v.startswith("[") and v.endswith("]") and "_TO_" in v:
-                        self._range_query_handle(field_name, v, operator)
+                        self._range_query_handle(field_name, v, operator, is_not)
                     # comparison query
                     elif v.startswith(">=") or v.startswith("<=") or v.startswith(">") or v.startswith("<"):
                         self._comparison_query_handle(field_name, v, operator)
                     else:
-                        self._match_query_handle(field_name, v, operator)
+                        self._match_query_handle(field_name, v, operator, is_not)
                 else:
-                    raise SearchError("argument q format invalid: {0}".format(q))
+                    raise SearchError(ErrFormat.argument_invalid.format("q"))
             elif q:
-                raise SearchError("argument q format invalid: {0}".format(q))
+                raise SearchError(ErrFormat.argument_invalid.format("q"))
 
     def _query_build_raw(self):
 
@@ -191,7 +264,7 @@ class Search(object):
         for field in self.facet_field:
             attr = AttributeCache.get(field)
             if not attr:
-                raise SearchError("Facet by <{0}> does not exist".format(field))
+                raise SearchError(ErrFormat.attribute_not_found(field))
             aggregations['aggs'].update({
                 field: {
                     "terms": {
@@ -222,7 +295,7 @@ class Search(object):
 
             attr = AttributeCache.get(field)
             if not attr:
-                raise SearchError("Sort by <{0}> does not exist".format(field))
+                raise SearchError(ErrFormat.attribute_not_found.format(field))
 
             sort_by = "{0}.keyword".format(field) \
                 if attr.value_type not in (ValueTypeEnum.INT, ValueTypeEnum.FLOAT) else field
@@ -242,7 +315,7 @@ class Search(object):
             numfound, cis, facet = self._query_build_raw()
         except Exception as e:
             current_app.logger.error(str(e))
-            raise SearchError("unknown search error")
+            raise SearchError(ErrFormat.unknown_search_error)
 
         total = len(cis)
 

@@ -1,21 +1,29 @@
 <template>
   <transition name="showHeader">
-    <div v-if="visible" class="header-animat">
+    <div class="header-animat">
       <a-layout-header
-        v-if="visible"
-        :class="[fixedHeader && 'ant-header-fixedHeader', sidebarOpened ? 'ant-header-side-opened' : 'ant-header-side-closed', ]"
-        :style="{ padding: '0' }">
+        :class="[
+          fixedHeader && 'ant-header-fixedHeader',
+          sidebarOpened ? 'ant-header-side-opened' : 'ant-header-side-closed',
+        ]"
+        :style="{ padding: '0' }"
+      >
         <div v-if="mode === 'sidemenu'" class="header">
-          <a-icon v-if="device==='mobile'" class="trigger" :type="collapsed ? 'menu-fold' : 'menu-unfold'" @click="toggle"/>
-          <a-icon v-else class="trigger" :type="collapsed ? 'menu-unfold' : 'menu-fold'" @click="toggle"/>
+          <a-icon
+            v-if="device === 'mobile'"
+            class="trigger"
+            :type="collapsed ? 'menu-fold' : 'menu-unfold'"
+            @click="toggle"
+          />
+          <a-icon v-else class="trigger" :type="collapsed ? 'menu-unfold' : 'menu-fold'" @click="toggle" />
           <top-menu></top-menu>
           <user-menu></user-menu>
         </div>
         <div v-else :class="['top-nav-header-index', theme]">
           <div class="header-index-wide">
             <div class="header-index-left">
-              <logo class="top-nav-header" :show-title="device !== 'mobile'"/>
-              <s-menu v-if="device !== 'mobile'" mode="horizontal" :menu="menus" :theme="theme" :i18n-render="i18nRender" />
+              <logo class="top-nav-header" :show-title="device !== 'mobile'" :collapsed="collapsed" />
+              <s-menu v-if="device !== 'mobile'" mode="horizontal" :menu="menus" :theme="theme" />
               <a-icon v-else class="trigger" :type="collapsed ? 'menu-fold' : 'menu-unfold'" @click="toggle" />
             </div>
             <top-menu></top-menu>
@@ -33,7 +41,6 @@ import TopMenu from '../tools/TopMenu'
 import SMenu from '../Menu/'
 import Logo from '../tools/Logo'
 import { mixin } from '@/utils/mixin'
-import { i18nRender } from '@/locales'
 
 export default {
   name: 'GlobalHeader',
@@ -41,47 +48,46 @@ export default {
     UserMenu,
     TopMenu,
     SMenu,
-    Logo
+    Logo,
   },
   mixins: [mixin],
   props: {
     mode: {
       type: String,
       // sidemenu, topmenu
-      default: 'sidemenu'
+      default: 'sidemenu',
     },
     menus: {
       type: Array,
-      required: true
+      required: true,
     },
     theme: {
       type: String,
       required: false,
-      default: 'dark'
+      default: 'dark',
     },
     collapsed: {
       type: Boolean,
       required: false,
-      default: false
+      default: false,
     },
     device: {
       type: String,
       required: false,
-      default: 'desktop'
-    }
+      default: 'desktop',
+    },
   },
-  data () {
+  data() {
     return {
-      visible: true,
-      oldScrollTop: 0
+      oldScrollTop: 0,
     }
   },
-  mounted () {
+  computed: {},
+  mounted() {
     document.addEventListener('scroll', this.handleScroll, { passive: true })
   },
   methods: {
-    i18nRender,
-    handleScroll () {
+    handleScroll() {
       if (!this.autoHideHeader) {
         return
       }
@@ -90,32 +96,32 @@ export default {
       if (!this.ticking) {
         this.ticking = true
         requestAnimationFrame(() => {
-          if (this.oldScrollTop > scrollTop) {
-            this.visible = true
-          } else if (scrollTop > 300 && this.visible) {
-            this.visible = false
-          } else if (scrollTop < 300 && !this.visible) {
-            this.visible = true
-          }
+          // if (this.oldScrollTop > scrollTop) {
+          //   // this.visible = true
+          // } else if (scrollTop > 300 && this.visible) {
+          //   // this.visible = false
+          // } else if (scrollTop < 300 && !this.visible) {
+          //   // this.visible = true
+          // }
           this.oldScrollTop = scrollTop
           this.ticking = false
         })
       }
     },
-    toggle () {
+    toggle() {
       this.$emit('toggle')
-    }
+    },
   },
-  beforeDestroy () {
+  beforeDestroy() {
     document.body.removeEventListener('scroll', this.handleScroll, true)
-  }
+  },
 }
 </script>
 
 <style lang="less">
 @import '../index.less';
 
-.header-animat{
+.header-animat {
   position: relative;
   z-index: @ant-global-header-zindex;
 }
@@ -125,7 +131,8 @@ export default {
 .showHeader-leave-active {
   transition: all 0.5s ease;
 }
-.showHeader-enter, .showHeader-leave-to {
+.showHeader-enter,
+.showHeader-leave-to {
   opacity: 0;
 }
 </style>

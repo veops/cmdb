@@ -22,10 +22,10 @@ const mixin = {
     })
   },
   methods: {
-    isTopMenu () {
+    isTopMenu() {
       return this.layoutMode === 'topmenu'
     },
-    isSideMenu () {
+    isSideMenu() {
       return !this.isTopMenu()
     }
   }
@@ -38,20 +38,20 @@ const mixinDevice = {
     })
   },
   methods: {
-    isMobile () {
+    isMobile() {
       return this.device === DEVICE_TYPE.MOBILE
     },
-    isDesktop () {
+    isDesktop() {
       return this.device === DEVICE_TYPE.DESKTOP
     },
-    isTablet () {
+    isTablet() {
       return this.device === DEVICE_TYPE.TABLET
     }
   }
 }
 
 const AppDeviceEnquire = {
-  mounted () {
+  mounted() {
     const { $store } = this
     deviceEnquire(deviceType => {
       switch (deviceType) {
@@ -73,4 +73,21 @@ const AppDeviceEnquire = {
   }
 }
 
-export { mixin, AppDeviceEnquire, mixinDevice }
+const mixinPermissions = {
+  computed: {
+    ...mapState({
+      detailPermissions: state => state.user.detailPermissions
+    })
+  },
+  methods: {
+    // 根据appName  资源名  perms名  返回true/false
+    // 判断该登录用户是否有传入的perms权限
+    hasDetailPermission(appName, resourceName, perms = []) {
+      const appNamePer = this.detailPermissions[`${appName}`]
+      const _findResourcePermissions = appNamePer.find(item => item.name === resourceName)
+      return _findResourcePermissions.permissions.some(item => perms.includes(item))
+    }
+  }
+}
+
+export { mixin, AppDeviceEnquire, mixinDevice, mixinPermissions }

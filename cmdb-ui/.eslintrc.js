@@ -8,7 +8,10 @@ module.exports = {
     '@vue/standard'
   ],
   rules: {
+    'no-unused-vars': 'warn',
+    'space-before-function-paren': 0,
     'no-console': 'off',
+    'comma-dangle': 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'generator-star-spacing': 'off',
     'no-mixed-operators': 0,
@@ -31,6 +34,7 @@ module.exports = {
     'vue/multiline-html-element-content-newline': 0,
     'vue/no-use-v-if-with-v-for': 0,
     'vue/html-closing-bracket-newline': 0,
+    'vue/prop-name-casing': 0,
     'vue/no-parsing-error': 0,
     'no-tabs': 0,
     'quotes': [
@@ -56,7 +60,8 @@ module.exports = {
       }
     ],
     'template-curly-spacing': 'off',
-    'indent': 'off'
+    'indent': 'off',
+    'camelcase': 'off'
   },
   parserOptions: {
     parser: 'babel-eslint'
@@ -65,7 +70,8 @@ module.exports = {
     {
       files: [
         '**/__tests__/*.{j,t}s?(x)',
-        '**/tests/unit/**/*.spec.{j,t}s?(x)'
+        '**/tests/unit/**/*.spec.{j,t}s?(x)',
+        '**/src/components/**'
       ],
       env: {
         jest: true

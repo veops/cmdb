@@ -52,7 +52,7 @@ class ValueTypeMap(object):
         ValueTypeEnum.FLOAT: float,
         ValueTypeEnum.TEXT: lambda x: x.decode() if not isinstance(x, six.string_types) else x,
         ValueTypeEnum.TIME: lambda x: x.decode() if not isinstance(x, six.string_types) else x,
-        ValueTypeEnum.DATE: lambda x: x.decode() if not isinstance(x, six.string_types) else x,
+        ValueTypeEnum.DATE: lambda x: (x.decode() if not isinstance(x, six.string_types) else x).split()[0],
         ValueTypeEnum.DATETIME: lambda x: x.decode() if not isinstance(x, six.string_types) else x,
         ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) and x else x,
     }
@@ -109,17 +109,25 @@ class ValueTypeMap(object):
 
 
 class TableMap(object):
-    def __init__(self, attr_name=None):
+    def __init__(self, attr_name=None, attr=None, is_index=None):
         self.attr_name = attr_name
+        self.attr = attr
+        self.is_index = is_index
 
     @property
     def table(self):
-        attr = AttributeCache.get(self.attr_name)
-        i = "index_{0}".format(attr.value_type) if attr.is_index else attr.value_type
+        attr = AttributeCache.get(self.attr_name) if not self.attr else self.attr
+        if self.is_index is None:
+            self.is_index = attr.is_index
+        i = "index_{0}".format(attr.value_type) if self.is_index else attr.value_type
+
         return ValueTypeMap.table.get(i)
 
     @property
     def table_name(self):
-        attr = AttributeCache.get(self.attr_name)
-        i = "index_{0}".format(attr.value_type) if attr.is_index else attr.value_type
+        attr = AttributeCache.get(self.attr_name) if not self.attr else self.attr
+        if self.is_index is None:
+            self.is_index = attr.is_index
+        i = "index_{0}".format(attr.value_type) if self.is_index else attr.value_type
+
         return ValueTypeMap.table_name.get(i)

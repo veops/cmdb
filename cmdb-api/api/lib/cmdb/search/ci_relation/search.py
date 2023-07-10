@@ -2,13 +2,16 @@
 
 
 import json
+from collections import Counter
 
 from flask import abort
 from flask import current_app
 
 from api.extensions import rd
+from api.lib.cmdb.ci import CIRelationManager
 from api.lib.cmdb.ci_type import CITypeRelationManager
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
+from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.search.ci.db.search import Search as SearchFromDB
 from api.lib.cmdb.search.ci.es.search import Search as SearchFromES
 from api.models.cmdb import CI
@@ -22,7 +25,8 @@ class Search(object):
                  facet_field=None,
                  page=1,
                  count=None,
-                 sort=None):
+                 sort=None,
+                 reverse=False):
         self.orig_query = query
         self.fl = fl
         self.facet_field = facet_field
@@ -32,20 +36,35 @@ class Search(object):
 
         self.root_id = root_id
         self.level = level
+        self.reverse = reverse
+
+    def _get_ids(self):
+        merge_ids = []
+        ids = [self.root_id] if not isinstance(self.root_id, list) else self.root_id
+        for level in range(1, sorted(self.level)[-1] + 1):
+            _tmp = list(map(lambda x: list(json.loads(x).keys()),
+                            filter(lambda x: x is not None, rd.get(ids, REDIS_PREFIX_CI_RELATION) or [])))
+            ids = [j for i in _tmp for j in i]
+            if level in self.level:
+                merge_ids.extend(ids)
+
+        return merge_ids
+
+    def _get_reverse_ids(self):
+        merge_ids = []
+        ids = [self.root_id] if not isinstance(self.root_id, list) else self.root_id
+        for level in range(1, sorted(self.level)[-1] + 1):
+            ids = CIRelationManager.get_ancestor_ids(ids, 1)
+            if level in self.level:
+                merge_ids.extend(ids)
+
+        return merge_ids
 
     def search(self):
         ids = [self.root_id] if not isinstance(self.root_id, list) else self.root_id
-        cis = [CI.get_by_id(_id) or abort(404, "CI <{0}> does not exist".format(_id)) for _id in ids]
+        cis = [CI.get_by_id(_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(_id))) for _id in ids]
 
-        merge_ids = []
-        for level in self.level:
-            ids = [self.root_id] if not isinstance(self.root_id, list) else self.root_id
-            for _ in range(0, level):
-                _tmp = list(map(lambda x: list(json.loads(x).keys()),
-                                filter(lambda x: x is not None, rd.get(ids, REDIS_PREFIX_CI_RELATION) or [])))
-                ids = [j for i in _tmp for j in i]
-
-            merge_ids.extend(ids)
+        merge_ids = self._get_ids() if not self.reverse else self._get_reverse_ids()
 
         if not self.orig_query or ("_type:" not in self.orig_query
                                    and "type_id:" not in self.orig_query
@@ -53,7 +72,10 @@ class Search(object):
             type_ids = []
             for level in self.level:
                 for ci in cis:
-                    type_ids.extend(CITypeRelationManager.get_child_type_ids(ci.type_id, level))
+                    if not self.reverse:
+                        type_ids.extend(CITypeRelationManager.get_child_type_ids(ci.type_id, level))
+                    else:
+                        type_ids.extend(CITypeRelationManager.get_parent_type_ids(ci.type_id, level))
             type_ids = list(set(type_ids))
             if self.orig_query:
                 self.orig_query = "_type:({0}),{1}".format(";".join(list(map(str, type_ids))), self.orig_query)
@@ -86,24 +108,30 @@ class Search(object):
         ids = [self.root_id] if not isinstance(self.root_id, list) else self.root_id
         for l in range(0, int(self.level)):
             if not l:
-                _tmp = list(map(lambda x: list(json.loads(x).keys()),
+                _tmp = list(map(lambda x: list(json.loads(x).items()),
                                 [i or '{}' for i in rd.get(ids, REDIS_PREFIX_CI_RELATION) or []]))
             else:
-                for idx, i in enumerate(_tmp):
-                    if i:
+                for idx, item in enumerate(_tmp):
+                    if item:
                         if type_ids and l == self.level - 1:
                             __tmp = list(
-                                map(lambda x: list({_id: 1 for _id, type_id in json.loads(x).items()
-                                                    if type_id in type_ids}.keys()),
+                                map(lambda x: [(_id, type_id) for _id, type_id in json.loads(x).items()
+                                               if type_id in type_ids],
                                     filter(lambda x: x is not None,
-                                           rd.get(i, REDIS_PREFIX_CI_RELATION) or [])))
+                                           rd.get([i[0] for i in item], REDIS_PREFIX_CI_RELATION) or [])))
                         else:
 
-                            __tmp = list(map(lambda x: list(json.loads(x).keys()),
+                            __tmp = list(map(lambda x: list(json.loads(x).items()),
                                              filter(lambda x: x is not None,
-                                                    rd.get(i, REDIS_PREFIX_CI_RELATION) or [])))
+                                                    rd.get([i[0] for i in item], REDIS_PREFIX_CI_RELATION) or [])))
+
                         _tmp[idx] = [j for i in __tmp for j in i]
                     else:
                         _tmp[idx] = []
 
-        return {_id: len(_tmp[idx]) for idx, _id in enumerate(ids)}
+        result = {str(_id): len(_tmp[idx]) for idx, _id in enumerate(ids)}
+
+        result.update(
+            detail={str(_id): dict(Counter([i[1] for i in _tmp[idx]]).items()) for idx, _id in enumerate(ids)})
+
+        return result
