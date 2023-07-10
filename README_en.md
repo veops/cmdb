@@ -54,6 +54,9 @@ Overview
 ### More Features
 > Welcome to visit VeOps official website to discover more free operations and maintenance systems.
 
+## Recommended
+[Spug - Open source lightweight automated operation and maintenance platform](https://github.com/openspug/spug)
+
 Installation
 ----
 ### [One-Click Docker Quick Build](docs/docker_en.md)
