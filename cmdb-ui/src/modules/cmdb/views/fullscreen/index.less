@@ -1,0 +1,408 @@
+.keyframesFunction(@name,@content) {
+  @keyframes @name {
+    @content();
+  }
+}
+.cmdb-fullscreen {
+  background: url('../../assets/fullscreen/background.gif');
+  background-size: 100% 100%;
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 110;
+  display: flex;
+  flex-direction: row;
+  font-size: 0.8368vw;
+  .short-title {
+    background: url('../../assets/fullscreen/wrapper_background-short_title.png');
+  }
+  .long-title {
+    background: url('../../assets/fullscreen/wrapper_background-long_title.png');
+  }
+  .long-wrapper {
+    background: url('../../assets/fullscreen/wrapper_background_long.png');
+  }
+  .cmdb-fullscreen-wrapper {
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    position: relative;
+    .title {
+      color: #fff;
+      font-size: 1em;
+      font-weight: 700;
+      position: absolute;
+      top: -0.75em;
+    }
+  }
+  .cmdb-fullscreen-left {
+    width: 24%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 3.125em 1.2em 4.25em 1.75em;
+    .cmdb-fullscreen-wrapper:not(:last-child) {
+      margin-bottom: 1.5em;
+    }
+    .pie-box,
+    .line-box {
+      width: 100%;
+      height: 100%;
+    }
+    .line-wrapper-application,
+    .line-wrapper-businesss {
+      width: 100%;
+      height: 100%;
+      padding: 2em;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      .line-wrapper {
+        display: flex;
+        align-items: center;
+        .name {
+          font-size: 0.875em;
+          font-weight: 700;
+          width: 4em;
+        }
+        .default-process {
+          display: inline-block;
+          height: 0.5em;
+          background-color: rgba(49, 73, 97, 1);
+          border-radius: 0.125em;
+          flex: 1;
+          position: relative;
+          &:hover .image_funnel {
+            .keyframesFunction (funnelBeat, {0%{top: -1.1em;} 50%{top: -1.5em;} 100%{top: -1.1em}});
+            animation: funnelBeat 0.8s linear infinite;
+          }
+          .real-process {
+            height: 0.5em;
+            border-radius: 0.125em;
+            position: relative;
+            width: var(--custom-width);
+            .keyframesFunction (scaleProcessWidth, {0%{width: 0;} 100%{width: var(--custom-width) ;}});
+            animation: scaleProcessWidth 2s linear 1;
+            .image_dot,
+            .image_funnel {
+              position: absolute;
+            }
+            .image_funnel {
+              top: -1.1em;
+              right: -0.8em;
+              z-index: -1;
+              width: 1.4375em;
+              height: 1.4375em;
+            }
+            .image_dot {
+              top: -1em;
+              right: -1.25em;
+              z-index: -2;
+              width: 3.4375em;
+              height: 1.9375em;
+            }
+          }
+        }
+        .number {
+          font-size: 0.75em;
+          font-weight: 500;
+          width: 5em;
+          text-align: right;
+          > span:nth-child(2) {
+            color: #fff;
+          }
+        }
+      }
+    }
+    .line-wrapper-application {
+      .line-wrapper {
+        .name,
+        .number > span:first-child {
+          color: #f5ffb5;
+        }
+        .real-process {
+          background: linear-gradient(to right, #f6ffb5, #38fffe);
+        }
+      }
+    }
+    .line-wrapper-businesss {
+      .line-wrapper {
+        .name,
+        .number > span:first-child {
+          color: rgba(144, 215, 255, 1);
+        }
+        .real-process {
+          background: linear-gradient(to right, #40dbff, #99b8ff);
+        }
+      }
+    }
+  }
+  .cmdb-fullscreen-right {
+    flex: 1;
+    height: 100%;
+    padding: 3.125em 1.75em 4.25em 0;
+    position: relative;
+    .cmdb-fullscreen-right-bottom {
+      position: absolute;
+      width: 100%;
+      height: 20%;
+      left: 0;
+      bottom: 4.25em;
+      display: flex;
+      flex-direction: row;
+      padding-right: 1.75em;
+      .first {
+        width: 66%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-right: 1.2em;
+      }
+      .second {
+        flex: 1;
+        .resource {
+          display: flex;
+          flex-direction: row;
+          width: 100%;
+          height: 100%;
+          .inner-box {
+            width: 100%;
+            height: calc(100% - 2.6em);
+            padding: 2em 1em 1em 2em;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            .inner-box-bar {
+              width: 0.875em;
+              height: 100%;
+              display: flex;
+              flex-direction: column;
+              justify-content: flex-end;
+              .inner-box-bar-inner {
+                height: 100%;
+                .keyframesFunction (scaleBarHeight, {0%{height: 0;} 100%{height: 100% ;}});
+                animation: scaleBarHeight 2s linear 1;
+                .inner-box-bar-core {
+                  width: 100%;
+                }
+              }
+            }
+
+            .inner-box-product {
+              .inner-box-cylinder {
+                height: 100%;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-end;
+                > div {
+                  width: 0.5em;
+                }
+                > div:not(:last-child) {
+                  margin-right: 0.1em;
+                }
+
+                .inner-box-cylinder-IQ,
+                .inner-box-cylinder-Service {
+                  position: relative;
+                  border-top-left-radius: 1em;
+                  border-top-right-radius: 1em;
+                  height: var(--custom-height);
+                  .keyframesFunction (scaleCylinderHeight, {0%{height: 0;} 100%{height: var(--custom-height) ;}});
+                  animation: scaleCylinderHeight 2s linear 1;
+                  &::before,
+                  &::after {
+                    content: '';
+                    width: 0.5em;
+                    height: 0.3em;
+                    position: absolute;
+                    border-radius: 100%;
+                    left: 0;
+                  }
+                  &::before {
+                    top: 0;
+                  }
+                  &::after {
+                    bottom: 0.4em;
+                    background-color: rgba(20, 244, 228, 0.15);
+                  }
+                  .inner-box-cylinder-dot {
+                    width: 0.5em;
+                    position: absolute;
+                    left: 0;
+                    bottom: 0.5em;
+                    z-index: 10;
+                    > img {
+                      width: 0.5em;
+                    }
+                    &::after {
+                      content: '';
+                      width: 0.5em;
+                      height: 0.3em;
+                      position: absolute;
+                      border-radius: 100%;
+                      background: linear-gradient(180deg, #397d90 0%, #0a497e 100%);
+                      left: 0;
+                      bottom: -0.4em;
+                    }
+                  }
+                }
+                .inner-box-cylinder-IQ {
+                  background: linear-gradient(
+                    180deg,
+                    #00feee 0%,
+                    rgba(103, 236, 228, 0.524935) 47.51%,
+                    rgba(216, 216, 216, 0.0001) 100%
+                  );
+                  &::before {
+                    background: linear-gradient(180deg, #00feee 0%, #02ecd9 56.87%, #07b0fe 100%);
+                  }
+                }
+                .inner-box-cylinder-Service {
+                  background: linear-gradient(180deg, #5da4f0 0%, #8ec4ff 47.51%, rgba(216, 216, 216, 0.0001) 100%);
+                  &::before {
+                    background: linear-gradient(180deg, #6499ff 0%, #61a6f1 56.87%, #3183ff 100%);
+                  }
+                }
+              }
+            }
+
+            .inner-subtitle {
+              color: rgba(255, 255, 255, 0.6);
+              font-size: 0.625em;
+            }
+            .inner-box-legend {
+              width: 4em;
+              align-self: flex-end;
+              .legend::before,
+              .product-legend::before {
+                content: '';
+                display: inline-block;
+                width: 0.5em;
+                height: 0.5em;
+                margin-right: 0.25em;
+              }
+              .product-legend::before {
+                border-radius: 50%;
+              }
+            }
+            .inner-box-bar-core.core_2,
+            .legend.core_2::before {
+              background: linear-gradient(to bottom, #03dffc, #1b63cc);
+            }
+            .inner-box-bar-core.core_4,
+            .legend.core_4::before {
+              background: linear-gradient(to bottom, #63fbfc, #05a998);
+            }
+            .inner-box-bar-core.core_8,
+            .legend.core_8::before {
+              background: linear-gradient(to bottom, #67b3fa, #2d5cbd);
+            }
+            .product-legend.IQ::before {
+              background-color: #09f4e6;
+            }
+            .product-legend.Service::before {
+              background-color: #5fa5f1;
+            }
+          }
+          .inner-title {
+            color: #fff;
+            font-size: 0.75em;
+            text-align: center;
+            position: relative;
+            &::after {
+              content: '';
+              width: 8em;
+              height: 0.375em;
+              background-image: url('../../assets/fullscreen/resource_decorate.png');
+              background-repeat: no-repeat;
+              position: absolute;
+              left: 50%;
+              top: calc(50% + 1em);
+              transform: translate(-50%, -50%);
+              background-size: 100%;
+            }
+          }
+          .resource-server,
+          .resource-product {
+            width: 50%;
+          }
+        }
+      }
+    }
+    .cmdb-fullscreen-total {
+      position: absolute;
+      right: 1.75em;
+      top: 3.125em;
+      display: flex;
+      align-items: center;
+      > span:first-child {
+        font-weight: 600;
+        font-size: 1.75em;
+        background-image: linear-gradient(91.36deg, #a8efff 0%, #8eb5ff 122.21%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        margin-right: 1em;
+      }
+      .cmdb-fullscreen-total-number {
+        display: inline-block;
+        width: 1.25em;
+        height: 1.25em;
+        font-size: 2.5em;
+        font-size: 700;
+        text-align: center;
+        background: url('../../assets/fullscreen/total_number_background.png');
+        background-repeat: no-repeat;
+        background-size: 100%;
+        margin-right: 0.4em;
+        color: rgba(102, 255, 255, 1);
+        line-height: 1.25em;
+      }
+    }
+    .cmdb-fullscreen-server {
+      position: absolute;
+      left: 0;
+      bottom: calc(20% + 4.25em + 2.5em);
+      > span {
+        color: #fff;
+        font-size: 1.75em;
+        font-weight: 800;
+        margin-left: 0.5em;
+      }
+      .cmdb-fullscreen-server-outer {
+        display: flex;
+        flex-direction: row;
+        .cmdb-fullscreen-server-inner {
+          padding-right: 3.125em;
+          span:first-child {
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.375em;
+            animation: serverOpacityChange 3s linear 1;
+          }
+          span:last-child {
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+            font-size: 1em;
+            animation: serverOpacityChange 2s linear 1;
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes serverOpacityChange {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

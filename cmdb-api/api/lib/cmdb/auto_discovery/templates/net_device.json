@@ -1,0 +1,37 @@
+[{
+  "name":"manufacturer",
+  "type": "文本",
+  "example":"HUAWEI Technology Co.,Ltd",
+  "desc":"制造产商"
+},{
+  "name":"sn",
+  "type": "文本",
+  "example":"102030059898",
+  "desc":"设备序列号"
+},{
+  "name":"device_name",
+  "type": "文本",
+  "example":"USG6525E",
+  "desc":"设备名称"
+},{
+  "name":"device_model",
+  "type": "文本",
+  "example":"2011.2.321.1.205",
+  "desc":"设备细分类型 结合相关产商获取相应的产品类型"
+},{
+  "name":"description",
+  "type": "文本",
+  "example":"Huawei Vwersatile Routing Platform Software",
+  "desc":"设备描述"
+},{
+  "name":"manager_ip",
+  "type": "文本",
+  "example":"192.168.1.1",
+  "desc":"管理ip"
+}, {
+  "name":"ips",
+  "type": "文本、多值",
+  "example":"192.168.1.1, 192.168.1.2",
+  "desc":"ips"
+}
+]

@@ -1,0 +1,297 @@
+[
+    {
+        "name": "Placement",
+        "type": "json",
+        "desc": "实例所在的位置。",
+        "example": {
+            "HostId": "host-h3m57oik",
+            "ProjectId": 1174660,
+            "HostIds": [],
+            "Zone": "ap-guangzhou-1",
+            "HostIps": []
+        }
+    },
+    {
+        "name": "InstanceId",
+        "type": "文本",
+        "desc": "实例ID。",
+        "example": "ins-xlsyru2j"
+    },
+    {
+        "name": "InstanceType",
+        "type": "文本",
+        "desc": "实例机型。",
+        "example": "S2.SMALL2"
+    },
+    {
+        "name": "CPU",
+        "type": "整数",
+        "desc": "实例的CPU核数，单位：核。",
+        "example": 1
+    },
+    {
+        "name": "Memory",
+        "type": "整数",
+        "desc": "实例内存容量，单位：GB。",
+        "example": 1
+    },
+    {
+        "name": "RestrictState",
+        "type": "文本",
+        "desc": "实例业务状态。取值范围： NORMAL：表示正常状态的实例 EXPIRED：表示过期的实例 PROTECTIVELY_ISOLATED：表示被安全隔离的实例。",
+        "example": "PROTECTIVELY_ISOLATED"
+    },
+    {
+        "name": "InstanceName",
+        "type": "文本",
+        "desc": "实例名称。",
+        "example": "test"
+    },
+    {
+        "name": "InstanceChargeType",
+        "type": "文本",
+        "desc": "实例计费模式。取值范围： PREPAID：表示预付费，即包年包月 POSTPAID_BY_HOUR：表示后付费，即按量计费 CDHPAID：专用宿主机付费，即只对专用宿主机计费，不对专用宿主机上的实例计费。 SPOTPAID：表示竞价实例付费。",
+        "example": "POSTPAID_BY_HOUR"
+    },
+    {
+        "name": "SystemDisk",
+        "type": "json",
+        "desc": "实例系统盘信息。",
+        "example": {
+            "DiskSize": 50,
+            "CdcId": null,
+            "DiskId": "disk-czsodtl1",
+            "DiskType": "CLOUD_SSD"
+        }
+    },
+    {
+        "name": "DataDisks",
+        "type": "json",
+        "desc": "实例数据盘信息。",
+        "example": [
+            {
+                "DeleteWithInstance": true,
+                "Encrypt": true,
+                "CdcId": null,
+                "DiskType": "CLOUD_SSD",
+                "ThroughputPerformance": 0,
+                "KmsKeyId": null,
+                "DiskSize": 50,
+                "SnapshotId": null,
+                "DiskId": "disk-bzsodtn1"
+            }
+        ]
+    },
+    {
+        "name": "PrivateIpAddresses",
+        "type": "文本、多值",
+        "desc": "实例主网卡的内网IP列表。",
+        "example": [
+            "172.16.32.78"
+        ]
+    },
+    {
+        "name": "PublicIpAddresses",
+        "type": "文本、多值",
+        "desc": "实例主网卡的公网IP列表。 注意：此字段可能返回 null，表示取不到有效值。",
+        "example": [
+            "123.207.11.190"
+        ]
+    },
+    {
+        "name": "InternetAccessible",
+        "type": "json",
+        "desc": "实例带宽信息。",
+        "example": {
+            "PublicIpAssigned": true,
+            "InternetChargeType": "TRAFFIC_POSTPAID_BY_HOUR",
+            "BandwidthPackageId": null,
+            "InternetMaxBandwidthOut": 1
+        }
+    },
+    {
+        "name": "VirtualPrivateCloud",
+        "type": "json",
+        "desc": "实例所属虚拟私有网络信息。",
+        "example": {
+            "SubnetId": "subnet-mv4sn55k",
+            "AsVpcGateway": false,
+            "Ipv6AddressCount": 1,
+            "VpcId": "vpc-m0cnatxj",
+            "PrivateIpAddresses": [
+                "172.16.3.59"
+            ]
+        }
+    },
+    {
+        "name": "ImageId",
+        "type": "文本",
+        "desc": "生产实例所使用的镜像ID。",
+        "example": "img-8toqc6s3"
+    },
+    {
+        "name": "RenewFlag",
+        "type": "文本",
+        "desc": "自动续费标识。取值范围： NOTIFY_AND_MANUAL_RENEW：表示通知即将过期，但不自动续费 NOTIFY_AND_AUTO_RENEW：表示通知即将过期，而且自动续费 DISABLE_NOTIFY_AND_MANUAL_RENEW：表示不通知即将过期，也不自动续费。 注意：后付费模式本项为null",
+        "example": "NOTIFY_AND_MANUAL_RENEW"
+    },
+    {
+        "name": "CreatedTime",
+        "type": "json",
+        "desc": "创建时间。按照ISO8601标准表示，并且使用UTC时间。格式为：YYYY-MM-DDThh:mm:ssZ。",
+        "example": "2020-09-22T00:00:00+00:00"
+    },
+    {
+        "name": "ExpiredTime",
+        "type": "json",
+        "desc": "到期时间。按照ISO8601标准表示，并且使用UTC时间。格式为：YYYY-MM-DDThh:mm:ssZ。注意：后付费模式本项为null",
+        "example": "2020-09-22T00:00:00+00:00"
+    },
+    {
+        "name": "OsName",
+        "type": "文本",
+        "desc": "操作系统名称。",
+        "example": "CentOS 7.4 64bit"
+    },
+    {
+        "name": "SecurityGroupIds",
+        "type": "文本、多值",
+        "desc": "实例所属安全组。该参数可以通过调用 DescribeSecurityGroups 的返回值中的sgId字段来获取。",
+        "example": [
+            "sg-p1ezv4wz"
+        ]
+    },
+    {
+        "name": "LoginSettings",
+        "type": "json",
+        "desc": "实例登录设置。目前只返回实例所关联的密钥。",
+        "example": {
+            "Password": "123qwe!@#QWE",
+            "KeepImageLogin": "False",
+            "KeyIds": [
+                "skey-b4vakk62"
+            ]
+        }
+    },
+    {
+        "name": "InstanceState",
+        "type": "文本",
+        "desc": "实例状态。取值范围： PENDING：表示创建中 LAUNCH_FAILED：表示创建失败 RUNNING：表示运行中 STOPPED：表示关机 STARTING：表示开机中 STOPPING：表示关机中 REBOOTING：表示重启中 SHUTDOWN：表示停止待销毁 TERMINATING：表示销毁中。",
+        "example": "RUNNING"
+    },
+    {
+        "name": "Tags",
+        "type": "json",
+        "desc": "实例关联的标签列表。",
+        "example": [
+            {
+                "Value": "test",
+                "Key": "test"
+            }
+        ]
+    },
+    {
+        "name": "StopChargingMode",
+        "type": "文本",
+        "desc": "实例的关机计费模式。 取值范围： KEEP_CHARGING：关机继续收费 STOP_CHARGING：关机停止收费NOT_APPLICABLE：实例处于非关机状态或者不适用关机停止计费的条件",
+        "example": "NOT_APPLICABLE"
+    },
+    {
+        "name": "Uuid",
+        "type": "文本",
+        "desc": "实例全局唯一ID",
+        "example": "e85f1388-0422-410d-8e50-bef540e78c18"
+    },
+    {
+        "name": "LatestOperation",
+        "type": "文本",
+        "desc": "实例的最新操作。例：StopInstances、ResetInstance。 注意：此字段可能返回 null，表示取不到有效值。",
+        "example": "ResetInstancesType"
+    },
+    {
+        "name": "LatestOperationState",
+        "type": "文本",
+        "desc": "实例的最新操作状态。取值范围： SUCCESS：表示操作成功 OPERATING：表示操作执行中 FAILED：表示操作失败 注意：此字段可能返回 null，表示取不到有效值。",
+        "example": "SUCCESS"
+    },
+    {
+        "name": "LatestOperationRequestId",
+        "type": "文本",
+        "desc": "实例最新操作的唯一请求 ID。 注意：此字段可能返回 null，表示取不到有效值。",
+        "example": "c7de1287-061d-4ace-8caf-6ad8e5a2f29a"
+    },
+    {
+        "name": "DisasterRecoverGroupId",
+        "type": "文本",
+        "desc": "分散置放群组ID。 注意：此字段可能返回 null，表示取不到有效值。",
+        "example": ""
+    },
+    {
+        "name": "IPv6Addresses",
+        "type": "文本、多值",
+        "desc": "实例的IPv6地址。 注意：此字段可能返回 null，表示取不到有效值。",
+        "example": [
+            "2001:0db8:86a3:08d3:1319:8a2e:0370:7344"
+        ]
+    },
+    {
+        "name": "CamRoleName",
+        "type": "文本",
+        "desc": "CAM角色名。 注意：此字段可能返回 null，表示取不到有效值。",
+        "example": ""
+    },
+    {
+        "name": "HpcClusterId",
+        "type": "文本",
+        "desc": "高性能计算集群ID。 注意：此字段可能返回 null，表示取不到有效值。",
+        "example": ""
+    },
+    {
+        "name": "RdmaIpAddresses",
+        "type": "文本、多值",
+        "desc": "高性能计算集群IP列表。 注意：此字段可能返回 null，表示取不到有效值。",
+        "example": []
+    },
+    {
+        "name": "IsolatedSource",
+        "type": "文本",
+        "desc": "实例隔离类型。取值范围： ARREAR：表示欠费隔离 EXPIRE：表示到期隔离 MANMADE：表示主动退还隔离 NOTISOLATED：表示未隔离 注意：此字段可能返回 null，表示取不到有效值。",
+        "example": "NOTISOLATED"
+    },
+    {
+        "name": "GPUInfo",
+        "type": "json",
+        "desc": "GPU信息。如果是gpu类型子机，该值会返回GPU信息，如果是其他类型子机则不返回。 注意：此字段可能返回 null，表示取不到有效值。",
+        "example": null
+    },
+    {
+        "name": "LicenseType",
+        "type": "文本",
+        "desc": "实例的操作系统许可类型，默认为TencentCloud",
+        "example": null
+    },
+    {
+        "name": "DisableApiTermination",
+        "type": "Boolean",
+        "desc": "实例销毁保护标志，表示是否允许通过api接口删除实例。取值范围： TRUE：表示开启实例保护，不允许通过api接口删除实例 FALSE：表示关闭实例保护，允许通过api接口删除实例 默认取值：FALSE。",
+        "example": null
+    },
+    {
+        "name": "DefaultLoginUser",
+        "type": "文本",
+        "desc": "默认登录用户。",
+        "example": null
+    },
+    {
+        "name": "DefaultLoginPort",
+        "type": "整数",
+        "desc": "默认登录端口。",
+        "example": null
+    },
+    {
+        "name": "LatestOperationErrorMsg",
+        "type": "文本",
+        "desc": "实例的最新操作错误信息。 注意：此字段可能返回 null，表示取不到有效值。",
+        "example": null
+    }
+]

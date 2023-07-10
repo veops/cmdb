@@ -132,15 +132,20 @@ def validate(ticket):
         current_app.logger.debug("valid")
         session[cas_username_session_key] = username
         user = UserCache.get(username)
-        session["acl"] = dict(uid=user_info.get("uuid"),
+
+        from api.lib.perm.acl.acl import ACLManager
+        user_info = ACLManager.get_user_info(username)
+
+        session["acl"] = dict(uid=user_info.get("uid"),
                               avatar=user.avatar if user else user_info.get("avatar"),
-                              userId=user_info.get("id"),
-                              userName=user_info.get("name"),
+                              userId=user_info.get("uid"),
+                              rid=user_info.get("rid"),
+                              userName=user_info.get("username"),
                               nickName=user_info.get("nickname"),
                               parentRoles=user_info.get("parents"),
                               childRoles=user_info.get("children"),
                               roleName=user_info.get("role"))
-        session["uid"] = user_info.get("uuid")
+        session["uid"] = user_info.get("uid")
         current_app.logger.debug(session)
         current_app.logger.debug(request.url)
     else:

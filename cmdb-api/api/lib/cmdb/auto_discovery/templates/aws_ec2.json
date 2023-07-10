@@ -1,0 +1,427 @@
+[
+    {
+        "name": "amiLaunchIndex",
+        "type": "整数",
+        "desc": "The AMI launch index, which can be used to find this instance in the launch group.",
+        "example": "0"
+    },
+    {
+        "name": "architecture",
+        "type": "文本",
+        "desc": "The architecture of the image.",
+        "example": "x86_64"
+    },
+    {
+        "name": "blockDeviceMapping",
+        "type": "json",
+        "desc": "Any block device mapping entries for the instance.",
+        "example": {
+            "item": {
+                "deviceName": "/dev/xvda",
+                "ebs": {
+                    "volumeId": "vol-1234567890abcdef0",
+                    "status": "attached",
+                    "attachTime": "2015-12-22T10:44:09.000Z",
+                    "deleteOnTermination": "true"
+                }
+            }
+        }
+    },
+    {
+        "name": "bootMode",
+        "type": "文本",
+        "desc": "The boot mode that was specified by the AMI. If the value is uefi-preferred, the AMI supports both UEFI and Legacy BIOS. The currentInstanceBootMode parameter is the boot mode that is used to boot the instance at launch or start.",
+        "example": null
+    },
+    {
+        "name": "capacityReservationId",
+        "type": "文本",
+        "desc": "The ID of the Capacity Reservation.",
+        "example": null
+    },
+    {
+        "name": "capacityReservationSpecification",
+        "type": "json",
+        "desc": "Information about the Capacity Reservation targeting option.",
+        "example": null
+    },
+    {
+        "name": "clientToken",
+        "type": "文本",
+        "desc": "The idempotency token you provided when you launched the instance, if applicable.",
+        "example": "xMcwG14507example"
+    },
+    {
+        "name": "cpuOptions",
+        "type": "json",
+        "desc": "The CPU options for the instance.",
+        "example": {
+            "coreCount": "1",
+            "threadsPerCore": "1"
+        }
+    },
+    {
+        "name": "currentInstanceBootMode",
+        "type": "文本",
+        "desc": "The boot mode that is used to boot the instance at launch or start. For more information, see Boot modes in the Amazon EC2 User Guide.",
+        "example": null
+    },
+    {
+        "name": "dnsName",
+        "type": "文本",
+        "desc": "[IPv4 only] The public DNS name assigned to the instance. This name is not available until the instance enters the running state. This name is only available if you've enabled DNS hostnames for your VPC.",
+        "example": "ec2-54-194-252-215.eu-west-1.compute.amazonaws.com"
+    },
+    {
+        "name": "ebsOptimized",
+        "type": "Boolean",
+        "desc": "Indicates whether the instance is optimized for Amazon EBS I/O. This optimization provides dedicated throughput to Amazon EBS and an optimized configuration stack to provide optimal I/O performance. This optimization isn't available with all instance types. Additional usage charges apply when using an EBS Optimized instance.",
+        "example": "false"
+    },
+    {
+        "name": "elasticGpuAssociationSet",
+        "type": "json",
+        "desc": "The Elastic GPU associated with the instance.",
+        "example": null
+    },
+    {
+        "name": "elasticInferenceAcceleratorAssociationSet",
+        "type": "json",
+        "desc": "The elastic inference accelerator associated with the instance.",
+        "example": null
+    },
+    {
+        "name": "enaSupport",
+        "type": "Boolean",
+        "desc": "Specifies whether enhanced networking with ENA is enabled.",
+        "example": null
+    },
+    {
+        "name": "enclaveOptions",
+        "type": "json",
+        "desc": "Indicates whether the instance is enabled for AWS Nitro Enclaves.",
+        "example": null
+    },
+    {
+        "name": "groupSet",
+        "type": "json",
+        "desc": "The security groups for the instance.",
+        "example": {
+            "item": {
+                "groupId": "sg-e4076980",
+                "groupName": "SecurityGroup1"
+            }
+        }
+    },
+    {
+        "name": "hibernationOptions",
+        "type": "json",
+        "desc": "Indicates whether the instance is enabled for hibernation.",
+        "example": null
+    },
+    {
+        "name": "hypervisor",
+        "type": "文本",
+        "desc": "The hypervisor type of the instance. The value xen is used for both Xen and Nitro hypervisors.",
+        "example": "xen"
+    },
+    {
+        "name": "iamInstanceProfile",
+        "type": "json",
+        "desc": "The IAM instance profile associated with the instance, if applicable.",
+        "example": {
+            "arn": "arn:aws:iam::123456789012:instance-profile/AdminRole",
+            "id": "ABCAJEDNCAA64SSD123AB"
+        }
+    },
+    {
+        "name": "imageId",
+        "type": "文本",
+        "desc": "The ID of the AMI used to launch the instance.",
+        "example": "ami-bff32ccc"
+    },
+    {
+        "name": "instanceId",
+        "type": "文本",
+        "desc": "The ID of the instance.",
+        "example": "i-1234567890abcdef0"
+    },
+    {
+        "name": "instanceLifecycle",
+        "type": "文本",
+        "desc": "Indicates whether this is a Spot Instance or a Scheduled Instance.",
+        "example": null
+    },
+    {
+        "name": "instanceState",
+        "type": "json",
+        "desc": "The current state of the instance.",
+        "example": {
+            "code": "16",
+            "name": "running"
+        }
+    },
+    {
+        "name": "instanceType",
+        "type": "文本",
+        "desc": "The instance type.",
+        "example": "t2.micro"
+    },
+    {
+        "name": "ipAddress",
+        "type": "文本",
+        "desc": "The public IPv4 address, or the Carrier IP address assigned to the instance, if applicable.",
+        "example": "54.194.252.215"
+    },
+    {
+        "name": "ipv6Address",
+        "type": "文本",
+        "desc": "The IPv6 address assigned to the instance.",
+        "example": null
+    },
+    {
+        "name": "kernelId",
+        "type": "文本",
+        "desc": "The kernel associated with this instance, if applicable.",
+        "example": null
+    },
+    {
+        "name": "keyName",
+        "type": "文本",
+        "desc": "The name of the key pair, if this instance was launched with an associated key pair.",
+        "example": "my_keypair"
+    },
+    {
+        "name": "launchTime",
+        "type": "Time",
+        "desc": "The time the instance was launched.",
+        "example": "2018-05-08T16:46:19.000Z"
+    },
+    {
+        "name": "licenseSet",
+        "type": "json",
+        "desc": "The license configurations for the instance.",
+        "example": null
+    },
+    {
+        "name": "maintenanceOptions",
+        "type": "json",
+        "desc": "Provides information on the recovery and maintenance options of your instance.",
+        "example": null
+    },
+    {
+        "name": "metadataOptions",
+        "type": "json",
+        "desc": "The metadata options for the instance.",
+        "example": null
+    },
+    {
+        "name": "monitoring",
+        "type": "json",
+        "desc": "The monitoring for the instance.",
+        "example": {
+            "state": "disabled"
+        }
+    },
+    {
+        "name": "networkInterfaceSet",
+        "type": "json",
+        "desc": "The network interfaces for the instance.",
+        "example": {
+            "item": {
+                "networkInterfaceId": "eni-551ba033",
+                "subnetId": "subnet-56f5f633",
+                "vpcId": "vpc-11112222",
+                "description": "Primary network interface",
+                "ownerId": "123456789012",
+                "status": "in-use",
+                "macAddress": "02:dd:2c:5e:01:69",
+                "privateIpAddress": "192.168.1.88",
+                "privateDnsName": "ip-192-168-1-88.eu-west-1.compute.internal",
+                "sourceDestCheck": "true",
+                "groupSet": {
+                    "item": {
+                        "groupId": "sg-e4076980",
+                        "groupName": "SecurityGroup1"
+                    }
+                },
+                "attachment": {
+                    "attachmentId": "eni-attach-39697adc",
+                    "deviceIndex": "0",
+                    "status": "attached",
+                    "attachTime": "2018-05-08T16:46:19.000Z",
+                    "deleteOnTermination": "true"
+                },
+                "association": {
+                    "publicIp": "54.194.252.215",
+                    "publicDnsName": "ec2-54-194-252-215.eu-west-1.compute.amazonaws.com",
+                    "ipOwnerId": "amazon"
+                },
+                "privateIpAddressesSet": {
+                    "item": {
+                        "privateIpAddress": "192.168.1.88",
+                        "privateDnsName": "ip-192-168-1-88.eu-west-1.compute.internal",
+                        "primary": "true",
+                        "association": {
+                            "publicIp": "54.194.252.215",
+                            "publicDnsName": "ec2-54-194-252-215.eu-west-1.compute.amazonaws.com",
+                            "ipOwnerId": "amazon"
+                        }
+                    }
+                },
+                "ipv6AddressesSet": {
+                    "item": {
+                        "ipv6Address": "2001:db8:1234:1a2b::123"
+                    }
+                }
+            }
+        }
+    },
+    {
+        "name": "outpostArn",
+        "type": "文本",
+        "desc": "The Amazon Resource Name (ARN) of the Outpost.",
+        "example": null
+    },
+    {
+        "name": "placement",
+        "type": "json",
+        "desc": "The location where the instance launched, if applicable.",
+        "example": {
+            "availabilityZone": "eu-west-1c",
+            "groupName": null,
+            "tenancy": "default"
+        }
+    },
+    {
+        "name": "platform",
+        "type": "文本",
+        "desc": "The value is Windows for Windows instances; otherwise blank.",
+        "example": null
+    },
+    {
+        "name": "platformDetails",
+        "type": "文本",
+        "desc": "The platform details value for the instance. For more information, see AMI billing information fields in the Amazon EC2 User Guide.",
+        "example": null
+    },
+    {
+        "name": "privateDnsName",
+        "type": "文本",
+        "desc": "[IPv4 only] The private DNS hostname name assigned to the instance. This DNS hostname can only be used inside the Amazon EC2 network. This name is not available until the instance enters the running state.",
+        "example": "ip-192-168-1-88.eu-west-1.compute.internal"
+    },
+    {
+        "name": "privateDnsNameOptions",
+        "type": "json",
+        "desc": "The options for the instance hostname.",
+        "example": null
+    },
+    {
+        "name": "privateIpAddress",
+        "type": "文本",
+        "desc": "The private IPv4 address assigned to the instance.",
+        "example": "192.168.1.88"
+    },
+    {
+        "name": "productCodes",
+        "type": "json",
+        "desc": "The product codes attached to this instance, if applicable.",
+        "example": null
+    },
+    {
+        "name": "ramdiskId",
+        "type": "文本",
+        "desc": "The RAM disk associated with this instance, if applicable.",
+        "example": null
+    },
+    {
+        "name": "reason",
+        "type": "文本",
+        "desc": "The reason for the most recent state transition. This might be an empty string.",
+        "example": null
+    },
+    {
+        "name": "rootDeviceName",
+        "type": "文本",
+        "desc": "The device name of the root device volume (for example, /dev/sda1).",
+        "example": "/dev/xvda"
+    },
+    {
+        "name": "rootDeviceType",
+        "type": "文本",
+        "desc": "The root device type used by the AMI. The AMI can use an EBS volume or an instance store volume.",
+        "example": "ebs"
+    },
+    {
+        "name": "sourceDestCheck",
+        "type": "Boolean",
+        "desc": "Indicates whether source/destination checking is enabled.",
+        "example": "true"
+    },
+    {
+        "name": "spotInstanceRequestId",
+        "type": "文本",
+        "desc": "If the request is a Spot Instance request, the ID of the request.",
+        "example": null
+    },
+    {
+        "name": "sriovNetSupport",
+        "type": "文本",
+        "desc": "Specifies whether enhanced networking with the Intel 82599 Virtual Function interface is enabled.",
+        "example": null
+    },
+    {
+        "name": "stateReason",
+        "type": "json",
+        "desc": "The reason for the most recent state transition.",
+        "example": null
+    },
+    {
+        "name": "subnetId",
+        "type": "文本",
+        "desc": "The ID of the subnet in which the instance is running.",
+        "example": "subnet-56f5f633"
+    },
+    {
+        "name": "tagSet",
+        "type": "json",
+        "desc": "Any tags assigned to the instance.",
+        "example": {
+            "item": {
+                "key": "Name",
+                "value": "Server_1"
+            }
+        }
+    },
+    {
+        "name": "tpmSupport",
+        "type": "文本",
+        "desc": "If the instance is configured for NitroTPM support, the value is v2.0. For more information, see NitroTPM in the Amazon EC2 User Guide.",
+        "example": null
+    },
+    {
+        "name": "usageOperation",
+        "type": "文本",
+        "desc": "The usage operation value for the instance. For more information, see AMI billing information fields in the Amazon EC2 User Guide.",
+        "example": null
+    },
+    {
+        "name": "usageOperationUpdateTime",
+        "type": "Time",
+        "desc": "The time that the usage operation was last updated.",
+        "example": null
+    },
+    {
+        "name": "virtualizationType",
+        "type": "文本",
+        "desc": "The virtualization type of the instance.",
+        "example": "hvm"
+    },
+    {
+        "name": "vpcId",
+        "type": "文本",
+        "desc": "The ID of the VPC in which the instance is running.",
+        "example": "vpc-11112222"
+    }
+]
