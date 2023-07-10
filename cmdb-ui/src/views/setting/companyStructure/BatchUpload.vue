@@ -1,0 +1,550 @@
+<template>
+  <a-modal
+    :visible="visible"
+    title="批量导入"
+    dialogClass="ops-modal setting-structure-upload"
+    :width="800"
+    @cancel="close"
+  >
+    <div class="setting-structure-upload-steps">
+      <div
+        :class="{ 'setting-structure-upload-step': true, selected: index + 1 <= currentStep }"
+        v-for="(step, index) in stepList"
+        :key="step.value"
+      >
+        <div :class="{ 'setting-structure-upload-step-icon': true }">
+          <ops-icon :type="step.icon" />
+        </div>
+        <span>{{ step.label }}</span>
+      </div>
+    </div>
+    <template v-if="currentStep === 1">
+      <a-upload :multiple="false" :customRequest="customRequest" accept=".xlsx" :showUploadList="false">
+        <a-button :style="{ marginBottom: '20px' }" type="primary"> <a-icon type="upload" />选择文件</a-button>
+      </a-upload>
+      <p><a @click="download">点击下载《员工导入模板》</a></p>
+    </template>
+    <div
+      :style="{ height: '60px', display: 'flex', justifyContent: 'center', alignItems: 'center' }"
+      v-if="currentStep === 3"
+    >
+      导入总数据{{ allCount }}条, 导入成功 <span :style="{ color: '#2362FB' }">{{ allCount - errorCount }}</span> 条,
+      导入失败<span :style="{ color: '#D81E06' }">{{ errorCount }}</span
+      >条
+    </div>
+    <vxe-table
+      v-if="currentStep === 2 || has_error"
+      ref="employeeTable"
+      stripe
+      :data="importData"
+      show-overflow
+      show-header-overflow
+      highlight-hover-row
+      size="small"
+      class="ops-stripe-table"
+      :max-height="400"
+      :column-config="{ resizable: true }"
+    >
+      <vxe-column field="email" title="邮箱" min-width="120" fixed="left"></vxe-column>
+      <vxe-column field="username" title="用户名" min-width="80" ></vxe-column>
+      <vxe-column field="nickname" title="姓名" min-width="80"></vxe-column>
+      <vxe-column field="password" title="密码" min-width="80"></vxe-column>
+      <vxe-column field="sex" title="性别" min-width="60"></vxe-column>
+      <vxe-column field="mobile" title="手机号" min-width="80"></vxe-column>
+      <vxe-column field="position_name" title="岗位" min-width="80"></vxe-column>
+      <vxe-column field="department_name" title="部门" min-width="80"></vxe-column>
+      <vxe-column field="current_company" v-if="useDFC" title="目前所属主体" min-width="120"></vxe-column>
+      <vxe-column field="dfc_entry_date" v-if="useDFC" title="初始入职日期" min-width="120"></vxe-column>
+      <vxe-column field="entry_date" title="目前主体入职日期" min-width="120"></vxe-column>
+      <vxe-column field="is_internship" title="正式/实习生" min-width="120"></vxe-column>
+      <vxe-column field="leave_date" title="离职日期" min-width="120"></vxe-column>
+      <vxe-column field="id_card" title="身份证号码" min-width="120"></vxe-column>
+      <vxe-column field="nation" title="民族" min-width="80"></vxe-column>
+      <vxe-column field="id_place" title="籍贯" min-width="80"></vxe-column>
+      <vxe-column field="party" title="组织关系" min-width="80"></vxe-column>
+      <vxe-column field="household_registration_type" title="户籍类型" min-width="80"></vxe-column>
+      <vxe-column field="hometown" title="户口所在地" min-width="80"></vxe-column>
+      <vxe-column field="marry" title="婚姻情况" min-width="80"></vxe-column>
+      <vxe-column field="max_degree" title="最高学历" min-width="80"></vxe-column>
+      <vxe-column field="emergency_person" title="紧急联系人" min-width="120"></vxe-column>
+      <vxe-column field="emergency_phone" title="紧急联系电话" min-width="120"></vxe-column>
+      <vxe-column field="bank_card_number" title="卡号" min-width="120"></vxe-column>
+      <vxe-column field="bank_card_name" title="银行" min-width="80"></vxe-column>
+      <vxe-column field="opening_bank" title="开户行" min-width="80"></vxe-column>
+      <vxe-column field="account_opening_location" title="开户地" min-width="120"></vxe-column>
+      <vxe-column field="school" title="学校" min-width="80"></vxe-column>
+      <vxe-column field="major" title="专业" min-width="80"></vxe-column>
+      <vxe-column field="education" title="学历" min-width="80"></vxe-column>
+      <vxe-column field="graduation_year" title="毕业年份" min-width="120"></vxe-column>
+      <vxe-column v-if="has_error" field="err" title="失败原因" min-width="120" fixed="right">
+        <template #default="{ row }">
+          <span :style="{ color: '#D81E06' }">{{ row.err }}</span>
+        </template>
+      </vxe-column>
+    </vxe-table>
+    <a-space slot="footer">
+      <a-button size="small" type="primary" ghost @click="close">取消</a-button>
+      <a-button v-if="currentStep !== 1" size="small" type="primary" ghost @click="goPre">上一步</a-button>
+      <a-button v-if="currentStep !== 3" size="small" type="primary" @click="goNext">下一步</a-button>
+      <a-button v-else size="small" type="primary" @click="close">完成</a-button>
+    </a-space>
+  </a-modal>
+</template>
+
+<script>
+import { downloadExcel, excel2Array } from '@/utils/download'
+import { importEmployee } from '@/api/employee'
+import appConfig from '@/config/app'
+export default {
+  name: 'BatchUpload',
+  data() {
+    const stepList = [
+      {
+        value: 1,
+        label: '上传文件',
+        icon: 'icon-shidi-tianjia',
+      },
+      {
+        value: 2,
+        label: '确认数据',
+        icon: 'icon-shidi-yunshangchuan',
+      },
+      {
+        value: 3,
+        label: '上传完成',
+        icon: 'icon-shidi-queren',
+      },
+    ]
+    const dfc_importParamsList = [
+      'email',
+      'username',
+      'nickname',
+      'password',
+      'sex',
+      'mobile',
+      'position_name',
+      'department_name',
+      'current_company',
+      'dfc_entry_date',
+      'entry_date',
+      'is_internship',
+      'leave_date',
+      'id_card',
+      'nation',
+      'id_place',
+      'party',
+      'household_registration_type',
+      'hometown',
+      'marry',
+      'max_degree',
+      'emergency_person',
+      'emergency_phone',
+      'bank_card_number',
+      'bank_card_name',
+      'opening_bank',
+      'account_opening_location',
+      'school',
+      'major',
+      'education',
+      'graduation_year',
+    ]
+    const common_importParamsList = [
+      'email',
+      'username',
+      'nickname',
+      'password',
+      'sex',
+      'mobile',
+      'position_name',
+      'department_name',
+      'entry_date',
+      'is_internship',
+      'leave_date',
+      'id_card',
+      'nation',
+      'id_place',
+      'party',
+      'household_registration_type',
+      'hometown',
+      'marry',
+      'max_degree',
+      'emergency_person',
+      'emergency_phone',
+      'bank_card_number',
+      'bank_card_name',
+      'opening_bank',
+      'account_opening_location',
+      'school',
+      'major',
+      'education',
+      'graduation_year',
+    ]
+    return {
+      stepList,
+      dfc_importParamsList,
+      common_importParamsList,
+      visible: false,
+      currentStep: 1,
+      importData: [],
+      has_error: false,
+      allCount: 0,
+      errorCount: 0,
+      useDFC: appConfig.useDFC,
+    }
+  },
+  methods: {
+    open() {
+      this.importData = []
+      this.has_error = false
+      this.errorCount = 0
+      this.visible = true
+    },
+    close() {
+      this.currentStep = 1
+      this.visible = false
+    },
+    async goNext() {
+      if (this.currentStep === 2) {
+        // 此处调用后端接口
+        this.allCount = this.importData.length
+        const importData = this.importData.map((item) => {
+          const { _X_ROW_KEY, ...rest } = item
+          const keyArr = Object.keys(rest)
+          keyArr.forEach((key) => {
+            if (rest[key]) {
+              rest[key] = rest[key] + ''
+            }
+          })
+          rest.educational_experience = [{
+            'school': rest.school,
+            'major': rest.major,
+            'education': rest.education,
+            'graduation_year': rest.graduation_year
+            }]
+          delete rest.school
+          delete rest.major
+          delete rest.education
+          delete rest.graduation_year
+          return rest
+        })
+        const res = await importEmployee({ employee_list: importData })
+        if (res.length) {
+          const errData = res.filter((item) => {
+            return item.err.length
+          })
+          console.log('err', errData)
+          this.has_error = true
+          this.errorCount = errData.length
+          this.currentStep += 1
+          this.importData = errData
+          this.$message.error('数据存在错误')
+        } else {
+          this.currentStep += 1
+          this.$message.success('操作成功')
+        }
+        this.$emit('refresh')
+      }
+    },
+    goPre() {
+      this.has_error = false
+      this.errorCount = 0
+      this.currentStep -= 1
+    },
+    download() {
+      const data = [
+        [
+          {
+            v:
+              '1、表头标“*”的红色字体为必填项\n2、邮箱、用户名不允许重复\n3、登录密码：密码由6-20位字母、数字组成\n4、部门：上下级部门间用"/"隔开，且从最上级部门开始，例如“深圳分公司/IT部/IT二部”。如出现相同的部门，则默认导入组织架构中顺序靠前的部门',
+            t: 's',
+            s: {
+              alignment: {
+                wrapText: true,
+                vertical: 'center',
+              },
+            },
+          },
+        ],
+        [
+          {
+            v: '*邮箱',
+            t: 's',
+            s: {
+              font: {
+                color: {
+                  rgb: 'FF0000',
+                },
+              },
+            },
+          },
+          {
+            v: '*用户名',
+            t: 's',
+            s: {
+              font: {
+                color: {
+                  rgb: 'FF0000',
+                },
+              },
+            },
+          },
+          {
+            v: '*姓名',
+            t: 's',
+            s: {
+              font: {
+                color: {
+                  rgb: 'FF0000',
+                },
+              },
+            },
+          },
+          {
+            v: '*密码',
+            t: 's',
+            s: {
+              font: {
+                color: {
+                  rgb: 'FF0000',
+                },
+              },
+            },
+          },
+          {
+            v: '性别',
+            t: 's',
+          },
+          {
+            v: '手机号',
+            t: 's',
+          },
+          {
+            v: '岗位',
+            t: 's',
+          },
+          {
+            v: '部门',
+            t: 's',
+          },
+          {
+            v: '目前所属主体',
+            t: 's',
+          },
+          {
+            v: '初始入职日期',
+            t: 's',
+          },
+          {
+            v: '目前主体入职日期',
+            t: 's',
+          },
+          {
+            v: '正式/实习生',
+            t: 's',
+          },
+          {
+            v: '离职日期',
+            t: 's',
+          },
+          {
+            v: '身份证号码',
+            t: 's',
+          },
+          {
+            v: '民族',
+            t: 's',
+          },
+          {
+            v: '籍贯',
+            t: 's',
+          },
+          {
+            v: '组织关系',
+            t: 's',
+          },
+          {
+            v: '户籍类型',
+            t: 's',
+          },
+          {
+            v: '户口所在地',
+            t: 's',
+          },
+          {
+            v: '婚姻情况',
+            t: 's',
+          },
+          {
+            v: '最高学历',
+            t: 's',
+          },
+          {
+            v: '紧急联系人',
+            t: 's',
+          },
+          {
+            v: '紧急联系电话',
+            t: 's',
+          },
+          {
+            v: '卡号',
+            t: 's',
+          },
+          {
+            v: '银行',
+            t: 's',
+          },
+          {
+            v: '开户行',
+            t: 's',
+          },
+          {
+            v: '开户地',
+            t: 's',
+          },
+          {
+            v: '学校',
+            t: 's',
+          },
+          {
+            v: '专业',
+            t: 's',
+          },
+          {
+            v: '学历',
+            t: 's',
+          },
+          {
+            v: '毕业年份',
+            t: 's',
+          },
+        ],
+      ]
+      if (this.useDFC) {
+        downloadExcel(data, '员工导入模板')
+      } else {
+        data[1] = data[1].filter(item => item['v'] !== '目前所属主体')
+        data[1] = data[1].filter(item => item['v'] !== '初始入职日期')
+        downloadExcel(data, '员工导入模板')
+      }
+    },
+    customRequest(data) {
+      this.fileList = [data.file]
+      excel2Array(data.file).then((res) => {
+        res = res.filter((item) => item.length)
+        this.importData = res.slice(2).map((item) => {
+          const obj = {}
+          // 格式化日期字段
+          if (this.useDFC) {
+            item[9] = this.formatDate(item[9]) // 初始入职日期日期
+            item[10] = this.formatDate(item[10]) // 目前主体入职日期
+            item[12] = this.formatDate(item[12]) // 离职日期
+            item[30] = this.formatDate(item[30]) // 毕业年份
+            item.forEach((ele, index) => {
+              obj[this.dfc_importParamsList[index]] = ele
+            })
+          } else {
+            item[8] = this.formatDate(item[8]) // 目前主体入职日期
+            item[10] = this.formatDate(item[10]) // 离职日期
+            item[28] = this.formatDate(item[28]) // 毕业年份
+          item.forEach((ele, index) => {
+            obj[this.common_importParamsList[index]] = ele
+          })
+          }
+          return obj
+        })
+        this.currentStep = 2
+      })
+    },
+    formatDate(numb) {
+      if (numb) {
+        const time = new Date((numb - 1) * 24 * 3600000 + 1)
+        time.setYear(time.getFullYear() - 70)
+        time.setMonth(time.getMonth())
+        time.setHours(time.getHours() - 8)
+        time.setMinutes(time.getMinutes())
+        time.setMilliseconds(time.getMilliseconds())
+        // return time.valueOf()
+        // 日期格式
+        const format = 'Y-m-d'
+        const year = time.getFullYear()
+        // 由于 getMonth 返回值会比正常月份小 1
+        let month = time.getMonth() + 1
+        let day = time.getDate()
+        month = month > 9 ? month : `0${month}`
+        day = day > 9 ? day : `0${day}`
+        const hash = {
+          'Y': year,
+          'm': month,
+          'd': day,
+        }
+        return format.replace(/\w/g, o => {
+          return hash[o]
+        })
+      } else {
+        return null
+      }
+    }
+  },
+}
+</script>
+
+<style lang="less">
+.setting-structure-upload {
+  .ant-modal-body {
+    padding: 24px 48px;
+  }
+  .setting-structure-upload-steps {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    .setting-structure-upload-step {
+      display: inline-block;
+      text-align: center;
+      position: relative;
+      .setting-structure-upload-step-icon {
+        width: 86px;
+        height: 86px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-image: url('../../../assets/icon-bg.png');
+        margin-bottom: 20px;
+        > i {
+          font-size: 40px;
+          color: #fff;
+        }
+      }
+      > span {
+        font-size: 16px;
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.5);
+      }
+    }
+    .setting-structure-upload-step:not(:first-child)::before {
+      content: '';
+      height: 2px;
+      width: 223px;
+      position: absolute;
+      background-color: #e7ecf3;
+      left: -223px;
+      top: 43px;
+      z-index: 0;
+    }
+    .selected.setting-structure-upload-step {
+      &:not(:first-child)::before {
+        background-color: #7eb0ff;
+      }
+    }
+    .selected {
+      .setting-structure-upload-step-icon {
+        background-image: url('../../../assets/icon-bg-selected.png');
+      }
+      > span {
+        color: rgba(0, 0, 0, 0.8);
+      }
+    }
+  }
+}
+</style>

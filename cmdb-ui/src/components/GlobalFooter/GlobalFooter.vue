@@ -1,6 +1,22 @@
 <template>
   <div class="footer">
+    <div class="links">
+      <a
+        href="https://veops.cn/"
+        target="_blank"
+      >维易科技</a>
+      <a
+        href="https://github.com/sendya/ant-design-pro-vue"
+        target="_blank"
+      >
+        <a-icon type="github" />
+      </a>
 
+    </div>
+    <div class="copyright">
+      Copyright
+      <a-icon type="copyright" /> 2021-2023 <span>@维易科技</span>
+    </div>
   </div>
 </template>
 

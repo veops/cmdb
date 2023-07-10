@@ -9,6 +9,7 @@ from flask import request
 
 from api.lib.cmdb.cache import RelationTypeCache
 from api.lib.cmdb.ci import CIRelationManager
+from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.search import SearchError
 from api.lib.cmdb.search.ci_relation.search import Search
 from api.lib.decorator import args_required
@@ -22,7 +23,6 @@ from api.resource import APIView
 class CIRelationSearchView(APIView):
     url_prefix = ("/ci_relations/s", "/ci_relations/search")
 
-    @auth_abandoned
     def get(self):
         """@params: q: query statement
                     fl: filter by column
@@ -31,7 +31,6 @@ class CIRelationSearchView(APIView):
                     level: default is 1
                     facet: statistic
         """
-
         page = get_page(request.values.get("page", 1))
         count = get_page_size(request.values.get("count") or request.values.get("page_size"))
 
@@ -42,9 +41,10 @@ class CIRelationSearchView(APIView):
         fl = handle_arg_list(request.values.get('fl', ""))
         facet = handle_arg_list(request.values.get("facet", ""))
         sort = request.values.get("sort")
+        reverse = request.values.get("reverse") in current_app.config.get('BOOL_TRUE')
 
         start = time.time()
-        s = Search(root_id, level, query, fl, facet, page, count, sort)
+        s = Search(root_id, level, query, fl, facet, page, count, sort, reverse)
         try:
             response, counter, total, page, numfound, facet = s.search()
         except SearchError as e:
@@ -89,7 +89,7 @@ class GetSecondCIsView(APIView):
         try:
             relation_type_id = RelationTypeCache.get(relation_type).id if relation_type else None
         except AttributeError:
-            return abort(400, "invalid relation type <{0}>".format(relation_type))
+            return abort(400, ErrFormat.invalid_relation_type.format(relation_type))
 
         manager = CIRelationManager()
         numfound, total, second_cis = manager.get_second_cis(
@@ -147,12 +147,12 @@ class BatchCreateOrUpdateCIRelationView(APIView):
     url_prefix = "/ci_relations/batch"
 
     @args_required('ci_ids')
-    @args_required('parents')
     def post(self):
-        ci_ids = request.values.get('ci_ids')
-        parents = request.values.get('parents')
+        ci_ids = list(map(int, request.values.get('ci_ids')))
+        parents = list(map(int, request.values.get('parents', [])))
+        children = list(map(int, request.values.get('children', [])))
 
-        CIRelationManager.batch_update(ci_ids, parents)
+        CIRelationManager.batch_update(ci_ids, parents, children)
 
         return self.jsonify(code=200)
 
@@ -160,3 +160,13 @@ class BatchCreateOrUpdateCIRelationView(APIView):
     @args_required('parents')
     def put(self):
         return self.post()
+
+    @args_required('ci_ids')
+    @args_required('parents')
+    def delete(self):
+        ci_ids = list(map(int, request.values.get('ci_ids')))
+        parents = list(map(int, request.values.get('parents', [])))
+
+        CIRelationManager.batch_delete(ci_ids, parents)
+
+        return self.jsonify(code=200)

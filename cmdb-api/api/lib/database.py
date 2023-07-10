@@ -10,36 +10,51 @@ from api.lib.exception import CommitException
 
 class FormatMixin(object):
     def to_dict(self):
-        res = dict()
-        for k in getattr(self, "__table__").columns:
-            if not isinstance(getattr(self, k.name), datetime.datetime):
-                res[k.name] = getattr(self, k.name)
-            else:
-                res[k.name] = getattr(self, k.name).strftime('%Y-%m-%d %H:%M:%S')
+        res = dict([(k, getattr(self, k) if not isinstance(
+            getattr(self, k), (datetime.datetime, datetime.date, datetime.time)) else str(
+            getattr(self, k))) for k in getattr(self, "__mapper__").c.keys()])
+        # FIXME: getattr(cls, "__table__").columns  k.name
+
+        res.pop('password', None)
+        res.pop('_password', None)
+        res.pop('secret', None)
 
         return res
+    
+    @classmethod
+    def from_dict(cls, **kwargs):
+        from sqlalchemy.sql.sqltypes import Time, Date, DateTime
+
+        columns = dict(getattr(cls, "__table__").columns)
+
+        for k, c in columns.items():
+            if kwargs.get(k):
+                if type(c.type) == Time:
+                    kwargs[k] = datetime.datetime.strptime(kwargs[k], "%H:%M:%S").time()
+                if type(c.type) == Date:
+                    kwargs[k] = datetime.datetime.strptime(kwargs[k], "%Y-%m-%d").date()
+                if type(c.type) == DateTime:
+                    kwargs[k] = datetime.datetime.strptime(kwargs[k], "%Y-%m-%d %H:%M:%S")
+
+        return cls(**kwargs)
 
     @classmethod
     def get_columns(cls):
-        return {k.name: 1 for k in getattr(cls, "__mapper__").c.values()}
+        return {k: 1 for k in getattr(cls, "__mapper__").c.keys()}
 
 
 class CRUDMixin(FormatMixin):
-    def __init__(self, **kwargs):
-        super(CRUDMixin, self).__init__(**kwargs)
-
     @classmethod
-    def create(cls, flush=False, **kwargs):
-        return cls(**kwargs).save(flush=flush)
+    def create(cls, flush=False, commit=True, **kwargs):
+        return cls(**kwargs).save(flush=flush, commit=commit)
 
-    def update(self, flush=False, **kwargs):
+    def update(self, flush=False, commit=True, filter_none=True, **kwargs):
         kwargs.pop("id", None)
         for attr, value in six.iteritems(kwargs):
-            if value is not None:
+            if (value is not None and filter_none) or not filter_none:
                 setattr(self, attr, value)
-        if flush:
-            return self.save(flush=flush)
-        return self.save()
+
+        return self.save(flush=flush, commit=commit)
 
     def save(self, commit=True, flush=False):
         db.session.add(self)
@@ -54,12 +69,13 @@ class CRUDMixin(FormatMixin):
 
         return self
 
-    def delete(self, flush=False):
+    def delete(self, flush=False, commit=True):
         db.session.delete(self)
         try:
             if flush:
                 return db.session.flush()
-            return db.session.commit()
+            elif commit:
+                return db.session.commit()
         except Exception as e:
             db.session.rollback()
             raise CommitException(str(e))
@@ -73,10 +89,19 @@ class CRUDMixin(FormatMixin):
     def get_by_id(cls, _id):
         if any((isinstance(_id, six.string_types) and _id.isdigit(),
                 isinstance(_id, (six.integer_types, float))), ):
-            return getattr(cls, "query").get(int(_id)) or None
+            obj = getattr(cls, "query").get(int(_id))
+            if obj and not obj.deleted:
+                return obj
 
     @classmethod
-    def get_by(cls, first=False, to_dict=True, fl=None, exclude=None, deleted=False, use_master=False, **kwargs):
+    def get_by(cls, first=False,
+               to_dict=True,
+               fl=None,
+               exclude=None,
+               deleted=False,
+               use_master=False,
+               only_query=False,
+               **kwargs):
         db_session = db.session if not use_master else db.session().using_bind("master")
         fl = fl.strip().split(",") if fl and isinstance(fl, six.string_types) else (fl or [])
         exclude = exclude.strip().split(",") if exclude and isinstance(exclude, six.string_types) else (exclude or [])
@@ -89,12 +114,26 @@ class CRUDMixin(FormatMixin):
         if hasattr(cls, "deleted") and deleted is not None:
             kwargs["deleted"] = deleted
 
+        kwargs_for_func = {i[7:]: kwargs[i] for i in kwargs if i.startswith('__func_')}
+        kwargs = {i: kwargs[i] for i in kwargs if not i.startswith('__func_')}
+
         if fl:
             query = db_session.query(*[getattr(cls, k) for k in fl])
-            query = query.filter_by(**kwargs)
-            result = [{k: getattr(i, k) for k in fl} for i in query]
         else:
-            result = [i.to_dict() if to_dict else i for i in getattr(cls, 'query').filter_by(**kwargs)]
+            query = db_session.query(cls)
+
+        query = query.filter_by(**kwargs)
+        for i in kwargs_for_func:
+            func, key = i.split('__key_')
+            query = query.filter(getattr(getattr(cls, key), func)(kwargs_for_func[i]))
+
+        if only_query:
+            return query
+
+        if fl:
+            result = [{k: getattr(i, k) for k in fl} if to_dict else i for i in query]
+        else:
+            result = [i.to_dict() if to_dict else i for i in query]
 
         return result[0] if first and result else (None if first else result)
 
@@ -116,6 +155,10 @@ class TimestampMixin(object):
     updated_at = db.Column(db.DateTime, onupdate=lambda: datetime.datetime.now())
 
 
+class TimestampMixin2(object):
+    created_at = db.Column(db.DateTime, default=lambda: datetime.datetime.now(), index=True)
+
+
 class SurrogatePK(object):
     __table_args__ = {"extend_existing": True}
 
@@ -127,4 +170,8 @@ class Model(SoftDeleteMixin, TimestampMixin, CRUDMixin, db.Model, SurrogatePK):
 
 
 class CRUDModel(db.Model, CRUDMixin):
+    __abstract__ = True
+
+
+class Model2(TimestampMixin2, db.Model, CRUDMixin, SurrogatePK):
     __abstract__ = True

@@ -2,19 +2,17 @@
 
 import datetime
 
+import six
 import jwt
 from flask import abort
 from flask import current_app
 from flask import request
-from flask import session
 from flask_login import login_user, logout_user
 
 from api.lib.decorator import args_required
+from api.lib.perm.acl.cache import User
 from api.lib.perm.auth import auth_abandoned
-from api.models.acl import User, Role
 from api.resource import APIView
-from api.lib.perm.acl.role import RoleRelationCRUD
-from api.lib.perm.acl.cache import RoleCache
 
 
 class LoginView(APIView):
@@ -26,14 +24,9 @@ class LoginView(APIView):
     def post(self):
         username = request.values.get("username") or request.values.get("email")
         password = request.values.get("password")
-        if current_app.config.get('AUTH_WITH_LDAP'):
-            user, authenticated = User.query.authenticate_with_ldap(username, password)
-        else:
-            user, authenticated = User.query.authenticate(username, password)
-        if not user:
-            return abort(403, "User <{0}> does not exist".format(username))
+        user, authenticated = User.query.authenticate(username, password)
         if not authenticated:
-            return abort(403, "invalid username or password")
+            return abort(401, "invalid username or password")
 
         login_user(user)
 
@@ -43,19 +36,30 @@ class LoginView(APIView):
             'exp': datetime.datetime.now() + datetime.timedelta(minutes=24 * 60 * 7)},
             current_app.config['SECRET_KEY'])
 
-        role = Role.get_by(uid=user.uid, first=True, to_dict=False)
-        if role:
-            parent_ids = RoleRelationCRUD.recursive_parent_ids(role.id)
-            parent_roles = [RoleCache.get(i).name for i in parent_ids]
-        else:
-            parent_roles = []
-        session["acl"] = dict(uid=user.uid,
-                              avatar=user.avatar,
-                              userName=user.username,
-                              nickName=user.nickname,
-                              parentRoles=parent_roles)
+        return self.jsonify(token=token.decode() if six.PY2 else token, username=username)
 
-        return self.jsonify(token=token.decode())
+
+class AuthWithKeyView(APIView):
+    url_prefix = "/auth_with_key"
+
+    @args_required("key")
+    @args_required("secret")
+    @args_required("path")
+    @auth_abandoned
+    def post(self):
+        key = request.values.get('key')
+        secret = request.values.get('secret')
+        path = six.moves.urllib.parse.urlparse(request.values.get('path')).path
+        payload = request.values.get('payload') or {}
+
+        payload.pop('_key', None)
+        payload.pop('_secret', None)
+
+        req_args = [str(payload[k]) for k in sorted(payload.keys())]
+        user, authenticated = User.query.authenticate_with_key(key, secret, req_args, path)
+
+        return self.jsonify(user=user.to_dict() if user else {},
+                            authenticated=authenticated)
 
 
 class LogoutView(APIView):

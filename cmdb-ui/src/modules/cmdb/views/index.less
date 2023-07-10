@@ -1,0 +1,101 @@
+@import '~@/style/static.less';
+
+.vxe-header--row {
+  .vxe-header--column:hover {
+    background: #f2f2f2;
+  }
+  .is--sortable {
+    cursor: pointer;
+  }
+  .vxe-handle {
+    cursor: move;
+    // position: relative;
+    // display: inline-flex;
+    // flex-direction: row;
+    // align-items: center;
+    &:hover > svg {
+      display: inline !important;
+    }
+  }
+  .operation-icon {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    &:hover {
+      color: #2f54eb;
+    }
+  }
+}
+.ci-table-edit-select,
+.search-form-bar-types-select {
+  width: 100%;
+  height: 32px;
+  display: flex;
+  line-height: 32px;
+  align-items: center;
+  .ant-select-selection--single {
+    width: 100%;
+    height: 32px;
+  }
+  .ant-select-selection--multiple {
+    width: 100%;
+    height: 32px;
+    .ant-select-selection__rendered {
+      height: 100%;
+      ul {
+        width: 100%;
+        height: 100%;
+        overflow-y: hidden;
+        display: -webkit-box;
+        &::-webkit-scrollbar {
+          width: 5px;
+          height: 5px;
+        }
+        &::-webkit-scrollbar-track {
+          background-color: #dedede;
+          -webkit-border-radius: 1em;
+          -moz-border-radius: 1em;
+          border-radius: 1em;
+        }
+        &::-webkit-scrollbar-thumb {
+          background-color: #bfbfbf;
+          -webkit-border-radius: 1em;
+          -moz-border-radius: 1em;
+          border-radius: 1em;
+        }
+        & > li {
+          padding: 0px 10px 0px 5px;
+          box-sizing: border-box;
+          width: 75px;
+          float: unset;
+        }
+      }
+    }
+  }
+}
+
+.cmdb-views-header {
+  border-left: 4px solid #custom_colors[color_1];
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  .cmdb-views-header-title {
+    font-size: 16px;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.75);
+    margin-left: 10px;
+  }
+  .cmdb-views-header-metadata {
+    cursor: pointer;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.55);
+    margin-left: 20px;
+    &:hover {
+      color: #custom_colors[color_1];
+    }
+  }
+}

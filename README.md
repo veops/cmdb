@@ -1,117 +1,70 @@
-<h1 align="center">CMDB</h1>
-<div align="center">
-尽可能实现比较通用的运维资源的配置和管理
-</div>
+![基础资源视图](docs/logo.png)
 
-<div align="center">
-
-[![License](https://img.shields.io/badge/License-GPLv2-brightgreen)](https://github.com/pycook/cmdb/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/License-AGPLv3-brightgreen)](https://github.com/veops/cmdb/blob/master/LICENSE)
 [![UI](https://img.shields.io/badge/UI-Ant%20Design%20Pro%20Vue-brightgreen)](https://github.com/sendya/ant-design-pro-vue) 
 [![API](https://img.shields.io/badge/API-Flask-brightgreen)](https://github.com/pallets/flask) 
 
-</div>
 
 [English](README_en.md) / [中文](README.md)
 
-- 在线预览: [CMDB](http://121.42.12.46:8000)
+- 在线体验: <a href="https://cmdb.veops.cn" target="_blank">CMDB</a>
     - username: demo
     - password: 123456
     
 > **重要提示**: `master` 分支在开发过程中可能处于 *不稳定的状态* 。
-请通过[releases](https://github.com/pycook/cmdb/releases)获取
+请通过[releases](https://github.com/veops/cmdb/releases)获取
     
-Overview
-----
+系统介绍
+-------------
+### 整体架构
+<img src=docs/view.png width=700 height=450 />
+
 ### 相关文档
-- [设计文档](https://zhuanlan.zhihu.com/p/98453732)
-- [API文档](https://github.com/pycook/cmdb/tree/master/docs)
-- [树形视图实践](https://mp.weixin.qq.com/s/EflmmJ-qdUkddTx2hRt3pA)
+- <a href="https://zhuanlan.zhihu.com/p/98453732" target="_blank">设计文档</a>
+- <a href="https://github.com/veops/cmdb/tree/master/docs" target="_blank">API文档</a>
+- <a href="https://mp.weixin.qq.com/s/EflmmJ-qdUkddTx2hRt3pA" target="_blank">树形视图实践</a>
 
-### 3种类型视图
-1. 资源视图 - 模型的实例数据, 用户可订阅
-2. 树形视图 - 模型按字段分级, 用树形图方式展示, 用户可订阅
-3. 关系视图 - 模型之间的关系, 用树形图方式展示, **管理员可配置**
-
-##### 资源视图
-![基础资源视图](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-ci.jpeg) 
-
-##### 树形视图
-![树形视图](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-tree.jpeg) 
-
-##### 关系视图
-![关系视图](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-relation.jpeg) 
-
-##### 用户订阅
-![用户订阅](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-preference.jpeg)
-
-##### 关系视图配置
-![关系视图配置](https://raw.githubusercontent.com/pycook/cmdb/master/cmdb-ui/public/cmdb-relation-define.jpeg)
-
-Docker一键快速构建
-----
-- 进入主目录（先安装docker环境）
-```
-    docker-compose up -d
-```
-
-- 浏览器打开: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-
-
-本地搭建: 环境和依赖
-----
-- 存储: mysql, redis
-- python版本: python2.7, >=python3.6
-
-Install
-----
-- 启动mysql服务, redis服务
-
-- 创建数据库cmdb
-- 拉取代码
-```bash
-git clone https://github.com/pycook/cmdb.git
-cd cmdb
-cp cmdb-api/settings.py.example cmdb-api/settings.py
-```
-**设置cmdb-api/settings.py里的database**
-
-- 安装库
-  - 后端: ```cd cmdb-api && pipenv run pipenv install && cd ..```
-  - 前端: ```cd cmdb-ui && yarn install && cd ..```
+### 特点
+- 灵活性
+   1. 规范并统一纳管复杂数据资产
+   2. 自动发现、入库IT资产
+- 安全性
+  1. 细粒度访问控制
+  2. 完备操作日志
+- 多应用
+  1. 丰富视图展示维度
+  2. 提供Restful API
+  3. 自定义字段触发器
   
-- 创建数据库表: 进入**cmdb-api**目录执行 ```pipenv run flask db-setup && pipenv run flask init-cache```
-- 可以将docs/cmdb.sql导入到数据库里，登录用户和密码分别是:demo/123456
-  
-- 启动服务
-  - 后端: 进入**cmdb-api**目录执行 ```pipenv run flask run -h 0.0.0.0```
-  - 前端: 进入**cmdb-ui**目录执行```yarn run serve```
-  - worker: 进入**cmdb-api**目录执行 ```pipenv run celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1```
-  
-  - 浏览器打开:  [http://127.0.0.1:8000](http://127.0.0.1:8000)
-    - 如果是非本机访问, 要修改**cmdb-ui/.env**里**VUE_APP_API_BASE_URL**里的IP地址为后端服务的ip地址
+### 主要功能
+- 模型属性支持索引、多值、默认排序、字体颜色，支持计算属性
+- 支持自动发现、定时巡检、文件导入
+- 支持资源、树形、关系视图展示
+- 支持模型间关系配置和展示
+- 细粒度访问控制，完备的操作日志
+- 支持跨模型搜索
+
+### 系统概览
+- 服务树
+![1](docs/0.png "首页展示")
+
+[查看更多展示](docs/screenshot.md)
+
+### 更多功能
 
 
-Install by Makefile
+> 也欢迎移步[维易科技官网](https://www.veops.cn)，发现更多免费运维系统。
+
+安装
 ----
-- 启动mysql服务, redis服务
-
-- 创建数据库cmdb
-- 拉取代码
-```bash
-git clone https://github.com/pycook/cmdb.git
-cd cmdb
-cp cmdb-api/settings.py.example cmdb-api/settings.py
-```
-**设置cmdb-api/settings.py里的database**
-
-- 顺序在cmdb目录下执行
-    - 环境: ```make env```
-    - 启动API: ```make api```
-    - 启动UI: ```make ui```
-    - 启动worker: ```make worker```
+### [Docker一键快速构建](docs/docker.md)
+### [本地搭建](docs/local.md)
+### [Makefile安装](docs/makefile.md)
 
 
-----
+
+
+----------------------
 _**欢迎加入CMDB运维开发QQ群（336164978）**_
 
-![QQ群](cmdb-ui/public/qr_code.jpg)
+![QQ群](docs/qr_code.jpg)

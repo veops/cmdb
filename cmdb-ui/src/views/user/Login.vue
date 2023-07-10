@@ -1,66 +1,61 @@
 <template>
-  <div class="main">
-    <a-form
-      id="formLogin"
-      class="user-layout-login"
-      ref="formLogin"
-      :form="form"
-      @submit="handleSubmit"
-    >
-      <a-tabs
-        :activeKey="customActiveKey"
-        :tabBarStyle="{ textAlign: 'center', borderBottom: 'unset' }"
-        @change="handleTabClick"
-      >
-        <a-tab-pane key="tab1" :tab="$t('login.loginHeader')">
-          <a-form-item>
-            <a-input
-              size="large"
-              type="text"
-              :placeholder="$t('login.loginName')"
-              v-decorator="[
-                'username',
-                {rules: [{ required: true, message: $t('login.loginNameRequired') }, { validator: handleUsernameOrEmail }], validateTrigger: 'change'}
-              ]"
-            >
-              <a-icon slot="prefix" type="user" :style="{ color: 'rgba(0,0,0,.25)' }"/>
-            </a-input>
-          </a-form-item>
+  <div class="ops-login">
+    <div class="ops-login-left">
+      <span>维易科技<br />让运维更简单</span>
+    </div>
+    <div class="ops-login-right">
+      <img src="../../assets/logo_VECMDB.png" />
+      <a-form
+        id="formLogin"
+        ref="formLogin"
+        :form="form"
+        @submit="handleSubmit"
+        hideRequiredMark
+        :colon="false">
+        <a-form-item label="用户名/邮箱">
+          <a-input
+            size="large"
+            type="text"
+            class="ops-input"
+            v-decorator="[
+              'username',
+              {
+                rules: [{ required: true, message: '请输入用户名或邮箱' }, { validator: handleUsernameOrEmail }],
+                validateTrigger: 'change',
+              },
+            ]"
+          >
+          </a-input>
+        </a-form-item>
 
-          <a-form-item>
-            <a-input
-              size="large"
-              type="password"
-              autocomplete="false"
-              :placeholder="$t('login.password')"
-              v-decorator="[
-                'password',
-                {rules: [{ required: true, message: $t('login.passwordRequired') }], validateTrigger: 'blur'}
-              ]"
-            >
-              <a-icon slot="prefix" type="lock" :style="{ color: 'rgba(0,0,0,.25)' }"/>
-            </a-input>
-          </a-form-item>
-        </a-tab-pane>
-      </a-tabs>
+        <a-form-item label="密码">
+          <a-input
+            size="large"
+            type="password"
+            autocomplete="false"
+            class="ops-input"
+            v-decorator="['password', { rules: [{ required: true, message: '请输入密码' }], validateTrigger: 'blur' }]"
+          >
+          </a-input>
+        </a-form-item>
 
-      <a-form-item>
-        <a-checkbox v-decorator="['rememberMe']">{{ $t('login.autoLogin') }}</a-checkbox>
-      </a-form-item>
+        <a-form-item>
+          <a-checkbox v-decorator="['rememberMe', { valuePropName: 'checked' }]">自动登录</a-checkbox>
+        </a-form-item>
 
-      <a-form-item style="margin-top:24px">
-        <a-button
-          size="large"
-          type="primary"
-          htmlType="submit"
-          class="login-button"
-          :loading="state.loginBtn"
-          :disabled="state.loginBtn"
-        >{{ $t('button.submit') }}</a-button>
-      </a-form-item>
-
-    </a-form>
-
+        <a-form-item style="margin-top: 24px">
+          <a-button
+            size="large"
+            type="primary"
+            htmlType="submit"
+            class="login-button"
+            :loading="state.loginBtn"
+            :disabled="state.loginBtn"
+          >确定</a-button
+          >
+        </a-form-item>
+      </a-form>
+    </div>
   </div>
 </template>
 
@@ -70,7 +65,7 @@ import { mapActions } from 'vuex'
 import { timeFix } from '@/utils/util'
 
 export default {
-  data () {
+  data() {
     return {
       customActiveKey: 'tab1',
       loginBtn: false,
@@ -84,16 +79,15 @@ export default {
         loginBtn: false,
         // login type: 0 email, 1 username, 2 telephone
         loginType: 0,
-        smsSendBtn: false
-      }
+        smsSendBtn: false,
+      },
     }
   },
-  created () {
-  },
+  created() {},
   methods: {
     ...mapActions(['Login', 'Logout']),
     // handler
-    handleUsernameOrEmail (rule, value, callback) {
+    handleUsernameOrEmail(rule, value, callback) {
       const { state } = this
       const regex = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/
       if (regex.test(value)) {
@@ -103,17 +97,13 @@ export default {
       }
       callback()
     },
-    handleTabClick (key) {
-      this.customActiveKey = key
-      // this.form.resetFields()
-    },
-    handleSubmit (e) {
+    handleSubmit(e) {
       e.preventDefault()
       const {
         form: { validateFields },
         state,
         customActiveKey,
-        Login
+        Login,
       } = this
 
       state.loginBtn = true
@@ -122,13 +112,13 @@ export default {
 
       validateFields(validateFieldsKey, { force: true }, (err, values) => {
         if (!err) {
+          console.log('login form', values)
           const loginParams = { ...values }
           delete loginParams.username
           loginParams[!state.loginType ? 'email' : 'username'] = values.username
           loginParams.password = md5(values.password)
           Login(loginParams)
             .then((res) => this.loginSuccess(res))
-            .catch(err => this.requestFailed(err))
             .finally(() => {
               state.loginBtn = false
             })
@@ -140,69 +130,54 @@ export default {
       })
     },
 
-    loginSuccess (res) {
+    loginSuccess(res) {
+      console.log(res)
       this.$router.push({ path: this.$route.query.redirect })
+      // 延迟 1 秒显示欢迎信息
       setTimeout(() => {
         this.$notification.success({
-          message: this.$t('login.welcome'),
-          description: `${timeFix()}，` + this.$t('login.welcomeBack')
+          message: '欢迎',
+          description: `${timeFix()}，欢迎回来`,
         })
       }, 1000)
     },
-    requestFailed (err) {
-      this.$notification['error']({
-        message: this.$t('tip.error'),
-        description: ((err.response || {}).data || {}).message || this.$t('tip.requestFailed'),
-        duration: 4
-      })
-    }
-  }
+  },
 }
 </script>
 
 <style lang="less" scoped>
-.user-layout-login {
-  label {
-    font-size: 14px;
-  }
-
-  .getCaptcha {
-    display: block;
-    width: 100%;
-    height: 40px;
-  }
-
-  .forge-password {
-    font-size: 14px;
-  }
-
-  button.login-button {
-    padding: 0 15px;
-    font-size: 16px;
-    height: 40px;
-    width: 100%;
-  }
-
-  .user-login-other {
-    text-align: left;
-    margin-top: 24px;
-    line-height: 22px;
-
-    .item-icon {
-      font-size: 24px;
-      color: rgba(0, 0, 0, 0.2);
-      margin-left: 16px;
-      vertical-align: middle;
-      cursor: pointer;
-      transition: color 0.3s;
-
-      &:hover {
-        color: #1890ff;
-      }
+.ops-login {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  min-width: 1000px;
+  overflow-x: auto;
+  .ops-login-left {
+    position: relative;
+    width: 50%;
+    background: url('../../assets/login_bg.png') no-repeat;
+    background-position: center;
+    background-size: cover;
+    > span {
+      color: white;
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.75vw;
+      text-align: center;
     }
-
-    .register {
-      float: right;
+  }
+  .ops-login-right {
+    width: 50%;
+    position: relative;
+    padding: 10%;
+    > img {
+      width: 70%;
+      margin-left: 15%;
+    }
+    .login-button {
+      width: 100%;
     }
   }
 }
