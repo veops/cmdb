@@ -21,7 +21,7 @@ Overview
 
 ### Document
 - <a href="https://zhuanlan.zhihu.com/p/98453732" target="_blank">Design Document</a>
-- <a href="https://github.com/veops/cmdb/tree/master/docs" target="_blank">API Documentation</a>
+- <a href="https://github.com/veops/cmdb/tree/master/docs/cmdb_api.md" target="_blank">API Documentation</a>
 - <a href="https://mp.weixin.qq.com/s/EflmmJ-qdUkddTx2hRt3pA" target="_blank">Practice of Tree View</a>
 
 
