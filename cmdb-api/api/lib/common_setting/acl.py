@@ -41,7 +41,8 @@ class ACLManager(object):
     def get_all_roles(self):
         numfound, roles = RoleCRUD.search(
             None, self.app_name, 1, 999999, True, True, False)
-        return roles
+
+        return [i.to_dict() for i in roles]
 
     def remove_user_from_role(self, user_rid, payload):
         app_id = self.app_name

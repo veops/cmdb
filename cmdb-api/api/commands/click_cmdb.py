@@ -41,6 +41,15 @@ from api.models.cmdb import PreferenceRelationView
 def cmdb_init_cache():
     db.session.remove()
 
+    ci_relations = CIRelation.get_by(to_dict=False)
+    relations = dict()
+    for cr in ci_relations:
+        relations.setdefault(cr.first_ci_id, {}).update({cr.second_ci_id: cr.second_ci.type_id})
+    for i in relations:
+        relations[i] = json.dumps(relations[i])
+    if relations:
+        rd.create_or_update(relations, REDIS_PREFIX_CI_RELATION)
+
     if current_app.config.get("USE_ES"):
         from api.extensions import es
         from api.models.cmdb import Attribute
@@ -82,15 +91,6 @@ def cmdb_init_cache():
             es.create(ci_dict)
         else:
             rd.create_or_update({ci.id: json.dumps(ci_dict)}, REDIS_PREFIX_CI)
-
-    ci_relations = CIRelation.get_by(to_dict=False)
-    relations = dict()
-    for cr in ci_relations:
-        relations.setdefault(cr.first_ci_id, {}).update({cr.second_ci_id: cr.second_ci.type_id})
-    for i in relations:
-        relations[i] = json.dumps(relations[i])
-    if relations:
-        rd.create_or_update(relations, REDIS_PREFIX_CI_RELATION)
 
     db.session.remove()
 
