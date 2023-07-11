@@ -17,7 +17,7 @@
 Overview
 -------------
 ### Technical Architecture
-<img src=docs/view.png width=700 height=450 />
+<img src=docs/view.png />
 
 ### Document
 - <a href="https://zhuanlan.zhihu.com/p/98453732" target="_blank">Design Document</a>

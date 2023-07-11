@@ -17,7 +17,7 @@
 系统介绍
 -------------
 ### 整体架构
-<img src=docs/view.png width=700 height=450 />
+<img src=docs/view.png />
 
 ### 相关文档
 - <a href="https://zhuanlan.zhihu.com/p/98453732" target="_blank">设计文档</a>
@@ -62,8 +62,6 @@
 ### [Docker一键快速构建](docs/docker.md)
 ### [本地搭建](docs/local.md)
 ### [Makefile安装](docs/makefile.md)
-
-
 
 
 ----------------------

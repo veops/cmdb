@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+
 from api.extensions import db
 from api.lib.database import Model, TimestampMixin, SoftDeleteMixin, CRUDMixin
 
