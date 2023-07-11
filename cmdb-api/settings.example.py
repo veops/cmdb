@@ -58,7 +58,12 @@ DEFAULT_MAIL_SENDER = ''
 CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/2"
 BROKER_URL = 'redis://127.0.0.1:6379/2'
 BROKER_VHOST = '/'
-
+ONCE = {
+    'backend': 'celery_once.backends.Redis',
+    'settings': {
+        'url': BROKER_URL,
+    }
+}
 
 # # SSO
 CAS_SERVER = "http://sso.xxx.com"

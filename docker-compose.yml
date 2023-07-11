@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   cmdb-db:
-    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-db:1.0
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-db:3.0
     container_name: cmdb-db
     environment:
       TZ: Asia/Shanghai
@@ -12,81 +12,55 @@ services:
       MYSQL_PASSWORD: '123456'
     volumes:
       - db-data:/var/lib/mysql
-      - ./docs/cmdb_en.sql:/docker-entrypoint-initdb.d/cmdb.sql
+      - ./docs/mysqld.cnf:/etc/mysql/conf.d/mysqld.cnf
+      - ./docs/cmdb.sql:/docker-entrypoint-initdb.d/cmdb.sql
     networks:
       new:
         aliases:
           - mysql
+    ports:
+      - '23306:3306'
 
   cmdb-cache:
-    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-cache:1.0
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-cache:3.0
     container_name: cmdb-cache
     networks:
       new:
         aliases:
           - redis
 
-  cmdb-search:
-    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-search:1.2
-#    build:
-#      context: .
-#      target: cmdb-search
-    container_name: cmdb-search
-    environment:
-      - discovery.type=single-node
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    volumes:
-      - esdata:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
-    networks:
-      new:
-        aliases:
-          - cmdb-search
-
   cmdb-api:
-    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-api:2.2
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:3.0
 #    build:
 #      context: .
 #      target: cmdb-api
     container_name: cmdb-api
     environment:
       TZ: Asia/Shanghai
-      WAIT_HOSTS: cmdb-db:3306, cmdb-cache:6379, cmdb-search:9200
+      WAIT_HOSTS: cmdb-db:3306, cmdb-cache:6379
     command:
       - /bin/sh
       - -c
       - |
-        sed -i "s#USE_ES = False#USE_ES = True#g" settings.py
         sed -i "s#USE_ACL = False#USE_ACL = True#g" settings.py
-        sed -i "s#ES_HOST = '127.0.0.1'#ES_HOST = 'cmdb-search'#g" settings.py
         /wait
         sleep 5
         gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000 -D
-        flask init-cache
-        flask init-acl
+        flask cmdb-init-cache
+        flask cmdb-init-acl
 
-        celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1
+        celery worker -A celery_worker.celery -E -Q one_cmdb_async --concurrency=2 -D
+        celery worker -A celery_worker.celery -E -Q acl_async --concurrency=2
     depends_on:
       - cmdb-db
       - cmdb-cache
-      - cmdb-search
     networks:
       new:
         aliases:
           - cmdb-api
 
   cmdb-ui:
-    image: registry.cn-qingdao.aliyuncs.com/pycook/cmdb-ui:2.2
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:3.0
 #    build:
 #      context: .
 #      target: cmdb-ui
@@ -112,7 +86,6 @@ services:
 
 volumes:
   db-data:
-  esdata:
 
 networks:
   new:
