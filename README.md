@@ -21,7 +21,7 @@
 
 ### 相关文档
 - <a href="https://zhuanlan.zhihu.com/p/98453732" target="_blank">设计文档</a>
-- <a href="https://github.com/veops/cmdb/tree/master/docs" target="_blank">API文档</a>
+- <a href="https://github.com/veops/cmdb/tree/master/docs/cmdb_api.md" target="_blank">API文档</a>
 - <a href="https://mp.weixin.qq.com/s/EflmmJ-qdUkddTx2hRt3pA" target="_blank">树形视图实践</a>
 
 ### 特点

@@ -4,3 +4,5 @@
 ```
 
 - 浏览器打开: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- username: demo 或者 admin
+- password: 123456
