@@ -444,7 +444,7 @@ class AutoDiscoveryCIType(Model):
     __tablename__ = "c_ad_ci_types"
 
     type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'))
-    adr_id = db.Column(db.Integer, db.ForeignKey('c_ad_ci_types.id'))
+    adr_id = db.Column(db.Integer, db.ForeignKey('c_ad_rules.id'))
 
     attributes = db.Column(db.JSON)  # {ad_key: cmdb_key}
 

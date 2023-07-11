@@ -95,7 +95,7 @@ class Search(object):
         for _v in new_v:
             ci_type = CITypeCache.get(_v)
 
-            if len(new_v) == 1 and not self.sort and ci_type.default_order_attr:
+            if len(new_v) == 1 and not self.sort and ci_type and ci_type.default_order_attr:
                 self.sort = ci_type.default_order_attr
 
             if ci_type is not None:
