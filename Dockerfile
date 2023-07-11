@@ -1,5 +1,5 @@
 # ================================= UI ================================
-FROM node:alpine AS builder
+FROM node:16.0.0-alpine AS builder
 
 LABEL description="cmdb-ui"
 
@@ -18,20 +18,20 @@ COPY --from=builder /data/apps/cmdb-ui/dist /etc/nginx/html/
 
 
 # ================================= API ================================
-FROM python:3.7-alpine AS cmdb-api
+FROM python:3.8-alpine AS cmdb-api
 
-LABEL description="Python3.7,cmdb"
+LABEL description="Python3.8,cmdb"
 
 COPY cmdb-api /data/apps/cmdb
 
 WORKDIR /data/apps/cmdb
 
-RUN apk add --no-cache tzdata gcc musl-dev libffi-dev openldap-dev
+RUN apk add --no-cache tzdata gcc musl-dev libffi-dev openldap-dev python3-dev jpeg-dev zlib-dev build-base
 
 ENV TZ=Asia/Shanghai
 
 RUN pip install  --no-cache-dir -r requirements.txt \
-    && cp ./settings.py.example settings.py \
+    && cp ./settings.example.py settings.py \
     && sed -i "s#{user}:{password}@127.0.0.1:3306/{db}#cmdb:123456@mysql:3306/cmdb#g" settings.py \
     && sed -i "s#redis://127.0.0.1#redis://redis#g" settings.py \
     && sed -i 's#CACHE_REDIS_HOST = "127.0.0.1"#CACHE_REDIS_HOST = "redis"#g' settings.py
