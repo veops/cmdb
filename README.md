@@ -17,7 +17,7 @@
 
 ### 整体架构
 
-<img src=docs/view.png />
+<img src=docs/view.jpg />
 
 ### 相关文档
 
@@ -55,15 +55,15 @@
 
 [查看更多展示](docs/screenshot.md)
 
-### 接入公司
 
-> 欢迎使用cmdb的公司，在 [#112](https://github.com/veops/cmdb/issues/112) 登记
 
 ### 更多功能
 
 > 也欢迎移步[维易科技官网](https://www.veops.cn)，发现更多免费运维系统。
 
+## 接入公司
 
+> 欢迎使用cmdb的公司，在 [#112](https://github.com/veops/cmdb/issues/112) 登记
 ## 推荐项目
 
 [Spug - 开源轻量自动化运维平台](https://github.com/openspug/spug)
