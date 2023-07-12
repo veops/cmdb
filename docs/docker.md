@@ -1,4 +1,5 @@
-- 进入主目录（先安装docker环境）
+- 进入主目录（先安装 docker 环境）
+
 ```
     docker-compose up -d
 ```
