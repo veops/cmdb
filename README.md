@@ -55,9 +55,14 @@
 
 [查看更多展示](docs/screenshot.md)
 
+### 接入公司
+
+> 欢迎使用cmdb的公司，在 [#112](https://github.com/veops/cmdb/issues/112) 登记
+
 ### 更多功能
 
 > 也欢迎移步[维易科技官网](https://www.veops.cn)，发现更多免费运维系统。
+
 
 ## 推荐项目
 
@@ -73,6 +78,6 @@
 
 ---
 
-_**欢迎加入 CMDB 运维开发 QQ 群（336164978）**_
+_**欢迎关注我们的公众号，点击联系我们，加入微信、qq运维群，获得更多产品、行业相关资讯**_
 
-![QQ群](docs/qr_code.jpg)
+![公众号](docs/qrcode_for_gzh.jpg)
