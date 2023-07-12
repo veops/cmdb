@@ -18,7 +18,6 @@ BCRYPT_LOG_ROUNDS = env.int("BCRYPT_LOG_ROUNDS", default=13)
 DEBUG_TB_ENABLED = DEBUG
 DEBUG_TB_INTERCEPT_REDIRECTS = False
 
-
 ERROR_CODES = [400, 401, 403, 404, 405, 500, 502]
 
 # # database
@@ -42,7 +41,6 @@ CACHE_DEFAULT_TIMEOUT = 3000
 # # log
 LOG_PATH = './logs/app.log'
 LOG_LEVEL = 'DEBUG'
-
 
 # # mail
 MAIL_SERVER = ''
@@ -90,5 +88,6 @@ USE_ACL = False
 ES_HOST = '127.0.0.1'
 USE_ES = False
 
-
 BOOL_TRUE = ['true', 'TRUE', 'True', True, '1', 1, "Yes", "YES", "yes", 'Y', 'y']
+
+CMDB_API = "http://127.0.0.1:5000/api/v0.1"
