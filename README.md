@@ -16,15 +16,19 @@
     
 系统介绍
 -------------
+
 ### 整体架构
+
 <img src=docs/view.png />
 
 ### 相关文档
+
 - <a href="https://zhuanlan.zhihu.com/p/98453732" target="_blank">设计文档</a>
 - <a href="https://github.com/veops/cmdb/tree/master/docs/cmdb_api.md" target="_blank">API文档</a>
 - <a href="https://mp.weixin.qq.com/s/EflmmJ-qdUkddTx2hRt3pA" target="_blank">树形视图实践</a>
 
 ### 特点
+
 - 灵活性
    1. 规范并统一纳管复杂数据资产
    2. 自动发现、入库IT资产
@@ -37,6 +41,7 @@
   3. 自定义字段触发器
   
 ### 主要功能
+
 - 模型属性支持索引、多值、默认排序、字体颜色，支持计算属性
 - 支持自动发现、定时巡检、文件导入
 - 支持资源、树形、关系视图展示
@@ -45,7 +50,9 @@
 - 支持跨模型搜索
 
 ### 系统概览
+
 - 服务树
+
 ![1](docs/0.png "首页展示")
 
 [查看更多展示](docs/screenshot.md)
@@ -55,16 +62,21 @@
 > 也欢迎移步[维易科技官网](https://www.veops.cn)，发现更多免费运维系统。
 
 ## 推荐项目
+
 [Spug - 开源轻量自动化运维平台](https://github.com/openspug/spug)
 
 安装
 ----
+
 ### [Docker一键快速构建](docs/docker.md)
+
 ### [本地搭建](docs/local.md)
+
 ### [Makefile安装](docs/makefile.md)
 
 
 ----------------------
+
 _**欢迎加入CMDB运维开发QQ群（336164978）**_
 
 ![QQ群](docs/qr_code.jpg)
