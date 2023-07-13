@@ -174,7 +174,7 @@ def add_user(user, password, mail):
     assert user is not None
     assert password is not None
     assert mail is not None
-    UserCRUD.add(username=user, password=password, email=mail, is_admin=is_admin)
+    UserCRUD.add(username=user, password=password, email=mail)
 
 
 @click.command()
