@@ -162,18 +162,14 @@ def cmdb_init_acl():
     '--mail',
     help='mail'
 )
-@click.option(
-    '--is_admin',
-    is_flag=True
-)
 @with_appcontext
-def add_user(user, password, mail, is_admin):
+def add_user(user, password, mail):
     """
     create a user
 
     is_admin: default is False
 
-    Example:  flask add-user -u <username> -p <password> -m <mail>  [--is_admin]
+    Example:  flask add-user -u <username> -p <password> -m <mail>
     """
     assert user is not None
     assert password is not None
