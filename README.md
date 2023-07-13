@@ -63,10 +63,7 @@
 
 ## 接入公司
 
-> 欢迎使用cmdb的公司，在 [#112](https://github.com/veops/cmdb/issues/112) 登记
-## 推荐项目
-
-[Spug - 开源轻量自动化运维平台](https://github.com/openspug/spug)
+> 欢迎使用CMDB的公司，在 [#112](https://github.com/veops/cmdb/issues/112) 登记
 
 ## 安装
 
