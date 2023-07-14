@@ -46,15 +46,13 @@
       :column-config="{ resizable: true }"
     >
       <vxe-column field="email" title="邮箱" min-width="120" fixed="left"></vxe-column>
-      <vxe-column field="username" title="用户名" min-width="80" ></vxe-column>
+      <vxe-column field="username" title="用户名" min-width="80"></vxe-column>
       <vxe-column field="nickname" title="姓名" min-width="80"></vxe-column>
       <vxe-column field="password" title="密码" min-width="80"></vxe-column>
       <vxe-column field="sex" title="性别" min-width="60"></vxe-column>
       <vxe-column field="mobile" title="手机号" min-width="80"></vxe-column>
       <vxe-column field="position_name" title="岗位" min-width="80"></vxe-column>
       <vxe-column field="department_name" title="部门" min-width="80"></vxe-column>
-      <vxe-column field="current_company" v-if="useDFC" title="目前所属主体" min-width="120"></vxe-column>
-      <vxe-column field="dfc_entry_date" v-if="useDFC" title="初始入职日期" min-width="120"></vxe-column>
       <vxe-column field="entry_date" title="目前主体入职日期" min-width="120"></vxe-column>
       <vxe-column field="is_internship" title="正式/实习生" min-width="120"></vxe-column>
       <vxe-column field="leave_date" title="离职日期" min-width="120"></vxe-column>
@@ -94,7 +92,6 @@
 <script>
 import { downloadExcel, excel2Array } from '@/utils/download'
 import { importEmployee } from '@/api/employee'
-import appConfig from '@/config/app'
 export default {
   name: 'BatchUpload',
   data() {
@@ -189,7 +186,6 @@ export default {
       has_error: false,
       allCount: 0,
       errorCount: 0,
-      useDFC: appConfig.useDFC,
     }
   },
   methods: {
@@ -215,12 +211,14 @@ export default {
               rest[key] = rest[key] + ''
             }
           })
-          rest.educational_experience = [{
-            'school': rest.school,
-            'major': rest.major,
-            'education': rest.education,
-            'graduation_year': rest.graduation_year
-            }]
+          rest.educational_experience = [
+            {
+              school: rest.school,
+              major: rest.major,
+              education: rest.education,
+              graduation_year: rest.graduation_year,
+            },
+          ]
           delete rest.school
           delete rest.major
           delete rest.education
@@ -254,8 +252,7 @@ export default {
       const data = [
         [
           {
-            v:
-              '1、表头标“*”的红色字体为必填项\n2、邮箱、用户名不允许重复\n3、登录密码：密码由6-20位字母、数字组成\n4、部门：上下级部门间用"/"隔开，且从最上级部门开始，例如“深圳分公司/IT部/IT二部”。如出现相同的部门，则默认导入组织架构中顺序靠前的部门',
+            v: '1、表头标“*”的红色字体为必填项\n2、邮箱、用户名不允许重复\n3、登录密码：密码由6-20位字母、数字组成\n4、部门：上下级部门间用"/"隔开，且从最上级部门开始，例如“深圳分公司/IT部/IT二部”。如出现相同的部门，则默认导入组织架构中顺序靠前的部门',
             t: 's',
             s: {
               alignment: {
@@ -420,13 +417,9 @@ export default {
           },
         ],
       ]
-      if (this.useDFC) {
-        downloadExcel(data, '员工导入模板')
-      } else {
-        data[1] = data[1].filter(item => item['v'] !== '目前所属主体')
-        data[1] = data[1].filter(item => item['v'] !== '初始入职日期')
-        downloadExcel(data, '员工导入模板')
-      }
+      data[1] = data[1].filter((item) => item['v'] !== '目前所属主体')
+      data[1] = data[1].filter((item) => item['v'] !== '初始入职日期')
+      downloadExcel(data, '员工导入模板')
     },
     customRequest(data) {
       this.fileList = [data.file]
@@ -435,22 +428,12 @@ export default {
         this.importData = res.slice(2).map((item) => {
           const obj = {}
           // 格式化日期字段
-          if (this.useDFC) {
-            item[9] = this.formatDate(item[9]) // 初始入职日期日期
-            item[10] = this.formatDate(item[10]) // 目前主体入职日期
-            item[12] = this.formatDate(item[12]) // 离职日期
-            item[30] = this.formatDate(item[30]) // 毕业年份
-            item.forEach((ele, index) => {
-              obj[this.dfc_importParamsList[index]] = ele
-            })
-          } else {
-            item[8] = this.formatDate(item[8]) // 目前主体入职日期
-            item[10] = this.formatDate(item[10]) // 离职日期
-            item[28] = this.formatDate(item[28]) // 毕业年份
+          item[8] = this.formatDate(item[8]) // 目前主体入职日期
+          item[10] = this.formatDate(item[10]) // 离职日期
+          item[28] = this.formatDate(item[28]) // 毕业年份
           item.forEach((ele, index) => {
             obj[this.common_importParamsList[index]] = ele
           })
-          }
           return obj
         })
         this.currentStep = 2
@@ -474,17 +457,17 @@ export default {
         month = month > 9 ? month : `0${month}`
         day = day > 9 ? day : `0${day}`
         const hash = {
-          'Y': year,
-          'm': month,
-          'd': day,
+          Y: year,
+          m: month,
+          d: day,
         }
-        return format.replace(/\w/g, o => {
+        return format.replace(/\w/g, (o) => {
           return hash[o]
         })
       } else {
         return null
       }
-    }
+    },
   },
 }
 </script>
