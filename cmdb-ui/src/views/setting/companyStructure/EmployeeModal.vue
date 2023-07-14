@@ -138,29 +138,6 @@
         />
       </a-form-model-item>
       <a-form-model-item
-        v-if="useDFC && attributes.findIndex((v) => v == 'current_company') !== -1"
-        ref="current_company"
-        label="目前所属主体"
-        prop="current_company"
-        :style="formModalItemStyle"
-      >
-        <a-input v-model="employeeFormData.current_company" placeholder="请输入目前所属主体" />
-      </a-form-model-item>
-      <a-form-model-item
-        v-if="useDFC && attributes.findIndex((v) => v == 'dfc_entry_date') !== -1"
-        ref="dfc_entry_date"
-        label="初始入职日期"
-        prop="dfc_entry_date"
-        :style="formModalItemStyle"
-      >
-        <a-date-picker
-          placeholder="请选择初始入职日期"
-          v-model="employeeFormData.dfc_entry_date"
-          :style="{ width: '100%' }"
-          @change="onChange($event, 'dfc_entry_date')"
-        ></a-date-picker>
-      </a-form-model-item>
-      <a-form-model-item
         ref="entry_date"
         label="目前主体入职日期"
         prop="entry_date"
@@ -405,9 +382,9 @@
         :style="{ display: 'inline-block', width: '98%', margin: '0 7px 24px' }"
         v-if="
           attributes.findIndex((v) => v == 'bank_card_number') !== -1 ||
-            attributes.findIndex((v) => v == 'bank_card_name') !== -1 ||
-            attributes.findIndex((v) => v == 'opening_bank') !== -1 ||
-            attributes.findIndex((v) => v == 'account_opening_location') !== -1
+          attributes.findIndex((v) => v == 'bank_card_name') !== -1 ||
+          attributes.findIndex((v) => v == 'opening_bank') !== -1 ||
+          attributes.findIndex((v) => v == 'account_opening_location') !== -1
         "
       >
         <a-row :gutter="[8, { xs: 8 }]">
@@ -439,7 +416,6 @@ import { postEmployee, putEmployee } from '@/api/employee'
 import Bus from './eventBus/bus'
 import EmployeeTreeSelect from '../components/employeeTreeSelect.vue'
 import DepartmentTreeSelect from '../components/departmentTreeSelect.vue'
-import appConfig from '@/config/app'
 import moment from 'moment'
 import { v4 as uuidv4 } from 'uuid'
 export default {
@@ -477,7 +453,6 @@ export default {
         ],
       },
       type: 'add',
-      useDFC: appConfig.useDFC,
       educational_experience: [],
       children_information: [],
       file_is_show: true,
