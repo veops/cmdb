@@ -7,7 +7,14 @@
     @close="() => (drawerVisible = false)"
     :hasFooter="false"
   >
-    <vxe-table :max-height="`${windowHeight - 150}px`" :data="resPerms" ref="rTable">
+    <vxe-table
+      stripe
+      size="mini"
+      class="ops-stripe-table"
+      :max-height="`${windowHeight - 150}px`"
+      :data="resPerms"
+      ref="rTable"
+    >
       <vxe-column
         field="name"
         title="角色名"
@@ -57,6 +64,10 @@
           </a-button>
         </template>
       </vxe-column>
+      <template slot="empty">
+        <img :src="require(`@/assets/data_empty.png`)" />
+        <p style="font-size: 14px; line-height: 17px; color: rgba(0, 0, 0, 0.6)">暂无数据</p>
+      </template>
     </vxe-table>
     <!-- <a-table
       :columns="columns"

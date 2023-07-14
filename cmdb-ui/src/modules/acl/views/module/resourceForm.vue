@@ -24,8 +24,12 @@
 
       <a-form-item label="是否组">
         <a-radio-group v-model="isGroup">
-          <a-radio :value="true"> 是 </a-radio>
-          <a-radio :value="false"> 否 </a-radio>
+          <a-radio :value="true">
+            是
+          </a-radio>
+          <a-radio :value="false">
+            否
+          </a-radio>
         </a-radio-group>
       </a-form-item>
       <a-form-item>
@@ -40,11 +44,12 @@
 </template>
 
 <script>
-import { addResource, searchResourceType, addResourceGroup } from '@/modules/acl/api/resource'
+/* eslint-disable */
+import { addResource, searchResourceType } from '@/modules/acl/api/resource'
+import { addResourceGroup } from '@/modules/acl/api/resource'
 
 export default {
   name: 'ResourceForm',
-  components: {},
   data() {
     return {
       drawerTitle: '新增资源',
@@ -119,7 +124,7 @@ export default {
     // },
   },
   watch: {
-    '$route.name': function (newValue, oldValue) {
+    '$route.name': function(newValue, oldValue) {
       this.getAllResourceTypes()
     },
   },
