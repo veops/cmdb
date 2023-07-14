@@ -3,6 +3,7 @@
     <div class="trigger-action-btn">
       <a-button type="primary" @click="handleCreateTrigger">新增触发器</a-button>
       <a-input-search
+        class="ops-input"
         :style="{ display: 'inline', marginLeft: '10px', width: '200px' }"
         placeholder="搜索 | 名称"
         v-model="searchName"
@@ -12,6 +13,9 @@
     </div>
 
     <vxe-grid
+      stripe
+      size="mini"
+      class="ops-stripe-table"
       :columns="tableColumns"
       :data="filterTriggers"
       :max-height="`${windowHeight - 185}px`"
@@ -59,6 +63,10 @@
           <a @click="handleEditTrigger(row)"><a-icon type="edit"/></a>
           <a @click="handleDeleteTrigger(row)" :style="{ color: 'red' }"><a-icon type="delete"/></a>
         </a-space>
+      </template>
+      <template slot="empty">
+        <img :src="require(`@/assets/data_empty.png`)" />
+        <p style="font-size: 14px; line-height: 17px; color: rgba(0, 0, 0, 0.6)">暂无数据</p>
       </template>
     </vxe-grid>
     <trigger-form

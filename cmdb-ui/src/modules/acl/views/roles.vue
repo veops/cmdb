@@ -3,6 +3,7 @@
     <div class="roles-action-btn">
       <a-button @click="handleCreate" type="primary">{{ btnName }}</a-button>
       <a-input-search
+        class="ops-input"
         allowClear
         :style="{ display: 'inline', marginLeft: '10px', width: '200px' }"
         placeholder="搜索 | 角色名"
@@ -17,8 +18,11 @@
       <a-checkbox :checked="is_all" @click="handleClickBoxChange">所有角色</a-checkbox>
     </div>
     <a-spin :spinning="loading">
-      <vxe-grid
-        :columns="tableColumns"
+      <vxe-table
+        stripe
+        class="ops-stripe-table"
+        size="mini"
+        resizable
         :data="tableData"
         :max-height="`${windowHeight - 185}px`"
         highlight-hover-row
@@ -26,54 +30,94 @@
         :filter-config="{ remote: true }"
         @filter-change="filterTableMethod"
       >
-        <template #is_app_admin_default="{row}">
-          <a-icon type="check" v-if="row.is_app_admin" />
-        </template>
-        <template #inherit_default="{row}">
-          <a-tag color="cyan" v-for="role in id2parents[row.id]" :key="role.id">{{ role.name }}</a-tag>
-        </template>
-        <template #isVisualRole_default="{row}">
-          {{ row.uid ? '否' : '是' }}
-        </template>
-        <template #action_default="{row}">
-          <div style="width:300px">
-            <span>
-              <a-tooltip title="资源列表">
-                <a
-                  v-if="$route.name !== 'acl_roles'"
-                  @click="handleDisplayUserResource(row)"
-                ><a-icon
-                  type="file-search"
-                /></a>
-              </a-tooltip>
-              <a-divider type="vertical" />
-              <div v-if="!row.uid" style="display: inline-block">
-                <a-tooltip
-                  title="用户列表"
-                ><a @click="handleDisplayUserUnderRole(row)"><a-icon type="team"/></a
-                ></a-tooltip>
+
+        <vxe-table-column
+          field="name"
+          title="角色名"
+          :min-width="150"
+          align="left"
+          fixed="left"
+          sortable
+          show-overflow>
+        </vxe-table-column>
+
+        <!-- 2 -->
+        <vxe-table-column field="is_app_admin" title="管理员" :min-width="100" align="center">
+          <template #default="{row}">
+            <a-icon type="check" v-if="row.is_app_admin" />
+          </template>
+        </vxe-table-column>
+
+        <vxe-table-column field="id" title="继承自" :min-width="150">
+          <template #default="{row}">
+            <a-tag color="cyan" v-for="role in id2parents[row.id]" :key="role.id">{{ role.name }}</a-tag>
+          </template>
+        </vxe-table-column>
+
+        <vxe-table-column
+          field="uid"
+          title="虚拟角色"
+          :min-width="100"
+          align="center"
+          :filters="[
+            { label: '是', value: 1 },
+            { label: '否', value: 0 },
+          ]"
+          :filterMultiple="false"
+          :filter-method="({ value, row }) => {
+            return value === !row.uid
+          }">
+          <template #default="{row}">
+            {{ row.uid ? '否' : '是' }}
+          </template>
+
+        </vxe-table-column>
+
+        <vxe-table-column field="action" title="操作" :min-width="150" fixed="right">
+          <template #default="{row}">
+            <div style="width:300px">
+              <span>
+                <a-tooltip title="资源列表">
+                  <a
+                    v-if="$route.name !== 'acl_roles'"
+                    @click="handleDisplayUserResource(row)"
+                  ><a-icon
+                    type="file-search"
+                  /></a>
+                </a-tooltip>
                 <a-divider type="vertical" />
-              </div>
-              <a @click="handleEdit(row)"><a-icon type="edit"/></a>
-              <a-divider type="vertical" />
-              <a-popconfirm title="确认删除?" @confirm="handleDelete(row)" @cancel="cancel" okText="是" cancelText="否">
-                <a style="color: red"><a-icon type="delete"/></a>
-              </a-popconfirm>
-            </span>
-          </div>
+                <div v-if="!row.uid" style="display: inline-block">
+                  <a-tooltip
+                    title="用户列表"
+                  ><a @click="handleDisplayUserUnderRole(row)"><a-icon type="team"/></a
+                  ></a-tooltip>
+                  <a-divider type="vertical" />
+                </div>
+                <a @click="handleEdit(row)"><a-icon type="edit"/></a>
+                <a-divider type="vertical" />
+                <a-popconfirm title="确认删除?" @confirm="handleDelete(row)" @cancel="cancel" okText="是" cancelText="否">
+                  <a style="color: red"><a-icon type="delete"/></a>
+                </a-popconfirm>
+              </span>
+            </div>
+          </template>
+        </vxe-table-column>
+
+        <template slot="empty">
+          <img :src="require(`@/assets/data_empty.png`)" />
+          <p style="font-size: 14px; line-height: 17px; color: rgba(0, 0, 0, 0.6)">暂无数据</p>
         </template>
-        <template #pager>
-          <vxe-pager
-            :layouts="['Total', 'PrevPage', 'JumpNumber', 'NextPage', 'Sizes']"
-            :current-page.sync="tablePage.currentPage"
-            :page-size.sync="tablePage.pageSize"
-            :total="tablePage.total"
-            :page-sizes="pageSizeOptions"
-            @page-change="handlePageChange"
-          >
-          </vxe-pager>
-        </template>
-      </vxe-grid>
+      </vxe-table>
+      <vxe-pager
+        size="mini"
+        :layouts="['Total', 'PrevPage', 'JumpNumber', 'NextPage', 'Sizes']"
+        :current-page.sync="tablePage.currentPage"
+        :page-size.sync="tablePage.pageSize"
+        :total="tablePage.total"
+        :page-sizes="pageSizeOptions"
+        @page-change="handlePageChange"
+      >
+      </vxe-pager>
     </a-spin>
 
     <roleForm ref="roleForm" :allRoles="allRoles" :id2parents="id2parents" :handleOk="handleOk"></roleForm>

@@ -8,6 +8,7 @@
         <a-space>
           <a-button @click="handleCreate" type="primary">{{ btnName }}</a-button>
           <a-input-search
+            class="ops-input"
             placeholder="搜索 | 资源名"
             v-model="searchName"
             @search="
@@ -65,56 +66,88 @@
           ></a-switch>
         </a-space>
       </div>
-      <a-spin
-        :spinning="loading"
-      ><vxe-grid
-        :columns="tableColumns"
-        :data="tableData"
-        highlight-hover-row
-        :max-height="`${windowHeight - 245}px`"
-        :checkbox-config="{ reserve: true }"
-        @checkbox-change="changeCheckbox"
-        @checkbox-all="changeCheckbox"
-        ref="xTable"
-        row-id="id"
-        show-overflow
-      >
-        <template #name_header>
-          {{ isGroup ? '资源组名' : '资源名' }}
-        </template>
-        <template #action_default="{row}">
-          <span v-show="isGroup">
-            <a @click="handleDisplayMember(row)">成员</a>
-            <a-divider type="vertical" />
-            <a @click="handleGroupEdit(row)">编辑</a>
-            <a-divider type="vertical" />
-          </span>
-          <a-tooltip title="查看授权">
-            <a @click="handlePerm(row)"><a-icon type="eye"/></a>
-          </a-tooltip>
-          <a-divider type="vertical" />
-          <a-tooltip title="授权">
-            <a :style="{ color: '#4bbb13' }" @click="handlePermManage(row)">
-              <a-icon type="usergroup-add" />
-            </a>
-          </a-tooltip>
-          <a-divider type="vertical" />
-          <a-popconfirm title="确认删除?" @confirm="handleDelete(row)" @cancel="cancel" okText="是" cancelText="否">
-            <a style="color: red"><a-icon type="delete"/></a>
-          </a-popconfirm>
-        </template>
-        <template #pager>
-          <vxe-pager
-            :layouts="['Total', 'PrevPage', 'JumpNumber', 'NextPage', 'Sizes']"
-            :current-page.sync="tablePage.currentPage"
-            :page-size.sync="tablePage.pageSize"
-            :total="tablePage.total"
-            :page-sizes="pageSizeOptions"
-            @page-change="handlePageChange"
-          >
-          </vxe-pager>
-        </template> </vxe-grid
-      ></a-spin>
+      <a-spin :spinning="loading">
+        <vxe-table
+          size="mini"
+          stripe
+          class="ops-stripe-table"
+          :data="tableData"
+          highlight-hover-row
+          :height="`${windowHeight - 280}px`"
+          :checkbox-config="{ reserve: true }"
+          @checkbox-change="changeCheckbox"
+          @checkbox-all="changeCheckbox"
+          ref="xTable"
+          row-id="id"
+          show-overflow
+        >
+          <!-- 1 -->
+          <vxe-table-column type="checkbox" fixed="left"></vxe-table-column>
+
+          <!-- 2 -->
+
+          <vxe-table-column field="name" title="资源名" :min-widh="150" fixed="left" show-overflow>
+            <template #title="{row}">
+              {{ row.isGroup ? '资源组名' : '资源名' }}
+            </template>
+          </vxe-table-column>
+
+          <!-- 3 -->
+          <vxe-table-column field="user" title="创建者" :min-widh="100"> </vxe-table-column>
+
+          <!-- 4 -->
+          <vxe-table-column field="created_at" title="创建时间" :min-widh="220" align="center"> </vxe-table-column>
+
+          <!-- 5 -->
+          <vxe-table-column field="updated_at" title="最后修改时间" :min-widh="220" fixed="center"> </vxe-table-column>
+
+          <!-- 6 -->
+
+          <vxe-table-column
+            field="action"
+            title="操作"
+            :min-widh="200"
+            fixed="right"
+            align="center"
+            show-overflow>
+            <template #default="{row}">
+              <span v-show="row.isGroup">
+                <a @click="handleDisplayMember(row)">成员</a>
+                <a-divider type="vertical" />
+                <a @click="handleGroupEdit(row)">编辑</a>
+                <a-divider type="vertical" />
+              </span>
+              <a-tooltip title="查看授权">
+                <a @click="handlePerm(row)"><a-icon type="eye"/></a>
+              </a-tooltip>
+              <a-divider type="vertical" />
+              <a-tooltip title="授权">
+                <a :style="{ color: '#4bbb13' }" @click="handlePermManage(row)">
+                  <a-icon type="usergroup-add" />
+                </a>
+              </a-tooltip>
+              <a-divider type="vertical" />
+              <a-popconfirm title="确认删除?" @confirm="handleDelete(row)" @cancel="cancel" okText="是" cancelText="否">
+                <a style="color: red"><a-icon type="delete"/></a>
+              </a-popconfirm>
+            </template>
+          </vxe-table-column>
+          <template slot="empty">
+            <img :src="require(`@/assets/data_empty.png`)" />
+            <p style="font-size: 14px; line-height: 17px; color: rgba(0, 0, 0, 0.6)">暂无数据</p>
+          </template>
+        </vxe-table>
+        <vxe-pager
+          size="mini"
+          :layouts="['Total', 'PrevPage', 'JumpNumber', 'NextPage', 'Sizes']"
+          :current-page.sync="tablePage.currentPage"
+          :page-size.sync="tablePage.pageSize"
+          :total="tablePage.total"
+          :page-sizes="pageSizeOptions"
+          @page-change="handlePageChange"
+        >
+        </vxe-pager>
+      </a-spin>
     </div>
     <div v-else style="text-align: center">
       <a-icon style="font-size:50px; margin-bottom: 20px; color: orange" type="info-circle" />
@@ -304,7 +337,7 @@ export default {
     },
     deleteResource(id) {
       if (!this.isGroup) {
-        deleteResourceById(id).then((res) => {
+        deleteResourceById(id, { app_id: this.$route.name.split('_')[0] }).then((res) => {
           this.$message.success(`删除成功`)
           this.handleOk()
         })

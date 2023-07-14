@@ -179,7 +179,7 @@
       sortable
       v-if="
         checkedCols.findIndex((v) => v == 'department_name') !== -1 &&
-          attributes.findIndex((v) => v == 'department_name') !== -1
+        attributes.findIndex((v) => v == 'department_name') !== -1
       "
       key="department_name"
     >
@@ -217,7 +217,7 @@
       sortable
       v-if="
         checkedCols.findIndex((v) => v == 'position_name') !== -1 &&
-          attributes.findIndex((v) => v == 'position_name') !== -1
+        attributes.findIndex((v) => v == 'position_name') !== -1
       "
       key="position_name"
     >
@@ -251,7 +251,7 @@
       sortable
       v-if="
         checkedCols.findIndex((v) => v == 'direct_supervisor_id') !== -1 &&
-          attributes.findIndex((v) => v == 'direct_supervisor_id') !== -1
+        attributes.findIndex((v) => v == 'direct_supervisor_id') !== -1
       "
       key="direct_supervisor_id"
     >
@@ -290,8 +290,8 @@
       min-width="80"
       v-if="
         checkedCols.findIndex((v) => v == 'annual_leave') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'annual_leave') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'annual_leave') !== -1
       "
       key="annual_leave"
     >
@@ -325,8 +325,8 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'virtual_annual_leave') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'virtual_annual_leave') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'virtual_annual_leave') !== -1
       "
       key="virtual_annual_leave"
     >
@@ -360,8 +360,8 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'parenting_leave') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'parenting_leave') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'parenting_leave') !== -1
       "
       key="parenting_leave"
     >
@@ -389,86 +389,14 @@
       </template>
     </vxe-column>
     <vxe-column
-      field="current_company"
-      title="目前所属主体"
-      sortable
-      min-width="120"
-      v-if="
-        useDFC &&
-          checkedCols.findIndex((v) => v == 'current_company') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'current_company') !== -1
-      "
-      key="current_company"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
-          <span>目前所属主体</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="dfc_entry_date"
-      title="初始入职日期"
-      sortable
-      min-width="120"
-      v-if="
-        useDFC &&
-          checkedCols.findIndex((v) => v == 'dfc_entry_date') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'dfc_entry_date') !== -1
-      "
-      key="dfc_entry_date"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
-          <span>初始入职日期</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
       field="entry_date"
       title="目前主体入职日期"
       sortable
       min-width="150"
       v-if="
         checkedCols.findIndex((v) => v == 'entry_date') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'entry_date') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'entry_date') !== -1
       "
       key="entry_date"
     >
@@ -503,8 +431,8 @@
       v-bind="tableType === 'structure' ? { filters: internOptions, 'filter-multiple': false } : {}"
       v-if="
         checkedCols.findIndex((v) => v == 'is_internship') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'is_internship') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'is_internship') !== -1
       "
       key="is_internship"
     >
@@ -541,8 +469,8 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'leave_date') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'leave_date') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'leave_date') !== -1
       "
       key="leave_date"
     >
@@ -576,8 +504,8 @@
       min-width="120"
       v-if="
         checkedCols.findIndex((v) => v == 'id_card') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'id_card') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'id_card') !== -1
       "
       key="id_card"
     >
@@ -611,8 +539,8 @@
       min-width="80"
       v-if="
         checkedCols.findIndex((v) => v == 'nation') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'nation') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'nation') !== -1
       "
       key="nation"
     >
@@ -646,8 +574,8 @@
       min-width="120"
       v-if="
         checkedCols.findIndex((v) => v == 'id_place') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'id_place') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'id_place') !== -1
       "
       key="id_place"
     >
@@ -681,8 +609,8 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'party') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'party') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'party') !== -1
       "
       key="party"
     >
@@ -716,8 +644,8 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'household_registration_type') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'household_registration_type') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'household_registration_type') !== -1
       "
       key="household_registration_type"
     >
@@ -751,8 +679,8 @@
       min-width="120"
       v-if="
         checkedCols.findIndex((v) => v == 'hometown') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'hometown') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'hometown') !== -1
       "
       key="hometown"
     >
@@ -786,8 +714,8 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'marry') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'marry') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'marry') !== -1
       "
       key="marry"
     >
@@ -821,8 +749,8 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'max_degree') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'max_degree') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'max_degree') !== -1
       "
       key="max_degree"
     >
@@ -856,8 +784,8 @@
       min-width="110"
       v-if="
         checkedCols.findIndex((v) => v == 'emergency_person') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'emergency_person') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'emergency_person') !== -1
       "
       key="emergency_person"
     >
@@ -891,8 +819,8 @@
       min-width="120"
       v-if="
         checkedCols.findIndex((v) => v == 'emergency_phone') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'emergency_phone') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'emergency_phone') !== -1
       "
       key="emergency_phone"
     >
@@ -926,8 +854,8 @@
       min-width="120"
       v-if="
         checkedCols.findIndex((v) => v == 'bank_card_number') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'bank_card_number') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'bank_card_number') !== -1
       "
       key="bank_card_number"
     >
@@ -961,8 +889,8 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'bank_card_name') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'bank_card_name') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'bank_card_name') !== -1
       "
       key="bank_card_name"
     >
@@ -996,8 +924,8 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'opening_bank') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'opening_bank') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'opening_bank') !== -1
       "
       key="opening_bank"
     >
@@ -1031,8 +959,8 @@
       min-width="120"
       v-if="
         checkedCols.findIndex((v) => v == 'account_opening_location') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'account_opening_location') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'account_opening_location') !== -1
       "
       key="account_opening_location"
     >
@@ -1065,8 +993,8 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'school') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'school') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'school') !== -1
       "
       key="school"
     >
@@ -1099,8 +1027,8 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'major') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'major') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'major') !== -1
       "
       key="major"
     >
@@ -1133,8 +1061,8 @@
       min-width="80"
       v-if="
         checkedCols.findIndex((v) => v == 'education') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'education') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'education') !== -1
       "
       key="education"
     >
@@ -1167,8 +1095,8 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'graduation_year') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'graduation_year') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'graduation_year') !== -1
       "
       key="graduation_year"
     >
@@ -1201,8 +1129,8 @@
       min-width="80"
       v-if="
         checkedCols.findIndex((v) => v == 'name') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'name') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'name') !== -1
       "
       key="name"
     >
@@ -1235,8 +1163,8 @@
       min-width="80"
       v-if="
         checkedCols.findIndex((v) => v == 'gender') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'gender') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'gender') !== -1
       "
       key="gender"
     >
@@ -1269,8 +1197,8 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'birthday') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'birthday') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'birthday') !== -1
       "
       key="birthday"
     >
@@ -1303,8 +1231,8 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'parental_leave_left') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'parental_leave_left') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'parental_leave_left') !== -1
       "
       key="parental_leave_left"
     >
@@ -1339,8 +1267,8 @@
       :formatter="formatDate"
       v-if="
         checkedCols.findIndex((v) => v == 'last_login') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'last_login') !== -1
+        tableType == 'structure' &&
+        attributes.findIndex((v) => v == 'last_login') !== -1
       "
       key="last_login"
     >
@@ -1568,7 +1496,6 @@ export default {
       checkedCols,
       unsbmitCheckedCols: [],
       visible: false,
-      useDFC: appConfig.useDFC,
       tableDragClassName: [], // 表格拖拽的参数
       attributes: [],
       internMap: [
@@ -1603,11 +1530,10 @@ export default {
     Bus.$on('reqExportSelectEvent', () => {
       this.exportExcel()
     })
-    if (!this.useDFC) {
-      this.options = this.options
-        .filter((item) => item.label !== '目前所属主体')
-        .filter((item) => item.label !== '初始入职日期')
-    }
+    this.options = this.options
+      .filter((item) => item.label !== '目前所属主体')
+      .filter((item) => item.label !== '初始入职日期')
+
     this.unsbmitCheckedCols = this.checkedCols
   },
   beforeDestroy() {
