@@ -1,8 +1,9 @@
 <template>
   <div :style="{ backgroundColor: '#fff', padding: '24px' }">
     <div class="resource-types-action-btn">
-      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem;">{{ btnName }}</a-button>
+      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem">{{ btnName }}</a-button>
       <a-input-search
+        class="ops-input"
         :style="{ display: 'inline', marginLeft: '10px', width: '200px' }"
         placeholder="搜索 | 资源类型名"
         v-model="searchName"
@@ -15,31 +16,60 @@
         "
       ></a-input-search>
     </div>
-    <a-spin
-      :spinning="loading"
-    ><vxe-grid :columns="tableColumns" :data="groups" :max-height="`${windowHeight - 185}px`" highlight-hover-row>
-      <template #id_default="{row}">
-        <a-tag color="cyan" v-for="perm in id2perms[row.id]" :key="perm.id">{{ perm.name }}</a-tag>
-      </template>
-      <template #action_default="{row}">
-        <a @click="handleEdit(row)"><a-icon type="edit"/></a>
-        <a-divider type="vertical" />
-        <a-popconfirm title="确认删除?" @confirm="handleDelete(row)" okText="是" cancelText="否">
-          <a style="color: red"><a-icon type="delete"/></a>
-        </a-popconfirm>
-      </template>
-      <template #pager>
-        <vxe-pager
-          :layouts="['Total', 'PrevPage', 'JumpNumber', 'NextPage', 'Sizes']"
-          :current-page.sync="tablePage.currentPage"
-          :page-size.sync="tablePage.pageSize"
-          :total="tablePage.total"
-          :page-sizes="pageSizeOptions"
-          @page-change="handlePageChange"
-        >
-        </vxe-pager>
-      </template> </vxe-grid
-    ></a-spin>
+    <a-spin :spinning="loading">
+      <vxe-table
+        stripe
+        size="mini"
+        class="ops-stripe-table"
+        :data="groups"
+        :max-height="`${windowHeight - 185}px`"
+        highlight-hover-row
+      >
+        <!-- 1 -->
+        <vxe-table-column
+          field="name"
+          title="资源类型名"
+          :min-width="175"
+          fixed="left"
+          show-overflow
+        ></vxe-table-column>
+
+        <!-- 2 -->
+        <vxe-table-column field="description" title="描述" :min-width="175"></vxe-table-column>
+
+        <!-- 3 -->
+        <vxe-table-column field="id" title="权限" :min-width="300">
+          <template #default="{ row }">
+            <a-tag color="cyan" v-for="perm in id2perms[row.id]" :key="perm.id">{{ perm.name }}</a-tag>
+          </template>
+        </vxe-table-column>
+
+        <!-- 4 -->
+        <vxe-table-column field="action" title="操作" :min-width="175" fixed="right">
+          <template #default="{ row }">
+            <a @click="handleEdit(row)"><a-icon type="edit" /></a>
+            <a-divider type="vertical" />
+            <a-popconfirm title="确认删除?" @confirm="handleDelete(row)" okText="是" cancelText="否">
+              <a style="color: red"><a-icon type="delete" /></a>
+            </a-popconfirm>
+          </template>
+        </vxe-table-column>
+        <template slot="empty">
+          <img :src="require(`@/assets/data_empty.png`)" />
+          <p style="font-size: 14px; line-height: 17px; color: rgba(0, 0, 0, 0.6)">暂无数据</p>
+        </template>
+      </vxe-table>
+      <vxe-pager
+        size="mini"
+        :layouts="['Total', 'PrevPage', 'JumpNumber', 'NextPage', 'Sizes']"
+        :current-page.sync="tablePage.currentPage"
+        :page-size.sync="tablePage.pageSize"
+        :total="tablePage.total"
+        :page-sizes="pageSizeOptions"
+        @page-change="handlePageChange"
+      >
+      </vxe-pager>
+    </a-spin>
 
     <resourceTypeForm ref="resourceTypeForm" :handleOk="handleOk"> </resourceTypeForm>
   </div>
@@ -110,7 +140,7 @@ export default {
     }),
   },
   watch: {
-    '$route.name': function(newName, oldName) {
+    '$route.name': function (newName, oldName) {
       this.tablePage = {
         total: 0,
         currentPage: 1,
@@ -141,7 +171,11 @@ export default {
         q: this.searchName,
       }
       searchResourceType(param).then((res) => {
-        this.tablePage = { ...this.tablePage, total: res.numfound, currentPage: res.page }
+        this.tablePage = {
+          ...this.tablePage,
+          total: res.numfound,
+          currentPage: res.page,
+        }
         this.groups = res.groups
         this.id2perms = res.id2perms
         this.loading = false

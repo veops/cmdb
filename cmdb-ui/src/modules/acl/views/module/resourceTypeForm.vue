@@ -103,7 +103,7 @@ export default {
       })
     },
     updateResourceType(id, data) {
-      updateResourceTypeById(id, data).then(res => {
+      updateResourceTypeById(id, data).then((res) => {
         this.$message.success(`更新成功`)
         this.handleOk()
         this.onClose()
@@ -112,7 +112,7 @@ export default {
     },
 
     createResourceType(data) {
-      addResourceType(data).then(res => {
+      addResourceType(data).then((res) => {
         this.$message.success(`添加成功`)
         this.handleOk()
         this.onClose()
