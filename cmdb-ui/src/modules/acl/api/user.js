@@ -14,6 +14,7 @@ export function getOnDutyUser() {
   return axios({
     url: urlPrefix + '/users/employee',
     method: 'GET',
+    // data: { 'originUrl': 'http://hr.dfc.sh/api/all_users?work_status=在职' }
   })
 }
 
