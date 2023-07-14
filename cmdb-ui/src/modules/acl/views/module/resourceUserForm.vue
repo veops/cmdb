@@ -12,7 +12,14 @@
         <a-select-option v-for="type in resourceTypes" :value="type.id" :key="type.id">{{ type.name }}</a-select-option>
       </a-select>
     </a-form-item>
-    <vxe-table :max-height="`${windowHeight - 180}px`" :data="records" ref="rTable">
+    <vxe-table
+      size="mini"
+      stripe
+      class="ops-stripe-table"
+      :max-height="`${windowHeight - 180}px`"
+      :data="records"
+      ref="rTable"
+    >
       <vxe-column
         field="name"
         title="资源名"
@@ -46,6 +53,10 @@
           <a-tag color="cyan" v-for="(r, index) in row.permissions" :key="index">{{ r }}</a-tag>
         </template>
       </vxe-column>
+      <template slot="empty">
+        <img :src="require(`@/assets/data_empty.png`)" />
+        <p style="font-size: 14px; line-height: 17px; color: rgba(0, 0, 0, 0.6)">暂无数据</p>
+      </template>
     </vxe-table>
     <!-- <a-table
       :columns="columns"
