@@ -149,7 +149,7 @@
         />
       </a-form-item>
     </a-col>
-    <a-col :span="6" v-if="currentValueType !== '6'">
+    <a-col :span="6" v-if="currentValueType === '2'">
       <a-form-item :label-col="horizontalFormItemLayout.labelCol" :wrapper-col="horizontalFormItemLayout.wrapperCol">
         <template slot="label">
           <span
@@ -174,12 +174,15 @@
           :disabled="isShowComputedArea"
           @change="onChange"
           name="is_index"
-          v-decorator="['is_index', { rules: [], valuePropName: 'checked' }]"
+          v-decorator="['is_index', { rules: [], valuePropName: 'checked', initialValue: true }]"
         />
       </a-form-item>
     </a-col>
     <a-col :span="6">
-      <a-form-item :label-col="{ span: 8 }" :wrapper-col="horizontalFormItemLayout.wrapperCol">
+      <a-form-item
+        :label-col="currentValueType === '2' ? { span: 8 } : horizontalFormItemLayout.labelCol"
+        :wrapper-col="horizontalFormItemLayout.wrapperCol"
+      >
         <template slot="label">
           <span
             style="position:relative;white-space:pre;"
@@ -208,7 +211,7 @@
     </a-col>
     <a-col :span="6" v-if="currentValueType !== '6'">
       <a-form-item
-        :label-col="horizontalFormItemLayout.labelCol"
+        :label-col="currentValueType === '2' ? horizontalFormItemLayout.labelCol : { span: 8 }"
         :wrapper-col="horizontalFormItemLayout.wrapperCol"
         label="排序"
       >
@@ -222,7 +225,10 @@
     </a-col>
 
     <a-col :span="6" v-if="currentValueType !== '6'">
-      <a-form-item :label-col="{ span: 8 }" :wrapper-col="horizontalFormItemLayout.wrapperCol">
+      <a-form-item
+        :label-col="currentValueType === '2' ? { span: 8 } : horizontalFormItemLayout.labelCol"
+        :wrapper-col="horizontalFormItemLayout.wrapperCol"
+      >
         <template slot="label">
           <span
             style="position:relative;white-space:pre;"
@@ -420,6 +426,14 @@ export default {
           }
           const fontOptions = this.$refs.fontArea.getData()
 
+          // is_index进行操作，除了文本   索引隐藏掉  文本  索引默认是true
+          // 框里的5种类型  is_index=true
+          // json类型  is_index=false
+          if (values.value_type === '6') {
+            values.is_index = false
+          } else if (values.value_type !== '2') {
+            values.is_index = true
+          }
           const { attr_id } = await createAttribute({ ...values, option: { fontOptions } })
 
           this.form.resetFields()
