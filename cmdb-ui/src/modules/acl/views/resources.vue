@@ -1,10 +1,10 @@
 <template>
-  <div :style="{ backgroundColor: '#fff', padding: '24px' }">
-    <div v-if="allResourceTypes.length > 0">
+  <div class="acl-resources">
+    <div v-if="allResourceTypes.length">
       <a-tabs default-active-key="1" @change="loadCurrentType">
         <a-tab-pane v-for="rtype in allResourceTypes" :key="rtype.id" :tab="rtype.name"> </a-tab-pane>
       </a-tabs>
-      <div class="resources-action-btn">
+      <div class="acl-resources-header">
         <a-space>
           <a-button @click="handleCreate" type="primary">{{ btnName }}</a-button>
           <a-input-search
@@ -18,25 +18,13 @@
               }
             "
           ></a-input-search>
-          <a-dropdown v-if="selectedRows && selectedRows.length">
-            <a-button type="primary" ghost>
-              批量操作
-            </a-button>
-            <a-menu slot="overlay">
-              <a-menu-item @click="handleBatchPerm">
-                <a href="javascript:;">授权</a>
-              </a-menu-item>
-              <a-menu-item @click="handleBatchRevoke">
-                <a href="javascript:;">权限回收</a>
-              </a-menu-item>
-            </a-menu>
-          </a-dropdown>
 
-          <span
-            v-if="selectedRows && selectedRows.length"
-          >已选择<strong>{{ selectedRows.length }}</strong
-          >项</span
-          >
+          <div v-if="!!selectedRows.length" class="ops-list-batch-action">
+            <span @click="handleBatchPerm">授权</span>
+            <a-divider type="vertical" />
+            <span @click="handleBatchRevoke">权限回收</span>
+            <span>选取: {{ selectedRows.length }} 项</span>
+          </div>
         </a-space>
 
         <a-space>
@@ -67,13 +55,13 @@
         </a-space>
       </div>
       <a-spin :spinning="loading">
-        <vxe-table
-          size="mini"
+        <ops-table
+          size="small"
           stripe
           class="ops-stripe-table"
           :data="tableData"
           highlight-hover-row
-          :height="`${windowHeight - 280}px`"
+          :height="`${windowHeight - 250}px`"
           :checkbox-config="{ reserve: true }"
           @checkbox-change="changeCheckbox"
           @checkbox-all="changeCheckbox"
@@ -132,24 +120,21 @@
               </a-popconfirm>
             </template>
           </vxe-table-column>
-          <template slot="empty">
-            <img :src="require(`@/assets/data_empty.png`)" />
-            <p style="font-size: 14px; line-height: 17px; color: rgba(0, 0, 0, 0.6)">暂无数据</p>
-          </template>
-        </vxe-table>
+        </ops-table>
         <vxe-pager
-          size="mini"
+          size="small"
           :layouts="['Total', 'PrevPage', 'JumpNumber', 'NextPage', 'Sizes']"
           :current-page.sync="tablePage.currentPage"
           :page-size.sync="tablePage.pageSize"
           :total="tablePage.total"
           :page-sizes="pageSizeOptions"
           @page-change="handlePageChange"
+          :style="{ marginTop: '10px' }"
         >
         </vxe-pager>
       </a-spin>
     </div>
-    <div v-else style="text-align: center">
+    <div v-else style="text-align: center;margin-top:20%">
       <a-icon style="font-size:50px; margin-bottom: 20px; color: orange" type="info-circle" />
       <h3>暂无类型信息，请先添加资源类型！</h3>
     </div>
@@ -398,14 +383,21 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.resources-action-btn {
-  width: 100%;
-  display: inline-flex;
-  margin-bottom: 15px;
-  align-items: center;
-  justify-content: space-between;
-  .ant-switch {
-    margin-left: auto;
+.acl-resources {
+  border-radius: 15px;
+  background-color: #fff;
+  height: calc(100vh - 64px);
+  margin-bottom: -24px;
+  padding: 12px 24px 24px 24px;
+  .acl-resources-header {
+    width: 100%;
+    display: inline-flex;
+    margin-bottom: 15px;
+    align-items: center;
+    justify-content: space-between;
+    .ant-switch {
+      margin-left: auto;
+    }
   }
 }
 </style>

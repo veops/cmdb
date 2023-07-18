@@ -1,6 +1,6 @@
 <template>
-  <div class="acl-role">
-    <div class="roles-action-btn">
+  <div class="acl-roles">
+    <div class="acl-roles-header">
       <a-button @click="handleCreate" type="primary">{{ btnName }}</a-button>
       <a-input-search
         class="ops-input"
@@ -18,19 +18,17 @@
       <a-checkbox :checked="is_all" @click="handleClickBoxChange">所有角色</a-checkbox>
     </div>
     <a-spin :spinning="loading">
-      <vxe-table
+      <ops-table
         stripe
         class="ops-stripe-table"
-        size="mini"
+        size="small"
         resizable
         :data="tableData"
-        :max-height="`${windowHeight - 185}px`"
+        :height="`${windowHeight - 200}px`"
         highlight-hover-row
-        min-height="300px"
         :filter-config="{ remote: true }"
         @filter-change="filterTableMethod"
       >
-
         <vxe-table-column
           field="name"
           title="角色名"
@@ -57,65 +55,57 @@
         <vxe-table-column
           field="uid"
           title="虚拟角色"
-          :min-width="100"
+          :width="100"
           align="center"
           :filters="[
             { label: '是', value: 1 },
             { label: '否', value: 0 },
           ]"
           :filterMultiple="false"
-          :filter-method="({ value, row }) => {
-            return value === !row.uid
-          }">
+          :filter-method="
+            ({ value, row }) => {
+              return value === !row.uid
+            }
+          "
+        >
           <template #default="{row}">
             {{ row.uid ? '否' : '是' }}
           </template>
-
         </vxe-table-column>
 
-        <vxe-table-column field="action" title="操作" :min-width="150" fixed="right">
+        <vxe-table-column field="action" title="操作" :width="120" fixed="right">
           <template #default="{row}">
-            <div style="width:300px">
-              <span>
-                <a-tooltip title="资源列表">
-                  <a
-                    v-if="$route.name !== 'acl_roles'"
-                    @click="handleDisplayUserResource(row)"
-                  ><a-icon
-                    type="file-search"
-                  /></a>
-                </a-tooltip>
-                <a-divider type="vertical" />
-                <div v-if="!row.uid" style="display: inline-block">
-                  <a-tooltip
-                    title="用户列表"
-                  ><a @click="handleDisplayUserUnderRole(row)"><a-icon type="team"/></a
-                  ></a-tooltip>
-                  <a-divider type="vertical" />
-                </div>
-                <a @click="handleEdit(row)"><a-icon type="edit"/></a>
-                <a-divider type="vertical" />
-                <a-popconfirm title="确认删除?" @confirm="handleDelete(row)" @cancel="cancel" okText="是" cancelText="否">
-                  <a style="color: red"><a-icon type="delete"/></a>
-                </a-popconfirm>
-              </span>
-            </div>
+            <a-space>
+              <a-tooltip title="资源列表">
+                <a
+                  v-if="$route.name !== 'acl_roles'"
+                  @click="handleDisplayUserResource(row)"
+                ><a-icon
+                  type="file-search"
+                /></a>
+              </a-tooltip>
+              <a-tooltip
+                title="用户列表"
+                v-if="!row.uid"
+              ><a @click="handleDisplayUserUnderRole(row)"><a-icon type="team"/></a
+              ></a-tooltip>
+              <a @click="handleEdit(row)"><a-icon type="edit"/></a>
+              <a-popconfirm title="确认删除?" @confirm="handleDelete(row)" @cancel="cancel" okText="是" cancelText="否">
+                <a style="color: red"><a-icon type="delete"/></a>
+              </a-popconfirm>
+            </a-space>
           </template>
         </vxe-table-column>
-
-        <template slot="empty">
-          <img :src="require(`@/assets/data_empty.png`)" />
-          <p style="font-size: 14px; line-height: 17px; color: rgba(0, 0, 0, 0.6)">暂无数据</p>
-        </template>
-      </vxe-table>
+      </ops-table>
       <vxe-pager
-        size="mini"
+        size="small"
         :layouts="['Total', 'PrevPage', 'JumpNumber', 'NextPage', 'Sizes']"
         :current-page.sync="tablePage.currentPage"
         :page-size.sync="tablePage.pageSize"
         :total="tablePage.total"
         :page-sizes="pageSizeOptions"
         @page-change="handlePageChange"
+        :style="{ marginTop: '10px' }"
       >
       </vxe-pager>
     </a-spin>
@@ -336,10 +326,13 @@ export default {
 </script>
 
 <style lang="less">
-.acl-role {
+.acl-roles {
+  border-radius: 15px;
   background-color: #fff;
+  height: calc(100vh - 64px);
+  margin-bottom: -24px;
   padding: 24px;
-  .roles-action-btn {
+  .acl-roles-header {
     width: 100%;
     display: inline-flex;
     margin-bottom: 15px;

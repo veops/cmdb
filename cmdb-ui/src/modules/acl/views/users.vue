@@ -1,8 +1,9 @@
 <template>
-  <a-card :bordered="false">
-    <div class="user-action-btn">
+  <div class="acl-users">
+    <div class="acl-users-header">
       <a-button v-if="isAclAdmin" @click="handleCreate" type="primary">{{ btnName }}</a-button>
       <a-input-search
+        class="ops-input"
         allowClear
         :style="{ display: 'inline', marginLeft: '10px' }"
         placeholder="搜索 | 用户名、中文名"
@@ -10,7 +11,15 @@
       ></a-input-search>
     </div>
     <a-spin :spinning="loading">
-      <vxe-grid :columns="tableColumns" :data="tableData" highlight-hover-row :max-height="`${windowHeight - 185}px`">
+      <vxe-grid
+        stripe
+        class="ops-stripe-table"
+        :columns="tableColumns"
+        :data="tableData"
+        highlight-hover-row
+        :height="`${windowHeight - 165}px`"
+        size="small"
+      >
         <template #block_default="{row}">
           <a-icon type="lock" v-if="row.block" />
         </template>
@@ -29,7 +38,7 @@
     </a-spin>
     <userForm ref="userForm" :handleOk="handleOk"> </userForm>
     <perm-collect-form ref="permCollectForm"></perm-collect-form>
-  </a-card>
+  </div>
 </template>
 
 <script>
@@ -95,21 +104,37 @@ export default {
   },
   async beforeMount() {
     this.loading = true
-    await getOnDutyUser().then(res => {
-      this.onDutuUids = res.map(i => i.uid)
+    await getOnDutyUser().then((res) => {
+      this.onDutuUids = res.map((i) => i.uid)
       this.search()
     })
   },
   computed: {
     ...mapState({
-      windowHeight: state => state.windowHeight,
+      windowHeight: (state) => state.windowHeight,
     }),
     isAclAdmin: function() {
-      if (this.$store.state.user.roles.permissions.filter(item => item === 'acl_admin').length > 0) {
+      if (this.$store.state.user.roles.permissions.filter((item) => item === 'acl_admin').length > 0) {
         return true
       } else {
         return false
       }
+    },
+  },
+  watch: {
+    searchName: {
+      immediate: true,
+      handler(newVal, oldVal) {
+        if (newVal) {
+          this.tableData = this.allUsers.filter(
+            (item) =>
+              item.username.toLowerCase().includes(newVal.toLowerCase()) ||
+              item.nickname.toLowerCase().includes(newVal.toLowerCase())
+          )
+        } else {
+          this.tableData = this.allUsers
+        }
+      },
     },
   },
   mounted() {},
@@ -117,8 +142,8 @@ export default {
 
   methods: {
     search() {
-      searchUser({ page_size: 10000 }).then(res => {
-        const ret = res.users.filter(u => this.onDutuUids.includes(u.uid))
+      searchUser({ page_size: 10000 }).then((res) => {
+        const ret = res.users.filter((u) => this.onDutuUids.includes(u.uid))
         this.allUsers = ret
         this.tableData = ret
         this.loading = false
@@ -137,45 +162,29 @@ export default {
       this.searchName = ''
       this.search()
     },
-
     handleCreate() {
       this.$refs.userForm.handleCreate()
     },
-
     deleteUser(attrId) {
-      deleteUserById(attrId).then(res => {
+      deleteUserById(attrId).then((res) => {
         this.$message.success(`删除成功`)
         this.handleOk()
       })
-      // .catch(err => this.requestFailed(err))
-    },
-    // requestFailed(err) {
-    //   const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
-    //   this.$message.error(`${msg}`)
-    // },
-  },
-  watch: {
-    searchName: {
-      immediate: true,
-      handler(newVal, oldVal) {
-        if (newVal) {
-          this.tableData = this.allUsers.filter(
-            item =>
-              item.username.toLowerCase().includes(newVal.toLowerCase()) ||
-              item.nickname.toLowerCase().includes(newVal.toLowerCase())
-          )
-        } else {
-          this.tableData = this.allUsers
-        }
-      },
     },
   },
 }
 </script>
 
 <style lang="less" scoped>
-.user-action-btn {
-  display: inline-flex;
-  margin-bottom: 15px;
+.acl-users {
+  border-radius: 15px;
+  background-color: #fff;
+  height: calc(100vh - 64px);
+  margin-bottom: -24px;
+  padding: 24px;
+  .acl-users-header {
+    display: inline-flex;
+    margin-bottom: 15px;
+  }
 }
 </style>

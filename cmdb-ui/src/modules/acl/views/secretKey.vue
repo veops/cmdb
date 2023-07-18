@@ -91,6 +91,8 @@ export default {
 .acl-secret-key {
   background-color: #fff;
   padding: 24px;
+  border-radius: 15px;
+  height: calc(100% + 24px);
   .ant-input[disabled] {
     color: rgba(0, 0, 0, 0.5);
   }

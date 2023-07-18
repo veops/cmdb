@@ -1,72 +1,70 @@
 <template>
-  <div>
-    <a-card :bordered="false">
-      <a-tabs default-active-key="1">
-        <a-tab-pane key="1" tab="权限变更">
-          <permisson-history-table
-            v-if="isloaded"
-            :allResourceTypes="allResourceTypes"
-            :allResources="allResources"
-            :allUsers="allUsers"
-            :allRoles="allRoles"
-            :allRolesMap="allRolesMap"
-            :allUsersMap="allUsersMap"
-            :allResourceTypesMap="allResourceTypesMap"
-            @loadMoreResources="loadMoreResources"
-            @reloadResources="reloadResources"
-            @fetchResources="fetchResources"
-            @resourceClear="resourceClear"
-          ></permisson-history-table>
-        </a-tab-pane>
-        <a-tab-pane key="2" tab="角色变更">
-          <role-history-table
-            v-if="isloaded"
-            :allUsers="allUsers"
-            :allRoles="allRoles"
-            :allRolesMap="allRolesMap"
-            :allUsersMap="allUsersMap"
-          ></role-history-table>
-        </a-tab-pane>
-        <a-tab-pane key="3" tab="资源变更">
-          <resource-history-table
-            v-if="isloaded"
-            :allResources="allResources"
-            :allUsers="allUsers"
-            :allRoles="allRoles"
-            :allRolesMap="allRolesMap"
-            :allUsersMap="allUsersMap"
-            :allResourcesMap="allResourcesMap"
-            @loadMoreResources="loadMoreResources"
-            @reloadResources="reloadResources"
-            @fetchResources="fetchResources"
-            @resourceClear="resourceClear"
-          ></resource-history-table>
-        </a-tab-pane>
-        <a-tab-pane key="4" tab="资源类型变更">
-          <resource-type-history-table
-            v-if="isloaded"
-            :allResourceTypes="allResourceTypes"
-            :allUsers="allUsers"
-            :allRoles="allRoles"
-            :allRolesMap="allRolesMap"
-            :allUsersMap="allUsersMap"
-            :allResourceTypesMap="allResourceTypesMap"
-          ></resource-type-history-table>
-        </a-tab-pane>
-        <a-tab-pane key="5" tab="触发器变更">
-          <trigger-history-table
-            v-if="isloaded"
-            :allTriggers="allTriggers"
-            :allUsers="allUsers"
-            :allRoles="allRoles"
-            :allRolesMap="allRolesMap"
-            :allUsersMap="allUsersMap"
-            :allTriggersMap="allTriggersMap"
-            :allResourceTypesMap="allResourceTypesMap"
-          ></trigger-history-table>
-        </a-tab-pane>
-      </a-tabs>
-    </a-card>
+  <div class="acl-history">
+    <a-tabs default-active-key="1">
+      <a-tab-pane key="1" tab="权限变更">
+        <permisson-history-table
+          v-if="isloaded"
+          :allResourceTypes="allResourceTypes"
+          :allResources="allResources"
+          :allUsers="allUsers"
+          :allRoles="allRoles"
+          :allRolesMap="allRolesMap"
+          :allUsersMap="allUsersMap"
+          :allResourceTypesMap="allResourceTypesMap"
+          @loadMoreResources="loadMoreResources"
+          @reloadResources="reloadResources"
+          @fetchResources="fetchResources"
+          @resourceClear="resourceClear"
+        ></permisson-history-table>
+      </a-tab-pane>
+      <a-tab-pane key="2" tab="角色变更">
+        <role-history-table
+          v-if="isloaded"
+          :allUsers="allUsers"
+          :allRoles="allRoles"
+          :allRolesMap="allRolesMap"
+          :allUsersMap="allUsersMap"
+        ></role-history-table>
+      </a-tab-pane>
+      <a-tab-pane key="3" tab="资源变更">
+        <resource-history-table
+          v-if="isloaded"
+          :allResources="allResources"
+          :allUsers="allUsers"
+          :allRoles="allRoles"
+          :allRolesMap="allRolesMap"
+          :allUsersMap="allUsersMap"
+          :allResourcesMap="allResourcesMap"
+          @loadMoreResources="loadMoreResources"
+          @reloadResources="reloadResources"
+          @fetchResources="fetchResources"
+          @resourceClear="resourceClear"
+        ></resource-history-table>
+      </a-tab-pane>
+      <a-tab-pane key="4" tab="资源类型变更">
+        <resource-type-history-table
+          v-if="isloaded"
+          :allResourceTypes="allResourceTypes"
+          :allUsers="allUsers"
+          :allRoles="allRoles"
+          :allRolesMap="allRolesMap"
+          :allUsersMap="allUsersMap"
+          :allResourceTypesMap="allResourceTypesMap"
+        ></resource-type-history-table>
+      </a-tab-pane>
+      <a-tab-pane key="5" tab="触发器变更">
+        <trigger-history-table
+          v-if="isloaded"
+          :allTriggers="allTriggers"
+          :allUsers="allUsers"
+          :allRoles="allRoles"
+          :allRolesMap="allRolesMap"
+          :allUsersMap="allUsersMap"
+          :allTriggersMap="allTriggersMap"
+          :allResourceTypesMap="allResourceTypesMap"
+        ></trigger-history-table>
+      </a-tab-pane>
+    </a-tabs>
   </div>
 </template>
 
@@ -234,4 +232,12 @@ export default {
 }
 </script>
 
-<style></style>
+<style lang="less" scoped>
+.acl-history {
+  border-radius: 15px;
+  height: calc(100vh - 64px);
+  margin-bottom: -24px;
+  padding: 24px;
+  background-color: #fff;
+}
+</style>

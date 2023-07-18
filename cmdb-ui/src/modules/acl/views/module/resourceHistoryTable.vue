@@ -14,12 +14,13 @@
     ></search-form>
     <vxe-table
       ref="xTable"
-      border
+      stripe
+      class="ops-stripe-table"
       size="small"
       :loading="loading"
       :data="tableData"
       resizable
-      :max-height="`${windowHeight - 331}px`"
+      :height="`${windowHeight - 310}px`"
     >
       <vxe-column field="created_at" width="144px" title="操作时间"></vxe-column>
       <vxe-column field="operate_uid" width="130px" title="操作员"></vxe-column>
@@ -54,6 +55,7 @@
       :isLoading="loading"
       @change="onChange"
       @showSizeChange="onShowSizeChange"
+      :style="{ marginTop: '10px' }"
     ></pager>
   </div>
 </template>
