@@ -13,12 +13,13 @@
     ></search-form>
     <vxe-table
       ref="xTable"
-      border
+      stripe
+      class="ops-stripe-table"
       resizable
       size="small"
       :data="tableData"
       :loading="loading"
-      :max-height="`${windowHeight - windowHeightMinus}px`"
+      :height="`${windowHeight - windowHeightMinus}px`"
       :scroll-y="{ enabled: false }"
     >
       <vxe-column field="created_at" width="144px" title="操作时间">
@@ -72,6 +73,7 @@
       :isLoading="loading"
       @change="onChange"
       @showSizeChange="onShowSizeChange"
+      :style="{ marginTop: '10px' }"
     ></pager>
   </div>
 </template>
@@ -172,7 +174,7 @@ export default {
       return this.$store.state.windowHeight
     },
     windowHeightMinus() {
-      return this.isExpand ? 396 : 331
+      return this.isExpand ? 374 : 310
     },
     tableDataLength() {
       return this.tableData.length
