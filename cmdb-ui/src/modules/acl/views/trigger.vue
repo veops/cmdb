@@ -1,6 +1,6 @@
 <template>
-  <div :style="{ backgroundColor: '#fff', padding: '24px' }">
-    <div class="trigger-action-btn">
+  <div class="acl-trigger">
+    <div class="acl-trigger-header">
       <a-button type="primary" @click="handleCreateTrigger">新增触发器</a-button>
       <a-input-search
         class="ops-input"
@@ -14,7 +14,7 @@
 
     <vxe-grid
       stripe
-      size="mini"
+      size="small"
       class="ops-stripe-table"
       :columns="tableColumns"
       :data="filterTriggers"
@@ -65,8 +65,10 @@
         </a-space>
       </template>
       <template slot="empty">
-        <img :src="require(`@/assets/data_empty.png`)" />
-        <p style="font-size: 14px; line-height: 17px; color: rgba(0, 0, 0, 0.6)">暂无数据</p>
+        <div>
+          <img :style="{ width: '100px' }" :src="require('@/assets/data_empty.png')" />
+          <div>暂无数据</div>
+        </div>
       </template>
     </vxe-grid>
     <trigger-form
@@ -188,7 +190,7 @@ export default {
         {
           title: '操作',
           field: 'action',
-          minWidth: '200px',
+          width: '120px',
           fixed: 'right',
           slots: {
             default: 'action_default',
@@ -317,10 +319,17 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-.trigger-action-btn {
-  width: 100%;
-  display: inline-flex;
-  margin-bottom: 15px;
-  align-items: center;
+.acl-trigger {
+  border-radius: 15px;
+  background-color: #fff;
+  height: calc(100vh - 64px);
+  margin-bottom: -24px;
+  padding: 24px;
+  .acl-trigger-header {
+    width: 100%;
+    display: inline-flex;
+    margin-bottom: 15px;
+    align-items: center;
+  }
 }
 </style>
