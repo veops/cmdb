@@ -1,5 +1,5 @@
 <template>
-  <div :style="{ backgroundColor: '#fff', padding: '24px' }">
+  <div class="acl-operation-history">
     <a-tabs default-active-key="1">
       <a-tab-pane key="1" tab="权限变更">
         <permisson-table></permisson-table>
@@ -31,4 +31,12 @@ export default {
 }
 </script>
 
-<style></style>
+<style lang="less" scoped>
+.acl-operation-history {
+  border-radius: 15px;
+  height: calc(100vh - 64px);
+  margin-bottom: -24px;
+  padding: 24px;
+  background-color: #fff;
+}
+</style>

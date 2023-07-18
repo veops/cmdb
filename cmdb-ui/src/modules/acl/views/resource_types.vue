@@ -1,6 +1,6 @@
 <template>
-  <div :style="{ backgroundColor: '#fff', padding: '24px' }">
-    <div class="resource-types-action-btn">
+  <div class="acl-resource-types">
+    <div class="acl-resource-types-header">
       <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem">{{ btnName }}</a-button>
       <a-input-search
         class="ops-input"
@@ -17,12 +17,12 @@
       ></a-input-search>
     </div>
     <a-spin :spinning="loading">
-      <vxe-table
+      <ops-table
         stripe
-        size="mini"
+        size="small"
         class="ops-stripe-table"
         :data="groups"
-        :max-height="`${windowHeight - 185}px`"
+        :height="`${windowHeight - 200}px`"
         highlight-hover-row
       >
         <!-- 1 -->
@@ -45,28 +45,25 @@
         </vxe-table-column>
 
         <!-- 4 -->
-        <vxe-table-column field="action" title="操作" :min-width="175" fixed="right">
+        <vxe-table-column field="action" title="操作" :width="100" fixed="right">
           <template #default="{ row }">
-            <a @click="handleEdit(row)"><a-icon type="edit" /></a>
+            <a @click="handleEdit(row)"><a-icon type="edit"/></a>
             <a-divider type="vertical" />
             <a-popconfirm title="确认删除?" @confirm="handleDelete(row)" okText="是" cancelText="否">
-              <a style="color: red"><a-icon type="delete" /></a>
+              <a style="color: red"><a-icon type="delete"/></a>
             </a-popconfirm>
           </template>
         </vxe-table-column>
-        <template slot="empty">
-          <img :src="require(`@/assets/data_empty.png`)" />
-          <p style="font-size: 14px; line-height: 17px; color: rgba(0, 0, 0, 0.6)">暂无数据</p>
-        </template>
-      </vxe-table>
+      </ops-table>
       <vxe-pager
-        size="mini"
+        size="small"
         :layouts="['Total', 'PrevPage', 'JumpNumber', 'NextPage', 'Sizes']"
         :current-page.sync="tablePage.currentPage"
         :page-size.sync="tablePage.pageSize"
         :total="tablePage.total"
         :page-sizes="pageSizeOptions"
         @page-change="handlePageChange"
+        :style="{ marginTop: '10px' }"
       >
       </vxe-pager>
     </a-spin>
@@ -140,7 +137,7 @@ export default {
     }),
   },
   watch: {
-    '$route.name': function (newName, oldName) {
+    '$route.name': function(newName, oldName) {
       this.tablePage = {
         total: 0,
         currentPage: 1,
@@ -222,10 +219,17 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.resource-types-action-btn {
-  width: 100%;
-  display: inline-flex;
-  margin-bottom: 15px;
-  align-items: center;
+.acl-resource-types {
+  border-radius: 15px;
+  background-color: #fff;
+  height: calc(100vh - 64px);
+  margin-bottom: -24px;
+  padding: 24px;
+  .acl-resource-types-header {
+    width: 100%;
+    display: inline-flex;
+    margin-bottom: 15px;
+    align-items: center;
+  }
 }
 </style>
