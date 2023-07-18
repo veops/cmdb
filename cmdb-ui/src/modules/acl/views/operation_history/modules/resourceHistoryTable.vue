@@ -15,13 +15,14 @@
       @resourceClear="resourceClear"
     ></search-form>
     <vxe-table
+      stripe
+      class="ops-stripe-table"
       ref="xTable"
-      border
       resizable
       size="small"
       :loading="loading"
       :data="tableData"
-      :max-height="`${windowHeight - windowHeightMinus}px`"
+      :height="`${windowHeight - windowHeightMinus}px`"
     >
       <vxe-column field="created_at" width="144px" title="操作时间"></vxe-column>
       <vxe-column field="operate_uid" width="130px" title="操作员"></vxe-column>
@@ -56,6 +57,7 @@
       :isLoading="loading"
       @change="onChange"
       @showSizeChange="onShowSizeChange"
+      :style="{ marginTop: '10px' }"
     ></pager>
   </div>
 </template>
@@ -160,7 +162,7 @@ export default {
       return this.$store.state.windowHeight
     },
     windowHeightMinus() {
-      return this.isExpand ? 396 : 331
+      return this.isExpand ? 374 : 310
     },
     tableDataLength() {
       return this.tableData.length
