@@ -199,24 +199,33 @@ export default {
       this.$refs.grantModal.open('depart')
       this.grantType = grantType
     },
-    // 授权common-setting中的角色  从中拿到roleid
+    // 授权最古老的角色权限
     grantRole(grantType) {
       this.$refs.grantModal.open('role')
       this.grantType = grantType
     },
-    handleOk(params) {
+    handleOk(params, type) {
       const { grantType } = this
-      console.log(params)
-      const rids = [
-        ...params.department.map((rid) => {
-          const _find = this.allDepartments.find((dep) => dep.acl_rid === rid)
-          return { rid, name: _find?.department_name ?? rid }
-        }),
-        ...params.user.map((rid) => {
-          const _find = this.allEmployees.find((dep) => dep.acl_rid === rid)
-          return { rid, name: _find?.nickname ?? rid }
-        }),
-      ]
+      let rids
+      if (type === 'depart') {
+        rids = [
+          ...params.department.map((rid) => {
+            const _find = this.allDepartments.find((dep) => dep.acl_rid === rid)
+            return { rid, name: _find?.department_name ?? rid }
+          }),
+          ...params.user.map((rid) => {
+            const _find = this.allEmployees.find((dep) => dep.acl_rid === rid)
+            return { rid, name: _find?.nickname ?? rid }
+          }),
+        ]
+      }
+      if (type === 'role') {
+        rids = [
+          ...params.map((role) => {
+            return { rid: role.id, name: role.name }
+          }),
+        ]
+      }
       if (grantType === 'ci_type') {
         this.tableData.unshift(
           ...rids.map(({ rid, name }) => {
