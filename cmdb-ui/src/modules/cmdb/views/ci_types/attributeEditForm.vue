@@ -172,7 +172,7 @@
         >
           <template slot="label">
             <span
-              style="position:relative;white-space:pre;"
+              style="position: relative; white-space: pre"
             >{{ `索引` }}
               <a-tooltip title="字段可被用于检索，加速查询">
                 <a-icon
@@ -204,7 +204,7 @@
         >
           <template slot="label">
             <span
-              style="position:relative;white-space:pre;"
+              style="position: relative; white-space: pre"
             >{{ `显示` }}
               <a-tooltip title="CI实例表格默认展示该字段">
                 <a-icon
@@ -250,7 +250,7 @@
         >
           <template slot="label">
             <span
-              style="position:relative;white-space:pre;"
+              style="position: relative; white-space: pre"
             >{{ `多值` }}
               <a-tooltip title="字段的值是1个或者多个，接口返回的值的类型是list">
                 <a-icon
@@ -316,7 +316,7 @@
           <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
             <template slot="label">
               <span
-                style="position:relative;white-space:pre;"
+                style="position: relative; white-space: pre"
               >{{ `计算属性` }}
                 <a-tooltip
                   :title="
