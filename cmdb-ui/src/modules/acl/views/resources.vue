@@ -36,7 +36,7 @@
                 $refs.resourceBatchPerm.open(currentType.id)
               }
             "
-          >便捷授权</a-button
+            >便捷授权</a-button
           >
           <a-switch
             v-model="isGroup"
@@ -46,8 +46,8 @@
                 tablePage.currentPage = 1
                 searchData()
                 selectedRows = []
-                $refs.xTable && $refs.xTable.clearCheckboxRow()
-                $refs.xTable && $refs.xTable.clearCheckboxReserve()
+                $refs.xTable && $refs.xTable.getVxetableRef().clearCheckboxRow()
+                $refs.xTable && $refs.xTable.getVxetableRef().clearCheckboxReserve()
               }
             "
             un-checked-children="组"
@@ -75,7 +75,7 @@
           <!-- 2 -->
 
           <vxe-table-column field="name" title="资源名" :min-widh="150" fixed="left" show-overflow>
-            <template #title="{row}">
+            <template #title="{ row }">
               {{ row.isGroup ? '资源组名' : '资源名' }}
             </template>
           </vxe-table-column>
@@ -91,14 +91,8 @@
 
           <!-- 6 -->
 
-          <vxe-table-column
-            field="action"
-            title="操作"
-            :min-widh="200"
-            fixed="right"
-            align="center"
-            show-overflow>
-            <template #default="{row}">
+          <vxe-table-column field="action" title="操作" :min-widh="200" fixed="right" align="center" show-overflow>
+            <template #default="{ row }">
               <span v-show="row.isGroup">
                 <a @click="handleDisplayMember(row)">成员</a>
                 <a-divider type="vertical" />
@@ -106,7 +100,7 @@
                 <a-divider type="vertical" />
               </span>
               <a-tooltip title="查看授权">
-                <a @click="handlePerm(row)"><a-icon type="eye"/></a>
+                <a @click="handlePerm(row)"><a-icon type="eye" /></a>
               </a-tooltip>
               <a-divider type="vertical" />
               <a-tooltip title="授权">
@@ -116,7 +110,7 @@
               </a-tooltip>
               <a-divider type="vertical" />
               <a-popconfirm title="确认删除?" @confirm="handleDelete(row)" @cancel="cancel" okText="是" cancelText="否">
-                <a style="color: red"><a-icon type="delete"/></a>
+                <a style="color: red"><a-icon type="delete" /></a>
               </a-popconfirm>
             </template>
           </vxe-table-column>
@@ -134,8 +128,8 @@
         </vxe-pager>
       </a-spin>
     </div>
-    <div v-else style="text-align: center;margin-top:20%">
-      <a-icon style="font-size:50px; margin-bottom: 20px; color: orange" type="info-circle" />
+    <div v-else style="text-align: center; margin-top: 20%">
+      <a-icon style="font-size: 50px; margin-bottom: 20px; color: orange" type="info-circle" />
       <h3>暂无类型信息，请先添加资源类型！</h3>
     </div>
     <resourceForm ref="resourceForm" @fresh="handleOk"> </resourceForm>
@@ -300,11 +294,12 @@ export default {
       this.searchName = ''
       this.selectedRows = []
       this.tablePage.currentPage = 1
-      this.$refs.xTable && this.$refs.xTable.clearCheckboxRow()
-      this.$refs.xTable && this.$refs.xTable.clearCheckboxReserve()
+      this.$refs.xTable && this.$refs.xTable.getVxetableRef().clearCheckboxRow()
+      this.$refs.xTable && this.$refs.xTable.getVxetableRef().clearCheckboxReserve()
       if (rtypeId) {
         this.currentType = this.allResourceTypes.find((item) => item.id === rtypeId)
       }
+      p
       this.searchData()
     },
     handlePerm(record) {
@@ -347,7 +342,10 @@ export default {
     },
     changeCheckbox({ records }) {
       // console.log(records)
-      this.selectedRows = this.$refs.xTable.getCheckboxRecords().concat(this.$refs.xTable.getCheckboxReserveRecords())
+      this.selectedRows = this.$refs.xTable
+        .getVxetableRef()
+        .getCheckboxRecords()
+        .concat(this.$refs.xTable.getVxetableRef().getCheckboxReserveRecords())
     },
     handleBatchPerm() {
       this.$refs['resourcePermManageForm'].editPerm(this.selectedRows, this.isGroup)
@@ -356,12 +354,12 @@ export default {
       this.$refs['resourcePermManageForm'].editPerm(this.selectedRows, this.isGroup, 'revoke')
     },
     closePerm() {
-      this.$refs.xTable.clearCheckboxRow()
+      this.$refs.xTable.getVxetableRef().clearCheckboxRow()
       this.selectedRows = []
     },
   },
   watch: {
-    '$route.name': function(newName, oldName) {
+    '$route.name': function (newName, oldName) {
       this.isGroup = false
       this.tablePage = {
         total: 0,
