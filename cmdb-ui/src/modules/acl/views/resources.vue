@@ -299,7 +299,6 @@ export default {
       if (rtypeId) {
         this.currentType = this.allResourceTypes.find((item) => item.id === rtypeId)
       }
-      p
       this.searchData()
     },
     handlePerm(record) {
