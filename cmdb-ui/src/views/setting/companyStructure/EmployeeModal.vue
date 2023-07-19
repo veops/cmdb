@@ -382,9 +382,9 @@
         :style="{ display: 'inline-block', width: '98%', margin: '0 7px 24px' }"
         v-if="
           attributes.findIndex((v) => v == 'bank_card_number') !== -1 ||
-          attributes.findIndex((v) => v == 'bank_card_name') !== -1 ||
-          attributes.findIndex((v) => v == 'opening_bank') !== -1 ||
-          attributes.findIndex((v) => v == 'account_opening_location') !== -1
+            attributes.findIndex((v) => v == 'bank_card_name') !== -1 ||
+            attributes.findIndex((v) => v == 'opening_bank') !== -1 ||
+            attributes.findIndex((v) => v == 'account_opening_location') !== -1
         "
       >
         <a-row :gutter="[8, { xs: 8 }]">
