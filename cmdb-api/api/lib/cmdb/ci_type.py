@@ -235,7 +235,7 @@ class CITypeGroupManager(object):
             for t in sorted(CITypeGroupItem.get_by(group_id=group['id']), key=lambda x: x['order'] or 0):
                 ci_type = CITypeCache.get(t['type_id']).to_dict()
                 if resources is None or (ci_type and ci_type['name'] in resources):
-                    ci_type['permissions'] = resources[ci_type['name']]
+                    ci_type['permissions'] = resources[ci_type['name']] if resources is not None else None
                     group.setdefault("ci_types", []).append(ci_type)
                     group_types.add(t["type_id"])
 
@@ -244,7 +244,7 @@ class CITypeGroupManager(object):
             other_types = dict(ci_types=[])
             for ci_type in ci_types:
                 if ci_type["id"] not in group_types and (resources is None or ci_type['name'] in resources):
-                    ci_type['permissions'] = resources.get(ci_type['name'])
+                    ci_type['permissions'] = resources.get(ci_type['name']) if resources is not None else None
                     other_types['ci_types'].append(ci_type)
 
             groups.append(other_types)
