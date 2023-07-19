@@ -11,7 +11,7 @@
     wrapClassName="attribute-edit-form"
   >
     <a-form :form="form" :layout="formLayout" @submit="handleSubmit">
-      <a-divider style="font-size: 14px; margin-top: 6px">基础设置</a-divider>
+      <a-divider style="font-size:14px;margin-top:6px;">基础设置</a-divider>
       <a-col :span="12">
         <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="属性名(英文)">
           <a-input
@@ -33,22 +33,24 @@
           />
         </a-form-item>
       </a-col>
-      <a-col :span="12"
-        ><a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="别名">
-          <a-input name="alias" v-decorator="['alias', { rules: [] }]" /> </a-form-item
+      <a-col
+        :span="12"
+      ><a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="别名">
+        <a-input name="alias" v-decorator="['alias', { rules: [] }]" /> </a-form-item
       ></a-col>
-      <a-col :span="12"
-        ><a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="数据类型">
-          <a-select
-            :disabled="true"
-            name="value_type"
-            style="width: 100%"
-            v-decorator="['value_type', { rules: [{ required: true }] }]"
-            @change="handleChangeValueType"
-          >
-            <a-select-option :value="key" :key="key" v-for="(value, key) in valueTypeMap">{{ value }}</a-select-option>
-          </a-select>
-        </a-form-item></a-col
+      <a-col
+        :span="12"
+      ><a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="数据类型">
+        <a-select
+          :disabled="true"
+          name="value_type"
+          style="width: 100%"
+          v-decorator="['value_type', { rules: [{ required: true }] }]"
+          @change="handleChangeValueType"
+        >
+          <a-select-option :value="key" :key="key" v-for="(value, key) in valueTypeMap">{{ value }}</a-select-option>
+        </a-select>
+      </a-form-item></a-col
       >
       <a-col :span="currentValueType === '6' ? 24 : 12">
         <a-form-item
@@ -70,7 +72,9 @@
               v-else-if="currentValueType === '0'"
               @select="selectIntDefaultValue"
             >
-              <a-select-option key="$auto_inc_id"> 自增ID </a-select-option>
+              <a-select-option key="$auto_inc_id">
+                自增ID
+              </a-select-option>
             </a-select>
             <a-input-number
               style="width: 100%"
@@ -90,9 +94,15 @@
               v-else-if="currentValueType === '3' && defaultForDatetime !== '$custom_time'"
               @select="changeDefaultForDatetime"
             >
-              <a-select-option key="$created_at"> 创建时间 </a-select-option>
-              <a-select-option key="$updated_at"> 更新时间 </a-select-option>
-              <a-select-option key="$custom_time"> 自定义时间 </a-select-option>
+              <a-select-option key="$created_at">
+                创建时间
+              </a-select-option>
+              <a-select-option key="$updated_at">
+                更新时间
+              </a-select-option>
+              <a-select-option key="$custom_time">
+                自定义时间
+              </a-select-option>
             </a-select>
             <template v-else-if="currentValueType === '4' || currentValueType === '3'">
               <a-date-picker
@@ -161,11 +171,12 @@
           :wrapper-col="horizontalFormItemLayout.wrapperCol"
         >
           <template slot="label">
-            <span style="position: relative; white-space: pre"
-              >{{ `索引` }}
+            <span
+              style="position:relative;white-space:pre;"
+            >{{ `索引` }}
               <a-tooltip title="字段可被用于检索，加速查询">
                 <a-icon
-                  style="position: absolute; top: 3px; left: -17px; color: #2f54eb"
+                  style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
                   type="question-circle"
                   theme="filled"
                   @click="
@@ -192,11 +203,12 @@
           :wrapper-col="horizontalFormItemLayout.wrapperCol"
         >
           <template slot="label">
-            <span style="position: relative; white-space: pre"
-              >{{ `显示` }}
+            <span
+              style="position:relative;white-space:pre;"
+            >{{ `显示` }}
               <a-tooltip title="CI实例表格默认展示该字段">
                 <a-icon
-                  style="position: absolute; top: 3px; left: -17px; color: #2f54eb"
+                  style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
                   type="question-circle"
                   theme="filled"
                   @click="
@@ -237,11 +249,12 @@
           :wrapper-col="horizontalFormItemLayout.wrapperCol"
         >
           <template slot="label">
-            <span style="position: relative; white-space: pre"
-              >{{ `多值` }}
+            <span
+              style="position:relative;white-space:pre;"
+            >{{ `多值` }}
               <a-tooltip title="字段的值是1个或者多个，接口返回的值的类型是list">
                 <a-icon
-                  style="position: absolute; top: 3px; left: -17px; color: #2f54eb"
+                  style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
                   type="question-circle"
                   theme="filled"
                   @click="
@@ -287,7 +300,7 @@
         </a-form-item>
       </a-col>
 
-      <a-divider style="font-size: 14px; margin-top: 6px">高级设置</a-divider>
+      <a-divider style="font-size:14px;margin-top:6px;">高级设置</a-divider>
       <a-row>
         <a-col :span="24">
           <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" label="字体">
@@ -302,13 +315,16 @@
         <a-col :span="24" v-if="currentValueType !== '6'">
           <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
             <template slot="label">
-              <span style="position: relative; white-space: pre"
-                >{{ `计算属性` }}
+              <span
+                style="position:relative;white-space:pre;"
+              >{{ `计算属性` }}
                 <a-tooltip
-                  :title="`该属性的值是通过模型的其它属性构建的表达式或者执行一段代码的方式计算而来，属性的引用方法为: {{ 属性名 }}`"
+                  :title="
+                    `该属性的值是通过模型的其它属性构建的表达式或者执行一段代码的方式计算而来，属性的引用方法为: {{ 属性名 }}`
+                  "
                 >
                   <a-icon
-                    style="position: absolute; top: 3px; left: -17px; color: #2f54eb"
+                    style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
                     type="question-circle"
                     theme="filled"
                     @click="
@@ -346,7 +362,11 @@
 <script>
 import moment from 'moment'
 import vueJsonEditor from 'vue-json-editor'
-import { updateAttributeById, updateCITypeAttributesById, canDefineComputed } from '@/modules/cmdb/api/CITypeAttr'
+import {
+  updateAttributeById,
+  updateCITypeAttributesById,
+  canDefineComputed,
+} from '@/modules/cmdb/api/CITypeAttr'
 import { valueTypeMap } from '../../utils/const'
 import ComputedArea from './computedArea.vue'
 import PreValueArea from './preValueArea.vue'
