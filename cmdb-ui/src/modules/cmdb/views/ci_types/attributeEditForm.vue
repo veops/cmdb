@@ -33,22 +33,24 @@
           />
         </a-form-item>
       </a-col>
-      <a-col :span="12"
-        ><a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="别名">
-          <a-input name="alias" v-decorator="['alias', { rules: [] }]" /> </a-form-item
+      <a-col
+        :span="12"
+      ><a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="别名">
+        <a-input name="alias" v-decorator="['alias', { rules: [] }]" /> </a-form-item
       ></a-col>
-      <a-col :span="12"
-        ><a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="数据类型">
-          <a-select
-            :disabled="true"
-            name="value_type"
-            style="width: 100%"
-            v-decorator="['value_type', { rules: [{ required: true }] }]"
-            @change="handleChangeValueType"
-          >
-            <a-select-option :value="key" :key="key" v-for="(value, key) in valueTypeMap">{{ value }}</a-select-option>
-          </a-select>
-        </a-form-item></a-col
+      <a-col
+        :span="12"
+      ><a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="数据类型">
+        <a-select
+          :disabled="true"
+          name="value_type"
+          style="width: 100%"
+          v-decorator="['value_type', { rules: [{ required: true }] }]"
+          @change="handleChangeValueType"
+        >
+          <a-select-option :value="key" :key="key" v-for="(value, key) in valueTypeMap">{{ value }}</a-select-option>
+        </a-select>
+      </a-form-item></a-col
       >
       <a-col :span="currentValueType === '6' ? 24 : 12">
         <a-form-item
@@ -161,8 +163,9 @@
           :wrapper-col="horizontalFormItemLayout.wrapperCol"
         >
           <template slot="label">
-            <span style="position: relative; white-space: pre"
-              >{{ `索引` }}
+            <span
+              style="position: relative; white-space: pre"
+            >{{ `索引` }}
               <a-tooltip title="字段可被用于检索，加速查询">
                 <a-icon
                   style="position: absolute; top: 3px; left: -17px; color: #2f54eb"
@@ -192,8 +195,9 @@
           :wrapper-col="horizontalFormItemLayout.wrapperCol"
         >
           <template slot="label">
-            <span style="position: relative; white-space: pre"
-              >{{ `显示` }}
+            <span
+              style="position: relative; white-space: pre"
+            >{{ `显示` }}
               <a-tooltip title="CI实例表格默认展示该字段">
                 <a-icon
                   style="position: absolute; top: 3px; left: -17px; color: #2f54eb"
@@ -237,8 +241,9 @@
           :wrapper-col="horizontalFormItemLayout.wrapperCol"
         >
           <template slot="label">
-            <span style="position: relative; white-space: pre"
-              >{{ `多值` }}
+            <span
+              style="position: relative; white-space: pre"
+            >{{ `多值` }}
               <a-tooltip title="字段的值是1个或者多个，接口返回的值的类型是list">
                 <a-icon
                   style="position: absolute; top: 3px; left: -17px; color: #2f54eb"
@@ -302,8 +307,9 @@
         <a-col :span="24" v-if="currentValueType !== '6'">
           <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
             <template slot="label">
-              <span style="position: relative; white-space: pre"
-                >{{ `计算属性` }}
+              <span
+                style="position: relative; white-space: pre"
+              >{{ `计算属性` }}
                 <a-tooltip
                   :title="`该属性的值是通过模型的其它属性构建的表达式或者执行一段代码的方式计算而来，属性的引用方法为: {{ 属性名 }}`"
                 >
