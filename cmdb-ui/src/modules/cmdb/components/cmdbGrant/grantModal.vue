@@ -7,14 +7,16 @@
       ref="employeeTransfer"
       :height="350"
     />
+    <RoleTransfer app_id="cmdb" :height="350" ref="roleTransfer" v-if="type === 'role'" />
   </a-modal>
 </template>
 
 <script>
 import EmployeeTransfer from '@/components/EmployeeTransfer'
+import RoleTransfer from '@/components/RoleTransfer'
 export default {
   name: 'GrantModal',
-  components: { EmployeeTransfer },
+  components: { EmployeeTransfer, RoleTransfer },
   data() {
     return {
       visible: false,
@@ -35,9 +37,15 @@ export default {
       this.type = type
     },
     handleOk() {
-      const params = this.$refs.employeeTransfer.getValues()
+      let params
+      if (this.type === 'depart') {
+        params = this.$refs.employeeTransfer.getValues()
+      }
+      if (this.type === 'role') {
+        params = this.$refs.roleTransfer.getValues()
+      }
       this.handleCancel()
-      this.$emit('handleOk', params)
+      this.$emit('handleOk', params, this.type)
     },
     handleCancel() {
       this.visible = false
