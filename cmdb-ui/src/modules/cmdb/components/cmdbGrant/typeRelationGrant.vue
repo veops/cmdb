@@ -10,7 +10,7 @@
     </vxe-table>
     <a-space>
       <span class="grant-button" @click="grantDepart">授权用户/部门</span>
-      <!-- <span class="grant-button" @click="grantRole">授权角色</span> -->
+      <span class="grant-button" @click="grantRole">授权角色</span>
     </a-space>
   </div>
 </template>
