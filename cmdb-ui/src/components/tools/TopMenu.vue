@@ -48,8 +48,8 @@ export default {
   components: { gridSvg, top_agent, top_acl },
   data() {
     return {
-      defaultShowRouteName: ['cmdb'],
-      defaultUnShowRouteName: ['acl'],
+      defaultShowRouteName: ['cmdb', 'acl'],
+      defaultUnShowRouteName: [],
       routes: store.getters.appRoutes.filter((i) => !(i.meta || {}).hiddenInTopMenu),
       current: store.getters.appRoutes[0].name,
       visible: false,
