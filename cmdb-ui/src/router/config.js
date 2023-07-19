@@ -7,7 +7,7 @@ import store from '../store'
 export const generatorDynamicRouter = async () => {
   const packages = []
   const { apps = undefined } = store.getters.userInfo
-  for (let appName of appConfig.buildModules.filter(item => item !== 'fullscreen')) {
+  for (let appName of appConfig.buildModules) {
     if (!apps || !apps.length || apps.includes(appName)) {
       const module = await import(`@/modules/${appName}/index.js`)
       const r = await module.default.route()
@@ -26,23 +26,6 @@ export const generatorDynamicRouter = async () => {
     }
   }
   let routes = packages
-  if (appConfig.buildModules.includes('fullscreen')) {
-    routes = routes.concat([
-      {
-        path: '/fullscreen',
-        component: BasicLayout,
-        redirect: '/fullscreen/index',
-        meta: { title: '大屏' },
-        name: 'fullscreen',
-        children: [{
-          path: '/fullscreen/index',
-          name: 'fullscreen_index',
-          meta: { title: '大屏' },
-          component: () => import(/* webpackChunkName: "fullscreen" */ '@/views/fullscreen'),
-        }],
-      },
-      { path: '*', redirect: '/404', hidden: true }])
-  }
   routes = routes.concat([
     { path: '*', redirect: '/404', hidden: true },
     {

@@ -49,13 +49,11 @@ const store = new Vuex.Store({
 })
 
 appConfig.buildModules.forEach(appName => {
-  if (appName !== 'fullscreen') {
     import(`@/modules/${appName}/index.js`).then(m => {
       if (m.default.store) {
         store.registerModule(m.default.store.name || m.deault.name, m.default.store)
       }
     })
-  }
 })
 
 export default store
