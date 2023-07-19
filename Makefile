@@ -18,14 +18,14 @@ env:
 deps:
 	pipenv install --dev && \
 	pipenv run flask db-setup && \
-	pipenv run flask init-cache && \
+	pipenv run flask cmdb-init-cache && \
     cd cmdb-ui && yarn install && cd ..
 
 api:
 	cd cmdb-api && pipenv run flask run -h 0.0.0.0
 
 worker:
-	cd cmdb-api && pipenv run celery worker -A celery_worker.celery -E -Q cmdb_async --concurrency=1
+	cd cmdb-api && pipenv run celery worker -A celery_worker.celery -E -Q one_cmdb_async --concurrency=1 -D && pipenv run celery worker -A celery_worker.celery -E -Q acl_async --concurrency=1 -D
 
 ui:
 	cd cmdb-ui && yarn run serve
