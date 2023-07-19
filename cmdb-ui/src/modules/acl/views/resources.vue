@@ -36,7 +36,7 @@
                 $refs.resourceBatchPerm.open(currentType.id)
               }
             "
-            >便捷授权</a-button
+          >便捷授权</a-button
           >
           <a-switch
             v-model="isGroup"
@@ -91,7 +91,13 @@
 
           <!-- 6 -->
 
-          <vxe-table-column field="action" title="操作" :min-widh="200" fixed="right" align="center" show-overflow>
+          <vxe-table-column
+            field="action"
+            title="操作"
+            :min-widh="200"
+            fixed="right"
+            align="center"
+            show-overflow>
             <template #default="{ row }">
               <span v-show="row.isGroup">
                 <a @click="handleDisplayMember(row)">成员</a>
