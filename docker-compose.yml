@@ -48,7 +48,7 @@ services:
         gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000 -D
         flask cmdb-init-cache
         flask cmdb-init-acl
-        flask cmdb-counter
+        nohup flask cmdb-counter > counter.log 2>&1 &
 
         celery worker -A celery_worker.celery -E -Q one_cmdb_async --concurrency=2 -D
         celery worker -A celery_worker.celery -E -Q acl_async --concurrency=2
