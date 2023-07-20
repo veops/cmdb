@@ -1,4 +1,4 @@
-![基础资源视图](docs/logo.png)
+![维易CMDB](docs/images/logo.png)
 
 [![License](https://img.shields.io/badge/License-AGPLv3-brightgreen)](https://github.com/veops/cmdb/blob/master/LICENSE)
 [![UI](https://img.shields.io/badge/UI-Ant%20Design%20Pro%20Vue-brightgreen)](https://github.com/sendya/ant-design-pro-vue)
