@@ -17,7 +17,7 @@
 
 ### 整体架构
 
-<img src=docs/view.jpg />
+<img src=docs/images/view.jpg />
 
 ### 相关文档
 
@@ -51,10 +51,9 @@
 
 - 服务树
 
-![1](docs/0.png "首页展示")
+![1](docs/images/0.png "首页展示")
 
 [查看更多展示](docs/screenshot.md)
-
 
 
 ### 更多功能
@@ -67,9 +66,18 @@
 
 ## 安装
 
-### [Docker 一键快速构建](docs/docker.md)
+### Docker 一键快速构建
+- 进入主目录（先安装 docker 环境）
 
-### [本地搭建](docs/local.md)
+```
+docker-compose up -d
+```
+
+- 浏览器打开: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- username: demo 或者 admin
+- password: 123456
+
+### [本地开发环境搭建](docs/local.md)
 
 ### [Makefile 安装](docs/makefile.md)
 
@@ -77,4 +85,4 @@
 
 _**欢迎关注我们的公众号，点击联系我们，加入微信、qq运维群，获得更多产品、行业相关资讯**_
 
-![公众号](docs/qrcode_for_gzh.jpg)
+![公众号](docs/images/qrcode_for_gzh.jpg)
