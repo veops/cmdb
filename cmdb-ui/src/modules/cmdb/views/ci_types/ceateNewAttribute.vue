@@ -437,7 +437,7 @@ export default {
           const { attr_id } = await createAttribute({ ...values, option: { fontOptions } })
 
           this.form.resetFields()
-          this.currentValueType = '0'
+          this.currentValueType = '2'
           this.$refs.preValueArea.valueList = []
           this.$emit('done', attr_id, data, isCloseModal)
         } else {
