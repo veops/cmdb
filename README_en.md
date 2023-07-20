@@ -18,7 +18,7 @@
 
 ### Technical Architecture
 
-<img src=docs/view.png />
+<img src=docs/images/view.jpg />
 
 ### Document
 
@@ -51,7 +51,7 @@
 ### System Overview
 
 - Service Tree
-  ![1](docs/0.png "首页展示")
+  ![1](docs/images/0.png "首页展示")
 
 [View more screenshots](docs/screenshot.md)
 
@@ -61,7 +61,17 @@
 
 ## Installation
 
-### [One-Click Docker Quick Build](docs/docker_en.md)
+### One-Click Docker Quick Build
+
+- Prepare: install docker and docker-compose
+- In directory cmdb
+  ```
+  docker-compose up -d
+  ```
+- View: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- username: demo or admin
+- password: 123456
+
 
 ### [Local Setup](docs/local_en.md)
 
@@ -77,6 +87,6 @@
 
 ---
 
-_**Welcome to join us through QQ group（336164978）**_
+_**Welcome to pay attention to our public account, click to contact us, join WeChat, QQ operation and maintenance group, and get more product and industry related information**_
 
-![QQgroup](docs/qr_code.jpg)
+![QQgroup](docs/images/qrcode_for_gzh.jpg)
