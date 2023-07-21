@@ -18,6 +18,7 @@ from api.lib.decorator import kwargs_required
 from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import validate_permission
 from api.models.cmdb import Attribute
+from api.models.cmdb import CIType
 from api.models.cmdb import CITypeAttribute
 from api.models.cmdb import CITypeAttributeGroupItem
 from api.models.cmdb import PreferenceShowAttributes
@@ -314,6 +315,9 @@ class AttributeManager(object):
     def delete(_id):
         attr = Attribute.get_by_id(_id) or abort(404, ErrFormat.attribute_not_found.format("id={}".format(_id)))
         name = attr.name
+
+        if CIType.get_by(unique_id=attr.id, first=True, to_dict=False) is not None:
+            return abort(400, ErrFormat.attribute_is_unique_id)
 
         if attr.uid and attr.uid != g.user.uid:
             return abort(403, ErrFormat.cannot_delete_attribute)
