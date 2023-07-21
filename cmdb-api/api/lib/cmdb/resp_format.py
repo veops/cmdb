@@ -10,6 +10,7 @@ class ErrFormat(CommonErrFormat):
     argument_file_not_found = "文件似乎并未上传"
 
     attribute_not_found = "属性 {} 不存在!"
+    attribute_is_unique_id = "该属性是模型的唯一标识，不能被删除!"
     attribute_value_type_cannot_change = "属性的值类型不允许修改!"
     attribute_list_value_cannot_change = "多值不被允许修改!"
     attribute_index_cannot_change = "修改索引 非管理员不被允许!"
