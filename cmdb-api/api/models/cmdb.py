@@ -249,26 +249,26 @@ class CIIndexValueDateTime(Model):
     __table_args__ = (db.Index("datetime_attr_value_index", "attr_id", "value"),)
 
 
-class CIValueInteger(Model):
-    __tablename__ = "c_value_integers"
-
-    ci_id = db.Column(db.Integer, db.ForeignKey('c_cis.id'), nullable=False)
-    attr_id = db.Column(db.Integer, db.ForeignKey('c_attributes.id'), nullable=False)
-    value = db.Column(db.Integer, nullable=False)
-
-    ci = db.relationship("CI", backref="c_value_integers.ci_id")
-    attr = db.relationship("Attribute", backref="c_value_integers.attr_id")
-
-
-class CIValueFloat(Model):
-    __tablename__ = "c_value_floats"
-
-    ci_id = db.Column(db.Integer, db.ForeignKey('c_cis.id'), nullable=False)
-    attr_id = db.Column(db.Integer, db.ForeignKey('c_attributes.id'), nullable=False)
-    value = db.Column(DOUBLE, nullable=False)
-
-    ci = db.relationship("CI", backref="c_value_floats.ci_id")
-    attr = db.relationship("Attribute", backref="c_value_floats.attr_id")
+# class CIValueInteger(Model):
+#     __tablename__ = "c_value_integers"
+#
+#     ci_id = db.Column(db.Integer, db.ForeignKey('c_cis.id'), nullable=False)
+#     attr_id = db.Column(db.Integer, db.ForeignKey('c_attributes.id'), nullable=False)
+#     value = db.Column(db.Integer, nullable=False)
+#
+#     ci = db.relationship("CI", backref="c_value_integers.ci_id")
+#     attr = db.relationship("Attribute", backref="c_value_integers.attr_id")
+#
+#
+# class CIValueFloat(Model):
+#     __tablename__ = "c_value_floats"
+#
+#     ci_id = db.Column(db.Integer, db.ForeignKey('c_cis.id'), nullable=False)
+#     attr_id = db.Column(db.Integer, db.ForeignKey('c_attributes.id'), nullable=False)
+#     value = db.Column(DOUBLE, nullable=False)
+#
+#     ci = db.relationship("CI", backref="c_value_floats.ci_id")
+#     attr = db.relationship("Attribute", backref="c_value_floats.attr_id")
 
 
 class CIValueText(Model):
@@ -282,15 +282,15 @@ class CIValueText(Model):
     attr = db.relationship("Attribute", backref="c_value_texts.attr_id")
 
 
-class CIValueDateTime(Model):
-    __tablename__ = "c_value_datetime"
-
-    ci_id = db.Column(db.Integer, db.ForeignKey('c_cis.id'), nullable=False)
-    attr_id = db.Column(db.Integer, db.ForeignKey('c_attributes.id'), nullable=False)
-    value = db.Column(db.DateTime, nullable=False)
-
-    ci = db.relationship("CI", backref="c_value_datetime.ci_id")
-    attr = db.relationship("Attribute", backref="c_value_datetime.attr_id")
+# class CIValueDateTime(Model):
+#     __tablename__ = "c_value_datetime"
+#
+#     ci_id = db.Column(db.Integer, db.ForeignKey('c_cis.id'), nullable=False)
+#     attr_id = db.Column(db.Integer, db.ForeignKey('c_attributes.id'), nullable=False)
+#     value = db.Column(db.DateTime, nullable=False)
+#
+#     ci = db.relationship("CI", backref="c_value_datetime.ci_id")
+#     attr = db.relationship("Attribute", backref="c_value_datetime.attr_id")
 
 
 class CIValueJson(Model):
