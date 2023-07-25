@@ -19,7 +19,7 @@ class InitEmployee(object):
 
     def import_user_from_acl(self):
         """
-        从ACL导入用户
+        Import users from ACL
         """
 
         acl = ACLManager('acl')
@@ -149,7 +149,7 @@ class InitDepartment(object):
 @with_appcontext
 def init_import_user_from_acl():
     """
-    从ACL导入用户
+    Import users from ACL
     """
     InitEmployee().import_user_from_acl()
 
@@ -158,7 +158,7 @@ def init_import_user_from_acl():
 @with_appcontext
 def init_department():
     """
-    初始化 部门
+    Department initialization
     """
     InitDepartment().init()
     InitDepartment().create_acl_role_with_department()
