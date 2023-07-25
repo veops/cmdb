@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import datetime
 import json
+import re
 
 import six
 from markupsafe import escape
@@ -11,6 +12,8 @@ from markupsafe import escape
 import api.models.cmdb as model
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.const import ValueTypeEnum
+
+TIME_RE = re.compile(r"^(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$")
 
 
 def string2int(x):
@@ -31,7 +34,7 @@ class ValueTypeMap(object):
         ValueTypeEnum.INT: string2int,
         ValueTypeEnum.FLOAT: float,
         ValueTypeEnum.TEXT: lambda x: escape(x).encode('utf-8').decode('utf-8'),
-        ValueTypeEnum.TIME: lambda x: escape(x).encode('utf-8').decode('utf-8'),
+        ValueTypeEnum.TIME: lambda x: TIME_RE.findall(escape(x).encode('utf-8').decode('utf-8'))[0],
         ValueTypeEnum.DATETIME: str2datetime,
         ValueTypeEnum.DATE: str2datetime,
         ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) and x else x,
@@ -61,15 +64,11 @@ class ValueTypeMap(object):
         ValueTypeEnum.INT: model.IntegerChoice,
         ValueTypeEnum.FLOAT: model.FloatChoice,
         ValueTypeEnum.TEXT: model.TextChoice,
+        ValueTypeEnum.TIME: model.TextChoice,
     }
 
     table = {
-        ValueTypeEnum.INT: model.CIValueInteger,
         ValueTypeEnum.TEXT: model.CIValueText,
-        ValueTypeEnum.DATETIME: model.CIValueDateTime,
-        ValueTypeEnum.DATE: model.CIValueDateTime,
-        ValueTypeEnum.TIME: model.CIValueText,
-        ValueTypeEnum.FLOAT: model.CIValueFloat,
         ValueTypeEnum.JSON: model.CIValueJson,
         'index_{0}'.format(ValueTypeEnum.INT): model.CIIndexValueInteger,
         'index_{0}'.format(ValueTypeEnum.TEXT): model.CIIndexValueText,
@@ -81,12 +80,7 @@ class ValueTypeMap(object):
     }
 
     table_name = {
-        ValueTypeEnum.INT: 'c_value_integers',
         ValueTypeEnum.TEXT: 'c_value_texts',
-        ValueTypeEnum.DATETIME: 'c_value_datetime',
-        ValueTypeEnum.DATE: 'c_value_datetime',
-        ValueTypeEnum.TIME: 'c_value_texts',
-        ValueTypeEnum.FLOAT: 'c_value_floats',
         ValueTypeEnum.JSON: 'c_value_json',
         'index_{0}'.format(ValueTypeEnum.INT): 'c_value_index_integers',
         'index_{0}'.format(ValueTypeEnum.TEXT): 'c_value_index_texts',
@@ -117,8 +111,11 @@ class TableMap(object):
     @property
     def table(self):
         attr = AttributeCache.get(self.attr_name) if not self.attr else self.attr
-        if self.is_index is None:
+        if attr.value_type != ValueTypeEnum.TEXT and attr.value_type != ValueTypeEnum.JSON:
+            self.is_index = True
+        elif self.is_index is None:
             self.is_index = attr.is_index
+
         i = "index_{0}".format(attr.value_type) if self.is_index else attr.value_type
 
         return ValueTypeMap.table.get(i)
@@ -126,8 +123,11 @@ class TableMap(object):
     @property
     def table_name(self):
         attr = AttributeCache.get(self.attr_name) if not self.attr else self.attr
-        if self.is_index is None:
+        if attr.value_type != ValueTypeEnum.TEXT and attr.value_type != ValueTypeEnum.JSON:
+            self.is_index = True
+        elif self.is_index is None:
             self.is_index = attr.is_index
+
         i = "index_{0}".format(attr.value_type) if self.is_index else attr.value_type
 
         return ValueTypeMap.table_name.get(i)

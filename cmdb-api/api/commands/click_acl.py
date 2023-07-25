@@ -5,6 +5,9 @@ from flask.cli import with_appcontext
 @click.command()
 @with_appcontext
 def init_acl():
+    """
+    acl init
+    """
     from api.models.acl import Role
     from api.models.acl import App
     from api.tasks.acl import role_rebuild

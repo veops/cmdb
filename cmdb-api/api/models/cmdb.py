@@ -250,6 +250,9 @@ class CIIndexValueDateTime(Model):
 
 
 class CIValueInteger(Model):
+    """
+    Deprecated in a future version
+    """
     __tablename__ = "c_value_integers"
 
     ci_id = db.Column(db.Integer, db.ForeignKey('c_cis.id'), nullable=False)
@@ -261,6 +264,9 @@ class CIValueInteger(Model):
 
 
 class CIValueFloat(Model):
+    """
+    Deprecated in a future version
+    """
     __tablename__ = "c_value_floats"
 
     ci_id = db.Column(db.Integer, db.ForeignKey('c_cis.id'), nullable=False)
@@ -283,6 +289,9 @@ class CIValueText(Model):
 
 
 class CIValueDateTime(Model):
+    """
+    Deprecated in a future version
+    """
     __tablename__ = "c_value_datetime"
 
     ci_id = db.Column(db.Integer, db.ForeignKey('c_cis.id'), nullable=False)
