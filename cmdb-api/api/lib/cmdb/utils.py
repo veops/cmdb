@@ -13,6 +13,8 @@ import api.models.cmdb as model
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.const import ValueTypeEnum
 
+TIME_RE = re.compile(r"^(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$")
+
 
 def string2int(x):
     return int(float(x))
@@ -32,8 +34,7 @@ class ValueTypeMap(object):
         ValueTypeEnum.INT: string2int,
         ValueTypeEnum.FLOAT: float,
         ValueTypeEnum.TEXT: lambda x: escape(x).encode('utf-8').decode('utf-8'),
-        ValueTypeEnum.TIME: lambda x: re.compile(r'\d\d:\d\d:\d\d').findall(
-            escape(x).encode('utf-8').decode('utf-8'))[0],
+        ValueTypeEnum.TIME: lambda x: TIME_RE.findall(escape(x).encode('utf-8').decode('utf-8'))[0],
         ValueTypeEnum.DATETIME: str2datetime,
         ValueTypeEnum.DATE: str2datetime,
         ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) and x else x,

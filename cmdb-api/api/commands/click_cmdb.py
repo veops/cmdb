@@ -29,6 +29,7 @@ from api.lib.perm.acl.role import RoleCRUD
 from api.lib.perm.acl.user import UserCRUD
 from api.models.acl import App
 from api.models.acl import ResourceType
+from api.models.cmdb import Attribute
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
 from api.models.cmdb import CIType
@@ -200,6 +201,9 @@ def del_user(user):
 @click.command()
 @with_appcontext
 def cmdb_counter():
+    """
+    Dashboard calculations
+    """
     from api.lib.cmdb.cache import CMDBCounterCache
 
     while True:
@@ -217,6 +221,9 @@ def cmdb_counter():
 @click.command()
 @with_appcontext
 def cmdb_trigger():
+    """
+    Trigger execution
+    """
     current_day = datetime.datetime.today().strftime("%Y-%m-%d")
     trigger2cis = dict()
     trigger2completed = dict()
@@ -259,3 +266,33 @@ def cmdb_trigger():
 
         i += 1
         time.sleep(10)
+
+
+@click.command()
+@with_appcontext
+def cmdb_index_table_upgrade():
+    """
+    Migrate data from tables c_value_integers, c_value_floats, and c_value_datetime
+    """
+    for attr in Attribute.get_by(to_dict=False):
+        if attr.value_type not in {ValueTypeEnum.TEXT, ValueTypeEnum.JSON}:
+            attr.update(is_index=True)
+
+    from api.models.cmdb import CIValueInteger, CIIndexValueInteger
+    from api.models.cmdb import CIValueFloat, CIIndexValueFloat
+    from api.models.cmdb import CIValueDateTime, CIIndexValueDateTime
+
+    for i in CIValueInteger.get_by(to_dict=False):
+        CIIndexValueInteger.create(ci_id=i.ci_id, attr_id=i.attr_id, value=i.value, commit=False)
+        i.delete(commit=False)
+    db.session.commit()
+
+    for i in CIValueFloat.get_by(to_dict=False):
+        CIIndexValueFloat.create(ci_id=i.ci_id, attr_id=i.attr_id, value=i.value, commit=False)
+        i.delete(commit=False)
+    db.session.commit()
+
+    for i in CIValueDateTime.get_by(to_dict=False):
+        CIIndexValueDateTime.create(ci_id=i.ci_id, attr_id=i.attr_id, value=i.value, commit=False)
+        i.delete(commit=False)
+    db.session.commit()
