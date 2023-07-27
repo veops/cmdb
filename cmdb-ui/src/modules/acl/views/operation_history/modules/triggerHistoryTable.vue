@@ -241,7 +241,7 @@ export default {
       this.isExpand = expand
     },
     handleSearch(queryParams) {
-      this.queryParams = queryParams
+      this.queryParams = { ...this.queryParams, ...queryParams }
       this.getTable(this.queryParams)
     },
     searchFormReset() {

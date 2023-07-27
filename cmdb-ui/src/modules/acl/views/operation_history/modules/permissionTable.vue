@@ -348,7 +348,7 @@ export default {
       this.getTable(this.queryParams)
     },
     handleSearch(queryParams) {
-      this.queryParams = queryParams
+      this.queryParams = { ...this.queryParams, ...queryParams }
       this.getTable(this.queryParams)
     },
     handleExpandChange(expand) {

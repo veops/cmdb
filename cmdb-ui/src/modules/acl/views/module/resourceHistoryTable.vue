@@ -212,7 +212,12 @@ export default {
 
     // searchForm相关
     handleSearch(queryParams) {
-      this.queryParams = { ...queryParams, app_id: this.app_id, scope: this.checked ? 'resource_group' : 'resource' }
+      this.queryParams = {
+        ...this.queryParams,
+        ...queryParams,
+        app_id: this.app_id,
+        scope: this.checked ? 'resource_group' : 'resource',
+      }
       this.getTable(this.queryParams)
     },
     searchFormReset() {

@@ -286,7 +286,7 @@ export default {
       this.getTable(this.queryParams)
     },
     handleSearch(queryParams) {
-      this.queryParams = { ...queryParams, app_id: this.app_id }
+      this.queryParams = { ...this.queryParams, ...queryParams, app_id: this.app_id }
       this.getTable(this.queryParams)
     },
 
