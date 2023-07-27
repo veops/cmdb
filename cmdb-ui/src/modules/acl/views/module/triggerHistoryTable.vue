@@ -200,7 +200,7 @@ export default {
 
     // searchForm相关
     handleSearch(queryParams) {
-      this.queryParams = queryParams
+      this.queryParams = { ...this.queryParams, ...queryParams }
       this.queryParams.app_id = this.app_id
       this.getTable(this.queryParams)
     },
