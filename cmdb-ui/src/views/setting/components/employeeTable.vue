@@ -57,23 +57,7 @@
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>用户名</span>
         </span>
       </template>
@@ -88,23 +72,7 @@
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>邮箱</span>
         </span>
       </template>
@@ -120,23 +88,7 @@
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>性别</span>
         </span>
       </template>
@@ -151,57 +103,25 @@
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>手机号</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
-      field="department_id"
+      field="department_name"
       title="部门"
       min-width="90px"
       sortable
       v-if="
         checkedCols.findIndex((v) => v == 'department_name') !== -1 &&
-        attributes.findIndex((v) => v == 'department_name') !== -1
+          attributes.findIndex((v) => v == 'department_name') !== -1
       "
       key="department_name"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>部门</span>
         </span>
       </template>
@@ -217,29 +137,13 @@
       sortable
       v-if="
         checkedCols.findIndex((v) => v == 'position_name') !== -1 &&
-        attributes.findIndex((v) => v == 'position_name') !== -1
+          attributes.findIndex((v) => v == 'position_name') !== -1
       "
       key="position_name"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>岗位</span>
         </span>
       </template>
@@ -251,29 +155,13 @@
       sortable
       v-if="
         checkedCols.findIndex((v) => v == 'direct_supervisor_id') !== -1 &&
-        attributes.findIndex((v) => v == 'direct_supervisor_id') !== -1
+          attributes.findIndex((v) => v == 'direct_supervisor_id') !== -1
       "
       key="direct_supervisor_id"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>直接上级</span>
         </span>
       </template>
@@ -290,30 +178,14 @@
       min-width="80"
       v-if="
         checkedCols.findIndex((v) => v == 'annual_leave') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'annual_leave') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'annual_leave') !== -1
       "
       key="annual_leave"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>年假</span>
         </span>
       </template>
@@ -325,30 +197,14 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'virtual_annual_leave') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'virtual_annual_leave') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'virtual_annual_leave') !== -1
       "
       key="virtual_annual_leave"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>虚拟年假</span>
         </span>
       </template>
@@ -360,31 +216,55 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'parenting_leave') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'parenting_leave') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'parenting_leave') !== -1
       "
       key="parenting_leave"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>育儿假</span>
+        </span>
+      </template>
+    </vxe-column>
+    <vxe-column
+      field="current_company"
+      title="目前所属主体"
+      sortable
+      min-width="120"
+      v-if="
+        useDFC &&
+          checkedCols.findIndex((v) => v == 'current_company') !== -1 &&
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'current_company') !== -1
+      "
+      key="current_company"
+    >
+      <template #header>
+        <span class="vxe-handle">
+          <OpsMoveIcon class="move-icon" />
+          <span>目前所属主体</span>
+        </span>
+      </template>
+    </vxe-column>
+    <vxe-column
+      field="dfc_entry_date"
+      title="初始入职日期"
+      sortable
+      min-width="120"
+      v-if="
+        useDFC &&
+          checkedCols.findIndex((v) => v == 'dfc_entry_date') !== -1 &&
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'dfc_entry_date') !== -1
+      "
+      key="dfc_entry_date"
+    >
+      <template #header>
+        <span class="vxe-handle">
+          <OpsMoveIcon class="move-icon" />
+          <span>初始入职日期</span>
         </span>
       </template>
     </vxe-column>
@@ -395,30 +275,14 @@
       min-width="150"
       v-if="
         checkedCols.findIndex((v) => v == 'entry_date') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'entry_date') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'entry_date') !== -1
       "
       key="entry_date"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>目前主体入职日期</span>
         </span>
       </template>
@@ -431,30 +295,14 @@
       v-bind="tableType === 'structure' ? { filters: internOptions, 'filter-multiple': false } : {}"
       v-if="
         checkedCols.findIndex((v) => v == 'is_internship') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'is_internship') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'is_internship') !== -1
       "
       key="is_internship"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>正式/实习生</span>
         </span>
       </template>
@@ -469,30 +317,14 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'leave_date') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'leave_date') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'leave_date') !== -1
       "
       key="leave_date"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>离职日期</span>
         </span>
       </template>
@@ -504,30 +336,14 @@
       min-width="120"
       v-if="
         checkedCols.findIndex((v) => v == 'id_card') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'id_card') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'id_card') !== -1
       "
       key="id_card"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>身份证号码</span>
         </span>
       </template>
@@ -539,30 +355,14 @@
       min-width="80"
       v-if="
         checkedCols.findIndex((v) => v == 'nation') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'nation') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'nation') !== -1
       "
       key="nation"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>民族</span>
         </span>
       </template>
@@ -574,30 +374,14 @@
       min-width="120"
       v-if="
         checkedCols.findIndex((v) => v == 'id_place') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'id_place') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'id_place') !== -1
       "
       key="id_place"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>籍贯</span>
         </span>
       </template>
@@ -609,30 +393,14 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'party') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'party') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'party') !== -1
       "
       key="party"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>组织关系</span>
         </span>
       </template>
@@ -644,30 +412,14 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'household_registration_type') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'household_registration_type') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'household_registration_type') !== -1
       "
       key="household_registration_type"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>户籍类型</span>
         </span>
       </template>
@@ -679,30 +431,14 @@
       min-width="120"
       v-if="
         checkedCols.findIndex((v) => v == 'hometown') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'hometown') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'hometown') !== -1
       "
       key="hometown"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>户口所在地</span>
         </span>
       </template>
@@ -714,30 +450,14 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'marry') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'marry') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'marry') !== -1
       "
       key="marry"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>婚姻情况</span>
         </span>
       </template>
@@ -749,30 +469,14 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'max_degree') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'max_degree') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'max_degree') !== -1
       "
       key="max_degree"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>最高学历</span>
         </span>
       </template>
@@ -784,30 +488,14 @@
       min-width="110"
       v-if="
         checkedCols.findIndex((v) => v == 'emergency_person') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'emergency_person') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'emergency_person') !== -1
       "
       key="emergency_person"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>紧急联系人</span>
         </span>
       </template>
@@ -819,30 +507,14 @@
       min-width="120"
       v-if="
         checkedCols.findIndex((v) => v == 'emergency_phone') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'emergency_phone') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'emergency_phone') !== -1
       "
       key="emergency_phone"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>紧急联系电话</span>
         </span>
       </template>
@@ -854,30 +526,14 @@
       min-width="120"
       v-if="
         checkedCols.findIndex((v) => v == 'bank_card_number') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'bank_card_number') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'bank_card_number') !== -1
       "
       key="bank_card_number"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>卡号</span>
         </span>
       </template>
@@ -889,30 +545,14 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'bank_card_name') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'bank_card_name') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'bank_card_name') !== -1
       "
       key="bank_card_name"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>银行</span>
         </span>
       </template>
@@ -924,30 +564,14 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'opening_bank') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'opening_bank') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'opening_bank') !== -1
       "
       key="opening_bank"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>开户行</span>
         </span>
       </template>
@@ -959,30 +583,14 @@
       min-width="120"
       v-if="
         checkedCols.findIndex((v) => v == 'account_opening_location') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'account_opening_location') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'account_opening_location') !== -1
       "
       key="account_opening_location"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>开户地</span>
         </span>
       </template>
@@ -993,30 +601,14 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'school') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'school') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'school') !== -1
       "
       key="school"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>学校</span>
         </span>
       </template>
@@ -1027,30 +619,14 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'major') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'major') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'major') !== -1
       "
       key="major"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>专业</span>
         </span>
       </template>
@@ -1061,30 +637,14 @@
       min-width="80"
       v-if="
         checkedCols.findIndex((v) => v == 'education') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'education') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'education') !== -1
       "
       key="education"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>学历</span>
         </span>
       </template>
@@ -1095,30 +655,14 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'graduation_year') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'graduation_year') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'graduation_year') !== -1
       "
       key="graduation_year"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>毕业年份</span>
         </span>
       </template>
@@ -1129,30 +673,14 @@
       min-width="80"
       v-if="
         checkedCols.findIndex((v) => v == 'name') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'name') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'name') !== -1
       "
       key="name"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>子女姓名</span>
         </span>
       </template>
@@ -1163,30 +691,14 @@
       min-width="80"
       v-if="
         checkedCols.findIndex((v) => v == 'gender') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'gender') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'gender') !== -1
       "
       key="gender"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>子女性别</span>
         </span>
       </template>
@@ -1197,30 +709,14 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'birthday') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'birthday') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'birthday') !== -1
       "
       key="birthday"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>子女出生日期</span>
         </span>
       </template>
@@ -1231,32 +727,49 @@
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'parental_leave_left') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'parental_leave_left') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'parental_leave_left') !== -1
       "
       key="parental_leave_left"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>剩余育儿假</span>
         </span>
+      </template>
+    </vxe-column>
+    <vxe-column
+      field="roles"
+      title="角色"
+      v-bind="tableType === 'structure' ? { filters: [], 'filter-multiple': true } : {}"
+      :min-width="120"
+      v-if="
+        checkedCols.findIndex((v) => v == 'roles') !== -1 &&
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'roles') !== -1
+      "
+      key="role"
+    >
+      <template #header>
+        <span class="vxe-handle">
+          <OpsMoveIcon class="move-icon" />
+          <span>角色</span>
+        </span>
+      </template>
+      <template #default="{ row }">
+        <a-popover v-if="row.roles.length">
+          <template slot="content">
+            <a-tag v-for="item in row.roles" color="blue" :key="item.role_id" :style="{ marginBottom: '2px' }">
+              {{ item.role_name }}
+            </a-tag>
+          </template>
+          <span>
+            <a-tag v-for="item in row.roles" color="blue" :key="item.role_id" :style="{ marginBottom: '2px' }">
+              {{ item.role_name }}
+            </a-tag>
+          </span>
+        </a-popover>
       </template>
     </vxe-column>
     <vxe-column
@@ -1267,30 +780,14 @@
       :formatter="formatDate"
       v-if="
         checkedCols.findIndex((v) => v == 'last_login') !== -1 &&
-        tableType == 'structure' &&
-        attributes.findIndex((v) => v == 'last_login') !== -1
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'last_login') !== -1
       "
       key="last_login"
     >
       <template #header>
         <span class="vxe-handle">
-          <svg
-            t="1662694543392"
-            class="icon"
-            viewBox="0 0 1024 1024"
-            version="1.1"
-            xmlns="http://www.w3.org/2000/svg"
-            p-id="2689"
-            width="17"
-            height="17"
-            style="display: none; position: absolute; left: -3px; top: 12px"
-          >
-            <path
-              d="M469.333333 256a85.333333 85.333333 0 1 1-85.333333-85.333333 85.333333 85.333333 0 0 1 85.333333 85.333333z m-85.333333 170.666667a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m256-341.333334a85.333333 85.333333 0 1 0-85.333333-85.333333 85.333333 85.333333 0 0 0 85.333333 85.333333z m0 85.333334a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z m0 256a85.333333 85.333333 0 1 0 85.333333 85.333333 85.333333 85.333333 0 0 0-85.333333-85.333333z"
-              p-id="2690"
-              fill="#8a8a8a"
-            ></path>
-          </svg>
+          <OpsMoveIcon class="move-icon" />
           <span>上次登录时间</span>
         </span>
       </template>
@@ -1317,7 +814,7 @@
           >
             <template slot="content">
               <div :style="{ maxHeight: `${windowHeight - 320}px`, overflowY: 'auto', width: '160px' }">
-                <a-checkbox-group v-model="unsbmitCheckedCols" :options="options" style="display: grid">
+                <a-checkbox-group v-model="unsbmitCheckedCols" :options="options" style="display: grid;">
                 </a-checkbox-group>
               </div>
               <div
@@ -1333,32 +830,40 @@
                 <a-button size="small" @click="handleSubmit" type="primary">确定</a-button>
               </div>
             </template>
-            <a-icon type="control" style="cursor: pointer" />
+            <a-icon type="control" style="cursor: pointer;" />
           </a-popover>
         </template>
       </template>
       <template #default="{ row }">
         <a-space v-if="tableType === 'structure'">
-          <a><a-icon type="edit" @click="openEmployeeModal(row, 'edit')" /></a>
+          <a><a-icon type="edit" @click="openEmployeeModal(row, 'edit')"/></a>
           <a-tooltip>
-            <template slot="title"> 重置密码 </template>
-            <a><a-icon type="reload" @click="openBatchModal('password', row)" /></a>
+            <template slot="title">
+              重置密码
+            </template>
+            <a><a-icon type="reload" @click="openBatchModal('password', row)"/></a>
           </a-tooltip>
           <a-tooltip v-if="!row.block">
-            <template slot="title"> 禁用 </template>
+            <template slot="title">
+              禁用
+            </template>
             <a :style="{ color: 'red' }" @click="openBatchModal('block', row, 1)">
               <ops-icon type="icon-xianxing-weilianjie" />
             </a>
           </a-tooltip>
           <a-tooltip v-else>
-            <template slot="title"> 恢复 </template>
+            <template slot="title">
+              恢复
+            </template>
             <a @click="openBatchModal('block', row, 0)">
               <ops-icon type="icon-xianxing-yilianjie" />
             </a>
           </a-tooltip>
         </a-space>
         <a-tooltip v-else>
-          <template slot="title"> 移除 </template>
+          <template slot="title">
+            移除
+          </template>
           <a :style="{ color: 'red' }" @click="removeEmployee(row)">
             <ops-icon type="icon-xianxing-shanchuyonghu" />
           </a>
@@ -1376,13 +881,17 @@
 
 <script>
 import { mapState } from 'vuex'
+import { getRoleList } from '@/api/role'
 import { getDepartmentName, getDirectorName } from '@/utils/util'
 import Bus from '../companyStructure/eventBus/bus'
 import appConfig from '@/config/app'
 import Sortable from 'sortablejs'
 import XEUtils from 'xe-utils'
+import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
+
 export default {
   name: 'EmployeeTable',
+  components: { OpsMoveIcon },
   props: {
     tableData: {
       type: Array,
@@ -1496,6 +1005,7 @@ export default {
       checkedCols,
       unsbmitCheckedCols: [],
       visible: false,
+      useDFC: appConfig.useDFC,
       tableDragClassName: [], // 表格拖拽的参数
       attributes: [],
       internMap: [
@@ -1530,10 +1040,11 @@ export default {
     Bus.$on('reqExportSelectEvent', () => {
       this.exportExcel()
     })
-    this.options = this.options
-      .filter((item) => item.label !== '目前所属主体')
-      .filter((item) => item.label !== '初始入职日期')
-
+    if (!this.useDFC) {
+      this.options = this.options
+        .filter((item) => item.label !== '目前所属主体')
+        .filter((item) => item.label !== '初始入职日期')
+    }
     this.unsbmitCheckedCols = this.checkedCols
   },
   beforeDestroy() {
@@ -1545,6 +1056,8 @@ export default {
       localStorage.removeItem('setting-table-CheckedCols')
     }
     setTimeout(() => {
+      // 获取并设置角色过滤项
+      this.setRoleFilter()
       // table拖拽
       this.columnDrop()
     }, 1000)
@@ -1557,6 +1070,37 @@ export default {
   methods: {
     getDepartmentName,
     getDirectorName,
+    getVxetableRef() {
+      return this.$refs.employeeTable
+    },
+    setRoleFilter() {
+      // 获取并设置角色过滤项
+      this.$nextTick(() => {
+        if (this.tableType === 'structure') {
+          getRoleList('all').then((res) => {
+            const _filterRoleList = []
+            Object.keys(res).forEach((key) => {
+              _filterRoleList.push(
+                ...res[key].role_list.map((role) => {
+                  return {
+                    label: role.role_name,
+                    value: role.role_id,
+                  }
+                })
+              )
+            })
+            this.filterRoleList = _filterRoleList
+            const $table = this.$refs.employeeTable
+            if ($table) {
+              const nameColumn = $table.getColumnByField('role')
+              if (nameColumn) {
+                $table.setFilter(nameColumn, this.filterRoleList)
+              }
+            }
+          })
+        }
+      })
+    },
     initAttributes() {
       // 过滤用户没有权限的字段
       if (this.tableData.length) {
@@ -1644,6 +1188,9 @@ export default {
       })
     },
     contentMethod({ column }) {
+      if (column.property === 'role') {
+        return ''
+      }
       return null
     },
     // table中上次登录时间如果后端返回None则显示为空
@@ -1673,6 +1220,10 @@ export default {
     },
     handleSubmit() {
       this.visible = false
+      // 如果用户选择了角色列，获取角色list
+      if (!this.checkedCols.includes('roles') && this.unsbmitCheckedCols.includes('roles')) {
+        this.setRoleFilter()
+      }
       localStorage.setItem('setting-table-CheckedCols', JSON.stringify(this.unsbmitCheckedCols))
       this.$nextTick(() => {
         this.checkedCols = JSON.parse(localStorage.getItem('setting-table-CheckedCols'))
@@ -1695,7 +1246,14 @@ export default {
         this.fillZero(minute) +
         this.fillZero(second)
       this.$refs.employeeTable.exportData({
-        data: this.$refs.employeeTable.getCheckboxRecords(),
+        data: this.$refs.employeeTable.getCheckboxRecords().map((item) => {
+          return {
+            ...item,
+            is_internship: item.is_internship ? '实习生' : '正式',
+            direct_supervisor_id: getDirectorName(this.allFlatEmployees, item.direct_supervisor_id),
+            roles: this.getRoleName(item.roles)
+          }
+        }),
         filename: 'employee-' + now_time,
         sheetName: 'Sheet1',
         type: 'xlsx',
@@ -1703,11 +1261,16 @@ export default {
         useStyle: true, // 是否导出样式
         isFooter: false, // 是否导出表尾（比如合计）
         // 过滤那个字段导出
-        columnFilterMethod: function (column, $columnIndex) {
+        columnFilterMethod: function(column, $columnIndex) {
           return !(column.$columnIndex === 0)
           // 0是复选框 不导出
         },
       })
+      this.$refs.employeeTable.clearCheckboxRow()
+      this.$refs.employeeTable.clearCheckboxReserve()
+      this.$refs.employeeTable.clearSort()
+      this.tableSortData = undefined
+      Bus.$emit('changeSelectedRowKeys', [])
     },
     fillZero(str) {
       let realNum
@@ -1717,6 +1280,14 @@ export default {
         realNum = str
       }
       return realNum
+    },
+    getRoleName(roles) {
+      let roles_str = ''
+      roles.forEach(role => {
+        roles_str += `${role.role_name}` + '，'
+      })
+      roles_str = roles_str.substring(0, roles_str.length - 1)
+      return roles_str
     },
     columnDrop() {
       this.$nextTick(() => {
@@ -1760,7 +1331,16 @@ export default {
 <style lang="less" scoped>
 .vxe-handle {
   cursor: move;
-  &:hover > svg {
+  .move-icon {
+    display: none;
+    width: 17px;
+    height: 17px;
+    display: none;
+    position: absolute;
+    left: -3px;
+    top: 12px;
+  }
+  &:hover > .move-icon {
     display: inline !important;
   }
 }
