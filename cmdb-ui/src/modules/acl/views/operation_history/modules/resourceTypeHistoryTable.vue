@@ -217,7 +217,7 @@ export default {
       this.isExpand = expand
     },
     handleSearch(queryParams) {
-      this.queryParams = { ...queryParams, scope: 'resource_type' }
+      this.queryParams = { ...this.queryParams, ...queryParams, scope: 'resource_type' }
       this.getTable(this.queryParams)
     },
     searchFormReset() {

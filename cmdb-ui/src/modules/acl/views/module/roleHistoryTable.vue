@@ -220,7 +220,12 @@ export default {
       this.getTable(this.queryParams)
     },
     handleSearch(queryParams) {
-      this.queryParams = { ...queryParams, app_id: this.app_id, scope: this.checked ? 'role_relation' : 'role' }
+      this.queryParams = {
+        ...this.queryParams,
+        ...queryParams,
+        app_id: this.app_id,
+        scope: this.checked ? 'role_relation' : 'role',
+      }
       this.getTable(this.queryParams)
     },
     searchFormReset() {

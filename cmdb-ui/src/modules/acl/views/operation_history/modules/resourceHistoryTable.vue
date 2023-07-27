@@ -267,7 +267,7 @@ export default {
       this.isExpand = expand
     },
     handleSearch(queryParams) {
-      this.queryParams = { ...queryParams, scope: this.checked ? 'resource_group' : 'resource' }
+      this.queryParams = { ...this.queryParams, ...queryParams, scope: this.checked ? 'resource_group' : 'resource' }
       this.getTable(this.queryParams)
     },
     searchFormReset() {

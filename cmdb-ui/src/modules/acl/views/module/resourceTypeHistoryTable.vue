@@ -179,7 +179,7 @@ export default {
 
     // searchForm相关
     handleSearch(queryParams) {
-      this.queryParams = { ...queryParams, app_id: this.app_id, scope: 'resource_type' }
+      this.queryParams = { ...this.queryParams, ...queryParams, app_id: this.app_id, scope: 'resource_type' }
       this.getTable(this.queryParams)
     },
     searchFormReset() {
