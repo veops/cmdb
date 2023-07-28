@@ -534,7 +534,7 @@ export default {
       })
     },
     getAllFlatEmployees() {
-      getEmployeeList({ block_status: 0, page_size: 99999 }).then((res) => {
+      getEmployeeList({ block_status: -1, page_size: 99999 }).then((res) => {
         this.allFlatEmployees = res.data_list
       })
     },
@@ -721,7 +721,7 @@ export default {
       this.loading = false
     },
     updateAll() {
-      this.expression = []
+      // this.expression = []
       this.updateCount()
       this.updateTableDataByFilter()
     },
@@ -774,7 +774,7 @@ export default {
     },
     reset() {
       this.filterName = ''
-      this.$refs.filterComp.expression = ''
+      this.$refs.filterComp.expression = []
       this.updateTableDataByFilter()
     },
     handleSearch(expression) {
