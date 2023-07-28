@@ -79,6 +79,7 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import debounce from 'lodash/debounce'
 import Pager from '../../module/pager.vue'
 import SearchForm from '../../module/searchForm.vue'
@@ -347,7 +348,7 @@ export default {
       this.getTable(this.queryParams)
     },
     handleSearch(queryParams) {
-      this.queryParams = queryParams
+      this.queryParams = { ...this.queryParams, ...queryParams }
       this.getTable(this.queryParams)
     },
     handleExpandChange(expand) {
@@ -387,23 +388,24 @@ export default {
     },
 
     handleQueryParams(queryParams) {
+      const _queryParams = _.cloneDeep(queryParams)
       let q = ''
-      for (const key in queryParams) {
+      for (const key in _queryParams) {
         if (
           key !== 'page' &&
           key !== 'page_size' &&
           key !== 'app_id' &&
           key !== 'start' &&
           key !== 'end' &&
-          queryParams[key] !== undefined
+          _queryParams[key] !== undefined
         ) {
-          if (q) q += `,${key}:${queryParams[key]}`
-          else q += `${key}:${queryParams[key]}`
-          delete queryParams[key]
+          if (q) q += `,${key}:${_queryParams[key]}`
+          else q += `${key}:${_queryParams[key]}`
+          delete _queryParams[key]
         }
       }
-      const newQueryParams = { ...queryParams, q }
-      return q ? newQueryParams : queryParams
+      const newQueryParams = { ..._queryParams, q }
+      return q ? newQueryParams : _queryParams
     },
   },
 }
