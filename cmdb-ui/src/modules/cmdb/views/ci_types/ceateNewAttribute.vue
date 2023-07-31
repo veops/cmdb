@@ -1,130 +1,137 @@
 <template>
   <a-form :form="form" class="create-new-attribute">
     <a-divider style="font-size:14px;margin-top:6px;">基础设置</a-divider>
-    <a-col :span="12">
-      <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="属性名(英文)">
-        <a-input
-          name="name"
-          placeholder="英文"
-          v-decorator="[
-            'name',
-            {
-              rules: [
-                { required: true, message: '请输入属性名' },
-                { message: '不能以数字开头，可以是英文 数字以及下划线 (_)', pattern: RegExp('^(?!\\d)[a-zA-Z_0-9]+$') },
-                { message: '内置字段', pattern: RegExp('^(?!(id|_id|ci_id|type|_type|ci_type)$).*$') },
-              ],
-            },
-          ]"
-        />
-      </a-form-item>
-    </a-col>
-    <a-col :span="12">
-      <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="别名">
-        <a-input name="alias" v-decorator="['alias', { rules: [] }]" />
-      </a-form-item>
-    </a-col>
-    <a-col :span="12">
-      <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="数据类型">
-        <a-select
-          name="value_type"
-          style="width: 100%"
-          v-decorator="['value_type', { rules: [{ required: true }], initialValue: '2' }]"
-          @change="handleChangeValueType"
-        >
-          <a-select-option :value="key" :key="key" v-for="(value, key) in valueTypeMap">{{ value }}</a-select-option>
-        </a-select>
-      </a-form-item>
-    </a-col>
-    <a-col :span="currentValueType === '6' ? 24 : 12">
-      <a-form-item
-        :label-col="{ span: currentValueType === '6' ? 4 : 8 }"
-        :wrapper-col="{ span: currentValueType === '6' ? 18 : 12 }"
-        label="默认值"
-      >
-        <template>
-          <a-select
-            v-if="form.getFieldValue('is_list')"
-            mode="tags"
-            :style="{ width: '100%' }"
-            v-decorator="['default_value', { rules: [{ required: false }] }]"
-          >
-          </a-select>
-          <a-input-number
-            style="width: 100%"
-            v-else-if="currentValueType === '1'"
-            v-decorator="['default_value', { rules: [{ required: false }] }]"
-          >
-          </a-input-number>
-          <a-select
-            v-decorator="['default_value', { rules: [{ required: false }] }]"
-            mode="tags"
-            v-else-if="currentValueType === '0'"
-            @select="selectIntDefaultValue"
-          >
-            <a-select-option key="$auto_inc_id">
-              自增ID
-            </a-select-option>
-          </a-select>
+    <a-row>
+      <a-col :span="12">
+        <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="属性名(英文)">
           <a-input
-            style="width: 100%"
-            v-else-if="currentValueType === '2' || currentValueType === '5'"
-            v-decorator="['default_value', { rules: [{ required: false }] }]"
-          >
-          </a-input>
-          <a-select
-            allowClear
-            v-decorator="['default_value', { rules: [{ required: false }] }]"
-            v-else-if="currentValueType === '3' && defaultForDatetime !== '$custom_time'"
-            @select="changeDefaultForDatetime"
-          >
-            <a-select-option key="$created_at">
-              创建时间
-            </a-select-option>
-            <a-select-option key="$updated_at">
-              更新时间
-            </a-select-option>
-            <a-select-option key="$custom_time">
-              自定义时间
-            </a-select-option>
-          </a-select>
-          <template v-else-if="currentValueType === '4' || currentValueType === '3'">
-            <a-date-picker
-              style="width: 100%"
-              v-decorator="['default_value', { rules: [{ required: false }] }]"
-              :format="currentValueType === '4' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss'"
-              :showTime="currentValueType === '4' ? false : { format: 'HH:mm:ss' }"
-            />
-            <a-dropdown
-              :style="{ position: 'absolute', right: '-15px', top: '-10px' }"
-              :trigger="['click']"
-              v-if="currentValueType === '3'"
-            >
-              <a><a-icon type="down" /> </a>
-              <a-menu slot="overlay" @click="onClick">
-                <a-menu-item key="$created_at">
-                  <a>创建时间</a>
-                </a-menu-item>
-                <a-menu-item key="$updated_at">
-                  <a>更新时间</a>
-                </a-menu-item>
-              </a-menu>
-            </a-dropdown>
-          </template>
-
-          <vue-json-editor
-            v-else-if="currentValueType === '6'"
-            :style="{ '--custom-height': `${200}px` }"
-            v-model="default_value_json"
-            :showBtns="false"
-            :mode="'code'"
-            lang="zh"
-            @json-change="onJsonChange"
-            @has-error="onJsonError"
+            name="name"
+            placeholder="英文"
+            v-decorator="[
+              'name',
+              {
+                rules: [
+                  { required: true, message: '请输入属性名' },
+                  {
+                    message: '不能以数字开头，可以是英文 数字以及下划线 (_)',
+                    pattern: RegExp('^(?!\\d)[a-zA-Z_0-9]+$'),
+                  },
+                  { message: '内置字段', pattern: RegExp('^(?!(id|_id|ci_id|type|_type|ci_type)$).*$') },
+                ],
+              },
+            ]"
           />
-        </template>
-      </a-form-item>
-    </a-col>
+        </a-form-item>
+      </a-col>
+      <a-col :span="12">
+        <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="别名">
+          <a-input name="alias" v-decorator="['alias', { rules: [] }]" />
+        </a-form-item>
+      </a-col>
+    </a-row>
+    <a-row>
+      <a-col :span="12">
+        <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="数据类型">
+          <a-select
+            name="value_type"
+            style="width: 100%"
+            v-decorator="['value_type', { rules: [{ required: true }], initialValue: '2' }]"
+            @change="handleChangeValueType"
+          >
+            <a-select-option :value="key" :key="key" v-for="(value, key) in valueTypeMap">{{ value }}</a-select-option>
+          </a-select>
+        </a-form-item>
+      </a-col>
+      <a-col :span="currentValueType === '6' ? 24 : 12">
+        <a-form-item
+          :label-col="{ span: currentValueType === '6' ? 4 : 8 }"
+          :wrapper-col="{ span: currentValueType === '6' ? 18 : 12 }"
+          label="默认值"
+        >
+          <template>
+            <a-select
+              v-if="form.getFieldValue('is_list')"
+              mode="tags"
+              :style="{ width: '100%' }"
+              v-decorator="['default_value', { rules: [{ required: false }] }]"
+            >
+            </a-select>
+            <a-input-number
+              style="width: 100%"
+              v-else-if="currentValueType === '1'"
+              v-decorator="['default_value', { rules: [{ required: false }] }]"
+            >
+            </a-input-number>
+            <a-select
+              v-decorator="['default_value', { rules: [{ required: false }] }]"
+              mode="tags"
+              v-else-if="currentValueType === '0'"
+              @select="selectIntDefaultValue"
+            >
+              <a-select-option key="$auto_inc_id">
+                自增ID
+              </a-select-option>
+            </a-select>
+            <a-input
+              style="width: 100%"
+              v-else-if="currentValueType === '2' || currentValueType === '5'"
+              v-decorator="['default_value', { rules: [{ required: false }] }]"
+            >
+            </a-input>
+            <a-select
+              allowClear
+              v-decorator="['default_value', { rules: [{ required: false }] }]"
+              v-else-if="currentValueType === '3' && defaultForDatetime !== '$custom_time'"
+              @select="changeDefaultForDatetime"
+            >
+              <a-select-option key="$created_at">
+                创建时间
+              </a-select-option>
+              <a-select-option key="$updated_at">
+                更新时间
+              </a-select-option>
+              <a-select-option key="$custom_time">
+                自定义时间
+              </a-select-option>
+            </a-select>
+            <template v-else-if="currentValueType === '4' || currentValueType === '3'">
+              <a-date-picker
+                style="width: 100%"
+                v-decorator="['default_value', { rules: [{ required: false }] }]"
+                :format="currentValueType === '4' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss'"
+                :showTime="currentValueType === '4' ? false : { format: 'HH:mm:ss' }"
+              />
+              <a-dropdown
+                :style="{ position: 'absolute', right: '-15px', top: '-10px' }"
+                :trigger="['click']"
+                v-if="currentValueType === '3'"
+              >
+                <a><a-icon type="down" /> </a>
+                <a-menu slot="overlay" @click="onClick">
+                  <a-menu-item key="$created_at">
+                    <a>创建时间</a>
+                  </a-menu-item>
+                  <a-menu-item key="$updated_at">
+                    <a>更新时间</a>
+                  </a-menu-item>
+                </a-menu>
+              </a-dropdown>
+            </template>
+
+            <vue-json-editor
+              v-else-if="currentValueType === '6'"
+              :style="{ '--custom-height': `${200}px` }"
+              v-model="default_value_json"
+              :showBtns="false"
+              :mode="'code'"
+              lang="zh"
+              @json-change="onJsonChange"
+              @has-error="onJsonError"
+            />
+          </template>
+        </a-form-item>
+      </a-col>
+    </a-row>
 
     <a-col :span="6">
       <a-form-item

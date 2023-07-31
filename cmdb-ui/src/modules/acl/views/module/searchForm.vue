@@ -147,7 +147,6 @@ export default {
       expand: false,
       queryParams: {
         page: 1,
-        page_size: 50,
       },
       date: undefined,
       checked: false,
@@ -188,7 +187,6 @@ export default {
     handleReset() {
       this.queryParams = {
         page: 1,
-        page_size: 50,
       }
       this.date = undefined
       this.$emit('searchFormReset')

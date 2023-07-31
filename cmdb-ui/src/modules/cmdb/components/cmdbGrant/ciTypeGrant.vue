@@ -1,6 +1,14 @@
 <template>
   <div class="ci-type-grant">
-    <vxe-table size="mini" stripe class="ops-stripe-table" :data="filterTableData" :max-height="`${tableHeight}px`">
+    <vxe-table
+      ref="xTable"
+      size="mini"
+      stripe
+      class="ops-stripe-table"
+      :data="filterTableData"
+      :max-height="`${tableHeight}px`"
+      :row-style="(params) => getCurrentRowStyle(params, addedRids)"
+    >
       <vxe-column field="name"></vxe-column>
       <vxe-column v-for="col in columns" :key="col" :field="col" :title="permMap[col]">
         <template #default="{row}">
@@ -37,6 +45,7 @@ import _ from 'lodash'
 import { permMap } from './constants.js'
 import { grantCiType, revokeCiType } from '../../api/CIType'
 import ReadCheckbox from './readCheckbox.vue'
+import { getCurrentRowStyle } from './utils'
 
 export default {
   name: 'CiTypeGrant',
@@ -55,10 +64,13 @@ export default {
       type: String,
       default: 'ci_type',
     },
+    addedRids: {
+      type: Array,
+      default: () => [],
+    },
   },
   computed: {
     filterTableData() {
-      console.log(_.cloneDeep(this.tableData))
       const _tableData = this.tableData.filter((data) => {
         const _intersection = _.intersection(
           Object.keys(data),
@@ -90,6 +102,7 @@ export default {
     }
   },
   methods: {
+    getCurrentRowStyle,
     async handleChange(e, col, row) {
       if (e.target.checked) {
         await grantCiType(this.CITypeId, row.rid, { perms: [col] }).catch(() => {
