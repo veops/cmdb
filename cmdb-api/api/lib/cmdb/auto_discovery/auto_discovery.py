@@ -476,7 +476,10 @@ class AutoDiscoveryCICRUD(DBMixin):
                         except:
                             pass
 
-        adc.update(is_accept=True, accept_by=nickname or g.user.nickname, accept_time=datetime.datetime.now())
+        adc.update(is_accept=True,
+                   accept_by=nickname or g.user.nickname,
+                   accept_time=datetime.datetime.now(),
+                   ci_id=ci_id)
 
 
 class AutoDiscoveryHTTPManager(object):
