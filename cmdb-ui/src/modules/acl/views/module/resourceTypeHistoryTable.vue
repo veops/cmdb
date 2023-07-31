@@ -179,7 +179,7 @@ export default {
 
     // searchForm相关
     handleSearch(queryParams) {
-      this.queryParams = { ...queryParams, app_id: this.app_id, scope: 'resource_type' }
+      this.queryParams = { ...this.queryParams, ...queryParams, app_id: this.app_id, scope: 'resource_type' }
       this.getTable(this.queryParams)
     },
     searchFormReset() {
@@ -206,9 +206,11 @@ export default {
     },
 
     handleQueryParams(queryParams) {
+      const _queryParams = _.cloneDeep(queryParams)
+
       let flag = false
-      let q = queryParams.q ? queryParams.q : ''
-      for (const key in queryParams) {
+      let q = _queryParams.q ? _queryParams.q : ''
+      for (const key in _queryParams) {
         if (
           key !== 'page' &&
           key !== 'page_size' &&
@@ -216,16 +218,16 @@ export default {
           key !== 'q' &&
           key !== 'start' &&
           key !== 'end' &&
-          queryParams[key] !== undefined
+          _queryParams[key] !== undefined
         ) {
           flag = true
-          if (q) q += `,${key}:${queryParams[key]}`
-          else q += `${key}:${queryParams[key]}`
-          delete queryParams[key]
+          if (q) q += `,${key}:${_queryParams[key]}`
+          else q += `${key}:${_queryParams[key]}`
+          delete _queryParams[key]
         }
       }
-      const newQueryParams = { ...queryParams, q }
-      return flag ? newQueryParams : queryParams
+      const newQueryParams = { ..._queryParams, q }
+      return flag ? newQueryParams : _queryParams
     },
     handleTagColor(operateType) {
       return this.colorMap.get(operateType)

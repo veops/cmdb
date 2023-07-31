@@ -200,7 +200,7 @@ export default {
 
     // searchForm相关
     handleSearch(queryParams) {
-      this.queryParams = queryParams
+      this.queryParams = { ...this.queryParams, ...queryParams }
       this.queryParams.app_id = this.app_id
       this.getTable(this.queryParams)
     },
@@ -281,25 +281,27 @@ export default {
       }
     },
     handleQueryParams(queryParams) {
+      const _queryParams = _.cloneDeep(queryParams)
+
       let q = ''
-      for (const key in queryParams) {
+      for (const key in _queryParams) {
         if (
           key !== 'page' &&
           key !== 'page_size' &&
           key !== 'app_id' &&
           key !== 'start' &&
           key !== 'end' &&
-          queryParams[key] !== undefined
+          _queryParams[key] !== undefined
         ) {
           if (q) {
-            q += `,${key}:${queryParams[key]}`
+            q += `,${key}:${_queryParams[key]}`
           } else {
-            q += `${key}:${queryParams[key]}`
+            q += `${key}:${_queryParams[key]}`
           }
         }
       }
-      const newQueryParams = { ...queryParams, q }
-      return q ? newQueryParams : queryParams
+      const newQueryParams = { ..._queryParams, q }
+      return q ? newQueryParams : _queryParams
     },
     handleTagColor(operateType) {
       return this.colorMap.get(operateType)

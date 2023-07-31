@@ -1,6 +1,14 @@
 <template>
   <div class="ci-relation-grant">
-    <vxe-table size="mini" stripe class="ops-stripe-table" :data="tableData" :max-height="`${tableHeight}px`">
+    <vxe-table
+      ref="xTable"
+      size="mini"
+      stripe
+      class="ops-stripe-table"
+      :data="tableData"
+      :max-height="`${tableHeight}px`"
+      :row-style="(params) => getCurrentRowStyle(params, addedRids)"
+    >
       <vxe-column field="name"></vxe-column>
       <vxe-column v-for="col in columns" :key="col" :field="col" :title="permMap[col]">
         <template #default="{row}">
@@ -18,6 +26,8 @@
 <script>
 import { permMap } from './constants.js'
 import { grantRelationView, revokeRelationView } from '../../api/preference.js'
+import { getCurrentRowStyle } from './utils'
+
 export default {
   name: 'RelationViewGrant',
   inject: ['loading', 'isModal'],
@@ -33,6 +43,10 @@ export default {
     grantType: {
       type: String,
       default: 'relation_view',
+    },
+    addedRids: {
+      type: Array,
+      default: () => [],
     },
   },
   data() {
@@ -53,6 +67,7 @@ export default {
     },
   },
   methods: {
+    getCurrentRowStyle,
     grantDepart() {
       this.$emit('grantDepart', this.grantType)
     },

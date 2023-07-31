@@ -9,6 +9,8 @@
         @grantDepart="grantDepart"
         @grantRole="grantRole"
         @getTableData="getTableData"
+        ref="grant_ci_type"
+        :addedRids="addedRids"
       />
     </template>
     <template
@@ -25,6 +27,8 @@
         @grantRole="grantRole"
         @getTableData="getTableData"
         @openReadGrantModal="openReadGrantModal"
+        ref="grant_ci"
+        :addedRids="addedRids"
       />
     </template>
     <template v-if="cmdbGrantType.includes('type_relation')">
@@ -36,6 +40,8 @@
         @grantDepart="grantDepart"
         @grantRole="grantRole"
         @getTableData="getTableData"
+        ref="grant_type_relation"
+        :addedRids="addedRids"
       />
     </template>
     <template v-if="cmdbGrantType.includes('relation_view')">
@@ -47,6 +53,8 @@
         @grantDepart="grantDepart"
         @grantRole="grantRole"
         @getTableData="getTableData"
+        ref="grant_relation_view"
+        :addedRids="addedRids"
       />
     </template>
 
@@ -108,6 +116,7 @@ export default {
       attrGroup: [],
       filerPerimissions: {},
       loading: false,
+      addedRids: [], // 本次新增的rid
     }
   },
   computed: {
@@ -282,6 +291,12 @@ export default {
           })
         )
       }
+      this.addedRids = rids
+      this.$nextTick(() => {
+        setTimeout(() => {
+          this.$refs[`grant_${grantType}`].$refs.xTable.elemStore['main-body-wrapper'].scrollTo(0, 0)
+        }, 300)
+      })
     },
     openReadGrantModal(col, row) {
       this.$refs.readGrantModal.open(col, row)
