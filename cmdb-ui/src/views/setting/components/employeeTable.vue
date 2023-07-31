@@ -229,46 +229,6 @@
       </template>
     </vxe-column>
     <vxe-column
-      field="current_company"
-      title="目前所属主体"
-      sortable
-      min-width="120"
-      v-if="
-        useDFC &&
-          checkedCols.findIndex((v) => v == 'current_company') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'current_company') !== -1
-      "
-      key="current_company"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>目前所属主体</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="dfc_entry_date"
-      title="初始入职日期"
-      sortable
-      min-width="120"
-      v-if="
-        useDFC &&
-          checkedCols.findIndex((v) => v == 'dfc_entry_date') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'dfc_entry_date') !== -1
-      "
-      key="dfc_entry_date"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>初始入职日期</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
       field="entry_date"
       title="目前主体入职日期"
       sortable
@@ -740,39 +700,6 @@
       </template>
     </vxe-column>
     <vxe-column
-      field="roles"
-      title="角色"
-      v-bind="tableType === 'structure' ? { filters: [], 'filter-multiple': true } : {}"
-      :min-width="120"
-      v-if="
-        checkedCols.findIndex((v) => v == 'roles') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'roles') !== -1
-      "
-      key="role"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>角色</span>
-        </span>
-      </template>
-      <template #default="{ row }">
-        <a-popover v-if="row.roles.length">
-          <template slot="content">
-            <a-tag v-for="item in row.roles" color="blue" :key="item.role_id" :style="{ marginBottom: '2px' }">
-              {{ item.role_name }}
-            </a-tag>
-          </template>
-          <span>
-            <a-tag v-for="item in row.roles" color="blue" :key="item.role_id" :style="{ marginBottom: '2px' }">
-              {{ item.role_name }}
-            </a-tag>
-          </span>
-        </a-popover>
-      </template>
-    </vxe-column>
-    <vxe-column
       field="last_login"
       title="上次登录时间"
       min-width="140px"
@@ -814,7 +741,7 @@
           >
             <template slot="content">
               <div :style="{ maxHeight: `${windowHeight - 320}px`, overflowY: 'auto', width: '160px' }">
-                <a-checkbox-group v-model="unsbmitCheckedCols" :options="options" style="display: grid;">
+                <a-checkbox-group v-model="unsbmitCheckedCols" :options="options" style="display: grid">
                 </a-checkbox-group>
               </div>
               <div
@@ -830,40 +757,32 @@
                 <a-button size="small" @click="handleSubmit" type="primary">确定</a-button>
               </div>
             </template>
-            <a-icon type="control" style="cursor: pointer;" />
+            <a-icon type="control" style="cursor: pointer" />
           </a-popover>
         </template>
       </template>
       <template #default="{ row }">
         <a-space v-if="tableType === 'structure'">
-          <a><a-icon type="edit" @click="openEmployeeModal(row, 'edit')"/></a>
+          <a><a-icon type="edit" @click="openEmployeeModal(row, 'edit')" /></a>
           <a-tooltip>
-            <template slot="title">
-              重置密码
-            </template>
-            <a><a-icon type="reload" @click="openBatchModal('password', row)"/></a>
+            <template slot="title"> 重置密码 </template>
+            <a><a-icon type="reload" @click="openBatchModal('password', row)" /></a>
           </a-tooltip>
           <a-tooltip v-if="!row.block">
-            <template slot="title">
-              禁用
-            </template>
+            <template slot="title"> 禁用 </template>
             <a :style="{ color: 'red' }" @click="openBatchModal('block', row, 1)">
               <ops-icon type="icon-xianxing-weilianjie" />
             </a>
           </a-tooltip>
           <a-tooltip v-else>
-            <template slot="title">
-              恢复
-            </template>
+            <template slot="title"> 恢复 </template>
             <a @click="openBatchModal('block', row, 0)">
               <ops-icon type="icon-xianxing-yilianjie" />
             </a>
           </a-tooltip>
         </a-space>
         <a-tooltip v-else>
-          <template slot="title">
-            移除
-          </template>
+          <template slot="title"> 移除 </template>
           <a :style="{ color: 'red' }" @click="removeEmployee(row)">
             <ops-icon type="icon-xianxing-shanchuyonghu" />
           </a>
@@ -881,7 +800,6 @@
 
 <script>
 import { mapState } from 'vuex'
-import { getRoleList } from '@/api/role'
 import { getDepartmentName, getDirectorName } from '@/utils/util'
 import Bus from '../companyStructure/eventBus/bus'
 import appConfig from '@/config/app'
@@ -1005,7 +923,6 @@ export default {
       checkedCols,
       unsbmitCheckedCols: [],
       visible: false,
-      useDFC: appConfig.useDFC,
       tableDragClassName: [], // 表格拖拽的参数
       attributes: [],
       internMap: [
@@ -1040,11 +957,9 @@ export default {
     Bus.$on('reqExportSelectEvent', () => {
       this.exportExcel()
     })
-    if (!this.useDFC) {
-      this.options = this.options
-        .filter((item) => item.label !== '目前所属主体')
-        .filter((item) => item.label !== '初始入职日期')
-    }
+    this.options = this.options
+      .filter((item) => item.label !== '目前所属主体')
+      .filter((item) => item.label !== '初始入职日期')
     this.unsbmitCheckedCols = this.checkedCols
   },
   beforeDestroy() {
@@ -1056,8 +971,6 @@ export default {
       localStorage.removeItem('setting-table-CheckedCols')
     }
     setTimeout(() => {
-      // 获取并设置角色过滤项
-      this.setRoleFilter()
       // table拖拽
       this.columnDrop()
     }, 1000)
@@ -1072,34 +985,6 @@ export default {
     getDirectorName,
     getVxetableRef() {
       return this.$refs.employeeTable
-    },
-    setRoleFilter() {
-      // 获取并设置角色过滤项
-      this.$nextTick(() => {
-        if (this.tableType === 'structure') {
-          getRoleList('all').then((res) => {
-            const _filterRoleList = []
-            Object.keys(res).forEach((key) => {
-              _filterRoleList.push(
-                ...res[key].role_list.map((role) => {
-                  return {
-                    label: role.role_name,
-                    value: role.role_id,
-                  }
-                })
-              )
-            })
-            this.filterRoleList = _filterRoleList
-            const $table = this.$refs.employeeTable
-            if ($table) {
-              const nameColumn = $table.getColumnByField('role')
-              if (nameColumn) {
-                $table.setFilter(nameColumn, this.filterRoleList)
-              }
-            }
-          })
-        }
-      })
     },
     initAttributes() {
       // 过滤用户没有权限的字段
@@ -1220,10 +1105,6 @@ export default {
     },
     handleSubmit() {
       this.visible = false
-      // 如果用户选择了角色列，获取角色list
-      if (!this.checkedCols.includes('roles') && this.unsbmitCheckedCols.includes('roles')) {
-        this.setRoleFilter()
-      }
       localStorage.setItem('setting-table-CheckedCols', JSON.stringify(this.unsbmitCheckedCols))
       this.$nextTick(() => {
         this.checkedCols = JSON.parse(localStorage.getItem('setting-table-CheckedCols'))
@@ -1251,7 +1132,6 @@ export default {
             ...item,
             is_internship: item.is_internship ? '实习生' : '正式',
             direct_supervisor_id: getDirectorName(this.allFlatEmployees, item.direct_supervisor_id),
-            roles: this.getRoleName(item.roles)
           }
         }),
         filename: 'employee-' + now_time,
@@ -1261,7 +1141,7 @@ export default {
         useStyle: true, // 是否导出样式
         isFooter: false, // 是否导出表尾（比如合计）
         // 过滤那个字段导出
-        columnFilterMethod: function(column, $columnIndex) {
+        columnFilterMethod: function (column, $columnIndex) {
           return !(column.$columnIndex === 0)
           // 0是复选框 不导出
         },
@@ -1280,14 +1160,6 @@ export default {
         realNum = str
       }
       return realNum
-    },
-    getRoleName(roles) {
-      let roles_str = ''
-      roles.forEach(role => {
-        roles_str += `${role.role_name}` + '，'
-      })
-      roles_str = roles_str.substring(0, roles_str.length - 1)
-      return roles_str
     },
     columnDrop() {
       this.$nextTick(() => {
