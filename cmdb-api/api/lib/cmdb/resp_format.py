@@ -37,6 +37,7 @@ class ErrFormat(CommonErrFormat):
     unique_key_not_define = "主键未定义或者已被删除"
     only_owner_can_delete = "只有创建人才能删除它!"
     ci_exists_and_cannot_delete_type = "因为CI已经存在，不能删除模型"
+    ci_relation_view_exists_and_cannot_delete_type = "因为关系视图 {} 引用了该模型，不能删除模型"
     ci_type_group_not_found = "模型分组 {} 不存在"
     ci_type_group_exists = "模型分组 {} 已经存在"
     ci_type_relation_not_found = "模型关系 {} 不存在"

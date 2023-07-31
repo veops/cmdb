@@ -750,10 +750,10 @@ class CIRelationManager(object):
         first_existed = CIRelation.get_by(first_ci_id=first_ci_id, relation_type_id=type_relation.relation_type_id)
         second_existed = CIRelation.get_by(second_ci_id=second_ci_id, relation_type_id=type_relation.relation_type_id)
         if type_relation.constraint == ConstraintEnum.One2One and (first_existed or second_existed):
-            return abort(400, ErrFormat.relation_constraint.format("1对1"))
+            return abort(400, ErrFormat.relation_constraint.format("1-1"))
 
         if type_relation.constraint == ConstraintEnum.One2Many and second_existed:
-            return abort(400, ErrFormat.relation_constraint.format("1对多"))
+            return abort(400, ErrFormat.relation_constraint.format("1-N"))
 
     @classmethod
     def add(cls, first_ci_id, second_ci_id, more=None, relation_type_id=None):
