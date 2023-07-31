@@ -13,6 +13,7 @@ from flask.cli import with_appcontext
 import api.lib.cmdb.ci
 from api.extensions import db
 from api.extensions import rd
+from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.ci_type import CITypeTriggerManager
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import REDIS_PREFIX_CI
@@ -275,8 +276,9 @@ def cmdb_index_table_upgrade():
     Migrate data from tables c_value_integers, c_value_floats, and c_value_datetime
     """
     for attr in Attribute.get_by(to_dict=False):
-        if attr.value_type not in {ValueTypeEnum.TEXT, ValueTypeEnum.JSON}:
+        if attr.value_type not in {ValueTypeEnum.TEXT, ValueTypeEnum.JSON} and not attr.is_index:
             attr.update(is_index=True)
+            AttributeCache.clean(attr)
 
     from api.models.cmdb import CIValueInteger, CIIndexValueInteger
     from api.models.cmdb import CIValueFloat, CIIndexValueFloat

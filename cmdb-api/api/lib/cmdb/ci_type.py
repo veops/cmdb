@@ -37,6 +37,7 @@ from api.models.cmdb import CITypeGroupItem
 from api.models.cmdb import CITypeRelation
 from api.models.cmdb import CITypeTrigger
 from api.models.cmdb import CITypeUniqueConstraint
+from api.models.cmdb import PreferenceRelationView
 from api.models.cmdb import PreferenceShowAttributes
 from api.models.cmdb import PreferenceTreeView
 from api.models.cmdb import RelationType
@@ -189,6 +190,12 @@ class CITypeManager(object):
 
         if CI.get_by(type_id=type_id, first=True, to_dict=False) is not None:
             return abort(400, ErrFormat.ci_exists_and_cannot_delete_type)
+
+        relation_views = PreferenceRelationView.get_by(to_dict=False)
+        for rv in relation_views:
+            for item in (rv.cr_ids or []):
+                if item.get('parent_id') == type_id or item.get('child_id') == type_id:
+                    return abort(400, ErrFormat.ci_relation_view_exists_and_cannot_delete_type.format(rv.name))
 
         for item in CITypeRelation.get_by(parent_id=type_id, to_dict=False):
             item.soft_delete()
