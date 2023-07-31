@@ -78,6 +78,7 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import Pager from './pager.vue'
 import SearchForm from './searchForm.vue'
 import { searchPermissonHistory } from '@/modules/acl/api/history'
@@ -251,23 +252,25 @@ export default {
     },
     // 处理查询参数
     handleQueryParams(queryParams) {
+      const _queryParams = _.cloneDeep(queryParams)
+
       let q = ''
-      for (const key in queryParams) {
+      for (const key in _queryParams) {
         if (
           key !== 'page' &&
           key !== 'page_size' &&
           key !== 'app_id' &&
           key !== 'start' &&
           key !== 'end' &&
-          queryParams[key] !== undefined
+          _queryParams[key] !== undefined
         ) {
-          if (q) q += `,${key}:${queryParams[key]}`
-          else q += `${key}:${queryParams[key]}`
-          delete queryParams[key]
+          if (q) q += `,${key}:${_queryParams[key]}`
+          else q += `${key}:${_queryParams[key]}`
+          delete _queryParams[key]
         }
       }
-      const newQueryParams = { ...queryParams, q }
-      return q ? newQueryParams : queryParams
+      const newQueryParams = { ..._queryParams, q }
+      return q ? newQueryParams : _queryParams
     },
 
     // searchForm相关
@@ -283,7 +286,7 @@ export default {
       this.getTable(this.queryParams)
     },
     handleSearch(queryParams) {
-      this.queryParams = { ...queryParams, app_id: this.app_id }
+      this.queryParams = { ...this.queryParams, ...queryParams, app_id: this.app_id }
       this.getTable(this.queryParams)
     },
 
