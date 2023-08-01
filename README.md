@@ -51,7 +51,7 @@
 
 - 服务树
 
-![1](docs/images/0.png "首页展示")
+![服务树](docs/images/0.png "首页展示")
 
 [查看更多展示](docs/screenshot.md)
 
@@ -83,6 +83,6 @@ docker-compose up -d
 
 ---
 
-_**欢迎关注我们的公众号，点击联系我们，加入微信、qq运维群(336164978)，获得更多产品、行业相关资讯**_
+_**欢迎关注我们的公众号，点击联系我们，加入微信、QQ群(336164978)，获得更多产品、行业相关资讯**_
 
-![公众号](docs/images/qrcode_for_gzh.jpg)
+![公众号: 维易科技OneOps](docs/images/qrcode_for_gzh.jpg)
