@@ -1,23 +1,6 @@
 # -*- coding:utf-8 -*-
 from datetime import datetime
 
-import pandas as pd
-from sqlalchemy import text
-
-from api.extensions import db
-
-
-def get_df_from_read_sql(query, to_dict=False):
-    bind = query.session.bind
-    query = query.statement.compile(dialect=bind.dialect if bind else None,
-                                    compile_kwargs={"literal_binds": True}).string
-    a = db.engine
-    df = pd.read_sql(sql=text(query), con=a.connect())
-
-    if to_dict:
-        return df.to_dict('records')
-    return df
-
 
 def get_cur_time_str(split_flag='-'):
     f = f"%Y{split_flag}%m{split_flag}%d{split_flag}%H{split_flag}%M{split_flag}%S{split_flag}%f"
