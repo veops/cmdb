@@ -62,10 +62,10 @@ class UserQuery(BaseQuery):
         ldap_conn.set_option(ldap.OPT_REFERRALS, 0)
         if '@' in username:
             email = username
-            who = '{0}@{1}'.format(username.split('@')[0], current_app.config.get('LDAP_DOMAIN'))
+            who = current_app.config.get('LDAP_USER_DN').format(username.split('@')[0])
         else:
-            who = '{0}@{1}'.format(username, current_app.config.get('LDAP_DOMAIN'))
-            email = who
+            who = current_app.config.get('LDAP_USER_DN').format(username)
+            email = "{}@{}".format(who, current_app.config.get('LDAP_DOMAIN'))
 
         username = username.split('@')[0]
         user = self.get_by_username(username)
