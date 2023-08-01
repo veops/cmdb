@@ -3,7 +3,6 @@
 import traceback
 from datetime import datetime
 
-import pandas as pd
 from flask import abort
 from flask_login import current_user
 from sqlalchemy import or_, literal_column, func, not_, and_
@@ -17,7 +16,6 @@ from api.extensions import db
 from api.lib.common_setting.acl import ACLManager
 from api.lib.common_setting.const import COMMON_SETTING_QUEUE, OperatorType
 from api.lib.common_setting.resp_format import ErrFormat
-from api.lib.common_setting.utils import get_df_from_read_sql
 from api.models.common_setting import Employee, Department
 
 
@@ -214,59 +212,49 @@ class EmployeeCRUD(object):
         return CreateEmployee().batch_create(employee_list)
 
     @staticmethod
-    def get_export_employee_df(block_status):
-        criterion = [
-            Employee.deleted == 0
-        ]
+    def get_export_employee_list(block_status):
         if block_status >= 0:
-            criterion.append(
-                Employee.block == block_status
-            )
+            employees = Employee.get_by(block=block_status, to_dict=False)
+        else:
+            employees = Employee.get_by(to_dict=False)
 
-        query = Employee.query.with_entities(
-            Employee.employee_id,
-            Employee.nickname,
-            Employee.email,
-            Employee.sex,
-            Employee.mobile,
-            Employee.position_name,
-            Employee.last_login,
-            Employee.department_id,
-            Employee.direct_supervisor_id,
-        ).filter(*criterion)
-        df = get_df_from_read_sql(query)
-        if df.empty:
-            return df
+        keep_cols = EmployeeCRUD.get_current_user_view_columns()
 
-        query = Department.query.filter(
-            *criterion
-        )
-        department_df = get_df_from_read_sql(query)
+        all_departments = Department.get_by(to_dict=False)
+        d_id_map = {d.department_id: d.department_name for d in all_departments}
+        e_id_map = {e.employee_id: e.nickname for e in employees}
 
-        def find_name(row):
-            department_id = row['department_id']
-            _df = department_df[department_df['department_id']
-                                == department_id]
-            row['department_name'] = '' if _df.empty else _df.iloc[0]['department_name']
+        export_columns_map = {
+            'username': "用户名",
+            'nickname': '姓名',
+            'email': '邮箱',
+            'department_name': '部门',
+            'sex': '性别',
+            'mobile': '手机号',
+            'position_name': '岗位',
+            'nickname_direct_supervisor': '直属上级',
+            'last_login': '上次登录时间',
+        }
 
-            direct_supervisor_id = row['direct_supervisor_id']
-            _df = df[df['employee_id'] == direct_supervisor_id]
-            row['nickname_direct_supervisor'] = '' if _df.empty else _df.iloc[0]['nickname']
+        data_list = []
+        for e in employees:
+            department_name = d_id_map.get(e.department_id, '')
+            nickname_direct_supervisor = e_id_map.get(e.direct_supervisor_id, '')
+            try:
+                last_login = str(e.last_login) if e.last_login else ''
+            except:
+                last_login = ''
+            data = e.to_dict()
+            data['last_login'] = last_login
+            data['department_name'] = department_name
+            data['nickname_direct_supervisor'] = nickname_direct_supervisor
 
-            if isinstance(row['last_login'], pd.Timestamp):
-                try:
-                    row['last_login'] = str(row['last_login'])
-                except:
-                    row['last_login'] = ''
-            else:
-                row['last_login'] = ''
+            tmp = {export_columns_map[k]: data[k] for k in export_columns_map.keys() if
+                   k in keep_cols or k in sub_columns}
 
-            return row
+            data_list.append(tmp)
 
-        df = df.apply(find_name, axis=1)
-        df.drop(['department_id', 'direct_supervisor_id',
-                 'employee_id'], axis=1, inplace=True)
-        return df
+        return data_list
 
     @staticmethod
     def batch_employee(column_name, column_value, employee_id_list):
@@ -481,7 +469,7 @@ class EmployeeCRUD(object):
             if value:
                 abort(400, ErrFormat.query_column_none_keep_value_empty.format(column))
             expr = [attr.is_(None)]
-            if column not in ["entry_date", "leave_date", "dfc_entry_date", "last_login"]:
+            if column not in ["last_login"]:
                 expr += [attr == '']
                 expr = [or_(*expr)]
         elif operator == OperatorType.IS_NOT_EMPTY:
