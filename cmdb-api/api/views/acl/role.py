@@ -31,13 +31,10 @@ class RoleView(APIView):
         page_size = get_page_size(request.values.get("page_size"))
         q = request.values.get('q')
         app_id = request.values.get('app_id')
-        is_all = request.values.get('is_all', True)
-        is_all = True if is_all in current_app.config.get("BOOL_TRUE") else False
-        user_role = request.values.get('user_role', True)
-        user_only = request.values.get('user_only', False)
-        user_role = True if user_role in current_app.config.get("BOOL_TRUE") else False
-        user_only = True if user_only in current_app.config.get("BOOL_TRUE") else False
-
+        is_all = request.values.get('is_all', True) in current_app.config.get("BOOL_TRUE")
+        user_role = request.values.get('user_role', True) in current_app.config.get("BOOL_TRUE")
+        user_only = request.values.get('user_only', False) in current_app.config.get("BOOL_TRUE")
+        
         numfound, roles = RoleCRUD.search(q, app_id, page, page_size, user_role, is_all, user_only)
 
         id2parents = RoleRelationCRUD.get_parents([i.id for i in roles], app_id=app_id)
