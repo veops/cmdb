@@ -108,7 +108,7 @@ def _auth_with_ip_white_list():
 
 
 def _auth_with_app_token():
-    if _auth_with_session():
+    if _auth_with_session() or _auth_with_token():
         if not is_app_admin(request.values.get('app_id')) and request.method != "GET":
             return False
         elif is_app_admin(request.values.get('app_id')):
