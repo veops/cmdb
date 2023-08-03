@@ -25,18 +25,20 @@ export function addCI(params) {
   })
 }
 
-export function updateCI(id, params) {
+export function updateCI(id, params, isShowMessage = true) {
   return axios({
     url: urlPrefix + `/ci/${id}`,
     method: 'PUT',
-    data: params
+    data: params,
+    isShowMessage
   })
 }
 
-export function deleteCI(ciId) {
+export function deleteCI(ciId, isShowMessage = true) {
   return axios({
     url: urlPrefix + `/ci/${ciId}`,
-    method: 'DELETE'
+    method: 'DELETE',
+    isShowMessage
   })
 }
 
