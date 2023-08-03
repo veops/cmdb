@@ -158,10 +158,8 @@ def register_error_handlers(app):
         error_code = getattr(error, "code", 500)
         if not str(error_code).isdigit():
             error_code = 400
-        if error_code != 500:
-            return make_response(jsonify(message=str(error)), error_code)
-        else:
-            return make_response(jsonify(message=traceback.format_exc(-1)), error_code)
+
+        return make_response(jsonify(message=str(error)), error_code)
 
     for errcode in app.config.get("ERROR_CODES") or [400, 401, 403, 404, 405, 500, 502]:
         app.errorhandler(errcode)(render_error)

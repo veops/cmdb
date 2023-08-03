@@ -150,17 +150,6 @@ class EmployeeViewExportExcel(APIView):
     url_prefix = (f'{prefix}/export_all',)
 
     def get(self):
-        col_desc_map = {
-            'nickname': "姓名",
-            'email': '邮箱',
-            'sex': '性别',
-            'mobile': '手机号',
-            'department_name': '部门',
-            'position_name': '岗位',
-            'nickname_direct_supervisor': '直接上级',
-            'last_login': '上次登录时间',
-        }
-
         # 规定了静态文件的存储位置
         excel_filename = 'all_employee_info.xlsx'
         excel_path = current_app.config['UPLOAD_DIRECTORY_FULL']
@@ -168,20 +157,19 @@ class EmployeeViewExportExcel(APIView):
 
         # 根据parameter查表，自连接通过上级id获取上级名字列
         block_status = int(request.args.get('block_status', -1))
-        df = EmployeeCRUD.get_export_employee_df(block_status)
+        data_list = EmployeeCRUD.get_export_employee_list(block_status)
 
-        # 改变列名为中文head
-        try:
-            df = df.rename(columns=col_desc_map)
-        except Exception as e:
-            abort(500, ErrFormat.rename_columns_failed.format(str(e)))
+        headers = data_list[0].keys()
+        from openpyxl import Workbook
 
-        # 生成静态excel文件
-        try:
-            df.to_excel(excel_path_with_filename,
-                        sheet_name='Sheet1', index=False, encoding="utf-8")
-        except Exception as e:
-            current_app.logger.error(e)
-            abort(500, ErrFormat.generate_excel_failed.format(str(e)))
+        wb = Workbook()
+        ws = wb.active
+        # insert header
+        for col_num, col_data in enumerate(headers, start=1):
+            ws.cell(row=1, column=col_num, value=col_data)
 
+        for row_num, row_data in enumerate(data_list, start=2):
+            for col_num, col_data in enumerate(row_data.values(), start=1):
+                ws.cell(row=row_num, column=col_num, value=col_data)
+        wb.save(excel_path_with_filename)
         return send_from_directory(excel_path, excel_filename, as_attachment=True)
