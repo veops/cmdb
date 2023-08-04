@@ -14,16 +14,12 @@
               }
             "
             class="cmdb-views-header-metadata"
-          ><a-icon type="info-circle" />
+            ><a-icon type="info-circle" />
             属性说明
           </span>
         </span>
-        <a-button
-          size="small"
-          icon="plus"
-          type="primary"
-          @click="$refs.create.handleOpen(true, 'create')"
-        >新建</a-button
+        <a-button size="small" icon="plus" type="primary" @click="$refs.create.handleOpen(true, 'create')"
+          >新建</a-button
         >
       </div>
       <SplitPane
@@ -235,10 +231,10 @@
                           margin: '2px',
                           ...getChoiceValueStyle(col, value),
                         }"
-                      ><ops-icon
-                        :style="{ color: getChoiceValueIcon(col, value).color }"
-                        :type="getChoiceValueIcon(col, value).name"
-                      />{{ value }}</span
+                        ><ops-icon
+                          :style="{ color: getChoiceValueIcon(col, value).color }"
+                          :type="getChoiceValueIcon(col, value).name"
+                        />{{ value }}</span
                       >
                     </template>
                     <span
@@ -283,6 +279,9 @@
                   <img :style="{ width: '200px' }" :src="require('@/assets/data_empty.png')" />
                   <div>暂无数据</div>
                 </div>
+              </template>
+              <template #loading>
+                <div style="height: 200px; line-height: 200px">{{ loadTip || '加载中...' }}</div>
               </template>
             </ops-table>
             <div :style="{ textAlign: 'right', marginTop: '4px' }">
@@ -389,6 +388,7 @@ export default {
       instanceList: [],
       columns: [],
       loading: false,
+      loadTip: '',
       pageSizeOptions: ['50', '100', '200', '100000'],
       pageSize: 50,
       currentPage: 1,
@@ -970,25 +970,30 @@ export default {
         title: '警告',
         content: '确认删除？',
         onOk() {
-          that.loading = true
-          const promises = that.selectedRowKeys.map((ciId) => {
-            return deleteCI(ciId).then((res) => {
-              return 'ok'
-            })
-          })
-          Promise.all(promises)
-            .then((res) => {
-              that.$message.success('删除成功！')
-            })
-            .catch((e) => {
-              console.log(e)
-            })
-            .finally(() => {
-              that.loading = false
-              that.reload()
-            })
+          that.batchDeleteAsync()
         },
       })
+    },
+    async batchDeleteAsync() {
+      let successNum = 0
+      let errorNum = 0
+      this.loading = true
+      this.loadTip = `正在删除...`
+      for (let i = 0; i < this.selectedRowKeys.length; i++) {
+        await deleteCI(this.selectedRowKeys[i], false)
+          .then(() => {
+            successNum += 1
+          })
+          .catch(() => {
+            errorNum += 1
+          })
+          .finally(() => {
+            this.loadTip = `正在删除，共${this.selectedRowKeys.length}个，成功${successNum}个，失败${errorNum}个`
+          })
+      }
+      this.loading = false
+      this.loadTip = ''
+      this.reload()
     },
     sumbitFromCreateInstance({ ci_id }) {
       this.reload()
@@ -999,51 +1004,54 @@ export default {
         title: '警告',
         content: '确认要批量修改吗 ?',
         onOk() {
-          that.loading = true
-          const payload = {}
-          Object.keys(values).forEach((key) => {
-            if (values[key] || values[key] === 0) {
-              payload[key] = values[key]
-            }
-            // 字段值支持置空
-            // 目前存在字段值不支持置空，由后端返回
-            if (values[key] === undefined || values[key] === null) {
-              payload[key] = null
-            }
-          })
-          const promises = that.selectedRowKeys.map((ciId) => {
-            return updateCI(ciId, payload).then((res) => {
-              return 'ok'
-            })
-          })
-          Promise.all(promises)
-            .then((res) => {
-              that.$message.success('批量修改成功')
-            })
-            .catch((e) => {
-              console.log(e)
-            })
-            .finally(() => {
-              that.loading = false
-              that.$refs.create.visible = false
-              const arr1 = that.treeViewsLevels.map((item) => item.name)
-              const arr2 = Object.keys(values)
-              const arr3 = arr1.filter((item) => {
-                return arr2.includes(item)
-              })
-              if (arr3.length) {
-                that.reload()
-                return
-              }
-              setTimeout(() => {
-                that.handleLoadInstance()
-              }, 1000)
-              that.selectedRowKeys = []
-              that.$refs.xTable.getVxetableRef().clearCheckboxRow()
-              that.$refs.xTable.getVxetableRef().clearCheckboxReserve()
-            })
+          that.batchUpdateAsync(values)
         },
       })
+    },
+    async batchUpdateAsync(values) {
+      let successNum = 0
+      let errorNum = 0
+      this.loading = true
+      this.loadTip = `正在批量修改...`
+      const payload = {}
+      Object.keys(values).forEach((key) => {
+        if (values[key] || values[key] === 0) {
+          payload[key] = values[key]
+        }
+        // 字段值支持置空
+        // 目前存在字段值不支持置空，由后端返回
+        if (values[key] === undefined || values[key] === null) {
+          payload[key] = null
+        }
+      })
+      this.$refs.create.visible = false
+      for (let i = 0; i < this.selectedRowKeys.length; i++) {
+        await updateCI(this.selectedRowKeys[i], payload, false)
+          .then(() => {
+            successNum += 1
+          })
+          .catch(() => {
+            errorNum += 1
+          })
+          .finally(() => {
+            this.loadTip = `正在批量修改，共${this.selectedRowKeys.length}个，成功${successNum}个，失败${errorNum}个`
+          })
+      }
+      this.loading = false
+      this.loadTip = ''
+      const arr1 = this.treeViewsLevels.map((item) => item.name)
+      const arr2 = Object.keys(values)
+      const arr3 = arr1.filter((item) => {
+        return arr2.includes(item)
+      })
+      if (arr3.length) {
+        this.reload()
+        return
+      }
+      this.selectedRowKeys = []
+      this.$refs.xTable.getVxetableRef().clearCheckboxRow()
+      this.$refs.xTable.getVxetableRef().clearCheckboxReserve()
+      this.handleLoadInstance()
     },
     onShowSizeChange(current, pageSize) {
       this.pageSize = pageSize

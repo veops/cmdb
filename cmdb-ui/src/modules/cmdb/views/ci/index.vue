@@ -522,44 +522,47 @@ export default {
       const that = this
       this.$confirm({
         title: '警告',
-        content: '确认要批量修改吗 ?',
-        onOk() {
-          that.loading = true
-          that.loadTip = '正在批量修改 ...'
-          const payload = {}
-          Object.keys(values).forEach((key) => {
-            if (values[key] || values[key] === 0) {
-              payload[key] = values[key]
-            }
-            // 字段值支持置空
-            // 目前存在字段值不支持置空，由后端返回
-            if (values[key] === undefined || values[key] === null) {
-              payload[key] = null
-            }
-          })
-          const promises = that.selectedRowKeys.map((ciId) => {
-            return updateCI(ciId, payload).then((res) => {
-              return 'ok'
-            })
-          })
-          Promise.all(promises)
-            .then((res) => {
-              that.$message.success('批量修改成功')
-              that.$refs.create.visible = false
-            })
-            .catch((e) => {
-              console.log(e)
-            })
-            .finally(() => {
-              that.loading = false
-              that.loadTip = ''
-              that.selectedRowKeys = []
-              that.$refs.xTable.getVxetableRef().clearCheckboxRow()
-              that.$refs.xTable.getVxetableRef().clearCheckboxReserve()
-              that.reloadData()
-            })
+        content: '确认要批量修改吗？',
+        async onOk() {
+          that.batchUpdateAsync(values)
         },
       })
+    },
+    async batchUpdateAsync(values) {
+      let successNum = 0
+      let errorNum = 0
+      this.loading = true
+      this.loadTip = `正在批量修改...`
+      const payload = {}
+      Object.keys(values).forEach((key) => {
+        if (values[key] || values[key] === 0) {
+          payload[key] = values[key]
+        }
+        // 字段值支持置空
+        // 目前存在字段值不支持置空，由后端返回
+        if (values[key] === undefined || values[key] === null) {
+          payload[key] = null
+        }
+      })
+      this.$refs.create.visible = false
+      for (let i = 0; i < this.selectedRowKeys.length; i++) {
+        await updateCI(this.selectedRowKeys[i], payload, false)
+          .then(() => {
+            successNum += 1
+          })
+          .catch((err) => {
+            errorNum += 1
+          })
+          .finally(() => {
+            this.loadTip = `正在批量修改，共${this.selectedRowKeys.length}个，成功${successNum}个，失败${errorNum}个`
+          })
+      }
+      this.loading = false
+      this.loadTip = ''
+      this.selectedRowKeys = []
+      this.$refs.xTable.getVxetableRef().clearCheckboxRow()
+      this.$refs.xTable.getVxetableRef().clearCheckboxReserve()
+      this.reloadData()
     },
     batchDelete() {
       const that = this
@@ -567,29 +570,38 @@ export default {
         title: '警告',
         content: '确认删除？',
         onOk() {
-          that.loading = true
-          that.loadTip = '正在删除 ...'
-          const promises = that.selectedRowKeys.map((ciId) => {
-            return deleteCI(ciId).then((res) => {
-              return 'ok'
-            })
-          })
-          Promise.all(promises)
-            .then((res) => {
-              that.$message.success('删除成功')
-            })
-            .catch((e) => {
-              console.log(e)
-            })
-            .finally(() => {
-              that.loading = false
-              that.loadTip = ''
-              that.selectedRowKeys = []
-              that.$refs.xTable.getVxetableRef().clearCheckboxRow()
-              that.$refs.xTable.getVxetableRef().clearCheckboxReserve()
-              that.reloadData()
-            })
+          that.batchDeleteAsync()
         },
+      })
+    },
+    async batchDeleteAsync() {
+      let successNum = 0
+      let errorNum = 0
+      this.loading = true
+      this.loadTip = `正在删除...`
+      for (let i = 0; i < this.selectedRowKeys.length; i++) {
+        await deleteCI(this.selectedRowKeys[i], false)
+          .then(() => {
+            successNum += 1
+          })
+          .catch((err) => {
+            errorNum += 1
+          })
+          .finally(() => {
+            this.loadTip = `正在删除，共${this.selectedRowKeys.length}个，成功${successNum}个，失败${errorNum}个`
+          })
+      }
+      this.loading = false
+      this.loadTip = ''
+      this.selectedRowKeys = []
+      this.$refs.xTable.getVxetableRef().clearCheckboxRow()
+      this.$refs.xTable.getVxetableRef().clearCheckboxReserve()
+      this.$nextTick(() => {
+        if (this.currentPage === 1) {
+          this.loadTableData()
+        } else {
+          this.currentPage = 1
+        }
       })
     },
     deleteCI(record) {
