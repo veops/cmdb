@@ -76,6 +76,7 @@ DEFAULT_SERVICE = "http://127.0.0.1:8000"
 AUTH_WITH_LDAP = False
 LDAP_SERVER = ''
 LDAP_DOMAIN = ''
+LDAP_USER_DN = 'cn={},ou=users,dc=xxx,dc=com'
 
 # # pagination
 DEFAULT_PAGE_COUNT = 50
