@@ -4,16 +4,16 @@
 import hashlib
 
 import requests
-from future.moves.urllib.parse import urlparse
 from flask import abort
-from flask import g
 from flask import current_app
+from flask_login import current_user
+from future.moves.urllib.parse import urlparse
 
 
 def build_api_key(path, params):
-    g.user is not None or abort(403, u"您得登陆才能进行该操作")
-    key = g.user.key
-    secret = g.user.secret
+    current_user is not None or abort(403, u"您得登陆才能进行该操作")
+    key = current_user.key
+    secret = current_user.secret
     values = "".join([str(params[k]) for k in sorted(params.keys())
                       if params[k] is not None]) if params.keys() else ""
     _secret = "".join([path, secret, values]).encode("utf-8")

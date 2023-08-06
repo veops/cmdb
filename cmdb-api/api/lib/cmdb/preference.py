@@ -7,7 +7,7 @@ import six
 import toposort
 from flask import abort
 from flask import current_app
-from flask import g
+from flask_login import current_user
 
 from api.extensions import db
 from api.lib.cmdb.attribute import AttributeManager
@@ -36,10 +36,10 @@ class PreferenceManager(object):
     @staticmethod
     def get_types(instance=False, tree=False):
         types = db.session.query(PreferenceShowAttributes.type_id).filter(
-            PreferenceShowAttributes.uid == g.user.uid).filter(
+            PreferenceShowAttributes.uid == current_user.uid).filter(
             PreferenceShowAttributes.deleted.is_(False)).group_by(PreferenceShowAttributes.type_id).all() \
             if instance else []
-        tree_types = PreferenceTreeView.get_by(uid=g.user.uid, to_dict=False) if tree else []
+        tree_types = PreferenceTreeView.get_by(uid=current_user.uid, to_dict=False) if tree else []
         type_ids = list(set([i.type_id for i in types + tree_types]))
         return [CITypeCache.get(type_id).to_dict() for type_id in type_ids]
 
@@ -62,7 +62,7 @@ class PreferenceManager(object):
                 PreferenceShowAttributes.deleted.is_(False)).group_by(
                 PreferenceShowAttributes.uid, PreferenceShowAttributes.type_id)
             for i in types:
-                if i.uid == g.user.uid:
+                if i.uid == current_user.uid:
                     result['self']['instance'].append(i.type_id)
                     if str(i.created_at) > str(result['self']['type_id2subs_time'].get(i.type_id, "")):
                         result['self']['type_id2subs_time'][i.type_id] = i.created_at
@@ -72,7 +72,7 @@ class PreferenceManager(object):
         if tree:
             types = PreferenceTreeView.get_by(to_dict=False)
             for i in types:
-                if i.uid == g.user.uid:
+                if i.uid == current_user.uid:
                     result['self']['tree'].append(i.type_id)
                     if str(i.created_at) > str(result['self']['type_id2subs_time'].get(i.type_id, "")):
                         result['self']['type_id2subs_time'][i.type_id] = i.created_at
@@ -91,7 +91,7 @@ class PreferenceManager(object):
 
         attrs = db.session.query(PreferenceShowAttributes, CITypeAttribute.order).join(
             CITypeAttribute, CITypeAttribute.attr_id == PreferenceShowAttributes.attr_id).filter(
-            PreferenceShowAttributes.uid == g.user.uid).filter(
+            PreferenceShowAttributes.uid == current_user.uid).filter(
             PreferenceShowAttributes.type_id == type_id).filter(
             PreferenceShowAttributes.deleted.is_(False)).filter(CITypeAttribute.deleted.is_(False)).filter(
             CITypeAttribute.type_id == type_id).all()
@@ -120,7 +120,7 @@ class PreferenceManager(object):
 
     @classmethod
     def create_or_update_show_attributes(cls, type_id, attr_order):
-        existed_all = PreferenceShowAttributes.get_by(type_id=type_id, uid=g.user.uid, to_dict=False)
+        existed_all = PreferenceShowAttributes.get_by(type_id=type_id, uid=current_user.uid, to_dict=False)
         for x, order in attr_order:
             if isinstance(x, list):
                 _attr, is_fixed = x
@@ -128,13 +128,13 @@ class PreferenceManager(object):
                 _attr, is_fixed = x, False
             attr = AttributeCache.get(_attr) or abort(404, ErrFormat.attribute_not_found.format("id={}".format(_attr)))
             existed = PreferenceShowAttributes.get_by(type_id=type_id,
-                                                      uid=g.user.uid,
+                                                      uid=current_user.uid,
                                                       attr_id=attr.id,
                                                       first=True,
                                                       to_dict=False)
             if existed is None:
                 PreferenceShowAttributes.create(type_id=type_id,
-                                                uid=g.user.uid,
+                                                uid=current_user.uid,
                                                 attr_id=attr.id,
                                                 order=order,
                                                 is_fixed=is_fixed)
@@ -148,7 +148,7 @@ class PreferenceManager(object):
 
     @staticmethod
     def get_tree_view():
-        res = PreferenceTreeView.get_by(uid=g.user.uid, to_dict=True)
+        res = PreferenceTreeView.get_by(uid=current_user.uid, to_dict=True)
         for item in res:
             if item["levels"]:
                 ci_type = CITypeCache.get(item['type_id']).to_dict()
@@ -176,14 +176,14 @@ class PreferenceManager(object):
                 if i == attr.id or i == attr.name or i == attr.alias:
                     levels[idx] = attr.id
 
-        existed = PreferenceTreeView.get_by(uid=g.user.uid, type_id=type_id, to_dict=False, first=True)
+        existed = PreferenceTreeView.get_by(uid=current_user.uid, type_id=type_id, to_dict=False, first=True)
         if existed is not None:
             if not levels:
                 existed.soft_delete()
                 return existed
             return existed.update(levels=levels)
         elif levels:
-            return PreferenceTreeView.create(levels=levels, type_id=type_id, uid=g.user.uid)
+            return PreferenceTreeView.create(levels=levels, type_id=type_id, uid=current_user.uid)
 
     @staticmethod
     def get_relation_view():
@@ -254,7 +254,7 @@ class PreferenceManager(object):
         existed = PreferenceRelationView.get_by(name=name, to_dict=False, first=True)
         current_app.logger.debug(existed)
         if existed is None:
-            PreferenceRelationView.create(name=name, cr_ids=cr_ids, uid=g.user.uid, is_public=is_public)
+            PreferenceRelationView.create(name=name, cr_ids=cr_ids, uid=current_user.uid, is_public=is_public)
 
             if current_app.config.get("USE_ACL"):
                 ACLManager().add_resource(name, ResourceTypeEnum.RELATION_VIEW)
@@ -278,7 +278,7 @@ class PreferenceManager(object):
     @staticmethod
     def get_search_option(**kwargs):
         query = PreferenceSearchOption.get_by(only_query=True)
-        query = query.filter(PreferenceSearchOption.uid == g.user.uid)
+        query = query.filter(PreferenceSearchOption.uid == current_user.uid)
 
         for k in kwargs:
             if hasattr(PreferenceSearchOption, k) and kwargs[k]:
@@ -288,9 +288,9 @@ class PreferenceManager(object):
 
     @staticmethod
     def add_search_option(**kwargs):
-        kwargs['uid'] = g.user.uid
+        kwargs['uid'] = current_user.uid
 
-        existed = PreferenceSearchOption.get_by(uid=g.user.uid,
+        existed = PreferenceSearchOption.get_by(uid=current_user.uid,
                                                 name=kwargs.get('name'),
                                                 prv_id=kwargs.get('prv_id'),
                                                 ptv_id=kwargs.get('ptv_id'),
@@ -306,10 +306,10 @@ class PreferenceManager(object):
 
         existed = PreferenceSearchOption.get_by_id(_id) or abort(404, ErrFormat.preference_search_option_not_found)
 
-        if g.user.uid != existed.uid:
+        if current_user.uid != existed.uid:
             return abort(400, ErrFormat.no_permission2)
 
-        other = PreferenceSearchOption.get_by(uid=g.user.uid,
+        other = PreferenceSearchOption.get_by(uid=current_user.uid,
                                               name=kwargs.get('name'),
                                               prv_id=kwargs.get('prv_id'),
                                               ptv_id=kwargs.get('ptv_id'),
@@ -324,7 +324,7 @@ class PreferenceManager(object):
     def delete_search_option(_id):
         existed = PreferenceSearchOption.get_by_id(_id) or abort(404, ErrFormat.preference_search_option_not_found)
 
-        if g.user.uid != existed.uid:
+        if current_user.uid != existed.uid:
             return abort(400, ErrFormat.no_permission2)
 
         existed.soft_delete()

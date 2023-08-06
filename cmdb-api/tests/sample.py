@@ -3,6 +3,7 @@
 import uuid
 import random
 
+
 from api.models.cmdb import (
     Attribute,
     CIType,

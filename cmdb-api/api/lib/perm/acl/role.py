@@ -6,6 +6,7 @@ import time
 import six
 from flask import abort
 from flask import current_app
+from sqlalchemy import or_
 
 from api.extensions import db
 from api.lib.perm.acl.app import AppCRUD
@@ -212,17 +213,15 @@ class RoleCRUD(object):
 
     @staticmethod
     def search(q, app_id, page=1, page_size=None, user_role=True, is_all=False, user_only=False):
-        query = db.session.query(Role).filter(Role.deleted.is_(False))
-        query1 = query.filter(Role.app_id == app_id).filter(Role.uid.is_(None))
-        query2 = query.filter(Role.app_id.is_(None)).filter(Role.uid.is_(None))
-        query = query1.union(query2)
 
-        if user_role:
-            query1 = db.session.query(Role).filter(Role.deleted.is_(False)).filter(Role.uid.isnot(None))
-            query = query.union(query1)
-
-        if user_only:
+        if user_only:  # only user role
             query = db.session.query(Role).filter(Role.deleted.is_(False)).filter(Role.uid.isnot(None))
+
+        else:
+            query = db.session.query(Role).filter(Role.deleted.is_(False)).filter(
+                or_(Role.app_id == app_id, Role.app_id.is_(None)))
+            if not user_role:  # only virtual role
+                query = query.filter(Role.uid.is_(None))
 
         if not is_all:
             role_ids = list(HasResourceRoleCache.get(app_id).keys())

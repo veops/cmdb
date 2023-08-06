@@ -7,8 +7,9 @@ import copy
 import time
 
 from flask import current_app
-from flask import g
+from flask_login import current_user
 from jinja2 import Template
+
 from api.extensions import db
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeCache
@@ -105,7 +106,7 @@ class Search(object):
                         ci_filter = self.type2filter_perms[ci_type.id].get('ci_filter')
                         if ci_filter:
                             sub = []
-                            ci_filter = Template(ci_filter).render(user=g.user)
+                            ci_filter = Template(ci_filter).render(user=current_user)
                             for i in ci_filter.split(','):
                                 if i.startswith("~") and not sub:
                                     queries.append(i)
@@ -355,7 +356,7 @@ class Search(object):
             else:
                 result.append(q)
 
-        _is_app_admin = is_app_admin('cmdb') or g.user.username == "worker"
+        _is_app_admin = is_app_admin('cmdb') or current_user.username == "worker"
         if result and not has_type and not _is_app_admin:
             type_q = self.__get_types_has_read()
             if id_query:
