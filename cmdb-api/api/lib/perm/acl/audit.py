@@ -9,8 +9,8 @@ from flask_login import current_user
 from sqlalchemy import func
 
 from api.lib.perm.acl import AppCache
-from api.models.acl import AuditRoleLog, AuditResourceLog, AuditPermissionLog, AuditTriggerLog, RolePermission, \
-    Resource, ResourceGroup, Permission, Role, ResourceType
+from api.models.acl import AuditPermissionLog, AuditResourceLog, AuditRoleLog, AuditTriggerLog, Permission, Resource, \
+    ResourceGroup, ResourceType, Role, RolePermission
 
 
 class AuditScope(str, Enum):
@@ -50,7 +50,7 @@ class AuditCRUD(object):
     @staticmethod
     def get_current_operate_uid(uid=None):
 
-        user_id = uid or (hasattr(g, 'user') and getattr(g.user, 'uid', None)) \
+        user_id = uid or (hasattr(g, 'user') and getattr(current_user, 'uid', None)) \
                   or getattr(current_user, 'user_id', None)
 
         if has_request_context() and request.headers.get('X-User-Id'):

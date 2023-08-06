@@ -5,7 +5,7 @@ import datetime
 
 from flask import abort
 from flask import current_app
-from flask import g
+from flask_login import current_user
 
 from api.extensions import db
 from api.lib.cmdb.attribute import AttributeManager
@@ -118,7 +118,7 @@ class CITypeManager(object):
         cls._validate_unique(alias=kwargs['alias'])
 
         kwargs["unique_id"] = unique_key.id
-        kwargs['uid'] = g.user.uid
+        kwargs['uid'] = current_user.uid
         ci_type = CIType.create(**kwargs)
 
         CITypeAttributeManager.add(ci_type.id, [unique_key.id], is_required=True)
@@ -132,7 +132,7 @@ class CITypeManager(object):
                                                 ResourceTypeEnum.CI,
                                                 permissions=[PermEnum.READ])
             ACLManager().grant_resource_to_role(ci_type.name,
-                                                g.user.username,
+                                                current_user.username,
                                                 ResourceTypeEnum.CI)
 
         CITypeHistoryManager.add(CITypeOperateType.ADD, ci_type.id, change=ci_type.to_dict())
@@ -185,7 +185,7 @@ class CITypeManager(object):
     def delete(cls, type_id):
         ci_type = cls.check_is_existed(type_id)
 
-        if ci_type.uid and ci_type.uid != g.user.uid:
+        if ci_type.uid and ci_type.uid != current_user.uid:
             return abort(403, ErrFormat.only_owner_can_delete)
 
         if CI.get_by(type_id=type_id, first=True, to_dict=False) is not None:
@@ -582,7 +582,7 @@ class CITypeRelationManager(object):
                                                     ResourceTypeEnum.CI_TYPE_RELATION,
                                                     permissions=[PermEnum.READ])
                 ACLManager().grant_resource_to_role(resource_name,
-                                                    g.user.username,
+                                                    current_user.username,
                                                     ResourceTypeEnum.CI_TYPE_RELATION)
 
         CITypeHistoryManager.add(CITypeOperateType.ADD_RELATION, p.id,
@@ -816,7 +816,7 @@ class CITypeTemplateManager(object):
                                                         ResourceTypeEnum.CI,
                                                         permissions=[PermEnum.READ])
                     ACLManager().grant_resource_to_role(type_name,
-                                                        g.user.username,
+                                                        current_user.username,
                                                         ResourceTypeEnum.CI)
 
             else:
@@ -954,7 +954,7 @@ class CITypeTemplateManager(object):
             rule.pop("created_at", None)
             rule.pop("updated_at", None)
 
-            rule['uid'] = g.user.uid
+            rule['uid'] = current_user.uid
             try:
                 AutoDiscoveryCITypeCRUD.add(**rule)
             except:

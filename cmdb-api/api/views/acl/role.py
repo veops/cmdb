@@ -2,8 +2,8 @@
 
 from flask import abort
 from flask import current_app
-from flask import g
 from flask import request
+from flask_login import current_user
 
 from api.lib.decorator import args_required
 from api.lib.decorator import args_validate
@@ -31,12 +31,9 @@ class RoleView(APIView):
         page_size = get_page_size(request.values.get("page_size"))
         q = request.values.get('q')
         app_id = request.values.get('app_id')
-        is_all = request.values.get('is_all', True)
-        is_all = True if is_all in current_app.config.get("BOOL_TRUE") else False
-        user_role = request.values.get('user_role', True)
-        user_only = request.values.get('user_only', False)
-        user_role = True if user_role in current_app.config.get("BOOL_TRUE") else False
-        user_only = True if user_only in current_app.config.get("BOOL_TRUE") else False
+        is_all = request.values.get('is_all', True) in current_app.config.get("BOOL_TRUE")
+        user_role = request.values.get('user_role', True) in current_app.config.get("BOOL_TRUE")
+        user_only = request.values.get('user_only', False) in current_app.config.get("BOOL_TRUE")
 
         numfound, roles = RoleCRUD.search(q, app_id, page, page_size, user_role, is_all, user_only)
 
@@ -160,8 +157,8 @@ class RoleHasPermissionView(APIView):
     @auth_with_app_token
     def get(self):
         if not request.values.get('rid'):
-            role = RoleCache.get_by_name(None, g.user.username)
-            role or abort(404, ErrFormat.role_not_found.format(g.user.username))
+            role = RoleCache.get_by_name(None, current_user.username)
+            role or abort(404, ErrFormat.role_not_found.format(current_user.username))
         else:
             role = RoleCache.get(int(request.values.get('rid')))
 

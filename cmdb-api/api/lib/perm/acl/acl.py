@@ -5,8 +5,9 @@ import hashlib
 
 import requests
 import six
-from flask import current_app, g, request
-from flask import session, abort
+from flask import abort, session
+from flask import current_app, request
+from flask_login import current_user
 
 from api.extensions import cache
 from api.lib.perm.acl.audit import AuditCRUD
@@ -154,9 +155,9 @@ class ACLManager(object):
         if is_app_admin(self.app_id):
             return True
 
-        role = self._get_role(g.user.username)
+        role = self._get_role(current_user.username)
 
-        role or abort(404, ErrFormat.role_not_found.format(g.user.username))
+        role or abort(404, ErrFormat.role_not_found.format(current_user.username))
 
         return RoleCRUD.has_permission(role.id, resource_name, resource_type, self.app_id, perm,
                                        resource_id=resource_id)
@@ -193,9 +194,9 @@ class ACLManager(object):
         return user
 
     def get_resources(self, resource_type_name=None):
-        role = self._get_role(g.user.username)
+        role = self._get_role(current_user.username)
 
-        role or abort(404, ErrFormat.role_not_found.format(g.user.username))
+        role or abort(404, ErrFormat.role_not_found.format(current_user.username))
         rid = role.id
 
         return RoleCRUD.recursive_resources(rid, self.app_id, resource_type_name).get('resources')
@@ -215,7 +216,7 @@ def validate_permission(resources, resource_type, perm, app=None):
         return
 
     if current_app.config.get("USE_ACL"):
-        if g.user.username == "worker":
+        if current_user.username == "worker":
             return
 
         resources = [resources] if isinstance(resources, six.string_types) else resources
@@ -313,7 +314,7 @@ def role_required(role_name, app=None):
                 return
 
             if current_app.config.get("USE_ACL"):
-                if getattr(g.user, 'username', None) == "worker":
+                if getattr(current_user, 'username', None) == "worker":
                     return func(*args, **kwargs)
 
                 if role_name not in session.get("acl", {}).get("parentRoles", []) and not is_app_admin(app):

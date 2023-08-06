@@ -5,7 +5,7 @@ import os
 
 from flask import abort
 from flask import current_app
-from flask import g
+from flask_login import current_user
 from sqlalchemy import func
 
 from api.extensions import db
@@ -156,7 +156,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
                 continue
 
             if isinstance(rule.get("extra_option"), dict) and rule['extra_option'].get('secret'):
-                if not (g.user.username == "cmdb_agent" or g.user.uid == rule['uid']):
+                if not (current_user.username == "cmdb_agent" or current_user.uid == rule['uid']):
                     rule['extra_option'].pop('secret', None)
                 else:
                     rule['extra_option']['secret'] = AESCrypto.decrypt(rule['extra_option']['secret'])
@@ -213,7 +213,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
             agent_id = agent_id.strip()
             q = "op_duty:{0},-rd_duty:{0},oneagent_id:{1}"
 
-            s = search(q.format(g.user.username, agent_id.strip()))
+            s = search(q.format(current_user.username, agent_id.strip()))
             try:
                 response, _, _, _, _, _ = s.search()
                 if response:
@@ -222,7 +222,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
                 current_app.logger.warning(e)
                 return abort(400, str(e))
 
-            s = search(q.format(g.user.nickname, agent_id.strip()))
+            s = search(q.format(current_user.nickname, agent_id.strip()))
             try:
                 response, _, _, _, _, _ = s.search()
                 if response:
@@ -240,9 +240,9 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
             try:
                 response, _, _, _, _, _ = s.search()
                 for i in response:
-                    if g.user.username not in (i.get('rd_duty') or []) and g.user.username not in \
-                            (i.get('op_duty') or []) and g.user.nickname not in (i.get('rd_duty') or []) and \
-                            g.user.nickname not in (i.get('op_duty') or []):
+                    if current_user.username not in (i.get('rd_duty') or []) and current_user.username not in \
+                            (i.get('op_duty') or []) and current_user.nickname not in (i.get('rd_duty') or []) and \
+                            current_user.nickname not in (i.get('op_duty') or []):
                         return abort(403, ErrFormat.adt_target_expr_no_permission.format(
                             i.get("{}_name".format(i.get('ci_type')))))
             except SearchError as e:
@@ -270,7 +270,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
         if isinstance(kwargs.get('extra_option'), dict) and kwargs['extra_option'].get('secret'):
             kwargs['extra_option']['secret'] = AESCrypto.encrypt(kwargs['extra_option']['secret'])
 
-        kwargs['uid'] = g.user.uid
+        kwargs['uid'] = current_user.uid
 
         return kwargs
 
@@ -281,7 +281,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
         self.__valid_exec_target(kwargs.get('agent_id'), kwargs.get('query_expr'))
 
         if isinstance(kwargs.get('extra_option'), dict) and kwargs['extra_option'].get('secret'):
-            if g.user.uid != existed.uid:
+            if current_user.uid != existed.uid:
                 return abort(403, ErrFormat.adt_secret_no_permission)
 
         return existed
@@ -477,7 +477,7 @@ class AutoDiscoveryCICRUD(DBMixin):
                             pass
 
         adc.update(is_accept=True,
-                   accept_by=nickname or g.user.nickname,
+                   accept_by=nickname or current_user.nickname,
                    accept_time=datetime.datetime.now(),
                    ci_id=ci_id)
 
