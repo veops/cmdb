@@ -7,7 +7,7 @@ import json
 
 from flask import abort
 from flask import current_app
-from flask import g
+from flask_login import current_user
 from werkzeug.exceptions import BadRequest
 
 from api.extensions import db
@@ -24,8 +24,8 @@ from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import ConstraintEnum
 from api.lib.cmdb.const import ExistPolicy
 from api.lib.cmdb.const import OperateType
+from api.lib.cmdb.const import PermEnum, ResourceTypeEnum
 from api.lib.cmdb.const import REDIS_PREFIX_CI
-from api.lib.cmdb.const import ResourceTypeEnum, PermEnum
 from api.lib.cmdb.const import RetKey
 from api.lib.cmdb.history import AttributeHistoryManger
 from api.lib.cmdb.history import CIRelationHistoryManager
@@ -38,8 +38,8 @@ from api.lib.decorator import kwargs_required
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import validate_permission
-from api.lib.utils import Lock
 from api.lib.utils import handle_arg_list
+from api.lib.utils import Lock
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
 from api.models.cmdb import CITypeAttribute
@@ -316,7 +316,7 @@ class CIManager(object):
         ci_attr2type_attr = {type_attr.attr_id: type_attr for type_attr, _ in attrs}
 
         ci = None
-        need_lock = g.user.username not in ("worker", "cmdb_agent", "agent")
+        need_lock = current_user.username not in ("worker", "cmdb_agent", "agent")
         with Lock(ci_type_name, need_lock=need_lock):
             existed = cls.ci_is_exist(unique_key, unique_value, ci_type.id)
             if existed is not None:
@@ -411,7 +411,7 @@ class CIManager(object):
 
         limit_attrs = self._valid_ci_for_no_read(ci) if not _is_admin else {}
 
-        need_lock = g.user.username not in ("worker", "cmdb_agent", "agent")
+        need_lock = current_user.username not in ("worker", "cmdb_agent", "agent")
         with Lock(ci.ci_type.name, need_lock=need_lock):
             self._valid_unique_constraint(ci.type_id, ci_dict, ci_id)
 

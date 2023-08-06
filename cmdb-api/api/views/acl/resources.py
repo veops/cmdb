@@ -2,6 +2,7 @@
 
 from flask import g
 from flask import request
+from flask_login import current_user
 
 from api.lib.decorator import args_required
 from api.lib.decorator import args_validate
@@ -103,8 +104,8 @@ class ResourceView(APIView):
         type_id = request.values.get('type_id')
         app_id = request.values.get('app_id')
         uid = request.values.get('uid')
-        if not uid and hasattr(g, "user") and hasattr(g.user, "uid"):
-            uid = g.user.uid
+        if not uid and hasattr(g, "user") and hasattr(current_user, "uid"):
+            uid = current_user.uid
 
         resource = ResourceCRUD.add(name, type_id, app_id, uid)
 
