@@ -26,8 +26,8 @@
   - backend: in **cmdb-api** directory: `pipenv run flask run -h 0.0.0.0`
   - frontend: in **cmdb-ui** directory: `yarn run serve`
   - worker: 
-    - in **cmdb-api** directory: `pipenv run celery worker -A celery_worker.celery -E -Q one_cmdb_async --concurrency=1 -D`
-    - in **cmdb-api** directory: `pipenv run celery worker -A celery_worker.celery -E -Q acl_async --concurrency=1 -D`
+    - in **cmdb-api** directory: `pipenv run celery -A celery_worker.celery worker -E -Q one_cmdb_async --concurrency=1 -D`
+    - in **cmdb-api** directory: `pipenv run celery -A celery_worker.celery worker -E -Q acl_async --concurrency=1 -D`
 
   - homepage: [http://127.0.0.1:8000](http://127.0.0.1:8000)
     - if not run localhost: please change ip address(**VUE_APP_API_BASE_URL**) in config file **cmdb-ui/.env** into your backend ip address

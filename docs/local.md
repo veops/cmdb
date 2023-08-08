@@ -28,8 +28,8 @@ cp cmdb-api/settings.example.py cmdb-api/settings.py
   - 后端: 进入**cmdb-api**目录执行 `pipenv run flask run -h 0.0.0.0`
   - 前端: 进入**cmdb-ui**目录执行`yarn run serve`
   - worker: 
-    - 进入**cmdb-api**目录执行 `pipenv run celery worker -A celery_worker.celery -E -Q one_cmdb_async --concurrency=1 -D`
-    - 进入**cmdb-api**目录执行 `pipenv run celery worker -A celery_worker.celery -E -Q acl_async --concurrency=1 -D`
+    - 进入**cmdb-api**目录执行 `pipenv run celery -A celery_worker.celery worker -E -Q one_cmdb_async --concurrency=1 -D`
+    - 进入**cmdb-api**目录执行 `pipenv run celery -A celery_worker.celery worker -E -Q acl_async --concurrency=1 -D`
 
   - 浏览器打开: [http://127.0.0.1:8000](http://127.0.0.1:8000)
     - 如果是非本机访问, 要修改**cmdb-ui/.env**里**VUE_APP_API_BASE_URL**里的 IP 地址为后端服务的 ip 地址
