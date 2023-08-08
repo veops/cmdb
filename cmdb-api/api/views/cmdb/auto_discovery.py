@@ -5,8 +5,8 @@ from io import BytesIO
 
 from flask import abort
 from flask import current_app
-from flask import g
 from flask import request
+from flask_login import current_user
 
 from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryCICRUD
 from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryCITypeCRUD
@@ -119,7 +119,7 @@ class AutoDiscoveryCITypeView(APIView):
         _, res = AutoDiscoveryCITypeCRUD.search(page=1, page_size=100000, type_id=type_id, **request.values)
         for i in res:
             if isinstance(i.get("extra_option"), dict) and i['extra_option'].get('secret'):
-                if not (g.user.username == "cmdb_agent" or g.user.uid == i['uid']):
+                if not (current_user.username == "cmdb_agent" or current_user.uid == i['uid']):
                     i['extra_option'].pop('secret', None)
                 else:
                     i['extra_option']['secret'] = AESCrypto.decrypt(i['extra_option']['secret'])
@@ -213,7 +213,7 @@ class AutoDiscoveryRuleSyncView(APIView):
     url_prefix = ("/adt/sync",)
 
     def get(self):
-        if g.user.username not in ("cmdb_agent", "worker", "admin"):
+        if current_user.username not in ("cmdb_agent", "worker", "admin"):
             return abort(403)
 
         oneagent_name = request.values.get('oneagent_name')

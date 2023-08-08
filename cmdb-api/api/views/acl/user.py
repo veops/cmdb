@@ -13,7 +13,6 @@ from api.lib.decorator import args_required
 from api.lib.decorator import args_validate
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import role_required
-from api.lib.perm.acl.audit import AuditCRUD, AuditOperateType
 from api.lib.perm.acl.cache import AppCache
 from api.lib.perm.acl.cache import UserCache
 from api.lib.perm.acl.resp_format import ErrFormat
@@ -116,7 +115,7 @@ class UserView(APIView):
 
     @role_required("acl_admin")
     def delete(self, uid):
-        if g.user.uid == uid:
+        if current_user.uid == uid:
             return abort(400, ErrFormat.invalid_operation)
         UserCRUD.delete(uid)
 
@@ -163,7 +162,7 @@ class UserResetPasswordView(APIView):
                 return abort(403, ErrFormat.invalid_request)
 
         elif hasattr(g, 'user'):
-            if g.user.username != request.values['username']:
+            if current_user.username != request.values['username']:
                 return abort(403, ErrFormat.invalid_request)
 
         else:
