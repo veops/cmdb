@@ -6,26 +6,16 @@ import logging
 import os
 import sys
 from inspect import getmembers
+from json import JSONEncoder
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask
-from flask import make_response, jsonify
+from flask import jsonify, make_response
 from flask.blueprints import Blueprint
 from flask.cli import click
-from flask.json import JSONEncoder
 
 import api.views.entry
-from api.extensions import (
-    bcrypt,
-    cors,
-    cache,
-    db,
-    login_manager,
-    migrate,
-    celery,
-    rd,
-    es,
-)
+from api.extensions import (bcrypt, cache, celery, cors, db, es, login_manager, migrate, rd)
 from api.flask_cas import CAS
 from api.models.acl import User
 

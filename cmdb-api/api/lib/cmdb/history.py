@@ -4,7 +4,7 @@
 import json
 
 from flask import abort
-from flask import g
+from flask_login import current_user
 
 from api.extensions import db
 from api.lib.cmdb.cache import AttributeCache
@@ -201,7 +201,7 @@ class AttributeHistoryManger(object):
     @staticmethod
     def add(record_id, ci_id, history_list, type_id=None, flush=False, commit=True):
         if record_id is None:
-            record = OperationRecord.create(uid=g.user.uid, type_id=type_id)
+            record = OperationRecord.create(uid=current_user.uid, type_id=type_id)
             record_id = record.id
 
         for attr_id, operate_type, old, new in history_list or []:
@@ -220,7 +220,7 @@ class AttributeHistoryManger(object):
 class CIRelationHistoryManager(object):
     @staticmethod
     def add(rel_obj, operate_type=OperateType.ADD):
-        record = OperationRecord.create(uid=g.user.uid)
+        record = OperationRecord.create(uid=current_user.uid)
 
         CIRelationHistory.create(relation_id=rel_obj.id,
                                  record_id=record.id,
@@ -279,7 +279,7 @@ class CITypeHistoryManager(object):
         for _type_id in type_ids:
             payload = dict(operate_type=operate_type,
                            type_id=_type_id,
-                           uid=g.user.uid,
+                           uid=current_user.uid,
                            attr_id=attr_id,
                            trigger_id=trigger_id,
                            unique_constraint_id=unique_constraint_id,

@@ -4,8 +4,8 @@ import functools
 
 from flask import abort
 from flask import current_app
-from flask import g
 from flask import request
+from flask_login import current_user
 
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.resp_format import ErrFormat
@@ -74,7 +74,7 @@ class CIFilterPermsCRUD(DBMixin):
 
     @classmethod
     def get_attr_filter(cls, type_id):
-        if is_app_admin('cmdb') or g.user.username in ('worker', 'cmdb_agent'):
+        if is_app_admin('cmdb') or current_user.username in ('worker', 'cmdb_agent'):
             return []
 
         res2 = ACLManager('cmdb').get_resources(ResourceTypeEnum.CI_FILTER)
@@ -160,7 +160,7 @@ def has_perm_for_ci(arg_name, resource_type, perm, callback=None, app=None):
                 resource = callback(resource)
 
             if current_app.config.get("USE_ACL") and resource:
-                if g.user.username == "worker" or g.user.username == "cmdb_agent":
+                if current_user.username == "worker" or current_user.username == "cmdb_agent":
                     request.values['__is_admin'] = True
                     return func(*args, **kwargs)
 
