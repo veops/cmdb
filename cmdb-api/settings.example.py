@@ -53,13 +53,16 @@ MAIL_PASSWORD = ''
 DEFAULT_MAIL_SENDER = ''
 
 # # queue
-CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/2"
-BROKER_URL = 'redis://127.0.0.1:6379/2'
-BROKER_VHOST = '/'
+CELERY = {
+    "broker_url": 'redis://127.0.0.1:6379/2',
+    "result_backend": "redis://127.0.0.1:6379/2",
+    "broker_vhost": "/",
+    "broker_connection_retry_on_startup": True
+}
 ONCE = {
     'backend': 'celery_once.backends.Redis',
     'settings': {
-        'url': BROKER_URL,
+        'url': CELERY['broker_url'],
     }
 }
 
