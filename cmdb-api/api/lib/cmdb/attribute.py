@@ -3,13 +3,13 @@
 import requests
 from flask import abort
 from flask import current_app
-from flask import g
 from flask import session
+from flask_login import current_user
 
 from api.extensions import db
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.const import CITypeOperateType
-from api.lib.cmdb.const import ResourceTypeEnum, RoleEnum, PermEnum
+from api.lib.cmdb.const import PermEnum, ResourceTypeEnum, RoleEnum
 from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.cmdb.history import CITypeHistoryManager
 from api.lib.cmdb.resp_format import ErrFormat
@@ -177,7 +177,7 @@ class AttributeManager(object):
                                 name=name,
                                 alias=alias,
                                 is_choice=is_choice,
-                                uid=g.user.uid,
+                                uid=current_user.uid,
                                 **kwargs)
 
         if choice_value:
@@ -240,7 +240,7 @@ class AttributeManager(object):
     def _can_edit_attribute(attr):
         from api.lib.cmdb.ci_type import CITypeManager
 
-        if attr.uid == g.user.uid:
+        if attr.uid == current_user.uid:
             return True
 
         for i in CITypeAttribute.get_by(attr_id=attr.id, to_dict=False):
@@ -319,7 +319,7 @@ class AttributeManager(object):
         if CIType.get_by(unique_id=attr.id, first=True, to_dict=False) is not None:
             return abort(400, ErrFormat.attribute_is_unique_id)
 
-        if attr.uid and attr.uid != g.user.uid:
+        if attr.uid and attr.uid != current_user.uid:
             return abort(403, ErrFormat.cannot_delete_attribute)
 
         if attr.is_choice:

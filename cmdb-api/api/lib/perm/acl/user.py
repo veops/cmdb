@@ -6,7 +6,7 @@ import string
 import uuid
 
 from flask import abort
-from flask import g
+from flask_login import current_user
 
 from api.extensions import db
 from api.lib.perm.acl.audit import AuditCRUD, AuditOperateType, AuditScope
@@ -90,9 +90,9 @@ class UserCRUD(object):
     @classmethod
     def reset_key_secret(cls):
         key, secret = cls.gen_key_secret()
-        g.user.update(key=key, secret=secret)
+        current_user.update(key=key, secret=secret)
 
-        UserCache.clean(g.user)
+        UserCache.clean(current_user)
 
         return key, secret
 
