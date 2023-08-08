@@ -129,7 +129,9 @@ def register_extensions(app):
     rd.init_app(app)
     if app.config.get('USE_ES'):
         es.init_app(app)
-    celery.conf.update(app.config.get('CELERY'))
+
+    app.config.update(app.config.get("CELERY"))
+    celery.conf.update(app.config)
 
 
 def register_blueprints(app):
