@@ -403,7 +403,7 @@ export default {
       handleSearch: this.refreshTable,
       setPreferenceSearchCurrent: this.setPreferenceSearchCurrent,
       attrList: () => {
-        return this.preferenceAttrList
+        return this.attrList
       },
       attributes: () => {
         return this.attributes
