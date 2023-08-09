@@ -37,7 +37,7 @@ FACET_QUERY1 = """
            count({0}.ci_id)
     FROM {0}
     INNER JOIN c_attributes AS attr ON attr.id={0}.attr_id
-    WHERE attr.name="{1}"
+    WHERE {0}.deleted != 1 AND attr.name="{1}"
     GROUP BY {0}.ci_id;
 """
 
@@ -46,15 +46,15 @@ FACET_QUERY = """
            count({0}.ci_id)
     FROM {0}
     INNER JOIN ({1}) AS F ON F.ci_id={0}.ci_id
-    WHERE {0}.attr_id={2:d}
+    WHERE {0}.deleted != 1 AND {0}.attr_id={2:d}
     GROUP BY {0}.value
 """
 
 QUERY_CI_BY_ATTR_NAME = """
     SELECT {0}.ci_id
     FROM {0}
-    WHERE {0}.attr_id={1:d}
-      AND {0}.value {2}
+    WHERE {0}.deleted != 1 AND {0}.attr_id={1:d}
+      AND {0}.value {2} 
 """
 
 QUERY_CI_BY_ID = """
@@ -66,7 +66,7 @@ QUERY_CI_BY_ID = """
 QUERY_CI_BY_TYPE = """
     SELECT c_cis.id AS ci_id
     FROM c_cis
-    WHERE c_cis.type_id in ({0})
+    WHERE c_cis.deleted != 1 And c_cis.type_id in ({0})
 """
 
 QUERY_UNION_CI_ATTRIBUTE_IS_NULL = """
@@ -79,7 +79,7 @@ QUERY_UNION_CI_ATTRIBUTE_IS_NULL = """
       LEFT JOIN (
         SELECT {1}.ci_id
         FROM {1}
-        WHERE {1}.attr_id = {2}
+        WHERE {1}.deleted != 1 AND {1}.attr_id = {2}
           AND {1}.value LIKE "%"
       ) {4} USING (ci_id)
     WHERE {4}.ci_id IS NULL
@@ -90,18 +90,18 @@ SELECT *
 FROM 
     (SELECT c_value_index_texts.ci_id
     FROM c_value_index_texts
-    WHERE c_value_index_texts.value LIKE "{0}"
+    WHERE  c_value_index_texts.deleted != 1 AND c_value_index_texts.value LIKE "{0}"
     UNION
     SELECT c_value_index_integers.ci_id
     FROM c_value_index_integers
-    WHERE c_value_index_integers.value LIKE "{0}"
+    WHERE c_value_index_integers.deleted != 1 AND c_value_index_integers.value LIKE "{0}"
     UNION
     SELECT c_value_index_floats.ci_id
     FROM c_value_index_floats
-    WHERE c_value_index_floats.value LIKE "{0}"
+    WHERE c_value_index_floats.deleted != 1 AND c_value_index_floats.value LIKE "{0}"
     UNION
     SELECT c_value_index_datetime.ci_id
     FROM c_value_index_datetime
-    WHERE c_value_index_datetime.value LIKE "{0}") AS {1}
+    WHERE c_value_index_datetime.deleted != 1 AND c_value_index_datetime.value LIKE "{0}") AS {1}
 GROUP BY  {1}.ci_id
 """
