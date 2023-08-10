@@ -45,7 +45,6 @@ def get_all_employee_list(block=0, to_dict=True):
         'email',
         'mobile',
         'direct_supervisor_id',
-        'annual_leave',
         'block',
         'department_id',
     ]
