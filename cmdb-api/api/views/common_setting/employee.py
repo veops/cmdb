@@ -145,29 +145,3 @@ class EmployeePositionView(APIView):
         result = EmployeeCRUD.get_all_position()
         return self.jsonify(result)
 
-
-class EmployeeViewExportExcel(APIView):
-    url_prefix = (f'{prefix}/export_all',)
-
-    def get(self):
-        excel_filename = 'all_employee_info.xlsx'
-        excel_path = current_app.config['UPLOAD_DIRECTORY_FULL']
-        excel_path_with_filename = os.path.join(excel_path, excel_filename)
-
-        block_status = int(request.args.get('block_status', -1))
-        data_list = EmployeeCRUD.get_export_employee_list(block_status)
-
-        headers = data_list[0].keys()
-        from openpyxl import Workbook
-
-        wb = Workbook()
-        ws = wb.active
-        # insert header
-        for col_num, col_data in enumerate(headers, start=1):
-            ws.cell(row=1, column=col_num, value=col_data)
-
-        for row_num, row_data in enumerate(data_list, start=2):
-            for col_num, col_data in enumerate(row_data.values(), start=1):
-                ws.cell(row=row_num, column=col_num, value=col_data)
-        wb.save(excel_path_with_filename)
-        return send_from_directory(excel_path, excel_filename, as_attachment=True)
