@@ -49,3 +49,8 @@ class ErrFormat(CommonErrFormat):
     acl_add_user_to_role_failed = "ACL 添加用户到角色失败: {}"
     acl_import_user_failed = "ACL 导入用户[{}]失败: {}"
 
+    nickname_is_required = "用户名不能为空"
+    username_is_required = "username不能为空"
+    email_is_required = "邮箱不能为空"
+    email_format_error = "邮箱格式错误"
+
