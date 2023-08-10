@@ -150,12 +150,10 @@ class EmployeeViewExportExcel(APIView):
     url_prefix = (f'{prefix}/export_all',)
 
     def get(self):
-        # 规定了静态文件的存储位置
         excel_filename = 'all_employee_info.xlsx'
         excel_path = current_app.config['UPLOAD_DIRECTORY_FULL']
         excel_path_with_filename = os.path.join(excel_path, excel_filename)
 
-        # 根据parameter查表，自连接通过上级id获取上级名字列
         block_status = int(request.args.get('block_status', -1))
         data_list = EmployeeCRUD.get_export_employee_list(block_status)
 
