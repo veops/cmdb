@@ -154,12 +154,9 @@ def _auth_with_acl_token():
 
 
 def auth_required(func):
-    try:
-        if request.json is not None:
-            setattr(request, 'values', request.json)
-        else:
-            setattr(request, 'values', request.values.to_dict())
-    except:
+    if request.get_json(silent=True) is not None:
+        setattr(request, 'values', request.json)
+    else:
         setattr(request, 'values', request.values.to_dict())
 
     @wraps(func)
