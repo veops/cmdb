@@ -100,7 +100,7 @@ class DepartmentSortView(APIView):
 
     def put(self):
         """
-        修改部门排序，只能在同一个上级内排序
+        only can sort in the same parent
         """
         department_list = request.json.get('department_list', None)
         if department_list is None:
