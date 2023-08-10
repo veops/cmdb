@@ -70,7 +70,7 @@
           show-overflow
         >
           <!-- 1 -->
-          <vxe-table-column type="checkbox" fixed="left"></vxe-table-column>
+          <vxe-table-column type="checkbox" fixed="left" :width="45"></vxe-table-column>
 
           <!-- 2 -->
 
@@ -186,49 +186,6 @@ export default {
         pageSize: 50,
       },
       tableData: [],
-      tableColumns: [
-        {
-          type: 'checkbox',
-          fixed: 'left',
-        },
-        {
-          title: '资源名',
-          field: 'name',
-          minWidth: '150px',
-          showOverflow: 'tooltip',
-          fixed: 'left',
-          slots: {
-            header: 'name_header',
-          },
-        },
-        {
-          title: '创建者',
-          minWidth: '100px',
-          field: 'user',
-        },
-        {
-          title: '创建时间',
-          minWidth: '220px',
-          field: 'created_at',
-          align: 'center',
-        },
-        {
-          title: '最后修改时间',
-          minWidth: '220px',
-          field: 'updated_at',
-          align: 'center',
-        },
-        {
-          title: '操作',
-          field: 'action',
-          width: '200px',
-          fixed: 'right',
-          align: 'center',
-          slots: {
-            default: 'action_default',
-          },
-        },
-      ],
       btnName: '新增资源',
       isGroup: false,
       allResourceTypes: [],
