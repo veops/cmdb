@@ -231,7 +231,7 @@ class EmployeeCRUD(object):
             raise Exception(err)
 
     @staticmethod
-    def get_employee_list_by_body(department_id, block_status, search='', order='', conditions=[], page=1,
+    def get_employee_list_by_body(department_id, block_status, search='', order='', conditions=None, page=1,
                                   page_size=10):
         criterion = [
             Employee.deleted == 0
