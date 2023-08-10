@@ -129,6 +129,8 @@ def register_extensions(app):
     rd.init_app(app)
     if app.config.get('USE_ES'):
         es.init_app(app)
+
+    app.config.update(app.config.get("CELERY"))
     celery.conf.update(app.config)
 
 

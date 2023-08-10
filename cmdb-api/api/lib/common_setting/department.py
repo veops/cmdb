@@ -7,6 +7,7 @@ from wtforms import IntegerField
 from wtforms import StringField
 from wtforms import validators
 
+from api.extensions import db
 from api.lib.common_setting.resp_format import ErrFormat
 from api.lib.perm.acl.role import RoleCRUD
 from api.models.common_setting import Department, Employee
@@ -44,7 +45,6 @@ def get_all_employee_list(block=0, to_dict=True):
         'email',
         'mobile',
         'direct_supervisor_id',
-        'annual_leave',
         'block',
         'department_id',
     ]
@@ -94,11 +94,9 @@ class DepartmentTree(object):
 
         for top_d in top_departments:
             department_id = top_d['department_id']
-            # 检查 department_id 是否作为其他部门的 parent
             sub_deps = self.get_department_by_parent_id(department_id)
             employees = []
             if self.append_employee:
-                # 要包含员工
                 employees = self.get_employees_by_d_id(department_id)
 
             top_d['employees'] = employees
@@ -127,7 +125,6 @@ class DepartmentTree(object):
             sub_deps = self.get_department_by_parent_id(d['department_id'])
             employees = []
             if self.append_employee:
-                # 要包含员工
                 employees = self.get_employees_by_d_id(d['department_id'])
 
             d['employees'] = employees
@@ -184,7 +181,6 @@ class DepartmentCRUD(object):
     def check_department_parent_id_allow(d_id, department_parent_id):
         if department_parent_id == 0:
             return
-        # 检查 department_parent_id 是否在许可范围内
         allow_p_d_id_list = DepartmentCRUD.get_allow_parent_d_id_by(d_id)
         target = list(
             filter(lambda d: d['department_id'] == department_parent_id, allow_p_d_id_list))
@@ -263,9 +259,6 @@ class DepartmentCRUD(object):
 
     @staticmethod
     def get_allow_parent_d_id_by(department_id):
-        """
-        获取可以成为 department_id 的 department_parent_id 的 list
-        """
         tree_list = DepartmentCRUD.get_department_tree_list()
 
         allow_d_id_list = []
@@ -307,7 +300,6 @@ class DepartmentCRUD(object):
         if len(all_deps) == 0:
             return []
 
-        # 一级部门
         top_deps = list(filter(lambda d: d['department_parent_id'] == -1, all_deps))
         if len(top_deps) == 0:
             return []
@@ -321,7 +313,6 @@ class DepartmentCRUD(object):
                 top_d['department_name'],
                 identifier_root
             )
-            # 检查 department_id 是否作为其他部门的 parent
             sub_ds = list(filter(lambda d: d['department_parent_id'] == identifier_root, all_deps))
             if len(sub_ds) == 0:
                 tree_list.append(tree)
@@ -349,6 +340,13 @@ class DepartmentCRUD(object):
 
             DepartmentCRUD.parse_sub_department_node(
                 next_sub_ds, all_ds, tree, d['department_id'])
+
+    @staticmethod
+    def get_department_by_query(query, to_dict=True):
+        results = query.all()
+        if not results:
+            return []
+        return results if not to_dict else [r.to_dict() for r in results]
 
     @staticmethod
     def get_departments_and_ids(department_parent_id, block):
