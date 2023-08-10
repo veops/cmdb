@@ -63,6 +63,7 @@
 import md5 from 'md5'
 import { mapActions } from 'vuex'
 import { timeFix } from '@/utils/util'
+import appConfig from '@/config/app.js'
 
 export default {
   data() {
@@ -116,7 +117,7 @@ export default {
           const loginParams = { ...values }
           delete loginParams.username
           loginParams[!state.loginType ? 'email' : 'username'] = values.username
-          loginParams.password = md5(values.password)
+          loginParams.password = appConfig.useEncryption?md5(values.password):values.password
           Login(loginParams)
             .then((res) => this.loginSuccess(res))
             .finally(() => {
