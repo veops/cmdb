@@ -10,7 +10,10 @@
         </div>
         <div class="attribute-card_value-type">{{ valueTypeMap[property.value_type] }}</div>
       </div>
-      <div class="attribute-card-trigger" v-if="property.value_type === '3' || property.value_type === '4'">
+      <div
+        class="attribute-card-trigger"
+        v-if="(property.value_type === '3' || property.value_type === '4') && !isStore"
+      >
         <a @click="openTrigger"><ops-icon type="ops-trigger"/></a>
       </div>
     </div>
@@ -47,7 +50,7 @@
       </a-popover>
 
       <a-space class="attribute-card-operation">
-        <a><a-icon type="edit" @click="handleEdit"/></a>
+        <a v-if="!isStore"><a-icon type="edit" @click="handleEdit"/></a>
         <a style="color:red;"><a-icon type="delete" @click="handleDelete"/></a>
       </a-space>
     </div>
@@ -56,7 +59,7 @@
 </template>
 
 <script>
-import { deleteCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
+import { deleteCITypeAttributesById, deleteAttributesById } from '@/modules/cmdb/api/CITypeAttr'
 import ValueTypeIcon from '@/components/CMDBValueTypeMapIcon'
 import {
   ops_default_show,
@@ -91,6 +94,10 @@ export default {
     CITypeId: {
       type: Number,
       default: null,
+    },
+    isStore: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -140,10 +147,17 @@ export default {
         title: '警告',
         content: `确认删除 【${that.property.alias || that.property.name}】？`,
         onOk() {
-          deleteCITypeAttributesById(that.CITypeId, { attr_id: [that.property.id] }).then(() => {
-            that.$message.success('删除成功！')
-            that.$emit('ok')
-          })
+          if (that.isStore) {
+            deleteAttributesById(that.property.id).then(() => {
+              that.$message.success('删除成功！')
+              that.$emit('ok')
+            })
+          } else {
+            deleteCITypeAttributesById(that.CITypeId, { attr_id: [that.property.id] }).then(() => {
+              that.$message.success('删除成功！')
+              that.$emit('ok')
+            })
+          }
         },
         onCancel() {},
       })
