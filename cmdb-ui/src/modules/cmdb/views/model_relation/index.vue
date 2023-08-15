@@ -1,65 +1,63 @@
 <template>
-  <div>
-    <a-card :bordered="false">
-      <a-button @click="handleCreate" type="primary" style="margin-bottom: 15px;" icon="plus">新增关系</a-button>
-      <model-relation-table ref="table"></model-relation-table>
-      <a-modal
-        :closable="false"
-        :title="drawerTitle"
-        :visible="visible"
-        @cancel="onClose"
-        @ok="handleSubmit"
-        width="500px"
-      >
-        <a-form :form="form" @submit="handleSubmit" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-          <a-form-item label="源模型">
-            <a-select
-              showSearch
-              name="source_ci_type_id"
-              v-decorator="['source_ci_type_id', { rules: [{ required: true, message: '请选择源模型' }] }]"
-              @change="handleSourceTypeChange"
-              :filterOption="filterOption"
-            >
-              <a-select-option :value="CIType.id" :key="CIType.id" v-for="CIType in displayCITypes">{{
-                CIType.alias || CIType.name
-              }}</a-select-option>
-            </a-select>
-          </a-form-item>
-          <a-form-item label="目标模型">
-            <a-select
-              showSearch
-              name="ci_type_id"
-              v-decorator="['ci_type_id', { rules: [{ required: true, message: '请选择目标模型' }] }]"
-              @change="handleTargetTypeChange"
-              :filterOption="filterOption"
-            >
-              <a-select-option :value="CIType.id" :key="CIType.id" v-for="CIType in displayTargetCITypes">
-                {{ CIType.alias || CIType.name }}
-              </a-select-option>
-            </a-select>
-          </a-form-item>
+  <div class="model-relation">
+    <a-button @click="handleCreate" type="primary" style="margin-bottom: 15px;" icon="plus">新增关系</a-button>
+    <model-relation-table ref="table"></model-relation-table>
+    <a-modal
+      :closable="false"
+      :title="drawerTitle"
+      :visible="visible"
+      @cancel="onClose"
+      @ok="handleSubmit"
+      width="500px"
+    >
+      <a-form :form="form" @submit="handleSubmit" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
+        <a-form-item label="源模型">
+          <a-select
+            showSearch
+            name="source_ci_type_id"
+            v-decorator="['source_ci_type_id', { rules: [{ required: true, message: '请选择源模型' }] }]"
+            @change="handleSourceTypeChange"
+            :filterOption="filterOption"
+          >
+            <a-select-option :value="CIType.id" :key="CIType.id" v-for="CIType in displayCITypes">{{
+              CIType.alias || CIType.name
+            }}</a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="目标模型">
+          <a-select
+            showSearch
+            name="ci_type_id"
+            v-decorator="['ci_type_id', { rules: [{ required: true, message: '请选择目标模型' }] }]"
+            @change="handleTargetTypeChange"
+            :filterOption="filterOption"
+          >
+            <a-select-option :value="CIType.id" :key="CIType.id" v-for="CIType in displayTargetCITypes">
+              {{ CIType.alias || CIType.name }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
 
-          <a-form-item label="关联关系">
-            <a-select
-              name="relation_type_id"
-              v-decorator="['relation_type_id', { rules: [{ required: true, message: '请选择关联关系' }] }]"
-            >
-              <a-select-option :value="relationType.id" :key="relationType.id" v-for="relationType in relationTypes">{{
-                relationType.name
-              }}</a-select-option>
-            </a-select>
-          </a-form-item>
+        <a-form-item label="关联关系">
+          <a-select
+            name="relation_type_id"
+            v-decorator="['relation_type_id', { rules: [{ required: true, message: '请选择关联关系' }] }]"
+          >
+            <a-select-option :value="relationType.id" :key="relationType.id" v-for="relationType in relationTypes">{{
+              relationType.name
+            }}</a-select-option>
+          </a-select>
+        </a-form-item>
 
-          <a-form-item label="关联约束">
-            <a-select v-decorator="['constraint', { rules: [{ required: true, message: '请选择关联约束' }] }]">
-              <a-select-option value="0">一对多</a-select-option>
-              <a-select-option value="1">一对一</a-select-option>
-              <a-select-option value="2">多对多</a-select-option>
-            </a-select>
-          </a-form-item>
-        </a-form>
-      </a-modal>
-    </a-card>
+        <a-form-item label="关联约束">
+          <a-select v-decorator="['constraint', { rules: [{ required: true, message: '请选择关联约束' }] }]">
+            <a-select-option value="0">一对多</a-select-option>
+            <a-select-option value="1">一对一</a-select-option>
+            <a-select-option value="2">多对多</a-select-option>
+          </a-select>
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
@@ -110,16 +108,13 @@ export default {
   },
   mounted() {
     const _currentId = localStorage.getItem('ops_cityps_currentId')
-    console.log(_currentId)
     if (_currentId) {
       this.currentId = _currentId
     }
     searchResourceType({ page_size: 9999, app_id: 'cmdb' }).then((res) => {
-      console.log('searchResourceType', res)
       this.resource_type = { groups: res.groups, id2perms: res.id2perms }
     })
     this.loadCITypes(!_currentId)
-    console.log(this.CITypeId)
   },
   computed: {
     currentCId() {
@@ -168,7 +163,6 @@ export default {
     },
     getCITypes() {
       getCITypes().then((res) => {
-        console.log('getCITypes', res.ci_types)
         this.CITypes = res.ci_types
       })
     },
@@ -196,9 +190,6 @@ export default {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          // eslint-disable-next-line no-console
-          console.log('Received values of form: ', values)
-
           createRelation(values.source_ci_type_id, values.ci_type_id, values.relation_type_id, values.constraint).then(
             (res) => {
               this.$message.success(`添加成功`)
@@ -215,8 +206,6 @@ export default {
       this.$refs.table.refresh()
     },
     handleDelete(record) {
-      console.log(record)
-
       deleteRelation(record.source_ci_type_id, record.id).then((res) => {
         this.$message.success(`删除成功！`)
 
@@ -236,4 +225,12 @@ export default {
 }
 </script>
 
-<style></style>
+<style lang="less" scoped>
+.model-relation {
+  background-color: #fff;
+  border-radius: 15px;
+  padding: 24px;
+  height: calc(100vh - 64px);
+  margin-bottom: -24px;
+}
+</style>
