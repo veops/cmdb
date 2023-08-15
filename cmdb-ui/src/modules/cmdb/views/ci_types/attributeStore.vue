@@ -78,7 +78,7 @@
   import { searchAttributes } from '../../api/CITypeAttr'
   import AttributeCard from './attributeCard.vue'
   export default {
-    name: 'AttrbuteStore',
+    name: 'AttributeStore',
     components: { AttributeCard },
     data() {
       return {
