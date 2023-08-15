@@ -1,12 +1,13 @@
 <template>
   <div>
     <vxe-table
+      ref="xTable"
       stripe
       class="ops-stripe-table"
       show-header-overflow
       show-overflow
       resizable
-      :max-height="`${windowHeight - 183}px`"
+      :height="`${windowHeight - 160}px`"
       :data="tableData"
       :sort-config="{ defaultSort: { field: 'created_at', order: 'desc' } }"
     >
@@ -16,21 +17,8 @@
         field="relation_type_id"
         title="关系"
         :filters="[{ data: '' }]"
-        :filter-method="filterRelationMethod"
-        :filter-recover-method="filterRelationRecoverMethod"
+        :filter-multiple="false"
       >
-        <template #filter="{ $panel, column }">
-          <template v-for="(option, index) in column.filters">
-            <input
-              type="type"
-              :key="index"
-              v-model="option.data"
-              @input="$panel.changeOption($event, !!option.data, option)"
-              @keyup.enter="$panel.confirmFilter()"
-              placeholder="按回车确认筛选"
-            />
-          </template>
-        </template>
         <template #default="{ row }">
           <a-tag color="cyan">
             {{ row.relation_type.name }}
@@ -39,9 +27,14 @@
       </vxe-column>
       <vxe-column field="child.alias" title="目标模型"></vxe-column>
       <vxe-column field="constraint" title="关联约束"></vxe-column>
-      <vxe-column field="authorization" title="授权" width="89px">
+      <vxe-column field="authorization" title="操作" width="89px">
         <template #default="{ row }">
-          <a @click="handleOpenGrant(row)"><a-icon type="user-add"/></a>
+          <a-space>
+            <a @click="handleOpenGrant(row)"><a-icon type="user-add"/></a>
+            <a-popconfirm title="确认删除？" @confirm="deleteRelation(row)">
+              <a :style="{ color: 'red' }"><ops-icon type="icon-xianxing-delete"/></a>
+            </a-popconfirm>
+          </a-space>
         </template>
       </vxe-column>
     </vxe-table>
@@ -50,7 +43,7 @@
 </template>
 
 <script>
-import { getCITypeRelations } from '@/modules/cmdb/api/CITypeRelation'
+import { getCITypeRelations, deleteRelation } from '@/modules/cmdb/api/CITypeRelation'
 import { getRelationTypes } from '@/modules/cmdb/api/relationType'
 import CMDBGrant from '../../../components/cmdbGrant'
 
@@ -86,40 +79,35 @@ export default {
         item.constraint = this.handleConstraint(item.constraint)
       })
       this.tableData = res
-      console.log('MainData', res)
     },
     // 获取关系
     async getRelationTypes() {
       const res = await getRelationTypes()
-      const relationTypeMap = new Map()
-      res.forEach((item) => {
-        relationTypeMap.set(item.id, item.name)
-      })
-      this.relationTypeList = relationTypeMap
-      console.log('relationTypeList', this.relationTypeList)
+      this.relationTypeList = res.map((item) => ({ value: item.id, label: item.name }))
+      const $table = this.$refs.xTable
+      if ($table) {
+        const nameColumn = $table.getColumnByField('relation_type_id')
+        if (nameColumn) {
+          $table.setFilter(nameColumn, this.relationTypeList)
+        }
+      }
     },
     // 转换关联关系
     handleConstraint(constraintId) {
       return this.constraintMap[constraintId]
     },
     handleOpenGrant(record) {
-      console.log('record', record)
-      console.log(`${record.parent.name} -> ${record.child.name}`)
-      // this.$refs.grantDrawer.open({ name: `${record.parent.name} -> ${record.child.name}` })
       this.$refs.cmdbGrant.open({
         name: `${record.parent.name} -> ${record.child.name}`,
         typeRelationIds: [record.parent_id, record.child_id],
         cmdbGrantType: 'type_relation',
       })
     },
-    filterRelationMethod({ option, row }) {
-      return row.relation_type.name.includes(String(option.data))
-    },
-    filterRelationRecoverMethod({ option }) {
-      option.data = ''
-    },
-    refresh() {
-      this.getMainData()
+    deleteRelation(row) {
+      deleteRelation(row.parent_id, row.child_id).then((res) => {
+        this.$message.success(`删除成功！`)
+        this.getRelationTypes()
+      })
     },
   },
 }

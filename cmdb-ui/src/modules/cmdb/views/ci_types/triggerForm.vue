@@ -90,7 +90,12 @@ export default {
       )
     },
   },
-  inject: ['refresh'],
+  inject: {
+    refresh: {
+      from: 'refresh',
+      default: null,
+    },
+  },
   methods: {
     createFromTriggerTable(canAddTriggerAttr) {
       this.visible = true
@@ -163,7 +168,9 @@ export default {
             await addTrigger(this.CITypeId, params)
           }
           this.handleCancel()
-          this.refresh()
+          if (this.refresh) {
+            this.refresh()
+          }
         }
       })
     },
@@ -176,7 +183,9 @@ export default {
           deleteTrigger(that.CITypeId, that.triggerId).then(() => {
             that.$message.success('删除成功！')
             that.handleCancel()
-            that.refresh()
+            if (that.refresh) {
+              that.refresh()
+            }
           })
         },
       })
