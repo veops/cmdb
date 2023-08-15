@@ -75,9 +75,9 @@ class AutoDiscoveryRuleTemplateFileView(APIView):
 
         return self.send_file(bf,
                               as_attachment=True,
-                              attachment_filename="cmdb_auto_discovery.json",
+                              download_name="cmdb_auto_discovery.json",
                               mimetype='application/json',
-                              cache_timeout=0)
+                              max_age=0)
 
     def post(self):
         f = request.files.get('file')
