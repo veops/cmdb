@@ -1,4 +1,4 @@
-![维易CMDB](docs/images/logo.png)
+![维易开源CMDB](docs/images/logo.png)
 
 [![License](https://img.shields.io/badge/License-AGPLv3-brightgreen)](https://github.com/veops/cmdb/blob/master/LICENSE)
 [![UI](https://img.shields.io/badge/UI-Ant%20Design%20Pro%20Vue-brightgreen)](https://github.com/sendya/ant-design-pro-vue)
@@ -7,7 +7,7 @@
 [English](README_en.md) / [中文](README.md)
 
 - 在线体验: <a href="https://cmdb.veops.cn" target="_blank">CMDB</a>
-  - username: demo
+  - username: demo 或者 admin
   - password: 123456
 
 > **重要提示**: `master` 分支在开发过程中可能处于 _不稳定的状态_ 。
@@ -62,7 +62,7 @@
 
 ## 接入公司
 
-> 欢迎使用CMDB的公司，在 [#112](https://github.com/veops/cmdb/issues/112) 登记
+> 欢迎使用开源CMDB的公司，在 [#112](https://github.com/veops/cmdb/issues/112) 登记
 
 ## 安装
 
