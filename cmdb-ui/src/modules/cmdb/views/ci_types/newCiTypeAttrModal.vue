@@ -91,13 +91,8 @@ export default {
         })
     },
   },
-  beforeMount() {
-    this.loadTotalAttrs()
-  },
   methods: {
     async handleSubmit(isCloseModal = true) {
-      console.log(this.targetKeys)
-
       if (this.activeKey === '2') {
         if (this.targetKeys.length) {
           this.confirmLoading = true
@@ -125,6 +120,7 @@ export default {
       this.visible = true
       this.currentGroup = group
       this.activeKey = '1'
+      this.loadTotalAttrs()
       this.$nextTick(() => {
         this.$refs.createNewAttribute.checkCanDefineComputed()
       })
