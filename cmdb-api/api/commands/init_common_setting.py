@@ -33,7 +33,7 @@ class InitEmployee(object):
             block = 1 if user['block'] else 0
             acl_rid = self.get_rid_by_uid(acl_uid)
             if user['username'] in username_list:
-                existed = Employee.get_by(first=True, username=user['username'])
+                existed = Employee.get_by(first=True, username=user['username'], to_dict=False)
                 if existed:
                     existed.update(
                         acl_uid=acl_uid,
