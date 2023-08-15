@@ -22,13 +22,24 @@ class InitEmployee(object):
         Import users from ACL
         """
 
+        InitDepartment().init()
         acl = ACLManager('acl')
         user_list = acl.get_all_users()
 
         username_list = [e['username'] for e in Employee.get_by()]
 
         for user in user_list:
+            acl_uid = user['uid']
+            block = 1 if user['block'] else 0
+            acl_rid = self.get_rid_by_uid(acl_uid)
             if user['username'] in username_list:
+                existed = Employee.get_by(first=True, username=user['username'])
+                if existed:
+                    existed.update(
+                        acl_uid=acl_uid,
+                        acl_rid=acl_rid,
+                        block=block,
+                    )
                 continue
             try:
                 form = EmployeeAddForm(MultiDict(user))
@@ -36,8 +47,9 @@ class InitEmployee(object):
                     raise Exception(
                         ','.join(['{}: {}'.format(filed, ','.join(msg)) for filed, msg in form.errors.items()]))
                 data = form.data
-                data['acl_uid'] = user['uid']
-                data['block'] = 1 if user['block'] else 0
+                data['acl_uid'] = acl_uid
+                data['acl_rid'] = acl_rid
+                data['block'] = block
                 data.pop('password')
                 Employee.create(
                     **data
@@ -45,6 +57,11 @@ class InitEmployee(object):
             except Exception as e:
                 self.log.error(ErrFormat.acl_import_user_failed.format(user['username'], str(e)))
                 self.log.error(e)
+
+    def get_rid_by_uid(self, uid):
+        from api.models.acl import Role
+        role = Role.get_by(first=True, uid=uid)
+        return role['id'] if role is not None else 0
 
 
 class InitDepartment(object):
