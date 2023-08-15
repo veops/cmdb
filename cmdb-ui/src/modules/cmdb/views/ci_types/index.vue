@@ -29,7 +29,7 @@
               <a
                 @click="
                   () => {
-                    $refs.attrbuteStore.open()
+                    $refs.AttributeStore.open()
                   }
                 "
               >属性库</a
@@ -258,7 +258,7 @@
       </a-form>
     </CustomDrawer>
     <CMDBGrant ref="cmdbGrant" resourceType="CIType" app_id="cmdb" />
-    <AttrbuteStore ref="attrbuteStore" />
+    <AttributeStore ref="AttributeStore" />
   </div>
 </template>
 
@@ -286,7 +286,7 @@ import IconArea from './iconArea.vue'
 import SplitPane from '@/components/SplitPane'
 import CMDBGrant from '../../components/cmdbGrant'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
-import AttrbuteStore from './attrbuteStore.vue'
+import AttributeStore from './attributeStore.vue'
 
 export default {
   name: 'CITypes',
@@ -300,7 +300,7 @@ export default {
     IconArea,
     SplitPane,
     OpsMoveIcon,
-    AttrbuteStore,
+    AttributeStore,
   },
   data() {
     return {
