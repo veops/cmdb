@@ -29,7 +29,7 @@
               <a
                 @click="
                   () => {
-                    $refs.AttributeStore.open()
+                    $refs.attributeStore.open()
                   }
                 "
               >属性库</a
@@ -258,7 +258,7 @@
       </a-form>
     </CustomDrawer>
     <CMDBGrant ref="cmdbGrant" resourceType="CIType" app_id="cmdb" />
-    <AttributeStore ref="AttributeStore" />
+    <AttributeStore ref="attributeStore" />
   </div>
 </template>
 
