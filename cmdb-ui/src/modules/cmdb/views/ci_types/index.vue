@@ -25,47 +25,71 @@
               class="ops-button-primary"
             >分组</a-button
             >
-            <a-space v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')">
-              <a-upload
-                name="file"
-                accept="json"
-                :showUploadList="false"
-                style="display: inline-block"
-                action="/api/v0.1/ci_types/template/import/file "
+            <a-space>
+              <a
+                @click="
+                  () => {
+                    $refs.attrbuteStore.open()
+                  }
+                "
+              >属性库</a
               >
-                <a>导入</a>
-              </a-upload>
-              <a href="/api/v0.1/ci_types/template/export/file">导出</a>
+              <a-dropdown v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')">
+                <a><ops-icon type="ops-menu"/></a>
+                <a-menu slot="overlay">
+                  <a-menu-item key="0">
+                    <a-upload
+                      name="file"
+                      accept="json"
+                      :showUploadList="false"
+                      style="display: inline-block"
+                      action="/api/v0.1/ci_types/template/import/file "
+                    >
+                      <a-space
+                      ><a><a-icon type="upload"/></a><a>导入</a></a-space
+                      >
+                    </a-upload>
+                  </a-menu-item>
+                  <a-menu-item key="1">
+                    <a-space>
+                      <a><a-icon type="download"/></a>
+                      <a href="/api/v0.1/ci_types/template/export/file">导出</a>
+                    </a-space>
+                  </a-menu-item>
+                </a-menu>
+              </a-dropdown>
             </a-space>
           </div>
           <draggable class="ci-types-left-content" :list="CITypeGroups" @end="handleChangeGroups" filter=".undraggable">
             <div v-for="g in CITypeGroups" :key="g.id || g.name">
               <div
-                :class="`${currentGId === g.id && !currentCId ? 'selected' : ''} ci-types-left-group ${
-                  g.id === -1 ? 'undraggable' : ''
-                }`"
+                :class="
+                  `${currentGId === g.id && !currentCId ? 'selected' : ''} ci-types-left-group ${
+                    g.id === -1 ? 'undraggable' : ''
+                  }`
+                "
                 @click="handleClickGroup(g.id)"
               >
                 <div>
                   <OpsMoveIcon
                     style="width: 17px; height: 17px; display: none; position: absolute; left: -3px; top: 10px"
                   />
-                  <span style="font-weight: 700">{{ g.name || '其他' }}</span>
+                  <span style="font-weight:700">{{ g.name || '其他' }}</span>
                   <span :style="{ color: '#c3cdd7' }">({{ g.ci_types.length }})</span>
                 </div>
                 <a-space>
                   <a-tooltip>
                     <template slot="title">在该组中新增CI模型</template>
-                    <a><a-icon type="plus" @click="handleCreate(g)" /></a>
+                    <a><a-icon type="plus" @click="handleCreate(g)"/></a>
                   </a-tooltip>
                   <template v-if="g.id !== -1">
                     <a-tooltip>
                       <template slot="title">编辑组名称</template>
-                      <a><a-icon type="edit" @click="handleEditGroup(g)" /></a>
+                      <a><a-icon type="edit" @click="handleEditGroup(g)"/></a>
                     </a-tooltip>
                     <a-tooltip>
                       <template slot="title">删除该组</template>
-                      <a style="color: red"><a-icon type="delete" @click="handleDeleteGroup(g)" /></a>
+                      <a style="color: red"><a-icon type="delete" @click="handleDeleteGroup(g)"/></a>
                     </a-tooltip>
                   </template>
                 </a-space>
@@ -102,9 +126,9 @@
                   </div>
                   <span class="ci-types-left-detail-title">{{ ci.alias || ci.name }}</span>
                   <a-space class="ci-types-left-detail-action">
-                    <a><a-icon type="user-add" @click="(e) => handlePerm(e, ci)" /></a>
-                    <a><a-icon type="edit" @click="(e) => handleEdit(e, ci)" /></a>
-                    <a style="color: red" @click="(e) => handleDelete(e, ci)"><a-icon type="delete" /></a>
+                    <a><a-icon type="user-add" @click="(e) => handlePerm(e, ci)"/></a>
+                    <a><a-icon type="edit" @click="(e) => handleEdit(e, ci)"/></a>
+                    <a style="color: red" @click="(e) => handleDelete(e, ci)"><a-icon type="delete"/></a>
                   </a-space>
                 </div>
               </draggable>
@@ -185,8 +209,12 @@
             <a-divider :style="{ margin: '5px 0' }" />
             <div :style="{ textAlign: 'right' }">
               <a-radio-group v-model="default_order_asc">
-                <a-radio value="1"> 正序 </a-radio>
-                <a-radio value="2"> 倒序 </a-radio>
+                <a-radio value="1">
+                  正序
+                </a-radio>
+                <a-radio value="2">
+                  倒序
+                </a-radio>
               </a-radio-group>
             </div>
           </el-select>
@@ -230,6 +258,7 @@
       </a-form>
     </CustomDrawer>
     <CMDBGrant ref="cmdbGrant" resourceType="CIType" app_id="cmdb" />
+    <AttrbuteStore ref="attrbuteStore" />
   </div>
 </template>
 
@@ -257,6 +286,7 @@ import IconArea from './iconArea.vue'
 import SplitPane from '@/components/SplitPane'
 import CMDBGrant from '../../components/cmdbGrant'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
+import AttrbuteStore from './attrbuteStore.vue'
 
 export default {
   name: 'CITypes',
@@ -270,6 +300,7 @@ export default {
     IconArea,
     SplitPane,
     OpsMoveIcon,
+    AttrbuteStore,
   },
   data() {
     return {
@@ -589,7 +620,6 @@ export default {
       }
     },
     async handleChangeCITypes(e, g) {
-      console.log(111, g)
       if (g.id && g.id !== -1) {
         putCITypeGroupByGId(g.id, { name: g.name, type_ids: g.ci_types.map((i) => i.id) })
           .then(() => {
@@ -613,7 +643,6 @@ export default {
       const { type_id } = await createCIType(data).catch(() => {
         this.loading = false
       })
-      console.log(111)
       this.$message.success(`添加成功`)
       if (this.selectGroup && this.selectGroup.id && this.selectGroup.id !== -1) {
         const ids = this.selectGroup.ci_types.map((i) => i.id)
