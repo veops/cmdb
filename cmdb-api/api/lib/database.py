@@ -80,10 +80,10 @@ class CRUDMixin(FormatMixin):
             db.session.rollback()
             raise CommitException(str(e))
 
-    def soft_delete(self, flush=False):
+    def soft_delete(self, flush=False, commit=True):
         setattr(self, "deleted", True)
         setattr(self, "deleted_at", datetime.datetime.now())
-        self.save(flush=flush)
+        self.save(flush=flush, commit=commit)
 
     @classmethod
     def get_by_id(cls, _id):
@@ -138,8 +138,11 @@ class CRUDMixin(FormatMixin):
         return result[0] if first and result else (None if first else result)
 
     @classmethod
-    def get_by_like(cls, to_dict=True, **kwargs):
+    def get_by_like(cls, to_dict=True, deleted=False, **kwargs):
         query = db.session.query(cls)
+        if hasattr(cls, "deleted") and deleted is not None:
+            query = query.filter(cls.deleted.is_(deleted))
+
         for k, v in kwargs.items():
             query = query.filter(getattr(cls, k).ilike('%{0}%'.format(v)))
         return [i.to_dict() if to_dict else i for i in query]

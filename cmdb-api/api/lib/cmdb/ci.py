@@ -38,8 +38,8 @@ from api.lib.decorator import kwargs_required
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import validate_permission
-from api.lib.utils import handle_arg_list
 from api.lib.utils import Lock
+from api.lib.utils import handle_arg_list
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
 from api.models.cmdb import CITypeAttribute
@@ -48,6 +48,8 @@ from api.tasks.cmdb import ci_cache
 from api.tasks.cmdb import ci_delete
 from api.tasks.cmdb import ci_relation_cache
 from api.tasks.cmdb import ci_relation_delete
+
+PRIVILEGED_USERS = {"worker", "cmdb_agent", "agent"}
 
 
 class CIManager(object):
@@ -316,7 +318,7 @@ class CIManager(object):
         ci_attr2type_attr = {type_attr.attr_id: type_attr for type_attr, _ in attrs}
 
         ci = None
-        need_lock = current_user.username not in ("worker", "cmdb_agent", "agent")
+        need_lock = current_user.username not in current_app.config.get('PRIVILEGED_USERS', PRIVILEGED_USERS)
         with Lock(ci_type_name, need_lock=need_lock):
             existed = cls.ci_is_exist(unique_key, unique_value, ci_type.id)
             if existed is not None:
@@ -411,7 +413,7 @@ class CIManager(object):
 
         limit_attrs = self._valid_ci_for_no_read(ci) if not _is_admin else {}
 
-        need_lock = current_user.username not in ("worker", "cmdb_agent", "agent")
+        need_lock = current_user.username not in current_app.config.get('PRIVILEGED_USERS', PRIVILEGED_USERS)
         with Lock(ci.ci_type.name, need_lock=need_lock):
             self._valid_unique_constraint(ci.type_id, ci_dict, ci_id)
 
