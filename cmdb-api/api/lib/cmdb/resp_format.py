@@ -11,6 +11,7 @@ class ErrFormat(CommonErrFormat):
 
     attribute_not_found = "属性 {} 不存在!"
     attribute_is_unique_id = "该属性是模型的唯一标识，不能被删除!"
+    attribute_is_ref_by_type = "该属性被模型 {} 引用, 不能删除!"
     attribute_value_type_cannot_change = "属性的值类型不允许修改!"
     attribute_list_value_cannot_change = "多值不被允许修改!"
     attribute_index_cannot_change = "修改索引 非管理员不被允许!"
@@ -20,7 +21,7 @@ class ErrFormat(CommonErrFormat):
     add_attribute_failed = "创建属性 {} 失败!"
     update_attribute_failed = "修改属性 {} 失败!"
     cannot_edit_attribute = "您没有权限修改该属性!"
-    cannot_delete_attribute = "您没有权限删除该属性!"
+    cannot_delete_attribute = "目前只允许 属性创建人、管理员 删除属性!"
     attribute_name_cannot_be_builtin = "属性字段名不能是内置字段: id, _id, ci_id, type, _type, ci_type"
 
     ci_not_found = "CI {} 不存在"

@@ -107,6 +107,10 @@ class UserCRUD(object):
 
         UserCache.clean(user)
 
+        role = RoleCRUD.get_by_name(user.username, app_id=None)
+        if role:
+            RoleCRUD.delete_role(role[0]['id'], force=True)
+
         AuditCRUD.add_role_log(None, AuditOperateType.delete,
                                AuditScope.user, user.uid, origin, {}, {}, {})
 
