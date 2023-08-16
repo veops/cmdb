@@ -16,6 +16,7 @@
         class="ops-stripe-table"
         :columns="tableColumns"
         :data="tableData"
+        show-overflow
         highlight-hover-row
         :height="`${windowHeight - 165}px`"
         size="small"
@@ -24,15 +25,17 @@
           <a-icon type="lock" v-if="row.block" />
         </template>
         <template #action_default="{row}">
-          <template>
+          <a-space>
             <a :disabled="isAclAdmin ? false : true" @click="handleEdit(row)">
               <a-icon type="edit" />
             </a>
-            <a-divider type="vertical" />
             <a-tooltip title="权限汇总">
               <a @click="handlePermCollect(row)"><a-icon type="solution"/></a>
             </a-tooltip>
-          </template>
+            <a-popconfirm :title="`确认删除【${row.nickname || row.username}】？`" @confirm="deleteUser(row.uid)">
+              <a :style="{ color: 'red' }"><ops-icon type="icon-xianxing-delete"/></a>
+            </a-popconfirm>
+          </a-space>
         </template>
       </vxe-grid>
     </a-spin>
@@ -73,11 +76,14 @@ export default {
           title: '加入时间',
           field: 'date_joined',
           minWidth: '160px',
+          align: 'center',
+          sortable: true,
         },
         {
           title: '锁定',
           field: 'block',
-          minWidth: '100px',
+          width: '150px',
+          align: 'center',
           slots: {
             default: 'block_default',
           },
@@ -85,8 +91,9 @@ export default {
         {
           title: '操作',
           field: 'action',
-          minWidth: '180px',
+          width: '150px',
           fixed: 'right',
+          align: 'center',
           slots: {
             default: 'action_default',
           },
@@ -155,9 +162,6 @@ export default {
     handleEdit(record) {
       this.$refs.userForm.handleEdit(record)
     },
-    handleDelete(record) {
-      this.deleteUser(record.uid)
-    },
     handleOk() {
       this.searchName = ''
       this.search()
@@ -165,9 +169,9 @@ export default {
     handleCreate() {
       this.$refs.userForm.handleCreate()
     },
-    deleteUser(attrId) {
-      deleteUserById(attrId).then((res) => {
-        this.$message.success(`删除成功`)
+    deleteUser(uid) {
+      deleteUserById(uid).then((res) => {
+        this.$message.success(`删除成功！`)
         this.handleOk()
       })
     },
