@@ -17,6 +17,7 @@ class ErrFormat(CommonErrFormat):
     role_exists = "角色 {} 已经存在!"
     global_role_not_found = "全局角色 {} 不存在!"
     global_role_exists = "全局角色 {} 已经存在!"
+    user_role_delete_invalid = "删除用户角色, 请在 用户管理 页面操作!"
 
     resource_no_permission = "您没有资源: {} 的 {} 权限"
     admin_required = "需要管理员权限"
