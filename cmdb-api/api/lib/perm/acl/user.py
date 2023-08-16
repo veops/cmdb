@@ -39,8 +39,11 @@ class UserCRUD(object):
 
     @classmethod
     def add(cls, **kwargs):
-        existed = User.get_by(username=kwargs['username'], email=kwargs['email'])
+        existed = User.get_by(username=kwargs['username'])
         existed and abort(400, ErrFormat.user_exists.format(kwargs['username']))
+
+        existed = User.get_by(username=kwargs['email'])
+        existed and abort(400, ErrFormat.user_exists.format(kwargs['email']))
 
         kwargs['nickname'] = kwargs.get('nickname') or kwargs['username']
         kwargs['block'] = 0
@@ -103,7 +106,7 @@ class UserCRUD(object):
 
         origin = user.to_dict()
 
-        user.soft_delete()
+        user.delete()
 
         UserCache.clean(user)
 
