@@ -63,6 +63,7 @@ class AttributeView(APIView):
         current_app.logger.debug(params)
 
         attr_id = AttributeManager.add(**params)
+
         return self.jsonify(attr_id=attr_id)
 
     @args_validate(AttributeManager.cls)
@@ -72,8 +73,10 @@ class AttributeView(APIView):
         params["choice_value"] = choice_value
         current_app.logger.debug(params)
         AttributeManager().update(attr_id, **params)
+
         return self.jsonify(attr_id=attr_id)
 
     def delete(self, attr_id):
         attr_name = AttributeManager.delete(attr_id)
+
         return self.jsonify(message="attribute {0} deleted".format(attr_name))
