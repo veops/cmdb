@@ -285,10 +285,12 @@ class RoleCRUD(object):
         return role
 
     @classmethod
-    def delete_role(cls, rid):
+    def delete_role(cls, rid, force=False):
         from api.lib.perm.acl.acl import is_admin
 
         role = Role.get_by_id(rid) or abort(404, ErrFormat.role_not_found.format("rid={}".format(rid)))
+
+        not force and role.uid and abort(400, ErrFormat.user_role_delete_invalid)
 
         if not role.app_id and not is_admin():
             return abort(403, ErrFormat.admin_required)
@@ -301,18 +303,20 @@ class RoleCRUD(object):
 
         for i in RoleRelation.get_by(parent_id=rid, to_dict=False):
             child_ids.append(i.child_id)
-            i.soft_delete()
+            i.soft_delete(commit=False)
 
         for i in RoleRelation.get_by(child_id=rid, to_dict=False):
             parent_ids.append(i.parent_id)
-            i.soft_delete()
+            i.soft_delete(commit=False)
 
         role_permissions = []
         for i in RolePermission.get_by(rid=rid, to_dict=False):
             role_permissions.append(i.to_dict())
-            i.soft_delete()
+            i.soft_delete(commit=False)
 
-        role.soft_delete()
+        role.soft_delete(commit=False)
+
+        db.session.commit()
 
         role_rebuild.apply_async(args=(recursive_child_ids, role.app_id), queue=ACL_QUEUE)
 

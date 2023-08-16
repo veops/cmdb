@@ -8,6 +8,7 @@ from flask_login import current_user
 
 from api.extensions import db
 from api.lib.cmdb.cache import AttributeCache
+from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.const import CITypeOperateType
 from api.lib.cmdb.const import PermEnum, ResourceTypeEnum, RoleEnum
 from api.lib.cmdb.const import ValueTypeEnum
@@ -319,7 +320,12 @@ class AttributeManager(object):
         if CIType.get_by(unique_id=attr.id, first=True, to_dict=False) is not None:
             return abort(400, ErrFormat.attribute_is_unique_id)
 
-        if attr.uid and attr.uid != current_user.uid:
+        ref = CITypeAttribute.get_by(attr_id=_id, to_dict=False, first=True)
+        if ref is not None:
+            ci_type = CITypeCache.get(ref.type_id)
+            return abort(400, ErrFormat.attribute_is_ref_by_type.format(ci_type.alias))
+
+        if attr.uid != current_user.uid and not is_app_admin('cmdb'):
             return abort(403, ErrFormat.cannot_delete_attribute)
 
         if attr.is_choice:
@@ -330,9 +336,6 @@ class AttributeManager(object):
         AttributeCache.clean(attr)
 
         attr.soft_delete()
-
-        for i in CITypeAttribute.get_by(attr_id=_id, to_dict=False):
-            i.soft_delete()
 
         for i in PreferenceShowAttributes.get_by(attr_id=_id, to_dict=False):
             i.soft_delete()
