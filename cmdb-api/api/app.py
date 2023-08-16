@@ -6,7 +6,7 @@ import logging
 import os
 import sys
 from inspect import getmembers
-from json import JSONEncoder
+from flask.json.provider import DefaultJSONProvider
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask
@@ -65,7 +65,7 @@ class ReverseProxy(object):
         return self.app(environ, start_response)
 
 
-class MyJSONEncoder(JSONEncoder):
+class MyJSONEncoder(DefaultJSONProvider):
     def default(self, o):
         if isinstance(o, (decimal.Decimal, datetime.date, datetime.time)):
             return str(o)
@@ -93,7 +93,7 @@ def create_app(config_object="settings"):
     app = Flask(__name__.split(".")[0])
 
     app.config.from_object(config_object)
-    app.json_encoder = MyJSONEncoder
+    app.json = MyJSONEncoder(app)
     configure_logger(app)
     register_extensions(app)
     register_blueprints(app)
