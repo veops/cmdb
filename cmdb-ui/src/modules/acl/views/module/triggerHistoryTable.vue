@@ -238,7 +238,7 @@ export default {
                 item.changeDescription += str
               } else {
                 const str = ` 【 ${key} : 由 ${oldVal} 改为 ${newVal} 】 `
-                item.changeDescription += ` 【 ${key} : 由 ${oldVal} 改为 ${newVal} 】 `
+                item.changeDescription += str
               }
             }
           }
