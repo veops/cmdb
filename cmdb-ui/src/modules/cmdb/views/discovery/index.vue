@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { getDiscovery, deleteDiscovery, downloadADR } from '../../api/discovery'
+import { getDiscovery, deleteDiscovery } from '../../api/discovery'
 import DiscoveryCard from './discoveryCard.vue'
 import EditDrawer from './editDrawer.vue'
 export default {
