@@ -117,7 +117,7 @@ export default {
           const loginParams = { ...values }
           delete loginParams.username
           loginParams[!state.loginType ? 'email' : 'username'] = values.username
-          loginParams.password = appConfig.useEncryption?md5(values.password):values.password
+          loginParams.password = appConfig.useEncryption ? md5(values.password) : values.password
           Login(loginParams)
             .then((res) => this.loginSuccess(res))
             .finally(() => {
