@@ -66,7 +66,7 @@ import ModelRelationTable from './modules/modelRelationTable.vue'
 import { searchResourceType } from '@/modules/acl/api/resource'
 import { getCITypeGroupsConfig } from '@/modules/cmdb/api/ciTypeGroup'
 import { getCITypes } from '@/modules/cmdb/api/CIType'
-import { createRelation, deleteRelation, getCITypeChildren, getRelationTypes } from '@/modules/cmdb/api/CITypeRelation'
+import { createRelation, deleteRelation, getRelationTypes } from '@/modules/cmdb/api/CITypeRelation'
 export default {
   name: 'Index',
   components: {

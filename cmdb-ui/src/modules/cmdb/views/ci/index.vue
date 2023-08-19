@@ -550,7 +550,7 @@ export default {
           .then(() => {
             successNum += 1
           })
-          .catch((err) => {
+          .catch(() => {
             errorNum += 1
           })
           .finally(() => {
@@ -584,7 +584,7 @@ export default {
           .then(() => {
             successNum += 1
           })
-          .catch((err) => {
+          .catch(() => {
             errorNum += 1
           })
           .finally(() => {
@@ -685,7 +685,7 @@ export default {
             },
             onEnd: (params) => {
               // 由于开启了虚拟滚动，newIndex和oldIndex是虚拟的
-              const { newIndex, oldIndex, from, to } = params
+              const { newIndex, oldIndex } = params
               // 从tableDragClassName拿到colid
               const fromColid = this.tableDragClassName[oldIndex]
               const toColid = this.tableDragClassName[newIndex]

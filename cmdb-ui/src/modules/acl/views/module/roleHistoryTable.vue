@@ -287,7 +287,7 @@ export default {
                 item.description += str
               } else {
                 const str = ` 【 ${key} : 由 ${oldVal} 改为 ${newVal} 】 `
-                item.description += ` 【 ${key} : 由 ${oldVal} 改为 ${newVal} 】 `
+                item.description += str
               }
             }
           }
