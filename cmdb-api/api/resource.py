@@ -27,7 +27,7 @@ class APIView(Resource):
         return send_file(*args, **kwargs)
 
 
-API_PACKAGE = "api"
+API_PACKAGE = os.path.abspath(os.path.dirname(__file__))
 
 
 def register_resources(resource_path, rest_api):
