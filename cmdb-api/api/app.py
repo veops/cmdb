@@ -21,7 +21,6 @@ from api.models.acl import User
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir)
-API_PACKAGE = "api"
 
 
 @login_manager.user_loader
@@ -174,7 +173,7 @@ def register_commands(app):
     for root, _, files in os.walk(os.path.join(HERE, "commands")):
         for filename in files:
             if not filename.startswith("_") and filename.endswith("py"):
-                module_path = os.path.join(API_PACKAGE, root[root.index("commands"):])
+                module_path = os.path.join(HERE, root[root.index("commands"):])
                 if module_path not in sys.path:
                     sys.path.insert(1, module_path)
                 command = __import__(os.path.splitext(filename)[0])
