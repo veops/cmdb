@@ -4,7 +4,6 @@
 import requests
 from flask import abort
 from flask import current_app
-from flask import g
 from flask import request
 from flask import session
 from flask_login import current_user
@@ -161,7 +160,7 @@ class UserResetPasswordView(APIView):
             if app.name not in ('cas-server', 'acl'):
                 return abort(403, ErrFormat.invalid_request)
 
-        elif hasattr(g, 'user'):
+        elif hasattr(current_user, 'username'):
             if current_user.username != request.values['username']:
                 return abort(403, ErrFormat.invalid_request)
 
