@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """provide some sample data in database"""
-import uuid
 import random
+import uuid
 
-
+from api.lib.cmdb.ci import CIManager, CIRelationManager
+from api.lib.cmdb.ci_type import CITypeAttributeManager
+from api.models.acl import User
 from api.models.cmdb import (
     Attribute,
     CIType,
@@ -12,16 +14,12 @@ from api.models.cmdb import (
     CITypeRelation,
     RelationType
 )
-from api.models.acl import User
-
-from api.lib.cmdb.ci_type import CITypeAttributeManager
-from api.lib.cmdb.ci import CIManager, CIRelationManager
 
 
 def force_add_user():
-    from flask import g
-    if not getattr(g, "user", None):
-        g.user = User.query.first()
+    from flask_login import current_user, login_user
+    if not getattr(current_user, "username", None):
+        login_user(User.query.first())
 
 
 def init_attributes(num=1):
@@ -78,12 +76,12 @@ def init_relation_type(num=1):
 
 def init_ci_type_relation(num=1):
     result = []
-    ci_types = init_ci_types(num+1)
+    ci_types = init_ci_types(num + 1)
     relation_types = init_relation_type(num)
     for i in range(num):
         result.append(CITypeRelation.create(
             parent_id=ci_types[i].id,
-            child_id=ci_types[i+1].id,
+            child_id=ci_types[i + 1].id,
             relation_type_id=relation_types[i].id
         ))
     return result
