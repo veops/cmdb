@@ -594,7 +594,7 @@ export default {
 
         this.calcColumns()
         if (refreshType === 'refreshNumber') {
-          const promises = this.treeKeys.map((key, index) => {
+          this.treeKeys.map((key, index) => {
             statisticsCIRelation({
               root_ids: key.split('%')[0],
               level: this.treeKeys.length - index,
