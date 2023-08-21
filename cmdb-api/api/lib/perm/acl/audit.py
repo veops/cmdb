@@ -49,7 +49,6 @@ class AuditCRUD(object):
 
     @staticmethod
     def get_current_operate_uid(uid=None):
-
         user_id = uid or (getattr(current_user, 'uid', None)) or getattr(current_user, 'user_id', None)
 
         if has_request_context() and request.headers.get('X-User-Id'):
