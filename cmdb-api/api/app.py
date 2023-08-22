@@ -6,13 +6,13 @@ import logging
 import os
 import sys
 from inspect import getmembers
-from flask.json.provider import DefaultJSONProvider
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask
 from flask import jsonify, make_response
 from flask.blueprints import Blueprint
 from flask.cli import click
+from flask.json.provider import DefaultJSONProvider
 
 import api.views.entry
 from api.extensions import (bcrypt, cache, celery, cors, db, es, login_manager, migrate, rd)
@@ -173,9 +173,8 @@ def register_commands(app):
     for root, _, files in os.walk(os.path.join(HERE, "commands")):
         for filename in files:
             if not filename.startswith("_") and filename.endswith("py"):
-                module_path = os.path.join(HERE, root[root.index("commands"):])
-                if module_path not in sys.path:
-                    sys.path.insert(1, module_path)
+                if root not in sys.path:
+                    sys.path.insert(1, root)
                 command = __import__(os.path.splitext(filename)[0])
                 func_list = [o[0] for o in getmembers(command) if isinstance(o[1], click.core.Command)]
                 for func_name in func_list:

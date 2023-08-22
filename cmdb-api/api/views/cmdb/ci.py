@@ -106,6 +106,7 @@ class CIView(APIView):
                            _is_admin=request.values.pop('__is_admin', False),
                            **ci_dict)
         else:
+            request.values.pop('exist_policy', None)
             ci_id = manager.add(ci_type,
                                 exist_policy=ExistPolicy.REPLACE,
                                 _no_attribute_policy=_no_attribute_policy,
