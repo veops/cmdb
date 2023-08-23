@@ -27,7 +27,10 @@ from api.lib.decorator import kwargs_required
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import is_app_admin
 from api.models.cmdb import Attribute
+from api.models.cmdb import AutoDiscoveryCI
+from api.models.cmdb import AutoDiscoveryCIType
 from api.models.cmdb import CI
+from api.models.cmdb import CIFilterPerms
 from api.models.cmdb import CIType
 from api.models.cmdb import CITypeAttribute
 from api.models.cmdb import CITypeAttributeGroup
@@ -37,7 +40,9 @@ from api.models.cmdb import CITypeGroupItem
 from api.models.cmdb import CITypeRelation
 from api.models.cmdb import CITypeTrigger
 from api.models.cmdb import CITypeUniqueConstraint
+from api.models.cmdb import CustomDashboard
 from api.models.cmdb import PreferenceRelationView
+from api.models.cmdb import PreferenceSearchOption
 from api.models.cmdb import PreferenceShowAttributes
 from api.models.cmdb import PreferenceTreeView
 from api.models.cmdb import RelationType
@@ -198,19 +203,21 @@ class CITypeManager(object):
                     return abort(400, ErrFormat.ci_relation_view_exists_and_cannot_delete_type.format(rv.name))
 
         for item in CITypeRelation.get_by(parent_id=type_id, to_dict=False):
-            item.soft_delete()
+            item.soft_delete(commit=False)
 
         for item in CITypeRelation.get_by(child_id=type_id, to_dict=False):
-            item.soft_delete()
+            item.soft_delete(commit=False)
 
-        for item in PreferenceTreeView.get_by(type_id=type_id, to_dict=False):
-            item.soft_delete()
+        for table in [PreferenceTreeView, PreferenceShowAttributes, PreferenceSearchOption, CustomDashboard,
+                      CITypeGroupItem, CITypeAttributeGroup, CITypeAttribute, CITypeUniqueConstraint, CITypeTrigger,
+                      AutoDiscoveryCIType, CIFilterPerms]:
+            for item in table.get_by(type_id=type_id, to_dict=False):
+                item.soft_delete(commit=False)
 
-        for item in PreferenceShowAttributes.get_by(type_id=type_id, to_dict=False):
-            item.soft_delete()
+        for item in AutoDiscoveryCI.get_by(type_id=type_id, to_dict=False):
+            item.delete(commit=False)
 
-        for item in CITypeGroupItem.get_by(type_id=type_id, to_dict=False):
-            item.soft_delete()
+        db.session.commit()
 
         ci_type.soft_delete()
 
