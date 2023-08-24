@@ -40,6 +40,7 @@ from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import validate_permission
 from api.lib.utils import Lock
 from api.lib.utils import handle_arg_list
+from api.models.cmdb import AutoDiscoveryCI
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
 from api.models.cmdb import CITypeAttribute
@@ -464,6 +465,10 @@ class CIManager(object):
         for item in CIRelation.get_by(second_ci_id=ci_id, to_dict=False):
             ci_relation_delete.apply_async(args=(item.first_ci_id, item.second_ci_id), queue=CMDB_QUEUE)
             item.delete()
+
+        AutoDiscoveryCI.query.filter_by(
+            ci_id=ci_id).update({"is_accept": False, "accept_by": None, "accept_time": None})
+        db.session.commit()
 
         ci.delete()  # TODO: soft delete
 
