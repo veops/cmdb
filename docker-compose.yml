@@ -44,6 +44,7 @@ services:
       - |
         sed -i "s#USE_ACL = False#USE_ACL = True#g" settings.py
         /wait
+        flask db-setup
         gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000 -D
         flask cmdb-init-cache
         flask cmdb-init-acl
