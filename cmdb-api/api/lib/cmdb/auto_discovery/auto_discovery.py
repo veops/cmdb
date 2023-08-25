@@ -453,10 +453,12 @@ class AutoDiscoveryCICRUD(DBMixin):
 
         relation_adts = AutoDiscoveryCIType.get_by(type_id=adt.type_id, adr_id=None, to_dict=False)
         for r_adt in relation_adts:
-            if r_adt.relation and ci_id is not None:
-                ad_key, cmdb_key = None, {}
-                for ad_key in r_adt.relation:
-                    cmdb_key = r_adt.relation[ad_key]
+            if not r_adt.relation or ci_id is None:
+                continue
+            for ad_key in r_adt.relation:
+                if not adc.instance.get(ad_key):
+                    continue
+                cmdb_key = r_adt.relation[ad_key]
                 query = "_type:{},{}:{}".format(cmdb_key.get('type_name'), cmdb_key.get('attr_name'),
                                                 adc.instance.get(ad_key))
                 s = search(query)
