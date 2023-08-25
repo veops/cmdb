@@ -40,6 +40,7 @@ from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import validate_permission
 from api.lib.utils import Lock
 from api.lib.utils import handle_arg_list
+from api.models.cmdb import AutoDiscoveryCI
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
 from api.models.cmdb import CITypeAttribute
@@ -455,17 +456,22 @@ class CIManager(object):
         for attr_name in attr_names:
             value_table = TableMap(attr_name=attr_name).table
             for item in value_table.get_by(ci_id=ci_id, to_dict=False):
-                item.delete()
+                item.delete(commit=False)
 
         for item in CIRelation.get_by(first_ci_id=ci_id, to_dict=False):
             ci_relation_delete.apply_async(args=(item.first_ci_id, item.second_ci_id), queue=CMDB_QUEUE)
-            item.delete()
+            item.delete(commit=False)
 
         for item in CIRelation.get_by(second_ci_id=ci_id, to_dict=False):
             ci_relation_delete.apply_async(args=(item.first_ci_id, item.second_ci_id), queue=CMDB_QUEUE)
-            item.delete()
+            item.delete(commit=False)
 
-        ci.delete()  # TODO: soft delete
+        ad_ci = AutoDiscoveryCI.get_by(ci_id=ci_id, to_dict=False, first=True)
+        ad_ci and ad_ci.update(is_accept=False, accept_by=None, accept_time=None, filter_none=False, commit=False)
+
+        ci.delete(commit=False)  # TODO: soft delete
+
+        db.session.commit()
 
         AttributeHistoryManger.add(None, ci_id, [(None, OperateType.DELETE, ci_dict, None)], ci.type_id)
 
