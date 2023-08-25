@@ -1,7 +1,7 @@
 <template>
   <a-card :bordered="false">
     <div class="action-btn">
-      <a-button @click="handleCreate" type="primary" style="margin-bottom: 15px">新增关系类型</a-button>
+      <a-button @click="handleCreate" type="primary" style="margin-bottom: 15px;">新增关系类型</a-button>
     </div>
     <vxe-table
       ref="relationTypeTable"
@@ -20,17 +20,17 @@
         :edit-render="{ name: 'input', attrs: { type: 'text' }, events: { keyup: customCloseEdit } }"
       ></vxe-table-column>
       <vxe-table-column field="updateTime" title="更新时间">
-        <template #default="{ row }">
+        <template #default="{row}">
           {{ row.updated_at || row.created_at }}
         </template>
       </vxe-table-column>
       <vxe-table-column field="operation" title="操作" align="center">
-        <template #default="{ row }">
+        <template #default="{row}">
           <template>
-            <a><a-icon type="edit" @click="handleEdit(row)" /></a>
+            <a><a-icon type="edit" @click="handleEdit(row)"/></a>
             <a-divider type="vertical" />
             <a-popconfirm title="确认删除吗?" @confirm="handleDelete(row)" okText="是" cancelText="否">
-              <a :style="{ color: 'red' }"><a-icon type="delete" /></a>
+              <a :style="{ color: 'red' }"><a-icon type="delete"/></a>
             </a-popconfirm>
           </template>
         </template>
@@ -122,7 +122,6 @@ export default {
       if ($event.keyCode === 13) {
         const $table = this.$refs.relationTypeTable
         $table.clearActived()
-        this.handleEditClose({ row: value.row })
       }
     },
   },
