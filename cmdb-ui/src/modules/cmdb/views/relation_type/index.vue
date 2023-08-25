@@ -10,6 +10,9 @@
       highlight-hover-row
       :edit-config="{ trigger: 'manual', mode: 'row' }"
       @edit-closed="handleEditClose"
+      stripe
+      class="ops-stripe-table"
+      bordered
     >
       <vxe-table-column
         field="name"
