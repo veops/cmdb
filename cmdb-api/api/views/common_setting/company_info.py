@@ -16,15 +16,16 @@ class CompanyInfoView(APIView):
         return self.jsonify(CompanyInfoCRUD.get())
 
     def post(self):
-        info = CompanyInfoCRUD.get()
-        if info:
-            abort(400, ErrFormat.company_info_is_already_existed)
         data = {
             'info': {
                 **request.values
             }
         }
-        d = CompanyInfoCRUD.create(**data)
+        info = CompanyInfoCRUD.get()
+        if info:
+            d = CompanyInfoCRUD.update(info.get('id'), **data)
+        else:
+            d = CompanyInfoCRUD.create(**data)
         res = d.to_dict()
         return self.jsonify(res)
 
