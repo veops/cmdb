@@ -87,7 +87,7 @@ DEFAULT_PAGE_COUNT = 50
 
 # # permission
 WHITE_LIST = ["127.0.0.1"]
-USE_ACL = False
+USE_ACL = True
 
 # # elastic search
 ES_HOST = '127.0.0.1'
