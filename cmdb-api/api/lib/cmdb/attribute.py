@@ -8,6 +8,7 @@ from flask_login import current_user
 
 from api.extensions import db
 from api.lib.cmdb.cache import AttributeCache
+from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.const import CITypeOperateType
 from api.lib.cmdb.const import PermEnum, ResourceTypeEnum, RoleEnum
@@ -213,7 +214,11 @@ class AttributeManager(object):
         return attr.id
 
     @staticmethod
-    def _change_index(attr, old, new):
+    def _clean_ci_type_attributes_cache(attr_id):
+        for i in CITypeAttribute.get_by(attr_id=attr_id, to_dict=False):
+            CITypeAttributesCache.clean(i.type_id)
+
+    def _change_index(self, attr, old, new):
         from api.lib.cmdb.utils import TableMap
         from api.tasks.cmdb import batch_ci_cache
         from api.lib.cmdb.const import CMDB_QUEUE
@@ -309,6 +314,8 @@ class AttributeManager(object):
                                  change=dict(old=existed2, new=new))
 
         AttributeCache.clean(attr)
+
+        self._clean_ci_type_attributes_cache(_id)
 
         return attr.id
 
