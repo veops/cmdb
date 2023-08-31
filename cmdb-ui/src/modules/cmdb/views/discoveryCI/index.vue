@@ -13,14 +13,17 @@
           @click="clickSidebar(type.id)"
         >
           <span class="cmdb-adc-side-icon">
-            <ops-icon
-              :style="{
-                color: type.icon.split('$$')[1],
-                fontSize: '14px',
-              }"
-              v-if="type.icon"
-              :type="type.icon.split('$$')[0]"
-            />
+            <template v-if="type.icon">
+              <img v-if="type.icon.split('$$')[2]" :src="`/api/common-setting/v1/file/${type.icon.split('$$')[3]}`" />
+              <ops-icon
+                v-else
+                :style="{
+                  color: type.icon.split('$$')[1],
+                  fontSize: '14px',
+                }"
+                :type="type.icon.split('$$')[0]"
+              />
+            </template>
             <span :style="{ color: '#2f54eb' }" v-else>{{ type.name[0].toUpperCase() }}</span>
           </span>
           <span :title="type.alias || type.name" class="cmdb-adc-side-name">{{ type.alias || type.name }}</span>
@@ -57,7 +60,7 @@
           @checkbox-change="onSelectChange"
           @checkbox-all="onSelectChange"
           @checkbox-range-end="onSelectChange"
-          :checkbox-config="{reserve: true, highlight: true, range: true}"
+          :checkbox-config="{ reserve: true, highlight: true, range: true }"
           :sort-config="{ remote: false, trigger: 'cell' }"
         >
           <vxe-column align="center" type="checkbox" width="60"></vxe-column>
@@ -316,7 +319,7 @@ export default {
     align-items: center;
     justify-content: center;
     .cmdb-adc-side-icon {
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
       width: 20px;
@@ -325,6 +328,10 @@ export default {
       box-shadow: 0px 1px 2px rgba(47, 84, 235, 0.2);
       margin-right: 6px;
       background-color: #fff;
+      img {
+        max-height: 20px;
+        max-width: 20px;
+      }
     }
     .cmdb-adc-side-name {
       display: inline-block;
