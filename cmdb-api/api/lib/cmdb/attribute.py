@@ -92,8 +92,9 @@ class AttributeManager(object):
     def _del_choice_values(_id, value_type):
         choice_table = ValueTypeMap.choice.get(value_type)
 
-        db.session.query(choice_table).filter(choice_table.attr_id == _id).delete()
-        db.session.flush()
+        if choice_table is not None:
+            db.session.query(choice_table).filter(choice_table.attr_id == _id).delete()
+            db.session.flush()
 
     @classmethod
     def search_attributes(cls, name=None, alias=None, page=1, page_size=None):
@@ -296,7 +297,7 @@ class AttributeManager(object):
 
         if is_choice and choice_value:
             self.add_choice_values(attr.id, attr.value_type, choice_value)
-        elif not is_choice:
+        elif existed2['is_choice']:
             self._del_choice_values(attr.id, attr.value_type)
 
         try:
