@@ -40,14 +40,13 @@ module.exports = {
             default:
               return selector
           }
-        }
-      })
-    ]
+        },
+      }),
+    ],
   },
 
   chainWebpack: (config) => {
-    config.resolve.alias
-      .set('@$', resolve('src'))
+    config.resolve.alias.set('@$', resolve('src'))
 
     const svgRule = config.module.rule('svg')
     svgRule.uses.clear()
@@ -62,7 +61,7 @@ module.exports = {
       .use('file-loader')
       .loader('file-loader')
       .options({
-        name: 'assets/[name].[hash:8].[ext]'
+        name: 'assets/[name].[hash:8].[ext]',
       })
     /* svgRule.oneOf('inline')
       .resourceQuery(/inline/)
@@ -84,28 +83,36 @@ module.exports = {
       less: {
         modifyVars: {
           /* less 变量覆盖，用于自定义 ant design 主题 */
-
           /*
           'primary-color': '#F5222D',
           'link-color': '#F5222D',
           'border-radius-base': '4px',
           */
         },
-        javascriptEnabled: true
-      }
-    }
+        javascriptEnabled: true,
+      },
+    },
   },
 
   devServer: {
     disableHostCheck: true,
-    port: process.env.DEV_PORT || 8000
+    port: process.env.DEV_PORT || 8000,
+    proxy: {
+      '/api': {
+        pathRewrite: {
+          '^/api': '/api',
+        },
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      },
+    },
   },
 
   // disable source map in production
   productionSourceMap: false,
   lintOnSave: undefined,
   // babel-loader no-ignore node_modules/*
-  transpileDependencies: []
+  transpileDependencies: [],
 }
 
 function getAntdSerials(color) {
