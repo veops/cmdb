@@ -15,14 +15,29 @@
     >
       <span
         :style="{
-          display: 'inline-block',
+          display: 'flex',
           overflow: 'hidden',
           width: '100%',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
+          alignItems: 'center',
         }"
       >
-        <ops-icon :style="{ color: icon.split('$$')[1] }" v-if="icon" :type="icon.split('$$')[0]" />
+        <template v-if="icon">
+          <img
+            v-if="icon.split('$$')[2]"
+            :src="`/api/common-setting/v1/file/${icon.split('$$')[3]}`"
+            :style="{ maxHeight: '14px', maxWidth: '14px' }"
+          />
+          <ops-icon
+            v-else
+            :style="{
+              color: icon.split('$$')[1],
+              fontSize: '14px',
+            }"
+            :type="icon.split('$$')[0]"
+          />
+        </template>
         <span
           :style="{
             display: 'inline-block',
@@ -38,7 +53,7 @@
           v-else
         >{{ ciTypeName ? ciTypeName[0].toUpperCase() : 'i' }}</span
         >
-        {{ this.title }}
+        <span :style="{ marginLeft: '5px' }">{{ this.title }}</span>
       </span>
       <a-icon :style="{ fontSize: '10px' }" v-if="childLength && !isLeaf" :type="switchIcon"></a-icon>
     </div>
