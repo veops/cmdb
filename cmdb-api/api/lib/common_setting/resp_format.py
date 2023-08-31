@@ -54,3 +54,4 @@ class ErrFormat(CommonErrFormat):
     email_is_required = "邮箱不能为空"
     email_format_error = "邮箱格式错误"
 
+    common_data_not_found = "ID {} 找不到记录"
