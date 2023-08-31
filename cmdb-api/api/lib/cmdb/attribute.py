@@ -296,7 +296,7 @@ class AttributeManager(object):
 
         if is_choice and choice_value:
             self.add_choice_values(attr.id, attr.value_type, choice_value)
-        elif is_choice:
+        elif not is_choice:
             self._del_choice_values(attr.id, attr.value_type)
 
         try:
