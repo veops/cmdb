@@ -80,3 +80,10 @@ class InternalMessage(Model):
     category = db.Column(db.VARCHAR(128), nullable=False)
     message_data = db.Column(db.JSON, nullable=True)
     employee_id = db.Column(db.Integer, db.ForeignKey('common_employee.employee_id'), comment='ID')
+
+
+class CommonData(Model):
+    __table_name__ = 'common_data'
+
+    data_type = db.Column(db.VARCHAR(255), default='')
+    data = db.Column(db.JSON)
