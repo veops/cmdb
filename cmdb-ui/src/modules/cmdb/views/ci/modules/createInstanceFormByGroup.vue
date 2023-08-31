@@ -1,6 +1,6 @@
 <template>
   <a-form :form="form">
-    <a-divider style="font-size:14px;margin:14px 0;font-weight:700;">{{ group.name || '其他' }}</a-divider>
+    <a-divider style="font-size: 14px; margin: 14px 0; font-weight: 700">{{ group.name || '其他' }}</a-divider>
     <a-row :gutter="24" align="top" type="flex">
       <a-col
         :span="12"
@@ -37,12 +37,19 @@
               :key="'New_' + attr.name + choice_idx"
               v-for="(choice, choice_idx) in attr.choice_value"
             >
-              <span :style="choice[1] ? choice[1].style || {} : {}">
-                <ops-icon
-                  :style="{ color: choice[1].icon.color }"
-                  v-if="choice[1] && choice[1].icon && choice[1].icon.name"
-                  :type="choice[1].icon.name"
-                />
+              <span :style="{ ...(choice[1] ? choice[1].style : {}), display: 'inline-flex', alignItems: 'center' }">
+                <template v-if="choice[1] && choice[1].icon && choice[1].icon.name">
+                  <img
+                    v-if="choice[1].icon.id && choice[1].icon.url"
+                    :src="`/api/common-setting/v1/file/${choice[1].icon.url}`"
+                    :style="{ maxHeight: '13px', maxWidth: '13px', marginRight: '5px' }"
+                  />
+                  <ops-icon
+                    v-else
+                    :style="{ color: choice[1].icon.color, marginRight: '5px' }"
+                    :type="choice[1].icon.name"
+                  />
+                </template>
                 {{ choice[0] }}
               </span>
             </a-select-option>

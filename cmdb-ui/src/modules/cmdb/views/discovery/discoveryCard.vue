@@ -10,7 +10,12 @@
     <div class="discovery-bottom"></div>
     <div class="discovery-top">
       <div class="discovery-header">
-        <ops-icon :type="icon.name || 'caise-chajian'" :style="{ fontSize: '30px', color: icon.color }"></ops-icon>
+        <img
+          v-if="icon.id && icon.url"
+          :src="`/api/common-setting/v1/file/${icon.url}`"
+          :style="{ maxHeight: '30px', maxWidth: '30px' }"
+        />
+        <ops-icon v-else :type="icon.name || 'caise-chajian'" :style="{ fontSize: '30px', color: icon.color }" />
         <span :title="rule.name">{{ rule.name }}</span>
       </div>
       <template v-if="!isSelected">

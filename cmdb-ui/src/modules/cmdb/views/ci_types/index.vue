@@ -113,14 +113,20 @@
                       style="width: 17px; height: 17px; display: none; position: absolute; left: 15px; top: 5px"
                     />
                     <span class="ci-types-left-detail-icon">
-                      <ops-icon
-                        :style="{
-                          color: ci.icon.split('$$')[1],
-                          fontSize: '14px',
-                        }"
-                        v-if="ci.icon"
-                        :type="ci.icon.split('$$')[0]"
-                      />
+                      <template v-if="ci.icon">
+                        <img
+                          v-if="ci.icon.split('$$')[2]"
+                          :src="`/api/common-setting/v1/file/${ci.icon.split('$$')[3]}`"
+                        />
+                        <ops-icon
+                          v-else
+                          :style="{
+                            color: ci.icon.split('$$')[1],
+                            fontSize: '14px',
+                          }"
+                          :type="ci.icon.split('$$')[0]"
+                        />
+                      </template>
                       <span :style="{ color: '#2f54eb' }" v-else>{{ ci.name[0].toUpperCase() }}</span>
                     </span>
                   </div>
@@ -204,7 +210,7 @@
               :label="item.alias || item.name"
             >
               <span> {{ item.alias || item.name }}</span>
-              <span :title="item.name" style="font-size: 10px; color: #afafaf"> {{ item.name }}</span>
+              <span :title="item.name" style="font-size:10px;color:#afafaf;"> {{ item.name }}</span>
             </el-option>
             <a-divider :style="{ margin: '5px 0' }" />
             <div :style="{ textAlign: 'right' }">
@@ -235,7 +241,7 @@
               :label="item.alias || item.name"
             >
               <span> {{ item.alias || item.name }}</span>
-              <span :title="item.name" style="font-size: 10px; color: #afafaf"> {{ item.name }}</span>
+              <span :title="item.name" style="font-size:10px;color:#afafaf;"> {{ item.name }}</span>
             </el-option>
           </el-select>
           <a-divider type="vertical" />
@@ -533,21 +539,20 @@ export default {
       e.preventDefault()
       this.form.validateFields(async (err, values) => {
         if (!err) {
-          // eslint-disable-next-line no-console
-          console.log('Received values of form: ', values)
-          const icon = this.$refs.iconArea.getIcon()
           this.loading = true
           if (values.default_order_attr && this.default_order_asc === '2') {
             values.default_order_attr = `-${values.default_order_attr}`
           }
+          const _icon = this.$refs.iconArea.getIcon()
+          const icon =
+            _icon && _icon.name ? `${_icon.name}$$${_icon.color || ''}$$${_icon.id || ''}$$${_icon.url || ''}` : ''
           if (values.id) {
             await this.updateCIType(values.id, {
               ...values,
-              icon: icon && icon.name ? `${icon.name}$$${icon.color || ''}` : '',
+              icon,
             })
           } else {
-            await this.createCIType({ ...values, icon: icon && icon.name ? `${icon.name}$$${icon.color || ''}` : '' })
-            // todo 把改ci 类型绑定在当前group下
+            await this.createCIType({ ...values, icon })
           }
         }
       })
@@ -731,6 +736,8 @@ export default {
               ? {
                   name: record.icon.split('$$')[0] || '',
                   color: record.icon.split('$$')[1] || '',
+                  id: record.icon.split('$$')[2] ? Number(record.icon.split('$$')[2]) : null,
+                  url: record.icon.split('$$')[3] || '',
                 }
               : {}
           )
@@ -828,7 +835,7 @@ export default {
         margin-left: auto;
       }
       .ci-types-left-detail-icon {
-        display: inline-flex;
+        display: flex;
         align-items: center;
         justify-content: center;
         width: 20px;
@@ -837,6 +844,10 @@ export default {
         box-shadow: 0px 1px 2px rgba(47, 84, 235, 0.2);
         margin-right: 6px;
         background-color: #fff;
+        img {
+          max-height: 20px;
+          max-width: 20px;
+        }
       }
       &:hover {
         background-color: #e1efff;
