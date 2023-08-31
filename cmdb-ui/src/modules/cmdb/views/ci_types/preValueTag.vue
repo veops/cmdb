@@ -102,8 +102,17 @@
       "
     >
       <span :style="{ cursor: disabled ? 'default' : 'move' }">
-        <ops-icon v-if="icon.name" :type="icon.name" :style="{ color: icon.color || '#595959' }" />
-        {{ item[0] }}
+        <img
+          v-if="icon.id && icon.url"
+          :src="`/api/common-setting/v1/file/${icon.url}`"
+          :style="{ maxHeight: '12px', maxWidth: '12px', marginRight: '5px' }"
+        />
+        <ops-icon
+          v-else-if="icon.name"
+          :type="icon.name"
+          :style="{ marginRight: '5px', color: icon.color || '#595959' }"
+        />
+        <span>{{ item[0] }}</span>
       </span>
       <a
         class="pre-value-tag-dropdown"
@@ -240,6 +249,10 @@ export default {
   border-radius: 4px;
   font-size: 12px;
   position: relative;
+  > span {
+    display: flex;
+    align-items: center;
+  }
   &:hover .pre-value-tag-dropdown-icon {
     display: inline !important;
   }

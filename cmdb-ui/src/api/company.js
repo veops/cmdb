@@ -20,13 +20,7 @@ export function putCompanyInfo(id, parameter) {
     data: parameter,
   })
 }
-export function postImageFile(parameter) {
-  return axios({
-    url: '/common-setting/v1/file',
-    method: 'post',
-    data: parameter,
-  })
-}
+
 export function getDepartmentList(params) {
   // ?department_parent_id=-1 查询第一级部门，下面的id根据实际的传
   return axios({

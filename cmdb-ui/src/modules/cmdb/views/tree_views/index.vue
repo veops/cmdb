@@ -63,14 +63,21 @@
                   }"
                 >
                   <span class="tree-views-left-header-icon">
-                    <ops-icon
-                      :style="{
-                        color: ciType.icon.split('$$')[1],
-                        fontSize: '14px',
-                      }"
-                      v-if="ciType.icon"
-                      :type="ciType.icon.split('$$')[0]"
-                    />
+                    <template v-if="ciType.icon">
+                      <img
+                        v-if="ciType.icon.split('$$')[2]"
+                        :src="`/api/common-setting/v1/file/${ciType.icon.split('$$')[3]}`"
+                        :style="{ maxHeight: '14px', maxWidth: '14px' }"
+                      />
+                      <ops-icon
+                        v-else
+                        :style="{
+                          color: ciType.icon.split('$$')[1],
+                          fontSize: '14px',
+                        }"
+                        :type="ciType.icon.split('$$')[0]"
+                      />
+                    </template>
                     <span :style="{ color: '#2f54eb' }" v-else>{{ ciType.name[0].toUpperCase() }}</span>
                   </span>
                   <span class="tree-views-left-header-name">{{ ciType.alias || ciType.name }}</span>
@@ -203,12 +210,21 @@
                       :key="'edit_' + col.field + idx"
                       v-for="(choice, idx) in col.filters"
                     >
-                      <span :style="choice[1] ? choice[1].style || {} : {}">
-                        <ops-icon
-                          :style="{ color: choice[1].icon.color }"
-                          v-if="choice[1] && choice[1].icon && choice[1].icon.name"
-                          :type="choice[1].icon.name"
-                        />
+                      <span
+                        :style="{ ...(choice[1] ? choice[1].style : {}), display: 'inline-flex', alignItems: 'center' }"
+                      >
+                        <template v-if="choice[1] && choice[1].icon && choice[1].icon.name">
+                          <img
+                            v-if="choice[1].icon.id && choice[1].icon.url"
+                            :src="`/api/common-setting/v1/file/${choice[1].icon.url}`"
+                            :style="{ maxHeight: '13px', maxWidth: '13px', marginRight: '5px' }"
+                          />
+                          <ops-icon
+                            v-else
+                            :style="{ color: choice[1].icon.color, marginRight: '5px' }"
+                            :type="choice[1].icon.name"
+                          />
+                        </template>
                         {{ choice[0] }}
                       </span>
                     </a-select-option>
@@ -234,11 +250,20 @@
                           padding: '1px 5px',
                           margin: '2px',
                           ...getChoiceValueStyle(col, value),
+                          display: 'inline-flex',
+                          alignItems: 'center',
                         }"
-                      ><ops-icon
-                        :style="{ color: getChoiceValueIcon(col, value).color }"
-                        :type="getChoiceValueIcon(col, value).name"
-                      />{{ value }}</span
+                      >
+                        <img
+                          v-if="getChoiceValueIcon(col, value).id && getChoiceValueIcon(col, value).url"
+                          :src="`/api/common-setting/v1/file/${getChoiceValueIcon(col, value).url}`"
+                          :style="{ maxHeight: '13px', maxWidth: '13px', marginRight: '5px' }"
+                        />
+                        <ops-icon
+                          v-else
+                          :style="{ color: getChoiceValueIcon(col, value).color, marginRight: '5px' }"
+                          :type="getChoiceValueIcon(col, value).name"
+                        />{{ value }}</span
                       >
                     </template>
                     <span
@@ -248,10 +273,18 @@
                         padding: '1px 5px',
                         margin: '2px 0',
                         ...getChoiceValueStyle(col, row[col.field]),
+                        display: 'inline-flex',
+                        alignItems: 'center',
                       }"
                     >
+                      <img
+                        v-if="getChoiceValueIcon(col, row[col.field]).id && getChoiceValueIcon(col, row[col.field]).url"
+                        :src="`/api/common-setting/v1/file/${getChoiceValueIcon(col, row[col.field]).url}`"
+                        :style="{ maxHeight: '13px', maxWidth: '13px', marginRight: '5px' }"
+                      />
                       <ops-icon
-                        :style="{ color: getChoiceValueIcon(col, row[col.field]).color }"
+                        v-else
+                        :style="{ color: getChoiceValueIcon(col, row[col.field]).color, marginRight: '5px' }"
                         :type="getChoiceValueIcon(col, row[col.field]).name"
                       />{{ row[col.field] }}</span
                     >

@@ -222,6 +222,9 @@ export default {
     renderIcon({ icon, selectedIcon, customIcon = undefined, name = undefined, typeId = undefined, routeName }) {
       if (typeId) {
         if (customIcon) {
+          if (customIcon.split('$$')[2]) {
+            return <img style={{ maxHeight: '14px', maxWidth: '14px', marginRight: '10px' }} src={`/api/common-setting/v1/file/${customIcon.split('$$')[3]}`}></img >
+          }
           return <ops-icon
             style={{
               color: customIcon.split('$$')[1],
