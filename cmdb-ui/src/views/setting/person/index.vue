@@ -51,7 +51,7 @@
                 :customRequest="customRequest"
                 :before-upload="beforeUpload"
                 :style="{ width: '310px', height: '100px' }"
-                accept="png,jpg,jpeg"
+                accept=".svg,.png,.jpg,.jpeg"
               >
                 <a-button type="primary" ghost size="small">更换头像</a-button>
               </a-upload>
@@ -133,7 +133,8 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import { getAllDepartmentList, postImageFile } from '@/api/company'
+import { getAllDepartmentList } from '@/api/company'
+import { postImageFile } from '@/api/file'
 import {
   getEmployeeList,
   getEmployeeByUid,

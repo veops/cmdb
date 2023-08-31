@@ -123,7 +123,8 @@
 </template>
 
 <script>
-import { getCompanyInfo, postCompanyInfo, putCompanyInfo, postImageFile } from '@/api/company'
+import { getCompanyInfo, postCompanyInfo, putCompanyInfo } from '@/api/company'
+import { postImageFile } from '@/api/file'
 import { mapMutations, mapState } from 'vuex'
 import SpanTitle from '../components/spanTitle.vue'
 import EditImage from '../components/EditImage.vue'

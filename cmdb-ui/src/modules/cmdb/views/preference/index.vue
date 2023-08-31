@@ -47,15 +47,21 @@
             }"
             :style="{ width: '30px', height: '30px', marginRight: '10px' }"
           >
-            <ops-icon
-              v-if="ciType.icon"
-              :style="{
-                overflow: 'hidden',
-                color: ciType.icon.split('$$')[1] || '',
-                fontSize: '26px',
-              }"
-              :type="ciType.icon.split('$$')[0]"
-            />
+            <template v-if="ciType.icon">
+              <img
+                v-if="ciType.icon.split('$$')[2]"
+                :src="`/api/common-setting/v1/file/${ciType.icon.split('$$')[3]}`"
+                :style="{ maxHeight: '30px', maxWidth: '30px' }"
+              />
+              <ops-icon
+                v-else
+                :style="{
+                  color: ciType.icon.split('$$')[1],
+                  fontSize: '14px',
+                }"
+                :type="ciType.icon.split('$$')[0]"
+              />
+            </template>
             <span v-else :style="{ fontSize: '20px' }">{{ ciType.name[0].toUpperCase() }}</span>
           </div>
           <span class="cmdb-preference-group-content-title">{{ ciType.alias || ciType.name }}</span>
@@ -96,11 +102,21 @@
                     'cmdb-preference-avatar-noicon-is_subscribed': !item.icon && item.is_subscribed,
                   }"
                 >
-                  <ops-icon
-                    v-if="item.icon"
-                    :style="{ overflow: 'hidden', color: item.icon.split('$$')[1] || '', fontSize: '32px' }"
-                    :type="item.icon.split('$$')[0]"
-                  />
+                  <template v-if="item.icon">
+                    <img
+                      v-if="item.icon.split('$$')[2]"
+                      :src="`/api/common-setting/v1/file/${item.icon.split('$$')[3]}`"
+                      :style="{ maxHeight: '30px', maxWidth: '30px' }"
+                    />
+                    <ops-icon
+                      v-else
+                      :style="{
+                        color: item.icon.split('$$')[1],
+                        fontSize: '14px',
+                      }"
+                      :type="item.icon.split('$$')[0]"
+                    />
+                  </template>
                   <span v-else>{{ item.name[0].toUpperCase() }}</span>
                 </div>
                 <span class="cmdb-preference-title" :title="item.alias || item.name">
@@ -536,7 +552,7 @@ export default {
   }
 
   .cmdb-preference-avatar {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     width: 40px;

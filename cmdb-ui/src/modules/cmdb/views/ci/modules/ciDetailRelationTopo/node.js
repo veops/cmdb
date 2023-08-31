@@ -15,7 +15,11 @@ class BaseNode extends TreeNode {
             .attr('id', opts.id)
         let icon
         if (opts.options.icon) {
-            icon = $(`<svg class="icon" style="color:${opts.options.icon.split('$$')[1]}" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false" class=""><use data-v-5bd421da="" xlink:href="#${opts.options.icon.split('$$')[0]}"></use></svg>`)
+            if (opts.options.icon.split('$$')[2]) {
+                icon = $(`<img style="max-width:16px;max-height:16px;" src="/api/common-setting/v1/file/${opts.options.icon.split('$$')[3]}" />`)
+            } else {
+                icon = $(`<svg class="icon" style="color:${opts.options.icon.split('$$')[1]}" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false" class=""><use data-v-5bd421da="" xlink:href="#${opts.options.icon.split('$$')[0]}"></use></svg>`)
+            }
         } else {
             icon = $(`<span class="icon icon-default">${opts.options.name[0].toUpperCase()}</span>`)
         }
