@@ -9,7 +9,8 @@ from inspect import getmembers
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask
-from flask import jsonify, make_response
+from flask import jsonify
+from flask import make_response
 from flask.blueprints import Blueprint
 from flask.cli import click
 from flask.json.provider import DefaultJSONProvider

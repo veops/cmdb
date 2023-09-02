@@ -5,7 +5,9 @@ from flask import abort
 from flask import current_app
 
 from api.extensions import db
-from api.lib.perm.acl.audit import AuditCRUD, AuditOperateType, AuditScope
+from api.lib.perm.acl.audit import AuditCRUD
+from api.lib.perm.acl.audit import AuditOperateType
+from api.lib.perm.acl.audit import AuditScope
 from api.lib.perm.acl.cache import ResourceCache
 from api.lib.perm.acl.cache import ResourceGroupCache
 from api.lib.perm.acl.cache import UserCache
@@ -102,8 +104,8 @@ class ResourceTypeCRUD(object):
 
     @classmethod
     def delete(cls, rt_id):
-        rt = ResourceType.get_by_id(rt_id) or \
-             abort(404, ErrFormat.resource_type_not_found.format("id={}".format(rt_id)))
+        rt = ResourceType.get_by_id(rt_id) or abort(
+            404, ErrFormat.resource_type_not_found.format("id={}".format(rt_id)))
 
         Resource.get_by(resource_type_id=rt_id) and abort(400, ErrFormat.resource_type_cannot_delete)
 
@@ -165,8 +167,8 @@ class ResourceGroupCRUD(object):
 
     @staticmethod
     def add(name, type_id, app_id, uid=None):
-        ResourceGroup.get_by(name=name, resource_type_id=type_id, app_id=app_id) and \
-        abort(400, ErrFormat.resource_group_exists.format(name))
+        ResourceGroup.get_by(name=name, resource_type_id=type_id, app_id=app_id) and abort(
+            400, ErrFormat.resource_group_exists.format(name))
         rg = ResourceGroup.create(name=name, resource_type_id=type_id, app_id=app_id, uid=uid)
 
         AuditCRUD.add_resource_log(app_id, AuditOperateType.create,
@@ -175,8 +177,8 @@ class ResourceGroupCRUD(object):
 
     @staticmethod
     def update(rg_id, items):
-        rg = ResourceGroup.get_by_id(rg_id) or \
-             abort(404, ErrFormat.resource_group_not_found.format("id={}".format(rg_id)))
+        rg = ResourceGroup.get_by_id(rg_id) or abort(
+            404, ErrFormat.resource_group_not_found.format("id={}".format(rg_id)))
 
         existed = ResourceGroupItems.get_by(group_id=rg_id, to_dict=False)
         existed_ids = [i.resource_id for i in existed]
@@ -196,8 +198,8 @@ class ResourceGroupCRUD(object):
 
     @staticmethod
     def delete(rg_id):
-        rg = ResourceGroup.get_by_id(rg_id) or \
-             abort(404, ErrFormat.resource_group_not_found.format("id={}".format(rg_id)))
+        rg = ResourceGroup.get_by_id(rg_id) or abort(
+            404, ErrFormat.resource_group_not_found.format("id={}".format(rg_id)))
 
         origin = rg.to_dict()
         rg.soft_delete()
@@ -266,8 +268,8 @@ class ResourceCRUD(object):
     def add(cls, name, type_id, app_id, uid=None):
         type_id = cls._parse_resource_type_id(type_id, app_id)
 
-        Resource.get_by(name=name, resource_type_id=type_id, app_id=app_id) and \
-        abort(400, ErrFormat.resource_exists.format(name))
+        Resource.get_by(name=name, resource_type_id=type_id, app_id=app_id) and abort(
+            400, ErrFormat.resource_exists.format(name))
 
         r = Resource.create(name=name, resource_type_id=type_id, app_id=app_id, uid=uid)
 
