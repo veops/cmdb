@@ -9,7 +9,9 @@ from flask import abort
 from flask_login import current_user
 
 from api.extensions import db
-from api.lib.perm.acl.audit import AuditCRUD, AuditOperateType, AuditScope
+from api.lib.perm.acl.audit import AuditCRUD
+from api.lib.perm.acl.audit import AuditOperateType
+from api.lib.perm.acl.audit import AuditScope
 from api.lib.perm.acl.cache import UserCache
 from api.lib.perm.acl.resp_format import ErrFormat
 from api.lib.perm.acl.role import RoleCRUD
@@ -49,11 +51,9 @@ class UserCRUD(object):
         kwargs['block'] = 0
         kwargs['key'], kwargs['secret'] = cls.gen_key_secret()
 
-        user_employee = db.session.query(User).filter(User.deleted.is_(False)).order_by(
-            User.employee_id.desc()).first()
+        user_employee = db.session.query(User).filter(User.deleted.is_(False)).order_by(User.employee_id.desc()).first()
 
-        biggest_employee_id = int(float(user_employee.employee_id)) \
-            if user_employee is not None else 0
+        biggest_employee_id = int(float(user_employee.employee_id)) if user_employee is not None else 0
 
         kwargs['employee_id'] = '{0:04d}'.format(biggest_employee_id + 1)
         user = User.create(**kwargs)

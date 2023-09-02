@@ -11,7 +11,8 @@ from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci import CIManager
 from api.lib.cmdb.ci import CIRelationManager
 from api.lib.cmdb.const import ExistPolicy
-from api.lib.cmdb.const import ResourceTypeEnum, PermEnum
+from api.lib.cmdb.const import PermEnum
+from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RetKey
 from api.lib.cmdb.perms import has_perm_for_ci
 from api.lib.cmdb.search import SearchError
