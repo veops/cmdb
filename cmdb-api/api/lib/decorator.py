@@ -55,8 +55,8 @@ def args_validate(model_cls, exclude_args=None):
                     if exclude_args and arg in exclude_args:
                         continue
 
-                    if attr.type.python_type == str and attr.type.length and \
-                            len(request.values[arg] or '') > attr.type.length:
+                    if attr.type.python_type == str and attr.type.length and (
+                            len(request.values[arg] or '') > attr.type.length):
 
                         return abort(400, CommonErrFormat.argument_str_length_limit.format(arg, attr.type.length))
                     elif attr.type.python_type in (int, float) and request.values[arg]:

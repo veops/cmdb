@@ -16,7 +16,9 @@ from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.const import CITypeOperateType
 from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import ConstraintEnum
-from api.lib.cmdb.const import PermEnum, ResourceTypeEnum, RoleEnum
+from api.lib.cmdb.const import PermEnum
+from api.lib.cmdb.const import ResourceTypeEnum
+from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.cmdb.history import CITypeHistoryManager
 from api.lib.cmdb.relation_type import RelationTypeManager
@@ -60,6 +62,7 @@ class CITypeManager(object):
     @staticmethod
     def get_name_by_id(type_id):
         ci_type = CITypeCache.get(type_id)
+
         return ci_type and ci_type.name
 
     @staticmethod
@@ -71,7 +74,7 @@ class CITypeManager(object):
     @staticmethod
     def get_ci_types(type_name=None):
         resources = None
-        if current_app.config.get('USE_ACL') and not is_app_admin():
+        if current_app.config.get('USE_ACL') and not is_app_admin('cmdb'):
             resources = set([i.get('name') for i in ACLManager().get_resources("CIType")])
 
         ci_types = CIType.get_by() if type_name is None else CIType.get_by_like(name=type_name)
@@ -110,9 +113,6 @@ class CITypeManager(object):
     @classmethod
     @kwargs_required("name")
     def add(cls, **kwargs):
-        from api.lib.cmdb.const import L_TYPE
-        if L_TYPE and len(CIType.get_by()) > L_TYPE * 2:
-            return abort(400, ErrFormat.limit_ci_type.format(L_TYPE * 2))
 
         unique_key = kwargs.pop("unique_key", None)
         unique_key = AttributeCache.get(unique_key) or abort(404, ErrFormat.unique_key_not_define)
@@ -184,6 +184,7 @@ class CITypeManager(object):
     def set_enabled(cls, type_id, enabled=True):
         ci_type = cls.check_is_existed(type_id)
         ci_type.update(enabled=enabled)
+
         return type_id
 
     @classmethod
@@ -268,6 +269,7 @@ class CITypeGroupManager(object):
     @staticmethod
     def add(name):
         CITypeGroup.get_by(name=name, first=True) and abort(400, ErrFormat.ci_type_group_exists.format(name))
+
         return CITypeGroup.create(name=name)
 
     @staticmethod
@@ -354,6 +356,7 @@ class CITypeAttributeManager(object):
                 attr_dict.pop('choice_web_hook', None)
 
             result.append(attr_dict)
+
         return result
 
     @staticmethod
@@ -541,6 +544,7 @@ class CITypeRelationManager(object):
         ci_type_dict["attributes"] = CITypeAttributeManager.get_attributes_by_type_id(ci_type_dict["id"])
         ci_type_dict["relation_type"] = relation_inst.relation_type.name
         ci_type_dict["constraint"] = relation_inst.constraint
+
         return ci_type_dict
 
     @classmethod
@@ -599,8 +603,8 @@ class CITypeRelationManager(object):
 
     @classmethod
     def delete(cls, _id):
-        ctr = CITypeRelation.get_by_id(_id) or \
-              abort(404, ErrFormat.ci_type_relation_not_found.format("id={}".format(_id)))
+        ctr = (CITypeRelation.get_by_id(_id) or
+               abort(404, ErrFormat.ci_type_relation_not_found.format("id={}".format(_id))))
         ctr.soft_delete()
 
         CITypeHistoryManager.add(CITypeOperateType.DELETE_RELATION, ctr.parent_id,
@@ -654,6 +658,7 @@ class CITypeAttributeGroupManager(object):
         :param name:
         :param group_order: group order
         :param attr_order:
+        :param is_update:
         :return:
         """
         existed = CITypeAttributeGroup.get_by(type_id=type_id, name=name, first=True, to_dict=False)
@@ -694,8 +699,8 @@ class CITypeAttributeGroupManager(object):
 
     @staticmethod
     def delete(group_id):
-        group = CITypeAttributeGroup.get_by_id(group_id) \
-                or abort(404, ErrFormat.ci_type_attribute_group_not_found.format("id={}".format(group_id)))
+        group = (CITypeAttributeGroup.get_by_id(group_id) or
+                 abort(404, ErrFormat.ci_type_attribute_group_not_found.format("id={}".format(group_id))))
         group.soft_delete()
 
         items = CITypeAttributeGroupItem.get_by(group_id=group_id, to_dict=False)
@@ -964,8 +969,8 @@ class CITypeTemplateManager(object):
             rule['uid'] = current_user.uid
             try:
                 AutoDiscoveryCITypeCRUD.add(**rule)
-            except:
-                pass
+            except Exception as e:
+                current_app.logger.warning("import auto discovery rules failed: {}".format(e))
 
     def import_template(self, tpt):
         import time
@@ -1124,8 +1129,8 @@ class CITypeTriggerManager(object):
 
     @staticmethod
     def update(_id, notify):
-        existed = CITypeTrigger.get_by_id(_id) or \
-                  abort(404, ErrFormat.ci_type_trigger_not_found.format("id={}".format(_id)))
+        existed = (CITypeTrigger.get_by_id(_id) or
+                   abort(404, ErrFormat.ci_type_trigger_not_found.format("id={}".format(_id))))
 
         existed2 = existed.to_dict()
         new = existed.update(notify=notify)
@@ -1139,8 +1144,8 @@ class CITypeTriggerManager(object):
 
     @staticmethod
     def delete(_id):
-        existed = CITypeTrigger.get_by_id(_id) or \
-                  abort(404, ErrFormat.ci_type_trigger_not_found.format("id={}".format(_id)))
+        existed = (CITypeTrigger.get_by_id(_id) or
+                   abort(404, ErrFormat.ci_type_trigger_not_found.format("id={}".format(_id))))
 
         existed.soft_delete()
 
@@ -1163,16 +1168,16 @@ class CITypeTriggerManager(object):
 
         result = []
         for v in values:
-            if isinstance(v.value, (datetime.date, datetime.datetime)) and \
-                    (v.value - delta_time).strftime('%Y%m%d') == now.strftime("%Y%m%d"):
+            if (isinstance(v.value, (datetime.date, datetime.datetime)) and
+                    (v.value - delta_time).strftime('%Y%m%d') == now.strftime("%Y%m%d")):
                 result.append(v)
 
         return result
 
     @staticmethod
     def trigger_notify(trigger, ci):
-        if trigger.notify.get('notify_at') == datetime.datetime.now().strftime("%H:%M") or \
-                not trigger.notify.get('notify_at'):
+        if (trigger.notify.get('notify_at') == datetime.datetime.now().strftime("%H:%M") or
+                not trigger.notify.get('notify_at')):
             from api.tasks.cmdb import trigger_notify
 
             trigger_notify.apply_async(args=(trigger.notify, ci.ci_id), queue=CMDB_QUEUE)

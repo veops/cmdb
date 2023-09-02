@@ -10,7 +10,9 @@ from sqlalchemy import or_
 
 from api.extensions import db
 from api.lib.perm.acl.app import AppCRUD
-from api.lib.perm.acl.audit import AuditCRUD, AuditOperateType, AuditScope
+from api.lib.perm.acl.audit import AuditCRUD
+from api.lib.perm.acl.audit import AuditOperateType
+from api.lib.perm.acl.audit import AuditScope
 from api.lib.perm.acl.cache import AppCache
 from api.lib.perm.acl.cache import HasResourceRoleCache
 from api.lib.perm.acl.cache import RoleCache
@@ -69,16 +71,16 @@ class RoleRelationCRUD(object):
     @staticmethod
     def get_parent_ids(rid, app_id):
         if app_id is not None:
-            return [i.parent_id for i in RoleRelation.get_by(child_id=rid, app_id=app_id, to_dict=False)] + \
-                   [i.parent_id for i in RoleRelation.get_by(child_id=rid, app_id=None, to_dict=False)]
+            return ([i.parent_id for i in RoleRelation.get_by(child_id=rid, app_id=app_id, to_dict=False)] +
+                    [i.parent_id for i in RoleRelation.get_by(child_id=rid, app_id=None, to_dict=False)])
         else:
             return [i.parent_id for i in RoleRelation.get_by(child_id=rid, app_id=app_id, to_dict=False)]
 
     @staticmethod
     def get_child_ids(rid, app_id):
         if app_id is not None:
-            return [i.child_id for i in RoleRelation.get_by(parent_id=rid, app_id=app_id, to_dict=False)] + \
-                   [i.child_id for i in RoleRelation.get_by(parent_id=rid, app_id=None, to_dict=False)]
+            return ([i.child_id for i in RoleRelation.get_by(parent_id=rid, app_id=app_id, to_dict=False)] +
+                    [i.child_id for i in RoleRelation.get_by(parent_id=rid, app_id=None, to_dict=False)])
         else:
             return [i.child_id for i in RoleRelation.get_by(parent_id=rid, app_id=app_id, to_dict=False)]
 

@@ -297,8 +297,8 @@ class Search(object):
             if not attr:
                 raise SearchError(ErrFormat.attribute_not_found.format(field))
 
-            sort_by = "{0}.keyword".format(field) \
-                if attr.value_type not in (ValueTypeEnum.INT, ValueTypeEnum.FLOAT) else field
+            sort_by = ("{0}.keyword".format(field)
+                       if attr.value_type not in (ValueTypeEnum.INT, ValueTypeEnum.FLOAT) else field)
             sorts.append({sort_by: {"order": sort_type}})
 
         self.query.update(dict(sort=sorts))
