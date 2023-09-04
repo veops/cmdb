@@ -34,6 +34,7 @@ class AttributeCache(object):
             attr = attr or Attribute.get_by(alias=key, first=True, to_dict=False)
             if attr is not None:
                 cls.set(attr)
+
         return attr
 
     @classmethod
@@ -67,6 +68,7 @@ class CITypeCache(object):
             ct = ct or CIType.get_by(alias=key, first=True, to_dict=False)
             if ct is not None:
                 cls.set(ct)
+
         return ct
 
     @classmethod
@@ -98,6 +100,7 @@ class RelationTypeCache(object):
             ct = RelationType.get_by(name=key, first=True, to_dict=False) or RelationType.get_by_id(key)
             if ct is not None:
                 cls.set(ct)
+
         return ct
 
     @classmethod
@@ -133,12 +136,15 @@ class CITypeAttributesCache(object):
         attrs = attrs or cache.get(cls.PREFIX_ID.format(key))
         if not attrs:
             attrs = CITypeAttribute.get_by(type_id=key, to_dict=False)
+
             if not attrs:
                 ci_type = CIType.get_by(name=key, first=True, to_dict=False)
                 if ci_type is not None:
                     attrs = CITypeAttribute.get_by(type_id=ci_type.id, to_dict=False)
+
             if attrs is not None:
                 cls.set(key, attrs)
+
         return attrs
 
     @classmethod
@@ -155,13 +161,16 @@ class CITypeAttributesCache(object):
         attrs = attrs or cache.get(cls.PREFIX_ID2.format(key))
         if not attrs:
             attrs = CITypeAttribute.get_by(type_id=key, to_dict=False)
+
             if not attrs:
                 ci_type = CIType.get_by(name=key, first=True, to_dict=False)
                 if ci_type is not None:
                     attrs = CITypeAttribute.get_by(type_id=ci_type.id, to_dict=False)
+
             if attrs is not None:
                 attrs = [(i, AttributeCache.get(i.attr_id)) for i in attrs]
                 cls.set2(key, attrs)
+
         return attrs
 
     @classmethod
@@ -204,10 +213,11 @@ class CITypeAttributeCache(object):
 
         attr = cache.get(cls.PREFIX_ID.format(type_id, attr_id))
         attr = attr or cache.get(cls.PREFIX_ID.format(type_id, attr_id))
-        if not attr:
-            attr = CITypeAttribute.get_by(type_id=type_id, attr_id=attr_id, first=True, to_dict=False)
-            if attr is not None:
-                cls.set(type_id, attr_id, attr)
+        attr = attr or CITypeAttribute.get_by(type_id=type_id, attr_id=attr_id, first=True, to_dict=False)
+
+        if attr is not None:
+            cls.set(type_id, attr_id, attr)
+
         return attr
 
     @classmethod

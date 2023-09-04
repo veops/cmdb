@@ -176,8 +176,8 @@ class AttributeHistoryManger(object):
     def get_record_detail(record_id):
         from api.lib.cmdb.ci import CIManager
 
-        record = OperationRecord.get_by_id(record_id) or \
-                 abort(404, ErrFormat.record_not_found.format("id={}".format(record_id)))
+        record = (OperationRecord.get_by_id(record_id) or
+                  abort(404, ErrFormat.record_not_found.format("id={}".format(record_id))))
 
         username = UserCache.get(record.uid).nickname or UserCache.get(record.uid).username
         timestamp = record.created_at.strftime("%Y-%m-%d %H:%M:%S")

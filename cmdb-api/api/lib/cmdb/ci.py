@@ -38,8 +38,8 @@ from api.lib.decorator import kwargs_required
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import validate_permission
-from api.lib.utils import Lock
 from api.lib.utils import handle_arg_list
+from api.lib.utils import Lock
 from api.models.cmdb import AutoDiscoveryCI
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
@@ -67,11 +67,13 @@ class CIManager(object):
     @staticmethod
     def get_type_name(ci_id):
         ci = CI.get_by_id(ci_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(ci_id)))
+
         return CITypeCache.get(ci.type_id).name
 
     @staticmethod
     def get_type(ci_id):
         ci = CI.get_by_id(ci_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(ci_id)))
+
         return CITypeCache.get(ci.type_id)
 
     @staticmethod
@@ -93,9 +95,7 @@ class CIManager(object):
 
         res = dict()
 
-        if need_children:
-            children = CIRelationManager.get_children(ci_id, ret_key=ret_key)  # one floor
-            res.update(children)
+        need_children and res.update(CIRelationManager.get_children(ci_id, ret_key=ret_key))  # one floor
 
         ci_type = CITypeCache.get(ci.type_id)
         res["ci_type"] = ci_type.name
@@ -162,14 +162,11 @@ class CIManager(object):
 
         ci = CI.get_by_id(ci_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(ci_id)))
 
-        if valid:
-            cls.valid_ci_only_read(ci)
+        valid and cls.valid_ci_only_read(ci)
 
         res = dict()
 
-        if need_children:
-            children = CIRelationManager.get_children(ci_id, ret_key=ret_key)  # one floor
-            res.update(children)
+        need_children and res.update(CIRelationManager.get_children(ci_id, ret_key=ret_key))  # one floor
 
         ci_type = CITypeCache.get(ci.type_id)
         res["ci_type"] = ci_type.name
@@ -248,7 +245,7 @@ class CIManager(object):
         for i in unique_constraints:
             attr_ids.extend(i.attr_ids)
 
-        attrs = [AttributeCache.get(i) for i in list(set(attr_ids))]
+        attrs = [AttributeCache.get(i) for i in set(attr_ids)]
         id2name = {i.id: i.name for i in attrs if i}
         not_existed_fields = list(set(id2name.values()) - set(ci_dict.keys()))
         if not_existed_fields and ci_id is not None:
@@ -333,10 +330,6 @@ class CIManager(object):
                 if exist_policy == ExistPolicy.NEED:
                     return abort(404, ErrFormat.ci_not_found.format("{}={}".format(unique_key.name, unique_value)))
 
-                from api.lib.cmdb.const import L_CI
-                if L_CI and len(CI.get_by(type_id=ci_type.id)) > L_CI * 2:
-                    return abort(400, ErrFormat.limit_ci.format(L_CI * 2))
-
             limit_attrs = cls._valid_ci_for_no_read(ci, ci_type) if not _is_admin else {}
 
             if existed is None:  # set default
@@ -368,12 +361,12 @@ class CIManager(object):
             cls._valid_unique_constraint(ci_type.id, ci_dict, ci and ci.id)
 
             for k in ci_dict:
-                if k not in ci_type_attrs_name and k not in ci_type_attrs_alias and \
-                        _no_attribute_policy == ExistPolicy.REJECT:
+                if k not in ci_type_attrs_name and (
+                        k not in ci_type_attrs_alias and _no_attribute_policy == ExistPolicy.REJECT):
                     return abort(400, ErrFormat.attribute_not_found.format(k))
 
-                if limit_attrs and ci_type_attrs_name.get(k) not in limit_attrs and \
-                        ci_type_attrs_alias.get(k) not in limit_attrs:
+                if limit_attrs and ci_type_attrs_name.get(k) not in limit_attrs and (
+                        ci_type_attrs_alias.get(k) not in limit_attrs):
                     return abort(403, ErrFormat.ci_filter_perm_attr_no_permission.format(k))
 
             ci_dict = {k: v for k, v in ci_dict.items() if k in ci_type_attrs_name or k in ci_type_attrs_alias}
@@ -486,11 +479,11 @@ class CIManager(object):
         unique_key = AttributeCache.get(ci_type.unique_id)
         value_table = TableMap(attr=unique_key).table
 
-        v = value_table.get_by(attr_id=unique_key.id,
+        v = (value_table.get_by(attr_id=unique_key.id,
                                value=unique_value,
                                to_dict=False,
-                               first=True) \
-            or abort(404, ErrFormat.not_found)
+                               first=True) or
+             abort(404, ErrFormat.not_found))
 
         ci = CI.get_by_id(v.ci_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(v.ci_id)))
 
@@ -536,6 +529,7 @@ class CIManager(object):
         result = [(i.get("hostname"), i.get("private_ip")[0], i.get("ci_type"),
                    heartbeat_dict.get(i.get("_id"))) for i in res
                   if i.get("private_ip")]
+
         return numfound, result
 
     @staticmethod
@@ -655,6 +649,7 @@ class CIManager(object):
             return res
 
         current_app.logger.warning("cache not hit...............")
+
         return cls._get_cis_from_db(ci_ids, ret_key, fields, value_tables, excludes=excludes)
 
 
@@ -680,6 +675,7 @@ class CIRelationManager(object):
             ci_type = CITypeCache.get(type_id)
             children = CIManager.get_cis_by_ids(list(map(str, ci_type2ci_ids[type_id])), ret_key=ret_key)
             res[ci_type.name] = children
+
         return res
 
     @staticmethod
@@ -856,12 +852,12 @@ class CIRelationManager(object):
         :param children:
         :return:
         """
-        if parents is not None and isinstance(parents, list):
+        if isinstance(parents, list):
             for parent_id in parents:
                 for ci_id in ci_ids:
                     cls.add(parent_id, ci_id)
 
-        if children is not None and isinstance(children, list):
+        if isinstance(children, list):
             for child_id in children:
                 for ci_id in ci_ids:
                     cls.add(ci_id, child_id)
@@ -875,7 +871,7 @@ class CIRelationManager(object):
         :return:
         """
 
-        if parents is not None and isinstance(parents, list):
+        if isinstance(parents, list):
             for parent_id in parents:
                 for ci_id in ci_ids:
                     cls.delete_2(parent_id, ci_id)

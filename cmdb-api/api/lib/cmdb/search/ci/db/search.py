@@ -245,10 +245,8 @@ class Search(object):
         new_table = _v_query_sql
 
         if self.only_type_query or not self.type_id_list:
-            return "SELECT SQL_CALC_FOUND_ROWS DISTINCT C.ci_id " \
-                   "FROM ({0}) AS C " \
-                   "ORDER BY C.value {2} " \
-                   "LIMIT {1:d}, {3};".format(new_table, (self.page - 1) * self.count, sort_type, self.count)
+            return ("SELECT SQL_CALC_FOUND_ROWS DISTINCT C.ci_id FROM ({0}) AS C ORDER BY C.value {2} "
+                    "LIMIT {1:d}, {3};".format(new_table, (self.page - 1) * self.count, sort_type, self.count))
 
         elif self.type_id_list:
             self.query_sql = """SELECT C.ci_id

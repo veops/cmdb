@@ -6,7 +6,9 @@ from flask import Blueprint
 from flask_restful import Api
 
 from api.resource import register_resources
-from .account import LoginView, LogoutView, AuthWithKeyView
+from .account import AuthWithKeyView
+from .account import LoginView
+from .account import LogoutView
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
