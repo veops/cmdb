@@ -99,5 +99,7 @@ CMDB_QUEUE = "one_cmdb_async"
 REDIS_PREFIX_CI = "ONE_CMDB"
 REDIS_PREFIX_CI_RELATION = "CMDB_CI_RELATION"
 
+BUILTIN_KEYWORDS = {'id', '_id', 'ci_id', 'type', '_type', 'ci_type'}
+
 L_TYPE = None
 L_CI = None

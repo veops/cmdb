@@ -240,9 +240,10 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
             try:
                 response, _, _, _, _, _ = s.search()
                 for i in response:
-                    if current_user.username not in (i.get('rd_duty') or []) and current_user.username not in \
-                            (i.get('op_duty') or []) and current_user.nickname not in (i.get('rd_duty') or []) and \
-                            current_user.nickname not in (i.get('op_duty') or []):
+                    if (current_user.username not in (i.get('rd_duty') or []) and
+                            current_user.username not in (i.get('op_duty') or []) and
+                            current_user.nickname not in (i.get('rd_duty') or []) and
+                            current_user.nickname not in (i.get('op_duty') or [])):
                         return abort(403, ErrFormat.adt_target_expr_no_permission.format(
                             i.get("{}_name".format(i.get('ci_type')))))
             except SearchError as e:

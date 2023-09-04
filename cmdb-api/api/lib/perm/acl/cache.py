@@ -60,15 +60,15 @@ class UserCache(object):
 
     @classmethod
     def get(cls, key):
-        user = cache.get(cls.PREFIX_ID.format(key)) or \
-               cache.get(cls.PREFIX_NAME.format(key)) or \
-               cache.get(cls.PREFIX_NICK.format(key)) or \
-               cache.get(cls.PREFIX_WXID.format(key))
+        user = (cache.get(cls.PREFIX_ID.format(key)) or
+                cache.get(cls.PREFIX_NAME.format(key)) or
+                cache.get(cls.PREFIX_NICK.format(key)) or
+                cache.get(cls.PREFIX_WXID.format(key)))
         if not user:
-            user = User.query.get(key) or \
-                   User.query.get_by_username(key) or \
-                   User.query.get_by_nickname(key) or \
-                   User.query.get_by_wxid(key)
+            user = (User.query.get(key) or
+                    User.query.get_by_username(key) or
+                    User.query.get_by_nickname(key) or
+                    User.query.get_by_wxid(key))
         if user:
             cls.set(user)
 

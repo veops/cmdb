@@ -5,7 +5,9 @@ from flask import abort
 from flask import request
 
 from api.lib.cmdb.ci_type import CITypeManager
-from api.lib.cmdb.const import PermEnum, ResourceTypeEnum, RoleEnum
+from api.lib.cmdb.const import PermEnum
+from api.lib.cmdb.const import ResourceTypeEnum
+from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.cmdb.preference import PreferenceManager
 from api.lib.cmdb.resp_format import ErrFormat

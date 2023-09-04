@@ -7,7 +7,8 @@ from flask import abort
 from flask import request
 
 from api.lib.cmdb.ci import CIManager
-from api.lib.cmdb.const import ResourceTypeEnum, PermEnum
+from api.lib.cmdb.const import PermEnum
+from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.history import AttributeHistoryManger
 from api.lib.cmdb.history import CITypeHistoryManager

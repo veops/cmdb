@@ -6,7 +6,9 @@ from flask import request
 
 from api.lib.cmdb.ci_type import CITypeManager
 from api.lib.cmdb.ci_type import CITypeRelationManager
-from api.lib.cmdb.const import PermEnum, ResourceTypeEnum, RoleEnum
+from api.lib.cmdb.const import PermEnum
+from api.lib.cmdb.const import ResourceTypeEnum
+from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.decorator import args_required
 from api.lib.perm.acl.acl import ACLManager

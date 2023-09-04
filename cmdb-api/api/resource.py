@@ -2,7 +2,8 @@
 
 import os
 import sys
-from inspect import getmembers, isclass
+from inspect import getmembers
+from inspect import isclass
 
 import six
 from flask import jsonify

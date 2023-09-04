@@ -37,10 +37,12 @@ class PreferenceManager(object):
     def get_types(instance=False, tree=False):
         types = db.session.query(PreferenceShowAttributes.type_id).filter(
             PreferenceShowAttributes.uid == current_user.uid).filter(
-            PreferenceShowAttributes.deleted.is_(False)).group_by(PreferenceShowAttributes.type_id).all() \
-            if instance else []
+            PreferenceShowAttributes.deleted.is_(False)).group_by(
+            PreferenceShowAttributes.type_id).all() if instance else []
+
         tree_types = PreferenceTreeView.get_by(uid=current_user.uid, to_dict=False) if tree else []
-        type_ids = list(set([i.type_id for i in types + tree_types]))
+        type_ids = set([i.type_id for i in types + tree_types])
+
         return [CITypeCache.get(type_id).to_dict() for type_id in type_ids]
 
     @staticmethod

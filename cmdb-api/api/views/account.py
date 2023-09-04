@@ -2,12 +2,13 @@
 
 import datetime
 
-import six
 import jwt
+import six
 from flask import abort
 from flask import current_app
 from flask import request
-from flask_login import login_user, logout_user
+from flask_login import login_user
+from flask_login import logout_user
 
 from api.lib.decorator import args_required
 from api.lib.perm.acl.cache import User

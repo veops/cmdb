@@ -6,9 +6,10 @@ import json
 import re
 from fnmatch import fnmatch
 
-from flask import abort, current_app
+from flask import abort
 
-from api.lib.perm.acl.audit import AuditCRUD, AuditOperateType
+from api.lib.perm.acl.audit import AuditCRUD
+from api.lib.perm.acl.audit import AuditOperateType
 from api.lib.perm.acl.cache import UserCache
 from api.lib.perm.acl.const import ACL_QUEUE
 from api.lib.perm.acl.resp_format import ErrFormat

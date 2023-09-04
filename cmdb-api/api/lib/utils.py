@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*- 
 
 import base64
-import json
 import sys
 import time
 from typing import Set
@@ -113,7 +112,7 @@ class RedisHandler(object):
         try:
             ret = self.r.hdel(prefix, key_id)
             if not ret:
-                current_app.logger.warn("[{0}] is not in redis".format(key_id))
+                current_app.logger.warning("[{0}] is not in redis".format(key_id))
         except Exception as e:
             current_app.logger.error("delete redis key error, {0}".format(str(e)))
 
@@ -204,9 +203,9 @@ class ESHandler(object):
 
         res = self.es.search(index=self.index, body=query, filter_path=filter_path)
         if res['hits'].get('hits'):
-            return res['hits']['total']['value'], \
-                   [i['_source'] for i in res['hits']['hits']], \
-                   res.get("aggregations", {})
+            return (res['hits']['total']['value'],
+                    [i['_source'] for i in res['hits']['hits']],
+                    res.get("aggregations", {}))
         else:
             return 0, [], {}
 
@@ -257,93 +256,10 @@ class Lock(object):
             self.release()
 
 
-class Redis2Handler(object):
-    def __init__(self, flask_app=None, prefix=None):
-        self.flask_app = flask_app
-        self.prefix = prefix
-        self.r = None
-
-    def init_app(self, app):
-        self.flask_app = app
-        config = self.flask_app.config
-        try:
-            pool = redis.ConnectionPool(
-                max_connections=config.get("REDIS_MAX_CONN"),
-                host=config.get("ONEAGENT_REDIS_HOST"),
-                port=config.get("ONEAGENT_REDIS_PORT"),
-                db=config.get("ONEAGENT_REDIS_DB"),
-                password=config.get("ONEAGENT_REDIS_PASSWORD")
-            )
-            self.r = redis.Redis(connection_pool=pool)
-        except Exception as e:
-            current_app.logger.warning(str(e))
-            current_app.logger.error("init redis connection failed")
-
-    def get(self, key):
-        try:
-            value = json.loads(self.r.get(key))
-        except:
-            return
-
-        return value
-
-    def lrange(self, key, start=0, end=-1):
-        try:
-            value = "".join(map(redis_decode, self.r.lrange(key, start, end) or []))
-        except:
-            return
-
-        return value
-
-    def lrange2(self, key, start=0, end=-1):
-        try:
-            return list(map(redis_decode, self.r.lrange(key, start, end) or []))
-        except:
-            return []
-
-    def llen(self, key):
-        try:
-            return self.r.llen(key) or 0
-        except:
-            return 0
-
-    def hget(self, key, field):
-        try:
-            return self.r.hget(key, field)
-        except Exception as e:
-            current_app.logger.warning("hget redis failed, %s" % str(e))
-            return
-
-    def hset(self, key, field, value):
-        try:
-            self.r.hset(key, field, value)
-        except Exception as e:
-            current_app.logger.warning("hset redis failed, %s" % str(e))
-            return
-
-    def expire(self, key, timeout):
-        try:
-            self.r.expire(key, timeout)
-        except Exception as e:
-            current_app.logger.warning("expire redis failed, %s" % str(e))
-            return
-
-
-def redis_decode(x):
-    try:
-        return x.decode()
-    except Exception as e:
-        print(x, e)
-        try:
-            return x.decode("gb18030")
-        except:
-            return "decode failed"
-
-
 class AESCrypto(object):
     BLOCK_SIZE = 16  # Bytes
-    pad = lambda s: s + (AESCrypto.BLOCK_SIZE - len(s) % AESCrypto.BLOCK_SIZE) * \
-                    chr(AESCrypto.BLOCK_SIZE - len(s) % AESCrypto.BLOCK_SIZE)
+    pad = lambda s: s + ((AESCrypto.BLOCK_SIZE - len(s) % AESCrypto.BLOCK_SIZE) *
+                         chr(AESCrypto.BLOCK_SIZE - len(s) % AESCrypto.BLOCK_SIZE))
     unpad = lambda s: s[:-ord(s[len(s) - 1:])]
 
     iv = '0102030405060708'
@@ -352,7 +268,7 @@ class AESCrypto(object):
     def key():
         key = current_app.config.get("SECRET_KEY")[:16]
         if len(key) < 16:
-            key = "{}{}".format(key, (16 - len(key) * "x"))
+            key = "{}{}".format(key, (16 - len(key)) * "x")
 
         return key.encode('utf8')
 
