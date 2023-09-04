@@ -4,7 +4,9 @@ import datetime
 from flask import abort
 
 from api.extensions import db
-from api.lib.perm.acl.audit import AuditCRUD, AuditOperateType, AuditOperateSource
+from api.lib.perm.acl.audit import AuditCRUD
+from api.lib.perm.acl.audit import AuditOperateSource
+from api.lib.perm.acl.audit import AuditOperateType
 from api.lib.perm.acl.cache import PermissionCache
 from api.lib.perm.acl.cache import RoleCache
 from api.lib.perm.acl.cache import UserCache
@@ -97,8 +99,8 @@ class PermissionCRUD(object):
         elif group_id is not None:
             from api.models.acl import ResourceGroup
 
-            group = ResourceGroup.get_by_id(group_id) or \
-                    abort(404, ErrFormat.resource_group_not_found.format("id={}".format(group_id)))
+            group = ResourceGroup.get_by_id(group_id) or abort(
+                404, ErrFormat.resource_group_not_found.format("id={}".format(group_id)))
             app_id = group.app_id
             rt_id = group.resource_type_id
             if not perms:
@@ -206,8 +208,8 @@ class PermissionCRUD(object):
         if resource_id is not None:
             from api.models.acl import Resource
 
-            resource = Resource.get_by_id(resource_id) or \
-                       abort(404, ErrFormat.resource_not_found.format("id={}".format(resource_id)))
+            resource = Resource.get_by_id(resource_id) or abort(
+                404, ErrFormat.resource_not_found.format("id={}".format(resource_id)))
             app_id = resource.app_id
             rt_id = resource.resource_type_id
             if not perms:
@@ -216,8 +218,8 @@ class PermissionCRUD(object):
         elif group_id is not None:
             from api.models.acl import ResourceGroup
 
-            group = ResourceGroup.get_by_id(group_id) or \
-                    abort(404, ErrFormat.resource_group_not_found.format("id={}".format(group_id)))
+            group = ResourceGroup.get_by_id(group_id) or abort(
+                404, ErrFormat.resource_group_not_found.format("id={}".format(group_id)))
             app_id = group.app_id
 
             rt_id = group.resource_type_id

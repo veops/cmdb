@@ -83,6 +83,7 @@ class AttributeValueManager(object):
     def __deserialize_value(value_type, value):
         if not value:
             return value
+
         deserialize = ValueTypeMap.deserialize[value_type]
         try:
             v = deserialize(value)
@@ -184,8 +185,8 @@ class AttributeValueManager(object):
         return [var for var in schema.get("properties")]
 
     def _compute_attr_value(self, attr, payload, ci):
-        attrs = self._jinja2_parse(attr['compute_expr']) if attr.get('compute_expr') else \
-            self._jinja2_parse(attr['compute_script'])
+        attrs = (self._jinja2_parse(attr['compute_expr']) if attr.get('compute_expr')
+                 else self._jinja2_parse(attr['compute_script']))
         not_existed = [i for i in attrs if i not in payload]
         if ci is not None:
             payload.update(self.get_attr_values(not_existed, ci.id))

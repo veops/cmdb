@@ -10,8 +10,11 @@ from api.extensions import db
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.cache import CITypeCache
+from api.lib.cmdb.const import BUILTIN_KEYWORDS
 from api.lib.cmdb.const import CITypeOperateType
-from api.lib.cmdb.const import PermEnum, ResourceTypeEnum, RoleEnum
+from api.lib.cmdb.const import PermEnum
+from api.lib.cmdb.const import ResourceTypeEnum
+from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.cmdb.history import CITypeHistoryManager
 from api.lib.cmdb.resp_format import ErrFormat
@@ -41,7 +44,7 @@ class AttributeManager(object):
         ret_key = choice_web_hook.get('ret_key')
         headers = choice_web_hook.get('headers') or {}
         payload = choice_web_hook.get('payload') or {}
-        method = choice_web_hook.get('method', 'GET').lower()
+        method = (choice_web_hook.get('method') or 'GET').lower()
 
         try:
             res = getattr(requests, method)(url, headers=headers, data=payload).json()
@@ -56,15 +59,17 @@ class AttributeManager(object):
                 return [[i, {}] for i in (res.get(ret_key_list[-1]) or [])]
 
         except Exception as e:
-            current_app.logger.error(str(e))
+            current_app.logger.error("get choice values failed: {}".format(e))
             return []
 
     @classmethod
     def get_choice_values(cls, attr_id, value_type, choice_web_hook, choice_web_hook_parse=True):
-        if choice_web_hook and isinstance(choice_web_hook, dict) and choice_web_hook_parse:
-            return cls._get_choice_values_from_web_hook(choice_web_hook)
-        elif choice_web_hook and not choice_web_hook_parse:
-            return []
+        if choice_web_hook:
+            if choice_web_hook_parse:
+                if isinstance(choice_web_hook, dict):
+                    return cls._get_choice_values_from_web_hook(choice_web_hook)
+            else:
+                return []
 
         choice_table = ValueTypeMap.choice.get(value_type)
         choice_values = choice_table.get_by(fl=["value", "option"], attr_id=attr_id)
@@ -74,25 +79,25 @@ class AttributeManager(object):
     @staticmethod
     def add_choice_values(_id, value_type, choice_values):
         choice_table = ValueTypeMap.choice.get(value_type)
+        if choice_table is None:
+            return
 
-        db.session.query(choice_table).filter(choice_table.attr_id == _id).delete()
-        db.session.flush()
-        choice_values = choice_values
+        choice_table.get_by(attr_id=_id, only_query=True).delete()
+
         for v, option in choice_values:
-            table = choice_table(attr_id=_id, value=v, option=option)
-
-            db.session.add(table)
+            choice_table.create(attr_id=_id, value=v, option=option, commit=False)
 
         try:
             db.session.flush()
-        except:
+        except Exception as e:
+            current_app.logger.warning("add choice values failed: {}".format(e))
             return abort(400, ErrFormat.invalid_choice_values)
 
     @staticmethod
     def _del_choice_values(_id, value_type):
         choice_table = ValueTypeMap.choice.get(value_type)
 
-        db.session.query(choice_table).filter(choice_table.attr_id == _id).delete()
+        choice_table and choice_table.get_by(attr_id=_id, only_query=True).delete()
         db.session.flush()
 
     @classmethod
@@ -115,8 +120,8 @@ class AttributeManager(object):
         attrs = attrs[(page - 1) * page_size:][:page_size]
         res = list()
         for attr in attrs:
-            attr["is_choice"] and attr.update(dict(choice_value=cls.get_choice_values(
-                attr["id"], attr["value_type"], attr["choice_web_hook"])))
+            attr["is_choice"] and attr.update(
+                dict(choice_value=cls.get_choice_values(attr["id"], attr["value_type"], attr["choice_web_hook"])))
             attr['is_choice'] and attr.pop('choice_web_hook', None)
 
             res.append(attr)
@@ -125,30 +130,31 @@ class AttributeManager(object):
 
     def get_attribute_by_name(self, name):
         attr = Attribute.get_by(name=name, first=True)
-        if attr and attr["is_choice"]:
-            attr.update(dict(choice_value=self.get_choice_values(
-                attr["id"], attr["value_type"], attr["choice_web_hook"])))
+        if attr.get("is_choice"):
+            attr["choice_value"] = self.get_choice_values(attr["id"], attr["value_type"], attr["choice_web_hook"])
+
         return attr
 
     def get_attribute_by_alias(self, alias):
         attr = Attribute.get_by(alias=alias, first=True)
-        if attr and attr["is_choice"]:
-            attr.update(dict(choice_value=self.get_choice_values(
-                attr["id"], attr["value_type"], attr["choice_web_hook"])))
+        if attr.get("is_choice"):
+            attr["choice_value"] = self.get_choice_values(attr["id"], attr["value_type"], attr["choice_web_hook"])
+
         return attr
 
     def get_attribute_by_id(self, _id):
         attr = Attribute.get_by_id(_id).to_dict()
-        if attr and attr["is_choice"]:
-            attr.update(dict(choice_value=self.get_choice_values(
-                attr["id"], attr["value_type"], attr["choice_web_hook"])))
+        if attr.get("is_choice"):
+            attr["choice_value"] = self.get_choice_values(attr["id"], attr["value_type"], attr["choice_web_hook"])
+
         return attr
 
     def get_attribute(self, key, choice_web_hook_parse=True):
         attr = AttributeCache.get(key).to_dict()
-        if attr and attr["is_choice"]:
-            attr.update(dict(choice_value=self.get_choice_values(
-                attr["id"], attr["value_type"], attr["choice_web_hook"])), choice_web_hook_parse=choice_web_hook_parse)
+        if attr.get("is_choice"):
+            attr["choice_value"] = self.get_choice_values(
+                attr["id"], attr["value_type"], attr["choice_web_hook"], choice_web_hook_parse=choice_web_hook_parse)
+
         return attr
 
     @staticmethod
@@ -164,8 +170,9 @@ class AttributeManager(object):
         is_choice = True if choice_value or kwargs.get('choice_web_hook') else False
 
         name = kwargs.pop("name")
-        if name in {'id', '_id', 'ci_id', 'type', '_type', 'ci_type'}:
+        if name in BUILTIN_KEYWORDS:
             return abort(400, ErrFormat.attribute_name_cannot_be_builtin)
+
         alias = kwargs.pop("alias", "")
         alias = name if not alias else alias
         Attribute.get_by(name=name, first=True) and abort(400, ErrFormat.attribute_name_duplicate.format(name))
@@ -218,7 +225,8 @@ class AttributeManager(object):
         for i in CITypeAttribute.get_by(attr_id=attr_id, to_dict=False):
             CITypeAttributesCache.clean(i.type_id)
 
-    def _change_index(self, attr, old, new):
+    @staticmethod
+    def _change_index(attr, old, new):
         from api.lib.cmdb.utils import TableMap
         from api.tasks.cmdb import batch_ci_cache
         from api.lib.cmdb.const import CMDB_QUEUE
@@ -227,11 +235,11 @@ class AttributeManager(object):
         new_table = TableMap(attr=attr, is_index=new).table
 
         ci_ids = []
-        for i in db.session.query(old_table).filter(getattr(old_table, 'attr_id') == attr.id):
+        for i in old_table.get_by(attr_id=attr.id, to_dict=False):
             new_table.create(ci_id=i.ci_id, attr_id=attr.id, value=i.value, flush=True)
             ci_ids.append(i.ci_id)
 
-        db.session.query(old_table).filter(getattr(old_table, 'attr_id') == attr.id).delete()
+        old_table.get_by(attr_id=attr.id, only_query=True).delete()
 
         try:
             db.session.commit()
@@ -296,7 +304,7 @@ class AttributeManager(object):
 
         if is_choice and choice_value:
             self.add_choice_values(attr.id, attr.value_type, choice_value)
-        elif is_choice:
+        elif existed2['is_choice']:
             self._del_choice_values(attr.id, attr.value_type)
 
         try:
@@ -330,24 +338,25 @@ class AttributeManager(object):
         ref = CITypeAttribute.get_by(attr_id=_id, to_dict=False, first=True)
         if ref is not None:
             ci_type = CITypeCache.get(ref.type_id)
-            return abort(400, ErrFormat.attribute_is_ref_by_type.format(ci_type.alias))
+            return abort(400, ErrFormat.attribute_is_ref_by_type.format(ci_type and ci_type.alias or ref.type_id))
 
         if attr.uid != current_user.uid and not is_app_admin('cmdb'):
             return abort(403, ErrFormat.cannot_delete_attribute)
 
         if attr.is_choice:
             choice_table = ValueTypeMap.choice.get(attr.value_type)
-            db.session.query(choice_table).filter(choice_table.attr_id == _id).delete()  # FIXME: session conflict
-            db.session.flush()
-
-        AttributeCache.clean(attr)
+            choice_table.get_by(attr_id=_id, only_query=True).delete()
 
         attr.soft_delete()
 
+        AttributeCache.clean(attr)
+
         for i in PreferenceShowAttributes.get_by(attr_id=_id, to_dict=False):
-            i.soft_delete()
+            i.soft_delete(commit=False)
 
         for i in CITypeAttributeGroupItem.get_by(attr_id=_id, to_dict=False):
-            i.soft_delete()
+            i.soft_delete(commit=False)
+
+        db.session.commit()
 
         return name

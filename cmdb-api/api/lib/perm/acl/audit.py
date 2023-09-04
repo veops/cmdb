@@ -9,8 +9,16 @@ from flask_login import current_user
 from sqlalchemy import func
 
 from api.lib.perm.acl import AppCache
-from api.models.acl import AuditPermissionLog, AuditResourceLog, AuditRoleLog, AuditTriggerLog, Permission, Resource, \
-    ResourceGroup, ResourceType, Role, RolePermission
+from api.models.acl import AuditPermissionLog
+from api.models.acl import AuditResourceLog
+from api.models.acl import AuditRoleLog
+from api.models.acl import AuditTriggerLog
+from api.models.acl import Permission
+from api.models.acl import Resource
+from api.models.acl import ResourceGroup
+from api.models.acl import ResourceType
+from api.models.acl import Role
+from api.models.acl import RolePermission
 
 
 class AuditScope(str, Enum):
@@ -91,11 +99,8 @@ class AuditCRUD(object):
                 criterion.append(AuditPermissionLog.operate_type == v)
 
         records = AuditPermissionLog.query.filter(
-            AuditPermissionLog.deleted == 0,
-            *criterion) \
-            .order_by(AuditPermissionLog.id.desc()) \
-            .offset((page - 1) * page_size) \
-            .limit(page_size).all()
+            AuditPermissionLog.deleted == 0, *criterion).order_by(
+            AuditPermissionLog.id.desc()).offset((page - 1) * page_size).limit(page_size).all()
 
         data = {
             'data': [r.to_dict() for r in records],
@@ -158,10 +163,8 @@ class AuditCRUD(object):
             elif k == 'operate_type':
                 criterion.append(AuditRoleLog.operate_type == v)
 
-        records = AuditRoleLog.query.filter(AuditRoleLog.deleted == 0, *criterion) \
-            .order_by(AuditRoleLog.id.desc()) \
-            .offset((page - 1) * page_size) \
-            .limit(page_size).all()
+        records = AuditRoleLog.query.filter(AuditRoleLog.deleted == 0, *criterion).order_by(
+            AuditRoleLog.id.desc()).offset((page - 1) * page_size).limit(page_size).all()
 
         data = {
             'data': [r.to_dict() for r in records],
@@ -223,11 +226,8 @@ class AuditCRUD(object):
                 criterion.append(AuditResourceLog.operate_type == v)
 
         records = AuditResourceLog.query.filter(
-            AuditResourceLog.deleted == 0,
-            *criterion) \
-            .order_by(AuditResourceLog.id.desc()) \
-            .offset((page - 1) * page_size) \
-            .limit(page_size).all()
+            AuditResourceLog.deleted == 0, *criterion).order_by(
+            AuditResourceLog.id.desc()).offset((page - 1) * page_size).limit(page_size).all()
 
         data = {
             'data': [r.to_dict() for r in records],
@@ -257,11 +257,8 @@ class AuditCRUD(object):
                 criterion.append(AuditTriggerLog.operate_type == v)
 
         records = AuditTriggerLog.query.filter(
-            AuditTriggerLog.deleted == 0,
-            *criterion) \
-            .order_by(AuditTriggerLog.id.desc()) \
-            .offset((page - 1) * page_size) \
-            .limit(page_size).all()
+            AuditTriggerLog.deleted == 0, *criterion).order_by(
+            AuditTriggerLog.id.desc()).offset((page - 1) * page_size).limit(page_size).all()
 
         data = {
             'data': [r.to_dict() for r in records],
