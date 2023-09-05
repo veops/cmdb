@@ -5,7 +5,7 @@
 [![API](https://img.shields.io/badge/API-Flask-brightgreen)](https://github.com/pallets/flask)
 
 [English](docs/README_en.md) / [中文](README.md)
-
+- 产品文档：https://veops.cn/docs/
 - 在线体验: <a href="https://cmdb.veops.cn" target="_blank">CMDB</a>
   - username: demo 或者 admin
   - password: 123456
