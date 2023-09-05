@@ -38,8 +38,8 @@ from api.lib.decorator import kwargs_required
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import validate_permission
-from api.lib.utils import handle_arg_list
 from api.lib.utils import Lock
+from api.lib.utils import handle_arg_list
 from api.models.cmdb import AutoDiscoveryCI
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
@@ -290,7 +290,7 @@ class CIManager(object):
             _is_admin=False,
             **ci_dict):
         """
-
+        add ci
         :param ci_type_name:
         :param exist_policy: replace or reject or need
         :param _no_attribute_policy: ignore or reject
@@ -479,10 +479,7 @@ class CIManager(object):
         unique_key = AttributeCache.get(ci_type.unique_id)
         value_table = TableMap(attr=unique_key).table
 
-        v = (value_table.get_by(attr_id=unique_key.id,
-                               value=unique_value,
-                               to_dict=False,
-                               first=True) or
+        v = (value_table.get_by(attr_id=unique_key.id, value=unique_value, to_dict=False, first=True) or
              abort(404, ErrFormat.not_found))
 
         ci = CI.get_by_id(v.ci_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(v.ci_id)))

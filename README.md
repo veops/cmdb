@@ -4,7 +4,7 @@
 [![UI](https://img.shields.io/badge/UI-Ant%20Design%20Pro%20Vue-brightgreen)](https://github.com/sendya/ant-design-pro-vue)
 [![API](https://img.shields.io/badge/API-Flask-brightgreen)](https://github.com/pallets/flask)
 
-[English](README_en.md) / [中文](README.md)
+[English](docs/README_en.md) / [中文](README.md)
 
 - 在线体验: <a href="https://cmdb.veops.cn" target="_blank">CMDB</a>
   - username: demo 或者 admin
