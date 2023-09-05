@@ -1,3 +1,5 @@
+MYSQL_ROOT_PASSWORD ?= root
+
 default: help
 help:  ## Display this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
@@ -11,11 +13,11 @@ env: ## Create a development environment using pipenv
 .PHONY: env
 
 docker-mysql: ## deploy MySQL use docker
-	@docker run --name some-mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:latest
+	@docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} -d mysql:latest
 .PHONY: docker-mysql
 
 docker-redis: ## deploy Redis use docker
-	@docker run --name some-redis -p 6379:6379 -d redis:latest
+	@docker run --name redis -p 6379:6379 -d redis:latest
 .PHONY: docker-redis
 
 deps: ## install dependencies using pip
