@@ -15,10 +15,18 @@ env:
 	npm install yarn && \
 	make deps
 
+docker-mysql:
+	@docker run --name some-mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:latest
+
+docker-redis:
+	@docker run --name some-redis -p 6379:6379 -d redis:latest
+
 deps:
+	cd cmdb-api && \
 	pipenv install --dev && \
 	pipenv run flask db-setup && \
 	pipenv run flask cmdb-init-cache && \
+	cd .. && \
     cd cmdb-ui && yarn install && cd ..
 
 api:
