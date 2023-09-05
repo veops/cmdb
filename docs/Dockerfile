@@ -3,7 +3,7 @@ FROM node:16.0.0-alpine AS builder
 
 LABEL description="cmdb-ui"
 
-COPY cmdb-ui /data/apps/cmdb-ui
+COPY ../cmdb-ui /data/apps/cmdb-ui
 
 WORKDIR /data/apps/cmdb-ui
 
@@ -22,7 +22,7 @@ FROM python:3.8-alpine AS cmdb-api
 
 LABEL description="Python3.8,cmdb"
 
-COPY cmdb-api /data/apps/cmdb
+COPY ../cmdb-api /data/apps/cmdb
 
 WORKDIR /data/apps/cmdb
 
