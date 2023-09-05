@@ -1,10 +1,10 @@
-![维易CMDB](docs/images/logo.png)
+![维易CMDB](images/logo.png)
 
 [![License](https://img.shields.io/badge/License-AGPLv3-brightgreen)](https://github.com/veops/cmdb/blob/master/LICENSE)
 [![UI](https://img.shields.io/badge/UI-Ant%20Design%20Pro%20Vue-brightgreen)](https://github.com/sendya/ant-design-pro-vue)
 [![API](https://img.shields.io/badge/API-Flask-brightgreen)](https://github.com/pallets/flask)
 
-[English](README_en.md) / [中文](README.md)
+[English](README_en.md) / [中文](../README.md)
 
 ## DEMO ONLINE
 
@@ -18,7 +18,7 @@
 
 ### Technical Architecture
 
-<img src=docs/images/view.jpg />
+<img src=images/view.jpg />
 
 ### Document
 
@@ -51,9 +51,9 @@
 ### System Overview
 
 - Service Tree
-  ![1](docs/images/0.png "首页展示")
+  ![1](images/0.png "首页展示")
 
-[View more screenshots](docs/screenshot.md)
+[View more screenshots](screenshot.md)
 
 ### More Features
 
@@ -73,9 +73,9 @@
 - password: 123456
 
 
-### [Local Setup](docs/local_en.md)
+### [Local Setup](local_en.md)
 
-### [Installation with Makefile](docs/makefile_en.md)
+### [Installation with Makefile](makefile_en.md)
 
 ## Contributing
 
@@ -89,4 +89,4 @@
 
 _**Welcome to pay attention to our public account, click to contact us, join WeChat, QQ operation and maintenance group, and get more product and industry related information**_
 
-![QQgroup](docs/images/qrcode_for_gzh.jpg)
+![QQgroup](images/qrcode_for_gzh.jpg)

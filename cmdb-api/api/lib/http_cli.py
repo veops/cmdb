@@ -19,6 +19,7 @@ def build_api_key(path, params):
     _secret = "".join([path, secret, values]).encode("utf-8")
     params["_secret"] = hashlib.sha1(_secret).hexdigest()
     params["_key"] = key
+
     return params
 
 
