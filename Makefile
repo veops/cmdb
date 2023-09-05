@@ -1,4 +1,6 @@
 MYSQL_ROOT_PASSWORD ?= root
+MYSQL_PORT ?= 3306
+REDIS_PORT ?= 6379
 
 default: help
 help:  ## display this help
@@ -13,11 +15,11 @@ env: ## create a development environment using pipenv
 .PHONY: env
 
 docker-mysql: ## deploy MySQL use docker
-	@docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} -d mysql:latest
+	@docker run --name mysql -p ${MYSQL_PORT}:3306 -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} -d mysql:latest
 .PHONY: docker-mysql
 
 docker-redis: ## deploy Redis use docker
-	@docker run --name redis -p 6379:6379 -d redis:latest
+	@docker run --name redis -p ${REDIS_PORT}:6379 -d redis:latest
 .PHONY: docker-redis
 
 deps: ## install dependencies using pip
