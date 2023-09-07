@@ -7,6 +7,7 @@ import time
 import jinja2
 import requests
 from flask import current_app
+from flask_login import login_user
 
 import api.lib.cmdb.ci
 from api.extensions import celery
@@ -18,8 +19,12 @@ from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import REDIS_PREFIX_CI
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
 from api.lib.mail import send_mail
+from api.lib.perm.acl.cache import UserCache
 from api.lib.utils import Lock
+from api.lib.utils import handle_arg_list
+from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
+from api.models.cmdb import CITypeAttribute
 
 
 @celery.task(name="cmdb.ci_cache", queue=CMDB_QUEUE)
@@ -82,6 +87,51 @@ def ci_relation_cache(parent_id, child_id):
         rd.create_or_update({parent_id: json.dumps(children)}, REDIS_PREFIX_CI_RELATION)
 
     current_app.logger.info("ADD ci relation cache: {0} -> {1}".format(parent_id, child_id))
+
+
+@celery.task(name="cmdb.ci_relation_add", queue=CMDB_QUEUE)
+def ci_relation_add(parent_dict, child_id, uid):
+    """
+    :param parent_dict: key is '$parent_model.attr_name'
+    :param child_id:
+    :param uid:
+    :return:
+    """
+    from api.lib.cmdb.ci import CIRelationManager
+    from api.lib.cmdb.ci_type import CITypeAttributeManager
+    from api.lib.cmdb.search import SearchError
+    from api.lib.cmdb.search.ci import search
+
+    current_app.test_request_context().push()
+    login_user(UserCache.get(uid))
+
+    db.session.remove()
+
+    for parent in parent_dict:
+        parent_ci_type_name, _attr_name = parent.strip()[1:].split('.', 1)
+        attr_name = CITypeAttributeManager.get_attr_name(parent_ci_type_name, _attr_name)
+        if attr_name is None:
+            current_app.logger.warning("attr name {} does not exist".format(_attr_name))
+            continue
+
+        parent_dict[parent] = handle_arg_list(parent_dict[parent])
+        for v in parent_dict[parent]:
+            query = "_type:{},{}:{}".format(parent_ci_type_name, attr_name, v)
+            s = search(query)
+            try:
+                response, _, _, _, _, _ = s.search()
+            except SearchError as e:
+                current_app.logger.error('ci relation add failed: {}'.format(e))
+                continue
+
+            for ci in response:
+                try:
+                    CIRelationManager.add(ci['_id'], child_id)
+                    ci_relation_cache(ci['_id'], child_id)
+                except Exception as e:
+                    current_app.logger.warning(e)
+                finally:
+                    db.session.remove()
 
 
 @celery.task(name="cmdb.ci_relation_delete", queue=CMDB_QUEUE)
@@ -156,3 +206,18 @@ def trigger_notify(notify, ci_id):
                            for i in notify['mail_to'] if i], subject, body)
         except Exception as e:
             current_app.logger.error("Send mail failed: {0}".format(str(e)))
+
+
+@celery.task(name="cmdb.calc_computed_attribute", queue=CMDB_QUEUE)
+def calc_computed_attribute(attr_id, uid):
+    from api.lib.cmdb.ci import CIManager
+
+    db.session.remove()
+
+    current_app.test_request_context().push()
+    login_user(UserCache.get(uid))
+
+    for i in CITypeAttribute.get_by(attr_id=attr_id, to_dict=False):
+        cis = CI.get_by(type_id=i.type_id, to_dict=False)
+        for ci in cis:
+            CIManager.update(ci.id, {})
