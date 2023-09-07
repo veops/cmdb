@@ -38,7 +38,7 @@
       <a-tab-pane key="tab_2">
         <span slot="tab"><a-icon type="branches" />关系</span>
         <div :style="{ padding: '24px' }">
-          <CiDetailRelation :ciId="ciId" :typeId="typeId" :ci="ci" />
+          <CiDetailRelation ref="ciDetailRelation" :ciId="ciId" :typeId="typeId" :ci="ci" />
         </div>
       </a-tab-pane>
       <a-tab-pane key="tab_3">
@@ -147,8 +147,14 @@ export default {
   },
   inject: ['reload', 'handleSearch', 'attrList'],
   methods: {
-    create(ciId) {
+    create(ciId, activeTabKey = 'tab_1', ciDetailRelationKey = '1') {
       this.visible = true
+      this.activeTabKey = activeTabKey
+      if (activeTabKey === 'tab_2') {
+        this.$nextTick(() => {
+          this.$refs.ciDetailRelation.activeKey = ciDetailRelationKey
+        })
+      }
       this.ciId = ciId
       this.getAttributes()
       this.getCI()
