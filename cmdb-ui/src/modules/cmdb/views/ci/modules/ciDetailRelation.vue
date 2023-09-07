@@ -244,14 +244,13 @@ export default {
     },
   },
   mounted() {
-    console.log(this.ci)
     this.init(true)
   },
   methods: {
     async init(isFirst) {
       await Promise.all([this.getParentCITypes(), this.getChildCITypes()])
       Promise.all([this.getFirstCIs(), this.getSecondCIs()]).then(() => {
-        if (isFirst) {
+        if (isFirst && this.$refs.ciDetailRelationTopo) {
           this.$refs.ciDetailRelationTopo.setTopoData(this.topoData)
         }
       })
@@ -395,12 +394,6 @@ export default {
     margin-top: 20px;
     margin-bottom: 5px;
     color: #303133;
-    > a {
-      display: none;
-    }
-    &:hover > a {
-      display: inline-block;
-    }
   }
 }
 </style>
