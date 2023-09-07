@@ -209,13 +209,19 @@
               <EditAttrsPopover :typeId="typeId" class="operation-icon" @refresh="refreshAfterEditAttrs" />
             </template>
             <template #default="{ row }">
-              <a @click="$refs.detail.create(row.ci_id || row._id)">
-                <a-icon type="unordered-list" />
-              </a>
-              <a-divider type="vertical" />
-              <a @click="deleteCI(row)" :style="{ color: 'red' }">
-                <a-icon type="delete" />
-              </a>
+              <a-space>
+                <a @click="$refs.detail.create(row.ci_id || row._id)">
+                  <a-icon type="unordered-list" />
+                </a>
+                <a-tooltip title="添加关系">
+                  <a @click="$refs.detail.create(row.ci_id || row._id, 'tab_2', '2')">
+                    <a-icon type="retweet" />
+                  </a>
+                </a-tooltip>
+                <a @click="deleteCI(row)" :style="{ color: 'red' }">
+                  <a-icon type="delete" />
+                </a>
+              </a-space>
             </template>
           </vxe-column>
           <template #empty>

@@ -23,6 +23,30 @@
           :attributeList="attributeList"
         />
       </template>
+      <template v-if="parentsType && parentsType.length">
+        <a-divider style="font-size:14px;margin:14px 0;font-weight:700;">模型关系</a-divider>
+        <a-form>
+          <a-row :gutter="24" align="top" type="flex">
+            <a-col :span="12" v-for="item in parentsType" :key="item.id">
+              <a-form-item :label="item.alias || item.name" :colon="false">
+                <a-input-group compact style="width: 100%">
+                  <a-select v-model="parentsForm[item.name].attr">
+                    <a-select-option
+                      :title="attr.alias || attr.name"
+                      v-for="attr in item.attributes"
+                      :key="attr.name"
+                      :value="attr.name"
+                    >
+                      {{ attr.alias || attr.name }}
+                    </a-select-option>
+                  </a-select>
+                  <a-input placeholder="多个值使用,分割" v-model="parentsForm[item.name].value" style="width: 50%" />
+                </a-input-group>
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
+      </template>
     </template>
     <template v-if="action === 'update'">
       <a-form :form="form">
@@ -110,6 +134,7 @@ import { addCI } from '@/modules/cmdb/api/ci'
 import JsonEditor from '../../../components/JsonEditor/jsonEditor.vue'
 import { valueTypeMap } from '../../../utils/const'
 import CreateInstanceFormByGroup from './createInstanceFormByGroup.vue'
+import { getCITypeParent } from '@/modules/cmdb/api/CITypeRelation'
 
 export default {
   name: 'CreateInstanceForm',
@@ -138,6 +163,8 @@ export default {
       batchUpdateLists: [],
       editAttr: null,
       attributesByGroup: [],
+      parentsType: [],
+      parentsForm: {},
     }
   },
   computed: {
@@ -231,6 +258,11 @@ export default {
           }
         })
         values.ci_type = _this.typeId
+        Object.keys(this.parentsForm).forEach((type) => {
+          if (this.parentsForm[type].value) {
+            values[`$${type}.${this.parentsForm[type].attr}`] = this.parentsForm[type].value
+          }
+        })
         addCI(values).then((res) => {
           _this.$message.success('新增成功!')
           _this.visible = false
@@ -249,6 +281,17 @@ export default {
         Promise.all([this.getCIType(), this.getAttributeList()]).then(() => {
           this.batchUpdateLists = [{ name: this.attributeList[0].name }]
         })
+        if (action === 'create') {
+          getCITypeParent(this.typeId).then((res) => {
+            this.parentsType = res.parents
+            const _parentsForm = {}
+            res.parents.forEach((item) => {
+              const _find = item.attributes.find((attr) => attr.id === item.unique_id)
+              _parentsForm[item.name] = { attr: _find.name, value: '' }
+            })
+            this.parentsForm = _parentsForm
+          })
+        }
       })
     },
     getFieldType(name) {
