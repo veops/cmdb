@@ -40,15 +40,25 @@ export default {
   },
   computed: {
     columns() {
+      const _columns = []
       if (this.ciTypeAttrs.attributes) {
-        return this.ciTypeAttrs.attributes.map((item) => {
-          return {
-            title: item.alias || item.name,
-            field: item.alias || item.name,
+        _columns.push(
+          ...this.ciTypeAttrs.attributes.map((item) => {
+            return {
+              title: item.alias || item.name,
+              field: item.alias || item.name,
+            }
+          })
+        )
+      }
+      if (this.uploadData && this.uploadData.length) {
+        Object.keys(this.uploadData[0]).forEach((key) => {
+          if (key.startsWith('$')) {
+            _columns.push({ title: key, field: key })
           }
         })
       }
-      return []
+      return _columns
     },
     dataSource() {
       return _.cloneDeep(this.uploadData)
