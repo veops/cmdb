@@ -7,7 +7,6 @@ import json
 import re
 
 import six
-from markupsafe import escape
 
 import api.models.cmdb as model
 from api.lib.cmdb.cache import AttributeCache
@@ -33,8 +32,8 @@ class ValueTypeMap(object):
     deserialize = {
         ValueTypeEnum.INT: string2int,
         ValueTypeEnum.FLOAT: float,
-        ValueTypeEnum.TEXT: lambda x: escape(x).encode('utf-8').decode('utf-8'),
-        ValueTypeEnum.TIME: lambda x: TIME_RE.findall(escape(x).encode('utf-8').decode('utf-8'))[0],
+        ValueTypeEnum.TEXT: lambda x: x,
+        ValueTypeEnum.TIME: lambda x: TIME_RE.findall(x)[0],
         ValueTypeEnum.DATETIME: str2datetime,
         ValueTypeEnum.DATE: str2datetime,
         ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) and x else x,
