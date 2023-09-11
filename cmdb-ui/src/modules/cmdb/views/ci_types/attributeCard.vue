@@ -51,6 +51,9 @@
 
       <a-space class="attribute-card-operation">
         <a v-if="!isStore"><a-icon type="edit" @click="handleEdit"/></a>
+        <a-tooltip title="所有CI触发计算">
+          <a v-if="!isStore && property.is_computed"><a-icon type="redo" @click="handleCalcComputed"/></a>
+        </a-tooltip>
         <a style="color:red;"><a-icon type="delete" @click="handleDelete"/></a>
       </a-space>
     </div>
@@ -59,7 +62,7 @@
 </template>
 
 <script>
-import { deleteCITypeAttributesById, deleteAttributesById } from '@/modules/cmdb/api/CITypeAttr'
+import { deleteCITypeAttributesById, deleteAttributesById, calcComputedAttribute } from '@/modules/cmdb/api/CITypeAttr'
 import ValueTypeIcon from '@/components/CMDBValueTypeMapIcon'
 import {
   ops_default_show,
@@ -164,6 +167,18 @@ export default {
     },
     openTrigger() {
       this.$refs.triggerForm.open(this.property)
+    },
+    handleCalcComputed() {
+      const that = this
+      this.$confirm({
+        title: '警告',
+        content: `确认触发所有CI的计算？`,
+        onOk() {
+          calcComputedAttribute(that.property.id).then(() => {
+            that.$message.success('触发成功！')
+          })
+        },
+      })
     },
   },
 }

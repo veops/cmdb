@@ -153,3 +153,10 @@ export function canDefineComputed() {
     method: 'HEAD',
   })
 }
+
+export function calcComputedAttribute(attr_id) {
+  return axios({
+    url: `/v0.1/attributes/${attr_id}/calc_computed_attribute`,
+    method: 'PUT',
+  })
+}
