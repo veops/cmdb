@@ -10,7 +10,7 @@
     :headerStyle="{ borderBottom: 'none' }"
     wrapClassName="attribute-edit-form"
   >
-    <a-form :form="form" :layout="formLayout" @submit="handleSubmit">
+    <a-form :form="form" :layout="formLayout">
       <a-divider style="font-size:14px;margin-top:6px;">基础设置</a-divider>
       <a-col :span="12">
         <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="属性名(英文)">
@@ -343,7 +343,13 @@
               name="is_password"
               v-decorator="['is_computed', { rules: [], valuePropName: 'checked' }]"
             />
-            <ComputedArea ref="computedArea" v-show="isShowComputedArea" :canDefineComputed="canDefineComputed" />
+            <ComputedArea
+              showCalcComputed
+              ref="computedArea"
+              v-show="isShowComputedArea"
+              @handleCalcComputed="handleCalcComputed"
+              :canDefineComputed="canDefineComputed"
+            />
           </a-form-item>
         </a-col>
       </a-row>
@@ -353,7 +359,7 @@
       </a-form-item>
       <div class="custom-drawer-bottom-action">
         <a-button @click="onClose">取消</a-button>
-        <a-button @click="handleSubmit" type="primary">确定</a-button>
+        <a-button @click="handleSubmit(false)" type="primary">确定</a-button>
       </div>
     </a-form>
   </CustomDrawer>
@@ -366,6 +372,7 @@ import {
   updateAttributeById,
   updateCITypeAttributesById,
   canDefineComputed,
+  calcComputedAttribute,
 } from '@/modules/cmdb/api/CITypeAttr'
 import { valueTypeMap } from '../../utils/const'
 import ComputedArea from './computedArea.vue'
@@ -576,15 +583,14 @@ export default {
       })
     },
 
-    handleSubmit(e) {
-      e.preventDefault()
-      this.form.validateFields((err, values) => {
+    async handleSubmit(isCalcComputed = false) {
+      await this.form.validateFields(async (err, values) => {
         if (!err) {
           console.log('Received values of form: ', values)
 
           if (this.record.is_required !== values.is_required || this.record.default_show !== values.default_show) {
             console.log('changed is_required')
-            updateCITypeAttributesById(this.CITypeId, {
+            await updateCITypeAttributesById(this.CITypeId, {
               attributes: [
                 { attr_id: this.record.id, is_required: values.is_required, default_show: values.default_show },
               ],
@@ -630,19 +636,21 @@ export default {
 
           const fontOptions = this.$refs.fontArea.getData()
           if (values.id) {
-            this.updateAttribute(values.id, { ...values, option: { fontOptions } })
+            await this.updateAttribute(values.id, { ...values, option: { fontOptions } }, isCalcComputed)
           } else {
             // this.createAttribute(values)
           }
         }
       })
     },
-    updateAttribute(attrId, data) {
-      updateAttributeById(attrId, data).then((res) => {
-        this.$message.success(`更新成功`)
-        this.handleOk()
-        this.onClose()
-      })
+    async updateAttribute(attrId, data, isCalcComputed = false) {
+      await updateAttributeById(attrId, data)
+      if (isCalcComputed) {
+        await calcComputedAttribute(attrId)
+      }
+      this.$message.success(`更新成功`)
+      this.handleOk()
+      this.onClose()
     },
     handleOk() {
       this.$emit('ok')
@@ -681,6 +689,9 @@ export default {
       this.form.setFieldsValue({
         default_value: key,
       })
+    },
+    async handleCalcComputed() {
+      await this.handleSubmit(true)
     },
   },
   watch: {},
