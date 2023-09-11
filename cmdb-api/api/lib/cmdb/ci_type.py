@@ -337,6 +337,17 @@ class CITypeAttributeManager(object):
         pass
 
     @staticmethod
+    def get_attr_name(ci_type_name, key):
+        ci_type = CITypeCache.get(ci_type_name)
+        if ci_type is None:
+            return
+
+        for i in CITypeAttributesCache.get(ci_type.id):
+            attr = AttributeCache.get(i.attr_id)
+            if attr and (attr.name == key or attr.alias == key):
+                return attr.name
+
+    @staticmethod
     def get_attr_names_by_type_id(type_id):
         return [AttributeCache.get(attr.attr_id).name for attr in CITypeAttributesCache.get(type_id)]
 
