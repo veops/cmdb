@@ -8,6 +8,14 @@
       <span style="font-size:12px;" slot="tab">代码</span>
       <codemirror style="z-index: 9999" :options="cmOptions" v-model="compute_script"></codemirror>
     </a-tab-pane>
+    <template slot="tabBarExtraContent" v-if="showCalcComputed">
+      <a-button type="primary" size="small" @click="handleCalcComputed">
+        应用
+      </a-button>
+      <a-tooltip title="所有CI触发计算">
+        <a-icon type="question-circle" style="margin-left:5px" />
+      </a-tooltip>
+    </template>
   </a-tabs>
 </template>
 
@@ -25,6 +33,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    showCalcComputed: {
+      type: Boolean,
+      default: false,
+    }
   },
   data() {
     return {
@@ -61,6 +73,16 @@ export default {
       } else {
         this.activeKey = 'expr'
       }
+    },
+    handleCalcComputed() {
+      const that = this
+      this.$confirm({
+        title: '警告',
+        content: `确认触发将保存当前配置及触发所有CI的计算？`,
+        onOk() {
+          that.$emit('handleCalcComputed')
+        },
+      })
     },
   },
 }
