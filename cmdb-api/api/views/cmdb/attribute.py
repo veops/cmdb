@@ -56,12 +56,7 @@ class AttributeView(APIView):
 
     @args_required("name")
     @args_validate(AttributeManager.cls)
-    def post(self, attr_id=None):
-        if request.url.endswith("/calc_computed_attribute"):
-            AttributeManager.calc_computed_attribute(attr_id)
-
-            return self.jsonify(attr_id=attr_id)
-
+    def post(self):
         choice_value = handle_arg_list(request.values.get("choice_value"))
         params = request.values
         params["choice_value"] = choice_value
@@ -74,6 +69,11 @@ class AttributeView(APIView):
 
     @args_validate(AttributeManager.cls)
     def put(self, attr_id):
+        if request.url.endswith("/calc_computed_attribute"):
+            AttributeManager.calc_computed_attribute(attr_id)
+
+            return self.jsonify(attr_id=attr_id)
+
         choice_value = handle_arg_list(request.values.get("choice_value"))
         params = request.values
         params["choice_value"] = choice_value

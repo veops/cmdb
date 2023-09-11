@@ -1,4 +1,4 @@
-# -*- coding:utf-8 -*- 
+# -*- coding:utf-8 -*-
 
 import copy
 import datetime
@@ -114,7 +114,7 @@ class CITypeManager(object):
     @kwargs_required("name")
     def add(cls, **kwargs):
 
-        unique_key = kwargs.pop("unique_key", None)
+        unique_key = kwargs.pop("unique_key", None) or kwargs.pop("unique_id", None)
         unique_key = AttributeCache.get(unique_key) or abort(404, ErrFormat.unique_key_not_define)
 
         kwargs["alias"] = kwargs["name"] if not kwargs.get("alias") else kwargs["alias"]
@@ -276,10 +276,10 @@ class CITypeGroupManager(object):
     def update(gid, name, type_ids):
         """
         update part
-        :param gid: 
-        :param name: 
-        :param type_ids: 
-        :return: 
+        :param gid:
+        :param name:
+        :param type_ids:
+        :return:
         """
         existed = CITypeGroup.get_by_id(gid) or abort(
             404, ErrFormat.ci_type_group_not_found.format("id={}".format(gid)))
@@ -386,10 +386,10 @@ class CITypeAttributeManager(object):
     def add(cls, type_id, attr_ids=None, **kwargs):
         """
         add attributes to CIType
-        :param type_id: 
+        :param type_id:
         :param attr_ids: list
-        :param kwargs: 
-        :return: 
+        :param kwargs:
+        :return:
         """
         attr_ids = list(set(attr_ids))
 
@@ -416,9 +416,9 @@ class CITypeAttributeManager(object):
     def update(cls, type_id, attributes):
         """
         update attributes to CIType
-        :param type_id: 
+        :param type_id:
         :param attributes: list
-        :return: 
+        :return:
         """
         cls._check(type_id, [i.get('attr_id') for i in attributes])
 
@@ -446,9 +446,9 @@ class CITypeAttributeManager(object):
     def delete(cls, type_id, attr_ids=None):
         """
         delete attributes from CIType
-        :param type_id: 
+        :param type_id:
         :param attr_ids: list
-        :return: 
+        :return:
         """
         from api.tasks.cmdb import ci_cache
 
@@ -823,6 +823,12 @@ class CITypeTemplateManager(object):
         for added_id in set(id2obj_dicts.keys()) - set(existed_ids):
             if cls == CIType:
                 CITypeManager.add(**id2obj_dicts[added_id])
+            elif cls == CITypeRelation:
+                CITypeRelationManager.add(id2obj_dicts[added_id].get('parent_id'),
+                                          id2obj_dicts[added_id].get('child_id'),
+                                          id2obj_dicts[added_id].get('relation_type_id'),
+                                          id2obj_dicts[added_id].get('constraint'),
+                                          )
             else:
                 cls.create(flush=True, **id2obj_dicts[added_id])
 
