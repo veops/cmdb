@@ -47,6 +47,7 @@ from api.models.cmdb import CITypeAttribute
 from api.models.cmdb import CITypeRelation
 from api.tasks.cmdb import ci_cache
 from api.tasks.cmdb import ci_delete
+from api.tasks.cmdb import ci_relation_add
 from api.tasks.cmdb import ci_relation_cache
 from api.tasks.cmdb import ci_relation_delete
 
@@ -305,9 +306,7 @@ class CIManager(object):
         unique_key = AttributeCache.get(ci_type.unique_id) or abort(
             400, ErrFormat.unique_value_not_found.format("unique_id={}".format(ci_type.unique_id)))
 
-        unique_value = ci_dict.get(unique_key.name)
-        unique_value = unique_value or ci_dict.get(unique_key.alias)
-        unique_value = unique_value or ci_dict.get(unique_key.id)
+        unique_value = ci_dict.get(unique_key.name) or ci_dict.get(unique_key.alias) or ci_dict.get(unique_key.id)
         unique_value = unique_value or abort(400, ErrFormat.unique_key_required.format(unique_key.name))
 
         attrs = CITypeAttributesCache.get2(ci_type_name)
@@ -360,7 +359,12 @@ class CIManager(object):
 
             cls._valid_unique_constraint(ci_type.id, ci_dict, ci and ci.id)
 
+            ref_ci_dict = dict()
             for k in ci_dict:
+                if k.startswith("$") and "." in k:
+                    ref_ci_dict[k] = ci_dict[k]
+                    continue
+
                 if k not in ci_type_attrs_name and (
                         k not in ci_type_attrs_alias and _no_attribute_policy == ExistPolicy.REJECT):
                     return abort(400, ErrFormat.attribute_not_found.format(k))
@@ -384,6 +388,9 @@ class CIManager(object):
 
         if record_id:  # has change
             ci_cache.apply_async([ci.id], queue=CMDB_QUEUE)
+
+        if ref_ci_dict:  # add relations
+            ci_relation_add.apply_async(args=(ref_ci_dict, ci.id, current_user.uid), queue=CMDB_QUEUE)
 
         return ci.id
 
@@ -426,6 +433,10 @@ class CIManager(object):
 
         if record_id:  # has change
             ci_cache.apply_async([ci_id], queue=CMDB_QUEUE)
+
+        ref_ci_dict = {k: v for k, v in ci_dict.items() if k.startswith("$") and "." in k}
+        if ref_ci_dict:
+            ci_relation_add.apply_async(args=(ref_ci_dict, ci.id), queue=CMDB_QUEUE)
 
     @staticmethod
     def update_unique_value(ci_id, unique_name, unique_value):
@@ -744,17 +755,28 @@ class CIRelationManager(object):
         return ci_ids
 
     @staticmethod
-    def _check_constraint(first_ci_id, second_ci_id, type_relation):
+    def _check_constraint(first_ci_id, first_type_id, second_ci_id, second_type_id, type_relation):
+        db.session.remove()
         if type_relation.constraint == ConstraintEnum.Many2Many:
             return
 
-        first_existed = CIRelation.get_by(first_ci_id=first_ci_id, relation_type_id=type_relation.relation_type_id)
-        second_existed = CIRelation.get_by(second_ci_id=second_ci_id, relation_type_id=type_relation.relation_type_id)
-        if type_relation.constraint == ConstraintEnum.One2One and (first_existed or second_existed):
-            return abort(400, ErrFormat.relation_constraint.format("1-1"))
+        first_existed = CIRelation.get_by(first_ci_id=first_ci_id,
+                                          relation_type_id=type_relation.relation_type_id, to_dict=False)
+        second_existed = CIRelation.get_by(second_ci_id=second_ci_id,
+                                           relation_type_id=type_relation.relation_type_id, to_dict=False)
+        if type_relation.constraint == ConstraintEnum.One2One:
+            for i in first_existed:
+                if i.second_ci.type_id == second_type_id:
+                    return abort(400, ErrFormat.relation_constraint.format("1-1"))
 
-        if type_relation.constraint == ConstraintEnum.One2Many and second_existed:
-            return abort(400, ErrFormat.relation_constraint.format("1-N"))
+            for i in second_existed:
+                if i.first_ci.type_id == first_type_id:
+                    return abort(400, ErrFormat.relation_constraint.format("1-1"))
+
+        if type_relation.constraint == ConstraintEnum.One2Many:
+            for i in second_existed:
+                if i.first_ci.type_id == first_type_id:
+                    return abort(400, ErrFormat.relation_constraint.format("1-N"))
 
     @classmethod
     def add(cls, first_ci_id, second_ci_id, more=None, relation_type_id=None):
@@ -793,15 +815,17 @@ class CIRelationManager(object):
             else:
                 type_relation = CITypeRelation.get_by_id(relation_type_id)
 
-            cls._check_constraint(first_ci_id, second_ci_id, type_relation)
+            with Lock("ci_relation_add_{}_{}".format(first_ci.type_id, second_ci.type_id), need_lock=True):
 
-            existed = CIRelation.create(first_ci_id=first_ci_id,
-                                        second_ci_id=second_ci_id,
-                                        relation_type_id=relation_type_id)
+                cls._check_constraint(first_ci_id, first_ci.type_id, second_ci_id, second_ci.type_id, type_relation)
 
-            CIRelationHistoryManager().add(existed, OperateType.ADD)
+                existed = CIRelation.create(first_ci_id=first_ci_id,
+                                            second_ci_id=second_ci_id,
+                                            relation_type_id=relation_type_id)
 
-            ci_relation_cache.apply_async(args=(first_ci_id, second_ci_id), queue=CMDB_QUEUE)
+                CIRelationHistoryManager().add(existed, OperateType.ADD)
+
+                ci_relation_cache.apply_async(args=(first_ci_id, second_ci_id), queue=CMDB_QUEUE)
 
         if more is not None:
             existed.upadte(more=more)

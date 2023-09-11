@@ -12,6 +12,7 @@ from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.const import BUILTIN_KEYWORDS
 from api.lib.cmdb.const import CITypeOperateType
+from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RoleEnum
@@ -103,10 +104,10 @@ class AttributeManager(object):
     @classmethod
     def search_attributes(cls, name=None, alias=None, page=1, page_size=None):
         """
-        :param name: 
-        :param alias: 
-        :param page: 
-        :param page_size: 
+        :param name:
+        :param alias:
+        :param page:
+        :param page_size:
         :return: attribute, if name is None, then return all attributes
         """
         if name is not None:
@@ -161,6 +162,17 @@ class AttributeManager(object):
     def can_create_computed_attribute():
         if RoleEnum.CONFIG not in session.get("acl", {}).get("parentRoles", []) and not is_app_admin('cmdb'):
             return abort(403, ErrFormat.role_required.format(RoleEnum.CONFIG))
+
+    @staticmethod
+    def calc_computed_attribute(attr_id):
+        """
+        calculate computed attribute for all ci
+        :param attr_id:
+        :return:
+        """
+        from api.tasks.cmdb import calc_computed_attribute
+
+        calc_computed_attribute.apply_async(args=(attr_id, current_user.uid), queue=CMDB_QUEUE)
 
     @classmethod
     @kwargs_required("name")

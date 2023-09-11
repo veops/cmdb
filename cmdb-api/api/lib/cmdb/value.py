@@ -80,7 +80,7 @@ class AttributeValueManager(object):
         return res
 
     @staticmethod
-    def __deserialize_value(value_type, value):
+    def _deserialize_value(value_type, value):
         if not value:
             return value
 
@@ -92,13 +92,13 @@ class AttributeValueManager(object):
             return abort(400, ErrFormat.attribute_value_invalid.format(value))
 
     @staticmethod
-    def __check_is_choice(attr, value_type, value):
+    def _check_is_choice(attr, value_type, value):
         choice_values = AttributeManager.get_choice_values(attr.id, value_type, attr.choice_web_hook)
         if str(value) not in list(map(str, [i[0] for i in choice_values])):
             return abort(400, ErrFormat.not_in_choice_values.format(value))
 
     @staticmethod
-    def __check_is_unique(value_table, attr, ci_id, type_id, value):
+    def _check_is_unique(value_table, attr, ci_id, type_id, value):
         existed = db.session.query(value_table.attr_id).join(CI, CI.id == value_table.ci_id).filter(
             CI.type_id == type_id).filter(
             value_table.attr_id == attr.id).filter(value_table.deleted.is_(False)).filter(
@@ -107,20 +107,20 @@ class AttributeValueManager(object):
         existed and abort(400, ErrFormat.attribute_value_unique_required.format(attr.alias, value))
 
     @staticmethod
-    def __check_is_required(type_id, attr, value, type_attr=None):
+    def _check_is_required(type_id, attr, value, type_attr=None):
         type_attr = type_attr or CITypeAttributeCache.get(type_id, attr.id)
         if type_attr and type_attr.is_required and not value and value != 0:
             return abort(400, ErrFormat.attribute_value_required.format(attr.alias))
 
     def _validate(self, attr, value, value_table, ci=None, type_id=None, ci_id=None, type_attr=None):
         ci = ci or {}
-        v = self.__deserialize_value(attr.value_type, value)
+        v = self._deserialize_value(attr.value_type, value)
 
-        attr.is_choice and value and self.__check_is_choice(attr, attr.value_type, v)
-        attr.is_unique and self.__check_is_unique(
+        attr.is_choice and value and self._check_is_choice(attr, attr.value_type, v)
+        attr.is_unique and self._check_is_unique(
             value_table, attr, ci and ci.id or ci_id, ci and ci.type_id or type_id, v)
 
-        self.__check_is_required(ci and ci.type_id or type_id, attr, v, type_attr=type_attr)
+        self._check_is_required(ci and ci.type_id or type_id, attr, v, type_attr=type_attr)
 
         if v == "" and attr.value_type not in (ValueTypeEnum.TEXT,):
             v = None
@@ -145,7 +145,7 @@ class AttributeValueManager(object):
         return record_id
 
     @staticmethod
-    def __compute_attr_value_from_expr(expr, ci_dict):
+    def _compute_attr_value_from_expr(expr, ci_dict):
         t = jinja2.Template(expr).render(ci_dict)
 
         try:
@@ -155,7 +155,7 @@ class AttributeValueManager(object):
             return t
 
     @staticmethod
-    def __compute_attr_value_from_script(script, ci_dict):
+    def _compute_attr_value_from_script(script, ci_dict):
         script = jinja2.Template(script).render(ci_dict)
 
         script_f = tempfile.NamedTemporaryFile(delete=False, suffix=".py")
@@ -184,22 +184,22 @@ class AttributeValueManager(object):
 
         return [var for var in schema.get("properties")]
 
-    def _compute_attr_value(self, attr, payload, ci):
+    def _compute_attr_value(self, attr, payload, ci_id):
         attrs = (self._jinja2_parse(attr['compute_expr']) if attr.get('compute_expr')
                  else self._jinja2_parse(attr['compute_script']))
         not_existed = [i for i in attrs if i not in payload]
-        if ci is not None:
-            payload.update(self.get_attr_values(not_existed, ci.id))
+        if ci_id is not None:
+            payload.update(self.get_attr_values(not_existed, ci_id))
 
         if attr['compute_expr']:
-            return self.__compute_attr_value_from_expr(attr['compute_expr'], payload)
+            return self._compute_attr_value_from_expr(attr['compute_expr'], payload)
         elif attr['compute_script']:
-            return self.__compute_attr_value_from_script(attr['compute_script'], payload)
+            return self._compute_attr_value_from_script(attr['compute_script'], payload)
 
     def handle_ci_compute_attributes(self, ci_dict, computed_attrs, ci):
         payload = copy.deepcopy(ci_dict)
         for attr in computed_attrs:
-            computed_value = self._compute_attr_value(attr, payload, ci)
+            computed_value = self._compute_attr_value(attr, payload, ci and ci.id)
             if computed_value is not None:
                 ci_dict[attr['name']] = computed_value
 
@@ -221,7 +221,7 @@ class AttributeValueManager(object):
                                   for i in handle_arg_list(value)]
                     ci_dict[key] = value_list
                     if not value_list:
-                        self.__check_is_required(type_id, attr, '')
+                        self._check_is_required(type_id, attr, '')
 
                 else:
                     value = self._validate(attr, value, value_table, ci=None, type_id=type_id, ci_id=ci_id,
@@ -311,7 +311,7 @@ class AttributeValueManager(object):
             if attr.is_list:
                 value_list = [self._validate(attr, i, value_table, ci) for i in handle_arg_list(value)]
                 if not value_list:
-                    self.__check_is_required(ci.type_id, attr, '')
+                    self._check_is_required(ci.type_id, attr, '')
 
                 existed_attrs = value_table.get_by(attr_id=attr.id, ci_id=ci.id, to_dict=False)
                 existed_values = [i.value for i in existed_attrs]

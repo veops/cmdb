@@ -1,37 +1,52 @@
-.PHONY: env clean api ui worker
+MYSQL_ROOT_PASSWORD ?= root
+MYSQL_PORT ?= 3306
+REDIS_PORT ?= 6379
 
-help:
-	@echo "  env         create a development environment using pipenv"
-	@echo "  deps        install dependencies using pip"
-	@echo "  clean       remove unwanted files like .pyc's"
-	@echo "  lint        check style with flake8"
-	@echo "  api         start api server"
-	@echo "  ui          start ui  server"
-	@echo "  worker      start async tasks worker"
+default: help
+help:  ## display this help
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+.PHONY: help
 
-env:
+env: ## create a development environment using pipenv
 	sudo easy_install pip && \
 	pip install pipenv -i https://pypi.douban.com/simple && \
 	npm install yarn && \
 	make deps
+.PHONY: env
 
-deps:
+docker-mysql: ## deploy MySQL use docker
+	@docker run --name mysql -p ${MYSQL_PORT}:3306 -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} -d mysql:latest
+.PHONY: docker-mysql
+
+docker-redis: ## deploy Redis use docker
+	@docker run --name redis -p ${REDIS_PORT}:6379 -d redis:latest
+.PHONY: docker-redis
+
+deps: ## install dependencies using pip
+	cd cmdb-api && \
 	pipenv install --dev && \
 	pipenv run flask db-setup && \
 	pipenv run flask cmdb-init-cache && \
+	cd .. && \
     cd cmdb-ui && yarn install && cd ..
+.PHONY: deps
 
-api:
+api: ## start api server
 	cd cmdb-api && pipenv run flask run -h 0.0.0.0
+.PHONY: api
 
-worker:
+worker: ## start async tasks worker
 	cd cmdb-api && pipenv run celery -A celery_worker.celery worker -E -Q one_cmdb_async --concurrency=1 -D && pipenv run celery -A celery_worker.celery worker -E -Q acl_async --concurrency=1 -D
+.PHONY: worker
 
-ui:
+ui: ## start ui server
 	cd cmdb-ui && yarn run serve
+.PHONY: ui
 
-clean:
+clean: ## remove unwanted files like .pyc's
 	pipenv run flask clean
+.PHONY: clean
 
-lint:
+lint: ## check style with flake8
 	flake8 --exclude=env .
+.PHONY: lint
