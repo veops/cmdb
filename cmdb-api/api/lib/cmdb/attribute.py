@@ -163,13 +163,15 @@ class AttributeManager(object):
         if RoleEnum.CONFIG not in session.get("acl", {}).get("parentRoles", []) and not is_app_admin('cmdb'):
             return abort(403, ErrFormat.role_required.format(RoleEnum.CONFIG))
 
-    @staticmethod
-    def calc_computed_attribute(attr_id):
+    @classmethod
+    def calc_computed_attribute(cls, attr_id):
         """
         calculate computed attribute for all ci
         :param attr_id:
         :return:
         """
+        cls.can_create_computed_attribute()
+
         from api.tasks.cmdb import calc_computed_attribute
 
         calc_computed_attribute.apply_async(args=(attr_id, current_user.uid), queue=CMDB_QUEUE)
