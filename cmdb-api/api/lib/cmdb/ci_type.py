@@ -3,9 +3,11 @@
 import copy
 import datetime
 
+import toposort
 from flask import abort
 from flask import current_app
 from flask_login import current_user
+from toposort import toposort_flatten
 
 from api.extensions import db
 from api.lib.cmdb.attribute import AttributeManager
@@ -371,6 +373,16 @@ class CITypeAttributeManager(object):
         return result
 
     @staticmethod
+    def get_common_attributes(type_ids):
+        result = CITypeAttribute.get_by(__func_in___key_type_id=list(map(int, type_ids)), to_dict=False)
+        attr2types = {}
+        for i in result:
+            attr2types.setdefault(i.attr_id, []).append(i.type_id)
+
+        return [AttributeCache.get(attr_id).to_dict() for attr_id in attr2types
+                if len(attr2types[attr_id]) == len(type_ids)]
+
+    @staticmethod
     def _check(type_id, attr_ids):
         ci_type = CITypeManager.check_is_existed(type_id)
 
@@ -565,6 +577,22 @@ class CITypeRelationManager(object):
         return [cls._wrap_relation_type_dict(child.child_id, child) for child in children]
 
     @classmethod
+    def recursive_level2children(cls, parent_id):
+        result = dict()
+
+        def get_children(_id, level):
+            children = CITypeRelation.get_by(parent_id=_id, to_dict=False)
+            result[level + 1] = [i.child.to_dict() for i in children]
+
+            for i in children:
+                if i.child_id != _id:
+                    get_children(i.child_id, level + 1)
+
+        get_children(parent_id, 0)
+
+        return result
+
+    @classmethod
     def get_parents(cls, child_id):
         parents = CITypeRelation.get_by(child_id=child_id, to_dict=False)
 
@@ -585,6 +613,17 @@ class CITypeRelationManager(object):
     def add(cls, parent, child, relation_type_id, constraint=ConstraintEnum.One2Many):
         p = CITypeManager.check_is_existed(parent)
         c = CITypeManager.check_is_existed(child)
+
+        rels = {}
+        for i in CITypeRelation.get_by(to_dict=False):
+            rels.setdefault(i.child_id, set()).add(i.parent_id)
+        rels.setdefault(c.id, set()).add(p.id)
+
+        try:
+            toposort_flatten(rels)
+        except toposort.CircularDependencyError as e:
+            current_app.logger.warning(str(e))
+            return abort(400, ErrFormat.circular_dependency_error)
 
         existed = cls._get(p.id, c.id)
         if existed is not None:
