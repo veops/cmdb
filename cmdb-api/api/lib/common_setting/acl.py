@@ -6,6 +6,7 @@ from api.lib.common_setting.resp_format import ErrFormat
 from api.lib.perm.acl.cache import RoleCache, AppCache
 from api.lib.perm.acl.role import RoleCRUD, RoleRelationCRUD
 from api.lib.perm.acl.user import UserCRUD
+from api.lib.perm.acl.resource import ResourceTypeCRUD, ResourceCRUD
 
 
 class ACLManager(object):
@@ -94,3 +95,22 @@ class ACLManager(object):
                       avatar=user_info.get('avatar'))
 
         return result
+
+    def validate_app(self):
+        return AppCache.get(self.app_name)
+
+    def get_all_resources_types(self, q=None, page=1, page_size=999999):
+        app_id = self.validate_app().id
+        numfound, res, id2perms = ResourceTypeCRUD.search(q, app_id, page, page_size)
+
+        return dict(
+            numfound=numfound,
+            groups=[i.to_dict() for i in res],
+            id2perms=id2perms
+        )
+
+    def create_resource(self, payload):
+        payload['app_id'] = self.validate_app().id
+        resource = ResourceCRUD.add(**payload)
+
+        return resource.to_dict()
