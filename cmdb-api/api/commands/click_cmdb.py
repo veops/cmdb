@@ -9,6 +9,7 @@ import time
 import click
 from flask import current_app
 from flask.cli import with_appcontext
+from flask_login import login_user
 
 import api.lib.cmdb.ci
 from api.extensions import db
@@ -24,6 +25,7 @@ from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.exception import AbortException
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.cache import AppCache
+from api.lib.perm.acl.cache import UserCache
 from api.lib.perm.acl.resource import ResourceCRUD
 from api.lib.perm.acl.resource import ResourceTypeCRUD
 from api.lib.perm.acl.role import RoleCRUD
@@ -207,6 +209,8 @@ def cmdb_counter():
     """
     from api.lib.cmdb.cache import CMDBCounterCache
 
+    current_app.test_request_context().push()
+    login_user(UserCache.get('worker'))
     while True:
         try:
             db.session.remove()
