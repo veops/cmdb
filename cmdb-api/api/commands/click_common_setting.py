@@ -161,6 +161,55 @@ class InitDepartment(object):
             info = f"update department acl_rid: {acl_rid}"
             current_app.logger.info(info)
 
+    def init_backend_resource(self):
+        acl = self.check_app('backend')
+        resources_types = acl.get_all_resources_types()
+
+        results = list(filter(lambda t: t['name'] == '操作权限', resources_types['groups']))
+        if len(results) == 0:
+            payload = dict(
+                app_id=acl.app_name,
+                name='操作权限',
+                description='',
+                perms=['read', 'grant', 'delete', 'update']
+            )
+            resource_type = acl.create_resources_type(payload)
+        else:
+            resource_type = results[0]
+
+        for name in ['公司信息']:
+            payload = dict(
+                type_id=resource_type['id'],
+                app_id=acl.app_name,
+                name=name,
+            )
+            try:
+                acl.create_resource(payload)
+            except Exception as e:
+                if '已经存在' in str(e):
+                    pass
+                else:
+                    raise Exception(e)
+
+    def check_app(self, app_name):
+        acl = ACLManager(app_name)
+        payload = dict(
+            name=app_name,
+            description=app_name
+        )
+        try:
+            app = acl.validate_app()
+            if app:
+                return acl
+
+            acl.create_app(payload)
+        except Exception as e:
+            current_app.logger.error(e)
+            if '不存在' in str(e):
+                acl.create_app(payload)
+                return acl
+            raise Exception(e)
+
 
 @click.command()
 @with_appcontext
@@ -177,5 +226,7 @@ def init_department():
     """
     Department initialization
     """
-    InitDepartment().init()
-    InitDepartment().create_acl_role_with_department()
+    cli = InitDepartment()
+    cli.init_wide_company()
+    cli.create_acl_role_with_department()
+    cli.init_backend_resource()
