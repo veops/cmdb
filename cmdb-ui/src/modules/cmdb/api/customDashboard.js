@@ -37,3 +37,11 @@ export function batchUpdateCustomDashboard(data) {
         data
     })
 }
+
+export function postCustomDashboardPreview(data) {
+    return axios({
+        url: '/v0.1/custom_dashboard/preview',
+        method: 'post',
+        data
+    })
+}
