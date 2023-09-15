@@ -94,5 +94,3 @@ ES_HOST = '127.0.0.1'
 USE_ES = False
 
 BOOL_TRUE = ['true', 'TRUE', 'True', True, '1', 1, "Yes", "YES", "yes", 'Y', 'y']
-
-CMDB_API = "http://127.0.0.1:5000/api/v0.1"
