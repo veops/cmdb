@@ -15,6 +15,14 @@ class CustomDashboardManager(object):
         return sorted(CustomDashboard.get_by(to_dict=True), key=lambda x: (x["category"], x['order']))
 
     @staticmethod
+    def preview(**kwargs):
+        from api.lib.cmdb.cache import CMDBCounterCache
+
+        res = CMDBCounterCache.update(kwargs, flush=False)
+
+        return res
+
+    @staticmethod
     def add(**kwargs):
         from api.lib.cmdb.cache import CMDBCounterCache
 
@@ -23,9 +31,9 @@ class CustomDashboardManager(object):
 
         new = CustomDashboard.create(**kwargs)
 
-        CMDBCounterCache.update(new.to_dict())
+        res = CMDBCounterCache.update(new.to_dict())
 
-        return new
+        return new, res
 
     @staticmethod
     def update(_id, **kwargs):
@@ -35,9 +43,9 @@ class CustomDashboardManager(object):
 
         new = existed.update(**kwargs)
 
-        CMDBCounterCache.update(new.to_dict())
+        res = CMDBCounterCache.update(new.to_dict())
 
-        return new
+        return new, res
 
     @staticmethod
     def batch_update(id2options):

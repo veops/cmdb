@@ -1,4 +1,4 @@
-# -*- coding:utf-8 -*- 
+# -*- coding:utf-8 -*-
 
 
 import json
@@ -154,9 +154,15 @@ class EnableCITypeView(APIView):
 
 
 class CITypeAttributeView(APIView):
-    url_prefix = ("/ci_types/<int:type_id>/attributes", "/ci_types/<string:type_name>/attributes")
+    url_prefix = ("/ci_types/<int:type_id>/attributes", "/ci_types/<string:type_name>/attributes",
+                  "/ci_types/common_attributes")
 
     def get(self, type_id=None, type_name=None):
+        if request.path.endswith("/common_attributes"):
+            type_ids = handle_arg_list(request.values.get('type_ids'))
+
+            return self.jsonify(attributes=CITypeAttributeManager.get_common_attributes(type_ids))
+
         t = CITypeCache.get(type_id) or CITypeCache.get(type_name) or abort(404, ErrFormat.ci_type_not_found)
         type_id = t.id
         unique_id = t.unique_id
@@ -500,3 +506,4 @@ class CITypeFilterPermissionView(APIView):
     @auth_with_app_token
     def get(self, type_id):
         return self.jsonify(CIFilterPermsCRUD().get(type_id))
+

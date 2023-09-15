@@ -2,14 +2,11 @@
 
 from __future__ import unicode_literals
 
-import requests
 from flask import current_app
 
 from api.extensions import cache
-from api.extensions import db
 from api.lib.cmdb.custom_dashboard import CustomDashboardManager
 from api.models.cmdb import Attribute
-from api.models.cmdb import CI
 from api.models.cmdb import CIType
 from api.models.cmdb import CITypeAttribute
 from api.models.cmdb import RelationType
@@ -210,7 +207,6 @@ class CITypeAttributeCache(object):
 
     @classmethod
     def get(cls, type_id, attr_id):
-
         attr = cache.get(cls.PREFIX_ID.format(type_id, attr_id))
         attr = attr or cache.get(cls.PREFIX_ID.format(type_id, attr_id))
         attr = attr or CITypeAttribute.get_by(type_id=type_id, attr_id=attr_id, first=True, to_dict=False)
@@ -251,53 +247,72 @@ class CMDBCounterCache(object):
         result = {}
         for custom in customs:
             if custom['category'] == 0:
-                result[custom['id']] = cls.summary_counter(custom['type_id'])
+                res = cls.sum_counter(custom)
             elif custom['category'] == 1:
-                result[custom['id']] = cls.attribute_counter(custom['type_id'], custom['attr_id'])
-            elif custom['category'] == 2:
-                result[custom['id']] = cls.relation_counter(custom['type_id'], custom['level'])
+                res = cls.attribute_counter(custom)
+            else:
+                res = cls.relation_counter(custom.get('type_id'),
+                                           custom.get('level'),
+                                           custom.get('options', {}).get('filter', ''),
+                                           custom.get('options', {}).get('type_ids', ''))
+
+            if res:
+                result[custom['id']] = res
 
         cls.set(result)
 
         return result
 
     @classmethod
-    def update(cls, custom):
+    def update(cls, custom, flush=True):
         result = cache.get(cls.KEY) or {}
         if not result:
             result = cls.reset()
 
         if custom['category'] == 0:
-            result[custom['id']] = cls.summary_counter(custom['type_id'])
+            res = cls.sum_counter(custom)
         elif custom['category'] == 1:
-            result[custom['id']] = cls.attribute_counter(custom['type_id'], custom['attr_id'])
-        elif custom['category'] == 2:
-            result[custom['id']] = cls.relation_counter(custom['type_id'], custom['level'])
+            res = cls.attribute_counter(custom)
+        else:
+            res = cls.relation_counter(custom.get('type_id'),
+                                       custom.get('level'),
+                                       custom.get('options', {}).get('filter', ''),
+                                       custom.get('options', {}).get('type_ids', ''))
 
-        cls.set(result)
+        if res and flush:
+            result[custom['id']] = res
+            cls.set(result)
+
+        return res
 
     @staticmethod
-    def summary_counter(type_id):
-        return db.session.query(CI.id).filter(CI.deleted.is_(False)).filter(CI.type_id == type_id).count()
+    def relation_counter(type_id, level, other_filer, type_ids):
+        from api.lib.cmdb.search.ci_relation.search import Search as RelSearch
+        from api.lib.cmdb.search import SearchError
+        from api.lib.cmdb.search.ci import search
 
-    @staticmethod
-    def relation_counter(type_id, level):
+        query = "_type:{}".format(type_id)
+        s = search(query, count=1000000)
+        try:
+            type_names, _, _, _, _, _ = s.search()
+        except SearchError as e:
+            current_app.logger.error(e)
+            return
 
-        uri = current_app.config.get('CMDB_API')
-
-        type_names = requests.get("{}/ci/s?q=_type:{}&count=10000".format(uri, type_id)).json().get('result')
         type_id_names = [(str(i.get('_id')), i.get(i.get('unique'))) for i in type_names]
 
-        url = "{}/ci_relations/statistics?root_ids={}&level={}".format(
-            uri, ','.join([i[0] for i in type_id_names]), level)
-        stats = requests.get(url).json()
+        s = RelSearch([i[0] for i in type_id_names], level, other_filer or '')
+        try:
+            stats = s.statistics(type_ids)
+        except SearchError as e:
+            current_app.logger.error(e)
+            return
 
         id2name = dict(type_id_names)
         type_ids = set()
         for i in (stats.get('detail') or []):
             for j in stats['detail'][i]:
                 type_ids.add(j)
-
         for type_id in type_ids:
             _type = CITypeCache.get(type_id)
             id2name[type_id] = _type and _type.alias
@@ -317,9 +332,94 @@ class CMDBCounterCache(object):
         return result
 
     @staticmethod
-    def attribute_counter(type_id, attr_id):
-        uri = current_app.config.get('CMDB_API')
-        url = "{}/ci/s?q=_type:{}&fl={}&facet={}".format(uri, type_id, attr_id, attr_id)
-        res = requests.get(url).json()
-        if res.get('facet'):
-            return dict([i[:2] for i in list(res.get('facet').values())[0]])
+    def attribute_counter(custom):
+        from api.lib.cmdb.search import SearchError
+        from api.lib.cmdb.search.ci import search
+
+        custom.setdefault('options', {})
+        type_id = custom.get('type_id')
+        attr_id = custom.get('attr_id')
+        type_ids = custom['options'].get('type_ids') or (type_id and [type_id])
+        attr_ids = list(map(str, custom['options'].get('attr_ids') or (attr_id and [attr_id])))
+        other_filter = custom['options'].get('filter')
+        other_filter = "({})".format(other_filter) if other_filter else ''
+
+        if custom['options'].get('ret') == 'cis':
+            query = "_type:({}),{}".format(";".join(map(str, type_ids)), other_filter)
+            s = search(query, fl=attr_ids, ret_key='alias', count=100)
+            try:
+                cis, _, _, _, _, _ = s.search()
+            except SearchError as e:
+                current_app.logger.error(e)
+                return
+
+            return cis
+
+        result = dict()
+        # level = 1
+        query = "_type:({}),{}".format(";".join(map(str, type_ids)), other_filter)
+        s = search(query, fl=attr_ids, facet=[attr_ids[0]], count=1)
+        try:
+            _, _, _, _, _, facet = s.search()
+        except SearchError as e:
+            current_app.logger.error(e)
+            return
+        for i in (list(facet.values()) or [[]])[0]:
+            result[i[0]] = i[1]
+        if len(attr_ids) == 1:
+            return result
+
+        # level = 2
+        for v in result:
+            query = "_type:({}),{},{}:{}".format(";".join(map(str, type_ids)), other_filter, attr_ids[0], v)
+            s = search(query, fl=attr_ids, facet=[attr_ids[1]], count=1)
+            try:
+                _, _, _, _, _, facet = s.search()
+            except SearchError as e:
+                current_app.logger.error(e)
+                return
+            result[v] = dict()
+            for i in (list(facet.values()) or [[]])[0]:
+                result[v][i[0]] = i[1]
+
+        if len(attr_ids) == 2:
+            return result
+
+        # level = 3
+        for v1 in result:
+            if not isinstance(result[v1], dict):
+                continue
+            for v2 in result[v1]:
+                query = "_type:({}),{},{}:{},{}:{}".format(";".join(map(str, type_ids)), other_filter,
+                                                           attr_ids[0], v1, attr_ids[1], v2)
+                s = search(query, fl=attr_ids, facet=[attr_ids[2]], count=1)
+                try:
+                    _, _, _, _, _, facet = s.search()
+                except SearchError as e:
+                    current_app.logger.error(e)
+                    return
+                result[v1][v2] = dict()
+                for i in (list(facet.values()) or [[]])[0]:
+                    result[v1][v2][i[0]] = i[1]
+
+        return result
+
+    @staticmethod
+    def sum_counter(custom):
+        from api.lib.cmdb.search import SearchError
+        from api.lib.cmdb.search.ci import search
+
+        custom.setdefault('options', {})
+        type_id = custom.get('type_id')
+        type_ids = custom['options'].get('type_ids') or (type_id and [type_id])
+        other_filter = custom['options'].get('filter') or ''
+
+        query = "_type:({}),{}".format(";".join(map(str, type_ids)), other_filter)
+        s = search(query, count=1)
+        try:
+            _, _, _, _, numfound, _ = s.search()
+        except SearchError as e:
+            current_app.logger.error(e)
+            return
+
+        return numfound
