@@ -6,6 +6,97 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "37334642",
+      "name": "cmdb-histogram",
+      "font_class": "cmdb-bar",
+      "unicode": "e886",
+      "unicode_decimal": 59526
+    },
+    {
+      "icon_id": "37334651",
+      "name": "cmdb-index",
+      "font_class": "cmdb-count",
+      "unicode": "e883",
+      "unicode_decimal": 59523
+    },
+    {
+      "icon_id": "37334650",
+      "name": "cmdb-piechart",
+      "font_class": "cmdb-pie",
+      "unicode": "e884",
+      "unicode_decimal": 59524
+    },
+    {
+      "icon_id": "37334648",
+      "name": "cmdb-line",
+      "font_class": "cmdb-line",
+      "unicode": "e885",
+      "unicode_decimal": 59525
+    },
+    {
+      "icon_id": "37334627",
+      "name": "cmdb-table",
+      "font_class": "cmdb-table",
+      "unicode": "e882",
+      "unicode_decimal": 59522
+    },
+    {
+      "icon_id": "37310392",
+      "name": "itsm-all",
+      "font_class": "itsm-all",
+      "unicode": "e87f",
+      "unicode_decimal": 59519
+    },
+    {
+      "icon_id": "36998696",
+      "name": "itsm-reply",
+      "font_class": "itsm-reply",
+      "unicode": "e87e",
+      "unicode_decimal": 59518
+    },
+    {
+      "icon_id": "36639018",
+      "name": "itsm-information",
+      "font_class": "itsm-information",
+      "unicode": "e880",
+      "unicode_decimal": 59520
+    },
+    {
+      "icon_id": "36639017",
+      "name": "itsm-contact",
+      "font_class": "itsm-contact",
+      "unicode": "e881",
+      "unicode_decimal": 59521
+    },
+    {
+      "icon_id": "36557425",
+      "name": "itsm-my-processed",
+      "font_class": "itsm-my-my_already_handle",
+      "unicode": "e87d",
+      "unicode_decimal": 59517
+    },
+    {
+      "icon_id": "36488174",
+      "name": "rule_7",
+      "font_class": "rule_7",
+      "unicode": "e87c",
+      "unicode_decimal": 59516
+    },
+    {
+      "icon_id": "36380087",
+      "name": "itsm-my-completed",
+      "font_class": "itsm-my-completed",
+      "unicode": "e879",
+      "unicode_decimal": 59513
+    },
+    {
+      "icon_id": "36380096",
+      "name": "itsm-my-plan",
+      "font_class": "itsm-my-plan",
+      "unicode": "e87b",
+      "unicode_decimal": 59515
+    },
+    {
       "icon_id": "36304673",
       "name": "rule_100",
       "font_class": "rule_100",
@@ -1450,7 +1541,7 @@
     {
       "icon_id": "35024980",
       "name": "itsm-node-strat",
-      "font_class": "itsm-node-strat",
+      "font_class": "itsm-node-start",
       "unicode": "e7ae",
       "unicode_decimal": 59310
     },
