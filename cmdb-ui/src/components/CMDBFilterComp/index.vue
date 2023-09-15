@@ -68,7 +68,8 @@ export default {
   },
 
   methods: {
-    visibleChange(open) {
+    visibleChange(open, isInitOne = true) {
+      // isInitOne  初始化exp为空时，ruleList是否默认给一条
       //   const regQ = /(?<=q=).+(?=&)|(?<=q=).+$/g
       const exp = this.expression.match(new RegExp(this.regQ, 'g'))
         ? this.expression.match(new RegExp(this.regQ, 'g'))[0]
@@ -151,15 +152,20 @@ export default {
         })
         this.ruleList = [...expArray]
       } else if (open) {
-        this.ruleList = [
-          {
-            id: uuidv4(),
-            type: 'and',
-            property: this.canSearchPreferenceAttrList[0].name,
-            exp: 'is',
-            value: null,
-          },
-        ]
+        this.ruleList = isInitOne
+          ? [
+              {
+                id: uuidv4(),
+                type: 'and',
+                property:
+                  this.canSearchPreferenceAttrList && this.canSearchPreferenceAttrList.length
+                    ? this.canSearchPreferenceAttrList[0].name
+                    : undefined,
+                exp: 'is',
+                value: null,
+              },
+            ]
+          : []
       }
     },
     handleClear() {

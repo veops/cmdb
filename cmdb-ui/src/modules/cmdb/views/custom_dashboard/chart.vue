@@ -1,11 +1,55 @@
 <template>
-  <div :style="{ width: '100%', height: 'calc(100% - 2.2vw)' }">
-    <div v-if="category === 0" class="cmdb-dashboard-grid-item-chart">
+  <div
+    :id="`cmdb-dashboard-${chartId}-${editable}-${isPreview}`"
+    :style="{ width: '100%', height: 'calc(100% - 2.2vw)' }"
+  >
+    <div
+      v-if="options.chartType === 'count'"
+      :style="{ color: options.fontColor || '#fff' }"
+      class="cmdb-dashboard-grid-item-chart"
+    >
+      <div class="cmdb-dashboard-grid-item-chart-icon" v-if="options.showIcon && ciType">
+        <template v-if="ciType.icon">
+          <img v-if="ciType.icon.split('$$')[2]" :src="`/api/common-setting/v1/file/${ciType.icon.split('$$')[3]}`" />
+          <ops-icon
+            v-else
+            :style="{
+              color: ciType.icon.split('$$')[1],
+            }"
+            :type="ciType.icon.split('$$')[0]"
+          />
+        </template>
+        <span :style="{ color: '#2f54eb' }" v-else>{{ ciType.name[0].toUpperCase() }}</span>
+      </div>
       <span :style="{ ...options.fontConfig }">{{ toThousands(data) }}</span>
     </div>
+    <vxe-table
+      :max-height="tableHeight"
+      :data="tableData"
+      :stripe="!!options.ret"
+      size="mini"
+      class="ops-stripe-table"
+      v-if="options.chartType === 'table'"
+      :span-method="mergeRowMethod"
+      :border="!options.ret"
+      :show-header="!!options.ret"
+    >
+      <template v-if="options.ret">
+        <vxe-column v-for="col in columns" :key="col" :title="col" :field="col"></vxe-column>
+      </template>
+      <template v-else>
+        <vxe-column
+          v-for="(key, index) in Array(keyLength)"
+          :key="`key${index}`"
+          :title="`key${index}`"
+          :field="`key${index}`"
+        ></vxe-column>
+        <vxe-column field="value" title="value"></vxe-column>
+      </template>
+    </vxe-table>
     <div
       :id="`cmdb-dashboard-${chartId}-${editable}`"
-      v-if="category === 1 || category === 2"
+      v-else-if="category === 1 || category === 2"
       class="cmdb-dashboard-grid-item-chart"
     ></div>
   </div>
@@ -15,17 +59,27 @@
 import * as echarts from 'echarts'
 import { mixin } from '@/utils/mixin'
 import { toThousands } from '../../utils/helper'
-import { category_1_bar_options, category_1_pie_options, category_2_bar_options } from './chartOptions'
+import {
+  category_1_bar_options,
+  category_1_line_options,
+  category_1_pie_options,
+  category_2_bar_options,
+  category_2_pie_options,
+} from './chartOptions'
 export default {
   name: 'Chart',
   mixins: [mixin],
   props: {
+    ci_types: {
+      type: Array,
+      default: () => [],
+    },
     chartId: {
       type: Number,
       default: 0,
     },
     data: {
-      type: [Number, Object],
+      type: [Number, Object, Array],
       default: 0,
     },
     category: {
@@ -40,11 +94,32 @@ export default {
       type: Boolean,
       default: false,
     },
+    type_id: {
+      type: [Number, Array],
+      default: null,
+    },
+    isPreview: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
       chart: null,
+      columns: [],
+      tableHeight: '',
+      tableData: [],
+      keyLength: 0,
     }
+  },
+  computed: {
+    ciType() {
+      if (this.type_id || this.options?.type_ids) {
+        const _find = this.ci_types.find((item) => item.id === this.type_id || item.id === this.options?.type_ids[0])
+        return _find || null
+      }
+      return null
+    },
   },
   watch: {
     data: {
@@ -52,8 +127,32 @@ export default {
       deep: true,
       handler(newValue, oldValue) {
         if (this.category === 1 || this.category === 2) {
-          if (Object.prototype.toString.call(newValue) === '[object Object]') {
-            this.setChart()
+          if (this.options.chartType !== 'table' && Object.prototype.toString.call(newValue) === '[object Object]') {
+            if (this.isPreview) {
+              this.$nextTick(() => {
+                this.setChart()
+              })
+            } else {
+              this.setChart()
+            }
+          }
+        }
+        if (this.options.chartType === 'table') {
+          this.$nextTick(() => {
+            const dom = document.getElementById(`cmdb-dashboard-${this.chartId}-${this.editable}-${this.isPreview}`)
+            this.tableHeight = dom.offsetHeight
+          })
+          if (this.options.ret) {
+            const excludeKeys = ['_X_ROW_KEY', 'ci_type', 'ci_type_alias', 'unique', 'unique_alias', '_id', '_type']
+            if (newValue && newValue.length) {
+              this.columns = Object.keys(newValue[0]).filter((keys) => !excludeKeys.includes(keys))
+              this.tableData = newValue
+            }
+          } else {
+            const _data = []
+            this.keyLength = this.options?.attr_ids?.length ?? 0
+            this.formatTableData(_data, this.data, {})
+            this.tableData = _data
           }
         }
       },
@@ -81,13 +180,19 @@ export default {
         this.chart = echarts.init(document.getElementById(`cmdb-dashboard-${this.chartId}-${this.editable}`))
       }
       if (this.category === 1 && this.options.chartType === 'bar') {
-        this.chart.setOption(category_1_bar_options(this.data), true)
+        this.chart.setOption(category_1_bar_options(this.data, this.options), true)
+      }
+      if (this.category === 1 && this.options.chartType === 'line') {
+        this.chart.setOption(category_1_line_options(this.data, this.options), true)
       }
       if (this.category === 1 && this.options.chartType === 'pie') {
-        this.chart.setOption(category_1_pie_options(this.data), true)
+        this.chart.setOption(category_1_pie_options(this.data, this.options), true)
       }
-      if (this.category === 2) {
-        this.chart.setOption(category_2_bar_options(this.data), true)
+      if (this.category === 2 && ['bar', 'line'].includes(this.options.chartType)) {
+        this.chart.setOption(category_2_bar_options(this.data, this.options, this.options.chartType), true)
+      }
+      if (this.category === 2 && this.options.chartType === 'pie') {
+        this.chart.setOption(category_2_pie_options(this.data, this.options), true)
       }
     },
     resizeChart() {
@@ -96,6 +201,34 @@ export default {
           this.chart.resize()
         }
       })
+    },
+    formatTableData(_data, data, obj) {
+      Object.keys(data).forEach((k) => {
+        if (typeof data[k] === 'number') {
+          _data.push({ ...obj, [`key${Object.keys(obj).length}`]: k, value: data[k] })
+        } else {
+          this.formatTableData(_data, data[k], { ...obj, [`key${Object.keys(obj).length}`]: k })
+        }
+      })
+    },
+    mergeRowMethod({ row, _rowIndex, column, visibleData }) {
+      const fields = ['key0', 'key1', 'key2']
+      const cellValue = row[column.field]
+      if (cellValue && fields.includes(column.field)) {
+        const prevRow = visibleData[_rowIndex - 1]
+        let nextRow = visibleData[_rowIndex + 1]
+        if (prevRow && prevRow[column.field] === cellValue) {
+          return { rowspan: 0, colspan: 0 }
+        } else {
+          let countRowspan = 1
+          while (nextRow && nextRow[column.field] === cellValue) {
+            nextRow = visibleData[++countRowspan + _rowIndex]
+          }
+          if (countRowspan > 1) {
+            return { rowspan: countRowspan, colspan: 1 }
+          }
+        }
+      }
     },
   },
 }
@@ -106,14 +239,28 @@ export default {
   width: 100%;
   height: 100%;
   position: relative;
-  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   > span {
     font-size: 50px;
     font-weight: 700;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+  }
+  .cmdb-dashboard-grid-item-chart-icon {
+    > i {
+      font-size: 4vw;
+    }
+    > img {
+      width: 4vw;
+    }
+    > span {
+      display: inline-block;
+      width: 4vw;
+      height: 4vw;
+      font-size: 50px;
+      text-align: center;
+      line-height: 50px;
+    }
   }
 }
 </style>

@@ -77,6 +77,14 @@ export function getCITypeAttributesByTypeIds(params) {
   })
 }
 
+export function getCITypeCommonAttributesByTypeIds(params) {
+  return axios({
+    url: `/v0.1/ci_types/common_attributes`,
+    method: 'get',
+    params: params
+  })
+}
+
 /**
  * 删除属性
  * @param attrId
