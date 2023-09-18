@@ -335,12 +335,18 @@ class CMDBCounterCache(object):
     def attribute_counter(custom):
         from api.lib.cmdb.search import SearchError
         from api.lib.cmdb.search.ci import search
+        from api.lib.cmdb.utils import ValueTypeMap
 
         custom.setdefault('options', {})
         type_id = custom.get('type_id')
         attr_id = custom.get('attr_id')
         type_ids = custom['options'].get('type_ids') or (type_id and [type_id])
         attr_ids = list(map(str, custom['options'].get('attr_ids') or (attr_id and [attr_id])))
+        try:
+            attr2value_type = [AttributeCache.get(i).value_type for i in attr_ids]
+        except AttributeError:
+            return
+
         other_filter = custom['options'].get('filter')
         other_filter = "{}".format(other_filter) if other_filter else ''
 
@@ -365,7 +371,7 @@ class CMDBCounterCache(object):
             current_app.logger.error(e)
             return
         for i in (list(facet.values()) or [[]])[0]:
-            result[i[0]] = i[1]
+            result[ValueTypeMap.serialize2[attr2value_type[0]](str(i[0]))] = i[1]
         if len(attr_ids) == 1:
             return result
 
@@ -380,7 +386,7 @@ class CMDBCounterCache(object):
                 return
             result[v] = dict()
             for i in (list(facet.values()) or [[]])[0]:
-                result[v][i[0]] = i[1]
+                result[v][ValueTypeMap.serialize2[attr2value_type[1]](str(i[0]))] = i[1]
 
         if len(attr_ids) == 2:
             return result
@@ -400,7 +406,7 @@ class CMDBCounterCache(object):
                     return
                 result[v1][v2] = dict()
                 for i in (list(facet.values()) or [[]])[0]:
-                    result[v1][v2][i[0]] = i[1]
+                    result[v1][v2][ValueTypeMap.serialize2[attr2value_type[2]](str(i[0]))] = i[1]
 
         return result
 

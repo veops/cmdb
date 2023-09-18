@@ -1,4 +1,4 @@
-# -*- coding:utf-8 -*- 
+# -*- coding:utf-8 -*-
 
 
 from __future__ import unicode_literals
@@ -141,6 +141,10 @@ class Search(object):
     @staticmethod
     def _in_query_handler(attr, v, is_not):
         new_v = v[1:-1].split(";")
+
+        if attr.value_type == ValueTypeEnum.DATE:
+            new_v = ["{} 00:00:00".format(i) for i in new_v if len(i) == 10]
+
         table_name = TableMap(attr=attr).table_name
         in_query = " OR {0}.value ".format(table_name).join(['{0} "{1}"'.format(
             "NOT LIKE" if is_not else "LIKE",
@@ -151,6 +155,11 @@ class Search(object):
     @staticmethod
     def _range_query_handler(attr, v, is_not):
         start, end = [x.strip() for x in v[1:-1].split("_TO_")]
+
+        if attr.value_type == ValueTypeEnum.DATE:
+            start = "{} 00:00:00".format(start) if len(start) == 10 else start
+            end = "{} 00:00:00".format(end) if len(end) == 10 else end
+
         table_name = TableMap(attr=attr).table_name
         range_query = "{0} '{1}' AND '{2}'".format(
             "NOT BETWEEN" if is_not else "BETWEEN",
@@ -162,8 +171,14 @@ class Search(object):
     def _comparison_query_handler(attr, v):
         table_name = TableMap(attr=attr).table_name
         if v.startswith(">=") or v.startswith("<="):
+            if attr.value_type == ValueTypeEnum.DATE and len(v[2:]) == 10:
+                v = "{} 00:00:00".format(v)
+
             comparison_query = "{0} '{1}'".format(v[:2], v[2:].replace("*", "%"))
         else:
+            if attr.value_type == ValueTypeEnum.DATE and len(v[1:]) == 10:
+                v = "{} 00:00:00".format(v)
+
             comparison_query = "{0} '{1}'".format(v[0], v[1:].replace("*", "%"))
         _query_sql = QUERY_CI_BY_ATTR_NAME.format(table_name, attr.id, comparison_query)
         return _query_sql
@@ -239,7 +254,7 @@ class Search(object):
         attr_id = attr.id
 
         table_name = TableMap(attr=attr).table_name
-        _v_query_sql = """SELECT {0}.ci_id, {1}.value 
+        _v_query_sql = """SELECT {0}.ci_id, {1}.value
                           FROM ({2}) AS {0} INNER JOIN {1} ON {1}.ci_id = {0}.ci_id
                           WHERE {1}.attr_id = {3}""".format("ALIAS", table_name, query_sql, attr_id)
         new_table = _v_query_sql
@@ -285,7 +300,7 @@ class Search(object):
             query_sql = "SELECT * FROM ({0}) as {1} UNION ALL ({2})".format(query_sql, alias, _query_sql)
 
         elif operator == "~":
-            query_sql = """SELECT * FROM ({0}) as {1} LEFT JOIN ({2}) as {3} USING(ci_id) 
+            query_sql = """SELECT * FROM ({0}) as {1} LEFT JOIN ({2}) as {3} USING(ci_id)
                            WHERE {3}.ci_id is NULL""".format(query_sql, alias, _query_sql, alias + "A")
 
         return query_sql
@@ -295,7 +310,7 @@ class Search(object):
 
         start = time.time()
         execute = db.session.execute
-        current_app.logger.debug(v_query_sql)
+        # current_app.logger.debug(v_query_sql)
         res = execute(v_query_sql).fetchall()
         end_time = time.time()
         current_app.logger.debug("query ci ids time is: {0}".format(end_time - start))
@@ -390,6 +405,9 @@ class Search(object):
                 raise SearchError(ErrFormat.attribute_not_found.format(field))
 
             is_not = True if operator == "|~" else False
+
+            if field_type == ValueTypeEnum.DATE and len(v) == 10:
+                v = "{} 00:00:00".format(v)
 
             # in query
             if v.startswith("(") and v.endswith(")"):
@@ -506,7 +524,7 @@ class Search(object):
             if k:
                 table_name = TableMap(attr=attr).table_name
                 query_sql = FACET_QUERY.format(table_name, self.query_sql, attr.id)
-                # current_app.logger.debug(query_sql)
+                # current_app.logger.warning(query_sql)
                 result = db.session.execute(query_sql).fetchall()
                 facet[k] = result
 
