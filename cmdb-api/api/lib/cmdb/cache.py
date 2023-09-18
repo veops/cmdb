@@ -342,7 +342,7 @@ class CMDBCounterCache(object):
         type_ids = custom['options'].get('type_ids') or (type_id and [type_id])
         attr_ids = list(map(str, custom['options'].get('attr_ids') or (attr_id and [attr_id])))
         other_filter = custom['options'].get('filter')
-        other_filter = "({})".format(other_filter) if other_filter else ''
+        other_filter = "{}".format(other_filter) if other_filter else ''
 
         if custom['options'].get('ret') == 'cis':
             query = "_type:({}),{}".format(";".join(map(str, type_ids)), other_filter)
