@@ -582,7 +582,8 @@ class CITypeRelationManager(object):
 
         def get_children(_id, level):
             children = CITypeRelation.get_by(parent_id=_id, to_dict=False)
-            result[level + 1] = [i.child.to_dict() for i in children]
+            if children:
+                result.setdefault(level + 1, []).extend([i.child.to_dict() for i in children])
 
             for i in children:
                 if i.child_id != _id:
