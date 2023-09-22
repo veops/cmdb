@@ -185,8 +185,8 @@ class CIUnique(APIView):
     @has_perm_from_args("ci_id", ResourceTypeEnum.CI, PermEnum.UPDATE, CIManager.get_type_name)
     def put(self, ci_id):
         params = request.values
-        unique_name = params.keys()[0]
-        unique_value = params.values()[0]
+        unique_name = list(params.keys())[0]
+        unique_value = list(params.values())[0]
 
         CIManager.update_unique_value(ci_id, unique_name, unique_value)
 
