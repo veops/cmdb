@@ -419,22 +419,21 @@ class CITypeTriggerView(APIView):
         return self.jsonify(CITypeTriggerManager.get(type_id))
 
     @has_perm_from_args("type_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
-    @args_required("attr_id")
-    @args_required("notify")
+    @args_required("option")
     def post(self, type_id):
-        attr_id = request.values.get('attr_id')
-        notify = request.values.get('notify')
+        attr_id = request.values.get('attr_id') or None
+        option = request.values.get('option')
 
-        return self.jsonify(CITypeTriggerManager().add(type_id, attr_id, notify))
+        return self.jsonify(CITypeTriggerManager().add(type_id, attr_id, option))
 
     @has_perm_from_args("type_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
-    @args_required("notify")
+    @args_required("option")
     def put(self, type_id, _id):
         assert type_id is not None
 
-        notify = request.values.get('notify')
+        option = request.values.get('option')
 
-        return self.jsonify(CITypeTriggerManager().update(_id, notify))
+        return self.jsonify(CITypeTriggerManager().update(_id, option))
 
     @has_perm_from_args("type_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
     def delete(self, type_id, _id):

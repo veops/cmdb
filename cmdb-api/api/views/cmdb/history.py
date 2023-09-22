@@ -5,15 +5,18 @@ import datetime
 
 from flask import abort
 from flask import request
+from flask import session
 
 from api.lib.cmdb.ci import CIManager
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.history import AttributeHistoryManger
+from api.lib.cmdb.history import CITriggerHistoryManager
 from api.lib.cmdb.history import CITypeHistoryManager
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.perm.acl.acl import has_perm_from_args
+from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import role_required
 from api.lib.utils import get_page
 from api.lib.utils import get_page_size
@@ -74,6 +77,39 @@ class CIHistoryView(APIView):
         result = AttributeHistoryManger.get_by_ci_id(ci_id)
 
         return self.jsonify(result)
+
+
+class CITriggerHistoryView(APIView):
+    url_prefix = ("/history/ci_triggers/<int:ci_id>", "/history/ci_triggers")
+
+    @has_perm_from_args("ci_id", ResourceTypeEnum.CI, PermEnum.READ, CIManager.get_type_name)
+    def get(self, ci_id=None):
+        if ci_id is not None:
+            result = CITriggerHistoryManager.get_by_ci_id(ci_id)
+
+            return self.jsonify(result)
+
+        if RoleEnum.CONFIG not in session.get("acl", {}).get("parentRoles", []) and not is_app_admin("cmdb"):
+            return abort(403, ErrFormat.role_required.format(RoleEnum.CONFIG))
+
+        type_id = request.values.get("type_id")
+        trigger_id = request.values.get("trigger_id")
+        operate_type = request.values.get("operate_type")
+
+        page = get_page(request.values.get('page', 1))
+        page_size = get_page_size(request.values.get('page_size', 1))
+
+        numfound, result = CITriggerHistoryManager.get(page,
+                                                       page_size,
+                                                       type_id=type_id,
+                                                       trigger_id=trigger_id,
+                                                       operate_type=operate_type)
+
+        return self.jsonify(page=page,
+                            page_size=page_size,
+                            numfound=numfound,
+                            total=len(result),
+                            result=result)
 
 
 class CITypeHistoryView(APIView):

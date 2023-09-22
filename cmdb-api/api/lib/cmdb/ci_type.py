@@ -1166,16 +1166,18 @@ class CITypeUniqueConstraintManager(object):
 
 class CITypeTriggerManager(object):
     @staticmethod
-    def get(type_id):
-        return CITypeTrigger.get_by(type_id=type_id, to_dict=True)
+    def get(type_id, to_dict=True):
+        return CITypeTrigger.get_by(type_id=type_id, to_dict=to_dict)
 
     @staticmethod
-    def add(type_id, attr_id, notify):
-        CITypeTrigger.get_by(type_id=type_id, attr_id=attr_id) and abort(400, ErrFormat.ci_type_trigger_duplicate)
+    def add(type_id, attr_id, option):
+        for i in CITypeTrigger.get_by(type_id=type_id, attr_id=attr_id, to_dict=False):
+            if i.option == option:
+                return abort(400, ErrFormat.ci_type_trigger_duplicate)
 
-        not isinstance(notify, dict) and abort(400, ErrFormat.argument_invalid.format("notify"))
+        not isinstance(option, dict) and abort(400, ErrFormat.argument_invalid.format("option"))
 
-        trigger = CITypeTrigger.create(type_id=type_id, attr_id=attr_id, notify=notify)
+        trigger = CITypeTrigger.create(type_id=type_id, attr_id=attr_id, option=option)
 
         CITypeHistoryManager.add(CITypeOperateType.ADD_TRIGGER,
                                  type_id,
@@ -1185,12 +1187,12 @@ class CITypeTriggerManager(object):
         return trigger.to_dict()
 
     @staticmethod
-    def update(_id, notify):
+    def update(_id, option):
         existed = (CITypeTrigger.get_by_id(_id) or
                    abort(404, ErrFormat.ci_type_trigger_not_found.format("id={}".format(_id))))
 
         existed2 = existed.to_dict()
-        new = existed.update(notify=notify)
+        new = existed.update(option=option)
 
         CITypeHistoryManager.add(CITypeOperateType.UPDATE_TRIGGER,
                                  existed.type_id,
@@ -1210,35 +1212,3 @@ class CITypeTriggerManager(object):
                                  existed.type_id,
                                  trigger_id=_id,
                                  change=existed.to_dict())
-
-    @staticmethod
-    def waiting_cis(trigger):
-        now = datetime.datetime.today()
-
-        delta_time = datetime.timedelta(days=(trigger.notify.get('before_days', 0) or 0))
-
-        attr = AttributeCache.get(trigger.attr_id)
-
-        value_table = TableMap(attr=attr).table
-
-        values = value_table.get_by(attr_id=attr.id, to_dict=False)
-
-        result = []
-        for v in values:
-            if (isinstance(v.value, (datetime.date, datetime.datetime)) and
-                    (v.value - delta_time).strftime('%Y%m%d') == now.strftime("%Y%m%d")):
-                result.append(v)
-
-        return result
-
-    @staticmethod
-    def trigger_notify(trigger, ci):
-        if (trigger.notify.get('notify_at') == datetime.datetime.now().strftime("%H:%M") or
-                not trigger.notify.get('notify_at')):
-            from api.tasks.cmdb import trigger_notify
-
-            trigger_notify.apply_async(args=(trigger.notify, ci.ci_id), queue=CMDB_QUEUE)
-
-            return True
-
-        return False
