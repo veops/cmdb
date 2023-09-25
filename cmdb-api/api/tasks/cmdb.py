@@ -4,8 +4,6 @@
 import json
 import time
 
-import jinja2
-import requests
 from flask import current_app
 from flask_login import login_user
 
@@ -18,7 +16,6 @@ from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import REDIS_PREFIX_CI
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
-from api.lib.mail import send_mail
 from api.lib.perm.acl.cache import UserCache
 from api.lib.utils import Lock
 from api.lib.utils import handle_arg_list
@@ -28,7 +25,9 @@ from api.models.cmdb import CITypeAttribute
 
 
 @celery.task(name="cmdb.ci_cache", queue=CMDB_QUEUE)
-def ci_cache(ci_id):
+def ci_cache(ci_id, operate_type, record_id):
+    from api.lib.cmdb.ci import CITriggerManager
+
     time.sleep(0.01)
     db.session.remove()
 
@@ -42,9 +41,14 @@ def ci_cache(ci_id):
 
     current_app.logger.info("{0} flush..........".format(ci_id))
 
+    current_app.test_request_context().push()
+    login_user(UserCache.get('worker'))
+
+    CITriggerManager.fire(operate_type, ci_dict, record_id)
+
 
 @celery.task(name="cmdb.batch_ci_cache", queue=CMDB_QUEUE)
-def batch_ci_cache(ci_ids):
+def batch_ci_cache(ci_ids, ):  # only for attribute change index
     time.sleep(1)
     db.session.remove()
 
@@ -61,7 +65,10 @@ def batch_ci_cache(ci_ids):
 
 
 @celery.task(name="cmdb.ci_delete", queue=CMDB_QUEUE)
-def ci_delete(ci_id):
+def ci_delete(ci_dict, operate_type, record_id):
+    from api.lib.cmdb.ci import CITriggerManager
+
+    ci_id = ci_dict.get('_id')
     current_app.logger.info(ci_id)
 
     if current_app.config.get("USE_ES"):
@@ -70,6 +77,11 @@ def ci_delete(ci_id):
         rd.delete(ci_id, REDIS_PREFIX_CI)
 
     current_app.logger.info("{0} delete..........".format(ci_id))
+
+    current_app.test_request_context().push()
+    login_user(UserCache.get('worker'))
+
+    CITriggerManager.fire(operate_type, ci_dict, record_id)
 
 
 @celery.task(name="cmdb.ci_relation_cache", queue=CMDB_QUEUE)
@@ -168,46 +180,6 @@ def ci_type_attribute_order_rebuild(type_id):
             order += 1
 
 
-@celery.task(name='cmdb.trigger_notify', queue=CMDB_QUEUE)
-def trigger_notify(notify, ci_id):
-    from api.lib.perm.acl.cache import UserCache
-
-    def _wrap_mail(mail_to):
-        if "@" not in mail_to:
-            user = UserCache.get(mail_to)
-            if user:
-                return user.email
-
-        return mail_to
-
-    db.session.remove()
-
-    m = api.lib.cmdb.ci.CIManager()
-    ci_dict = m.get_ci_by_id_from_db(ci_id, need_children=False, use_master=False)
-
-    subject = jinja2.Template(notify.get('subject') or "").render(ci_dict)
-    body = jinja2.Template(notify.get('body') or "").render(ci_dict)
-
-    if notify.get('wx_to'):
-        to_user = jinja2.Template('|'.join(notify['wx_to'])).render(ci_dict)
-        url = current_app.config.get("WX_URI")
-        data = {"to_user": to_user, "content": subject}
-        try:
-            requests.post(url, data=data)
-        except Exception as e:
-            current_app.logger.error(str(e))
-
-    if notify.get('mail_to'):
-        try:
-            if len(subject) > 700:
-                subject = subject[:600] + "..." + subject[-100:]
-
-            send_mail("", [_wrap_mail(jinja2.Template(i).render(ci_dict))
-                           for i in notify['mail_to'] if i], subject, body)
-        except Exception as e:
-            current_app.logger.error("Send mail failed: {0}".format(str(e)))
-
-
 @celery.task(name="cmdb.calc_computed_attribute", queue=CMDB_QUEUE)
 def calc_computed_attribute(attr_id, uid):
     from api.lib.cmdb.ci import CIManager
@@ -217,7 +189,8 @@ def calc_computed_attribute(attr_id, uid):
     current_app.test_request_context().push()
     login_user(UserCache.get(uid))
 
+    cim = CIManager()
     for i in CITypeAttribute.get_by(attr_id=attr_id, to_dict=False):
         cis = CI.get_by(type_id=i.type_id, to_dict=False)
         for ci in cis:
-            CIManager.update(ci.id, {})
+            cim.update(ci.id, {})
