@@ -32,19 +32,28 @@
       v-if="options.chartType === 'table'"
       :span-method="mergeRowMethod"
       :border="!options.ret"
-      :show-header="!!options.ret"
+      show-overflow
+      show-header-overflow
     >
       <template v-if="options.ret">
-        <vxe-column v-for="col in columns" :key="col" :title="col" :field="col"></vxe-column>
+        <vxe-column v-for="col in columns" :key="col" :title="col" :field="col">
+          <template #default="{ row }">
+            <span>{{ row[col] }}</span>
+          </template>
+        </vxe-column>
       </template>
       <template v-else>
         <vxe-column
           v-for="(key, index) in Array(keyLength)"
           :key="`key${index}`"
-          :title="`key${index}`"
+          :title="columnName[index]"
           :field="`key${index}`"
-        ></vxe-column>
-        <vxe-column field="value" title="value"></vxe-column>
+        >
+          <template #default="{ row }">
+            <span>{{ row[`key${index}`] }}</span>
+          </template>
+        </vxe-column>
+        <vxe-column field="value" title="数量"></vxe-column>
       </template>
     </vxe-table>
     <div
@@ -66,6 +75,8 @@ import {
   category_2_bar_options,
   category_2_pie_options,
 } from './chartOptions'
+import { getCITypeAttributesByTypeIds } from '../../api/CITypeAttr'
+
 export default {
   name: 'Chart',
   mixins: [mixin],
@@ -110,6 +121,8 @@ export default {
       tableHeight: '',
       tableData: [],
       keyLength: 0,
+      attributes: [],
+      columnName: [],
     }
   },
   computed: {
@@ -149,10 +162,19 @@ export default {
               this.tableData = newValue
             }
           } else {
-            const _data = []
-            this.keyLength = this.options?.attr_ids?.length ?? 0
-            this.formatTableData(_data, this.data, {})
-            this.tableData = _data
+            getCITypeAttributesByTypeIds({ type_ids: this.options?.type_ids.join(',') }).then((res) => {
+              this.attributes = res.attributes
+              const _data = []
+              this.keyLength = this.options?.attr_ids?.length ?? 0
+              const _columnName = []
+              this.options.attr_ids.forEach((attr) => {
+                const _find = this.attributes.find((item) => item.id === attr)
+                _columnName.push(_find?.alias || _find?.name)
+              })
+              this.columnName = _columnName
+              this.formatTableData(_data, this.data, {})
+              this.tableData = _data
+            })
           }
         }
       },
@@ -248,15 +270,15 @@ export default {
   }
   .cmdb-dashboard-grid-item-chart-icon {
     > i {
-      font-size: 4vw;
+      font-size: 40px;
     }
     > img {
-      width: 4vw;
+      width: 40px;
     }
     > span {
       display: inline-block;
-      width: 4vw;
-      height: 4vw;
+      width: 40px;
+      height: 40px;
       font-size: 50px;
       text-align: center;
       line-height: 50px;

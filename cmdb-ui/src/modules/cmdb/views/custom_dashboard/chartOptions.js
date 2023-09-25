@@ -23,6 +23,7 @@ export const category_1_bar_options = (data, options) => {
         })
     })
     return {
+
         color: options.chartColor.split(','),
         grid: {
             top: 15,
@@ -58,6 +59,7 @@ export const category_1_bar_options = (data, options) => {
             data: xData
         },
         tooltip: {
+            appendToBody: true,
             trigger: 'axis',
             axisPointer: {
                 type: 'shadow'
@@ -65,7 +67,7 @@ export const category_1_bar_options = (data, options) => {
         },
         series: Object.keys(secondCategory).map(key => {
             return {
-                name: key,
+                name: options.attr_ids.length === 1 ? '' : key,
                 type: 'bar',
                 stack: options?.barStack ?? 'total',
                 barGap: 0,
@@ -90,6 +92,7 @@ export const category_1_line_options = (data, options) => {
             containLabel: true,
         },
         tooltip: {
+            appendToBody: true,
             trigger: 'axis'
         },
         xAxis: {
@@ -137,6 +140,7 @@ export const category_1_pie_options = (data, options) => {
             containLabel: true,
         },
         tooltip: {
+            appendToBody: true,
             trigger: 'item'
         },
         legend: {
@@ -186,6 +190,7 @@ export const category_2_bar_options = (data, options, chartType) => {
             containLabel: true,
         },
         tooltip: {
+            appendToBody: true,
             trigger: 'axis',
             axisPointer: {
                 type: 'shadow'
@@ -257,7 +262,6 @@ export const category_2_bar_options = (data, options, chartType) => {
 }
 
 export const category_2_pie_options = (data, options) => {
-    console.log(1111, options)
     const _legend = []
     Object.keys(data.detail).forEach(key => {
         Object.keys(data.detail[key]).forEach(key2 => {
@@ -274,6 +278,7 @@ export const category_2_pie_options = (data, options) => {
             containLabel: true,
         },
         tooltip: {
+            appendToBody: true,
             trigger: 'item'
         },
         legend: {

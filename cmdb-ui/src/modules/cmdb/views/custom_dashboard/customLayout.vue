@@ -11,13 +11,12 @@
     <template v-if="layout && layout.length">
       <div v-if="editable">
         <a-button
-          :style="{ marginLeft: '22px', marginTop: '20px' }"
+          :style="{ marginLeft: '22px', marginTop: '20px', backgroundColor: '#D6E9FF', boxShadow: 'none' }"
           @click="openChartForm('add', { options: { w: 3 } })"
-          ghost
           type="primary"
-          size="small"
-          icon="plus"
-        >新增</a-button
+          icon="plus-circle"
+          class="ops-button-primary"
+        >新增图表</a-button
         >
       </div>
       <GridLayout
@@ -199,8 +198,14 @@ export default {
       console.log(type, item)
       this.$refs.chartForm.open(type, item)
     },
-    refresh() {
-      this.getLayout()
+    refresh(id) {
+      if (id) {
+        setTimeout(() => {
+          this.$refs[`chart_${id}`][0].resizeChart()
+        }, 100)
+      } else {
+        this.getLayout()
+      }
     },
     deleteChart(item) {
       const that = this
@@ -298,5 +303,8 @@ export default {
     text-align: center;
     margin-right: 5px;
   }
+}
+.ops-button-primary:hover {
+  background-color: #2f54eb !important;
 }
 </style>

@@ -82,7 +82,14 @@
             prop="attr_ids"
             v-if="(['bar', 'line', 'pie'].includes(chartType) && form.category === 1) || chartType === 'table'"
           >
-            <a-select @change="changeAttr" v-model="form.attr_ids" placeholder="请选择维度" mode="multiple" show-search>
+            <a-select
+              :filter-option="filterOption"
+              @change="changeAttr"
+              v-model="form.attr_ids"
+              placeholder="请选择维度"
+              mode="multiple"
+              show-search
+            >
               <a-select-option v-for="attr in commonAttributes" :key="attr.id" :value="attr.id">{{
                 attr.alias || attr.name
               }}</a-select-option>
@@ -116,7 +123,7 @@
               </a-select-opt-group>
             </a-select>
           </a-form-model-item>
-          <div class="chart-left-preview">
+          <div :class="{ 'chart-left-preview': true, 'chart-left-preview-empty': !isShowPreview }">
             <span class="chart-left-preview-operation" @click="showPreview"><a-icon type="play-circle" /> 预览</span>
             <template v-if="isShowPreview">
               <div v-if="chartType !== 'count'" class="cmdb-dashboard-grid-item-title">
@@ -170,6 +177,7 @@
                     type_ids: form.type_ids,
                     attr_ids: form.attr_ids,
                     isShadow: isShadow,
+                    ret: form.tableCategory === 2 ? 'cis' : '',
                   }"
                   :editable="false"
                   :ci_types="ci_types"
@@ -464,10 +472,12 @@ export default {
     changeCIType(value) {
       this.form.attr_ids = []
       this.commonAttributes = []
-      getCITypeAttributesByTypeIds({ type_ids: Array.isArray(value) ? value.join(',') : value }).then((res) => {
-        this.attributes = res.attributes
-      })
-      if (!Array.isArray(value)) {
+      if ((Array.isArray(value) && value.length) || (!Array.isArray(value) && value)) {
+        getCITypeAttributesByTypeIds({ type_ids: Array.isArray(value) ? value.join(',') : value }).then((res) => {
+          this.attributes = res.attributes
+        })
+      }
+      if (!Array.isArray(value) && value) {
         getRecursive_level2children(value).then((res) => {
           this.level2children = res
         })
@@ -523,6 +533,7 @@ export default {
             delete params.attr_ids
             delete params.tableCategory
             await putCustomDashboard(this.item.id, params)
+            this.$emit('refresh', this.item.id)
           } else {
             const { xLast, yLast, wLast } = getLastLayout(this.layout())
             const w = this.width
@@ -581,6 +592,9 @@ export default {
     //   }
     // },
     changeChartType(t) {
+      if (!(['bar', 'line', 'pie'].includes(this.chartType) && ['bar', 'line', 'pie'].includes(t.value))) {
+        this.resetForm()
+      }
       this.chartType = t.value
       this.isShowPreview = false
       if (t.value === 'count') {
@@ -588,7 +602,6 @@ export default {
       } else {
         this.form.category = 1
       }
-      this.resetForm()
     },
     showPreview() {
       this.$refs.chartForm.validate(async (valid) => {
@@ -673,6 +686,9 @@ export default {
       }
       this.form.level = level
     },
+    filterOption(input, option) {
+      return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
+    },
   },
 }
 </script>
@@ -701,6 +717,13 @@ export default {
         height: 250px;
         border-radius: 8px;
       }
+    }
+    .chart-left-preview-empty {
+      background: url('../../assets/dashboard_empty.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position-x: center;
+      background-position-y: center;
     }
   }
   .chart-right {
