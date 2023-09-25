@@ -61,3 +61,10 @@ export function revokeTypeRelation(first_type_id, second_type_id, rid, data) {
     data
   })
 }
+
+export function getRecursive_level2children(type_id) {
+  return axios({
+    url: `/v0.1/ci_type_relations/${type_id}/recursive_level2children`,
+    method: 'GET'
+  })
+}

@@ -13,7 +13,8 @@ from api.resource import APIView
 
 
 class CustomDashboardApiView(APIView):
-    url_prefix = ("/custom_dashboard", "/custom_dashboard/<int:_id>", "/custom_dashboard/batch")
+    url_prefix = ("/custom_dashboard", "/custom_dashboard/<int:_id>", "/custom_dashboard/batch",
+                  "/custom_dashboard/preview")
 
     def get(self):
         return self.jsonify(CustomDashboardManager.get())
@@ -21,17 +22,26 @@ class CustomDashboardApiView(APIView):
     @role_required(RoleEnum.CONFIG)
     @args_validate(CustomDashboardManager.cls)
     def post(self):
-        cm = CustomDashboardManager.add(**request.values)
+        if request.url.endswith("/preview"):
+            return self.jsonify(counter=CustomDashboardManager.preview(**request.values))
 
-        return self.jsonify(cm.to_dict())
+        cm, counter = CustomDashboardManager.add(**request.values)
+
+        res = cm.to_dict()
+        res.update(counter=counter)
+
+        return self.jsonify(res)
 
     @role_required(RoleEnum.CONFIG)
     @args_validate(CustomDashboardManager.cls)
     def put(self, _id=None):
         if _id is not None:
-            cm = CustomDashboardManager.update(_id, **request.values)
+            cm, counter = CustomDashboardManager.update(_id, **request.values)
 
-            return self.jsonify(cm.to_dict())
+            res = cm.to_dict()
+            res.update(counter=counter)
+
+            return self.jsonify(res)
 
         CustomDashboardManager.batch_update(request.values.get("id2options"))
 

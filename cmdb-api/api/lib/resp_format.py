@@ -9,6 +9,8 @@ class CommonErrFormat(object):
 
     not_found = "不存在"
 
+    circular_dependency_error = "存在循环依赖!"
+
     unknown_search_error = "未知搜索错误"
 
     invalid_json = "json格式似乎不正确了, 请仔细确认一下!"
