@@ -11,8 +11,8 @@
     <template v-if="layout && layout.length">
       <div v-if="editable">
         <a-button
-          :style="{ marginLeft: '10px' }"
-          @click="openChartForm('add', {})"
+          :style="{ marginLeft: '22px', marginTop: '20px' }"
+          @click="openChartForm('add', { options: { w: 3 } })"
           ghost
           type="primary"
           size="small"
@@ -39,11 +39,44 @@
           :h="item.h"
           :i="item.i"
           :key="item.i"
-          :style="{ backgroundColor: '#fafafa' }"
+          :style="{
+            background:
+              item.options.chartType === 'count'
+                ? Array.isArray(item.options.bgColor)
+                  ? `linear-gradient(to bottom, ${item.options.bgColor[0]} 0%, ${item.options.bgColor[1]} 100%)`
+                  : item.options.bgColor
+                : '#fafafa',
+          }"
         >
-          <CardTitle>{{ item.options.name }}</CardTitle>
+          <div class="cmdb-dashboard-grid-item-title">
+            <template v-if="item.options.chartType !== 'count' && item.options.showIcon && getCiType(item)">
+              <template v-if="getCiType(item).icon">
+                <img
+                  v-if="getCiType(item).icon.split('$$')[2]"
+                  :src="`/api/common-setting/v1/file/${getCiType(item).icon.split('$$')[3]}`"
+                />
+                <ops-icon
+                  v-else
+                  :style="{
+                    color: getCiType(item).icon.split('$$')[1],
+                  }"
+                  :type="getCiType(item).icon.split('$$')[0]"
+                />
+              </template>
+              <span :style="{ color: '#2f54eb' }" v-else>{{ getCiType(item).name[0].toUpperCase() }}</span>
+            </template>
+            <span :style="{ color: item.options.chartType === 'count' ? item.options.fontColor : '#000' }">{{
+              item.options.name
+            }}</span>
+          </div>
           <a-dropdown v-if="editable">
-            <a class="cmdb-dashboard-grid-item-operation"><a-icon type="menu"></a-icon></a>
+            <a
+              class="cmdb-dashboard-grid-item-operation"
+              :style="{
+                color: item.options.chartType === 'count' ? item.options.fontColor : '',
+              }"
+            ><a-icon type="menu"></a-icon
+            ></a>
             <a-menu slot="overlay">
               <a-menu-item>
                 <a @click="() => openChartForm('edit', item)"><a-icon style="margin-right:5px" type="edit" />编辑</a>
@@ -53,13 +86,13 @@
               </a-menu-item>
             </a-menu>
           </a-dropdown>
-          <a
+          <!-- <a
             v-if="editable && item.category === 1"
             class="cmdb-dashboard-grid-item-chart-type"
             @click="changeChartType(item)"
           ><a-icon
             :type="item.options.chartType === 'bar' ? 'bar-chart' : 'pie-chart'"
-          /></a>
+          /></a> -->
           <Chart
             :ref="`chart_${item.id}`"
             :chartId="item.id"
@@ -67,18 +100,26 @@
             :category="item.category"
             :options="item.options"
             :editable="editable"
+            :ci_types="ci_types"
+            :type_id="item.type_id"
           />
         </GridItem>
       </GridLayout>
     </template>
     <div v-else class="dashboard-empty">
       <a-empty :image="emptyImage" description=""></a-empty>
-      <a-button @click="openChartForm('add', {})" v-if="editable" size="small" type="primary" icon="plus">
+      <a-button
+        @click="openChartForm('add', { options: { w: 3 } })"
+        v-if="editable"
+        size="small"
+        type="primary"
+        icon="plus"
+      >
         定制仪表盘
       </a-button>
       <span v-else>管理员暂未定制仪表盘</span>
     </div>
-    <ChartForm ref="chartForm" @refresh="refresh" :ci_types="ci_types" />
+    <ChartForm ref="chartForm" @refresh="refresh" :ci_types="ci_types" :totalData="totalData" />
   </div>
 </template>
 
@@ -127,11 +168,13 @@ export default {
       },
     }
   },
-  mounted() {
-    this.getLayout()
+  created() {
     getCITypes().then((res) => {
       this.ci_types = res.ci_types
     })
+  },
+  mounted() {
+    this.getLayout()
   },
   methods: {
     async getLayout() {
@@ -196,6 +239,13 @@ export default {
         })
       }
     },
+    getCiType(item) {
+      if (item.type_id || item.options?.type_ids) {
+        const _find = this.ci_types.find((type) => type.id === item.type_id || type.id === item.options?.type_ids[0])
+        return _find || null
+      }
+      return null
+    },
   },
 }
 </script>
@@ -206,21 +256,47 @@ export default {
   text-align: center;
 }
 .cmdb-dashboard-grid-item {
-  border-radius: 15px;
+  border-radius: 8px;
+  padding: 6px 12px;
   .cmdb-dashboard-grid-item-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-weight: 700;
-    padding-left: 6px;
-    color: #000000bd;
+    color: #000000;
   }
   .cmdb-dashboard-grid-item-operation {
     position: absolute;
-    right: 6px;
+    right: 12px;
     top: 6px;
   }
   .cmdb-dashboard-grid-item-chart-type {
     position: absolute;
     top: 6px;
     right: 24px;
+  }
+}
+</style>
+
+<style lang="less">
+.cmdb-dashboard-grid-item-title {
+  display: flex;
+  align-items: center;
+  > i {
+    font-size: 16px;
+    margin-right: 5px;
+  }
+  > img {
+    width: 16px;
+    margin-right: 5px;
+  }
+  > span:not(:last-child) {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    text-align: center;
+    margin-right: 5px;
   }
 }
 </style>

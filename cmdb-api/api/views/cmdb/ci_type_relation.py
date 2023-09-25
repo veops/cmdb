@@ -19,9 +19,14 @@ from api.resource import APIView
 
 
 class GetChildrenView(APIView):
-    url_prefix = "/ci_type_relations/<int:parent_id>/children"
+    url_prefix = ("/ci_type_relations/<int:parent_id>/children",
+                  "/ci_type_relations/<int:parent_id>/recursive_level2children",
+                  )
 
     def get(self, parent_id):
+        if request.url.endswith("recursive_level2children"):
+            return self.jsonify(CITypeRelationManager.recursive_level2children(parent_id))
+
         return self.jsonify(children=CITypeRelationManager.get_children(parent_id))
 
 

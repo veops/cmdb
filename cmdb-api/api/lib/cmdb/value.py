@@ -18,7 +18,6 @@ from api.extensions import db
 from api.lib.cmdb.attribute import AttributeManager
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributeCache
-from api.lib.cmdb.const import ExistPolicy
 from api.lib.cmdb.const import OperateType
 from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.cmdb.history import AttributeHistoryManger
@@ -140,6 +139,7 @@ class AttributeValueManager(object):
         try:
             db.session.commit()
         except Exception as e:
+            db.session.rollback()
             current_app.logger.error("write change failed: {}".format(str(e)))
 
         return record_id
@@ -235,7 +235,7 @@ class AttributeValueManager(object):
 
         return key2attr
 
-    def create_or_update_attr_value2(self, ci, ci_dict, key2attr):
+    def create_or_update_attr_value(self, ci, ci_dict, key2attr):
         """
         add or update attribute value, then write history
         :param ci: instance object
@@ -287,66 +287,6 @@ class AttributeValueManager(object):
             return abort(400, ErrFormat.attribute_value_unknown_error.format(str(e)))
 
         return self._write_change2(changed)
-
-    def create_or_update_attr_value(self, key, value, ci, _no_attribute_policy=ExistPolicy.IGNORE, record_id=None):
-        """
-        add or update attribute value, then write history
-        :param key: id, name or alias
-        :param value:
-        :param ci: instance object
-        :param _no_attribute_policy: ignore or reject
-        :param record_id: op record
-        :return:
-        """
-        attr = self._get_attr(key)
-        if attr is None:
-            if _no_attribute_policy == ExistPolicy.IGNORE:
-                return
-            if _no_attribute_policy == ExistPolicy.REJECT:
-                return abort(400, ErrFormat.attribute_not_found.format(key))
-
-        value_table = TableMap(attr=attr).table
-
-        try:
-            if attr.is_list:
-                value_list = [self._validate(attr, i, value_table, ci) for i in handle_arg_list(value)]
-                if not value_list:
-                    self._check_is_required(ci.type_id, attr, '')
-
-                existed_attrs = value_table.get_by(attr_id=attr.id, ci_id=ci.id, to_dict=False)
-                existed_values = [i.value for i in existed_attrs]
-                added = set(value_list) - set(existed_values)
-                deleted = set(existed_values) - set(value_list)
-                for v in added:
-                    value_table.create(ci_id=ci.id, attr_id=attr.id, value=v)
-                    record_id = self._write_change(ci.id, attr.id, OperateType.ADD, None, v, record_id, ci.type_id)
-
-                for v in deleted:
-                    existed_attr = existed_attrs[existed_values.index(v)]
-                    existed_attr.delete()
-                    record_id = self._write_change(ci.id, attr.id, OperateType.DELETE, v, None, record_id, ci.type_id)
-            else:
-                value = self._validate(attr, value, value_table, ci)
-                existed_attr = value_table.get_by(attr_id=attr.id, ci_id=ci.id, first=True, to_dict=False)
-                existed_value = existed_attr and existed_attr.value
-                if existed_value is None and value is not None:
-                    value_table.create(ci_id=ci.id, attr_id=attr.id, value=value)
-
-                    record_id = self._write_change(ci.id, attr.id, OperateType.ADD, None, value, record_id, ci.type_id)
-                else:
-                    if existed_value != value:
-                        if value is None:
-                            existed_attr.delete()
-                        else:
-                            existed_attr.update(value=value)
-
-                        record_id = self._write_change(ci.id, attr.id, OperateType.UPDATE,
-                                                       existed_value, value, record_id, ci.type_id)
-
-            return record_id
-        except Exception as e:
-            current_app.logger.warning(str(e))
-            return abort(400, ErrFormat.attribute_value_invalid2.format("{}({})".format(attr.alias, attr.name), value))
 
     @staticmethod
     def delete_attr_value(attr_id, ci_id):

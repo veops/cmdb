@@ -1,11 +1,13 @@
-# -*- coding:utf-8 -*- 
+# -*- coding:utf-8 -*-
 
 import copy
 import datetime
 
+import toposort
 from flask import abort
 from flask import current_app
 from flask_login import current_user
+from toposort import toposort_flatten
 
 from api.extensions import db
 from api.lib.cmdb.attribute import AttributeManager
@@ -114,7 +116,7 @@ class CITypeManager(object):
     @kwargs_required("name")
     def add(cls, **kwargs):
 
-        unique_key = kwargs.pop("unique_key", None)
+        unique_key = kwargs.pop("unique_key", None) or kwargs.pop("unique_id", None)
         unique_key = AttributeCache.get(unique_key) or abort(404, ErrFormat.unique_key_not_define)
 
         kwargs["alias"] = kwargs["name"] if not kwargs.get("alias") else kwargs["alias"]
@@ -276,10 +278,10 @@ class CITypeGroupManager(object):
     def update(gid, name, type_ids):
         """
         update part
-        :param gid: 
-        :param name: 
-        :param type_ids: 
-        :return: 
+        :param gid:
+        :param name:
+        :param type_ids:
+        :return:
         """
         existed = CITypeGroup.get_by_id(gid) or abort(
             404, ErrFormat.ci_type_group_not_found.format("id={}".format(gid)))
@@ -371,6 +373,16 @@ class CITypeAttributeManager(object):
         return result
 
     @staticmethod
+    def get_common_attributes(type_ids):
+        result = CITypeAttribute.get_by(__func_in___key_type_id=list(map(int, type_ids)), to_dict=False)
+        attr2types = {}
+        for i in result:
+            attr2types.setdefault(i.attr_id, []).append(i.type_id)
+
+        return [AttributeCache.get(attr_id).to_dict() for attr_id in attr2types
+                if len(attr2types[attr_id]) == len(type_ids)]
+
+    @staticmethod
     def _check(type_id, attr_ids):
         ci_type = CITypeManager.check_is_existed(type_id)
 
@@ -386,10 +398,10 @@ class CITypeAttributeManager(object):
     def add(cls, type_id, attr_ids=None, **kwargs):
         """
         add attributes to CIType
-        :param type_id: 
+        :param type_id:
         :param attr_ids: list
-        :param kwargs: 
-        :return: 
+        :param kwargs:
+        :return:
         """
         attr_ids = list(set(attr_ids))
 
@@ -416,9 +428,9 @@ class CITypeAttributeManager(object):
     def update(cls, type_id, attributes):
         """
         update attributes to CIType
-        :param type_id: 
+        :param type_id:
         :param attributes: list
-        :return: 
+        :return:
         """
         cls._check(type_id, [i.get('attr_id') for i in attributes])
 
@@ -446,9 +458,9 @@ class CITypeAttributeManager(object):
     def delete(cls, type_id, attr_ids=None):
         """
         delete attributes from CIType
-        :param type_id: 
+        :param type_id:
         :param attr_ids: list
-        :return: 
+        :return:
         """
         from api.tasks.cmdb import ci_cache
 
@@ -565,6 +577,23 @@ class CITypeRelationManager(object):
         return [cls._wrap_relation_type_dict(child.child_id, child) for child in children]
 
     @classmethod
+    def recursive_level2children(cls, parent_id):
+        result = dict()
+
+        def get_children(_id, level):
+            children = CITypeRelation.get_by(parent_id=_id, to_dict=False)
+            if children:
+                result.setdefault(level + 1, []).extend([i.child.to_dict() for i in children])
+
+            for i in children:
+                if i.child_id != _id:
+                    get_children(i.child_id, level + 1)
+
+        get_children(parent_id, 0)
+
+        return result
+
+    @classmethod
     def get_parents(cls, child_id):
         parents = CITypeRelation.get_by(child_id=child_id, to_dict=False)
 
@@ -585,6 +614,17 @@ class CITypeRelationManager(object):
     def add(cls, parent, child, relation_type_id, constraint=ConstraintEnum.One2Many):
         p = CITypeManager.check_is_existed(parent)
         c = CITypeManager.check_is_existed(child)
+
+        rels = {}
+        for i in CITypeRelation.get_by(to_dict=False):
+            rels.setdefault(i.child_id, set()).add(i.parent_id)
+        rels.setdefault(c.id, set()).add(p.id)
+
+        try:
+            toposort_flatten(rels)
+        except toposort.CircularDependencyError as e:
+            current_app.logger.warning(str(e))
+            return abort(400, ErrFormat.circular_dependency_error)
 
         existed = cls._get(p.id, c.id)
         if existed is not None:
@@ -823,6 +863,12 @@ class CITypeTemplateManager(object):
         for added_id in set(id2obj_dicts.keys()) - set(existed_ids):
             if cls == CIType:
                 CITypeManager.add(**id2obj_dicts[added_id])
+            elif cls == CITypeRelation:
+                CITypeRelationManager.add(id2obj_dicts[added_id].get('parent_id'),
+                                          id2obj_dicts[added_id].get('child_id'),
+                                          id2obj_dicts[added_id].get('relation_type_id'),
+                                          id2obj_dicts[added_id].get('constraint'),
+                                          )
             else:
                 cls.create(flush=True, **id2obj_dicts[added_id])
 
@@ -1120,16 +1166,18 @@ class CITypeUniqueConstraintManager(object):
 
 class CITypeTriggerManager(object):
     @staticmethod
-    def get(type_id):
-        return CITypeTrigger.get_by(type_id=type_id, to_dict=True)
+    def get(type_id, to_dict=True):
+        return CITypeTrigger.get_by(type_id=type_id, to_dict=to_dict)
 
     @staticmethod
-    def add(type_id, attr_id, notify):
-        CITypeTrigger.get_by(type_id=type_id, attr_id=attr_id) and abort(400, ErrFormat.ci_type_trigger_duplicate)
+    def add(type_id, attr_id, option):
+        for i in CITypeTrigger.get_by(type_id=type_id, attr_id=attr_id, to_dict=False):
+            if i.option == option:
+                return abort(400, ErrFormat.ci_type_trigger_duplicate)
 
-        not isinstance(notify, dict) and abort(400, ErrFormat.argument_invalid.format("notify"))
+        not isinstance(option, dict) and abort(400, ErrFormat.argument_invalid.format("option"))
 
-        trigger = CITypeTrigger.create(type_id=type_id, attr_id=attr_id, notify=notify)
+        trigger = CITypeTrigger.create(type_id=type_id, attr_id=attr_id, option=option)
 
         CITypeHistoryManager.add(CITypeOperateType.ADD_TRIGGER,
                                  type_id,
@@ -1139,12 +1187,12 @@ class CITypeTriggerManager(object):
         return trigger.to_dict()
 
     @staticmethod
-    def update(_id, notify):
+    def update(_id, option):
         existed = (CITypeTrigger.get_by_id(_id) or
                    abort(404, ErrFormat.ci_type_trigger_not_found.format("id={}".format(_id))))
 
         existed2 = existed.to_dict()
-        new = existed.update(notify=notify)
+        new = existed.update(option=option)
 
         CITypeHistoryManager.add(CITypeOperateType.UPDATE_TRIGGER,
                                  existed.type_id,
@@ -1164,35 +1212,3 @@ class CITypeTriggerManager(object):
                                  existed.type_id,
                                  trigger_id=_id,
                                  change=existed.to_dict())
-
-    @staticmethod
-    def waiting_cis(trigger):
-        now = datetime.datetime.today()
-
-        delta_time = datetime.timedelta(days=(trigger.notify.get('before_days', 0) or 0))
-
-        attr = AttributeCache.get(trigger.attr_id)
-
-        value_table = TableMap(attr=attr).table
-
-        values = value_table.get_by(attr_id=attr.id, to_dict=False)
-
-        result = []
-        for v in values:
-            if (isinstance(v.value, (datetime.date, datetime.datetime)) and
-                    (v.value - delta_time).strftime('%Y%m%d') == now.strftime("%Y%m%d")):
-                result.append(v)
-
-        return result
-
-    @staticmethod
-    def trigger_notify(trigger, ci):
-        if (trigger.notify.get('notify_at') == datetime.datetime.now().strftime("%H:%M") or
-                not trigger.notify.get('notify_at')):
-            from api.tasks.cmdb import trigger_notify
-
-            trigger_notify.apply_async(args=(trigger.notify, ci.ci_id), queue=CMDB_QUEUE)
-
-            return True
-
-        return False

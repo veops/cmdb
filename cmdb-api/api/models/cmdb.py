@@ -125,16 +125,26 @@ class CITypeAttributeGroupItem(Model):
 
 
 class CITypeTrigger(Model):
-    # __tablename__ = "c_ci_type_triggers"
     __tablename__ = "c_c_t_t"
 
     type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'), nullable=False)
-    attr_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"), nullable=False)
-    notify = db.Column(db.JSON)  # {subject: x, body: x, wx_to: [], mail_to: [], before_days: 0, notify_at: 08:00}
+    attr_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"))
+    option = db.Column('notify', db.JSON)
+
+
+class CITriggerHistory(Model):
+    __tablename__ = "c_ci_trigger_histories"
+
+    operate_type = db.Column(db.Enum(*OperateType.all(), name="operate_type"))
+    record_id = db.Column(db.Integer, db.ForeignKey("c_records.id"))
+    ci_id = db.Column(db.Integer, index=True, nullable=False)
+    trigger_id = db.Column(db.Integer, db.ForeignKey("c_c_t_t.id"))
+    is_ok = db.Column(db.Boolean, default=False)
+    notify = db.Column(db.Text)
+    webhook = db.Column(db.Text)
 
 
 class CITypeUniqueConstraint(Model):
-    # __tablename__ = "c_ci_type_unique_constraints"
     __tablename__ = "c_c_t_u_c"
 
     type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'), nullable=False)
@@ -363,7 +373,6 @@ class CITypeHistory(Model):
 
 # preference
 class PreferenceShowAttributes(Model):
-    # __tablename__ = "c_preference_show_attributes"
     __tablename__ = "c_psa"
 
     uid = db.Column(db.Integer, index=True, nullable=False)
@@ -377,7 +386,6 @@ class PreferenceShowAttributes(Model):
 
 
 class PreferenceTreeView(Model):
-    # __tablename__ = "c_preference_tree_views"
     __tablename__ = "c_ptv"
 
     uid = db.Column(db.Integer, index=True, nullable=False)
@@ -386,7 +394,6 @@ class PreferenceTreeView(Model):
 
 
 class PreferenceRelationView(Model):
-    # __tablename__ = "c_preference_relation_views"
     __tablename__ = "c_prv"
 
     uid = db.Column(db.Integer, index=True, nullable=False)

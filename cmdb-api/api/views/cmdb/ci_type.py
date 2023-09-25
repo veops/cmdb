@@ -1,4 +1,4 @@
-# -*- coding:utf-8 -*- 
+# -*- coding:utf-8 -*-
 
 
 import json
@@ -154,9 +154,15 @@ class EnableCITypeView(APIView):
 
 
 class CITypeAttributeView(APIView):
-    url_prefix = ("/ci_types/<int:type_id>/attributes", "/ci_types/<string:type_name>/attributes")
+    url_prefix = ("/ci_types/<int:type_id>/attributes", "/ci_types/<string:type_name>/attributes",
+                  "/ci_types/common_attributes")
 
     def get(self, type_id=None, type_name=None):
+        if request.path.endswith("/common_attributes"):
+            type_ids = handle_arg_list(request.values.get('type_ids'))
+
+            return self.jsonify(attributes=CITypeAttributeManager.get_common_attributes(type_ids))
+
         t = CITypeCache.get(type_id) or CITypeCache.get(type_name) or abort(404, ErrFormat.ci_type_not_found)
         type_id = t.id
         unique_id = t.unique_id
@@ -413,22 +419,21 @@ class CITypeTriggerView(APIView):
         return self.jsonify(CITypeTriggerManager.get(type_id))
 
     @has_perm_from_args("type_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
-    @args_required("attr_id")
-    @args_required("notify")
+    @args_required("option")
     def post(self, type_id):
-        attr_id = request.values.get('attr_id')
-        notify = request.values.get('notify')
+        attr_id = request.values.get('attr_id') or None
+        option = request.values.get('option')
 
-        return self.jsonify(CITypeTriggerManager().add(type_id, attr_id, notify))
+        return self.jsonify(CITypeTriggerManager().add(type_id, attr_id, option))
 
     @has_perm_from_args("type_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
-    @args_required("notify")
+    @args_required("option")
     def put(self, type_id, _id):
         assert type_id is not None
 
-        notify = request.values.get('notify')
+        option = request.values.get('option')
 
-        return self.jsonify(CITypeTriggerManager().update(_id, notify))
+        return self.jsonify(CITypeTriggerManager().update(_id, option))
 
     @has_perm_from_args("type_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
     def delete(self, type_id, _id):
@@ -500,3 +505,4 @@ class CITypeFilterPermissionView(APIView):
     @auth_with_app_token
     def get(self, type_id):
         return self.jsonify(CIFilterPermsCRUD().get(type_id))
+
