@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1688550067963') format('woff2'),
-       url('iconfont.woff?t=1688550067963') format('woff'),
-       url('iconfont.ttf?t=1688550067963') format('truetype');
+  src: url('iconfont.woff2?t=1694508259411') format('woff2'),
+       url('iconfont.woff?t=1694508259411') format('woff'),
+       url('iconfont.ttf?t=1694508259411') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,58 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.cmdb-bar:before {
+  content: "\e886";
+}
+
+.cmdb-count:before {
+  content: "\e883";
+}
+
+.cmdb-pie:before {
+  content: "\e884";
+}
+
+.cmdb-line:before {
+  content: "\e885";
+}
+
+.cmdb-table:before {
+  content: "\e882";
+}
+
+.itsm-all:before {
+  content: "\e87f";
+}
+
+.itsm-reply:before {
+  content: "\e87e";
+}
+
+.itsm-information:before {
+  content: "\e880";
+}
+
+.itsm-contact:before {
+  content: "\e881";
+}
+
+.itsm-my-my_already_handle:before {
+  content: "\e87d";
+}
+
+.rule_7:before {
+  content: "\e87c";
+}
+
+.itsm-my-completed:before {
+  content: "\e879";
+}
+
+.itsm-my-plan:before {
+  content: "\e87b";
 }
 
 .rule_100:before {
@@ -837,7 +889,7 @@
   content: "\e7ad";
 }
 
-.itsm-node-strat:before {
+.itsm-node-start:before {
   content: "\e7ae";
 }
 

@@ -11,7 +11,7 @@ from api.resource import APIView
 prefix = '/file'
 
 ALLOWED_EXTENSIONS = {
-    'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'xls', 'xlsx', 'doc', 'docx', 'ppt', 'pptx', 'csv'
+    'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'xls', 'xlsx', 'doc', 'docx', 'ppt', 'pptx', 'csv', 'svg'
 }
 
 
