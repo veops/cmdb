@@ -293,13 +293,13 @@ class CITriggerHistoryManager(object):
     @staticmethod
     def get(page, page_size, type_id=None, trigger_id=None, operate_type=None):
         query = CITriggerHistory.get_by(only_query=True)
-        if type_id is not None:
+        if type_id:
             query = query.filter(CITriggerHistory.type_id == type_id)
 
         if trigger_id:
             query = query.filter(CITriggerHistory.trigger_id == trigger_id)
 
-        if operate_type is not None:
+        if operate_type:
             query = query.filter(CITriggerHistory.operate_type == operate_type)
 
         numfound = query.count()
@@ -316,22 +316,22 @@ class CITriggerHistoryManager(object):
 
     @staticmethod
     def get_by_ci_id(ci_id):
-        res = db.session.query(CITriggerHistory, CITypeTrigger, OperationRecord).join(
-            CITypeTrigger, CITypeTrigger.id == CITriggerHistory.trigger_id).join(
-            OperationRecord, OperationRecord.id == CITriggerHistory.record_id).filter(
+        res = db.session.query(CITriggerHistory, CITypeTrigger).join(
+            CITypeTrigger, CITypeTrigger.id == CITriggerHistory.trigger_id).filter(
             CITriggerHistory.ci_id == ci_id).order_by(CITriggerHistory.id.desc())
 
         result = []
         id2trigger = dict()
         for i in res:
             hist = i.CITriggerHistory
-            record = i.OperationRecord
             item = dict(is_ok=hist.is_ok,
                         operate_type=hist.operate_type,
                         notify=hist.notify,
+                        trigger_id=hist.trigger_id,
+                        trigger_name=hist.trigger_name,
                         webhook=hist.webhook,
-                        created_at=record.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                        record_id=record.id,
+                        created_at=hist.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                        record_id=hist.record_id,
                         hid=hist.id
                         )
             if i.CITypeTrigger.id not in id2trigger:
@@ -342,12 +342,13 @@ class CITriggerHistoryManager(object):
         return dict(items=result, id2trigger=id2trigger)
 
     @staticmethod
-    def add(operate_type, record_id, ci_id, trigger_id, is_ok=False, notify=None, webhook=None):
+    def add(operate_type, record_id, ci_id, trigger_id, trigger_name, is_ok=False, notify=None, webhook=None):
 
         CITriggerHistory.create(operate_type=operate_type,
                                 record_id=record_id,
                                 ci_id=ci_id,
                                 trigger_id=trigger_id,
+                                trigger_name=trigger_name,
                                 is_ok=is_ok,
                                 notify=notify,
                                 webhook=webhook)

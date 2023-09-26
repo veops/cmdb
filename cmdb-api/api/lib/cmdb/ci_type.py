@@ -1187,12 +1187,12 @@ class CITypeTriggerManager(object):
         return trigger.to_dict()
 
     @staticmethod
-    def update(_id, option):
+    def update(_id, attr_id, option):
         existed = (CITypeTrigger.get_by_id(_id) or
                    abort(404, ErrFormat.ci_type_trigger_not_found.format("id={}".format(_id))))
 
         existed2 = existed.to_dict()
-        new = existed.update(option=option)
+        new = existed.update(attr_id=attr_id or None, option=option, filter_none=False)
 
         CITypeHistoryManager.add(CITypeOperateType.UPDATE_TRIGGER,
                                  existed.type_id,

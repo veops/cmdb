@@ -15,7 +15,6 @@ import api.lib.cmdb.ci
 from api.extensions import db
 from api.extensions import rd
 from api.lib.cmdb.cache import AttributeCache
-from api.lib.cmdb.ci_type import CITypeTriggerManager
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import REDIS_PREFIX_CI
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
@@ -24,8 +23,8 @@ from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.exception import AbortException
 from api.lib.perm.acl.acl import ACLManager
+from api.lib.perm.acl.acl import UserCache
 from api.lib.perm.acl.cache import AppCache
-from api.lib.perm.acl.cache import UserCache
 from api.lib.perm.acl.resource import ResourceCRUD
 from api.lib.perm.acl.resource import ResourceTypeCRUD
 from api.lib.perm.acl.role import RoleCRUD
@@ -227,50 +226,60 @@ def cmdb_counter():
 @with_appcontext
 def cmdb_trigger():
     """
-    Trigger execution
+    Trigger execution for date attribute
     """
+    from api.lib.cmdb.ci import CITriggerManager
+
     current_day = datetime.datetime.today().strftime("%Y-%m-%d")
     trigger2cis = dict()
     trigger2completed = dict()
 
     i = 0
     while True:
-        db.session.remove()
-        if datetime.datetime.today().strftime("%Y-%m-%d") != current_day:
-            trigger2cis = dict()
-            trigger2completed = dict()
-            current_day = datetime.datetime.today().strftime("%Y-%m-%d")
+        try:
+            db.session.remove()
 
-        if i == 360 or i == 0:
-            i = 0
-            try:
-                triggers = CITypeTrigger.get_by(to_dict=False)
+            if datetime.datetime.today().strftime("%Y-%m-%d") != current_day:
+                trigger2cis = dict()
+                trigger2completed = dict()
+                current_day = datetime.datetime.today().strftime("%Y-%m-%d")
 
+            if i == 3 or i == 0:
+                i = 0
+                triggers = CITypeTrigger.get_by(to_dict=False, __func_isnot__key_attr_id=None)
                 for trigger in triggers:
-                    ready_cis = CITypeTriggerManager.waiting_cis(trigger)
+                    try:
+                        ready_cis = CITriggerManager.waiting_cis(trigger)
+                    except Exception as e:
+                        print(e)
+                        continue
+
                     if trigger.id not in trigger2cis:
                         trigger2cis[trigger.id] = (trigger, ready_cis)
                     else:
                         cur = trigger2cis[trigger.id]
                         cur_ci_ids = {i.ci_id for i in cur[1]}
-                        trigger2cis[trigger.id] = (trigger, cur[1] + [i for i in ready_cis if i.ci_id not in cur_ci_ids
-                                                                      and i.ci_id not in trigger2completed[trigger.id]])
+                        trigger2cis[trigger.id] = (
+                            trigger, cur[1] + [i for i in ready_cis if i.ci_id not in cur_ci_ids
+                                               and i.ci_id not in trigger2completed.get(trigger.id, {})])
 
-            except Exception as e:
-                print(e)
+            for tid in trigger2cis:
+                trigger, cis = trigger2cis[tid]
+                for ci in copy.deepcopy(cis):
+                    if CITriggerManager.trigger_notify(trigger, ci):
+                        trigger2completed.setdefault(trigger.id, set()).add(ci.ci_id)
 
-        for tid in trigger2cis:
-            trigger, cis = trigger2cis[tid]
-            for ci in copy.deepcopy(cis):
-                if CITypeTriggerManager.trigger_notify(trigger, ci):
-                    trigger2completed.setdefault(trigger.id, set()).add(ci.ci_id)
+                        for _ci in cis:
+                            if _ci.ci_id == ci.ci_id:
+                                cis.remove(_ci)
 
-                    for _ci in cis:
-                        if _ci.ci_id == ci.ci_id:
-                            cis.remove(_ci)
-
-        i += 1
-        time.sleep(10)
+            i += 1
+            time.sleep(10)
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            current_app.logger.error("cmdb trigger exception: {}".format(e))
+            time.sleep(60)
 
 
 @click.command()
