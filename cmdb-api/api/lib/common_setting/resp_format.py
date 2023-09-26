@@ -53,5 +53,6 @@ class ErrFormat(CommonErrFormat):
     username_is_required = "username不能为空"
     email_is_required = "邮箱不能为空"
     email_format_error = "邮箱格式错误"
+    email_send_timeout = "邮件发送超时"
 
     common_data_not_found = "ID {} 找不到记录"

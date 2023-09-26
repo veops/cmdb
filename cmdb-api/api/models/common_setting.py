@@ -47,6 +47,8 @@ class Employee(ModelWithoutPK):
     last_login = db.Column(db.TIMESTAMP, nullable=True)
     block = db.Column(db.Integer, default=0)
 
+    notice_info = db.Column(db.JSON, default={})
+
     _department = db.relationship(
         'Department', backref='common_employee.department_id',
         lazy='joined'
@@ -87,3 +89,10 @@ class CommonData(Model):
 
     data_type = db.Column(db.VARCHAR(255), default='')
     data = db.Column(db.JSON)
+
+
+class NoticeConfig(Model):
+    __tablename__ = "common_notice_config"
+
+    platform = db.Column(db.VARCHAR(255), nullable=False)
+    info = db.Column(db.JSON)
