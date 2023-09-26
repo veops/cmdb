@@ -194,7 +194,6 @@
 
 <script>
 import _ from 'lodash'
-import { getWX } from '../../api/perm'
 import { addTrigger, updateTrigger, deleteTrigger, getAllDagsName } from '../../api/CIType'
 import FilterComp from '@/components/CMDBFilterComp'
 import EmployeeTreeSelect from '@/views/setting/components/employeeTreeSelect.vue'
@@ -264,16 +263,6 @@ export default {
     }
   },
   computed: {
-    filterWxUsers() {
-      if (!this.filterValue) {
-        return this.WxUsers
-      }
-      return this.WxUsers.filter(
-        (user) =>
-          user.nickname.toLowerCase().indexOf(this.filterValue.toLowerCase()) >= 0 ||
-          user.username.toLowerCase().indexOf(this.filterValue.toLowerCase()) >= 0
-      )
-    },
     canAddTriggerAttr() {
       return this.attrList.filter((attr) => attr.value_type === '3' || attr.value_type === '4')
     },
@@ -299,7 +288,6 @@ export default {
     },
     createFromTriggerTable(attrList) {
       this.visible = true
-      this.getWxList()
       // this.getDags()
       this.attrList = attrList
       this.triggerId = null
@@ -319,7 +307,6 @@ export default {
     },
     async open(property, attrList) {
       this.visible = true
-      this.getWxList()
       // await this.getDags()
       this.attrList = attrList
       if (property.has_trigger) {
@@ -392,11 +379,6 @@ export default {
       this.triggerAction = '1'
       this.filterExp = ''
       this.visible = false
-    },
-    getWxList() {
-      getWX().then((res) => {
-        this.WxUsers = res.filter((item) => item.wx_id)
-      })
     },
     filterChange(value) {
       this.filterValue = value
