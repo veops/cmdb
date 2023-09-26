@@ -39,6 +39,7 @@
     "moment": "^2.24.0",
     "nprogress": "^0.2.0",
     "relation-graph": "^1.1.0",
+    "snabbdom": "^3.5.1",
     "sortablejs": "1.9.0",
     "viser-vue": "^2.4.8",
     "vue": "2.6.11",
