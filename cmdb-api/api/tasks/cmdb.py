@@ -65,10 +65,7 @@ def batch_ci_cache(ci_ids, ):  # only for attribute change index
 
 
 @celery.task(name="cmdb.ci_delete", queue=CMDB_QUEUE)
-def ci_delete(ci_dict, operate_type, record_id):
-    from api.lib.cmdb.ci import CITriggerManager
-
-    ci_id = ci_dict.get('_id')
+def ci_delete(ci_id):
     current_app.logger.info(ci_id)
 
     if current_app.config.get("USE_ES"):
@@ -78,10 +75,16 @@ def ci_delete(ci_dict, operate_type, record_id):
 
     current_app.logger.info("{0} delete..........".format(ci_id))
 
+
+@celery.task(name="cmdb.ci_delete_trigger", queue=CMDB_QUEUE)
+def ci_delete_trigger(trigger, operate_type, ci_dict):
+    current_app.logger.info('delete ci {} trigger'.format(ci_dict['_id']))
+    from api.lib.cmdb.ci import CITriggerManager
+
     current_app.test_request_context().push()
     login_user(UserCache.get('worker'))
 
-    CITriggerManager.fire(operate_type, ci_dict, record_id)
+    CITriggerManager.fire_by_trigger(trigger, operate_type, ci_dict)
 
 
 @celery.task(name="cmdb.ci_relation_cache", queue=CMDB_QUEUE)

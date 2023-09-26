@@ -94,3 +94,7 @@ ES_HOST = '127.0.0.1'
 USE_ES = False
 
 BOOL_TRUE = ['true', 'TRUE', 'True', True, '1', 1, "Yes", "YES", "yes", 'Y', 'y']
+
+# # messenger
+USE_MESSENGER = True
+MESSENGER_URL = "http://{messenger_url}/v1/message"
