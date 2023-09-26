@@ -9,13 +9,14 @@
     <vxe-table
       ref="xTable"
       :loading="loading"
-      border
       resizable
       :data="tableData"
       :max-height="`${windowHeight - windowHeightMinus}px`"
       row-id="_XID"
       size="small"
       :row-config="{isHover: true}"
+      stripe
+      class="ops-stripe-table"
     >
       <vxe-column field="created_at" width="159px" title="操作时间"></vxe-column>
       <vxe-column field="user" width="116px" title="用户"></vxe-column>
@@ -60,7 +61,7 @@
       </vxe-column>
       <vxe-column field="type_id" title="模型" width="150px">
         <template #default="{ row }">
-          {{ row.operate_type === '删除模型' ? row.change.alias : row.type_id }}
+          {{ row.operate_type === '删除模型' ? row.change.alias : row.type_id}}
         </template>
       </vxe-column>
       <vxe-column field="changeDescription" title="描述">
@@ -194,7 +195,7 @@ export default {
       return this.$store.state.windowHeight
     },
     windowHeightMinus() {
-      return this.isExpand ? 396 : 331
+      return this.isExpand ? 396 : 335
     },
   },
   watch: {
@@ -377,15 +378,15 @@ export default {
         }
         // 新增触发器
         case '6': {
-          item.changeDescription = `属性ID：${item.change.attr_id}，提前：${item.change.notify.before_days}天，主题：${item.change.notify.subject}\n内容：${item.change.notify.body}\n通知时间：${item.change.notify.notify_at}`
+          item.changeDescription = `属性ID：${item.change.attr_id}，提前：${item.change.option.before_days}天，主题：${item.change.option.subject}\n内容：${item.change.option.body}\n通知时间：${item.change.option.notify_at}`
           break
         }
         // 修改触发器
         case '7': {
           item.changeArr = []
-          for (const key in item.change.old.notify) {
-            const newVal = item.change.new.notify[key]
-            const oldVal = item.change.old.notify[key]
+          for (const key in item.change.old.option) {
+            const newVal = item.change.new.option[key]
+            const oldVal = item.change.old.option[key]
             if (!_.isEqual(newVal, oldVal) && key !== 'updated_at') {
               const str = ` [ ${key} : 由 ${oldVal} 改为 ${newVal} ] `
               item.changeDescription += str
@@ -397,7 +398,7 @@ export default {
         }
         // 删除触发器
         case '8': {
-          item.changeDescription = `属性ID：${item.change.attr_id}，提前：${item.change.notify.before_days}天，主题：${item.change.notify.subject}\n内容：${item.change.notify.body}\n通知时间：${item.change.notify.notify_at}`
+          item.changeDescription = `属性ID：${item.change.attr_id}，提前：${item.change.option.before_days}天，主题：${item.change.option.subject}\n内容：${item.change.option.body}\n通知时间：${item.change.option.notify_at}`
           break
         }
         // 新增联合唯一

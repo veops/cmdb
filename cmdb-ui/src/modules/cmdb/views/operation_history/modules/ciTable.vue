@@ -21,6 +21,7 @@
       :max-height="`${windowHeight - windowHeightMinus}px`"
       :span-method="mergeRowMethod"
       :scroll-y="{enabled: false}"
+      class="ops-unstripe-table"
     >
       <vxe-column field="created_at" width="159px" title="操作时间"></vxe-column>
       <vxe-column field="user" width="100px" title="用户">
