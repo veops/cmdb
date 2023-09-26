@@ -86,6 +86,12 @@
           </vxe-table>
         </div>
       </a-tab-pane>
+      <a-tab-pane key="tab_4">
+        <span slot="tab"><ops-icon type="itsm_auto_trigger" />触发历史</span>
+        <div :style="{ padding: '24px', height: 'calc(100vh - 44px)' }">
+          <TriggerTable :ci_id="ci._id" />
+        </div>
+      </a-tab-pane>
     </a-tabs>
   </CustomDrawer>
 </template>
@@ -97,6 +103,7 @@ import { getCIHistory } from '@/modules/cmdb/api/history'
 import { getCIById } from '@/modules/cmdb/api/ci'
 import CiDetailAttrContent from './ciDetailAttrContent.vue'
 import CiDetailRelation from './ciDetailRelation.vue'
+import TriggerTable from '../../operation_history/modules/triggerTable.vue'
 
 export default {
   components: {
@@ -104,6 +111,7 @@ export default {
     ElDescriptionsItem: DescriptionsItem,
     CiDetailAttrContent,
     CiDetailRelation,
+    TriggerTable,
   },
   props: {
     typeId: {
