@@ -17,6 +17,8 @@
     "@babel/plugin-syntax-import-meta": "^7.10.4",
     "@riophae/vue-treeselect": "^0.4.0",
     "@vue/composition-api": "^1.7.1",
+    "@wangeditor/editor": "^5.1.23",
+    "@wangeditor/editor-for-vue": "^1.0.0",
     "ant-design-vue": "^1.6.5",
     "axios": "0.18.0",
     "babel-eslint": "^8.2.2",
