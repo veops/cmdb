@@ -187,6 +187,7 @@
         </div>
       </div>
     </div>
+    <span v-if="triggerAction === '2'" class="trigger-tips">{{ webhookTips }}</span>
     <Webhook ref="webhook" style="margin-top:10px" v-if="triggerAction === '2'" />
   </CustomDrawer>
 </template>
@@ -235,6 +236,7 @@ export default {
       defaultDateForm,
       defaultNotify,
       tips: '标题、内容可以引用该模型的属性值，引用方法为: {{ attr_name }}',
+      webhookTips: '请求参数可以引用该模型的属性值，引用方法为: {{ attr_name }}',
       visible: false,
       category: 1,
       form: _.cloneDeep(defaultForm),
