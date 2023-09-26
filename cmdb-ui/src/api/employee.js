@@ -117,3 +117,11 @@ export function getEmployeeListByFilter(data) {
     data
   })
 }
+
+export function getNoticeByEmployeeIds(data) {
+  return axios({
+    url: '/common-setting/v1/employee/get_notice_by_ids',
+    method: 'post',
+    data
+  })
+}
