@@ -94,7 +94,7 @@
                 <ops-icon type="ops-setting-notice-wx" />
               </div>
               <div @click="handleBindWx" class="setting-person-bind-button">
-                {{ form.wx_id ? '重新绑定' : '绑定' }}
+                {{ form.notice_info.wechatApp ? '重新绑定' : '绑定' }}
               </div>
             </a-space>
           </a-form-model-item>

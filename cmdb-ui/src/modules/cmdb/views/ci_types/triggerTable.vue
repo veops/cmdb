@@ -9,7 +9,6 @@
         icon="plus"
       >新增触发器</a-button
       >
-      <span class="trigger-tips">{{ tips }}</span>
     </div>
     <vxe-table
       stripe
@@ -21,26 +20,40 @@
       :max-height="windowHeight - 180"
       class="ops-stripe-table"
     >
-      <vxe-column field="attr_name" title="属性名"></vxe-column>
-      <vxe-column field="notify.subject" title="主题"></vxe-column>
-      <vxe-column field="notify.body" title="内容"></vxe-column>
-      <vxe-column field="notify.wx_to" title="微信通知">
+      <vxe-column field="option.name" title="名称"></vxe-column>
+      <vxe-column field="option.description" title="备注"></vxe-column>
+      <vxe-column field="type" title="类型">
         <template #default="{ row }">
-          <span v-for="(person, index) in row.notify.wx_to" :key="person + index">[{{ person }}]</span>
+          <span v-if="row.attr_id">日期属性</span>
+          <span v-else>数据变更</span>
         </template>
       </vxe-column>
-      <vxe-column field="notify.mail_to" title="邮件通知">
+      <vxe-column field="option.enable" title="开启">
         <template #default="{ row }">
-          <span v-for="(email, index) in row.notify.mail_to" :key="email + index">[{{ email }}]</span>
+          <a-switch :checked="row.option.enable" @click="changeEnable(row)"></a-switch>
         </template>
       </vxe-column>
-      <vxe-column field="notify.before_days" title="提前">
+
+      <!-- <vxe-column field="attr_name" title="属性名"></vxe-column>
+      <vxe-column field="option.subject" title="主题"></vxe-column>
+      <vxe-column field="option.body" title="内容"></vxe-column>
+      <vxe-column field="option.wx_to" title="微信通知">
         <template #default="{ row }">
-          <span v-if="row.notify.before_days">{{ row.notify.before_days }}天</span>
+          <span v-for="(person, index) in row.option.wx_to" :key="person + index">[{{ person }}]</span>
         </template>
       </vxe-column>
-      <vxe-column field="notify.notify_at" title="发送时间"></vxe-column>
-      <vxe-column field="operation" title="操作" width="200px" align="center">
+      <vxe-column field="option.mail_to" title="邮件通知">
+        <template #default="{ row }">
+          <span v-for="(email, index) in row.option.mail_to" :key="email + index">[{{ email }}]</span>
+        </template>
+      </vxe-column>
+      <vxe-column field="option.before_days" title="提前">
+        <template #default="{ row }">
+          <span v-if="row.option.before_days">{{ row.option.before_days }}天</span>
+        </template>
+      </vxe-column>
+      <vxe-column field="option.notify_at" title="发送时间"></vxe-column> -->
+      <vxe-column field="operation" title="操作" width="80px" align="center">
         <template #default="{ row }">
           <a-space>
             <a @click="handleEdit(row)"><a-icon type="edit"/></a>
@@ -54,9 +67,12 @@
 </template>
 
 <script>
-import { getTriggerList, deleteTrigger } from '../../api/CIType'
+import _ from 'lodash'
+import { getTriggerList, deleteTrigger, updateTrigger } from '../../api/CIType'
 import { getCITypeAttributesById } from '../../api/CITypeAttr'
 import TriggerForm from './triggerForm.vue'
+import { getAllDepAndEmployee } from '@/api/company'
+
 export default {
   name: 'TriggerTable',
   components: { TriggerForm },
@@ -68,24 +84,33 @@ export default {
   },
   data() {
     return {
-      tips: '主题、内容、微信通知和邮件通知都可以引用该模型的属性值，引用方法为: {{ attr_name }}',
       tableData: [],
       attrList: [],
+      allTreeDepAndEmp: [],
     }
   },
   computed: {
     windowHeight() {
       return this.$store.state.windowHeight
     },
-    canAddTriggerAttr() {
-      return this.attrList.filter((attr) => attr.value_type === '3' || attr.value_type === '4')
-    },
   },
   provide() {
-    return { refresh: this.getTableData }
+    return {
+      refresh: this.getTableData,
+      provide_allTreeDepAndEmp: () => {
+        return this.allTreeDepAndEmp
+      },
+    }
   },
-  mounted() {},
+  mounted() {
+    this.getAllDepAndEmployee()
+  },
   methods: {
+    getAllDepAndEmployee() {
+      getAllDepAndEmployee({ block: 0 }).then((res) => {
+        this.allTreeDepAndEmp = res
+      })
+    },
     async getTableData() {
       const [triggerList, attrList] = await Promise.all([
         getTriggerList(this.CITypeId),
@@ -101,7 +126,7 @@ export default {
       this.attrList = attrList.attributes
     },
     handleAddTrigger() {
-      this.$refs.triggerForm.createFromTriggerTable(this.canAddTriggerAttr)
+      this.$refs.triggerForm.createFromTriggerTable(this.attrList)
     },
     handleDetele(id) {
       const that = this
@@ -117,12 +142,23 @@ export default {
       })
     },
     handleEdit(row) {
-      const _find = this.attrList.find((attr) => attr.id === row.attr_id)
-      this.$refs.triggerForm.open({
-        id: row.attr_id,
-        alias: _find ? _find.alias || _find.name : '',
-        trigger: { id: row.id, notify: row.notify },
-        has_trigger: true,
+      this.$refs.triggerForm.open(
+        {
+          id: row.attr_id,
+          alias: row?.option?.name ?? '',
+          trigger: { id: row.id, attr_id: row.attr_id, option: row.option },
+          has_trigger: true,
+        },
+        this.attrList
+      )
+    },
+    changeEnable(row) {
+      const _row = _.cloneDeep(row)
+      delete _row.id
+      const enable = row?.option?.enable ?? true
+      _row.option.enable = !enable
+      updateTrigger(this.CITypeId, row.id, _row).then(() => {
+        this.getTableData()
       })
     },
   },
@@ -132,13 +168,5 @@ export default {
 <style lang="less" scoped>
 .ci-types-triggers {
   padding: 16px 24px 24px;
-  .trigger-tips {
-    border: 1px solid #d4380d;
-    background-color: #fff2e8;
-    padding: 2px 10px;
-    border-radius: 4px;
-    color: #d4380d;
-    float: right;
-  }
 }
 </style>
