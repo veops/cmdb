@@ -230,3 +230,59 @@ def init_department():
     cli.init_wide_company()
     cli.create_acl_role_with_department()
     cli.init_backend_resource()
+
+
+@click.command()
+@with_appcontext
+def common_check_new_columns():
+    """
+    add new columns to tables
+    """
+    from api.extensions import db
+    from sqlalchemy import inspect, text
+
+    def get_model_by_table_name(table_name):
+        for model in db.Model.registry._class_registry.values():
+            if hasattr(model, '__tablename__') and model.__tablename__ == table_name:
+                return model
+        return None
+
+    def add_new_column(table_name, new_column):
+        column_type = new_column.type.compile(engine.dialect)
+        default_value = new_column.default.arg if new_column.default else None
+
+        sql = f"ALTER TABLE {table_name} ADD COLUMN {new_column.name} {column_type} "
+        if new_column.comment:
+            sql += f" comment '{new_column.comment}'"
+
+        if column_type == 'JSON':
+            pass
+        elif default_value:
+            if column_type.startswith('VAR') or column_type.startswith('Text'):
+                if default_value is None or len(default_value) == 0:
+                    pass
+            else:
+                sql += f" DEFAULT {default_value}"
+
+        sql = text(sql)
+        db.session.execute(sql)
+
+    engine = db.get_engine()
+    inspector = inspect(engine)
+    table_names = inspector.get_table_names()
+    for table_name in table_names:
+        existed_columns = inspector.get_columns(table_name)
+        existed_column_name_list = [c['name'] for c in existed_columns]
+
+        model = get_model_by_table_name(table_name)
+        if model is None:
+            continue
+        model_columns = model.__table__.columns._all_columns
+        for column in model_columns:
+            if column.name not in existed_column_name_list:
+                try:
+                    add_new_column(table_name, column)
+                    current_app.logger.info(f"add new column [{column.name}] in table [{table_name}] success.")
+                except Exception as e:
+                    current_app.logger.error(f"add new column [{column.name}] in table [{table_name}] err:")
+                    current_app.logger.error(e)
