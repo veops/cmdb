@@ -298,7 +298,7 @@ export default {
     createFromTriggerTable(attrList) {
       this.visible = true
       this.getWxList()
-      this.getDags()
+      // this.getDags()
       this.attrList = attrList
       this.triggerId = null
       this.title = '新增触发器'
@@ -318,7 +318,7 @@ export default {
     async open(property, attrList) {
       this.visible = true
       this.getWxList()
-      await this.getDags()
+      // await this.getDags()
       this.attrList = attrList
       if (property.has_trigger) {
         this.triggerId = property.trigger.id
