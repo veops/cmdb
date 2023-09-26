@@ -9,7 +9,6 @@
     <vxe-table
       ref="xTable"
       :loading="loading"
-      border
       size="small"
       show-overflow="tooltip"
       show-header-overflow="tooltip"
@@ -19,6 +18,8 @@
       row-id="_XID"
       :scroll-y="{ enabled: false }"
       :span-method="mergeRowMethod"
+      stripe
+      class="ops-stripe-table"
     >
       <vxe-column field="created_at" width="159px" title="操作时间"></vxe-column>
       <vxe-column field="user" width="100px" title="用户">

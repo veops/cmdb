@@ -11,6 +11,9 @@
         <a-tab-pane key="3" tab="模型变更">
           <type-table></type-table>
         </a-tab-pane>
+        <a-tab-pane key="4" tab="触发历史">
+          <TriggerTable></TriggerTable>
+        </a-tab-pane>
       </a-tabs>
     </a-card>
   </div>
@@ -20,18 +23,20 @@
 import CiTable from './modules/ciTable.vue'
 import RelationTable from './modules/relation.vue'
 import TypeTable from './modules/typeTable.vue'
+import TriggerTable from './modules/triggerTable.vue'
 export default {
-  name: 'Index',
-  data() {
-    return {
-      userList: []
-    }
-  },
+  name: 'OperationHistory',
   components: {
     CiTable,
     RelationTable,
-    TypeTable
-  }
+    TypeTable,
+    TriggerTable,
+  },
+  data() {
+    return {
+      userList: [],
+    }
+  },
 }
 </script>
 
