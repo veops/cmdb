@@ -37,7 +37,8 @@ PyYAML==6.0
 redis==4.6.0
 requests==2.31.0
 requests_oauthlib==1.3.1
-six==1.12.0
+markdownify==0.11.6
+six==1.16.0
 SQLAlchemy==1.4.49
 supervisor==4.0.3
 timeout-decorator==0.5.0
