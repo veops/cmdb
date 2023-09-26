@@ -20,6 +20,7 @@ export default {
   data() {
     return {
       topoData: {},
+      exsited_ci: [],
     }
   },
   inject: ['ci_types'],
@@ -95,31 +96,33 @@ export default {
       }
       const ci_types_list = this.ci_types()
       res.result.forEach((r) => {
-        const _findCiType = ci_types_list.find((item) => item.id === r._type)
-        newNodes.push({
-          id: `${r._id}`,
-          Class: Node,
-          title: r.ci_type_alias || r.ci_type,
-          name: r.ci_type,
-          side: side,
-          unique_alias: r.unique_alias,
-          unique_name: r.unique,
-          unique_value: r[r.unique],
-          children: [],
-          icon: _findCiType?.icon || '',
-          endpoints: [
-            {
-              id: 'left',
-              orientation: [-1, 0],
-              pos: [0, 0.5],
-            },
-            {
-              id: 'right',
-              orientation: [1, 0],
-              pos: [0, 0.5],
-            },
-          ],
-        })
+        if (!this.exsited_ci.includes(r._id)) {
+          const _findCiType = ci_types_list.find((item) => item.id === r._type)
+          newNodes.push({
+            id: `${r._id}`,
+            Class: Node,
+            title: r.ci_type_alias || r.ci_type,
+            name: r.ci_type,
+            side: side,
+            unique_alias: r.unique_alias,
+            unique_name: r.unique,
+            unique_value: r[r.unique],
+            children: [],
+            icon: _findCiType?.icon || '',
+            endpoints: [
+              {
+                id: 'left',
+                orientation: [-1, 0],
+                pos: [0, 0.5],
+              },
+              {
+                id: 'right',
+                orientation: [1, 0],
+                pos: [0, 0.5],
+              },
+            ],
+          })
+        }
         newEdges.push({
           id: `${r._id}`,
           source: 'right',
@@ -135,11 +138,13 @@ export default {
       this.canvas.removeEdges(edges)
 
       const _topoData = _.cloneDeep(this.topoData)
+      _topoData.edges.push(...newEdges)
       let result
       const getTreeItem = (data, id) => {
         for (let i = 0; i < data.length; i++) {
           if (data[i].id === id) {
             result = data[i] // 结果赋值
+            result.edges = _topoData.edges
             break
           } else {
             if (data[i].children && data[i].children.length) {
@@ -151,10 +156,10 @@ export default {
 
       getTreeItem(_topoData.nodes.children, sourceNode)
       result.children.push(...newNodes)
-      _topoData.edges.push(...newEdges)
 
       this.topoData = _topoData
       this.canvas.draw(_topoData, {}, () => {})
+      this.exsited_ci = [...new Set([...this.exsited_ci, ...res.result.map((r) => r._id)])]
     },
   },
 }
