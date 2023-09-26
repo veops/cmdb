@@ -12,6 +12,9 @@ import zhCN from 'ant-design-vue/lib/locale-provider/zh_CN'
 import { AppDeviceEnquire } from '@/utils/mixin'
 import { debounce } from './utils/util'
 
+import { h } from 'snabbdom'
+import { DomEditor, Boot } from '@wangeditor/editor'
+
 export default {
   mixins: [AppDeviceEnquire],
   provide() {
