@@ -145,3 +145,14 @@ class EmployeePositionView(APIView):
         result = EmployeeCRUD.get_all_position()
         return self.jsonify(result)
 
+
+class GetEmployeeNoticeByIds(APIView):
+    url_prefix = (f'{prefix}/get_notice_by_ids',)
+
+    def post(self):
+        employee_ids = request.json.get('employee_ids', [])
+        if not employee_ids:
+            result = []
+        else:
+            result = EmployeeCRUD.get_employee_notice_by_ids(employee_ids)
+        return self.jsonify(result)
