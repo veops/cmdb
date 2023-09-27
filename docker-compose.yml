@@ -30,7 +30,7 @@ services:
           - redis
 
   cmdb-api:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.3.3
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.3.4
 #    build:
 #      context: .
 #      target: cmdb-api
@@ -48,10 +48,11 @@ services:
         gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000 -D
         flask cmdb-init-cache
         flask cmdb-init-acl
+        nohup flask cmdb-trigger > trigger.log 2>&1 &
         nohup flask cmdb-counter > counter.log 2>&1 &
 
-        celery -A celery_worker.celery worker -E -Q one_cmdb_async --concurrency=2 -D
-        celery -A celery_worker.celery worker -E -Q acl_async --concurrency=2
+        celery -A celery_worker.celery worker -E -Q one_cmdb_async --autoscale=5,2 --logfile=one_cmdb_async.log -D
+        celery -A celery_worker.celery worker -E -Q acl_async --logfile=one_acl_async.log --concurrency=2
     depends_on:
       - cmdb-db
       - cmdb-cache
@@ -61,7 +62,7 @@ services:
           - cmdb-api
 
   cmdb-ui:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.3.3
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.3.4
 #    build:
 #      context: .
 #      target: cmdb-ui
