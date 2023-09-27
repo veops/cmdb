@@ -432,8 +432,9 @@ class CITypeTriggerView(APIView):
         assert type_id is not None
 
         option = request.values.get('option')
+        attr_id = request.values.get('attr_id')
 
-        return self.jsonify(CITypeTriggerManager().update(_id, option))
+        return self.jsonify(CITypeTriggerManager().update(_id, attr_id, option))
 
     @has_perm_from_args("type_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
     def delete(self, type_id, _id):
