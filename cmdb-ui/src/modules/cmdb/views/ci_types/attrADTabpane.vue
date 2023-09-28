@@ -276,7 +276,7 @@ export default {
       } else if (_findADT.agent_id) {
         this.agent_type = 'agent_id'
       } else {
-        this.agent_type = 'agent_id'
+        this.agent_type = this.agentTypeRadioList[0].value
       }
       if (_findADT.interval || (!_findADT.interval && !_findADT.cron)) {
         this.interval = 'interval'
@@ -348,9 +348,17 @@ export default {
       }
       if (this.agent_type === 'agent_id' || this.agent_type === 'all') {
         params.query_expr = ''
+        if (this.agent_type === 'agent_id' && !params.agent_id) {
+          this.$message.error('请填写指定节点！')
+          return
+        }
       }
       if (this.agent_type === 'query_expr' || this.agent_type === 'all') {
         params.agent_id = ''
+        if (this.agent_type === 'query_expr' && !params.query_expr) {
+          this.$message.error('请从cmdb中选择！')
+          return
+        }
       }
 
       putCITypeDiscovery(currentAdt.id, params).then((res) => {
