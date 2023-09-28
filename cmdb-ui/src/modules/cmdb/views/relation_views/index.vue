@@ -560,20 +560,22 @@ export default {
         } else {
           q = `q=_type:${this.currentTypeId[0]},` + q
         }
-        const res = await searchCI2(q)
-        this.pageNo = res.page
-        this.numfound = res.numfound
-        res.result.forEach((item, index) => (item.key = item._id))
-        const jsonAttrList = this.preferenceAttrList.filter((attr) => attr.value_type === '6')
-        console.log(jsonAttrList)
-        this.instanceList = res['result'].map((item) => {
-          jsonAttrList.forEach(
-            (jsonAttr) => (item[jsonAttr.name] = item[jsonAttr.name] ? JSON.stringify(item[jsonAttr.name]) : '')
-          )
-          return { ..._.cloneDeep(item) }
-        })
-        this.initialInstanceList = _.cloneDeep(this.instanceList)
-        this.calcColumns()
+        if (this.currentTypeId[0]) {
+          const res = await searchCI2(q)
+          this.pageNo = res.page
+          this.numfound = res.numfound
+          res.result.forEach((item, index) => (item.key = item._id))
+          const jsonAttrList = this.preferenceAttrList.filter((attr) => attr.value_type === '6')
+          console.log(jsonAttrList)
+          this.instanceList = res['result'].map((item) => {
+            jsonAttrList.forEach(
+              (jsonAttr) => (item[jsonAttr.name] = item[jsonAttr.name] ? JSON.stringify(item[jsonAttr.name]) : '')
+            )
+            return { ..._.cloneDeep(item) }
+          })
+          this.initialInstanceList = _.cloneDeep(this.instanceList)
+          this.calcColumns()
+        }
       } else {
         q += `&root_id=${this.treeKeys[this.treeKeys.length - 1].split('%')[0]}`
         const typeId = parseInt(this.treeKeys[this.treeKeys.length - 1].split('%')[1])
@@ -608,25 +610,28 @@ export default {
         } else {
           q = `q=_type:${this.currentTypeId[0]},` + q
         }
-        const res = await searchCIRelation(q)
+        if (this.currentTypeId[0]) {
+          const res = await searchCIRelation(q)
 
-        const _data = Object.assign([], res.result)
-        _data.forEach((item, index) => (item.key = item._id))
-        this.numfound = res.numfound
-        this.pageNo = res.page
+          const _data = Object.assign([], res.result)
+          _data.forEach((item, index) => (item.key = item._id))
+          this.numfound = res.numfound
+          this.pageNo = res.page
 
-        const jsonAttrList = this.preferenceAttrList.filter((attr) => attr.value_type === '6')
-        this.instanceList = _data.map((item) => {
-          jsonAttrList.forEach(
-            (jsonAttr) => (item[jsonAttr.name] = item[jsonAttr.name] ? JSON.stringify(item[jsonAttr.name]) : '')
-          )
-          return { ..._.cloneDeep(item) }
-        })
-        this.initialInstanceList = _.cloneDeep(this.instanceList)
+          const jsonAttrList = this.preferenceAttrList.filter((attr) => attr.value_type === '6')
+          this.instanceList = _data.map((item) => {
+            jsonAttrList.forEach(
+              (jsonAttr) => (item[jsonAttr.name] = item[jsonAttr.name] ? JSON.stringify(item[jsonAttr.name]) : '')
+            )
+            return { ..._.cloneDeep(item) }
+          })
+          this.initialInstanceList = _.cloneDeep(this.instanceList)
 
-        this.calcColumns()
+          this.calcColumns()
+        }
+
         if (refreshType === 'refreshNumber') {
-          this.treeKeys.map((key, index) => {
+          const promises = this.treeKeys.map((key, index) => {
             statisticsCIRelation({
               root_ids: key.split('%')[0],
               level: this.treeKeys.length - index,
