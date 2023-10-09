@@ -35,6 +35,9 @@
         <a-input v-model="infoData.email" :disabled="!isEditable" />
       </a-form-model-item>
       <SpanTitle>公司标识</SpanTitle>
+      <a-form-model-item label="Messenger地址" prop="messenger">
+        <a-input v-model="infoData.messenger" :disabled="!isEditable" />
+      </a-form-model-item>
       <a-form-model-item label="部署域名" prop="domainName">
         <a-input v-model="infoData.domainName" :disabled="!isEditable" />
       </a-form-model-item>
@@ -150,6 +153,8 @@ export default {
         email: '',
         logoName: '',
         smallLogoName: '',
+        messenger: '',
+        domainName: '',
       },
       rule: {
         name: [{ required: true, whitespace: true, message: '请输入名称', trigger: 'blur' }],
@@ -251,6 +256,8 @@ export default {
         email: '',
         logoName: '',
         smallLogoName: '',
+        messenger: '',
+        domainName: '',
       }
     },
     customRequest(file) {

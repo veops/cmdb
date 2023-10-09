@@ -156,12 +156,74 @@
       </a-form-model-item>
       <a-form-model-item label="通知方式" prop="method">
         <a-checkbox-group v-model="notifies.method">
-          <a-checkbox value="wechatApp">
-            微信
-          </a-checkbox>
-          <a-checkbox value="email">
-            邮件
-          </a-checkbox>
+          <a-row :style="{ marginTop: '4px' }" :gutter="[0, 12]">
+            <a-col :span="6">
+              <a-checkbox value="email"> <ops-icon type="email" style="margin-right:5px" />邮件 </a-checkbox>
+            </a-col>
+            <a-col :span="6">
+              <a-checkbox value="wechatApp">
+                <ops-icon type="wechatApp" style="margin-right:5px" />企业微信
+              </a-checkbox>
+            </a-col>
+            <a-col :span="6">
+              <a-checkbox value="dingdingApp">
+                <ops-icon type="dingdingApp" style="margin-right:5px" />钉钉
+              </a-checkbox>
+            </a-col>
+            <a-col :span="6">
+              <a-checkbox value="feishuApp"> <ops-icon type="feishuApp" style="margin-right:5px" />飞书 </a-checkbox>
+            </a-col>
+            <a-col :span="4" :style="{ lineHeight: '32px' }">
+              <ops-icon type="robot" style="margin-right:5px" />机器人：
+            </a-col>
+            <a-col :span="18">
+              <treeselect
+                :disable-branch-nodes="true"
+                :class="{
+                  'custom-treeselect': true,
+                  'custom-treeselect-bgcAndBorder': true,
+                }"
+                :style="{
+                  '--custom-height': '32px',
+                  lineHeight: '32px',
+                  '--custom-bg-color': '#fff',
+                  '--custom-border': '1px solid #d9d9d9',
+                  '--custom-multiple-lineHeight': '14px',
+                }"
+                v-model="selectedBot"
+                :multiple="true"
+                :clearable="true"
+                searchable
+                :options="appBot"
+                value-consists-of="LEAF_PRIORITY"
+                placeholder="请选择机器人"
+                :normalizer="
+                  (node) => {
+                    return {
+                      id: node.name,
+                      label: node.label || node.name,
+                      children: node.bot,
+                    }
+                  }
+                "
+                appendToBody
+                :zIndex="1050"
+                noChildrenText="暂无数据"
+              >
+                <div
+                  :title="node.label"
+                  slot="option-label"
+                  slot-scope="{ node }"
+                  :style="{ width: '100%', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }"
+                >
+                  <ops-icon :type="node.id" v-if="node.children" />{{ node.label }}
+                </div>
+                <div slot="value-label" slot-scope="{ node }">
+                  <ops-icon :type="node.parentNode.id" />{{ node.label }}
+                </div>
+              </treeselect>
+            </a-col>
+          </a-row>
         </a-checkbox-group>
       </a-form-model-item>
     </a-form-model>
@@ -200,6 +262,7 @@ import EmployeeTreeSelect from '@/views/setting/components/employeeTreeSelect.vu
 import Webhook from '../../components/webhook'
 import NoticeContent from '../../components/noticeContent'
 import { getNoticeByEmployeeIds } from '@/api/employee'
+import { getNoticeConfigAppBot } from '@/api/noticeSetting'
 
 export default {
   name: 'TriggerForm',
@@ -260,6 +323,8 @@ export default {
       isShow: false,
       dag_id: null,
       showCustomEmail: false,
+      appBot: [],
+      selectedBot: undefined,
     }
   },
   computed: {
@@ -286,9 +351,15 @@ export default {
         this.dags = res.map((dag) => ({ id: dag[1], label: dag[0] }))
       })
     },
+    async getNoticeConfigAppBot() {
+      await getNoticeConfigAppBot().then((res) => {
+        this.appBot = res
+      })
+    },
     createFromTriggerTable(attrList) {
       this.visible = true
-      // this.getDags()
+      this.getDags()
+      this.getNoticeConfigAppBot()
       this.attrList = attrList
       this.triggerId = null
       this.title = '新增触发器'
@@ -307,7 +378,8 @@ export default {
     },
     async open(property, attrList) {
       this.visible = true
-      // await this.getDags()
+      await this.getDags()
+      this.getNoticeConfigAppBot()
       this.attrList = attrList
       if (property.has_trigger) {
         this.triggerId = property.trigger.id
@@ -348,7 +420,7 @@ export default {
           const employee_ids = property?.trigger?.option?.employee_ids ?? undefined
           const custom_email =
             tos
-              .filter((t) => !t.employee_id)
+              .filter((t) => !t.employee_id && t.email)
               .map((t) => t.email)
               .join(';') ?? ''
 
@@ -360,7 +432,16 @@ export default {
               this.$refs.noticeContent.setContent(body_html)
             }, 100)
           }
-          this.notifies = { employee_ids, custom_email, subject, method }
+          const _method = method.filter((item) => ['email', 'wechatApp', 'dingdingApp', 'feishuApp'].includes(item))
+          const _flatAppBot = []
+          this.appBot.forEach((item) => {
+            _flatAppBot.push(...item.bot.map((b) => b.name))
+          })
+          const selectedBot = method.filter(
+            (item) => !['email', 'wechatApp', 'dingdingApp', 'feishuApp'].includes(item) && _flatAppBot.includes(item)
+          )
+          this.selectedBot = selectedBot
+          this.notifies = { employee_ids, custom_email, subject, method: _method }
         }
       } else {
         this.title = `新增触发器 ${property.alias || property.name}`
@@ -378,6 +459,7 @@ export default {
       this.category = 1
       this.triggerAction = '1'
       this.filterExp = ''
+      this.selectedBot = undefined
       this.visible = false
     },
     filterChange(value) {
@@ -415,11 +497,30 @@ export default {
                   tos.push({ email })
                 })
               }
+              if (this.selectedBot && this.selectedBot.length) {
+                this.selectedBot.forEach((bot) => {
+                  tos.push({ [`${bot}`]: bot })
+                })
+              }
               if (this.category === 2) {
                 const { before_days, notify_at } = this.dateForm
-                params.option.notifies = { tos, subject, body, body_html, method, before_days, notify_at }
+                params.option.notifies = {
+                  tos,
+                  subject,
+                  body,
+                  body_html,
+                  method: [...method, ...(this.selectedBot ?? [])],
+                  before_days,
+                  notify_at,
+                }
               } else {
-                params.option.notifies = { tos, subject, body, body_html, method }
+                params.option.notifies = {
+                  tos,
+                  subject,
+                  body,
+                  body_html,
+                  method: [...method, ...(this.selectedBot ?? [])],
+                }
               }
               break
             case '2':

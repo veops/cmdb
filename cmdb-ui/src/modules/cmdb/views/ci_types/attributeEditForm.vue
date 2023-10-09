@@ -307,9 +307,9 @@
             <FontArea ref="fontArea" />
           </a-form-item>
         </a-col>
-        <a-col :span="24">
+        <a-col :span="24" v-if="currentValueType !== '6'">
           <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" label="预定义值">
-            <PreValueArea ref="preValueArea" :disabled="isShowComputedArea" />
+            <PreValueArea v-if="drawerVisible" ref="preValueArea" :disabled="isShowComputedArea" />
           </a-form-item>
         </a-col>
         <a-col :span="24" v-if="currentValueType !== '6'">
@@ -573,10 +573,13 @@ export default {
           })
         }
         const _find = attributes.find((item) => item.id === record.id)
-        this.$refs.preValueArea.setData({
-          choice_value: (_find || {}).choice_value || [],
-          choice_web_hook: record.choice_web_hook,
-        })
+        if (record.value_type !== '6') {
+          this.$refs.preValueArea.setData({
+            choice_value: (_find || {}).choice_value || [],
+            choice_web_hook: record.choice_web_hook,
+            choice_other: record.choice_other || undefined,
+          })
+        }
         this.$refs.fontArea.setData({
           fontOptions: _find?.option?.fontOptions || {},
         })

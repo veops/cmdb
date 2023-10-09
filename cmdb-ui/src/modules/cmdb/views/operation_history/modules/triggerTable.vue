@@ -29,6 +29,12 @@
           <span v-else-if="row.notify">通知</span>
         </template>
       </vxe-column>
+      <vxe-column title="状态">
+        <template #default="{ row }">
+          <a-tag color="green" v-if="row.is_ok">已完成</a-tag>
+          <a-tag color="red" v-else>未完成</a-tag>
+        </template>
+      </vxe-column>
       <vxe-column title="触发时间">
         <template #default="{row}">
           {{ row.updated_at || row.created_at }}
