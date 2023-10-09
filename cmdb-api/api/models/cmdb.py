@@ -90,6 +90,7 @@ class Attribute(Model):
     compute_script = db.Column(db.Text)
 
     choice_web_hook = db.Column(db.JSON)
+    choice_other = db.Column(db.JSON)
 
     uid = db.Column(db.Integer, index=True)
 
@@ -139,6 +140,7 @@ class CITriggerHistory(Model):
     record_id = db.Column(db.Integer, db.ForeignKey("c_records.id"))
     ci_id = db.Column(db.Integer, index=True, nullable=False)
     trigger_id = db.Column(db.Integer, db.ForeignKey("c_c_t_t.id"))
+    trigger_name = db.Column(db.String(64))
     is_ok = db.Column(db.Boolean, default=False)
     notify = db.Column(db.Text)
     webhook = db.Column(db.Text)

@@ -474,6 +474,29 @@ class EmployeeCRUD(object):
 
         return [r.to_dict() for r in results]
 
+    @staticmethod
+    def get_employee_notice_by_ids(employee_ids):
+        criterion = [
+            Employee.employee_id.in_(employee_ids),
+            Employee.deleted == 0,
+        ]
+        direct_columns = ['email', 'mobile']
+        employees = Employee.query.filter(
+            *criterion
+        ).all()
+        results = []
+        for employee in employees:
+            d = employee.to_dict()
+            tmp = dict(
+                employee_id=employee.employee_id,
+            )
+            for column in direct_columns:
+                tmp[column] = d.get(column, '')
+            notice_info = d.get('notice_info', {})
+            tmp.update(**notice_info)
+            results.append(tmp)
+        return results
+
 
 def get_user_map(key='uid', acl=None):
     """

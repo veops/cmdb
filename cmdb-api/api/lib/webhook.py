@@ -82,11 +82,15 @@ def webhook_request(webhook, payload):
     """
     assert webhook.get('url') is not None
 
+    payload = {k: v or '' for k, v in payload.items()}
+
     url = Template(webhook['url']).render(payload)
 
     params = webhook.get('parameters') or None
     if isinstance(params, dict):
         params = json.loads(Template(json.dumps(params)).render(payload))
+
+    headers = json.loads(Template(json.dumps(webhook.get('headers') or {})).render(payload))
 
     data = Template(json.dumps(webhook.get('body', ''))).render(payload)
     auth = _wrap_auth(**webhook.get('authorization', {}))
@@ -99,7 +103,7 @@ def webhook_request(webhook, payload):
     return request(
         url,
         params=params,
-        headers=webhook.get('headers') or None,
+        headers=headers or None,
         data=data,
         auth=auth
     )

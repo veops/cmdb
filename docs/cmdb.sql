@@ -843,7 +843,7 @@ CREATE TABLE `c_c_t_t` (
   `updated_at` datetime DEFAULT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type_id` int(11) NOT NULL,
-  `attr_id` int(11) NOT NULL,
+  `attr_id` int(11) DEFAULT NULL,
   `notify` json DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `type_id` (`type_id`),
@@ -854,15 +854,36 @@ CREATE TABLE `c_c_t_t` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+
 --
--- Dumping data for table `c_c_t_t`
+-- Table structure for table `c_ci_trigger_histories`
 --
 
-LOCK TABLES `c_c_t_t` WRITE;
-/*!40000 ALTER TABLE `c_c_t_t` DISABLE KEYS */;
-INSERT INTO `c_c_t_t` VALUES (NULL,0,'2023-01-09 14:53:47',NULL,1,4,51,'{\"body\": \"bbb\", \"wx_to\": [], \"subject\": \"aaa\", \"notify_at\": \"08:00\", \"before_days\": 1}');
-/*!40000 ALTER TABLE `c_c_t_t` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `c_ci_trigger_histories`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `c_ci_trigger_histories` (
+  `deleted_at` datetime DEFAULT NULL,
+  `deleted` tinyint(1) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `operate_type` enum('1','0','2') DEFAULT NULL,
+  `record_id` int(11) DEFAULT NULL,
+  `ci_id` int(11) NOT NULL,
+  `trigger_id` int(11) DEFAULT NULL,
+  `trigger_name` varchar(64) DEFAULT NULL,
+  `is_ok` tinyint(1) DEFAULT NULL,
+  `notify` text,
+  `webhook` text,
+  PRIMARY KEY (`id`),
+  KEY `record_id` (`record_id`),
+  KEY `trigger_id` (`trigger_id`),
+  KEY `ix_c_ci_trigger_histories_ci_id` (`ci_id`),
+  KEY `ix_c_ci_trigger_histories_deleted` (`deleted`),
+  CONSTRAINT `c_ci_trigger_histories_ibfk_1` FOREIGN KEY (`record_id`) REFERENCES `c_records` (`id`),
+  CONSTRAINT `c_ci_trigger_histories_ibfk_2` FOREIGN KEY (`trigger_id`) REFERENCES `c_c_t_t` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `c_c_t_u_c`
@@ -2098,6 +2119,7 @@ CREATE TABLE `common_employee` (
   `acl_virtual_rid` int(11) DEFAULT NULL COMMENT 'ACL中虚拟角色rid',
   `last_login` timestamp NULL DEFAULT NULL COMMENT '上次登录时间',
   `block` int(11) DEFAULT NULL COMMENT '锁定状态',
+  `notice_info` json DEFAULT NULL,
   PRIMARY KEY (`employee_id`),
   KEY `department_id` (`department_id`),
   KEY `ix_common_employee_deleted` (`deleted`),
@@ -2111,7 +2133,7 @@ CREATE TABLE `common_employee` (
 
 LOCK TABLES `common_employee` WRITE;
 /*!40000 ALTER TABLE `common_employee` DISABLE KEYS */;
-INSERT INTO `common_employee` VALUES (NULL,0,'2023-07-11 16:28:25',NULL,1,'demo@veops.cn','demo','demo','','','','',0,0,46,0,0,'2023-07-11 08:28:24',0),(NULL,0,'2023-07-11 16:34:08',NULL,2,'admin@one-ops.com','admin','admin','','','','',0,0,1,0,0,'2023-07-11 08:34:08',0);
+INSERT INTO `common_employee` VALUES (NULL,0,'2023-07-11 16:28:25',NULL,1,'demo@veops.cn','demo','demo','','','','',0,0,46,0,0,'2023-07-11 08:28:24',0, null),(NULL,0,'2023-07-11 16:34:08',NULL,2,'admin@one-ops.com','admin','admin','','','','',0,0,1,0,0,'2023-07-11 08:34:08',0, null);
 /*!40000 ALTER TABLE `common_employee` ENABLE KEYS */;
 UNLOCK TABLES;
 
