@@ -59,7 +59,7 @@ export default {
     ]
     return {
       segmentedContentTypes,
-    //   contentType: 'none',
+      //   contentType: 'none',
       jsonData: {},
     }
   },
@@ -74,6 +74,9 @@ export default {
   }
   div.jsoneditor {
     border-color: #f3f4f6;
+    .jsoneditor-outer {
+      border-color: #f3f4f6;
+    }
   }
 }
 </style>

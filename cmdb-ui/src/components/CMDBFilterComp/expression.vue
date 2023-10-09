@@ -40,6 +40,8 @@
             }
           }
         "
+        appendToBody
+        :zIndex="1050"
       >
         <div
           :title="node.label"
@@ -76,6 +78,8 @@
           }
         "
         @select="(value) => handleChangeExp(value, item, index)"
+        appendToBody
+        :zIndex="1050"
       >
       </treeselect>
       <treeselect
@@ -97,6 +101,8 @@
             }
           }
         "
+        appendToBody
+        :zIndex="1050"
       >
         <div
           :title="node.label"
@@ -135,6 +141,8 @@
               }
             }
           "
+          appendToBody
+          :zIndex="1050"
         >
         </treeselect>
         <a-input class="ops-input" v-model="item.value" size="small" style="width: 113px" />

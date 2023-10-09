@@ -6,6 +6,55 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "37590786",
+      "name": "wechatApp",
+      "font_class": "wechatApp",
+      "unicode": "e88e",
+      "unicode_decimal": 59534
+    },
+    {
+      "icon_id": "37590798",
+      "name": "robot",
+      "font_class": "robot",
+      "unicode": "e88b",
+      "unicode_decimal": 59531
+    },
+    {
+      "icon_id": "37590794",
+      "name": "feishuApp",
+      "font_class": "feishuApp",
+      "unicode": "e88c",
+      "unicode_decimal": 59532
+    },
+    {
+      "icon_id": "37590791",
+      "name": "dingdingApp",
+      "font_class": "dingdingApp",
+      "unicode": "e88d",
+      "unicode_decimal": 59533
+    },
+    {
+      "icon_id": "37590776",
+      "name": "email",
+      "font_class": "email",
+      "unicode": "e88a",
+      "unicode_decimal": 59530
+    },
+    {
+      "icon_id": "37537876",
+      "name": "setting-feishu",
+      "font_class": "ops-setting-notice-feishu",
+      "unicode": "e887",
+      "unicode_decimal": 59527
+    },
+    {
+      "icon_id": "37537859",
+      "name": "setting-feishu-selected",
+      "font_class": "ops-setting-notice-feishu-selected",
+      "unicode": "e888",
+      "unicode_decimal": 59528
+    },
+    {
       "icon_id": "37334642",
       "name": "cmdb-histogram",
       "font_class": "cmdb-bar",
@@ -2391,6 +2440,13 @@
       "font_class": "ops-dot",
       "unicode": "e738",
       "unicode_decimal": 59192
+    },
+    {
+      "icon_id": "37575490",
+      "name": "ops-setting-notice-email-selected",
+      "font_class": "ops-setting-notice-email-selected-copy",
+      "unicode": "e889",
+      "unicode_decimal": 59529
     },
     {
       "icon_id": "34108346",
