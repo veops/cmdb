@@ -177,7 +177,7 @@ class InitDepartment(object):
         else:
             resource_type = results[0]
 
-        for name in ['公司信息', '通知设置']:
+        for name in ['公司信息', '公司架构', '通知设置']:
             payload = dict(
                 type_id=resource_type['id'],
                 app_id=acl.app_name,
