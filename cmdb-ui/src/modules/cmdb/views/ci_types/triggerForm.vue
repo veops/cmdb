@@ -256,7 +256,7 @@
 
 <script>
 import _ from 'lodash'
-import { addTrigger, updateTrigger, deleteTrigger, getAllDagsName } from '../../api/CIType'
+import { addTrigger, updateTrigger, deleteTrigger } from '../../api/CIType'
 import FilterComp from '@/components/CMDBFilterComp'
 import EmployeeTreeSelect from '@/views/setting/components/employeeTreeSelect.vue'
 import Webhook from '../../components/webhook'
@@ -346,9 +346,9 @@ export default {
   },
   mounted() {},
   methods: {
-    async getDags() {
-      await getAllDagsName().then((res) => {
-        this.dags = res.map((dag) => ({ id: dag[1], label: dag[0] }))
+    async getNoticeConfigAppBot() {
+      await getNoticeConfigAppBot().then((res) => {
+        this.appBot = res
       })
     },
     async getNoticeConfigAppBot() {
@@ -358,7 +358,6 @@ export default {
     },
     createFromTriggerTable(attrList) {
       this.visible = true
-      this.getDags()
       this.getNoticeConfigAppBot()
       this.attrList = attrList
       this.triggerId = null
@@ -378,7 +377,6 @@ export default {
     },
     async open(property, attrList) {
       this.visible = true
-      await this.getDags()
       this.getNoticeConfigAppBot()
       this.attrList = attrList
       if (property.has_trigger) {
