@@ -3,6 +3,7 @@
 import json
 
 import requests
+import six
 from flask import current_app
 from jinja2 import Template
 from markdownify import markdownify as md
@@ -17,7 +18,15 @@ def _request_messenger(subject, body, tos, sender, payload):
     if not params['tos']:
         raise Exception("no receivers")
 
-    params['tos'] = [Template(i).render(payload) for i in params['tos'] if i.strip()]
+    flat_tos = []
+    for i in params['tos']:
+        if i.strip():
+            to = Template(i).render(payload)
+            if isinstance(to, list):
+                flat_tos.extend(to)
+            elif isinstance(to, six.string_types):
+                flat_tos.append(to)
+    params['tos'] = flat_tos
 
     if sender == "email":
         params['msgtype'] = 'text/html'

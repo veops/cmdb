@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 
 import copy
-import datetime
 
 import toposort
 from flask import abort
@@ -25,7 +24,6 @@ from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.cmdb.history import CITypeHistoryManager
 from api.lib.cmdb.relation_type import RelationTypeManager
 from api.lib.cmdb.resp_format import ErrFormat
-from api.lib.cmdb.utils import TableMap
 from api.lib.cmdb.value import AttributeValueManager
 from api.lib.decorator import kwargs_required
 from api.lib.perm.acl.acl import ACLManager
@@ -354,19 +352,20 @@ class CITypeAttributeManager(object):
         return [AttributeCache.get(attr.attr_id).name for attr in CITypeAttributesCache.get(type_id)]
 
     @staticmethod
-    def get_attributes_by_type_id(type_id, choice_web_hook_parse=True):
+    def get_attributes_by_type_id(type_id, choice_web_hook_parse=True, choice_other_parse=True):
         has_config_perm = ACLManager('cmdb').has_permission(
             CITypeManager.get_name_by_id(type_id), ResourceTypeEnum.CI, PermEnum.CONFIG)
 
         attrs = CITypeAttributesCache.get(type_id)
         result = list()
         for attr in sorted(attrs, key=lambda x: (x.order, x.id)):
-            attr_dict = AttributeManager().get_attribute(attr.attr_id, choice_web_hook_parse)
+            attr_dict = AttributeManager().get_attribute(attr.attr_id, choice_web_hook_parse, choice_other_parse)
             attr_dict["is_required"] = attr.is_required
             attr_dict["order"] = attr.order
             attr_dict["default_show"] = attr.default_show
             if not has_config_perm:
                 attr_dict.pop('choice_web_hook', None)
+                attr_dict.pop('choice_other', None)
 
             result.append(attr_dict)
 
@@ -374,13 +373,25 @@ class CITypeAttributeManager(object):
 
     @staticmethod
     def get_common_attributes(type_ids):
+        has_config_perm = False
+        for type_id in type_ids:
+            has_config_perm |= ACLManager('cmdb').has_permission(
+                CITypeManager.get_name_by_id(type_id), ResourceTypeEnum.CI, PermEnum.CONFIG)
+
         result = CITypeAttribute.get_by(__func_in___key_type_id=list(map(int, type_ids)), to_dict=False)
         attr2types = {}
         for i in result:
             attr2types.setdefault(i.attr_id, []).append(i.type_id)
 
-        return [AttributeCache.get(attr_id).to_dict() for attr_id in attr2types
-                if len(attr2types[attr_id]) == len(type_ids)]
+        attrs = []
+        for attr_id in attr2types:
+            if len(attr2types[attr_id]) == len(type_ids):
+                attr = AttributeManager().get_attribute_by_id(attr_id)
+                if not has_config_perm:
+                    attr.pop('choice_web_hook', None)
+                attrs.append(attr)
+
+        return attrs
 
     @staticmethod
     def _check(type_id, attr_ids):
@@ -489,7 +500,7 @@ class CITypeAttributeManager(object):
                 for ci in CI.get_by(type_id=type_id, to_dict=False):
                     AttributeValueManager.delete_attr_value(attr_id, ci.id)
 
-                    ci_cache.apply_async([ci.id], queue=CMDB_QUEUE)
+                    ci_cache.apply_async(args=(ci.id, None, None), queue=CMDB_QUEUE)
 
                 CITypeAttributeCache.clean(type_id, attr_id)
 
@@ -522,7 +533,7 @@ class CITypeAttributeManager(object):
         CITypeAttributesCache.clean(type_id)
 
         from api.tasks.cmdb import ci_type_attribute_order_rebuild
-        ci_type_attribute_order_rebuild.apply_async(args=(type_id,), queue=CMDB_QUEUE)
+        ci_type_attribute_order_rebuild.apply_async(args=(type_id, current_user.uid), queue=CMDB_QUEUE)
 
 
 class CITypeRelationManager(object):
@@ -847,7 +858,7 @@ class CITypeAttributeGroupManager(object):
         CITypeAttributesCache.clean(type_id)
 
         from api.tasks.cmdb import ci_type_attribute_order_rebuild
-        ci_type_attribute_order_rebuild.apply_async(args=(type_id,), queue=CMDB_QUEUE)
+        ci_type_attribute_order_rebuild.apply_async(args=(type_id, current_user.uid), queue=CMDB_QUEUE)
 
 
 class CITypeTemplateManager(object):
@@ -1092,7 +1103,7 @@ class CITypeTemplateManager(object):
 
         for ci_type in tpt['ci_types']:
             tpt['type2attributes'][ci_type['id']] = CITypeAttributeManager.get_attributes_by_type_id(
-                ci_type['id'], choice_web_hook_parse=False)
+                ci_type['id'], choice_web_hook_parse=False, choice_other_parse=False)
 
             tpt['type2attribute_group'][ci_type['id']] = CITypeAttributeGroupManager.get_by_type_id(ci_type['id'])
 
