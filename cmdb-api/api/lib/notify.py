@@ -8,6 +8,7 @@ from flask import current_app
 from jinja2 import Template
 from markdownify import markdownify as md
 
+from api.lib.common_setting.notice_config import NoticeConfigCRUD
 from api.lib.mail import send_mail
 
 
@@ -41,7 +42,14 @@ def _request_messenger(subject, body, tos, sender, payload):
 
         params['content'] = json.dumps(dict(content=content))
 
-    resp = requests.post(current_app.config.get('MESSENGER_URL'), json=params)
+    url = current_app.config.get('MESSENGER_URL') or NoticeConfigCRUD.get_messenger_url()
+    if not url:
+        raise Exception("no messenger url")
+
+    if not url.endswith("message"):
+        url = "{}/v1/message".format(url)
+
+    resp = requests.post(url, json=params)
     if resp.status_code != 200:
         raise Exception(resp.text)
 
