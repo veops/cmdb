@@ -480,7 +480,8 @@ class EmployeeCRUD(object):
         existed = EmployeeCRUD.get_employee_by_uid(_uid)
         employee_data = existed.to_dict()
 
-        notice_info = copy.deepcopy(employee_data.get('notice_info', {}))
+        notice_info = employee_data.get('notice_info', {})
+        notice_info = copy.deepcopy(notice_info) if notice_info else {}
 
         notice_info[_platform] = ''
 
@@ -515,7 +516,8 @@ class EmployeeCRUD(object):
 
             employee_data = existed.to_dict()
 
-            notice_info = copy.deepcopy(employee_data.get('notice_info', {}))
+            notice_info = employee_data.get('notice_info', {})
+            notice_info = copy.deepcopy(notice_info) if notice_info else {}
 
             notice_info[_platform] = '' if not target_id else target_id
 
