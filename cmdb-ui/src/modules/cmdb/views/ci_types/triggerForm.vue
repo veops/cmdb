@@ -351,11 +351,6 @@ export default {
         this.appBot = res
       })
     },
-    async getNoticeConfigAppBot() {
-      await getNoticeConfigAppBot().then((res) => {
-        this.appBot = res
-      })
-    },
     createFromTriggerTable(attrList) {
       this.visible = true
       this.getNoticeConfigAppBot()
