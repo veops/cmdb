@@ -90,6 +90,7 @@ class Attribute(Model):
     compute_script = db.Column(db.Text)
 
     choice_web_hook = db.Column(db.JSON)
+    choice_other = db.Column(db.JSON)
 
     uid = db.Column(db.Integer, index=True)
 

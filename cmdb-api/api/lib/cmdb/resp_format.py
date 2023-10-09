@@ -23,6 +23,7 @@ class ErrFormat(CommonErrFormat):
     cannot_edit_attribute = "您没有权限修改该属性!"
     cannot_delete_attribute = "目前只允许 属性创建人、管理员 删除属性!"
     attribute_name_cannot_be_builtin = "属性字段名不能是内置字段: id, _id, ci_id, type, _type, ci_type"
+    attribute_choice_other_invalid = "预定义值: 其他模型请求参数不合法!"
 
     ci_not_found = "CI {} 不存在"
     unique_constraint = "多属性联合唯一校验不通过: {}"

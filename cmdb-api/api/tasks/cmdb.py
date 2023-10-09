@@ -41,10 +41,11 @@ def ci_cache(ci_id, operate_type, record_id):
 
     current_app.logger.info("{0} flush..........".format(ci_id))
 
-    current_app.test_request_context().push()
-    login_user(UserCache.get('worker'))
+    if operate_type:
+        current_app.test_request_context().push()
+        login_user(UserCache.get('worker'))
 
-    CITriggerManager.fire(operate_type, ci_dict, record_id)
+        CITriggerManager.fire(operate_type, ci_dict, record_id)
 
 
 @celery.task(name="cmdb.batch_ci_cache", queue=CMDB_QUEUE)
@@ -164,7 +165,7 @@ def ci_relation_delete(parent_id, child_id):
 
 
 @celery.task(name="cmdb.ci_type_attribute_order_rebuild", queue=CMDB_QUEUE)
-def ci_type_attribute_order_rebuild(type_id):
+def ci_type_attribute_order_rebuild(type_id, uid):
     current_app.logger.info('rebuild attribute order')
     db.session.remove()
 
@@ -172,6 +173,9 @@ def ci_type_attribute_order_rebuild(type_id):
 
     attrs = CITypeAttributesCache.get(type_id)
     id2attr = {attr.attr_id: attr for attr in attrs}
+
+    current_app.test_request_context().push()
+    login_user(UserCache.get(uid))
 
     res = CITypeAttributeGroupManager.get_by_type_id(type_id, True)
     order = 0

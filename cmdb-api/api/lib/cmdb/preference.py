@@ -116,7 +116,7 @@ class PreferenceManager(object):
         for i in result:
             if i["is_choice"]:
                 i.update(dict(choice_value=AttributeManager.get_choice_values(
-                    i["id"], i["value_type"], i["choice_web_hook"])))
+                    i["id"], i["value_type"], i["choice_web_hook"], i.get("choice_other"))))
 
         return is_subscribed, result
 
