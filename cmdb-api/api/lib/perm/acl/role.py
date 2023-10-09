@@ -10,9 +10,7 @@ from sqlalchemy import or_
 
 from api.extensions import db
 from api.lib.perm.acl.app import AppCRUD
-from api.lib.perm.acl.audit import AuditCRUD
-from api.lib.perm.acl.audit import AuditOperateType
-from api.lib.perm.acl.audit import AuditScope
+from api.lib.perm.acl.audit import AuditCRUD, AuditOperateType, AuditScope
 from api.lib.perm.acl.cache import AppCache
 from api.lib.perm.acl.cache import HasResourceRoleCache
 from api.lib.perm.acl.cache import RoleCache
@@ -71,16 +69,16 @@ class RoleRelationCRUD(object):
     @staticmethod
     def get_parent_ids(rid, app_id):
         if app_id is not None:
-            return ([i.parent_id for i in RoleRelation.get_by(child_id=rid, app_id=app_id, to_dict=False)] +
-                    [i.parent_id for i in RoleRelation.get_by(child_id=rid, app_id=None, to_dict=False)])
+            return [i.parent_id for i in RoleRelation.get_by(child_id=rid, app_id=app_id, to_dict=False)] + \
+                   [i.parent_id for i in RoleRelation.get_by(child_id=rid, app_id=None, to_dict=False)]
         else:
             return [i.parent_id for i in RoleRelation.get_by(child_id=rid, app_id=app_id, to_dict=False)]
 
     @staticmethod
     def get_child_ids(rid, app_id):
         if app_id is not None:
-            return ([i.child_id for i in RoleRelation.get_by(parent_id=rid, app_id=app_id, to_dict=False)] +
-                    [i.child_id for i in RoleRelation.get_by(parent_id=rid, app_id=None, to_dict=False)])
+            return [i.child_id for i in RoleRelation.get_by(parent_id=rid, app_id=app_id, to_dict=False)] + \
+                   [i.child_id for i in RoleRelation.get_by(parent_id=rid, app_id=None, to_dict=False)]
         else:
             return [i.child_id for i in RoleRelation.get_by(parent_id=rid, app_id=app_id, to_dict=False)]
 
@@ -215,7 +213,6 @@ class RoleCRUD(object):
 
     @staticmethod
     def search(q, app_id, page=1, page_size=None, user_role=True, is_all=False, user_only=False):
-
         if user_only:  # only user role
             query = db.session.query(Role).filter(Role.deleted.is_(False)).filter(Role.uid.isnot(None))
 
@@ -273,6 +270,13 @@ class RoleCRUD(object):
         RoleCache.clean(rid)
 
         role = role.update(**kwargs)
+
+        if origin['uid'] and kwargs.get('name') and kwargs.get('name') != origin['name']:
+            from api.models.acl import User
+            user = User.get_by(uid=origin['uid'], first=True, to_dict=False)
+            if user:
+                user.update(username=kwargs['name'])
+
         AuditCRUD.add_role_log(role.app_id, AuditOperateType.update,
                                AuditScope.role, role.id, origin, role.to_dict(), {},
                                )
@@ -291,11 +295,10 @@ class RoleCRUD(object):
         from api.lib.perm.acl.acl import is_admin
 
         role = Role.get_by_id(rid) or abort(404, ErrFormat.role_not_found.format("rid={}".format(rid)))
-
-        not force and role.uid and abort(400, ErrFormat.user_role_delete_invalid)
-
         if not role.app_id and not is_admin():
             return abort(403, ErrFormat.admin_required)
+
+        not force and role.uid and abort(400, ErrFormat.user_role_delete_invalid)
 
         origin = role.to_dict()
 
@@ -305,20 +308,18 @@ class RoleCRUD(object):
 
         for i in RoleRelation.get_by(parent_id=rid, to_dict=False):
             child_ids.append(i.child_id)
-            i.soft_delete(commit=False)
+            i.soft_delete()
 
         for i in RoleRelation.get_by(child_id=rid, to_dict=False):
             parent_ids.append(i.parent_id)
-            i.soft_delete(commit=False)
+            i.soft_delete()
 
         role_permissions = []
         for i in RolePermission.get_by(rid=rid, to_dict=False):
             role_permissions.append(i.to_dict())
-            i.soft_delete(commit=False)
+            i.soft_delete()
 
-        role.soft_delete(commit=False)
-
-        db.session.commit()
+        role.soft_delete()
 
         role_rebuild.apply_async(args=(recursive_child_ids, role.app_id), queue=ACL_QUEUE)
 
