@@ -1,8 +1,9 @@
 # -*- coding:utf-8 -*-
-
+import copy
 import traceback
 from datetime import datetime
 
+import requests
 from flask import abort
 from flask_login import current_user
 from sqlalchemy import or_, literal_column, func, not_, and_
@@ -473,6 +474,58 @@ class EmployeeCRUD(object):
         ).all()
 
         return [r.to_dict() for r in results]
+
+    @staticmethod
+    def remove_bind_notice_by_uid(_platform, _uid):
+        existed = EmployeeCRUD.get_employee_by_uid(_uid)
+        employee_data = existed.to_dict()
+
+        notice_info = copy.deepcopy(employee_data.get('notice_info', {}))
+
+        notice_info[_platform] = ''
+
+        existed.update(
+            notice_info=notice_info
+        )
+        return ErrFormat.notice_remove_bind_success
+
+    @staticmethod
+    def bind_notice_by_uid(_platform, _uid):
+        existed = EmployeeCRUD.get_employee_by_uid(_uid)
+        mobile = existed.mobile
+        if not mobile or len(mobile) == 0:
+            abort(400, ErrFormat.notice_bind_err_with_empty_mobile)
+
+        from api.lib.common_setting.notice_config import NoticeConfigCRUD
+        messenger = NoticeConfigCRUD.get_messenger_url()
+        if not messenger or len(messenger) == 0:
+            abort(400, ErrFormat.notice_please_config_messenger_first)
+
+        url = f"{messenger}/v1/uid/getbyphone"
+        try:
+            payload = dict(
+                phone=mobile,
+                sender=_platform
+            )
+            res = requests.post(url, json=payload)
+            result = res.json()
+            if res.status_code != 200:
+                raise Exception(result.get('msg', ''))
+            target_id = result.get('uid', '')
+
+            employee_data = existed.to_dict()
+
+            notice_info = copy.deepcopy(employee_data.get('notice_info', {}))
+
+            notice_info[_platform] = '' if not target_id else target_id
+
+            existed.update(
+                notice_info=notice_info
+            )
+            return ErrFormat.notice_bind_success
+
+        except Exception as e:
+            return abort(400, ErrFormat.notice_bind_failed.format(str(e)))
 
     @staticmethod
     def get_employee_notice_by_ids(employee_ids):
