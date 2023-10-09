@@ -90,12 +90,39 @@
           </a-form-model-item>
           <a-form-model-item label="绑定信息">
             <a-space>
-              <div :class="{ 'setting-person-bind': true, 'setting-person-bind-existed': form.wx_id }">
-                <ops-icon type="ops-setting-notice-wx" />
-              </div>
-              <div @click="handleBindWx" class="setting-person-bind-button">
-                {{ form.notice_info && form.notice_info.wechatApp ? '重新绑定' : '绑定' }}
-              </div>
+              <a-tooltip title="企业微信">
+                <div
+                  @click="handleBind('wechatApp', form.notice_info && form.notice_info.wechatApp)"
+                  :class="{
+                    'setting-person-bind': true,
+                    'setting-person-bind-existed': form.notice_info && form.notice_info.wechatApp,
+                  }"
+                >
+                  <ops-icon type="ops-setting-notice-wx" />
+                </div>
+              </a-tooltip>
+              <a-tooltip title="飞书">
+                <div
+                  @click="handleBind('feishuApp', form.notice_info && form.notice_info.feishuApp)"
+                  :class="{
+                    'setting-person-bind': true,
+                    'setting-person-bind-existed': form.notice_info && form.notice_info.feishuApp,
+                  }"
+                >
+                  <ops-icon type="ops-setting-notice-feishu" />
+                </div>
+              </a-tooltip>
+              <a-tooltip title="钉钉">
+                <div
+                  @click="handleBind('dingdingApp', form.notice_info && form.notice_info.dingdingApp)"
+                  :class="{
+                    'setting-person-bind': true,
+                    'setting-person-bind-existed': form.notice_info && form.notice_info.dingdingApp,
+                  }"
+                >
+                  <ops-icon type="ops-setting-notice-dingding" />
+                </div>
+              </a-tooltip>
             </a-space>
           </a-form-model-item>
         </div>
@@ -116,7 +143,6 @@
     </div>
     <EditImage
       v-if="showEditImage"
-      :fixed-number="eidtImageOption.fixedNumber"
       :show="showEditImage"
       :image="editImage"
       :title="eidtImageOption.title"
@@ -140,7 +166,8 @@ import {
   getEmployeeByUid,
   updateEmployeeByUid,
   updatePasswordByUid,
-  bindWxByUid,
+  bindPlatformByUid,
+  unbindPlatformByUid,
 } from '@/api/employee'
 import { getDepartmentName, getDirectorName } from '@/utils/util'
 import EditImage from '../components/EditImage.vue'
@@ -267,22 +294,40 @@ export default {
         }
       })
     },
-    async handleBindWx() {
-      await this.$refs.personForm.validate(async (valid) => {
-        if (valid) {
-          const { nickname, mobile, sex, avatar } = this.form
-          const params = { nickname, mobile, sex, avatar }
-          await updateEmployeeByUid(this.uid, params)
-          bindWxByUid(this.uid)
-            .then(() => {
-              this.$message.success('绑定成功！')
-            })
-            .finally(() => {
-              this.getEmployeeByUid()
-              this.GetInfo()
-            })
-        }
-      })
+    async handleBind(platform, isBind) {
+      if (isBind) {
+        const that = this
+        this.$confirm({
+          title: '警告',
+          content: `确认解绑？`,
+          onOk() {
+            unbindPlatformByUid(platform, that.uid)
+              .then(() => {
+                that.$message.success('解绑成功！')
+              })
+              .finally(() => {
+                that.getEmployeeByUid()
+                that.GetInfo()
+              })
+          },
+        })
+      } else {
+        await this.$refs.personForm.validate(async (valid) => {
+          if (valid) {
+            const { nickname, mobile, sex, avatar } = this.form
+            const params = { nickname, mobile, sex, avatar }
+            await updateEmployeeByUid(this.uid, params)
+            bindPlatformByUid(platform, this.uid)
+              .then(() => {
+                this.$message.success('绑定成功！')
+              })
+              .finally(() => {
+                this.getEmployeeByUid()
+                this.GetInfo()
+              })
+          }
+        })
+      }
     },
   },
 }
@@ -342,18 +387,10 @@ export default {
       color: #fff;
       font-size: 30px;
       text-align: center;
+      cursor: pointer;
     }
     .setting-person-bind-existed {
       background: #008cee;
-    }
-    .setting-person-bind-button {
-      height: 40px;
-      width: 72px;
-      background: #f0f5ff;
-      border-radius: 4px;
-      padding: 0 8px;
-      text-align: center;
-      cursor: pointer;
     }
   }
 }

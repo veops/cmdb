@@ -357,7 +357,6 @@ export default {
       })
     },
     handleAddGroupAttr(index) {
-      console.log(111, index)
       let group = null
       if (index === 0 || index) {
         group = this.CITypeGroups[index]
@@ -416,7 +415,7 @@ export default {
       console.log('changess')
       if (e.hasOwnProperty('moved') && e.moved.oldIndex !== e.moved.newIndex) {
         if (group === -1) {
-          this.$message.error('更多属性不能进行排序, 如需排序需添加入其他分组中！')
+          this.$message.error('其他分组中的属性不能进行排序，如需排序请先拖至自定义的分组！')
         } else {
           transferCITypeAttrIndex(this.CITypeId, {
             from: { attr_id: e.moved.element.id, group_id: group > -1 ? group : null },

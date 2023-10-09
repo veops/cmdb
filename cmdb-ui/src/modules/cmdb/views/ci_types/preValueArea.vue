@@ -28,32 +28,8 @@
     </a-tab-pane>
     <a-tab-pane key="webhook" :disabled="disabled">
       <span style="font-size:12px;" slot="tab">Webhook</span>
+      <Webhook ref="webhook" style="margin-top:10px" />
       <a-form-model :model="form">
-        <a-row :gutter="24">
-          <a-col :span="24">
-            <a-form-model-item label="地址" prop="url" :labelCol="{ span: 3 }" :wrapperCol="{ span: 16 }">
-              <a-input v-model="form.url" :disabled="disabled">
-                <a-select
-                  :showArrow="false"
-                  slot="addonBefore"
-                  style="width:60px;"
-                  v-model="form.method"
-                  :disabled="disabled"
-                >
-                  <a-select-option value="get">
-                    GET
-                  </a-select-option>
-                  <a-select-option value="post">
-                    POST
-                  </a-select-option>
-                  <a-select-option value="put">
-                    PUT
-                  </a-select-option>
-                </a-select>
-              </a-input>
-            </a-form-model-item>
-          </a-col>
-        </a-row>
         <a-col :span="24">
           <a-form-model-item prop="ret_key" :labelCol="{ span: 3 }" :wrapperCol="{ span: 18 }">
             <template slot="label">
@@ -76,6 +52,124 @@
         </a-col>
       </a-form-model>
     </a-tab-pane>
+    <a-tab-pane key="choice_other" :disabled="disabled">
+      <span style="font-size:12px;" slot="tab">其他模型属性</span>
+      <a-row :gutter="[24, 24]">
+        <a-col :span="12">
+          <a-form-item
+            :style="{ lineHeight: '24px', marginBottom: '5px' }"
+            label="模型"
+            :label-col="{ span: 4 }"
+            :wrapper-col="{ span: 20 }"
+          >
+            <treeselect
+              :disable-branch-nodes="true"
+              :class="{
+                'custom-treeselect': true,
+                'custom-treeselect-bgcAndBorder': true,
+              }"
+              :style="{
+                '--custom-height': '32px',
+                lineHeight: '32px',
+                '--custom-bg-color': '#fff',
+                '--custom-border': '1px solid #d9d9d9',
+                '--custom-multiple-lineHeight': '14px',
+              }"
+              v-model="choice_other.type_ids"
+              :multiple="true"
+              :clearable="true"
+              searchable
+              :options="ciTypeGroup"
+              value-consists-of="LEAF_PRIORITY"
+              placeholder="请选择CMDB模型"
+              :normalizer="
+                (node) => {
+                  return {
+                    id: node.id || -1,
+                    label: node.alias || node.name || '其他',
+                    title: node.alias || node.name || '其他',
+                    children: node.ci_types,
+                  }
+                }
+              "
+              appendToBody
+              :zIndex="1050"
+              @select="
+                () => {
+                  choice_other.attr_id = undefined
+                }
+              "
+            >
+              <div
+                :title="node.label"
+                slot="option-label"
+                slot-scope="{ node }"
+                :style="{ width: '100%', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }"
+              >
+                {{ node.label }}
+              </div>
+            </treeselect>
+          </a-form-item>
+        </a-col>
+        <a-col :span="12" v-if="choice_other.type_ids && choice_other.type_ids.length">
+          <a-form-item
+            :style="{ marginBottom: '5px' }"
+            label="属性"
+            :label-col="{ span: 4 }"
+            :wrapper-col="{ span: 20 }"
+          >
+            <treeselect
+              :disable-branch-nodes="true"
+              class="ops-setting-treeselect"
+              v-model="choice_other.attr_id"
+              :multiple="false"
+              :clearable="true"
+              searchable
+              :options="typeAttrs"
+              value-consists-of="LEAF_PRIORITY"
+              placeholder="请选择模型属性"
+              :normalizer="
+                (node) => {
+                  return {
+                    id: node.id || -1,
+                    label: node.alias || node.name || '其他',
+                    title: node.alias || node.name || '其他',
+                  }
+                }
+              "
+              appendToBody
+              :zIndex="1050"
+            >
+              <div
+                :title="node.label"
+                slot="option-label"
+                slot-scope="{ node }"
+                :style="{ width: '100%', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }"
+              >
+                {{ node.label }}
+              </div>
+            </treeselect>
+          </a-form-item>
+        </a-col>
+        <a-col :span="24" v-if="choice_other.type_ids && choice_other.type_ids.length">
+          <a-form-item
+            :style="{ marginBottom: '5px' }"
+            class="pre-value-filter"
+            label="筛选"
+            :label-col="{ span: 2 }"
+            :wrapper-col="{ span: 22 }"
+          >
+            <FilterComp
+              ref="filterComp"
+              :isDropdown="false"
+              :canSearchPreferenceAttrList="typeAttrs"
+              @setExpFromFilter="setExpFromFilter"
+              :expression="filterExp ? `q=${filterExp}` : ''"
+            />
+          </a-form-item>
+        </a-col>
+      </a-row>
+    </a-tab-pane>
   </a-tabs>
 </template>
 
@@ -85,10 +179,14 @@ import draggable from 'vuedraggable'
 import PreValueTag from './preValueTag.vue'
 import { defautValueColor } from '../../utils/const'
 import ColorPicker from '../../components/colorPicker/index.vue'
+import Webhook from '../../components/webhook'
+import { getCITypeGroups } from '../../api/ciTypeGroup'
+import { getCITypeCommonAttributesByTypeIds } from '../../api/CITypeAttr'
+import FilterComp from '@/components/CMDBFilterComp'
 
 export default {
   name: 'PreValueArea',
-  components: { draggable, PreValueTag, ColorPicker },
+  components: { draggable, PreValueTag, ColorPicker, Webhook, FilterComp },
   props: {
     disabled: {
       type: Boolean,
@@ -101,10 +199,15 @@ export default {
       activeKey: 'define', // define webhook
       valueList: [],
       form: {
-        url: '',
-        method: 'get',
         ret_key: '',
       },
+      choice_other: {
+        type_ids: undefined,
+        attr_id: undefined,
+      },
+      ciTypeGroup: [],
+      typeAttrs: [],
+      filterExp: '',
     }
   },
   watch: {
@@ -120,6 +223,25 @@ export default {
         }
       },
     },
+    'choice_other.type_ids': {
+      handler(newValue) {
+        if (newValue && newValue.length) {
+          getCITypeCommonAttributesByTypeIds({ type_ids: newValue.join(',') }).then((res) => {
+            this.typeAttrs = res.attributes
+          })
+        }
+      },
+    },
+  },
+  created() {
+    getCITypeGroups({ need_other: true }).then((res) => {
+      this.ciTypeGroup = res
+        .filter((item) => item.ci_types && item.ci_types.length)
+        .map((item) => {
+          item.id = `parent_${item.id || -1}`
+          return { ..._.cloneDeep(item) }
+        })
+    })
   },
   methods: {
     addNewValue(newValue, newStyle, newIcon) {
@@ -153,15 +275,42 @@ export default {
         return {
           choice_value: this.valueList,
           choice_web_hook: null,
+          choice_other: null,
         }
+      } else if (this.activeKey === 'webhook') {
+        const choice_web_hook = this.$refs.webhook.getParams()
+        choice_web_hook.ret_key = this.form.ret_key
+        return { choice_value: [], choice_web_hook, choice_other: null }
       } else {
-        return { choice_value: [], choice_web_hook: this.form }
+        let choice_other = {}
+        if (this.choice_other.type_ids && this.choice_other.type_ids.length) {
+          this.$refs.filterComp.handleSubmit()
+          choice_other = { ...this.choice_other, filter: this.filterExp }
+        }
+        return {
+          choice_value: [],
+          choice_web_hook: null,
+          choice_other,
+        }
       }
     },
-    setData({ choice_value, choice_web_hook }) {
+    setData({ choice_value, choice_web_hook, choice_other }) {
       if (choice_web_hook) {
-        this.form = choice_web_hook
         this.activeKey = 'webhook'
+        this.$nextTick(() => {
+          this.$refs.webhook.setParams(choice_web_hook)
+          this.form.ret_key = choice_web_hook.ret_key ?? ''
+        })
+      } else if (choice_other) {
+        this.activeKey = 'choice_other'
+        const { type_ids, attr_id, filter } = choice_other
+        this.choice_other = { type_ids, attr_id }
+        this.filterExp = filter
+        if (type_ids && type_ids.length) {
+          this.$nextTick(() => {
+            this.$refs.filterComp.visibleChange(true, false)
+          })
+        }
       } else {
         this.valueList = choice_value
         this.activeKey = 'define'
@@ -172,6 +321,13 @@ export default {
         dom.style.backgroundColor = '#00000040'
       } else {
         dom.style.backgroundColor = '#2f54eb'
+      }
+    },
+    setExpFromFilter(filterExp) {
+      if (filterExp) {
+        this.filterExp = `${filterExp}`
+      } else {
+        this.filterExp = ''
       }
     },
   },
@@ -190,6 +346,17 @@ export default {
     width: 25px;
     height: 20px;
     margin: 5px;
+  }
+}
+</style>
+
+<style lang="less">
+.pre-value-filter {
+  .ant-form-item-control {
+    line-height: 24px;
+  }
+  .table-filter-add {
+    line-height: 40px;
   }
 }
 </style>

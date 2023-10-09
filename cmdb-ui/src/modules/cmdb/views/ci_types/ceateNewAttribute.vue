@@ -294,7 +294,7 @@
           <FontArea ref="fontArea" />
         </a-form-item>
       </a-col>
-      <a-col :span="24">
+      <a-col :span="24" v-if="currentValueType !== '6'">
         <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" label="预定义值">
           <PreValueArea ref="preValueArea" :disabled="isShowComputedArea" />
         </a-form-item>
@@ -428,8 +428,10 @@ export default {
             values = { ...values, ...computedAreaData }
           } else {
             // 如果是非计算属性，就看看有没有预定义值
-            const preValueAreaData = this.$refs.preValueArea.getData()
-            values = { ...values, ...preValueAreaData }
+            if (values.value_type !== '6') {
+              const preValueAreaData = this.$refs.preValueArea.getData()
+              values = { ...values, ...preValueAreaData }
+            }
           }
           const fontOptions = this.$refs.fontArea.getData()
 
@@ -445,7 +447,9 @@ export default {
 
           this.form.resetFields()
           this.currentValueType = '2'
-          this.$refs.preValueArea.valueList = []
+          if (values.value_type !== '6') {
+            this.$refs.preValueArea.valueList = []
+          }
           this.$emit('done', attr_id, data, isCloseModal)
         } else {
           throw new Error()
