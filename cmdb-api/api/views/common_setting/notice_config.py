@@ -69,3 +69,11 @@ class NoticeConfigGetView(APIView):
     def get(self):
         res = NoticeConfigCRUD.get_all()
         return self.jsonify(res)
+
+
+class NoticeAppBotView(APIView):
+    url_prefix = (f'{prefix}/app_bot',)
+
+    def get(self):
+        res = NoticeConfigCRUD.get_app_bot()
+        return self.jsonify(res)

@@ -12,3 +12,10 @@ class OperatorType(BaseEnum):
     LESS_THAN = 6
     IS_EMPTY = 7
     IS_NOT_EMPTY = 8
+
+
+BotNameMap = {
+    'wechatApp': 'wechatBot',
+    'feishuApp': 'feishuBot',
+    'dingdingApp': 'dingdingBot',
+}
