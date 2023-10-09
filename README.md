@@ -21,9 +21,9 @@
 
 ### 相关文档
 
-- <a href="https://zhuanlan.zhihu.com/p/98453732" target="_blank">设计文档</a>
+- <a href="https://mp.weixin.qq.com/s/v3eANth64UBW5xdyOkK3tg" target="_blank">概要设计</a>
 - <a href="https://github.com/veops/cmdb/tree/master/docs/cmdb_api.md" target="_blank">API 文档</a>
-- <a href="https://mp.weixin.qq.com/s/EflmmJ-qdUkddTx2hRt3pA" target="_blank">树形视图实践</a>
+- <a href="https://mp.weixin.qq.com/s/rQaf4AES7YJsyNQG_MKOLg" target="_blank">自动发现</a>
 
 ### 特点
 
@@ -36,7 +36,7 @@
 - 多应用
   1. 丰富视图展示维度
   2. 提供 Restful API
-  3. 自定义字段触发器
+  3. 支持定义属性触发器、计算属性
 
 ### 主要功能
 
