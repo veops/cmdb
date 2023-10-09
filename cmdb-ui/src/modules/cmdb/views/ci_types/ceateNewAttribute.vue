@@ -447,7 +447,9 @@ export default {
 
           this.form.resetFields()
           this.currentValueType = '2'
-          this.$refs.preValueArea.valueList = []
+          if (values.value_type !== '6') {
+            this.$refs.preValueArea.valueList = []
+          }
           this.$emit('done', attr_id, data, isCloseModal)
         } else {
           throw new Error()
