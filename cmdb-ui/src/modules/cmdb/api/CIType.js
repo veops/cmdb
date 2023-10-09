@@ -205,11 +205,3 @@ export function ciTypeFilterPermissions(type_id) {
     method: 'get',
   })
 }
-
-export function getAllDagsName(params) {
-  return axios({
-      url: '/v1/dag/all_names',
-      method: 'GET',
-      params: params
-  })
-}
