@@ -56,3 +56,10 @@ class ErrFormat(CommonErrFormat):
     email_send_timeout = "邮件发送超时"
 
     common_data_not_found = "ID {} 找不到记录"
+    notice_platform_existed = "{} 已存在"
+    notice_not_existed = "{} 配置项不存在"
+    notice_please_config_messenger_first = "请先配置 messenger"
+    notice_bind_err_with_empty_mobile = "绑定失败，手机号为空"
+    notice_bind_failed = "绑定失败: {}"
+    notice_bind_success = "绑定成功"
+    notice_remove_bind_success = "解绑成功"

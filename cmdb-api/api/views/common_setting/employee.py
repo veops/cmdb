@@ -156,3 +156,15 @@ class GetEmployeeNoticeByIds(APIView):
         else:
             result = EmployeeCRUD.get_employee_notice_by_ids(employee_ids)
         return self.jsonify(result)
+
+
+class EmployeeBindNoticeWithACLID(APIView):
+    url_prefix = (f'{prefix}/by_uid/bind_notice/<string:platform>/<int:_uid>',)
+
+    def put(self, platform, _uid):
+        data = EmployeeCRUD.bind_notice_by_uid(platform, _uid)
+        return self.jsonify(info=data)
+
+    def delete(self, platform, _uid):
+        data = EmployeeCRUD.remove_bind_notice_by_uid(platform, _uid)
+        return self.jsonify(info=data)
