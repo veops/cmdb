@@ -1,6 +1,5 @@
-# -*- coding:utf-8 -*- 
+# -*- coding:utf-8 -*-
 
-import requests
 from flask import abort
 from flask import current_app
 from flask import session
@@ -23,6 +22,7 @@ from api.lib.cmdb.utils import ValueTypeMap
 from api.lib.decorator import kwargs_required
 from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import validate_permission
+from api.lib.webhook import webhook_request
 from api.models.cmdb import Attribute
 from api.models.cmdb import CIType
 from api.models.cmdb import CITypeAttribute
@@ -40,15 +40,11 @@ class AttributeManager(object):
         pass
 
     @staticmethod
-    def _get_choice_values_from_web_hook(choice_web_hook):
-        url = choice_web_hook.get('url')
-        ret_key = choice_web_hook.get('ret_key')
-        headers = choice_web_hook.get('headers') or {}
-        payload = choice_web_hook.get('payload') or {}
-        method = (choice_web_hook.get('method') or 'GET').lower()
+    def _get_choice_values_from_webhook(choice_webhook, payload=None):
+        ret_key = choice_webhook.get('ret_key')
 
         try:
-            res = getattr(requests, method)(url, headers=headers, data=payload).json()
+            res = webhook_request(choice_webhook, payload or {}).json()
             if ret_key:
                 ret_key_list = ret_key.strip().split("##")
                 for key in ret_key_list[:-1]:
@@ -63,16 +59,41 @@ class AttributeManager(object):
             current_app.logger.error("get choice values failed: {}".format(e))
             return []
 
+    @staticmethod
+    def _get_choice_values_from_other_ci(choice_other):
+        from api.lib.cmdb.search import SearchError
+        from api.lib.cmdb.search.ci import search
+
+        type_ids = choice_other.get('type_ids')
+        attr_id = choice_other.get('attr_id')
+        other_filter = choice_other.get('filter') or ''
+
+        query = "_type:({}),{}".format(";".join(map(str, type_ids)), other_filter)
+        s = search(query, fl=[str(attr_id)], facet=[str(attr_id)], count=1)
+        try:
+            _, _, _, _, _, facet = s.search()
+            return [[i[0], {}] for i in (list(facet.values()) or [[]])[0]]
+        except SearchError as e:
+            current_app.logger.error("get choice values from other ci failed: {}".format(e))
+            return []
+
     @classmethod
-    def get_choice_values(cls, attr_id, value_type, choice_web_hook, choice_web_hook_parse=True):
+    def get_choice_values(cls, attr_id, value_type, choice_web_hook, choice_other,
+                          choice_web_hook_parse=True, choice_other_parse=True):
         if choice_web_hook:
-            if choice_web_hook_parse:
-                if isinstance(choice_web_hook, dict):
-                    return cls._get_choice_values_from_web_hook(choice_web_hook)
+            if choice_web_hook_parse and isinstance(choice_web_hook, dict):
+                return cls._get_choice_values_from_webhook(choice_web_hook)
+            else:
+                return []
+        elif choice_other:
+            if choice_other_parse and isinstance(choice_other, dict):
+                return cls._get_choice_values_from_other_ci(choice_other)
             else:
                 return []
 
         choice_table = ValueTypeMap.choice.get(value_type)
+        if not choice_table:
+            return []
         choice_values = choice_table.get_by(fl=["value", "option"], attr_id=attr_id)
 
         return [[choice_value['value'], choice_value['option']] for choice_value in choice_values]
@@ -122,7 +143,8 @@ class AttributeManager(object):
         res = list()
         for attr in attrs:
             attr["is_choice"] and attr.update(
-                dict(choice_value=cls.get_choice_values(attr["id"], attr["value_type"], attr["choice_web_hook"])))
+                dict(choice_value=cls.get_choice_values(attr["id"], attr["value_type"],
+                                                        attr["choice_web_hook"], attr.get("choice_other"))))
             attr['is_choice'] and attr.pop('choice_web_hook', None)
 
             res.append(attr)
@@ -132,29 +154,38 @@ class AttributeManager(object):
     def get_attribute_by_name(self, name):
         attr = Attribute.get_by(name=name, first=True)
         if attr.get("is_choice"):
-            attr["choice_value"] = self.get_choice_values(attr["id"], attr["value_type"], attr["choice_web_hook"])
+            attr["choice_value"] = self.get_choice_values(attr["id"], attr["value_type"],
+                                                          attr["choice_web_hook"], attr.get("choice_other"))
 
         return attr
 
     def get_attribute_by_alias(self, alias):
         attr = Attribute.get_by(alias=alias, first=True)
         if attr.get("is_choice"):
-            attr["choice_value"] = self.get_choice_values(attr["id"], attr["value_type"], attr["choice_web_hook"])
+            attr["choice_value"] = self.get_choice_values(attr["id"], attr["value_type"],
+                                                          attr["choice_web_hook"], attr.get("choice_other"))
 
         return attr
 
     def get_attribute_by_id(self, _id):
         attr = Attribute.get_by_id(_id).to_dict()
         if attr.get("is_choice"):
-            attr["choice_value"] = self.get_choice_values(attr["id"], attr["value_type"], attr["choice_web_hook"])
+            attr["choice_value"] = self.get_choice_values(attr["id"], attr["value_type"],
+                                                          attr["choice_web_hook"], attr.get("choice_other"))
 
         return attr
 
-    def get_attribute(self, key, choice_web_hook_parse=True):
+    def get_attribute(self, key, choice_web_hook_parse=True, choice_other_parse=True):
         attr = AttributeCache.get(key).to_dict()
         if attr.get("is_choice"):
             attr["choice_value"] = self.get_choice_values(
-                attr["id"], attr["value_type"], attr["choice_web_hook"], choice_web_hook_parse=choice_web_hook_parse)
+                attr["id"],
+                attr["value_type"],
+                attr["choice_web_hook"],
+                attr.get("choice_other"),
+                choice_web_hook_parse=choice_web_hook_parse,
+                choice_other_parse=choice_other_parse,
+            )
 
         return attr
 
@@ -181,11 +212,16 @@ class AttributeManager(object):
     def add(cls, **kwargs):
         choice_value = kwargs.pop("choice_value", [])
         kwargs.pop("is_choice", None)
-        is_choice = True if choice_value or kwargs.get('choice_web_hook') else False
+        is_choice = True if choice_value or kwargs.get('choice_web_hook') or kwargs.get('choice_other') else False
 
         name = kwargs.pop("name")
         if name in BUILTIN_KEYWORDS:
             return abort(400, ErrFormat.attribute_name_cannot_be_builtin)
+
+        if kwargs.get('choice_other'):
+            if (not isinstance(kwargs['choice_other'], dict) or not kwargs['choice_other'].get('type_ids') or
+                    not kwargs['choice_other'].get('attr_id')):
+                return abort(400, ErrFormat.attribute_choice_other_invalid)
 
         alias = kwargs.pop("alias", "")
         alias = name if not alias else alias
@@ -301,12 +337,17 @@ class AttributeManager(object):
 
             self._change_index(attr, attr.is_index, kwargs['is_index'])
 
+        if kwargs.get('choice_other'):
+            if (not isinstance(kwargs['choice_other'], dict) or not kwargs['choice_other'].get('type_ids') or
+                    not kwargs['choice_other'].get('attr_id')):
+                return abort(400, ErrFormat.attribute_choice_other_invalid)
+
         existed2 = attr.to_dict()
-        if not existed2['choice_web_hook'] and existed2['is_choice']:
-            existed2['choice_value'] = self.get_choice_values(attr.id, attr.value_type, attr.choice_web_hook)
+        if not existed2['choice_web_hook'] and not existed2.get('choice_other') and existed2['is_choice']:
+            existed2['choice_value'] = self.get_choice_values(attr.id, attr.value_type, None, None)
 
         choice_value = kwargs.pop("choice_value", False)
-        is_choice = True if choice_value or kwargs.get('choice_web_hook') else False
+        is_choice = True if choice_value or kwargs.get('choice_web_hook') or kwargs.get('choice_other') else False
         kwargs['is_choice'] = is_choice
 
         if kwargs.get('default') and not (isinstance(kwargs['default'], dict) and 'default' in kwargs['default']):

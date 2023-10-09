@@ -506,4 +506,3 @@ class CITypeFilterPermissionView(APIView):
     @auth_with_app_token
     def get(self, type_id):
         return self.jsonify(CIFilterPermsCRUD().get(type_id))
-

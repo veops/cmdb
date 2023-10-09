@@ -92,7 +92,7 @@ class AttributeValueManager(object):
 
     @staticmethod
     def _check_is_choice(attr, value_type, value):
-        choice_values = AttributeManager.get_choice_values(attr.id, value_type, attr.choice_web_hook)
+        choice_values = AttributeManager.get_choice_values(attr.id, value_type, attr.choice_web_hook, attr.choice_other)
         if str(value) not in list(map(str, [i[0] for i in choice_values])):
             return abort(400, ErrFormat.not_in_choice_values.format(value))
 
