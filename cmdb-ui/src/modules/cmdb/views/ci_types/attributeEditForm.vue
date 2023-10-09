@@ -633,8 +633,10 @@ export default {
             values = { ...values, ...computedAreaData }
           } else {
             // 如果是非计算属性，就看看有没有预定义值
-            const preValueAreaData = this.$refs.preValueArea.getData()
-            values = { ...values, ...preValueAreaData }
+            if (values.value_type !== '6') {
+              const preValueAreaData = this.$refs.preValueArea.getData()
+              values = { ...values, ...preValueAreaData }
+            }
           }
 
           const fontOptions = this.$refs.fontArea.getData()

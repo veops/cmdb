@@ -100,12 +100,6 @@
               :CITypeId="CITypeId"
             />
             <i></i> <i></i> <i></i> <i></i> <i></i>
-
-            <!-- <a-col :xxl="4" :xl="6" :lg="8" :md="12" :sm="24">
-              <div class="property-item-empty filter-empty" @click="handleAddGroupAttr(index)">
-                <a><a-icon type="plus"/></a>
-              </div>
-            </a-col> -->
           </draggable>
         </div>
       </div>
@@ -145,10 +139,6 @@
             :CITypeId="CITypeId"
           />
           <i></i> <i></i> <i></i> <i></i> <i></i>
-          <!-- <a-col :xxl="4" :xl="6" :lg="8" :md="12" :sm="24">
-            <div class="property-item-empty filter-empty" @click="handleAddGroupAttr(undefined)">
-              <a><a-icon type="plus"/></a></div
-            ></a-col> -->
         </draggable>
       </div>
     </div>
@@ -262,7 +252,6 @@ export default {
         group.editable = false
         group.originOrder = group.order
         group.originName = group.name
-        // group.attributes = group.attributes.sort((a, b) => a.order - b.order)
       })
 
       this.otherGroupAttributes = this.attributes
@@ -390,7 +379,6 @@ export default {
               group.attributes = group.attributes.filter((x) => !values.checkedAttributes.includes(x.id))
             }
           })
-          // this.CITypeGroups = this.CITypeGroups
 
           this.otherGroupAttributes.forEach((attributes) => {
             if (values.groupId === null) {
