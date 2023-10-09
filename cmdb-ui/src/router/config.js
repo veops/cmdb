@@ -65,6 +65,34 @@ export const generatorDynamicRouter = async () => {
           meta: { title: '公司架构', appName: 'backend', icon: 'ops-setting-companyStructure', selectedIcon: 'ops-setting-companyStructure-selected', permission: ['acl_admin', 'backend_admin'] },
           component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/companyStructure/index')
         },
+        {
+          path: '/setting/notice',
+          name: 'notice',
+          component: RouteView,
+          meta: { title: '通知设置', appName: 'backend', icon: 'ops-setting-notice', selectedIcon: 'ops-setting-notice-selected', permission: ['通知设置', 'backend_admin'] },
+          redirect: '/setting/notice/email',
+          children: [{
+            path: '/setting/notice/email',
+            name: 'notice_email',
+            meta: { title: '邮件设置', icon: 'ops-setting-notice-email', selectedIcon: 'ops-setting-notice-email-selected' },
+            component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/notice/email/index')
+          }, {
+            path: '/setting/notice/wx',
+            name: 'notice_wx',
+            meta: { title: '企业微信', icon: 'ops-setting-notice-wx', selectedIcon: 'ops-setting-notice-wx-selected' },
+            component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/notice/wx')
+          }, {
+            path: '/setting/notice/dingding',
+            name: 'notice_dingding',
+            meta: { title: '钉钉', icon: 'ops-setting-notice-dingding', selectedIcon: 'ops-setting-notice-dingding-selected' },
+            component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/notice/dingding')
+          }, {
+            path: '/setting/notice/feishu',
+            name: 'notice_feishu',
+            meta: { title: '飞书', icon: 'ops-setting-notice-feishu', selectedIcon: 'ops-setting-notice-feishu-selected' },
+            component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/notice/feishu')
+          }]
+        }
       ]
     },])
   return routes

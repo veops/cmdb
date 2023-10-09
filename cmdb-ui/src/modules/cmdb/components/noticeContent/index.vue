@@ -83,10 +83,10 @@ export default {
     getContent() {
       const html = _.cloneDeep(this.editor.getHtml())
       const _html = html.replace(
-        /<span data-w-e-type="attachment" data-w-e-is-void data-w-e-is-inline.*?<\/span>/gm,
+        /<span data-w-e-type="attachment" (data-w-e-is-void|data-w-e-is-void="") (data-w-e-is-inline|data-w-e-is-inline="").*?<\/span>/gm,
         (value) => {
-          const _match = value.match(/(?<=data-attachmentValue=").*?(?=")/)
-          return `{{${_match}}}`
+          const _match = value.match(/(?<=data-attachment(V|v)alue=").*?(?=")/)
+          return `{{${_match[0]}}}`
         }
       )
       return { body_html: html, body: _html }

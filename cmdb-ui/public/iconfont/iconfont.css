@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1694508259411') format('woff2'),
-       url('iconfont.woff?t=1694508259411') format('woff'),
-       url('iconfont.ttf?t=1694508259411') format('truetype');
+  src: url('iconfont.woff2?t=1696815443987') format('woff2'),
+       url('iconfont.woff?t=1696815443987') format('woff'),
+       url('iconfont.ttf?t=1696815443987') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,34 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.wechatApp:before {
+  content: "\e88e";
+}
+
+.robot:before {
+  content: "\e88b";
+}
+
+.feishuApp:before {
+  content: "\e88c";
+}
+
+.dingdingApp:before {
+  content: "\e88d";
+}
+
+.email:before {
+  content: "\e88a";
+}
+
+.ops-setting-notice-feishu:before {
+  content: "\e887";
+}
+
+.ops-setting-notice-feishu-selected:before {
+  content: "\e888";
 }
 
 .cmdb-bar:before {
@@ -1375,6 +1403,10 @@
 
 .ops-dot:before {
   content: "\e738";
+}
+
+.ops-setting-notice-email-selected-copy:before {
+  content: "\e889";
 }
 
 .ops-setting-notice:before {

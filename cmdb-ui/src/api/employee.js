@@ -79,10 +79,17 @@ export function updatePasswordByUid(uid, data) {
   })
 }
 
-export function bindWxByUid(uid) {
+export function bindPlatformByUid(platform, uid) {
   return axios({
-    url: `/common-setting/v1/employee/by_uid/bind_work_wechat/${uid}`,
+    url: `/common-setting/v1/employee/by_uid/bind_notice/${platform}/${uid}`,
     method: 'put',
+  })
+}
+
+export function unbindPlatformByUid(platform, uid) {
+  return axios({
+    url: `/common-setting/v1/employee/by_uid/bind_notice/${platform}/${uid}`,
+    method: 'delete',
   })
 }
 
