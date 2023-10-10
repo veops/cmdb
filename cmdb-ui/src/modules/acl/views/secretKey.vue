@@ -35,8 +35,8 @@ export default {
         secret: '',
       },
       rules: {
-        key: [{ required: true, message: 'key is required' }],
-        secret: [{ required: true, message: 'secret is required' }],
+        key: [{ required: false, message: 'key is required' }],
+        secret: [{ required: false, message: 'secret is required' }],
       },
       visible: false,
     }
