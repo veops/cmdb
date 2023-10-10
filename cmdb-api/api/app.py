@@ -76,15 +76,6 @@ class MyJSONEncoder(DefaultJSONProvider):
         return o
 
 
-def create_acl_app(config_object="settings"):
-    app = Flask(__name__.split(".")[0])
-    app.config.from_object(config_object)
-
-    register_extensions(app)
-
-    return app
-
-
 def create_app(config_object="settings"):
     """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
 

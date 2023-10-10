@@ -47,13 +47,15 @@ services:
         flask db-setup
         flask common-check-new-columns
         gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000 -D
+        
+        celery -A celery_worker.celery worker -E -Q one_cmdb_async --autoscale=5,2 --logfile=one_cmdb_async.log -D
+        celery -A celery_worker.celery worker -E -Q acl_async --logfile=one_acl_async.log --concurrency=2 -D
+        
+        nohup flask cmdb-trigger > trigger.log 2>&1 &
         flask cmdb-init-cache
         flask cmdb-init-acl
-        nohup flask cmdb-trigger > trigger.log 2>&1 &
-        nohup flask cmdb-counter > counter.log 2>&1 &
+        flask cmdb-counter > counter.log 2>&1
 
-        celery -A celery_worker.celery worker -E -Q one_cmdb_async --autoscale=5,2 --logfile=one_cmdb_async.log -D
-        celery -A celery_worker.celery worker -E -Q acl_async --logfile=one_acl_async.log --concurrency=2
     depends_on:
       - cmdb-db
       - cmdb-cache
