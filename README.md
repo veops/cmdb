@@ -67,7 +67,7 @@
 ## 安装
 
 ### Docker 一键快速构建
-- 进入主目录（先安装 docker 环境）
+- 进入主目录（先安装 docker 环境, 注意要clone整个项目）
 
 ```
 docker-compose up -d
