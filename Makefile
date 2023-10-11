@@ -9,7 +9,7 @@ help:  ## display this help
 
 env: ## create a development environment using pipenv
 	sudo easy_install pip && \
-	pip install pipenv -i https://pypi.douban.com/simple && \
+	pip install pipenv -i https://repo.huaweicloud.com/repository/pypi/simple && \
 	npm install yarn && \
 	make deps
 .PHONY: env
@@ -36,7 +36,7 @@ api: ## start api server
 .PHONY: api
 
 worker: ## start async tasks worker
-	cd cmdb-api && pipenv run celery -A celery_worker.celery worker -E -Q one_cmdb_async --concurrency=1 -D && pipenv run celery -A celery_worker.celery worker -E -Q acl_async --concurrency=1 -D
+	cd cmdb-api && pipenv run celery -A celery_worker.celery worker -E -Q one_cmdb_async --autoscale=5,2 --logfile=one_cmdb_async.log -D && pipenv run celery -A celery_worker.celery worker -E -Q acl_async --autoscale=2,1 --logfile=one_acl_async.log -D
 .PHONY: worker
 
 ui: ## start ui server
