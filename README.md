@@ -6,7 +6,7 @@
 
 [English](docs/README_en.md) / [中文](README.md)
 - 产品文档：https://veops.cn/docs/
-- 在线体验: <a href="https://cmdb.veops.cn" target="_blank">CMDB</a>
+- 在线体验：<a href="https://cmdb.veops.cn" target="_blank">CMDB</a>
   - username: demo 或者 admin
   - password: 123456
 
@@ -84,6 +84,6 @@ docker-compose up -d
 
 ---
 
-_**欢迎关注公众号(维易科技OneOps)，关注后可加入微信群，进行产品和技术交流^_^**_
+_**欢迎关注公众号(维易科技OneOps)，关注后可加入微信群，进行产品和技术交流。**_
 
-![公众号: 维易科技OneOps](docs/images/qrcode_for_gzh.jpg)
+![公众号: 维易科技OneOps](docs/images/wechat.png)
