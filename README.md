@@ -19,30 +19,31 @@
 
 <img src=docs/images/view.jpg />
 
-### 相关文档
+### 相关文章
 
 - <a href="https://mp.weixin.qq.com/s/v3eANth64UBW5xdyOkK3tg" target="_blank">概要设计</a>
 - <a href="https://github.com/veops/cmdb/tree/master/docs/cmdb_api.md" target="_blank">API 文档</a>
 - <a href="https://mp.weixin.qq.com/s/rQaf4AES7YJsyNQG_MKOLg" target="_blank">自动发现</a>
+- 更多文章可以在公众号 **维易科技OneOps** 里查看
 
 ### 特点
 
 - 灵活性
-  1.  规范并统一纳管复杂数据资产
-  2.  自动发现、入库 IT 资产
+  1. 配置灵活，不设定任何运维场景，有内置模板
+  2. 自动发现、入库 IT 资产
 - 安全性
-  1. 细粒度访问控制
+  1. 细粒度权限控制
   2. 完备操作日志
 - 多应用
   1. 丰富视图展示维度
-  2. 提供 Restful API
+  2. API简单强大
   3. 支持定义属性触发器、计算属性
 
 ### 主要功能
 
 - 模型属性支持索引、多值、默认排序、字体颜色，支持计算属性
 - 支持自动发现、定时巡检、文件导入
-- 支持资源、树形、关系视图展示
+- 支持资源、层级、关系视图展示
 - 支持模型间关系配置和展示
 - 细粒度访问控制，完备的操作日志
 - 支持跨模型搜索
@@ -83,6 +84,6 @@ docker-compose up -d
 
 ---
 
-_**欢迎关注我们的公众号，点击联系我们，加入微信、QQ群(336164978)，获得更多产品、行业相关资讯**_
+_**欢迎关注公众号(维易科技OneOps)，关注后可加入微信群，进行产品和技术交流^_^**_
 
 ![公众号: 维易科技OneOps](docs/images/qrcode_for_gzh.jpg)
