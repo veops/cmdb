@@ -99,7 +99,7 @@
             align="center"
             show-overflow>
             <template #default="{ row }">
-              <span v-show="row.isGroup">
+              <span v-show="isGroup">
                 <a @click="handleDisplayMember(row)">成员</a>
                 <a-divider type="vertical" />
                 <a @click="handleGroupEdit(row)">编辑</a>

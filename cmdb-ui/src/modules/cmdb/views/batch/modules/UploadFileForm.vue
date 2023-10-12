@@ -7,6 +7,7 @@
       accept=".xls,.xlsx"
       :showUploadList="false"
       :fileList="fileList"
+      :disabled="!ciType"
     >
       <img :style="{ width: '80px', height: '80px' }" src="@/assets/file_upload.png" />
       <p class="ant-upload-text">点击或拖拽文件至此上传！</p>
@@ -24,6 +25,12 @@ import { processFile } from '@/modules/cmdb/api/batch'
 
 export default {
   name: 'UploadFileForm',
+  props: {
+    ciType: {
+      type: Number,
+      default: 0,
+    }
+  },
   data() {
     return {
       ciItemNum: 0,
