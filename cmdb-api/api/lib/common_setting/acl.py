@@ -7,6 +7,7 @@ from api.lib.perm.acl.cache import RoleCache, AppCache
 from api.lib.perm.acl.role import RoleCRUD, RoleRelationCRUD
 from api.lib.perm.acl.user import UserCRUD
 from api.lib.perm.acl.resource import ResourceTypeCRUD, ResourceCRUD
+from api.lib.perm.acl.permission import PermissionCRUD
 
 
 class ACLManager(object):
@@ -109,8 +110,26 @@ class ACLManager(object):
             id2perms=id2perms
         )
 
+    def create_resources_type(self, payload):
+        payload['app_id'] = self.validate_app().id
+        rt = ResourceTypeCRUD.add(**payload)
+
+        return rt.to_dict()
+
+    def update_resources_type(self, _id, payload):
+        rt = ResourceTypeCRUD.update(_id, **payload)
+
+        return rt.to_dict()
+
     def create_resource(self, payload):
         payload['app_id'] = self.validate_app().id
         resource = ResourceCRUD.add(**payload)
 
         return resource.to_dict()
+
+    def get_resource_by_type(self, q, u, rt_id, page=1, page_size=999999):
+        numfound, res = ResourceCRUD.search(q, u, self.validate_app().id, rt_id, page, page_size)
+        return res
+
+    def grant_resource(self, rid, resource_id, perms):
+        PermissionCRUD.grant(rid, perms, resource_id=resource_id, group_id=None)
