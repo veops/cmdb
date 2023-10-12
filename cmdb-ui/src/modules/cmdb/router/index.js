@@ -62,16 +62,16 @@ const genCmdbRoutes = async () => {
         meta: { title: '配置', disabled: true, },
       },
       {
-        path: '/cmdb/batch',
-        component: () => import('../views/batch'),
-        name: 'cmdb_batch',
-        meta: { 'title': '批量导入', icon: 'ops-cmdb-batch', selectedIcon: 'ops-cmdb-batch-selected', keepAlive: false }
-      },
-      {
         path: '/cmdb/preference',
         component: () => import('../views/preference/index'),
         name: 'cmdb_preference',
         meta: { title: '我的订阅', icon: 'ops-cmdb-preference', selectedIcon: 'ops-cmdb-preference-selected', keepAlive: false }
+      },
+      {
+        path: '/cmdb/batch',
+        component: () => import('../views/batch'),
+        name: 'cmdb_batch',
+        meta: { 'title': '批量导入', icon: 'ops-cmdb-batch', selectedIcon: 'ops-cmdb-batch-selected', keepAlive: false }
       },
       {
         path: '/cmdb/ci_types',
