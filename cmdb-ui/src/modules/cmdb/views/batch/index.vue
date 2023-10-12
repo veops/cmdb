@@ -5,7 +5,7 @@
     </div>
     <a-row>
       <a-col :span="12">
-        <upload-file-form ref="uploadFileForm" @uploadDone="uploadDone"></upload-file-form>
+        <upload-file-form :ciType="ciType" ref="uploadFileForm" @uploadDone="uploadDone"></upload-file-form>
       </a-col>
       <a-col :span="24" v-if="ciType && uploadData.length">
         <CiUploadTable :ciTypeAttrs="ciTypeAttrs" ref="ciUploadTable" :uploadData="uploadData"></CiUploadTable>
