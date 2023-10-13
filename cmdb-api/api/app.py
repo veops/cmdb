@@ -7,6 +7,7 @@ import os
 import sys
 from inspect import getmembers
 from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
 from flask import Flask
 from flask import jsonify
@@ -22,6 +23,7 @@ from api.models.acl import User
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir)
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 @login_manager.user_loader
@@ -116,7 +118,7 @@ def register_extensions(app):
     db.init_app(app)
     cors.init_app(app)
     login_manager.init_app(app)
-    migrate.init_app(app, db)
+    migrate.init_app(app, db, directory=f"{BASE_DIR}/migrations")
     rd.init_app(app)
     if app.config.get('USE_ES'):
         es.init_app(app)
