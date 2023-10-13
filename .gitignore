@@ -40,6 +40,7 @@ nosetests.xml
 .pytest_cache
 cmdb-api/test-output
 cmdb-api/api/uploaded_files
+cmdb-api/migrations/versions
 
 # Translations
 *.mo
