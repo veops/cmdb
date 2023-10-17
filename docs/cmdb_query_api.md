@@ -25,6 +25,8 @@
   - `IN`查询. eg. `hostname:(cmdb*;cmdb-web*)` 小括号, 分号分隔
   - `RANGE`查询. eg. `hostname:[cmdb* _TO_ cmdb-web*]` `_TO_`分隔
   - `COMPARISON`查询. eg. `cpu_count:>5` 支持`>, >=, <, <=`
+- 多个条件可以用`小括号`进行组合
+
 - 返回结果
   - 搜索表达式 `/api/v0.1/ci/s?q=_type:kvm,status:在线,idc:南汇,private_ip:10.1.1.1*&page=1&fl=hostname,private_ip&facet=private_ip&count=1`
   - 返回数据（默认 json）
@@ -91,6 +93,8 @@
   - `IN`查询. eg. `hostname:(cmdb*;cmdb-web*)` 小括号, 分号分隔
   - `RANGE`查询. eg. `hostname:[cmdb* _TO_ cmdb-web*]` `_TO_`分隔
   - `COMPARISON`查询. eg. `cpu_count:>5` 支持`>, >=, <, <=`
+- 多个条件可以用`小括号`进行组合
+
 - 返回结果
   - 搜索表达式 `/api/v0.1/ci_relations/s?root_id=53&level=3&q=_type:kvm,status:在线,idc:南汇,private_ip:10.1.1.1*&page=1&fl=hostname,private_ip&facet=private_ip&count=1`
   - 返回数据（默认 json）
