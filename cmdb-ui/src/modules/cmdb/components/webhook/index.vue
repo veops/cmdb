@@ -81,7 +81,11 @@ export default {
       this.$refs.Parameters.parameters.forEach((item) => {
         parameters[item.key] = item.value
       })
-      const body = this.$refs.Body.jsonData
+      let body = this.$refs.Body.jsonData
+      try {
+        JSON.parse(body)
+        body = JSON.parse(body)
+      } catch {}
       const headers = {}
       this.$refs.Header.headers.forEach((item) => {
         headers[item.key] = item.value
@@ -99,7 +103,6 @@ export default {
       return { method, url, parameters, body, headers, authorization }
     },
     setParams(params) {
-      console.log(2222, params)
       const { method, url, parameters, body, headers, authorization = {} } = params ?? {}
       this.method = method
       this.url = url
@@ -111,7 +114,11 @@ export default {
             value: parameters[key],
           }
         }) || []
-      this.$refs.Body.jsonData = body
+      if (body && Object.prototype.toString.call(body) === '[object Object]') {
+        this.$refs.Body.jsonData = JSON.stringify(body)
+      } else {
+        this.$refs.Body.jsonData = body
+      }
       this.$refs.Header.headers =
         Object.keys(headers).map((key) => {
           return {
