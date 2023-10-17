@@ -16,7 +16,7 @@
       </a-space> -->
     </div>
     <div style="margin-top:10px">
-      <vue-json-editor v-model="jsonData" :showBtns="false" :mode="'text'" />
+      <codemirror style="z-index: 9999" :options="cmOptions" v-model="jsonData"></codemirror>
       <!-- <a-empty
         v-else
         :image-style="{
@@ -31,11 +31,14 @@
 </template>
 
 <script>
-import vueJsonEditor from 'vue-json-editor'
+import { codemirror } from 'vue-codemirror'
+import 'codemirror/lib/codemirror.css'
+
+require('codemirror/mode/python/python.js')
 
 export default {
   name: 'Body',
-  components: { vueJsonEditor },
+  components: { codemirror },
   data() {
     const segmentedContentTypes = [
       {
@@ -60,7 +63,15 @@ export default {
     return {
       segmentedContentTypes,
       //   contentType: 'none',
-      jsonData: {},
+      jsonData: '',
+      cmOptions: {
+        lineNumbers: true,
+        mode: 'python',
+        height: '200px',
+        smartIndent: true,
+        tabSize: 4,
+        lineWrapping: true,
+      },
     }
   },
 }
