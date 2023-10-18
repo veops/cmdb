@@ -549,11 +549,11 @@ export default {
         q = q.slice(1)
       }
       if (this.treeKeys.length === 0) {
+        await this.judgeCITypes(q)
         if (!refreshType) {
           this.loadRoot()
         }
 
-        await this.judgeCITypes(q)
         const fuzzySearch = (this.$refs['search'] || {}).fuzzySearch || ''
         if (fuzzySearch) {
           q = `q=_type:${this.currentTypeId[0]},*${fuzzySearch}*,` + q
@@ -635,6 +635,7 @@ export default {
             statisticsCIRelation({
               root_ids: key.split('%')[0],
               level: this.treeKeys.length - index,
+              type_ids: this.showTypes.map((type) => type.id).join(','),
             }).then((res) => {
               let result
               const getTreeItem = (data, id) => {
@@ -689,6 +690,7 @@ export default {
       }
       const promises = _showTypeIds.map((typeId) => {
         const _q = (`q=_type:${typeId},` + q).replace(/count=\d*/, 'count=1')
+        console.log(_q)
         if (this.treeKeys.length === 0) {
           return searchCI2(_q).then((res) => {
             if (res.numfound !== 0) {
@@ -739,7 +741,11 @@ export default {
               level = idx + 1
             }
           })
-          return statisticsCIRelation({ root_ids: ciIds.join(','), level: level }).then((num) => {
+          return statisticsCIRelation({
+            root_ids: ciIds.join(','),
+            level: level,
+            type_ids: this.showTypes.map((type) => type.id).join(','),
+          }).then((num) => {
             facet.forEach((item, idx) => {
               item[1] += num[ciIds[idx] + '']
             })
@@ -752,25 +758,35 @@ export default {
 
     async loadNoRoot(rootIdAndTypeId, level) {
       const rootId = rootIdAndTypeId.split('%')[0]
-      searchCIRelation(`root_id=${rootId}&level=1&count=10000`).then(async (res) => {
-        const facet = []
-        const ciIds = []
-        res.result.forEach((item) => {
-          facet.push([item[item.unique], 0, item._id, item._type, item.unique])
-          ciIds.push(item._id)
-        })
-        const promises = level.map((_level) => {
-          if (_level > 1) {
-            return statisticsCIRelation({ root_ids: ciIds.join(','), level: _level - 1 }).then((num) => {
-              facet.forEach((item, idx) => {
-                item[1] += num[ciIds[idx] + '']
+      const typeId = Number(rootIdAndTypeId.split('%')[1])
+      const topo_flatten = this.relationViews?.views[this.$route.meta.name]?.topo_flatten ?? []
+      const index = topo_flatten.findIndex((id) => id === typeId)
+      const _type = topo_flatten[index + 1]
+      if (_type) {
+        searchCIRelation(`q=_type:${_type}&root_id=${rootId}&level=1&count=10000`).then(async (res) => {
+          const facet = []
+          const ciIds = []
+          res.result.forEach((item) => {
+            facet.push([item[item.unique], 0, item._id, item._type, item.unique])
+            ciIds.push(item._id)
+          })
+          const promises = level.map((_level) => {
+            if (_level > 1) {
+              return statisticsCIRelation({
+                root_ids: ciIds.join(','),
+                level: _level - 1,
+                type_ids: this.showTypes.map((type) => type.id).join(','),
+              }).then((num) => {
+                facet.forEach((item, idx) => {
+                  item[1] += num[ciIds[idx] + '']
+                })
               })
-            })
-          }
+            }
+          })
+          await Promise.all(promises)
+          this.wrapTreeData(facet, 'loadNoRoot')
         })
-        await Promise.all(promises)
-        this.wrapTreeData(facet, 'loadNoRoot')
-      })
+      }
     },
 
     onNodeClick(keys) {
