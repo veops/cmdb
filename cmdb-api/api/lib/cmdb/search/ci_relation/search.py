@@ -35,7 +35,7 @@ class Search(object):
         self.sort = sort or ("ci_id" if current_app.config.get("USE_ES") else None)
 
         self.root_id = root_id
-        self.level = level
+        self.level = level or 0
         self.reverse = reverse
 
     def _get_ids(self):
@@ -104,16 +104,22 @@ class Search(object):
                                 ci_ids=merge_ids).search()
 
     def statistics(self, type_ids):
+        self.level = int(self.level)
         _tmp = []
         ids = [self.root_id] if not isinstance(self.root_id, list) else self.root_id
-        for l in range(0, int(self.level)):
-            if not l:
-                _tmp = list(map(lambda x: list(json.loads(x).items()),
-                                [i or '{}' for i in rd.get(ids, REDIS_PREFIX_CI_RELATION) or []]))
+        for lv in range(0, self.level):
+            if not lv:
+                if type_ids and lv == self.level - 1:
+                    _tmp = list(map(lambda x: [i for i in x if i[1] in type_ids],
+                                    (map(lambda x: list(json.loads(x).items()),
+                                         [i or '{}' for i in rd.get(ids, REDIS_PREFIX_CI_RELATION) or []]))))
+                else:
+                    _tmp = list(map(lambda x: list(json.loads(x).items()),
+                                    [i or '{}' for i in rd.get(ids, REDIS_PREFIX_CI_RELATION) or []]))
             else:
                 for idx, item in enumerate(_tmp):
                     if item:
-                        if type_ids and l == self.level - 1:
+                        if type_ids and lv == self.level - 1:
                             __tmp = list(
                                 map(lambda x: [(_id, type_id) for _id, type_id in json.loads(x).items()
                                                if type_id in type_ids],
