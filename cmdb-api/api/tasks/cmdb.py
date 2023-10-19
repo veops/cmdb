@@ -16,6 +16,8 @@ from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import REDIS_PREFIX_CI
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
+from api.lib.decorator import flush_db
+from api.lib.decorator import reconnect_db
 from api.lib.perm.acl.cache import UserCache
 from api.lib.utils import Lock
 from api.lib.utils import handle_arg_list
@@ -25,11 +27,12 @@ from api.models.cmdb import CITypeAttribute
 
 
 @celery.task(name="cmdb.ci_cache", queue=CMDB_QUEUE)
+@flush_db
+@reconnect_db
 def ci_cache(ci_id, operate_type, record_id):
     from api.lib.cmdb.ci import CITriggerManager
 
     time.sleep(0.01)
-    db.session.remove()
 
     m = api.lib.cmdb.ci.CIManager()
     ci_dict = m.get_ci_by_id_from_db(ci_id, need_children=False, use_master=False)
@@ -49,9 +52,10 @@ def ci_cache(ci_id, operate_type, record_id):
 
 
 @celery.task(name="cmdb.batch_ci_cache", queue=CMDB_QUEUE)
+@flush_db
+@reconnect_db
 def batch_ci_cache(ci_ids, ):  # only for attribute change index
     time.sleep(1)
-    db.session.remove()
 
     for ci_id in ci_ids:
         m = api.lib.cmdb.ci.CIManager()
@@ -66,6 +70,7 @@ def batch_ci_cache(ci_ids, ):  # only for attribute change index
 
 
 @celery.task(name="cmdb.ci_delete", queue=CMDB_QUEUE)
+@reconnect_db
 def ci_delete(ci_id):
     current_app.logger.info(ci_id)
 
@@ -78,6 +83,7 @@ def ci_delete(ci_id):
 
 
 @celery.task(name="cmdb.ci_delete_trigger", queue=CMDB_QUEUE)
+@reconnect_db
 def ci_delete_trigger(trigger, operate_type, ci_dict):
     current_app.logger.info('delete ci {} trigger'.format(ci_dict['_id']))
     from api.lib.cmdb.ci import CITriggerManager
@@ -89,9 +95,9 @@ def ci_delete_trigger(trigger, operate_type, ci_dict):
 
 
 @celery.task(name="cmdb.ci_relation_cache", queue=CMDB_QUEUE)
+@flush_db
+@reconnect_db
 def ci_relation_cache(parent_id, child_id):
-    db.session.remove()
-
     with Lock("CIRelation_{}".format(parent_id)):
         children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
         children = json.loads(children) if children is not None else {}
@@ -106,6 +112,8 @@ def ci_relation_cache(parent_id, child_id):
 
 
 @celery.task(name="cmdb.ci_relation_add", queue=CMDB_QUEUE)
+@flush_db
+@reconnect_db
 def ci_relation_add(parent_dict, child_id, uid):
     """
     :param parent_dict: key is '$parent_model.attr_name'
@@ -120,8 +128,6 @@ def ci_relation_add(parent_dict, child_id, uid):
 
     current_app.test_request_context().push()
     login_user(UserCache.get(uid))
-
-    db.session.remove()
 
     for parent in parent_dict:
         parent_ci_type_name, _attr_name = parent.strip()[1:].split('.', 1)
@@ -147,10 +153,14 @@ def ci_relation_add(parent_dict, child_id, uid):
                 except Exception as e:
                     current_app.logger.warning(e)
                 finally:
-                    db.session.remove()
+                    try:
+                        db.session.commit()
+                    except:
+                        pass
 
 
 @celery.task(name="cmdb.ci_relation_delete", queue=CMDB_QUEUE)
+@reconnect_db
 def ci_relation_delete(parent_id, child_id):
     with Lock("CIRelation_{}".format(parent_id)):
         children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
@@ -165,9 +175,10 @@ def ci_relation_delete(parent_id, child_id):
 
 
 @celery.task(name="cmdb.ci_type_attribute_order_rebuild", queue=CMDB_QUEUE)
+@flush_db
+@reconnect_db
 def ci_type_attribute_order_rebuild(type_id, uid):
     current_app.logger.info('rebuild attribute order')
-    db.session.remove()
 
     from api.lib.cmdb.ci_type import CITypeAttributeGroupManager
 
@@ -188,10 +199,10 @@ def ci_type_attribute_order_rebuild(type_id, uid):
 
 
 @celery.task(name="cmdb.calc_computed_attribute", queue=CMDB_QUEUE)
+@flush_db
+@reconnect_db
 def calc_computed_attribute(attr_id, uid):
     from api.lib.cmdb.ci import CIManager
-
-    db.session.remove()
 
     current_app.test_request_context().push()
     login_user(UserCache.get(uid))
