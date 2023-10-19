@@ -5,7 +5,8 @@ import copy
 import hashlib
 from datetime import datetime
 
-import ldap
+from ldap3 import Server, Connection, ALL
+from ldap3.core.exceptions import LDAPBindError, LDAPCertificateError
 from flask import current_app
 from flask_sqlalchemy import BaseQuery
 
@@ -57,9 +58,7 @@ class UserQuery(BaseQuery):
         return user, authenticated
 
     def authenticate_with_ldap(self, username, password):
-        ldap_conn = ldap.initialize(current_app.config.get('LDAP_SERVER'))
-        ldap_conn.protocol_version = 3
-        ldap_conn.set_option(ldap.OPT_REFERRALS, 0)
+        server = Server(current_app.config.get('LDAP_SERVER'), get_info=ALL)
         if '@' in username:
             email = username
             who = current_app.config.get('LDAP_USER_DN').format(username.split('@')[0])
@@ -70,11 +69,12 @@ class UserQuery(BaseQuery):
         username = username.split('@')[0]
         user = self.get_by_username(username)
         try:
-
             if not password:
-                raise ldap.INVALID_CREDENTIALS
+                raise LDAPCertificateError
 
-            ldap_conn.simple_bind_s(who, password)
+            conn = Connection(server, user=who, password=password)
+            conn.bind()
+            conn.unbind()
 
             if not user:
                 from api.lib.perm.acl.user import UserCRUD
@@ -84,7 +84,7 @@ class UserQuery(BaseQuery):
             op_record.apply_async(args=(None, username, OperateType.LOGIN, ["ACL"]), queue=ACL_QUEUE)
 
             return user, True
-        except ldap.INVALID_CREDENTIALS:
+        except LDAPBindError:
             return user, False
 
     def search(self, key):
