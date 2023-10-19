@@ -260,7 +260,8 @@ class ResourceCRUD(object):
         numfound = query.count()
         res = [i.to_dict() for i in query.offset((page - 1) * page_size).limit(page_size)]
         for i in res:
-            i['user'] = UserCache.get(i['uid']).nickname if i['uid'] else ''
+            user = UserCache.get(i['uid']) if i['uid'] else ''
+            i['user'] = user and user.nickname
 
         return numfound, res
 
