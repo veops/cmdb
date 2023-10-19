@@ -4,8 +4,13 @@
 from functools import wraps
 
 from flask import abort
+from flask import current_app
 from flask import request
+from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import StatementError
 
+from api.extensions import db
 from api.lib.resp_format import CommonErrFormat
 
 
@@ -70,3 +75,40 @@ def args_validate(model_cls, exclude_args=None):
         return wrapper
 
     return decorate
+
+
+def reconnect_db(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except (StatementError, OperationalError, InvalidRequestError) as e:
+            error_msg = str(e)
+            if 'Lost connection' in error_msg or 'reconnect until invalid transaction' in error_msg or \
+                    'can be emitted within this transaction' in error_msg:
+                current_app.logger.info('[reconnect_db] lost connect rollback then retry')
+                db.session.rollback()
+                return func(*args, **kwargs)
+            else:
+                raise e
+        except Exception as e:
+            raise e
+
+    return wrapper
+
+
+def _flush_db():
+    db.session.commit()
+
+
+def flush_db(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        _flush_db()
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def run_flush_db():
+    _flush_db()
