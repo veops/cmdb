@@ -228,11 +228,11 @@ class CIFlushView(APIView):
         from api.tasks.cmdb import ci_cache
         from api.lib.cmdb.const import CMDB_QUEUE
         if ci_id is not None:
-            ci_cache.apply_async([ci_id], queue=CMDB_QUEUE)
+            ci_cache.apply_async(args=(ci_id, None, None), queue=CMDB_QUEUE)
         else:
             cis = CI.get_by(to_dict=False)
             for ci in cis:
-                ci_cache.apply_async([ci.id], queue=CMDB_QUEUE)
+                ci_cache.apply_async(args=(ci.id, None, None), queue=CMDB_QUEUE)
 
         return self.jsonify(code=200)
 
