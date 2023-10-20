@@ -74,6 +74,8 @@ class UserQuery(BaseQuery):
 
             conn = Connection(server, user=who, password=password)
             conn.bind()
+            if conn.result['result'] != 0:
+                raise LDAPBindError
             conn.unbind()
 
             if not user:
