@@ -216,10 +216,9 @@ class InitDepartment(object):
         )
         try:
             app = acl.validate_app()
-            if app:
-                return acl
-
-            acl.create_app(payload)
+            if not app:
+                acl.create_app(payload)
+            return acl
         except Exception as e:
             current_app.logger.error(e)
             if '不存在' in str(e):
