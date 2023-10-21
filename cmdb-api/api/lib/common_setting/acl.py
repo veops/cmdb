@@ -1,13 +1,13 @@
 # -*- coding:utf-8 -*-
-from flask import abort
 from flask import current_app
 
 from api.lib.common_setting.resp_format import ErrFormat
+from api.lib.perm.acl.app import AppCRUD
 from api.lib.perm.acl.cache import RoleCache, AppCache
+from api.lib.perm.acl.permission import PermissionCRUD
+from api.lib.perm.acl.resource import ResourceTypeCRUD, ResourceCRUD
 from api.lib.perm.acl.role import RoleCRUD, RoleRelationCRUD
 from api.lib.perm.acl.user import UserCRUD
-from api.lib.perm.acl.resource import ResourceTypeCRUD, ResourceCRUD
-from api.lib.perm.acl.permission import PermissionCRUD
 
 
 class ACLManager(object):
@@ -133,3 +133,9 @@ class ACLManager(object):
 
     def grant_resource(self, rid, resource_id, perms):
         PermissionCRUD.grant(rid, perms, resource_id=resource_id, group_id=None)
+
+    @staticmethod
+    def create_app(payload):
+        rt = AppCRUD.add(**payload)
+
+        return rt.to_dict()
