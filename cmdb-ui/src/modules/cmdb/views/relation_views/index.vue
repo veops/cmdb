@@ -940,10 +940,10 @@ export default {
         ),
         onOk() {
           const _tempTree = that.treeKeys[that.treeKeys.length - 1].split('%')
-          const firstCIObj = JSON.parse(_tempTree[2])
+          const first_ci_id = Number(_tempTree[0])
           batchDeleteCIRelation(
             that.selectedRowKeys.map((item) => item._id),
-            firstCIObj
+            [first_ci_id]
           ).then((res) => {
             that.$refs.xTable.clearCheckboxRow()
             that.$refs.xTable.clearCheckboxReserve()
