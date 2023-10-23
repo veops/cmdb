@@ -8,6 +8,7 @@ from flask import current_app
 from flask import request
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import PendingRollbackError
 from sqlalchemy.exc import StatementError
 
 from api.extensions import db
@@ -98,7 +99,10 @@ def reconnect_db(func):
 
 
 def _flush_db():
-    db.session.commit()
+    try:
+        db.session.commit()
+    except (StatementError, OperationalError, InvalidRequestError, PendingRollbackError):
+        db.session.rollback()
 
 
 def flush_db(func):
