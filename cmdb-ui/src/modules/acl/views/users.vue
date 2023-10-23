@@ -111,10 +111,8 @@ export default {
   },
   async beforeMount() {
     this.loading = true
-    await getOnDutyUser().then((res) => {
-      this.onDutuUids = res.map((i) => i.uid)
-      this.search()
-    })
+    await this.getOnDutyUser()
+    this.search()
   },
   computed: {
     ...mapState({
@@ -148,6 +146,11 @@ export default {
   inject: ['reload'],
 
   methods: {
+    async getOnDutyUser() {
+      await getOnDutyUser().then((res) => {
+        this.onDutuUids = res.map((i) => i.uid)
+      })
+    },
     search() {
       searchUser({ page_size: 10000 }).then((res) => {
         const ret = res.users.filter((u) => this.onDutuUids.includes(u.uid))
@@ -162,8 +165,9 @@ export default {
     handleEdit(record) {
       this.$refs.userForm.handleEdit(record)
     },
-    handleOk() {
+    async handleOk() {
       this.searchName = ''
+      await this.getOnDutyUser()
       this.search()
     },
     handleCreate() {
