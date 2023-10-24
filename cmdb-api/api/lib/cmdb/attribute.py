@@ -60,22 +60,33 @@ class AttributeManager(object):
             return []
 
     @staticmethod
-    def _get_choice_values_from_other_ci(choice_other):
+    def _get_choice_values_from_other(choice_other):
         from api.lib.cmdb.search import SearchError
         from api.lib.cmdb.search.ci import search
 
-        type_ids = choice_other.get('type_ids')
-        attr_id = choice_other.get('attr_id')
-        other_filter = choice_other.get('filter') or ''
+        if choice_other.get('type_ids'):
+            type_ids = choice_other.get('type_ids')
+            attr_id = choice_other.get('attr_id')
+            other_filter = choice_other.get('filter') or ''
 
-        query = "_type:({}),{}".format(";".join(map(str, type_ids)), other_filter)
-        s = search(query, fl=[str(attr_id)], facet=[str(attr_id)], count=1)
-        try:
-            _, _, _, _, _, facet = s.search()
-            return [[i[0], {}] for i in (list(facet.values()) or [[]])[0]]
-        except SearchError as e:
-            current_app.logger.error("get choice values from other ci failed: {}".format(e))
-            return []
+            query = "_type:({}),{}".format(";".join(map(str, type_ids)), other_filter)
+            s = search(query, fl=[str(attr_id)], facet=[str(attr_id)], count=1)
+            try:
+                _, _, _, _, _, facet = s.search()
+                return [[i[0], {}] for i in (list(facet.values()) or [[]])[0]]
+            except SearchError as e:
+                current_app.logger.error("get choice values from other ci failed: {}".format(e))
+                return []
+
+        elif choice_other.get('script'):
+            try:
+                x = compile(choice_other['script'], '', "exec")
+                exec(x)
+                res = locals()['ChoiceValue']().values() or []
+                return [[i, {}] for i in res]
+            except Exception as e:
+                current_app.logger.error("get choice values from script: {}".format(e))
+                return []
 
     @classmethod
     def get_choice_values(cls, attr_id, value_type, choice_web_hook, choice_other,
@@ -87,7 +98,7 @@ class AttributeManager(object):
                 return []
         elif choice_other:
             if choice_other_parse and isinstance(choice_other, dict):
-                return cls._get_choice_values_from_other_ci(choice_other)
+                return cls._get_choice_values_from_other(choice_other)
             else:
                 return []
 
@@ -96,7 +107,8 @@ class AttributeManager(object):
             return []
         choice_values = choice_table.get_by(fl=["value", "option"], attr_id=attr_id)
 
-        return [[choice_value['value'], choice_value['option']] for choice_value in choice_values]
+        return [[ValueTypeMap.serialize[value_type](choice_value['value']), choice_value['option']]
+                for choice_value in choice_values]
 
     @staticmethod
     def add_choice_values(_id, value_type, choice_values):
@@ -218,10 +230,15 @@ class AttributeManager(object):
         if name in BUILTIN_KEYWORDS:
             return abort(400, ErrFormat.attribute_name_cannot_be_builtin)
 
-        if kwargs.get('choice_other'):
-            if (not isinstance(kwargs['choice_other'], dict) or not kwargs['choice_other'].get('type_ids') or
-                    not kwargs['choice_other'].get('attr_id')):
-                return abort(400, ErrFormat.attribute_choice_other_invalid)
+        while kwargs.get('choice_other'):
+            if isinstance(kwargs['choice_other'], dict):
+                if kwargs['choice_other'].get('script'):
+                    break
+
+                if kwargs['choice_other'].get('type_ids') and kwargs['choice_other'].get('attr_id'):
+                    break
+
+            return abort(400, ErrFormat.attribute_choice_other_invalid)
 
         alias = kwargs.pop("alias", "")
         alias = name if not alias else alias
@@ -231,6 +248,8 @@ class AttributeManager(object):
             kwargs['default'] = dict(default=kwargs['default'])
 
         kwargs.get('is_computed') and cls.can_create_computed_attribute()
+
+        kwargs.get('choice_other') and kwargs['choice_other'].get('script') and cls.can_create_computed_attribute()
 
         attr = Attribute.create(flush=True,
                                 name=name,
@@ -337,10 +356,15 @@ class AttributeManager(object):
 
             self._change_index(attr, attr.is_index, kwargs['is_index'])
 
-        if kwargs.get('choice_other'):
-            if (not isinstance(kwargs['choice_other'], dict) or not kwargs['choice_other'].get('type_ids') or
-                    not kwargs['choice_other'].get('attr_id')):
-                return abort(400, ErrFormat.attribute_choice_other_invalid)
+        while kwargs.get('choice_other'):
+            if isinstance(kwargs['choice_other'], dict):
+                if kwargs['choice_other'].get('script'):
+                    break
+
+                if kwargs['choice_other'].get('type_ids') and kwargs['choice_other'].get('attr_id'):
+                    break
+
+            return abort(400, ErrFormat.attribute_choice_other_invalid)
 
         existed2 = attr.to_dict()
         if not existed2['choice_web_hook'] and not existed2.get('choice_other') and existed2['is_choice']:
