@@ -122,6 +122,19 @@ class EmployeeCRUD(object):
         return employee.to_dict()
 
     @staticmethod
+    def add_employee_from_acl_created(**kwargs):
+        try:
+            kwargs['acl_uid'] = kwargs.pop('uid')
+            kwargs['acl_rid'] = kwargs.pop('rid')
+            kwargs['department_id'] = 0
+
+            Employee.create(
+                **kwargs
+            )
+        except Exception as e:
+            abort(400, str(e))
+
+    @staticmethod
     def add(**kwargs):
         try:
             return CreateEmployee().create_single(**kwargs)
