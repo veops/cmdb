@@ -12,7 +12,7 @@ import api.models.cmdb as model
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.const import ValueTypeEnum
 
-TIME_RE = re.compile(r"^(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$")
+TIME_RE = re.compile(r"^20|21|22|23|[0-1]\d:[0-5]\d:[0-5]\d$")
 
 
 def string2int(x):
@@ -21,7 +21,7 @@ def string2int(x):
 
 def str2datetime(x):
     try:
-        return datetime.datetime.strptime(x, "%Y-%m-%d")
+        return datetime.datetime.strptime(x, "%Y-%m-%d").date()
     except ValueError:
         pass
 
@@ -44,8 +44,8 @@ class ValueTypeMap(object):
         ValueTypeEnum.FLOAT: float,
         ValueTypeEnum.TEXT: lambda x: x if isinstance(x, six.string_types) else str(x),
         ValueTypeEnum.TIME: lambda x: x if isinstance(x, six.string_types) else str(x),
-        ValueTypeEnum.DATE: lambda x: x.strftime("%Y-%m-%d"),
-        ValueTypeEnum.DATETIME: lambda x: x.strftime("%Y-%m-%d %H:%M:%S"),
+        ValueTypeEnum.DATE: lambda x: x.strftime("%Y-%m-%d") if not isinstance(x, six.string_types) else x,
+        ValueTypeEnum.DATETIME: lambda x: x.strftime("%Y-%m-%d %H:%M:%S") if not isinstance(x, six.string_types) else x,
         ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) and x else x,
     }
 
@@ -64,6 +64,8 @@ class ValueTypeMap(object):
         ValueTypeEnum.FLOAT: model.FloatChoice,
         ValueTypeEnum.TEXT: model.TextChoice,
         ValueTypeEnum.TIME: model.TextChoice,
+        ValueTypeEnum.DATE: model.TextChoice,
+        ValueTypeEnum.DATETIME: model.TextChoice,
     }
 
     table = {
@@ -97,7 +99,7 @@ class ValueTypeMap(object):
         ValueTypeEnum.DATE: 'text',
         ValueTypeEnum.TIME: 'text',
         ValueTypeEnum.FLOAT: 'float',
-        ValueTypeEnum.JSON: 'object'
+        ValueTypeEnum.JSON: 'object',
     }
 
 
