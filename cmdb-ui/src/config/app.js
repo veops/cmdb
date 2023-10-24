@@ -4,7 +4,7 @@ const appConfig = {
   buildAclToModules: true, // 是否在各个应用下 内联权限管理
   ssoLogoutURL: '/api/sso/logout',
   showDocs: false,
-  useEncryption: false,
+  useEncryption: true,
 }
 
 export default appConfig
