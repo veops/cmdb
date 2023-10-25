@@ -1,6 +1,6 @@
 
 <p align="center">
-  <a href="https://veops.cn"><img src="docs/images/logo.png" alt="维易CMDB" width="300"/></a>
+  <a href="https://veops.cn"><img src="images/logo.png" alt="维易CMDB" width="300"/></a>
 </p>
 <h3 align="center">Simple, lightweight, and versatile operational CMDB</h3>
 <p align="center">
