@@ -3,7 +3,7 @@ description: I have a question
 title: "[help wanted]: "
 labels: ["help wanted"]
 assignees:
-  - pycook
+  - ivonGwy
 body:
   - type: markdown
     attributes:
