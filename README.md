@@ -1,6 +1,6 @@
 
 <p align="center">
-  <a href="https://jumpserver.org"><img src="docs/images/logo.png" alt="维易CMDB" width="300"/></a>
+  <a href="https://veops.cn"><img src="docs/images/logo.png" alt="维易CMDB" width="300"/></a>
 </p>
 <h3 align="center">简单、轻量、通用的运维配置管理数据库</h3>
 <p align="center">
