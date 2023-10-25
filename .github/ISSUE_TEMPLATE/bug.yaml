@@ -18,13 +18,13 @@ body:
     validations:
       required: false
   - type: dropdown
-      id: aspects
-      attributes:
-        label: bug is related to UI or API aspects?
-        multiple: true
-        options:
-          - UI
-          - API
+    id: aspects
+    attributes:
+      label: bug is related to UI or API aspects?
+      multiple: true
+      options:
+        - UI
+        - API
     - type: textarea
       id: what-happened
       attributes:
