@@ -26,11 +26,11 @@ body:
       value: "i have a question!"
     validations:
       required: true
-  - type: textarea
+  - type: input
     id: version
     attributes:
       label: Version
       description: What version of our software are you running?
-      default: 2.3.5
+      value: "newest"
     validations:
       required: true
