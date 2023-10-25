@@ -58,10 +58,14 @@ class UserCRUD(object):
         kwargs['employee_id'] = '{0:04d}'.format(biggest_employee_id + 1)
         user = User.create(**kwargs)
 
-        RoleCRUD.add_role(user.username, uid=user.uid)
+        role = RoleCRUD.add_role(user.username, uid=user.uid)
         AuditCRUD.add_role_log(None, AuditOperateType.create,
                                AuditScope.user, user.uid, {}, user.to_dict(), {}, {}
                                )
+        from api.lib.common_setting.employee import EmployeeCRUD
+        payload = {column: getattr(user, column) for column in ['uid', 'username', 'nickname', 'email', 'block']}
+        payload['rid'] = role.id
+        EmployeeCRUD.add_employee_from_acl_created(**payload)
 
         return user
 

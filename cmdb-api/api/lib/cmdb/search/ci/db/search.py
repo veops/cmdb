@@ -28,6 +28,7 @@ from api.lib.cmdb.search.ci.db.query_sql import QUERY_CI_BY_NO_ATTR
 from api.lib.cmdb.search.ci.db.query_sql import QUERY_CI_BY_TYPE
 from api.lib.cmdb.search.ci.db.query_sql import QUERY_UNION_CI_ATTRIBUTE_IS_NULL
 from api.lib.cmdb.utils import TableMap
+from api.lib.cmdb.utils import ValueTypeMap
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import is_app_admin
 from api.lib.utils import handle_arg_list
@@ -524,15 +525,15 @@ class Search(object):
             if k:
                 table_name = TableMap(attr=attr).table_name
                 query_sql = FACET_QUERY.format(table_name, self.query_sql, attr.id)
-                # current_app.logger.warning(query_sql)
                 result = db.session.execute(query_sql).fetchall()
                 facet[k] = result
 
         facet_result = dict()
         for k, v in facet.items():
             if not k.startswith('_'):
-                a = getattr(AttributeCache.get(k), self.ret_key)
-                facet_result[a] = [(f[0], f[1], a) for f in v]
+                attr = AttributeCache.get(k)
+                a = getattr(attr, self.ret_key)
+                facet_result[a] = [(ValueTypeMap.serialize[attr.value_type](f[0]), f[1], a) for f in v]
 
         return facet_result
 
