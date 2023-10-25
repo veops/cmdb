@@ -1,0 +1,36 @@
+name: Help wanted
+description: I have a question
+title: "[help wanted]: "
+labels: ["help wanted"]
+assignees:
+  - pycook
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please tell us what's you need!
+  - type: input
+    id: contact
+    attributes:
+      label: Contact Details
+      description: How can we get in touch with you if we need more info?
+      placeholder: ex. email@example.com
+    validations:
+      required: false
+  - type: textarea
+    id: question
+    attributes:
+      label: What is your question?
+      description: Also tell us, how can we help?
+      placeholder: Tell us what you need!
+      value: "i have a question!"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What version of our software are you running?
+      value: "newest"
+    validations:
+      required: true
