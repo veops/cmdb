@@ -2,7 +2,7 @@
 <p align="center">
   <a href="https://jumpserver.org"><img src="docs/images/logo.png" alt="维易CMDB"/></a>
 </p>
-
+<h3 align="center">提供一站式运维整体解决方案</h3>
 <p align="center">
   <a href="https://github.com/veops/cmdb/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-AGPLv3-brightgreen" alt="License: GPLv3"></a>
   <a href="https:https://github.com/sendya/ant-design-pro-vue"><img src="https://img.shields.io/badge/UI-Ant%20Design%20Pro%20Vue-brightgreen" alt="UI"></a>
@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-    提供一站式运维整体解决方案,让运维变简单
+    让运维变简单
 </p>
 
 ------------------------------
