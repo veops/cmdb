@@ -284,7 +284,7 @@ class AttributeValueManager(object):
         except Exception as e:
             db.session.rollback()
             current_app.logger.warning(str(e))
-            return abort(400, ErrFormat.attribute_value_unknown_error.format(str(e)))
+            return abort(400, ErrFormat.attribute_value_unknown_error.format(e.args[0]))
 
         return self._write_change2(changed)
 
