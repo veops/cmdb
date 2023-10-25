@@ -18,27 +18,27 @@ body:
     validations:
       required: false
   - type: dropdown
-      id: type
+      id: aspects
       attributes:
         label: feature is related to UI or API aspects?
         multiple: true
         options:
           - UI
           - API
-    - type: textarea
-      id: describe the feature
-      attributes:
-        label: What is your advice?
-        description: Also tell us, what did you expect to happen?
-        placeholder: Tell us what you want!
-        value: "everyone wants this feature!"
-      validations:
-        required: true
-    - type: textarea
-      id: version
-      attributes:
-        label: Version
-        description: What version of our software are you running?
-        default: 2.3.5
-      validations:
-        required: true
+  - type: textarea
+    id: describe the feature
+    attributes:
+      label: What is your advice?
+      description: Also tell us, what did you expect to happen?
+      placeholder: Tell us what you want!
+      value: "everyone wants this feature!"
+    validations:
+      required: true
+  - type: textarea
+    id: version
+    attributes:
+      label: Version
+      description: What version of our software are you running?
+      default: 2.3.5
+    validations:
+      required: true
