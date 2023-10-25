@@ -1,0 +1,44 @@
+name: Feature wanted
+description: A new feature would be good
+title: "[Feature]: "
+labels: ["✏️ feature"]
+assignees:
+  - pycook
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for your feature suggestion; we will evaluate it carefully!
+  - type: input
+    id: contact
+    attributes:
+      label: Contact Details
+      description: How can we get in touch with you if we need more info?
+      placeholder: ex. email@example.com
+    validations:
+      required: false
+  - type: dropdown
+    id: aspects
+    attributes:
+      label: feature is related to UI or API aspects?
+      multiple: true
+      options:
+        - UI
+        - API
+  - type: textarea
+    id: feature
+    attributes:
+      label: What is your advice?
+      description: Also tell us, what did you expect to happen?
+      placeholder: Tell us what you want!
+      value: "everyone wants this feature!"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What version of our software are you running?
+      value: "newest"
+    validations:
+      required: true
