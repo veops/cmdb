@@ -20,7 +20,7 @@ body:
   - type: dropdown
     id: aspects
     attributes:
-      label: bug is related to UI or API aspects?
+      label: This bug is related to UI or API?
       multiple: true
       options:
         - UI
@@ -34,12 +34,12 @@ body:
       value: "A bug happened!"
     validations:
       required: true
-  - type: textarea
+  - type: input
     id: version
     attributes:
       label: Version
       description: What version of our software are you running?
-      value: "2.3.5"
+      value: "newest"
     validations:
       required: true
   - type: dropdown
