@@ -39,6 +39,6 @@ body:
     attributes:
       label: Version
       description: What version of our software are you running?
-      default: 2.3.5
+      value: "2.3.5"
     validations:
       required: true
