@@ -1,8 +1,16 @@
-![维易开源CMDB](docs/images/logo.png)
 
-[![License](https://img.shields.io/badge/License-AGPLv3-brightgreen)](https://github.com/veops/cmdb/blob/master/LICENSE)
-[![UI](https://img.shields.io/badge/UI-Ant%20Design%20Pro%20Vue-brightgreen)](https://github.com/sendya/ant-design-pro-vue)
-[![API](https://img.shields.io/badge/API-Flask-brightgreen)](https://github.com/pallets/flask)
+<p align="center">
+  <a href="https://veops.cn"><img src="docs/images/logo.png" alt="维易CMDB" width="300"/></a>
+</p>
+<h3 align="center">简单、轻量、通用的运维配置管理数据库</h3>
+<p align="center">
+  <a href="https://github.com/veops/cmdb/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-AGPLv3-brightgreen" alt="License: GPLv3"></a>
+  <a href="https:https://github.com/sendya/ant-design-pro-vue"><img src="https://img.shields.io/badge/UI-Ant%20Design%20Pro%20Vue-brightgreen" alt="UI"></a>
+  <a href="https://github.com/pallets/flask"><img src="https://img.shields.io/badge/API-Flask-brightgreen" alt="API"></a>
+</p>
+
+
+------------------------------
 
 [English](docs/README_en.md) / [中文](README.md)
 - 产品文档：https://veops.cn/docs/
@@ -15,9 +23,11 @@
 
 ## 系统介绍
 
-### 整体架构
+### 系统概览
 
-<img src=docs/images/view.jpg />
+<img src=docs/images/dashboard.png />
+
+[查看更多展示](docs/screenshot.md)
 
 ### 相关文章
 
@@ -48,13 +58,8 @@
 - 细粒度访问控制，完备的操作日志
 - 支持跨模型搜索
 
-### 系统概览
 
-- 服务树
 
-![服务树](docs/images/0.png "首页展示")
-
-[查看更多展示](docs/screenshot.md)
 
 
 ### 更多功能

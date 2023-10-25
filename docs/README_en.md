@@ -1,8 +1,16 @@
-![维易CMDB](images/logo.png)
 
-[![License](https://img.shields.io/badge/License-AGPLv3-brightgreen)](https://github.com/veops/cmdb/blob/master/LICENSE)
-[![UI](https://img.shields.io/badge/UI-Ant%20Design%20Pro%20Vue-brightgreen)](https://github.com/sendya/ant-design-pro-vue)
-[![API](https://img.shields.io/badge/API-Flask-brightgreen)](https://github.com/pallets/flask)
+<p align="center">
+  <a href="https://veops.cn"><img src="images/logo.png" alt="维易CMDB" width="300"/></a>
+</p>
+<h3 align="center">Simple, lightweight, and versatile operational CMDB</h3>
+<p align="center">
+  <a href="https://github.com/veops/cmdb/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-AGPLv3-brightgreen" alt="License: GPLv3"></a>
+  <a href="https:https://github.com/sendya/ant-design-pro-vue"><img src="https://img.shields.io/badge/UI-Ant%20Design%20Pro%20Vue-brightgreen" alt="UI"></a>
+  <a href="https://github.com/pallets/flask"><img src="https://img.shields.io/badge/API-Flask-brightgreen" alt="API"></a>
+</p>
+
+
+------------------------------
 
 [English](README_en.md) / [中文](../README.md)
 
@@ -16,9 +24,11 @@
 
 ## Overview
 
-### Technical Architecture
+### System Overview
 
-<img src=images/view.jpg />
+<img src=images/dashboard.png />
+
+[View more screenshots](screenshot.md)
 
 ### Document
 
@@ -48,12 +58,7 @@
 - Fine-grained access control and comprehensive operation logs.
 - Support cross-model search.
 
-### System Overview
 
-- Service Tree
-  ![1](images/0.png "首页展示")
-
-[View more screenshots](screenshot.md)
 
 ### More Features
 
