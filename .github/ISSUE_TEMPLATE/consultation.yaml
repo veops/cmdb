@@ -17,9 +17,8 @@ body:
       placeholder: ex. email@example.com
     validations:
       required: false
-
   - type: textarea
-    id: describe the problem
+    id: question
     attributes:
       label: What is your question?
       description: Also tell us, how can we help?
