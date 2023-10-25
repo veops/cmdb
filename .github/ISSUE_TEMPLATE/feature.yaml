@@ -1,7 +1,7 @@
 name: Feature wanted
 description: A new feature would be good
 title: "[Feature]: "
-labels: ["feature"]
+labels: ["✏️ feature"]
 assignees:
   - pycook
 body:
