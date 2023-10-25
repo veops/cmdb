@@ -26,7 +26,7 @@
 
 ### System Overview
 
-<img src=docs/images/dashboard.png />
+<img src=images/dashboard.png />
 
 [View more screenshots](screenshot.md)
 
