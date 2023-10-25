@@ -465,16 +465,17 @@ class CIManager(object):
         ci_dict = cls.get_cis_by_ids([ci_id])
         ci_dict = ci_dict and ci_dict[0]
 
-        triggers = CITriggerManager.get(ci_dict['_type'])
-        for trigger in triggers:
-            option = trigger['option']
-            if not option.get('enable') or option.get('action') != OperateType.DELETE:
-                continue
+        if ci_dict:
+            triggers = CITriggerManager.get(ci_dict['_type'])
+            for trigger in triggers:
+                option = trigger['option']
+                if not option.get('enable') or option.get('action') != OperateType.DELETE:
+                    continue
 
-            if option.get('filter') and not CITriggerManager.ci_filter(ci_dict.get('_id'), option['filter']):
-                continue
+                if option.get('filter') and not CITriggerManager.ci_filter(ci_dict.get('_id'), option['filter']):
+                    continue
 
-            ci_delete_trigger.apply_async(args=(trigger, OperateType.DELETE, ci_dict), queue=CMDB_QUEUE)
+                ci_delete_trigger.apply_async(args=(trigger, OperateType.DELETE, ci_dict), queue=CMDB_QUEUE)
 
         attrs = CITypeAttribute.get_by(type_id=ci.type_id, to_dict=False)
         attr_names = set([AttributeCache.get(attr.attr_id).name for attr in attrs])
@@ -498,7 +499,8 @@ class CIManager(object):
 
         db.session.commit()
 
-        AttributeHistoryManger.add(None, ci_id, [(None, OperateType.DELETE, ci_dict, None)], ci.type_id)
+        if ci_dict:
+            AttributeHistoryManger.add(None, ci_id, [(None, OperateType.DELETE, ci_dict, None)], ci.type_id)
 
         ci_delete.apply_async(args=(ci_id,), queue=CMDB_QUEUE)
 
