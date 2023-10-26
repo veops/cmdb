@@ -97,3 +97,8 @@ BOOL_TRUE = ['true', 'TRUE', 'True', True, '1', 1, "Yes", "YES", "yes", 'Y', 'y'
 
 # # messenger
 USE_MESSENGER = True
+
+# # secrets
+SECRETS_ENGINE = 'inner'  # 'inner' or 'vault'
+VAULT_URL = ''
+VAULT_TOKEN = ''
