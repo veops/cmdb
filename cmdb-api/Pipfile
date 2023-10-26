@@ -59,6 +59,7 @@ Jinja2 = "==3.1.2"
 jinja2schema = "==0.1.4"
 msgpack-python = "==0.5.6"
 alembic = "==1.7.7"
+hvac = "==2.0.0"
 
 [dev-packages]
 # Testing
