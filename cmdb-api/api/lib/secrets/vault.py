@@ -41,7 +41,7 @@ class VaultSDK:
         ciphertext = response['data']['ciphertext']
         return ciphertext
 
-    # 解密数据
+    # decrypt data
     def decrypt_data(self, ciphertext):
         response = self.client.secrets.transit.decrypt_data(name='transit-key', ciphertext=ciphertext)
         plaintext = response['data']['plaintext']
@@ -59,7 +59,7 @@ class VaultSDK:
 
         return response
 
-    # 读取数据
+    # read data
     def read_data(self, path, decrypt=None):
         try:
             response = self.client.secrets.kv.v2.read_secret_version(
@@ -76,7 +76,7 @@ class VaultSDK:
                 return data, True
         return data, True
 
-    # 更新数据
+    # update data
     def update_data(self, path, data, overwrite=None, encrypt=None):
         if encrypt:
             for k, v in data.items():
@@ -91,7 +91,7 @@ class VaultSDK:
             response = self.client.secrets.kv.v2.patch(path=path, secret=data, mount_point=self.mount_path)
         return response
 
-    # 删除数据
+    # delete data
     def delete_data(self, path):
         response = self.client.secrets.kv.v2.delete_metadata_and_all_versions(
             path=path,
@@ -99,14 +99,14 @@ class VaultSDK:
         )
         return response
 
-    # Base64编码
+    # Base64 encode
     @classmethod
     def encode_base64(cls, data):
         encoded_bytes = b64encode(data.encode())
         encoded_string = encoded_bytes.decode()
         return encoded_string
 
-    # Base64解码
+    # Base64 decode
     @classmethod
     def decode_base64(cls, encoded_string):
         decoded_bytes = b64decode(encoded_string)
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     mount_path = "cmdb"
 
     path = "test001"
-    # 使用示例
+    # Example
     sdk = VaultSDK(base_url, token, mount_path)
     # sdk.enable_secrets_engine()
     data = {"key1": "value1", "key2": "value2", "key3": "value3"}
