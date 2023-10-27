@@ -99,6 +99,7 @@
             :cell-type="col.value_type === '2' ? 'string' : 'auto'"
             :fixed="col.is_fixed ? 'left' : ''"
           >
+            <!-- <template #edit="{row}"><a-input v-model="row[col.field]"></a-input></template> -->
             <template #header>
               <span class="vxe-handle">
                 <OpsMoveIcon
@@ -107,7 +108,8 @@
                 <span>{{ col.title }}</span>
               </span>
             </template>
-            <template v-if="col.is_choice" #edit="{ row }">
+            <template v-if="col.is_choice || col.is_password" #edit="{ row }">
+              <vxe-input v-if="col.is_password" v-model="passwordValue[col.field]" />
               <a-select
                 :getPopupContainer="(trigger) => trigger.parentElement"
                 :style="{ width: '100%', height: '32px' }"
@@ -149,8 +151,21 @@
               #default="{ row }"
             >
               <span v-if="col.value_type === '6' && row[col.field]">{{ row[col.field] }}</span>
-              <a v-else-if="col.is_link" :href="`${row[col.field]}`" target="_blank">{{ row[col.field] }}</a>
-              <PasswordField v-else-if="col.is_password && row[col.field]" :password="row[col.field]"></PasswordField>
+              <a
+                v-else-if="col.is_link && row[col.field]"
+                :href="
+                  row[col.field].startsWith('http') || row[col.field].startsWith('https')
+                    ? `${row[col.field]}`
+                    : `http://${row[col.field]}`
+                "
+                target="_blank"
+              >{{ row[col.field] }}</a
+              >
+              <PasswordField
+                v-else-if="col.is_password && row[col.field]"
+                :ci_id="row._id"
+                :attr_id="col.attr_id"
+              ></PasswordField>
               <template v-else-if="col.is_choice">
                 <template v-if="col.is_list">
                   <span
@@ -198,8 +213,8 @@
                     :style="{ color: getChoiceValueIcon(col, row[col.field]).color, marginRight: '5px' }"
                     :type="getChoiceValueIcon(col, row[col.field]).name"
                   />
-                  {{ row[col.field] }}</span
-                >
+                  {{ row[col.field] }}
+                </span>
               </template>
             </template>
           </vxe-table-column>
@@ -207,6 +222,7 @@
             <template #header>
               <span>操作</span>
               <EditAttrsPopover :typeId="typeId" class="operation-icon" @refresh="refreshAfterEditAttrs" />
+              <!-- <a-icon class="operation-icon" type="control" /> -->
             </template>
             <template #default="{ row }">
               <a-space>
@@ -289,6 +305,7 @@ import PreferenceSearch from '../../components/preferenceSearch/preferenceSearch
 import MetadataDrawer from './modules/MetadataDrawer.vue'
 import CMDBGrant from '../../components/cmdbGrant'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
+import { getAttrPassword } from '../../api/CITypeAttr'
 
 export default {
   name: 'InstanceList',
@@ -348,13 +365,18 @@ export default {
       tableDragClassName: [],
 
       resource_type: {},
+
+      initialPasswordValue: {},
+      passwordValue: {},
+      lastEditCiId: null,
+      isContinueCloseEdit: true,
     }
   },
   watch: {
-    '$route.path': function (newPath, oldPath) {
+    '$route.path': function(newPath, oldPath) {
       this.reloadBoard()
     },
-    currentPage: function (newVal, oldVal) {
+    currentPage: function(newVal, oldVal) {
       this.loadTableData(this.sortByTable)
     },
   },
@@ -438,6 +460,12 @@ export default {
         })
         this.totalNumber = res['numfound']
         this.columns = this.getColumns(res.result, this.preferenceAttrList)
+        this.columns.forEach((col) => {
+          if (col.is_password) {
+            this.initialPasswordValue[col.field] = ''
+            this.passwordValue[col.field] = ''
+          }
+        })
         const jsonAttrList = this.attrList.filter((attr) => attr.value_type === '6')
         this.instanceList = res['result'].map((item) => {
           jsonAttrList.forEach(
@@ -492,14 +520,23 @@ export default {
     },
 
     handleEditClose({ row, rowIndex, column }) {
+      if (!this.isContinueCloseEdit) {
+        return
+      }
       const $table = this.$refs['xTable'].getVxetableRef()
       const data = {}
       this.columns.forEach((item) => {
         if (!_.isEqual(row[item.field], this.initialInstanceList[rowIndex][item.field])) {
-          data[item.field] = row[item.field] || null
+          data[item.field] = row[item.field] ?? null
+        }
+      })
+      Object.keys(this.initialPasswordValue).forEach((key) => {
+        if (this.initialPasswordValue[key] !== this.passwordValue[key]) {
+          data[key] = this.passwordValue[key]
         }
       })
       this.isEditActive = false
+      this.lastEditCiId = null
       if (JSON.stringify(data) !== '{}') {
         updateCI(row.ci_id || row._id, data)
           .then(() => {
@@ -517,6 +554,12 @@ export default {
             $table.revertData(row)
           })
       }
+      this.columns.forEach((col) => {
+        if (col.is_password) {
+          this.initialPasswordValue[col.field] = ''
+          this.passwordValue[col.field] = ''
+        }
+      })
     },
 
     async openBatchDownload() {
@@ -716,7 +759,7 @@ export default {
             },
             onEnd: (params) => {
               // 由于开启了虚拟滚动，newIndex和oldIndex是虚拟的
-              const { newIndex, oldIndex } = params
+              const { newIndex, oldIndex, from, to } = params
               // 从tableDragClassName拿到colid
               const fromColid = this.tableDragClassName[oldIndex]
               const toColid = this.tableDragClassName[newIndex]
@@ -749,6 +792,28 @@ export default {
     },
     handleEditActived() {
       this.isEditActive = true
+      const passwordCol = this.columns.filter((col) => col.is_password)
+      this.$nextTick(() => {
+        const editRecord = this.$refs.xTable.getVxetableRef().getEditRecord()
+        const { row, column } = editRecord
+        if (passwordCol.length && this.lastEditCiId !== row._id) {
+          this.$nextTick(async () => {
+            for (let i = 0; i < passwordCol.length; i++) {
+              await getAttrPassword(row._id, passwordCol[i].attr_id).then((res) => {
+                this.initialPasswordValue[passwordCol[i].field] = res.value
+                this.passwordValue[passwordCol[i].field] = res.value
+              })
+            }
+            this.isContinueCloseEdit = false
+            await this.$refs.xTable.getVxetableRef().clearEdit()
+            this.isContinueCloseEdit = true
+            this.$nextTick(() => {
+              this.$refs.xTable.getVxetableRef().setEditCell(row, column.field)
+            })
+          })
+        }
+        this.lastEditCiId = row._id
+      })
     },
     getCellStyle({ row, rowIndex, $rowIndex, column, columnIndex, $columnIndex }) {
       const { property } = column

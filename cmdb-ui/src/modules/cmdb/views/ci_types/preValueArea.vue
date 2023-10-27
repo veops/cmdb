@@ -1,5 +1,11 @@
 <template>
-  <a-tabs id="preValueArea" v-model="activeKey" size="small" :tabBarStyle="{ borderBottom: 'none' }">
+  <a-tabs
+    id="preValueArea"
+    v-model="activeKey"
+    @change="changeActiveKey"
+    size="small"
+    :tabBarStyle="{ borderBottom: 'none' }"
+  >
     <a-tab-pane key="define" :disabled="disabled">
       <span style="font-size:12px;" slot="tab">定义</span>
       <PreValueTag type="add" :item="[]" @add="addNewValue" :disabled="disabled">
@@ -170,6 +176,15 @@
         </a-col>
       </a-row>
     </a-tab-pane>
+    <a-tab-pane key="script" :disabled="disabled || !canDefineScript">
+      <span style="font-size:12px;" slot="tab">脚本</span>
+      <CustomCodeMirror
+        codeMirrorId="cmdb-pre-value"
+        ref="codemirror"
+        @changeCodeContent="changeCodeContent"
+      ></CustomCodeMirror>
+      <!-- <codemirror style="z-index: 9999" :options="cmOptions" v-model="script"></codemirror> -->
+    </a-tab-pane>
   </a-tabs>
 </template>
 
@@ -184,13 +199,21 @@ import { getCITypeGroups } from '../../api/ciTypeGroup'
 import { getCITypeCommonAttributesByTypeIds } from '../../api/CITypeAttr'
 import FilterComp from '@/components/CMDBFilterComp'
 
+import CustomCodeMirror from '@/components/CustomCodeMirror'
+import 'codemirror/lib/codemirror.css'
+import 'codemirror/theme/monokai.css'
+require('codemirror/mode/python/python.js')
 export default {
   name: 'PreValueArea',
-  components: { draggable, PreValueTag, ColorPicker, Webhook, FilterComp },
+  components: { draggable, PreValueTag, ColorPicker, Webhook, FilterComp, CustomCodeMirror },
   props: {
     disabled: {
       type: Boolean,
       default: true,
+    },
+    canDefineScript: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -208,6 +231,17 @@ export default {
       ciTypeGroup: [],
       typeAttrs: [],
       filterExp: '',
+      script:
+        'class ChoiceValue(object):\n    @staticmethod\n    def values():\n        """\n        执行入口, 返回预定义值\n        :return: 返回一个列表, 值的类型同属性的类型\n        例如:\n        return ["在线", "下线"]\n        """\n        return []',
+      cmOptions: {
+        lineNumbers: true,
+        mode: 'python',
+        height: '200px',
+        theme: 'monokai',
+        tabSize: 4,
+        lineWrapping: true,
+        readOnly: this.disabled || !this.canDefineScript,
+      },
     }
   },
   watch: {
@@ -281,6 +315,14 @@ export default {
         const choice_web_hook = this.$refs.webhook.getParams()
         choice_web_hook.ret_key = this.form.ret_key
         return { choice_value: [], choice_web_hook, choice_other: null }
+      } else if (this.activeKey === 'script') {
+        return {
+          choice_value: [],
+          choice_web_hook: null,
+          choice_other: {
+            script: this.script,
+          },
+        }
       } else {
         let choice_other = {}
         if (this.choice_other.type_ids && this.choice_other.type_ids.length) {
@@ -302,14 +344,22 @@ export default {
           this.form.ret_key = choice_web_hook.ret_key ?? ''
         })
       } else if (choice_other) {
-        this.activeKey = 'choice_other'
-        const { type_ids, attr_id, filter } = choice_other
-        this.choice_other = { type_ids, attr_id }
-        this.filterExp = filter
-        if (type_ids && type_ids.length) {
+        if (choice_other.script) {
+          this.activeKey = 'script'
+          this.script = choice_other.script
           this.$nextTick(() => {
-            this.$refs.filterComp.visibleChange(true, false)
+            this.$refs.codemirror.initCodeMirror(choice_other.script)
           })
+        } else {
+          this.activeKey = 'choice_other'
+          const { type_ids, attr_id, filter } = choice_other
+          this.choice_other = { type_ids, attr_id }
+          this.filterExp = filter
+          if (type_ids && type_ids.length) {
+            this.$nextTick(() => {
+              this.$refs.filterComp.visibleChange(true, false)
+            })
+          }
         }
       } else {
         this.valueList = choice_value
@@ -328,6 +378,16 @@ export default {
         this.filterExp = `${filterExp}`
       } else {
         this.filterExp = ''
+      }
+    },
+    changeCodeContent(value) {
+      this.script = value && value.replace('\t', '    ')
+    },
+    changeActiveKey(value) {
+      if (value === 'script') {
+        this.$nextTick(() => {
+          this.$refs.codemirror.initCodeMirror(this.script)
+        })
       }
     },
   },

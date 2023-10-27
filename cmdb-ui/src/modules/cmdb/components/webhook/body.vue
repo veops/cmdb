@@ -68,7 +68,6 @@ export default {
         lineNumbers: true,
         mode: 'python',
         height: '200px',
-        smartIndent: true,
         tabSize: 4,
         lineWrapping: true,
       },

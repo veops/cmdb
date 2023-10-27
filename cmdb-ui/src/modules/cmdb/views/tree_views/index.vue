@@ -3,7 +3,7 @@
     <div v-if="!subscribeTreeViewCiTypesLoading && subscribeTreeViewCiTypes.length === 0">
       <a-alert message="请先到 我的订阅 页面完成订阅!" banner></a-alert>
     </div>
-    <div class="tree-views" v-else>
+    <div class="tree-views">
       <div class="cmdb-views-header">
         <span>
           <span class="cmdb-views-header-title">{{ currentCiTypeName }}</span>
@@ -193,7 +193,8 @@
                     {{ col.title }}</span
                   >
                 </template>
-                <template v-if="col.is_choice" #edit="{ row }">
+                <template v-if="col.is_choice || col.is_password" #edit="{ row }">
+                  <vxe-input v-if="col.is_password" v-model="passwordValue[col.field]" />
                   <a-select
                     :getPopupContainer="(trigger) => trigger.parentElement"
                     :style="{ width: '100%', height: '32px' }"
@@ -232,13 +233,23 @@
                 </template>
                 <template
                   v-if="col.value_type === '6' || col.is_link || col.is_password || col.is_choice"
-                  #default="{ row }"
+                  #default="{row}"
                 >
                   <span v-if="col.value_type === '6' && row[col.field]">{{ row[col.field] }}</span>
-                  <a v-else-if="col.is_link" :href="`${row[col.field]}`" target="_blank">{{ row[col.field] }}</a>
+                  <a
+                    v-else-if="col.is_link && row[col.field]"
+                    :href="
+                      row[col.field].startsWith('http') || row[col.field].startsWith('https')
+                        ? `${row[col.field]}`
+                        : `http://${row[col.field]}`
+                    "
+                    target="_blank"
+                  >{{ row[col.field] }}</a
+                  >
                   <PasswordField
                     v-else-if="col.is_password && row[col.field]"
-                    :password="row[col.field]"
+                    :ci_id="row._id"
+                    :attr_id="col.attr_id"
                   ></PasswordField>
                   <template v-else-if="col.is_choice">
                     <template v-if="col.is_list">
@@ -400,6 +411,7 @@ import PreferenceSearch from '../../components/preferenceSearch/preferenceSearch
 import MetadataDrawer from '../ci/modules/MetadataDrawer.vue'
 import { intersection } from '@/utils/functions/set'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
+import { getAttrPassword } from '../../api/CITypeAttr'
 
 export default {
   name: 'TreeViews',
@@ -454,6 +466,11 @@ export default {
       tableDragClassName: [],
       // 已经设置过data的node
       isSetDataNodes: [],
+
+      initialPasswordValue: {},
+      passwordValue: {},
+      lastEditCiId: null,
+      isContinueCloseEdit: true,
     }
   },
 
@@ -487,7 +504,7 @@ export default {
     },
   },
   watch: {
-    '$route.path': function (newPath, oldPath) {
+    '$route.path': function(newPath, oldPath) {
       this.newLoad = true
       this.typeId = this.$route.params.typeId
       this.initPage()
@@ -652,6 +669,12 @@ export default {
         if (treeViewsRight) {
           const width = treeViewsRight.clientWidth - 50
           this.columns = getCITableColumns(res.result, this.currentAttrList, width)
+          this.columns.forEach((col) => {
+            if (col.is_password) {
+              this.initialPasswordValue[col.field] = ''
+              this.passwordValue[col.field] = ''
+            }
+          })
         }
       } catch (e) {
         console.log(e)
@@ -918,15 +941,47 @@ export default {
     onSelectRangeEnd({ records }) {
       this.selectedRowKeys = records.map((i) => i.ci_id || i._id)
     },
-    handleEditActived() {},
+    handleEditActived() {
+      const passwordCol = this.columns.filter((col) => col.is_password)
+      this.$nextTick(() => {
+        const editRecord = this.$refs.xTable.getVxetableRef().getEditRecord()
+        const { row, column } = editRecord
+        if (passwordCol.length && this.lastEditCiId !== row._id) {
+          this.$nextTick(async () => {
+            for (let i = 0; i < passwordCol.length; i++) {
+              await getAttrPassword(row._id, passwordCol[i].attr_id).then((res) => {
+                this.initialPasswordValue[passwordCol[i].field] = res.value
+                this.passwordValue[passwordCol[i].field] = res.value
+              })
+            }
+            this.isContinueCloseEdit = false
+            await this.$refs.xTable.getVxetableRef().clearEdit()
+            this.isContinueCloseEdit = true
+            this.$nextTick(() => {
+              this.$refs.xTable.getVxetableRef().setEditCell(row, column.field)
+            })
+          })
+        }
+        this.lastEditCiId = row._id
+      })
+    },
     handleEditClose({ row, rowIndex, column }) {
+      if (!this.isContinueCloseEdit) {
+        return
+      }
       const $table = this.$refs['xTable'].getVxetableRef()
       const data = {}
       this.columns.forEach((item) => {
         if (!_.isEqual(row[item.field], this.initialInstanceList[rowIndex][item.field])) {
-          data[item.field] = row[item.field] || null
+          data[item.field] = row[item.field] ?? null
         }
       })
+      Object.keys(this.initialPasswordValue).forEach((key) => {
+        if (this.initialPasswordValue[key] !== this.passwordValue[key]) {
+          data[key] = this.passwordValue[key]
+        }
+      })
+      this.lastEditCiId = null
       if (JSON.stringify(data) !== '{}') {
         updateCI(row._id, data)
           .then(() => {
@@ -953,6 +1008,12 @@ export default {
             $table.revertData(row)
           })
       }
+      this.columns.forEach((col) => {
+        if (col.is_password) {
+          this.initialPasswordValue[col.field] = ''
+          this.passwordValue[col.field] = ''
+        }
+      })
     },
     jsonEditorOk(row, column, jsonData) {
       // 后端写数据有快慢，不拉接口直接修改table的数据
