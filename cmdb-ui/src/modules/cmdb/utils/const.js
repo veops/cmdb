@@ -2,10 +2,12 @@ export const valueTypeMap = {
   '0': '整数',
   '1': '浮点数',
   '2': '文本',
-  '3': 'datetime',
-  '4': 'date',
-  '5': 'time',
-  '6': 'json'
+  '3': '日期时间',
+  '4': '日期',
+  '5': '时间',
+  '6': 'JSON',
+  '7': '密码',
+  '8': '链接'
 }
 
 export const defautValueColor = [

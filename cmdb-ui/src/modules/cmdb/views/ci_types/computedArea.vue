@@ -36,7 +36,7 @@ export default {
     showCalcComputed: {
       type: Boolean,
       default: false,
-    }
+    },
   },
   data() {
     return {
@@ -48,7 +48,6 @@ export default {
         mode: 'python',
         height: '200px',
         theme: 'monokai',
-        smartIndent: true,
         tabSize: 4,
         lineWrapping: true,
         readOnly: !this.canDefineComputed,

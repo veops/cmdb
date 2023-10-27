@@ -1,9 +1,14 @@
 <template>
-  <a-form :form="form" class="create-new-attribute">
+  <a-form
+    :form="form"
+    class="create-new-attribute"
+    :label-col="formItemLayout.labelCol"
+    :wrapper-col="formItemLayout.wrapperCol"
+  >
     <a-divider style="font-size:14px;margin-top:6px;">基础设置</a-divider>
     <a-row>
       <a-col :span="12">
-        <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="属性名(英文)">
+        <a-form-item label="属性名(英文)">
           <a-input
             name="name"
             placeholder="英文"
@@ -24,28 +29,33 @@
         </a-form-item>
       </a-col>
       <a-col :span="12">
-        <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="别名">
+        <a-form-item label="别名">
           <a-input name="alias" v-decorator="['alias', { rules: [] }]" />
         </a-form-item>
       </a-col>
     </a-row>
     <a-row>
       <a-col :span="12">
-        <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="数据类型">
+        <a-form-item label="数据类型">
           <a-select
             name="value_type"
             style="width: 100%"
             v-decorator="['value_type', { rules: [{ required: true }], initialValue: '2' }]"
             @change="handleChangeValueType"
           >
-            <a-select-option :value="key" :key="key" v-for="(value, key) in valueTypeMap">{{ value }}</a-select-option>
+            <a-select-option :value="key" :key="key" v-for="(value, key) in valueTypeMap">
+              {{ value }}
+              <span class="value-type-des" v-if="key === '3'">yyyy-mm-dd HH:MM:SS</span>
+              <span class="value-type-des" v-if="key === '4'">yyyy-mm-dd</span>
+              <span class="value-type-des" v-if="key === '5'">HH:MM:SS</span>
+            </a-select-option>
           </a-select>
         </a-form-item>
       </a-col>
       <a-col :span="currentValueType === '6' ? 24 : 12">
         <a-form-item
           :label-col="{ span: currentValueType === '6' ? 4 : 8 }"
-          :wrapper-col="{ span: currentValueType === '6' ? 18 : 12 }"
+          :wrapper-col="{ span: currentValueType === '6' ? 18 : 15 }"
           label="默认值"
         >
           <template>
@@ -74,7 +84,12 @@
             </a-select>
             <a-input
               style="width: 100%"
-              v-else-if="currentValueType === '2' || currentValueType === '5'"
+              v-else-if="
+                currentValueType === '2' ||
+                  currentValueType === '5' ||
+                  currentValueType === '7' ||
+                  currentValueType === '8'
+              "
               v-decorator="['default_value', { rules: [{ required: false }] }]"
             >
             </a-input>
@@ -140,13 +155,13 @@
         label="必须"
       >
         <a-switch
-          @change="onChange"
+          @change="(checked) => onChange(checked, 'is_required')"
           name="is_required"
           v-decorator="['is_required', { rules: [], valuePropName: 'checked' }]"
         />
       </a-form-item>
     </a-col>
-    <a-col :span="6" v-if="currentValueType !== '6'">
+    <a-col :span="6" v-if="currentValueType !== '6' && currentValueType !== '7'">
       <a-form-item :label-col="{ span: 8 }" :wrapper-col="horizontalFormItemLayout.wrapperCol" label="唯一">
         <a-switch
           :disabled="isShowComputedArea"
@@ -216,7 +231,7 @@
         />
       </a-form-item>
     </a-col>
-    <a-col :span="6" v-if="currentValueType !== '6'">
+    <a-col :span="6" v-if="currentValueType !== '6' && currentValueType !== '7'">
       <a-form-item
         :label-col="currentValueType === '2' ? horizontalFormItemLayout.labelCol : { span: 8 }"
         :wrapper-col="horizontalFormItemLayout.wrapperCol"
@@ -224,14 +239,14 @@
       >
         <a-switch
           :disabled="isShowComputedArea"
-          @change="onChange"
+          @change="(checked) => onChange(checked, 'is_sortable')"
           name="is_sortable"
           v-decorator="['is_sortable', { rules: [], valuePropName: 'checked' }]"
         />
       </a-form-item>
     </a-col>
 
-    <a-col :span="6" v-if="currentValueType !== '6'">
+    <a-col :span="6" v-if="currentValueType !== '6' && currentValueType !== '7'">
       <a-form-item
         :label-col="currentValueType === '2' ? { span: 8 } : horizontalFormItemLayout.labelCol"
         :wrapper-col="horizontalFormItemLayout.wrapperCol"
@@ -263,30 +278,6 @@
         />
       </a-form-item>
     </a-col>
-    <a-col :span="6" v-if="currentValueType === '2'">
-      <a-form-item
-        :label-col="horizontalFormItemLayout.labelCol"
-        :wrapper-col="horizontalFormItemLayout.wrapperCol"
-        label="密码"
-      >
-        <a-switch
-          :disabled="isShowComputedArea"
-          @change="(checked) => onChange(checked, 'is_password')"
-          name="is_password"
-          v-decorator="['is_password', { rules: [], valuePropName: 'checked' }]"
-        />
-      </a-form-item>
-    </a-col>
-    <a-col :span="6" v-if="currentValueType === '2'">
-      <a-form-item :label-col="{ span: 8 }" :wrapper-col="horizontalFormItemLayout.wrapperCol" label="链接">
-        <a-switch
-          :disabled="isShowComputedArea"
-          @change="(checked) => onChange(checked, 'is_link')"
-          name="is_link"
-          v-decorator="['is_link', { rules: [], valuePropName: 'checked' }]"
-        />
-      </a-form-item>
-    </a-col>
     <a-divider style="font-size:14px;margin-top:6px;">高级设置</a-divider>
     <a-row>
       <a-col :span="24">
@@ -294,12 +285,12 @@
           <FontArea ref="fontArea" />
         </a-form-item>
       </a-col>
-      <a-col :span="24" v-if="currentValueType !== '6'">
+      <a-col :span="24" v-if="!['6', '7'].includes(currentValueType)">
         <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" label="预定义值">
-          <PreValueArea ref="preValueArea" :disabled="isShowComputedArea" />
+          <PreValueArea ref="preValueArea" :canDefineScript="canDefineScript" :disabled="isShowComputedArea" />
         </a-form-item>
       </a-col>
-      <a-col :span="24">
+      <a-col :span="24" v-if="!['6', '7'].includes(currentValueType)">
         <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
           <template slot="label">
             <span
@@ -327,7 +318,7 @@
           <a-switch
             :disabled="!canDefineComputed"
             @change="(checked) => onChange(checked, 'is_computed')"
-            name="is_password"
+            name="is_computed"
             v-decorator="['is_computed', { rules: [], valuePropName: 'checked' }]"
           />
           <ComputedArea ref="computedArea" v-if="isShowComputedArea" :canDefineComputed="canDefineComputed" />
@@ -369,7 +360,7 @@ export default {
       valueTypeMap,
       formItemLayout: {
         labelCol: { span: 8 },
-        wrapperCol: { span: 12 },
+        wrapperCol: { span: 15 },
       },
       horizontalFormItemLayout: {
         labelCol: { span: 16 },
@@ -385,6 +376,11 @@ export default {
 
       defaultForDatetime: '',
     }
+  },
+  computed: {
+    canDefineScript() {
+      return this.canDefineComputed
+    },
   },
   methods: {
     handleSubmit(isCloseModal = true) {
@@ -428,7 +424,7 @@ export default {
             values = { ...values, ...computedAreaData }
           } else {
             // 如果是非计算属性，就看看有没有预定义值
-            if (values.value_type !== '6') {
+            if (!['6', '7'].includes(values.value_type)) {
               const preValueAreaData = this.$refs.preValueArea.getData()
               values = { ...values, ...preValueAreaData }
             }
@@ -437,17 +433,25 @@ export default {
 
           // is_index进行操作，除了文本   索引隐藏掉  文本  索引默认是true
           // 框里的5种类型  is_index=true
-          // json类型  is_index=false
-          if (values.value_type === '6') {
+          // json类型、密码、链接  is_index=false
+          if (['6', '7', '8'].includes(values.value_type)) {
             values.is_index = false
           } else if (values.value_type !== '2') {
             values.is_index = true
+          }
+          if (values.value_type === '7') {
+            values.value_type = '2'
+            values.is_password = true
+          }
+          if (values.value_type === '8') {
+            values.value_type = '2'
+            values.is_link = true
           }
           const { attr_id } = await createAttribute({ ...values, option: { fontOptions } })
 
           this.form.resetFields()
           this.currentValueType = '2'
-          if (values.value_type !== '6') {
+          if (!['6'].includes(values.value_type) && !values.is_password) {
             this.$refs.preValueArea.valueList = []
           }
           this.$emit('done', attr_id, data, isCloseModal)
@@ -485,27 +489,25 @@ export default {
             is_index: false,
             is_sortable: false,
           })
-          if (this.currentValueType === '2') {
-            this.form.setFieldsValue({
-              is_password: false,
-              is_link: false,
-            })
-          }
         }
-      }
-      if (checked && property === 'is_password') {
-        this.form.setFieldsValue({
-          is_link: false,
-        })
-      }
-      if (checked && property === 'is_link') {
-        this.form.setFieldsValue({
-          is_password: false,
-        })
       }
       if (property === 'is_list') {
         this.form.setFieldsValue({
           default_value: checked ? [] : '',
+        })
+      }
+      if (checked && property === 'is_sortable') {
+        this.$message.warning('选中排序，则必须也要选中！')
+        this.form.setFieldsValue({
+          is_required: true,
+        })
+      }
+      if (!checked && property === 'is_required' && this.form.getFieldValue('is_sortable')) {
+        this.$message.warning('选中排序，则必须也要选中！')
+        this.$nextTick(() => {
+          this.form.setFieldsValue({
+            is_required: true,
+          })
         })
       }
     },
@@ -547,5 +549,9 @@ export default {
   div.jsoneditor-menu {
     background-color: #2f54eb;
   }
+}
+.value-type-des {
+  font-size: 10px;
+  color: #a9a9a9;
 }
 </style>

@@ -14,24 +14,6 @@ export default {
     },
   },
   methods: {
-    getPropertyStyle(attr) {
-      switch (attr.value_type) {
-        case '0':
-          return { color: '#cf1322', backgroundColor: '#fff1f0' }
-        case '1':
-          return { color: '#d4b106', backgroundColor: '#feffe6' }
-        case '2':
-          return { color: '#d46b08', backgroundColor: '#fff7e6' }
-        case '3':
-          return { color: '#531dab', backgroundColor: '#f9f0ff' }
-        case '4':
-          return { color: '#389e0d', backgroundColor: '#f6ffed' }
-        case '5':
-          return { color: '#08979c', backgroundColor: '#e6fffb' }
-        case '6':
-          return { color: '#c41d7f', backgroundColor: '#fff0f6' }
-      }
-    },
     getPropertyIcon(attr) {
       switch (attr.value_type) {
         case '0':
@@ -39,6 +21,12 @@ export default {
         case '1':
           return 'icon-xianxing-fudianshu'
         case '2':
+          if (attr.is_password) {
+            return 'icon-xianxing-password'
+          }
+          if (attr.is_link) {
+            return 'icon-xianxing-link'
+          }
           return 'icon-xianxing-wenben'
         case '3':
           return 'icon-xianxing-datetime'

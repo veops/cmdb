@@ -185,7 +185,6 @@ if __name__ == "__main__":
         mode: 'python',
         height: '200px',
         theme: 'monokai',
-        smartIndent: true,
         tabSize: 4,
         lineWrapping: true,
       },

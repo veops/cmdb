@@ -8,7 +8,9 @@
         <div :class="{ 'attribute-card-name': true, 'attribute-card-name-default-show': property.default_show }">
           {{ property.alias || property.name }}
         </div>
-        <div class="attribute-card_value-type">{{ valueTypeMap[property.value_type] }}</div>
+        <div v-if="property.is_password" class="attribute-card_value-type">密码</div>
+        <div v-else-if="property.is_link" class="attribute-card_value-type">链接</div>
+        <div v-else class="attribute-card_value-type">{{ valueTypeMap[property.value_type] }}</div>
       </div>
       <div
         class="attribute-card-trigger"
@@ -124,14 +126,6 @@ export default {
       {
         label: '是否索引',
         property: 'is_index',
-      },
-      {
-        label: '是否密码',
-        property: 'is_password',
-      },
-      {
-        label: '是否链接',
-        property: 'is_link',
       },
     ]
     return {

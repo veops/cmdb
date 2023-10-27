@@ -1,7 +1,13 @@
 <template>
   <span :id="`ci-detail-attr-${attr.name}`">
     <span v-if="!isEdit || attr.value_type === '6'">
-      <template v-if="attr.value_type === '6'">{{ JSON.stringify(ci[attr.name] || {}) }}</template>
+      <PasswordField
+        :style="{ display: 'inline-block' }"
+        v-if="attr.is_password && ci[attr.name]"
+        :ci_id="ci._id"
+        :attr_id="attr.id"
+      ></PasswordField>
+      <template v-else-if="attr.value_type === '6'">{{ JSON.stringify(ci[attr.name] || {}) }}</template>
       <template v-else-if="attr.is_choice">
         <template v-if="attr.is_list">
           <span
@@ -12,10 +18,18 @@
               padding: '1px 5px',
               margin: '2px',
               ...getChoiceValueStyle(attr, value),
+              display: 'inline-flex',
+              alignItems: 'center',
             }"
           >
+            <img
+              v-if="getChoiceValueIcon(attr, value).id && getChoiceValueIcon(attr, value).url"
+              :src="`/api/common-setting/v1/file/${getChoiceValueIcon(attr, value).url}`"
+              :style="{ maxHeight: '13px', maxWidth: '13px', marginRight: '5px' }"
+            />
             <ops-icon
-              :style="{ color: getChoiceValueIcon(attr, value).color }"
+              v-else
+              :style="{ color: getChoiceValueIcon(attr, value).color, marginRight: '5px' }"
               :type="getChoiceValueIcon(attr, value).name"
             />
             {{ value }}</span
@@ -28,10 +42,18 @@
             padding: '1px 5px',
             margin: '2px 0',
             ...getChoiceValueStyle(attr, ci[attr.name]),
+            display: 'inline-flex',
+            alignItems: 'center',
           }"
         >
+          <img
+            v-if="getChoiceValueIcon(attr, ci[attr.name]).id && getChoiceValueIcon(attr, ci[attr.name]).url"
+            :src="`/api/common-setting/v1/file/${getChoiceValueIcon(attr, ci[attr.name]).url}`"
+            :style="{ maxHeight: '13px', maxWidth: '13px', marginRight: '5px' }"
+          />
           <ops-icon
-            :style="{ color: getChoiceValueIcon(attr, ci[attr.name]).color }"
+            v-else
+            :style="{ color: getChoiceValueIcon(attr, ci[attr.name]).color, marginRight: '5px' }"
             :type="getChoiceValueIcon(attr, ci[attr.name]).name"
           />
           {{ ci[attr.name] }}
@@ -64,12 +86,19 @@
               :key="'New_' + attr.name + choice_idx"
               v-for="(choice, choice_idx) in attr.choice_value"
             >
-              <span :style="choice[1] ? choice[1].style || {} : {}">
-                <ops-icon
-                  :style="{ color: choice[1].icon.color }"
-                  v-if="choice[1] && choice[1].icon && choice[1].icon.name"
-                  :type="choice[1].icon.name"
-                />
+              <span :style="{ ...(choice[1] ? choice[1].style : {}), display: 'inline-flex', alignItems: 'center' }">
+                <template v-if="choice[1] && choice[1].icon && choice[1].icon.name">
+                  <img
+                    v-if="choice[1].icon.id && choice[1].icon.url"
+                    :src="`/api/common-setting/v1/file/${choice[1].icon.url}`"
+                    :style="{ maxHeight: '13px', maxWidth: '13px', marginRight: '5px' }"
+                  />
+                  <ops-icon
+                    v-else
+                    :style="{ color: choice[1].icon.color, marginRight: '5px' }"
+                    :type="choice[1].icon.name"
+                  />
+                </template>
                 {{ choice[0] }}
               </span>
             </a-select-option>
@@ -99,6 +128,19 @@
             v-else-if="attr.value_type === '4' || attr.value_type === '3'"
             :showTime="attr.value_type === '4' ? false : { format: 'HH:mm:ss' }"
           />
+          <!-- <a-input
+            size="small"
+            @focus="(e) => handleFocusInput(e, attr)"
+            v-decorator="[
+              attr.name,
+              {
+                validateTrigger: ['submit'],
+                rules: [{ required: attr.is_required }],
+              },
+            ]"
+            style="width: 100%"
+            v-else-if="attr.value_type === '6'"
+          /> -->
           <a-input
             size="small"
             v-decorator="[
@@ -124,9 +166,12 @@ import _ from 'lodash'
 import moment from 'moment'
 import { updateCI } from '@/modules/cmdb/api/ci'
 import JsonEditor from '../../../components/JsonEditor/jsonEditor.vue'
+import PasswordField from '../../../components/passwordField/index.vue'
+import { getAttrPassword } from '../../../api/CITypeAttr'
+
 export default {
   name: 'CiDetailAttrContent',
-  components: { JsonEditor },
+  components: { JsonEditor, PasswordField },
   props: {
     ci: {
       type: Object,
@@ -174,10 +219,18 @@ export default {
         return
       }
       this.isEdit = true
-      this.$nextTick(() => {
+      this.$nextTick(async () => {
         if (this.attr.is_list && !this.attr.is_choice) {
           this.form.setFieldsValue({
             [`${this.attr.name}`]: this.ci[this.attr.name].join(',') || null,
+          })
+          return
+        }
+        if (this.attr.is_password) {
+          await getAttrPassword(this.ci._id, this.attr.id).then((res) => {
+            this.form.setFieldsValue({
+              [`${this.attr.name}`]: res.value ?? null,
+            })
           })
           return
         }
@@ -192,20 +245,32 @@ export default {
         await updateCI(this.ci._id, { [`${this.attr.name}`]: newData })
           .then(() => {
             this.$message.success('更新成功！')
+            this.$emit('updateCIByself', { [`${this.attr.name}`]: newData }, this.attr.name)
           })
-          .finally(() => {
+          .catch(() => {
             this.$emit('refresh', this.attr.name)
           })
       }
       this.isEdit = false
     },
+    // handleFocusInput(e, attr) {
+    //   console.log('focus')
+    //   if (this.attr.value_type === '6') {
+    //     e.preventDefault()
+    //     e.stopPropagation()
+    //     // e.srcElement.blur()
+    //     const jsonData = this.form.getFieldValue(attr.name)
+    //     this.$refs.jsonEditor.open(null, null, jsonData ? JSON.parse(jsonData) : {})
+    //   }
+    // },
     jsonEditorOk(jsonData) {
       if (!_.isEqual(this.ci[this.attr.name], jsonData)) {
         updateCI(this.ci._id, { [`${this.attr.name}`]: jsonData })
           .then(() => {
             this.$message.success('更新成功！')
+            this.$emit('updateCIByself', { [`${this.attr.name}`]: jsonData }, this.attr.name)
           })
-          .finally(() => {
+          .catch(() => {
             this.$emit('refresh', this.attr.name)
           })
       }

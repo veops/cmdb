@@ -90,9 +90,12 @@
               mode="multiple"
               show-search
             >
-              <a-select-option v-for="attr in commonAttributes" :key="attr.id" :value="attr.id">{{
-                attr.alias || attr.name
-              }}</a-select-option>
+              <a-select-option
+                v-for="attr in commonAttributes.filter((attr) => !attr.is_password)"
+                :key="attr.id"
+                :value="attr.id"
+              >{{ attr.alias || attr.name }}</a-select-option
+              >
             </a-select>
           </a-form-model-item>
           <a-form-model-item
