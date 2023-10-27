@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1696815443987') format('woff2'),
-       url('iconfont.woff?t=1696815443987') format('woff'),
-       url('iconfont.ttf?t=1696815443987') format('truetype');
+  src: url('iconfont.woff2?t=1698273699449') format('woff2'),
+       url('iconfont.woff?t=1698273699449') format('woff'),
+       url('iconfont.ttf?t=1698273699449') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,34 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-xianxing-password:before {
+  content: "\e894";
+}
+
+.icon-xianxing-link:before {
+  content: "\e895";
+}
+
+.a-itsm-oneclickdownload:before {
+  content: "\e892";
+}
+
+.a-itsm-packagedownload:before {
+  content: "\e893";
+}
+
+.a-Frame4:before {
+  content: "\e891";
+}
+
+.itsm-again:before {
+  content: "\e88f";
+}
+
+.itsm-next:before {
+  content: "\e890";
 }
 
 .wechatApp:before {

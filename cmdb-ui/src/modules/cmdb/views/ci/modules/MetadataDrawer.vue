@@ -51,8 +51,15 @@
           :sortable="index < 3 ? true : false"
           :title-help="column.help !== null ? { message: column.help } : null"
           :filters="
-            index < 2 ? null: index === 2
-              ? valueTypeFilters: [{ label: '是', value: true }, { label: '否', value: false },]"
+            index < 2
+              ? null
+              : index === 2
+                ? valueTypeFilters
+                : [
+                  { label: '是', value: true },
+                  { label: '否', value: false },
+                ]
+          "
           type="html"
         >
           <template #default="{ row }">
@@ -134,18 +141,6 @@ export default {
         help: '仅针对前端',
       },
       {
-        field: 'is_password',
-        title: '是否密码',
-        width: 100,
-        help: null,
-      },
-      {
-        field: 'is_link',
-        title: '是否链接',
-        width: 110,
-        help: null,
-      },
-      {
         field: 'is_computed',
         title: '计算属性',
         width: 110,
@@ -168,7 +163,7 @@ export default {
       return this.$store.state.windowHeight
     },
   },
-  created: function () {
+  created: function() {
     this.valueTypeFilters = Object.keys(this.valueTypeMap).map((key) => {
       return { label: this.valueTypeMap[key], value: key }
     })
@@ -182,17 +177,32 @@ export default {
     async getAttrs() {
       this.loading = true
       const { attributes = [] } = await getCITypeAttributesByName(this.typeId)
-      this.tableData = attributes
+      this.tableData = attributes.map((attr) => {
+        if (attr.is_password) {
+          attr.value_type = '7'
+        }
+        if (attr.is_link) {
+          attr.value_type = '8'
+        }
+        return attr
+      })
       this.loading = false
       this.searchAttributes()
     },
     searchAttributes() {
-      const filterName = XEUtils.toValueString(this.searchKey).trim().toLowerCase()
+      const filterName = XEUtils.toValueString(this.searchKey)
+        .trim()
+        .toLowerCase()
       if (filterName) {
         const filterRE = new RegExp(filterName, 'gi')
         const searchProps = ['name', 'alias', 'value_type']
         const rest = this.tableData.filter((item) =>
-          searchProps.some((key) => XEUtils.toValueString(item[key]).toLowerCase().indexOf(filterName) > -1)
+          searchProps.some(
+            (key) =>
+              XEUtils.toValueString(item[key])
+                .toLowerCase()
+                .indexOf(filterName) > -1
+          )
         )
         this.list = rest.map((row) => {
           const item = Object.assign({}, row)

@@ -96,8 +96,21 @@
           >
             <template v-if="col.value_type === '6' || col.is_link || col.is_password || col.is_choice" #default="{row}">
               <span v-if="col.value_type === '6' && row[col.field]">{{ JSON.stringify(row[col.field]) }}</span>
-              <a v-else-if="col.is_link" :href="`${row[col.field]}`" target="_blank">{{ row[col.field] }}</a>
-              <PasswordField v-else-if="col.is_password && row[col.field]" :password="row[col.field]"></PasswordField>
+              <a
+                v-else-if="col.is_link && row[col.field]"
+                :href="
+                  row[col.field].startsWith('http') || row[col.field].startsWith('https')
+                    ? `${row[col.field]}`
+                    : `http://${row[col.field]}`
+                "
+                target="_blank"
+              >{{ row[col.field] }}</a
+              >
+              <PasswordField
+                v-else-if="col.is_password && row[col.field]"
+                :ci_id="row._id"
+                :attr_id="col.attr_id"
+              ></PasswordField>
               <template v-else-if="col.is_choice">
                 <template v-if="col.is_list">
                   <span

@@ -114,7 +114,7 @@
           <a-col :span="2">
             <a-form-item>
               <a :style="{ color: 'red', marginTop: '2px' }" @click="handleDelete(list.name)">
-                <a-icon type="delete"/>
+                <a-icon type="delete" />
               </a>
             </a-form-item>
           </a-col>
@@ -122,6 +122,7 @@
         <a-button type="primary" ghost icon="plus" @click="handleAdd">新增修改字段</a-button>
       </a-form>
     </template>
+    <!-- </a-form> -->
     <JsonEditor ref="jsonEditor" @jsonEditorOk="jsonEditorOk" />
   </CustomDrawer>
 </template>
@@ -222,10 +223,18 @@ export default {
           }
           Object.keys(values).forEach((k) => {
             const _tempFind = this.attributeList.find((item) => item.name === k)
-            if (_tempFind.value_type === '3' && values[k]) {
+            if (
+              _tempFind.value_type === '3' &&
+              values[k] &&
+              Object.prototype.toString.call(values[k]) === '[object Object]'
+            ) {
               values[k] = values[k].format('YYYY-MM-DD HH:mm:ss')
             }
-            if (_tempFind.value_type === '4' && values[k]) {
+            if (
+              _tempFind.value_type === '4' &&
+              values[k] &&
+              Object.prototype.toString.call(values[k]) === '[object Object]'
+            ) {
               values[k] = values[k].format('YYYY-MM-DD')
             }
             if (_tempFind.value_type === '6') {
@@ -247,10 +256,18 @@ export default {
 
         Object.keys(values).forEach((k) => {
           const _tempFind = this.attributeList.find((item) => item.name === k)
-          if (_tempFind.value_type === '3' && values[k]) {
+          if (
+            _tempFind.value_type === '3' &&
+            values[k] &&
+            Object.prototype.toString.call(values[k]) === '[object Object]'
+          ) {
             values[k] = values[k].format('YYYY-MM-DD HH:mm:ss')
           }
-          if (_tempFind.value_type === '4' && values[k]) {
+          if (
+            _tempFind.value_type === '4' &&
+            values[k] &&
+            Object.prototype.toString.call(values[k]) === '[object Object]'
+          ) {
             values[k] = values[k].format('YYYY-MM-DD')
           }
           if (_tempFind.value_type === '6') {
@@ -258,6 +275,7 @@ export default {
           }
         })
         values.ci_type = _this.typeId
+        console.log(this.parentsForm)
         Object.keys(this.parentsForm).forEach((type) => {
           if (this.parentsForm[type].value) {
             values[`$${type}.${this.parentsForm[type].attr}`] = this.parentsForm[type].value
