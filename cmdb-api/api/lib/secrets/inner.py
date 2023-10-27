@@ -22,7 +22,6 @@ from flask import current_app
 global_iv_length = 16
 global_key_shares = 5  # Number of generated key shares
 global_key_threshold = 3  # Minimum number of shares required to rebuild the key
-global_shares = []
 
 backend_root_key_name = "root_key"
 backend_encrypt_key_name = "encrypt_key"
@@ -30,7 +29,6 @@ backend_root_key_salt_name = "root_key_salt"
 backend_encrypt_key_salt_name = "encrypt_key_salt"
 success = "success"
 seal_status = True
-cache = {}
 
 
 def string_to_bytes(value):
@@ -43,27 +41,9 @@ def string_to_bytes(value):
     return byte_string
 
 
-class CacheBackend:
-    def __init__(self):
-        pass
-
-    @classmethod
-    def get(cls, key):
-        global cache
-        return cache.get(key)
-
-    @classmethod
-    def add(cls, key, value):
-        cache[key] = value
-        return success, True
-
-
 class Backend:
     def __init__(self, backend=None):
-        if not backend:
-            self.backend = CacheBackend
-        else:
-            self.backend = backend
+        self.backend = backend
 
     def get(self, key):
         return self.backend.get(key)
@@ -79,6 +59,9 @@ class KeyManage:
         self.backend = backend
         if backend:
             self.backend = Backend(backend)
+
+    def init_app(self, app):
+        self.auto_unseal()
 
     def hash_root_key(self, value):
         algorithm = hashes.SHA256()
@@ -166,18 +149,19 @@ class KeyManage:
                 "message": "current status is unseal, skip",
                 "status": "skip"
             }
-        global global_shares
         try:
             t = [i for i in b64decode(key)]
             v = (int("".join([chr(i) for i in t[-2:]])), bytes(t[:-2]))
-            if v not in global_shares:
-                global_shares.append(v)
-            if len(global_shares) >= global_key_threshold:
-                recovered_secret = Shamir.combine(global_shares[:global_key_threshold])
+            shares = getattr(current_app, "secrets_shares", [])
+            if v not in shares:
+                shares.append(v)
+                setattr(current_app, "secrets_shares", shares)
+            if len(shares) >= global_key_threshold:
+                recovered_secret = Shamir.combine(shares[:global_key_threshold])
                 return self.auth_root_secret(b64encode(recovered_secret))
             else:
                 return {
-                    "message": "waiting for inputting other unseal key {0}/{1}".format(len(global_shares),
+                    "message": "waiting for inputting other unseal key {0}/{1}".format(len(shares),
                                                                                        global_key_threshold),
                     "status": "waiting"
                 }
