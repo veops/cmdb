@@ -84,7 +84,12 @@
             </a-input-number>
             <a-input
               style="width: 100%"
-              v-else-if="currentValueType === '2' || currentValueType === '5'"
+              v-else-if="
+                currentValueType === '2' ||
+                  currentValueType === '5' ||
+                  currentValueType === '7' ||
+                  currentValueType === '8'
+              "
               v-decorator="['default_value', { rules: [{ required: false }] }]"
             >
             </a-input>
@@ -148,13 +153,13 @@
           label="必须"
         >
           <a-switch
-            @change="onChange"
+            @change="(checked) => onChange(checked, 'is_required')"
             name="is_required"
             v-decorator="['is_required', { rules: [], valuePropName: 'checked' }]"
           />
         </a-form-item>
       </a-col>
-      <a-col :span="6" v-if="currentValueType !== '6'">
+      <a-col :span="6" v-if="currentValueType !== '6' && currentValueType !== '7'">
         <a-form-item :label-col="{ span: 8 }" :wrapper-col="horizontalFormItemLayout.wrapperCol" label="唯一">
           <a-switch
             :disabled="isShowComputedArea"
@@ -228,7 +233,7 @@
           />
         </a-form-item>
       </a-col>
-      <a-col :span="6" v-if="currentValueType !== '6'">
+      <a-col :span="6" v-if="currentValueType !== '6' && currentValueType !== '7'">
         <a-form-item
           :label-col="currentValueType === '2' ? horizontalFormItemLayout.labelCol : { span: 8 }"
           :wrapper-col="horizontalFormItemLayout.wrapperCol"
@@ -236,14 +241,14 @@
         >
           <a-switch
             :disabled="isShowComputedArea"
-            @change="onChange"
+            @change="(checked) => onChange(checked, 'is_sortable')"
             name="is_sortable"
             v-decorator="['is_sortable', { rules: [], valuePropName: 'checked' }]"
           />
         </a-form-item>
       </a-col>
 
-      <a-col :span="6" v-if="currentValueType !== '6'">
+      <a-col :span="6" v-if="currentValueType !== '6' && currentValueType !== '7'">
         <a-form-item
           :label-col="currentValueType === '2' ? { span: 8 } : horizontalFormItemLayout.labelCol"
           :wrapper-col="horizontalFormItemLayout.wrapperCol"
@@ -275,31 +280,6 @@
           />
         </a-form-item>
       </a-col>
-      <a-col :span="6" v-if="currentValueType === '2'">
-        <a-form-item
-          :label-col="horizontalFormItemLayout.labelCol"
-          :wrapper-col="horizontalFormItemLayout.wrapperCol"
-          label="密码"
-        >
-          <a-switch
-            :disabled="isShowComputedArea"
-            @change="(checked) => onChange(checked, 'is_password')"
-            name="is_password"
-            v-decorator="['is_password', { rules: [], valuePropName: 'checked' }]"
-          />
-        </a-form-item>
-      </a-col>
-      <a-col :span="6" v-if="currentValueType === '2'">
-        <a-form-item :label-col="{ span: 8 }" :wrapper-col="horizontalFormItemLayout.wrapperCol" label="链接">
-          <a-switch
-            :disabled="isShowComputedArea"
-            @change="(checked) => onChange(checked, 'is_link')"
-            name="is_link"
-            v-decorator="['is_link', { rules: [], valuePropName: 'checked' }]"
-          />
-        </a-form-item>
-      </a-col>
-
       <a-divider style="font-size:14px;margin-top:6px;">高级设置</a-divider>
       <a-row>
         <a-col :span="24">
@@ -307,12 +287,17 @@
             <FontArea ref="fontArea" />
           </a-form-item>
         </a-col>
-        <a-col :span="24" v-if="currentValueType !== '6'">
+        <a-col :span="24" v-if="!['6', '7'].includes(currentValueType)">
           <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" label="预定义值">
-            <PreValueArea v-if="drawerVisible" ref="preValueArea" :disabled="isShowComputedArea" />
+            <PreValueArea
+              v-if="drawerVisible"
+              :canDefineScript="canDefineScript"
+              ref="preValueArea"
+              :disabled="isShowComputedArea"
+            />
           </a-form-item>
         </a-col>
-        <a-col :span="24" v-if="currentValueType !== '6'">
+        <a-col :span="24" v-if="!['6', '7'].includes(currentValueType)">
           <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
             <template slot="label">
               <span
@@ -340,7 +325,7 @@
             <a-switch
               :disabled="!canDefineComputed"
               @change="(checked) => onChange(checked, 'is_computed')"
-              name="is_password"
+              name="is_computed"
               v-decorator="['is_computed', { rules: [], valuePropName: 'checked' }]"
             />
             <ComputedArea
@@ -366,6 +351,7 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import moment from 'moment'
 import vueJsonEditor from 'vue-json-editor'
 import {
@@ -434,6 +420,9 @@ export default {
         wrapperCol: { span: 4 },
       }
     },
+    canDefineScript() {
+      return this.canDefineComputed
+    },
   },
   mounted() {},
   methods: {
@@ -463,26 +452,28 @@ export default {
           })
           if (this.currentValueType === '2') {
             this.form.setFieldsValue({
-              is_password: false,
-              is_link: false,
               is_index: true,
             })
           }
         }
       }
-      if (checked && property === 'is_password') {
-        this.form.setFieldsValue({
-          is_link: false,
-        })
-      }
-      if (checked && property === 'is_link') {
-        this.form.setFieldsValue({
-          is_password: false,
-        })
-      }
       if (property === 'is_list') {
         this.form.setFieldsValue({
           default_value: checked ? [] : '',
+        })
+      }
+      if (checked && property === 'is_sortable') {
+        this.$message.warning('选中排序，则必须也要选中！')
+        this.form.setFieldsValue({
+          is_required: true,
+        })
+      }
+      if (!checked && property === 'is_required' && this.form.getFieldValue('is_sortable')) {
+        this.$message.warning('选中排序，则必须也要选中！')
+        this.$nextTick(() => {
+          this.form.setFieldsValue({
+            is_required: true,
+          })
         })
       }
     },
@@ -494,90 +485,91 @@ export default {
       } catch {
         this.canDefineComputed = false
       }
+      const _record = _.cloneDeep(record)
+      if (_record.is_password) {
+        _record.value_type = '7'
+      }
+      if (_record.is_link) {
+        _record.value_type = '8'
+      }
       this.drawerTitle = '编辑属性'
       this.drawerVisible = true
-      this.record = record
-      this.currentValueType = record.value_type
+      this.record = _record
+      this.currentValueType = _record.value_type
       this.$nextTick(() => {
         this.form.setFieldsValue({
-          id: record.id,
-          alias: record.alias,
-          name: record.name,
-          value_type: record.value_type,
-          is_required: record.is_required,
-          default_show: record.default_show,
+          id: _record.id,
+          alias: _record.alias,
+          name: _record.name,
+          value_type: _record.value_type,
+          is_required: _record.is_required,
+          default_show: _record.default_show,
         })
-        if (record.value_type !== '6') {
+        if (!['6', '7'].includes(_record.value_type)) {
           this.form.setFieldsValue({
-            is_list: record.is_list,
-            is_unique: record.is_unique,
-            is_index: record.is_index,
-            is_sortable: record.is_sortable,
-            is_computed: record.is_computed,
+            is_list: _record.is_list,
+            is_unique: _record.is_unique,
+            is_index: _record.is_index,
+            is_sortable: _record.is_sortable,
+            is_computed: _record.is_computed,
           })
         }
-        if (record.value_type === '2') {
-          this.form.setFieldsValue({
-            is_password: record.is_password,
-            is_link: record.is_link,
-          })
-        }
-        console.log(record)
-        if (record.default) {
+        console.log(_record)
+        if (_record.default) {
           this.$nextTick(() => {
-            if (record.value_type === '0') {
+            if (_record.value_type === '0') {
               this.form.setFieldsValue({
-                default_value: record.default.default ? [record.default.default] : [],
+                default_value: _record.default.default ? [_record.default.default] : [],
               })
-            } else if (record.value_type === '6') {
-              this.default_value_json = record?.default?.default || null
-            } else if (record.value_type === '3' || record.value_type === '4') {
-              if (record?.default?.default === '$created_at' || record?.default?.default === '$updated_at') {
-                this.defaultForDatetime = record.default.default
+            } else if (_record.value_type === '6') {
+              this.default_value_json = _record?.default?.default || null
+            } else if (_record.value_type === '3' || _record.value_type === '4') {
+              if (_record?.default?.default === '$created_at' || _record?.default?.default === '$updated_at') {
+                this.defaultForDatetime = _record.default.default
                 this.form.setFieldsValue({
-                  default_value: record?.default?.default,
+                  default_value: _record?.default?.default,
                 })
               } else {
                 this.defaultForDatetime = '$custom_time'
                 this.form.setFieldsValue({
-                  default_value: record.default && record.default.default ? moment(record.default.default) : null,
+                  default_value: _record.default && _record.default.default ? moment(_record.default.default) : null,
                 })
               }
             } else {
               this.$nextTick(() => {
                 this.form.setFieldsValue({
-                  default_value: record.default && record.default.default ? record.default.default : null,
+                  default_value: _record.default && _record.default.default ? _record.default.default : null,
                 })
               })
             }
           })
         } else {
           this.default_value_json = {}
-          if (record.value_type === '0') {
+          if (_record.value_type === '0') {
             this.form.setFieldsValue({
               default_value: [],
             })
-          } else if (record.value_type !== '6') {
+          } else if (_record.value_type !== '6') {
             this.form.setFieldsValue({
               default_value: null,
             })
           }
         }
-        this.isShowComputedArea = record.is_computed
-        if (record.is_computed) {
+        this.isShowComputedArea = _record.is_computed
+        if (_record.is_computed) {
           this.$nextTick(() => {
             this.$refs.computedArea.setData({
-              compute_expr: record.compute_expr,
-              compute_script: record.compute_script,
+              compute_expr: _record.compute_expr,
+              compute_script: _record.compute_script,
             })
           })
         }
-        const _find = attributes.find((item) => item.id === record.id)
-        if (record.value_type !== '6') {
+        const _find = attributes.find((item) => item.id === _record.id)
+        if (!['6', '7'].includes(_record.value_type)) {
           this.$refs.preValueArea.setData({
             choice_value: (_find || {}).choice_value || [],
-            choice_web_hook: record.choice_web_hook,
-            choice_other: record.choice_other || undefined,
+            choice_web_hook: _record.choice_web_hook,
+            choice_other: _record.choice_other || undefined,
           })
         }
         this.$refs.fontArea.setData({
@@ -633,13 +625,20 @@ export default {
             values = { ...values, ...computedAreaData }
           } else {
             // 如果是非计算属性，就看看有没有预定义值
-            if (values.value_type !== '6') {
+            if (!['6', '7'].includes(values.value_type)) {
               const preValueAreaData = this.$refs.preValueArea.getData()
               values = { ...values, ...preValueAreaData }
             }
           }
-
           const fontOptions = this.$refs.fontArea.getData()
+          if (values.value_type === '7') {
+            values.value_type = '2'
+            values.is_password = true
+          }
+          if (values.value_type === '8') {
+            values.value_type = '2'
+            values.is_link = true
+          }
           if (values.id) {
             await this.updateAttribute(values.id, { ...values, option: { fontOptions } }, isCalcComputed)
           } else {
@@ -660,7 +659,6 @@ export default {
     handleOk() {
       this.$emit('ok')
     },
-
     handleChangeValueType(value) {
       this.currentValueType = value
       this.$nextTick(() => {

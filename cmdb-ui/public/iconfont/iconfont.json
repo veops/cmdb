@@ -6,6 +6,55 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "37830610",
+      "name": "icon-xianxing-password",
+      "font_class": "icon-xianxing-password",
+      "unicode": "e894",
+      "unicode_decimal": 59540
+    },
+    {
+      "icon_id": "37830609",
+      "name": "icon-xianxing-link",
+      "font_class": "icon-xianxing-link",
+      "unicode": "e895",
+      "unicode_decimal": 59541
+    },
+    {
+      "icon_id": "37822199",
+      "name": "itsm-oneclick download",
+      "font_class": "a-itsm-oneclickdownload",
+      "unicode": "e892",
+      "unicode_decimal": 59538
+    },
+    {
+      "icon_id": "37822198",
+      "name": "itsm-package download",
+      "font_class": "a-itsm-packagedownload",
+      "unicode": "e893",
+      "unicode_decimal": 59539
+    },
+    {
+      "icon_id": "37772067",
+      "name": "weixin",
+      "font_class": "a-Frame4",
+      "unicode": "e891",
+      "unicode_decimal": 59537
+    },
+    {
+      "icon_id": "37632784",
+      "name": "itsm-again",
+      "font_class": "itsm-again",
+      "unicode": "e88f",
+      "unicode_decimal": 59535
+    },
+    {
+      "icon_id": "37632783",
+      "name": "itsm-next",
+      "font_class": "itsm-next",
+      "unicode": "e890",
+      "unicode_decimal": 59536
+    },
+    {
       "icon_id": "37590786",
       "name": "wechatApp",
       "font_class": "wechatApp",

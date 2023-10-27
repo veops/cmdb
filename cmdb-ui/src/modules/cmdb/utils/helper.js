@@ -85,6 +85,7 @@ export function getCITableColumns(data, attrList, width = 1600, height) {
 
         }
         columns.push({
+            attr_id:attr.id,
             editRender,
             title: attr.alias || attr.name,
             field: attr.name,
@@ -127,6 +128,10 @@ export const getPropertyStyle = (attr) => {
             return { color: '#08979c', backgroundColor: '#e6fffb' }
         case '6':
             return { color: '#c41d7f', backgroundColor: '#fff0f6' }
+        case '7':
+            return { color: '#0390CC', backgroundColor: '#e6fffb' }
+        case '8':
+            return { color: '#144BD9', backgroundColor: '#fff0f6' }
     }
 }
 

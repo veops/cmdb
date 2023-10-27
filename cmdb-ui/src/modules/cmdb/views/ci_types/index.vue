@@ -388,7 +388,7 @@ export default {
     filterAttributes() {
       // 唯一标识 排除掉choice password 计算属性  json
       const _attributes = this.allAttributes.filter(
-        (item) => !item.is_choice && !item.is_password && !item.is_computed && item.value_type !== '6'
+        (item) => !item.is_choice && !item.is_computed && !['6', '7'].includes(item.value_type)
       )
       if (this.filterInput) {
         return _attributes.filter(

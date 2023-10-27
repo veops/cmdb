@@ -12,7 +12,10 @@
         <a-button type="primary" ghost>条件过滤<a-icon type="filter"/></a-button>
       </slot>
       <template slot="content">
-        <Expression v-model="ruleList" :canSearchPreferenceAttrList="canSearchPreferenceAttrList" />
+        <Expression
+          v-model="ruleList"
+          :canSearchPreferenceAttrList="canSearchPreferenceAttrList.filter((attr) => !attr.is_password)"
+        />
         <a-divider :style="{ margin: '10px 0' }" />
         <div style="width:534px">
           <a-space :style="{ display: 'flex', justifyContent: 'flex-end' }">
@@ -22,7 +25,11 @@
         </div>
       </template>
     </a-popover>
-    <Expression v-else v-model="ruleList" :canSearchPreferenceAttrList="canSearchPreferenceAttrList" />
+    <Expression
+      v-else
+      v-model="ruleList"
+      :canSearchPreferenceAttrList="canSearchPreferenceAttrList.filter((attr) => !attr.is_password)"
+    />
   </div>
 </template>
 
@@ -152,14 +159,15 @@ export default {
         })
         this.ruleList = [...expArray]
       } else if (open) {
+        const _canSearchPreferenceAttrList = this.canSearchPreferenceAttrList.filter((attr) => !attr.is_password)
         this.ruleList = isInitOne
           ? [
               {
                 id: uuidv4(),
                 type: 'and',
                 property:
-                  this.canSearchPreferenceAttrList && this.canSearchPreferenceAttrList.length
-                    ? this.canSearchPreferenceAttrList[0].name
+                  _canSearchPreferenceAttrList && _canSearchPreferenceAttrList.length
+                    ? _canSearchPreferenceAttrList[0].name
                     : undefined,
                 exp: 'is',
                 value: null,

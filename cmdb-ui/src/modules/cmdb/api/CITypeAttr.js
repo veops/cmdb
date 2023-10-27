@@ -168,3 +168,10 @@ export function calcComputedAttribute(attr_id) {
     method: 'PUT',
   })
 }
+
+export function getAttrPassword(ci_id, attr_id) {
+  return axios({
+    url: `/v0.1/ci/${ci_id}/attributes/${attr_id}/password`,
+    method: 'Get',
+  })
+}

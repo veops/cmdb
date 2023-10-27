@@ -30,7 +30,7 @@
               :key="attr.name"
               v-for="attr in group.attributes"
             >
-              <CiDetailAttrContent :ci="ci" :attr="attr" @refresh="refresh" />
+              <CiDetailAttrContent :ci="ci" :attr="attr" @refresh="refresh" @updateCIByself="updateCIByself" />
             </el-descriptions-item>
           </el-descriptions>
         </div>
@@ -97,6 +97,7 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import { Descriptions, DescriptionsItem } from 'element-ui'
 import { getCITypeGroupById, getCITypes } from '@/modules/cmdb/api/CIType'
 import { getCIHistory } from '@/modules/cmdb/api/history'
@@ -291,6 +292,19 @@ export default {
           }
         }
       }
+    },
+    updateCIByself(params, editAttrName) {
+      const _ci = { ..._.cloneDeep(this.ci), ...params }
+      this.ci = _ci
+      const _find = this.treeViewsLevels.find((level) => level.name === editAttrName)
+      // 修改的字段为树形视图订阅的字段 则全部reload
+      setTimeout(() => {
+        if (_find) {
+          this.reload()
+        } else {
+          this.handleSearch()
+        }
+      }, 500)
     },
   },
 }

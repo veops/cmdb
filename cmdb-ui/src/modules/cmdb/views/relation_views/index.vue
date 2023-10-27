@@ -25,7 +25,7 @@
               :expandedKeys="expandedKeys"
             >
               <a-icon slot="switcherIcon" type="down" />
-              <template #title="{ key: treeKey, title, isLeaf }">
+              <template #title="{ key: treeKey, title,isLeaf }">
                 <ContextMenu
                   :title="title"
                   :treeKey="treeKey"
@@ -135,7 +135,8 @@
                     {{ col.title }}</span
                   >
                 </template>
-                <template v-if="col.is_choice" #edit="{ row }">
+                <template v-if="col.is_choice || col.is_password" #edit="{ row }">
+                  <vxe-input v-if="col.is_password" v-model="passwordValue[col.field]" />
                   <a-select
                     :getPopupContainer="(trigger) => trigger.parentElement"
                     :style="{ width: '100%', height: '32px' }"
@@ -177,10 +178,20 @@
                   #default="{row}"
                 >
                   <span v-if="col.value_type === '6' && row[col.field]">{{ row[col.field] }}</span>
-                  <a v-else-if="col.is_link" :href="`${row[col.field]}`" target="_blank">{{ row[col.field] }}</a>
+                  <a
+                    v-else-if="col.is_link && row[col.field]"
+                    :href="
+                      row[col.field].startsWith('http') || row[col.field].startsWith('https')
+                        ? `${row[col.field]}`
+                        : `http://${row[col.field]}`
+                    "
+                    target="_blank"
+                  >{{ row[col.field] }}</a
+                  >
                   <PasswordField
                     v-else-if="col.is_password && row[col.field]"
-                    :password="row[col.field]"
+                    :ci_id="row._id"
+                    :attr_id="col.attr_id"
                   ></PasswordField>
                   <template v-else-if="col.is_choice">
                     <template v-if="col.is_list">
@@ -333,7 +344,7 @@ import {
 } from '@/modules/cmdb/api/CIRelation'
 
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
-import { searchCI2, updateCI, deleteCI } from '@/modules/cmdb/api/ci'
+import { searchCI2, updateCI, deleteCI, searchCI } from '@/modules/cmdb/api/ci'
 import { getCITypes } from '../../api/CIType'
 import { roleHasPermissionToGrant } from '@/modules/acl/api/permission'
 import { searchResourceType } from '@/modules/acl/api/resource'
@@ -347,6 +358,7 @@ import PasswordField from '../../components/passwordField/index.vue'
 import PreferenceSearch from '../../components/preferenceSearch/preferenceSearch.vue'
 import CMDBGrant from '../../components/cmdbGrant'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
+import { getAttrPassword } from '../../api/CITypeAttr'
 
 export default {
   name: 'RelationViews',
@@ -407,6 +419,11 @@ export default {
       tableDragClassName: [],
 
       resource_type: {},
+
+      initialPasswordValue: {},
+      passwordValue: {},
+      lastEditCiId: null,
+      isContinueCloseEdit: true,
     }
   },
 
@@ -890,6 +907,12 @@ export default {
     calcColumns() {
       const width = document.getElementById('relation-views-right').clientWidth
       this.columns = getCITableColumns(this.instanceList, this.preferenceAttrList, width)
+      this.columns.forEach((col) => {
+        if (col.is_password) {
+          this.initialPasswordValue[col.field] = ''
+          this.passwordValue[col.field] = ''
+        }
+      })
       this.$nextTick(() => {
         this.$refs.xTable.refreshColumn()
       })
@@ -1076,15 +1099,47 @@ export default {
       }
       return _editRender
     },
-    handleEditActived() {},
+    handleEditActived() {
+      const passwordCol = this.columns.filter((col) => col.is_password)
+      this.$nextTick(() => {
+        const editRecord = this.$refs.xTable.getVxetableRef().getEditRecord()
+        const { row, column } = editRecord
+        if (passwordCol.length && this.lastEditCiId !== row._id) {
+          this.$nextTick(async () => {
+            for (let i = 0; i < passwordCol.length; i++) {
+              await getAttrPassword(row._id, passwordCol[i].attr_id).then((res) => {
+                this.initialPasswordValue[passwordCol[i].field] = res.value
+                this.passwordValue[passwordCol[i].field] = res.value
+              })
+            }
+            this.isContinueCloseEdit = false
+            await this.$refs.xTable.getVxetableRef().clearEdit()
+            this.isContinueCloseEdit = true
+            this.$nextTick(() => {
+              this.$refs.xTable.getVxetableRef().setEditCell(row, column.field)
+            })
+          })
+        }
+        this.lastEditCiId = row._id
+      })
+    },
     handleEditClose({ row, rowIndex, column }) {
+      if (!this.isContinueCloseEdit) {
+        return
+      }
       const $table = this.$refs['xTable']
       const data = {}
       this.columns.forEach((item) => {
         if (!_.isEqual(row[item.field], this.initialInstanceList[rowIndex][item.field])) {
-          data[item.field] = row[item.field] || null
+          data[item.field] = row[item.field] ?? null
         }
       })
+      Object.keys(this.initialPasswordValue).forEach((key) => {
+        if (this.initialPasswordValue[key] !== this.passwordValue[key]) {
+          data[key] = this.passwordValue[key]
+        }
+      })
+      this.lastEditCiId = null
       if (JSON.stringify(data) !== '{}') {
         updateCI(row.ci_id || row._id, data)
           .then(() => {
@@ -1102,6 +1157,12 @@ export default {
             $table.revertData(row)
           })
       }
+      this.columns.forEach((col) => {
+        if (col.is_password) {
+          this.initialPasswordValue[col.field] = ''
+          this.passwordValue[col.field] = ''
+        }
+      })
     },
     deleteCI(record) {
       const that = this
