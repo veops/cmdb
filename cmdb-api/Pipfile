@@ -60,6 +60,8 @@ jinja2schema = "==0.1.4"
 msgpack-python = "==0.5.6"
 alembic = "==1.7.7"
 hvac = "==2.0.0"
+colorama = ">=0.4.6"
+pycryptodomex = ">=3.19.0"
 
 [dev-packages]
 # Testing
@@ -76,4 +78,3 @@ flake8-isort = "==2.7.0"
 isort = "==4.3.21"
 pep8-naming = "==0.8.2"
 pydocstyle = "==3.0.0"
-

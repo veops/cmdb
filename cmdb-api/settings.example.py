@@ -102,3 +102,4 @@ USE_MESSENGER = True
 SECRETS_ENGINE = 'inner'  # 'inner' or 'vault'
 VAULT_URL = ''
 VAULT_TOKEN = ''
+INNER_TRIGGER_TOKEN = ''

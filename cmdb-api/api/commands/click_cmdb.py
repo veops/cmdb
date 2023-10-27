@@ -29,6 +29,10 @@ from api.lib.perm.acl.resource import ResourceCRUD
 from api.lib.perm.acl.resource import ResourceTypeCRUD
 from api.lib.perm.acl.role import RoleCRUD
 from api.lib.perm.acl.user import UserCRUD
+from api.lib.secrets.inner import KeyMange
+from api.lib.secrets.secrets import InnerKVManger
+from api.lib.secrets.inner import global_key_threshold
+
 from api.models.acl import App
 from api.models.acl import ResourceType
 from api.models.cmdb import Attribute
@@ -311,3 +315,60 @@ def cmdb_index_table_upgrade():
         CIIndexValueDateTime.create(ci_id=i.ci_id, attr_id=i.attr_id, value=i.value, commit=False)
         i.delete(commit=False)
     db.session.commit()
+
+
+@click.command()
+@with_appcontext
+def cmdb_inner_secrets_init():
+    """
+    init inner secrets for password feature
+    """
+    KeyMange(backend=InnerKVManger).init()
+
+
+@click.command()
+@click.option(
+    '-k',
+    '--token',
+    help='root token',
+)
+@with_appcontext
+def cmdb_inner_secrets_unseal(token):
+    """
+    unseal the secrets feature
+    """
+    for i in range(global_key_threshold):
+        token = click.prompt(f'Enter token {i+1}', hide_input=True, confirmation_prompt=False)
+        assert token is not None
+        res = KeyMange(backend=InnerKVManger).unseal(token)
+        KeyMange.print_response(res)
+
+
+@click.command()
+@click.option(
+    '-k',
+    '--token',
+    help='root token',
+    prompt=True,
+    hide_input=True,
+)
+@with_appcontext
+def cmdb_inner_secrets_seal(token):
+    """
+    seal the secrets feature
+    """
+    assert token is not None
+    res = KeyMange(backend=InnerKVManger()).seal(token)
+    KeyMange.print_response(res)
+
+
+@click.command()
+@with_appcontext
+def cmdb_inner_secrets_auto_seal():
+    """
+    auto seal the secrets feature
+    """
+    res = KeyMange(current_app.config.get("INNER_TRIGGER_TOKEN"), backend=InnerKVManger()).auto_unseal()
+    KeyMange.print_response(res)
+
+
