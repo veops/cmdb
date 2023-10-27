@@ -136,6 +136,6 @@ if __name__ == "__main__":
     # sdk.enable_secrets_engine()
     _data = {"key1": "value1", "key2": "value2", "key3": "value3"}
     _data = sdk.update(_path, _data, overwrite=True, encrypt=True)
-    print(_data.status_code)
+    print(_data)
     _data = sdk.read(_path, decrypt=True)
     print(_data)
