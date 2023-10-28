@@ -7,6 +7,7 @@ import json
 import time
 
 import click
+import requests
 from flask import current_app
 from flask.cli import with_appcontext
 from flask_login import login_user
@@ -318,28 +319,61 @@ def cmdb_index_table_upgrade():
 
 
 @click.command()
+@click.option(
+    '-a',
+    '--address',
+    help='inner cmdb api, http://127.0.0.1:8000',
+)
 @with_appcontext
-def cmdb_inner_secrets_init():
+def cmdb_inner_secrets_init(address):
     """
     init inner secrets for password feature
     """
     KeyManage(backend=InnerKVManger).init()
 
+    if address and address.startswith("http") and current_app.config.get("INNER_TRIGGER_TOKEN", "") != "":
+        resp = requests.post("{}/api/v0.1/secrets/auto_seal".format(address.strip("/")),
+                             headers={"Inner-Token": current_app.config.get("INNER_TRIGGER_TOKEN", "")})
+        if resp.status_code == 200:
+            KeyManage.print_response(resp.json())
+        else:
+            KeyManage.print_response({"message": resp.text, "status": "failed"})
+
 
 @click.command()
+@click.option(
+    '-a',
+    '--address',
+    help='inner cmdb api, http://127.0.0.1:8000',
+    required=True,
+)
 @with_appcontext
-def cmdb_inner_secrets_unseal():
+def cmdb_inner_secrets_unseal(address):
     """
     unseal the secrets feature
     """
+    address = "{}/api/v0.1/secrets/unseal".format(address.strip("/"))
+    if not address.startswith("http"):
+        KeyManage.print_response({"message": "invalid address, should start with http", "status": "failed"})
+        return
     for i in range(global_key_threshold):
-        token = click.prompt(f'Enter token {i + 1}', hide_input=True, confirmation_prompt=False)
+        token = click.prompt(f'Enter unseal token {i + 1}', hide_input=True, confirmation_prompt=False)
         assert token is not None
-        res = KeyManage(backend=InnerKVManger).unseal(token)
-        KeyManage.print_response(res)
+        resp = requests.post(address, headers={"Unseal-Token": token})
+        if resp.status_code == 200:
+            KeyManage.print_response(resp.json())
+        else:
+            KeyManage.print_response({"message": resp.text, "status": "failed"})
+            return
 
 
 @click.command()
+@click.option(
+    '-a',
+    '--address',
+    help='inner cmdb api, http://127.0.0.1:8000',
+    required=True,
+)
 @click.option(
     '-k',
     '--token',
@@ -348,23 +382,21 @@ def cmdb_inner_secrets_unseal():
     hide_input=True,
 )
 @with_appcontext
-def cmdb_inner_secrets_seal(token):
+def cmdb_inner_secrets_seal(address, token):
     """
     seal the secrets feature
     """
+    assert address is not None
     assert token is not None
-    res = KeyManage(backend=InnerKVManger()).seal(token)
-    KeyManage.print_response(res)
-
-
-@click.command()
-@with_appcontext
-def cmdb_inner_secrets_auto_seal():
-    """
-    auto seal the secrets feature
-    """
-    res = KeyManage(current_app.config.get("INNER_TRIGGER_TOKEN"), backend=InnerKVManger()).auto_unseal()
-    KeyManage.print_response(res)
+    if address.startswith("http"):
+        address = "{}/api/v0.1/secrets/seal".format(address.strip("/"))
+        resp = requests.post(address, headers={
+            "Inner-Token": token,
+        })
+        if resp.status_code == 200:
+            KeyManage.print_response(resp.json())
+        else:
+            KeyManage.print_response({"message": resp.text, "status": "failed"})
 
 
 @click.command()

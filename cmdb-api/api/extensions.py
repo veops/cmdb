@@ -14,6 +14,7 @@ from api.lib.utils import RedisHandler
 
 from api.lib.secrets.inner import KeyManage
 
+
 bcrypt = Bcrypt()
 login_manager = LoginManager()
 db = SQLAlchemy(session_options={"autoflush": False})
