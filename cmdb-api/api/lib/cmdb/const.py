@@ -12,6 +12,8 @@ class ValueTypeEnum(BaseEnum):
     DATE = "4"
     TIME = "5"
     JSON = "6"
+    PASSWORD = TEXT
+    LINK = TEXT
 
 
 class ConstraintEnum(BaseEnum):
