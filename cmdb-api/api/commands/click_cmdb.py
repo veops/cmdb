@@ -7,6 +7,7 @@ import json
 import time
 
 import click
+import requests
 from flask import current_app
 from flask.cli import with_appcontext
 from flask_login import login_user
@@ -29,6 +30,9 @@ from api.lib.perm.acl.resource import ResourceCRUD
 from api.lib.perm.acl.resource import ResourceTypeCRUD
 from api.lib.perm.acl.role import RoleCRUD
 from api.lib.perm.acl.user import UserCRUD
+from api.lib.secrets.inner import KeyManage
+from api.lib.secrets.inner import global_key_threshold
+from api.lib.secrets.secrets import InnerKVManger
 from api.models.acl import App
 from api.models.acl import ResourceType
 from api.models.cmdb import Attribute
@@ -53,6 +57,7 @@ def cmdb_init_cache():
     if relations:
         rd.create_or_update(relations, REDIS_PREFIX_CI_RELATION)
 
+    es = None
     if current_app.config.get("USE_ES"):
         from api.extensions import es
         from api.models.cmdb import Attribute
@@ -311,3 +316,128 @@ def cmdb_index_table_upgrade():
         CIIndexValueDateTime.create(ci_id=i.ci_id, attr_id=i.attr_id, value=i.value, commit=False)
         i.delete(commit=False)
     db.session.commit()
+
+
+@click.command()
+@click.option(
+    '-a',
+    '--address',
+    help='inner cmdb api, http://127.0.0.1:8000',
+)
+@with_appcontext
+def cmdb_inner_secrets_init(address):
+    """
+    init inner secrets for password feature
+    """
+    KeyManage(backend=InnerKVManger).init()
+
+    if address and address.startswith("http") and current_app.config.get("INNER_TRIGGER_TOKEN", "") != "":
+        resp = requests.post("{}/api/v0.1/secrets/auto_seal".format(address.strip("/")),
+                             headers={"Inner-Token": current_app.config.get("INNER_TRIGGER_TOKEN", "")})
+        if resp.status_code == 200:
+            KeyManage.print_response(resp.json())
+        else:
+            KeyManage.print_response({"message": resp.text, "status": "failed"})
+
+
+@click.command()
+@click.option(
+    '-a',
+    '--address',
+    help='inner cmdb api, http://127.0.0.1:8000',
+    required=True,
+)
+@with_appcontext
+def cmdb_inner_secrets_unseal(address):
+    """
+    unseal the secrets feature
+    """
+    address = "{}/api/v0.1/secrets/unseal".format(address.strip("/"))
+    if not address.startswith("http"):
+        KeyManage.print_response({"message": "invalid address, should start with http", "status": "failed"})
+        return
+    for i in range(global_key_threshold):
+        token = click.prompt(f'Enter unseal token {i + 1}', hide_input=True, confirmation_prompt=False)
+        assert token is not None
+        resp = requests.post(address, headers={"Unseal-Token": token})
+        if resp.status_code == 200:
+            KeyManage.print_response(resp.json())
+        else:
+            KeyManage.print_response({"message": resp.text, "status": "failed"})
+            return
+
+
+@click.command()
+@click.option(
+    '-a',
+    '--address',
+    help='inner cmdb api, http://127.0.0.1:8000',
+    required=True,
+)
+@click.option(
+    '-k',
+    '--token',
+    help='root token',
+    prompt=True,
+    hide_input=True,
+)
+@with_appcontext
+def cmdb_inner_secrets_seal(address, token):
+    """
+    seal the secrets feature
+    """
+    assert address is not None
+    assert token is not None
+    if address.startswith("http"):
+        address = "{}/api/v0.1/secrets/seal".format(address.strip("/"))
+        resp = requests.post(address, headers={
+            "Inner-Token": token,
+        })
+        if resp.status_code == 200:
+            KeyManage.print_response(resp.json())
+        else:
+            KeyManage.print_response({"message": resp.text, "status": "failed"})
+
+
+@click.command()
+@with_appcontext
+def cmdb_password_data_migrate():
+    """
+    Migrate CI password data, version >= v2.3.6
+    """
+    from api.models.cmdb import CIIndexValueText
+    from api.models.cmdb import CIValueText
+    from api.lib.secrets.inner import InnerCrypt
+    from api.lib.secrets.vault import VaultClient
+
+    attrs = Attribute.get_by(to_dict=False)
+    for attr in attrs:
+        if attr.is_password:
+
+            value_table = CIIndexValueText if attr.is_index else CIValueText
+
+            for i in value_table.get_by(attr_id=attr.id, to_dict=False):
+                if current_app.config.get("SECRETS_ENGINE", 'inner') == 'inner':
+                    _, status = InnerCrypt().decrypt(i.value)
+                    if status:
+                        continue
+
+                    encrypt_value, status = InnerCrypt().encrypt(i.value)
+                    if status:
+                        CIValueText.create(ci_id=i.ci_id, attr_id=attr.id, value=encrypt_value)
+                    else:
+                        continue
+                elif current_app.config.get("SECRETS_ENGINE") == 'vault':
+                    if i.value == '******':
+                        continue
+
+                    vault = VaultClient(current_app.config.get('VAULT_URL'), current_app.config.get('VAULT_TOKEN'))
+                    try:
+                        vault.update("/{}/{}".format(i.ci_id, i.attr_id), dict(v=i.value))
+                    except Exception as e:
+                        print('save password to vault failed: {}'.format(e))
+                        continue
+                else:
+                    continue
+
+                i.delete()

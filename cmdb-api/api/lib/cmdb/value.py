@@ -66,9 +66,10 @@ class AttributeValueManager(object):
                                     use_master=use_master,
                                     to_dict=False)
             field_name = getattr(attr, ret_key)
-
             if attr.is_list:
                 res[field_name] = [ValueTypeMap.serialize[attr.value_type](i.value) for i in rs]
+            elif attr.is_password and rs:
+                res[field_name] = '******'
             else:
                 res[field_name] = ValueTypeMap.serialize[attr.value_type](rs[0].value) if rs else None
 
@@ -131,8 +132,7 @@ class AttributeValueManager(object):
         return AttributeHistoryManger.add(record_id, ci_id, [(attr_id, operate_type, old, new)], type_id)
 
     @staticmethod
-    def _write_change2(changed):
-        record_id = None
+    def write_change2(changed, record_id=None):
         for ci_id, attr_id, operate_type, old, new, type_id in changed:
             record_id = AttributeHistoryManger.add(record_id, ci_id, [(attr_id, operate_type, old, new)], type_id,
                                                    commit=False, flush=False)
@@ -286,7 +286,7 @@ class AttributeValueManager(object):
             current_app.logger.warning(str(e))
             return abort(400, ErrFormat.attribute_value_unknown_error.format(e.args[0]))
 
-        return self._write_change2(changed)
+        return self.write_change2(changed)
 
     @staticmethod
     def delete_attr_value(attr_id, ci_id):

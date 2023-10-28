@@ -18,7 +18,9 @@ from flask.json.provider import DefaultJSONProvider
 
 import api.views.entry
 from api.extensions import (bcrypt, cache, celery, cors, db, es, login_manager, migrate, rd)
+from api.extensions import inner_secrets
 from api.flask_cas import CAS
+from api.lib.secrets.secrets import InnerKVManger
 from api.models.acl import User
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -125,6 +127,10 @@ def register_extensions(app):
 
     app.config.update(app.config.get("CELERY"))
     celery.conf.update(app.config)
+
+    if app.config.get('SECRETS_ENGINE') == 'inner':
+        with app.app_context():
+            inner_secrets.init_app(app, InnerKVManger())
 
 
 def register_blueprints(app):

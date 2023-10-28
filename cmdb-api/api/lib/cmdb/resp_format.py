@@ -95,3 +95,6 @@ class ErrFormat(CommonErrFormat):
     ci_filter_perm_cannot_or_query = "CI过滤授权 暂时不支持 或 查询"
     ci_filter_perm_attr_no_permission = "您没有属性 {} 的操作权限!"
     ci_filter_perm_ci_no_permission = "您没有该CI的操作权限!"
+
+    password_save_failed = "保存密码失败: {}"
+    password_load_failed = "获取密码失败: {}"
