@@ -7,6 +7,7 @@ QUERY_CIS_BY_VALUE_TABLE = """
           attr.alias AS attr_alias,
           attr.value_type,
           attr.is_list,
+          attr.is_password,
           c_cis.type_id,
           {0}.ci_id,
           {0}.attr_id,
@@ -26,7 +27,8 @@ QUERY_CIS_BY_IDS = """
            A.attr_alias,
            A.value,
            A.value_type,
-           A.is_list
+           A.is_list,
+           A.is_password
     FROM
       ({1}) AS A {0}
        ORDER BY A.ci_id;
@@ -43,7 +45,7 @@ FACET_QUERY1 = """
 
 FACET_QUERY = """
     SELECT {0}.value,
-           count({0}.ci_id)
+           count(distinct {0}.ci_id)
     FROM {0}
     INNER JOIN ({1}) AS F ON F.ci_id={0}.ci_id
     WHERE {0}.attr_id={2:d}

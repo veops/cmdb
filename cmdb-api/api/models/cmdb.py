@@ -504,3 +504,10 @@ class CIFilterPerms(Model):
     attr_filter = db.Column(db.Text)
 
     rid = db.Column(db.Integer, index=True)
+
+
+class InnerKV(Model):
+    __tablename__ = "c_kv"
+
+    key = db.Column(db.String(128), index=True)
+    value = db.Column(db.Text)

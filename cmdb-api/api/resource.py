@@ -46,5 +46,4 @@ def register_resources(resource_path, rest_api):
                         resource_cls.url_prefix = ("",)
                     if isinstance(resource_cls.url_prefix, six.string_types):
                         resource_cls.url_prefix = (resource_cls.url_prefix,)
-
                     rest_api.add_resource(resource_cls, *resource_cls.url_prefix)

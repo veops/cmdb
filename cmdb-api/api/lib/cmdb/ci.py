@@ -29,6 +29,7 @@ from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import REDIS_PREFIX_CI
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RetKey
+from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.cmdb.history import AttributeHistoryManger
 from api.lib.cmdb.history import CIRelationHistoryManager
 from api.lib.cmdb.history import CITriggerHistoryManager
@@ -42,6 +43,8 @@ from api.lib.notify import notify_send
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import validate_permission
+from api.lib.secrets.inner import InnerCrypt
+from api.lib.secrets.vault import VaultClient
 from api.lib.utils import Lock
 from api.lib.utils import handle_arg_list
 from api.lib.webhook import webhook_request
@@ -323,6 +326,8 @@ class CIManager(object):
         ci_attr2type_attr = {type_attr.attr_id: type_attr for type_attr, _ in attrs}
 
         ci = None
+        record_id = None
+        password_dict = {}
         need_lock = current_user.username not in current_app.config.get('PRIVILEGED_USERS', PRIVILEGED_USERS)
         with Lock(ci_type_name, need_lock=need_lock):
             existed = cls.ci_is_exist(unique_key, unique_value, ci_type.id)
@@ -351,14 +356,23 @@ class CIManager(object):
                                 ci_dict.get(attr.name) is None and ci_dict.get(attr.alias) is None)):
                             ci_dict[attr.name] = attr.default.get('default')
 
-                    if type_attr.is_required and (attr.name not in ci_dict and attr.alias not in ci_dict):
+                    if (type_attr.is_required and not attr.is_computed and
+                            (attr.name not in ci_dict and attr.alias not in ci_dict)):
                         return abort(400, ErrFormat.attribute_value_required.format(attr.name))
             else:
                 for type_attr, attr in attrs:
                     if attr.default and attr.default.get('default') == AttributeDefaultValueEnum.UPDATED_AT:
                         ci_dict[attr.name] = now
 
-            computed_attrs = [attr.to_dict() for _, attr in attrs if attr.is_computed] or None
+            computed_attrs = []
+            for _, attr in attrs:
+                if attr.is_computed:
+                    computed_attrs.append(attr.to_dict())
+                elif attr.is_password:
+                    if attr.name in ci_dict:
+                        password_dict[attr.id] = ci_dict.pop(attr.name)
+                    elif attr.alias in ci_dict:
+                        password_dict[attr.id] = ci_dict.pop(attr.alias)
 
             value_manager = AttributeValueManager()
 
@@ -395,6 +409,10 @@ class CIManager(object):
                     cls.delete(ci.id)
                 raise e
 
+        if password_dict:
+            for attr_id in password_dict:
+                record_id = cls.save_password(ci.id, attr_id, password_dict[attr_id], record_id, ci_type.id)
+
         if record_id:  # has change
             ci_cache.apply_async(args=(ci.id, operate_type, record_id), queue=CMDB_QUEUE)
 
@@ -414,7 +432,16 @@ class CIManager(object):
             if attr.default and attr.default.get('default') == AttributeDefaultValueEnum.UPDATED_AT:
                 ci_dict[attr.name] = now
 
-        computed_attrs = [attr.to_dict() for _, attr in attrs if attr.is_computed] or None
+        password_dict = dict()
+        computed_attrs = list()
+        for _, attr in attrs:
+            if attr.is_computed:
+                computed_attrs.append(attr.to_dict())
+            elif attr.is_password:
+                if attr.name in ci_dict:
+                    password_dict[attr.id] = ci_dict.pop(attr.name)
+                elif attr.alias in ci_dict:
+                    password_dict[attr.id] = ci_dict.pop(attr.alias)
 
         value_manager = AttributeValueManager()
 
@@ -423,6 +450,7 @@ class CIManager(object):
 
         limit_attrs = self._valid_ci_for_no_read(ci) if not _is_admin else {}
 
+        record_id = None
         need_lock = current_user.username not in current_app.config.get('PRIVILEGED_USERS', PRIVILEGED_USERS)
         with Lock(ci.ci_type.name, need_lock=need_lock):
             self._valid_unique_constraint(ci.type_id, ci_dict, ci_id)
@@ -439,6 +467,10 @@ class CIManager(object):
                 record_id = value_manager.create_or_update_attr_value(ci, ci_dict, key2attr)
             except BadRequest as e:
                 raise e
+
+        if password_dict:
+            for attr_id in password_dict:
+                record_id = self.save_password(ci.id, attr_id, password_dict[attr_id], record_id, ci.type_id)
 
         if record_id:  # has change
             ci_cache.apply_async(args=(ci_id, OperateType.UPDATE, record_id), queue=CMDB_QUEUE)
@@ -602,7 +634,7 @@ class CIManager(object):
             _fields = list()
             for field in fields:
                 attr = AttributeCache.get(field)
-                if attr is not None:
+                if attr is not None and not attr.is_password:
                     _fields.append(str(attr.id))
             filter_fields_sql = "WHERE A.attr_id in ({0})".format(",".join(_fields))
 
@@ -620,7 +652,7 @@ class CIManager(object):
         ci_dict = dict()
         unique_id2obj = dict()
         excludes = excludes and set(excludes)
-        for ci_id, type_id, attr_id, attr_name, attr_alias, value, value_type, is_list in cis:
+        for ci_id, type_id, attr_id, attr_name, attr_alias, value, value_type, is_list, is_password in cis:
             if not fields and excludes and (attr_name in excludes or attr_alias in excludes):
                 continue
 
@@ -647,11 +679,14 @@ class CIManager(object):
             else:
                 return abort(400, ErrFormat.argument_invalid.format("ret_key"))
 
-            value = ValueTypeMap.serialize2[value_type](value)
-            if is_list:
-                ci_dict.setdefault(attr_key, []).append(value)
+            if is_password and value:
+                ci_dict[attr_key] = '******'
             else:
-                ci_dict[attr_key] = value
+                value = ValueTypeMap.serialize2[value_type](value)
+                if is_list:
+                    ci_dict.setdefault(attr_key, []).append(value)
+                else:
+                    ci_dict[attr_key] = value
 
         return res
 
@@ -682,6 +717,75 @@ class CIManager(object):
         current_app.logger.warning("cache not hit...............")
 
         return cls._get_cis_from_db(ci_ids, ret_key, fields, value_tables, excludes=excludes)
+
+    @classmethod
+    def save_password(cls, ci_id, attr_id, value, record_id, type_id):
+        if not value:
+            return
+
+        changed = None
+
+        value_table = ValueTypeMap.table[ValueTypeEnum.PASSWORD]
+        if current_app.config.get('SECRETS_ENGINE') == 'inner':
+            encrypt_value, status = InnerCrypt().encrypt(value)
+            if not status:
+                current_app.logger.error('save password failed: {}'.format(encrypt_value))
+                return abort(400, ErrFormat.password_save_failed.format(encrypt_value))
+        else:
+            encrypt_value = '******'
+
+        existed = value_table.get_by(ci_id=ci_id, attr_id=attr_id, first=True, to_dict=False)
+        if existed is None:
+            value_table.create(ci_id=ci_id, attr_id=attr_id, value=encrypt_value)
+            changed = [(ci_id, attr_id, OperateType.ADD, '', '******', type_id)]
+        elif existed.value != encrypt_value:
+            existed.update(ci_id=ci_id, attr_id=attr_id, value=encrypt_value)
+            changed = [(ci_id, attr_id, OperateType.UPDATE, '******', '******', type_id)]
+
+        if current_app.config.get('SECRETS_ENGINE') == 'vault':
+            vault = VaultClient(current_app.config.get('VAULT_URL'), current_app.config.get('VAULT_TOKEN'))
+            try:
+                vault.update("/{}/{}".format(ci_id, attr_id), dict(v=value))
+            except Exception as e:
+                current_app.logger.error('save password to vault failed: {}'.format(e))
+                return abort(400, ErrFormat.password_save_failed.format('write vault failed'))
+
+        if changed is not None:
+            AttributeValueManager.write_change2(changed, record_id)
+
+    @classmethod
+    def load_password(cls, ci_id, attr_id):
+        ci = CI.get_by_id(ci_id) or abort(404, ErrFormat.ci_not_found.format(ci_id))
+
+        limit_attrs = cls._valid_ci_for_no_read(ci, ci.ci_type)
+        if limit_attrs:
+            attr = AttributeCache.get(attr_id)
+            if attr and attr.name not in limit_attrs:
+                return abort(403, ErrFormat.no_permission2)
+
+        if current_app.config.get('SECRETS_ENGINE', 'inner') == 'inner':
+            value_table = ValueTypeMap.table[ValueTypeEnum.PASSWORD]
+            v = value_table.get_by(ci_id=ci_id, attr_id=attr_id, first=True, to_dict=False)
+
+            v = v and v.value
+            if not v:
+                return
+
+            decrypt_value, status = InnerCrypt().decrypt(v)
+            if not status:
+                current_app.logger.error('load password failed: {}'.format(decrypt_value))
+                return abort(400, ErrFormat.password_load_failed.format(decrypt_value))
+
+            return decrypt_value
+
+        elif current_app.config.get('SECRETS_ENGINE') == 'vault':
+            vault = VaultClient(current_app.config.get('VAULT_URL'), current_app.config.get('VAULT_TOKEN'))
+            data, status = vault.read("/{}/{}".format(ci_id, attr_id))
+            if not status:
+                current_app.logger.error('read password from vault failed: {}'.format(data))
+                return abort(400, ErrFormat.password_load_failed.format(data))
+
+            return data.get('v')
 
 
 class CIRelationManager(object):

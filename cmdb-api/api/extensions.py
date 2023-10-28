@@ -12,6 +12,9 @@ from flask_sqlalchemy import SQLAlchemy
 from api.lib.utils import ESHandler
 from api.lib.utils import RedisHandler
 
+from api.lib.secrets.inner import KeyManage
+
+
 bcrypt = Bcrypt()
 login_manager = LoginManager()
 db = SQLAlchemy(session_options={"autoflush": False})
@@ -21,3 +24,4 @@ celery = Celery()
 cors = CORS(supports_credentials=True)
 rd = RedisHandler()
 es = ESHandler()
+inner_secrets = KeyManage()

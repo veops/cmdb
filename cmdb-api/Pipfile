@@ -26,17 +26,17 @@ Flask-Bcrypt = "==1.0.1"
 Flask-Cors = ">=3.0.8"
 ldap3 = "==2.9.1"
 pycryptodome = "==3.12.0"
-cryptography = "==41.0.2"
+cryptography = ">=41.0.2"
 # Caching
 Flask-Caching = ">=1.0.0"
 # Environment variable parsing
 environs = "==4.2.0"
 marshmallow = "==2.20.2"
 # async tasks
-celery = "==5.3.1"
+celery = ">=5.3.1"
 celery_once = "==3.0.1"
 more-itertools = "==5.0.0"
-kombu = "==5.3.1"
+kombu = ">=5.3.1"
 # common setting
 timeout-decorator = "==0.5.0"
 WTForms = "==3.0.0"
@@ -59,6 +59,9 @@ Jinja2 = "==3.1.2"
 jinja2schema = "==0.1.4"
 msgpack-python = "==0.5.6"
 alembic = "==1.7.7"
+hvac = "==2.0.0"
+colorama = ">=0.4.6"
+pycryptodomex = ">=3.19.0"
 
 [dev-packages]
 # Testing
@@ -75,4 +78,3 @@ flake8-isort = "==2.7.0"
 isort = "==4.3.21"
 pep8-naming = "==0.8.2"
 pydocstyle = "==3.0.0"
-
