@@ -37,8 +37,6 @@ class ValueTypeMap(object):
         ValueTypeEnum.DATETIME: str2datetime,
         ValueTypeEnum.DATE: str2datetime,
         ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) and x else x,
-        ValueTypeEnum.PASSWORD: lambda x: x,
-        ValueTypeEnum.LINK: lambda x: x,
     }
 
     serialize = {
@@ -49,8 +47,6 @@ class ValueTypeMap(object):
         ValueTypeEnum.DATE: lambda x: x.strftime("%Y-%m-%d") if not isinstance(x, six.string_types) else x,
         ValueTypeEnum.DATETIME: lambda x: x.strftime("%Y-%m-%d %H:%M:%S") if not isinstance(x, six.string_types) else x,
         ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) and x else x,
-        ValueTypeEnum.PASSWORD: lambda x: x if isinstance(x, six.string_types) else str(x),
-        ValueTypeEnum.LINK: lambda x: x if isinstance(x, six.string_types) else str(x),
     }
 
     serialize2 = {
@@ -61,8 +57,6 @@ class ValueTypeMap(object):
         ValueTypeEnum.DATE: lambda x: (x.decode() if not isinstance(x, six.string_types) else x).split()[0],
         ValueTypeEnum.DATETIME: lambda x: x.decode() if not isinstance(x, six.string_types) else x,
         ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) and x else x,
-        ValueTypeEnum.PASSWORD: lambda x: x.decode() if not isinstance(x, six.string_types) else x,
-        ValueTypeEnum.LINK: lambda x: x.decode() if not isinstance(x, six.string_types) else x,
     }
 
     choice = {
@@ -77,8 +71,6 @@ class ValueTypeMap(object):
     table = {
         ValueTypeEnum.TEXT: model.CIValueText,
         ValueTypeEnum.JSON: model.CIValueJson,
-        ValueTypeEnum.PASSWORD: model.CIValueText,
-        ValueTypeEnum.LINK: model.CIValueText,
         'index_{0}'.format(ValueTypeEnum.INT): model.CIIndexValueInteger,
         'index_{0}'.format(ValueTypeEnum.TEXT): model.CIIndexValueText,
         'index_{0}'.format(ValueTypeEnum.DATETIME): model.CIIndexValueDateTime,
@@ -91,8 +83,6 @@ class ValueTypeMap(object):
     table_name = {
         ValueTypeEnum.TEXT: 'c_value_texts',
         ValueTypeEnum.JSON: 'c_value_json',
-        ValueTypeEnum.PASSWORD: 'c_value_texts',
-        ValueTypeEnum.LINK: 'c_value_texts',
         'index_{0}'.format(ValueTypeEnum.INT): 'c_value_index_integers',
         'index_{0}'.format(ValueTypeEnum.TEXT): 'c_value_index_texts',
         'index_{0}'.format(ValueTypeEnum.DATETIME): 'c_value_index_datetime',
@@ -110,8 +100,6 @@ class ValueTypeMap(object):
         ValueTypeEnum.TIME: 'text',
         ValueTypeEnum.FLOAT: 'float',
         ValueTypeEnum.JSON: 'object',
-        ValueTypeEnum.PASSWORD: 'text',
-        ValueTypeEnum.LINK: 'text',
     }
 
 
@@ -124,7 +112,9 @@ class TableMap(object):
     @property
     def table(self):
         attr = AttributeCache.get(self.attr_name) if not self.attr else self.attr
-        if attr.value_type not in {ValueTypeEnum.TEXT, ValueTypeEnum.JSON, ValueTypeEnum.PASSWORD, ValueTypeEnum.LINK}:
+        if attr.is_password or attr.is_link:
+            self.is_index = False
+        elif attr.value_type not in {ValueTypeEnum.TEXT, ValueTypeEnum.JSON}:
             self.is_index = True
         elif self.is_index is None:
             self.is_index = attr.is_index
@@ -136,7 +126,9 @@ class TableMap(object):
     @property
     def table_name(self):
         attr = AttributeCache.get(self.attr_name) if not self.attr else self.attr
-        if attr.value_type not in {ValueTypeEnum.TEXT, ValueTypeEnum.JSON, ValueTypeEnum.PASSWORD, ValueTypeEnum.LINK}:
+        if attr.is_password or attr.is_link:
+            self.is_index = False
+        elif attr.value_type not in {ValueTypeEnum.TEXT, ValueTypeEnum.JSON}:
             self.is_index = True
         elif self.is_index is None:
             self.is_index = attr.is_index
