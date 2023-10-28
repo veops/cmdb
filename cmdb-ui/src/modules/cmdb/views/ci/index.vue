@@ -526,7 +526,7 @@ export default {
       const $table = this.$refs['xTable'].getVxetableRef()
       const data = {}
       this.columns.forEach((item) => {
-        if (!_.isEqual(row[item.field], this.initialInstanceList[rowIndex][item.field])) {
+        if (!(item.field in this.initialPasswordValue) && !_.isEqual(row[item.field], this.initialInstanceList[rowIndex][item.field])) {
           data[item.field] = row[item.field] ?? null
         }
       })
