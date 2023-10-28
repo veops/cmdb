@@ -84,11 +84,10 @@ class CIView(APIView):
         ci_dict = self._wrap_ci_dict()
 
         manager = CIManager()
-        current_app.logger.debug(ci_dict)
         ci_id = manager.add(ci_type,
                             exist_policy=exist_policy or ExistPolicy.REJECT,
                             _no_attribute_policy=_no_attribute_policy,
-                            _is_admin=request.values.pop('__is_admin', False),
+                            _is_admin=request.values.pop('__is_admin', None) or False,
                             **ci_dict)
 
         return self.jsonify(ci_id=ci_id)
@@ -96,7 +95,6 @@ class CIView(APIView):
     @has_perm_for_ci("ci_id", ResourceTypeEnum.CI, PermEnum.UPDATE, CIManager.get_type)
     def put(self, ci_id=None):
         args = request.values
-        current_app.logger.info(args)
         ci_type = args.get("ci_type")
         _no_attribute_policy = args.get("no_attribute_policy", ExistPolicy.IGNORE)
 
@@ -104,14 +102,14 @@ class CIView(APIView):
         manager = CIManager()
         if ci_id is not None:
             manager.update(ci_id,
-                           _is_admin=request.values.pop('__is_admin', False),
+                           _is_admin=request.values.pop('__is_admin', None) or False,
                            **ci_dict)
         else:
             request.values.pop('exist_policy', None)
             ci_id = manager.add(ci_type,
                                 exist_policy=ExistPolicy.REPLACE,
                                 _no_attribute_policy=_no_attribute_policy,
-                                _is_admin=request.values.pop('__is_admin', False),
+                                _is_admin=request.values.pop('__is_admin', None) or False,
                                 **ci_dict)
 
         return self.jsonify(ci_id=ci_id)
@@ -242,3 +240,13 @@ class CIAutoDiscoveryStatisticsView(APIView):
 
     def get(self):
         return self.jsonify(CIManager.get_ad_statistics())
+
+
+class CIPasswordView(APIView):
+    url_prefix = "/ci/<int:ci_id>/attributes/<int:attr_id>/password"
+
+    def get(self, ci_id, attr_id):
+        return self.jsonify(ci_id=ci_id, attr_id=attr_id, value=CIManager.load_password(ci_id, attr_id))
+
+    def post(self, ci_id, attr_id):
+        return self.get(ci_id, attr_id)
