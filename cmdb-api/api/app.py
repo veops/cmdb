@@ -20,8 +20,8 @@ import api.views.entry
 from api.extensions import (bcrypt, cache, celery, cors, db, es, login_manager, migrate, rd)
 from api.extensions import inner_secrets
 from api.flask_cas import CAS
-from api.models.acl import User
 from api.lib.secrets.secrets import InnerKVManger
+from api.models.acl import User
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir)
@@ -127,7 +127,10 @@ def register_extensions(app):
 
     app.config.update(app.config.get("CELERY"))
     celery.conf.update(app.config)
-    inner_secrets.init_app(app, InnerKVManger())
+
+    if app.config.get('SECRETS_ENGINE') == 'inner':
+        with app.app_context():
+            inner_secrets.init_app(app, InnerKVManger())
 
 
 def register_blueprints(app):
