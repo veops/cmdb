@@ -723,7 +723,6 @@ class CIManager(object):
     def save_password(cls, ci_id, attr_id, value, record_id, type_id):
         changed = None
         encrypt_value = None
-
         value_table = ValueTypeMap.table[ValueTypeEnum.PASSWORD]
         if current_app.config.get('SECRETS_ENGINE') == 'inner':
             if value:
