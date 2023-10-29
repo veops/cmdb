@@ -1,3 +1,4 @@
+from api.lib.perm.auth import auth_abandoned
 from api.resource import APIView
 from api.lib.secrets.inner import KeyManage
 from api.lib.secrets.secrets import InnerKVManger

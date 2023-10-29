@@ -204,33 +204,33 @@ class KeyManage:
         """
         root_key = self.backend.get(backend_root_key_name)
         if root_key:
-            return {"message": "already init, skip"}, False
+            return {"message": "already init, skip", "status": "skip"}, False
         else:
             root_key, shares, status = self.generate_unseal_keys()
             if not status:
-                return {"message": root_key}, False
+                return {"message": root_key, "status": "failed"}, False
 
             # hash root key and store in backend
             root_key_hash, ok = self.hash_root_key(root_key)
             if not ok:
-                return {"message": root_key_hash}, False
+                return {"message": root_key_hash, "status": "failed"}, False
 
             msg, ok = self.backend.add(backend_root_key_name, root_key_hash)
             if not ok:
-                return {"message": msg}, False
+                return {"message": msg, "status": "failed"}, False
 
             # generate encrypt key from root_key and store in backend
             encrypt_key, ok = self.generate_encrypt_key(root_key)
             if not ok:
-                return {"message": encrypt_key}
+                return {"message": encrypt_key, "status": "failed"}
 
             encrypt_key_aes, status = InnerCrypt.aes_encrypt(root_key, encrypt_key)
             if not status:
-                return {"message": encrypt_key_aes}
+                return {"message": encrypt_key_aes, "status": "failed"}
 
             msg, ok = self.backend.add(backend_encrypt_key_name, encrypt_key_aes)
             if not ok:
-                return {"message": msg}, False
+                return {"message": msg, "status": "failed"}, False
 
             current_app.config["secrets_root_key"] = root_key
             current_app.config["secrets_encrypt_key"] = encrypt_key
@@ -330,7 +330,7 @@ class KeyManage:
 
         for i, v in enumerate(shares):
             print(
-                "unseal token " + str(i + 1) + ": " + Fore.RED + Back.CYAN + v.decode("utf-8") + Style.RESET_ALL)
+                "unseal token " + str(i + 1) + ": " + Fore.RED + Back.BLACK + v.decode("utf-8") + Style.RESET_ALL)
             print()
 
         print(Fore.GREEN + "root token:  " + root_token.decode("utf-8") + Style.RESET_ALL)
