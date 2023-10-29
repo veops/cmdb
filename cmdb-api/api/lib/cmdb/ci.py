@@ -45,8 +45,8 @@ from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import validate_permission
 from api.lib.secrets.inner import InnerCrypt
 from api.lib.secrets.vault import VaultClient
-from api.lib.utils import Lock
 from api.lib.utils import handle_arg_list
+from api.lib.utils import Lock
 from api.lib.webhook import webhook_request
 from api.models.cmdb import AttributeHistory
 from api.models.cmdb import AutoDiscoveryCI
@@ -63,6 +63,7 @@ from api.tasks.cmdb import ci_relation_cache
 from api.tasks.cmdb import ci_relation_delete
 
 PRIVILEGED_USERS = {"worker", "cmdb_agent", "agent"}
+PASSWORD_DEFAULT_SHOW = "******"
 
 
 class CIManager(object):
@@ -680,7 +681,7 @@ class CIManager(object):
                 return abort(400, ErrFormat.argument_invalid.format("ret_key"))
 
             if is_password and value:
-                ci_dict[attr_key] = '******'
+                ci_dict[attr_key] = PASSWORD_DEFAULT_SHOW
             else:
                 value = ValueTypeMap.serialize2[value_type](value)
                 if is_list:
@@ -720,35 +721,45 @@ class CIManager(object):
 
     @classmethod
     def save_password(cls, ci_id, attr_id, value, record_id, type_id):
-        if not value:
-            return
-
         changed = None
-
+        encrypt_value = None
+        
         value_table = ValueTypeMap.table[ValueTypeEnum.PASSWORD]
         if current_app.config.get('SECRETS_ENGINE') == 'inner':
-            encrypt_value, status = InnerCrypt().encrypt(value)
-            if not status:
-                current_app.logger.error('save password failed: {}'.format(encrypt_value))
-                return abort(400, ErrFormat.password_save_failed.format(encrypt_value))
+            if value:
+                encrypt_value, status = InnerCrypt().encrypt(value)
+                if not status:
+                    current_app.logger.error('save password failed: {}'.format(encrypt_value))
+                    return abort(400, ErrFormat.password_save_failed.format(encrypt_value))
         else:
-            encrypt_value = '******'
+            encrypt_value = PASSWORD_DEFAULT_SHOW
 
         existed = value_table.get_by(ci_id=ci_id, attr_id=attr_id, first=True, to_dict=False)
         if existed is None:
-            value_table.create(ci_id=ci_id, attr_id=attr_id, value=encrypt_value)
-            changed = [(ci_id, attr_id, OperateType.ADD, '', '******', type_id)]
+            if value:
+                value_table.create(ci_id=ci_id, attr_id=attr_id, value=encrypt_value)
+                changed = [(ci_id, attr_id, OperateType.ADD, '', PASSWORD_DEFAULT_SHOW, type_id)]
         elif existed.value != encrypt_value:
-            existed.update(ci_id=ci_id, attr_id=attr_id, value=encrypt_value)
-            changed = [(ci_id, attr_id, OperateType.UPDATE, '******', '******', type_id)]
+            if value:
+                existed.update(ci_id=ci_id, attr_id=attr_id, value=encrypt_value)
+                changed = [(ci_id, attr_id, OperateType.UPDATE, PASSWORD_DEFAULT_SHOW, PASSWORD_DEFAULT_SHOW, type_id)]
+            else:
+                existed.delete()
+                changed = [(ci_id, attr_id, OperateType.DELETE, PASSWORD_DEFAULT_SHOW, '', type_id)]
 
         if current_app.config.get('SECRETS_ENGINE') == 'vault':
             vault = VaultClient(current_app.config.get('VAULT_URL'), current_app.config.get('VAULT_TOKEN'))
-            try:
-                vault.update("/{}/{}".format(ci_id, attr_id), dict(v=value))
-            except Exception as e:
-                current_app.logger.error('save password to vault failed: {}'.format(e))
-                return abort(400, ErrFormat.password_save_failed.format('write vault failed'))
+            if value:
+                try:
+                    vault.update("/{}/{}".format(ci_id, attr_id), dict(v=value))
+                except Exception as e:
+                    current_app.logger.error('save password to vault failed: {}'.format(e))
+                    return abort(400, ErrFormat.password_save_failed.format('write vault failed'))
+            else:
+                try:
+                    vault.delete("/{}/{}".format(ci_id, attr_id))
+                except Exception as e:
+                    current_app.logger.warning('delete password to vault failed: {}'.format(e))
 
         if changed is not None:
             AttributeValueManager.write_change2(changed, record_id)
