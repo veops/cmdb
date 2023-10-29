@@ -69,7 +69,7 @@ class AttributeValueManager(object):
             if attr.is_list:
                 res[field_name] = [ValueTypeMap.serialize[attr.value_type](i.value) for i in rs]
             elif attr.is_password and rs:
-                res[field_name] = '******'
+                res[field_name] = '******' if rs[0].value else ''
             else:
                 res[field_name] = ValueTypeMap.serialize[attr.value_type](rs[0].value) if rs else None
 
