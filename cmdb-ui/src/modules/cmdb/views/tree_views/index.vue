@@ -979,6 +979,7 @@ export default {
       Object.keys(this.initialPasswordValue).forEach((key) => {
         if (this.initialPasswordValue[key] !== this.passwordValue[key]) {
           data[key] = this.passwordValue[key]
+          row[key] = this.passwordValue[key]
         }
       })
       this.lastEditCiId = null
