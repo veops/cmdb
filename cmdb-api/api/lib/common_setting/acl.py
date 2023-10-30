@@ -80,20 +80,22 @@ class ACLManager(object):
         return role.to_dict()
 
     @staticmethod
-    def delete_role(_id, payload):
+    def delete_role(_id):
         RoleCRUD.delete_role(_id)
         return dict(rid=_id)
 
     def get_user_info(self, username):
         from api.lib.perm.acl.acl import ACLManager as ACL
         user_info = ACL().get_user_info(username, self.app_name)
-        result = dict(name=user_info.get('nickname') or username,
-                      username=user_info.get('username') or username,
-                      email=user_info.get('email'),
-                      uid=user_info.get('uid'),
-                      rid=user_info.get('rid'),
-                      role=dict(permissions=user_info.get('parents')),
-                      avatar=user_info.get('avatar'))
+        result = dict(
+            name=user_info.get('nickname') or username,
+            username=user_info.get('username') or username,
+            email=user_info.get('email'),
+            uid=user_info.get('uid'),
+            rid=user_info.get('rid'),
+            role=dict(permissions=user_info.get('parents')),
+            avatar=user_info.get('avatar')
+        )
 
         return result
 

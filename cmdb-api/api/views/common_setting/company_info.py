@@ -1,9 +1,7 @@
 # -*- coding:utf-8 -*-
-from flask import abort
 from flask import request
 
 from api.lib.common_setting.company_info import CompanyInfoCRUD
-from api.lib.common_setting.resp_format import ErrFormat
 from api.resource import APIView
 
 prefix = '/company'
