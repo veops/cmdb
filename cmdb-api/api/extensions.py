@@ -9,11 +9,9 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
+from api.lib.secrets.inner import KeyManage
 from api.lib.utils import ESHandler
 from api.lib.utils import RedisHandler
-
-from api.lib.secrets.inner import KeyManage
-
 
 bcrypt = Bcrypt()
 login_manager = LoginManager()
