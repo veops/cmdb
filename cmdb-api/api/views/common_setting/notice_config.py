@@ -47,7 +47,7 @@ class CheckEmailServer(APIView):
 
     def post(self):
         receive_address = request.args.get('receive_address')
-        info = request.values.get('info')
+        info = request.values.get('info', {})
 
         try:
 

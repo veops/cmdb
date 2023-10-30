@@ -24,12 +24,12 @@ class DataView(APIView):
 class DataViewWithId(APIView):
     url_prefix = (f'{prefix}/<string:data_type>/<int:_id>',)
 
-    def put(self, data_type, _id):
+    def put(self, _id):
         params = request.json
         res = CommonDataCRUD.update_data(_id, **params)
 
         return self.jsonify(res.to_dict())
 
-    def delete(self, data_type, _id):
+    def delete(self, _id):
         CommonDataCRUD.delete(_id)
         return self.jsonify({})
