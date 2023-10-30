@@ -318,6 +318,17 @@ def cmdb_index_table_upgrade():
     db.session.commit()
 
 
+def valid_address(address):
+    if not address.startswith(("http://127.0.0.1", "https://127.0.0.1")):
+        response = {
+            "message": "Address should start with http://127.0.0.1 or https://127.0.0.1",
+            "status": "failed"
+        }
+        KeyManage.print_response(response)
+        return False
+    return True
+
+
 @click.command()
 @click.option(
     '-a',
@@ -329,15 +340,26 @@ def cmdb_inner_secrets_init(address):
     """
     init inner secrets for password feature
     """
-    KeyManage(backend=InnerKVManger).init()
+    res, ok = KeyManage(backend=InnerKVManger).init()
+    if not ok:
+        if res.get("status") == "failed":
+            KeyManage.print_response(res)
+            return
 
-    if address and address.startswith("http") and current_app.config.get("INNER_TRIGGER_TOKEN", "") != "":
+    token = res.get("details", {}).get("root_token", "")
+    if valid_address(address):
+        token = current_app.config.get("INNER_TRIGGER_TOKEN", "") if not token else token
+        if not token:
+            token = click.prompt(f'Enter root token', hide_input=True, confirmation_prompt=False)
+        assert token is not None
         resp = requests.post("{}/api/v0.1/secrets/auto_seal".format(address.strip("/")),
-                             headers={"Inner-Token": current_app.config.get("INNER_TRIGGER_TOKEN", "")})
+                             headers={"Inner-Token": token})
         if resp.status_code == 200:
             KeyManage.print_response(resp.json())
         else:
-            KeyManage.print_response({"message": resp.text, "status": "failed"})
+            KeyManage.print_response({"message": resp.text or resp.status_code, "status": "failed"})
+    else:
+        KeyManage.print_response(res)
 
 
 @click.command()
@@ -352,18 +374,19 @@ def cmdb_inner_secrets_unseal(address):
     """
     unseal the secrets feature
     """
-    address = "{}/api/v0.1/secrets/unseal".format(address.strip("/"))
-    if not address.startswith("http"):
-        KeyManage.print_response({"message": "invalid address, should start with http", "status": "failed"})
+    if not valid_address(address):
         return
+    address = "{}/api/v0.1/secrets/unseal".format(address.strip("/"))
     for i in range(global_key_threshold):
         token = click.prompt(f'Enter unseal token {i + 1}', hide_input=True, confirmation_prompt=False)
         assert token is not None
         resp = requests.post(address, headers={"Unseal-Token": token})
         if resp.status_code == 200:
             KeyManage.print_response(resp.json())
+            if resp.json().get("status") in ["success", "skip"]:
+                return
         else:
-            KeyManage.print_response({"message": resp.text, "status": "failed"})
+            KeyManage.print_response({"message": resp.status_code, "status": "failed"})
             return
 
 
@@ -388,15 +411,16 @@ def cmdb_inner_secrets_seal(address, token):
     """
     assert address is not None
     assert token is not None
-    if address.startswith("http"):
-        address = "{}/api/v0.1/secrets/seal".format(address.strip("/"))
-        resp = requests.post(address, headers={
-            "Inner-Token": token,
-        })
-        if resp.status_code == 200:
-            KeyManage.print_response(resp.json())
-        else:
-            KeyManage.print_response({"message": resp.text, "status": "failed"})
+    if not valid_address(address):
+        return
+    address = "{}/api/v0.1/secrets/seal".format(address.strip("/"))
+    resp = requests.post(address, headers={
+        "Inner-Token": token,
+    })
+    if resp.status_code == 200:
+        KeyManage.print_response(resp.json())
+    else:
+        KeyManage.print_response({"message": resp.status_code, "status": "failed"})
 
 
 @click.command()
