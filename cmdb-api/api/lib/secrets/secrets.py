@@ -11,11 +11,12 @@ class InnerKVManger(object):
         res = InnerKV.create(**data)
         if res.key == key:
             return "success", True
+
         return "add failed", False
 
     @classmethod
     def get(cls, key):
-        res = InnerKV.get_by(first=True, to_dict=False, **{"key": key})
+        res = InnerKV.get_by(first=True, to_dict=False, key=key)
         if not res:
             return None
 
@@ -23,11 +24,12 @@ class InnerKVManger(object):
 
     @classmethod
     def update(cls, key, value):
-        res = InnerKV.get_by(first=True, to_dict=False, **{"key": key})
+        res = InnerKV.get_by(first=True, to_dict=False, key=key)
         if not res:
-            return None
-        res.value = value
-        t = res.update()
+            return cls.add(key, value)
+
+        t = res.update(value=value)
         if t.key == key:
             return "success", True
+
         return "update failed", True
