@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 
-from flask import abort
+from flask import abort, current_app
 from treelib import Tree
 from wtforms import Form
 from wtforms import IntegerField
@@ -9,6 +9,7 @@ from wtforms import validators
 
 from api.extensions import db
 from api.lib.common_setting.resp_format import ErrFormat
+from api.lib.common_setting.acl import ACLManager
 from api.lib.perm.acl.role import RoleCRUD
 from api.models.common_setting import Department, Employee
 
@@ -153,6 +154,10 @@ class DepartmentForm(Form):
 class DepartmentCRUD(object):
 
     @staticmethod
+    def get_department_by_id(d_id, to_dict=True):
+        return Department.get_by(first=True, department_id=d_id, to_dict=to_dict)
+
+    @staticmethod
     def add(**kwargs):
         DepartmentCRUD.check_department_name_unique(kwargs['department_name'])
         department_parent_id = kwargs.get('department_parent_id', 0)
@@ -186,10 +191,11 @@ class DepartmentCRUD(object):
             filter(lambda d: d['department_id'] == department_parent_id, allow_p_d_id_list))
         if len(target) == 0:
             try:
-                d = Department.get_by(
+                dep = Department.get_by(
                     first=True, to_dict=False, department_id=department_parent_id)
-                name = d.department_name if d else ErrFormat.department_id_not_found.format(department_parent_id)
+                name = dep.department_name if dep else ErrFormat.department_id_not_found.format(department_parent_id)
             except Exception as e:
+                current_app.logger.error(str(e))
                 name = ErrFormat.department_id_not_found.format(department_parent_id)
             abort(400, ErrFormat.cannot_to_be_parent_department.format(name))
 
@@ -253,7 +259,7 @@ class DepartmentCRUD(object):
         try:
             RoleCRUD.delete_role(existed.acl_rid)
         except Exception as e:
-            pass
+            current_app.logger.error(str(e))
 
         return existed.soft_delete()
 
@@ -268,7 +274,7 @@ class DepartmentCRUD(object):
                 try:
                     tree.remove_subtree(department_id)
                 except Exception as e:
-                    pass
+                    current_app.logger.error(str(e))
 
             [allow_d_id_list.append({'department_id': int(n.identifier), 'department_name': n.tag}) for n in
              tree.all_nodes()]
@@ -390,6 +396,125 @@ class DepartmentCRUD(object):
                 [id_list.append(int(n.identifier))
                  for n in tmp_tree.all_nodes()]
             except Exception as e:
-                pass
+                current_app.logger.error(str(e))
 
         return id_list
+
+
+class EditDepartmentInACL(object):
+
+    @staticmethod
+    def add_department_to_acl(department_id, op_uid):
+        db_department = DepartmentCRUD.get_department_by_id(department_id, to_dict=False)
+        if not db_department:
+            return
+
+        from api.models.acl import Role
+        role = Role.get_by(first=True, name=db_department.department_name, app_id=None)
+
+        acl = ACLManager('acl', str(op_uid))
+        if role is None:
+            payload = {
+                'app_id': 'acl',
+                'name': db_department.department_name,
+            }
+            role = acl.create_role(payload)
+
+        acl_rid = role.get('id') if role else 0
+
+        db_department.update(
+            acl_rid=acl_rid
+        )
+        info = f"add_department_to_acl, acl_rid: {acl_rid}"
+        current_app.logger.info(info)
+        return info
+
+    @staticmethod
+    def delete_department_from_acl(department_rids, op_uid):
+        acl = ACLManager('acl', str(op_uid))
+
+        result = []
+
+        for rid in department_rids:
+            try:
+                acl.delete_role(rid)
+            except Exception as e:
+                result.append(f"delete_department_in_acl, rid: {rid}, error: {e}")
+                continue
+
+        return result
+
+    @staticmethod
+    def edit_department_name_in_acl(d_rid: int, d_name: str, op_uid: int):
+        acl = ACLManager('acl', str(op_uid))
+        payload = {
+            'name': d_name
+        }
+        try:
+            acl.edit_role(d_rid, payload)
+        except Exception as e:
+            return f"edit_department_name_in_acl, rid: {d_rid}, error: {e}"
+
+        return f"edit_department_name_in_acl, rid: {d_rid}, success"
+
+    @staticmethod
+    def edit_employee_department_in_acl(e_list: list, new_d_id: int, op_uid: int):
+        result = []
+        new_department = DepartmentCRUD.get_department_by_id(new_d_id, False)
+        if not new_department:
+            result.append(f"{new_d_id} new_department is None")
+            return result
+
+        from api.models.acl import Role
+        new_role = Role.get_by(first=True, name=new_department.department_name, app_id=None)
+        new_d_rid_in_acl = new_role.get('id') if new_role else 0
+        if new_d_rid_in_acl == 0:
+            return
+
+        if new_d_rid_in_acl != new_department.acl_rid:
+            new_department.update(
+                acl_rid=new_d_rid_in_acl
+            )
+        new_department_acl_rid = new_department.acl_rid if new_d_rid_in_acl == new_department.acl_rid else \
+            new_d_rid_in_acl
+
+        acl = ACLManager('acl', str(op_uid))
+        for employee in e_list:
+            old_department = DepartmentCRUD.get_department_by_id(employee.get('department_id'), False)
+            if not old_department:
+                continue
+            employee_acl_rid = employee.get('e_acl_rid')
+            if employee_acl_rid == 0:
+                result.append(f"employee_acl_rid == 0")
+                continue
+
+            old_role = Role.get_by(first=True, name=old_department.department_name, app_id=None)
+            old_d_rid_in_acl = old_role.get('id') if old_role else 0
+            if old_d_rid_in_acl == 0:
+                return
+            if old_d_rid_in_acl != old_department.acl_rid:
+                old_department.update(
+                    acl_rid=old_d_rid_in_acl
+                )
+            d_acl_rid = old_department.acl_rid if old_d_rid_in_acl == old_department.acl_rid else old_d_rid_in_acl
+            payload = {
+                'app_id': 'acl',
+                'parent_id': d_acl_rid,
+            }
+            try:
+                acl.remove_user_from_role(employee_acl_rid, payload)
+            except Exception as e:
+                result.append(
+                    f"remove_user_from_role employee_acl_rid: {employee_acl_rid}, parent_id: {d_acl_rid}, err: {e}")
+
+            payload = {
+                'app_id': 'acl',
+                'child_ids': [employee_acl_rid],
+            }
+            try:
+                acl.add_user_to_role(new_department_acl_rid, payload)
+            except Exception as e:
+                result.append(
+                    f"add_user_to_role employee_acl_rid: {employee_acl_rid}, parent_id: {d_acl_rid}, err: {e}")
+
+        return result

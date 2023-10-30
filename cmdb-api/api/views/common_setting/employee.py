@@ -1,7 +1,5 @@
 # -*- coding:utf-8 -*-
-import os
-
-from flask import abort, current_app, send_from_directory
+from flask import abort
 from flask import request
 from werkzeug.datastructures import MultiDict
 

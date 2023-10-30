@@ -178,7 +178,7 @@ class EmployeeCRUD(object):
     def edit_employee_by_uid(_uid, **kwargs):
         existed = EmployeeCRUD.get_employee_by_uid(_uid)
         try:
-            user = edit_acl_user(_uid, **kwargs)
+            edit_acl_user(_uid, **kwargs)
 
             for column in employee_pop_columns:
                 if kwargs.get(column):
@@ -190,9 +190,9 @@ class EmployeeCRUD(object):
 
     @staticmethod
     def change_password_by_uid(_uid, password):
-        existed = EmployeeCRUD.get_employee_by_uid(_uid)
+        EmployeeCRUD.get_employee_by_uid(_uid)
         try:
-            user = edit_acl_user(_uid, password=password)
+            edit_acl_user(_uid, password=password)
         except Exception as e:
             return abort(400, str(e))
 
@@ -359,9 +359,11 @@ class EmployeeCRUD(object):
 
         if value and column == "last_login":
             try:
-                value = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+                return datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
             except Exception as e:
-                abort(400, ErrFormat.datetime_format_error.format(column))
+                err = f"{ErrFormat.datetime_format_error.format(column)}: {str(e)}"
+                abort(400, err)
+        return value
 
     @staticmethod
     def get_attr_by_column(column):
@@ -382,7 +384,7 @@ class EmployeeCRUD(object):
             relation = condition.get("relation", None)
             value = condition.get("value", None)
 
-            EmployeeCRUD.check_condition(column, operator, value, relation)
+            value = EmployeeCRUD.check_condition(column, operator, value, relation)
             a, o = EmployeeCRUD.get_expr_by_condition(
                 column, operator, value, relation)
             and_list += a
@@ -565,6 +567,125 @@ class EmployeeCRUD(object):
             results.append(tmp)
         return results
 
+    @staticmethod
+    def import_employee(employee_list):
+        res = CreateEmployee().batch_create(employee_list)
+        return res
+
+    @staticmethod
+    def batch_edit_employee_department(employee_id_list, column_value):
+        err_list = []
+        employee_list = []
+        for _id in employee_id_list:
+            try:
+                existed = EmployeeCRUD.get_employee_by_id(_id)
+                employee = dict(
+                    e_acl_rid=existed.acl_rid,
+                    department_id=existed.department_id
+                )
+                employee_list.append(employee)
+                existed.update(department_id=column_value)
+
+            except Exception as e:
+                err_list.append({
+                    'employee_id': _id,
+                    'err': str(e),
+                })
+        from api.lib.common_setting.department import EditDepartmentInACL
+        EditDepartmentInACL.edit_employee_department_in_acl(
+            employee_list, column_value, current_user.uid
+        )
+        return err_list
+
+    @staticmethod
+    def batch_edit_password_or_block_column(column_name, employee_id_list, column_value, is_acl=False):
+        if column_name == 'block':
+            err_list = []
+            success_list = []
+            for _id in employee_id_list:
+                try:
+                    employee = EmployeeCRUD.edit_employee_block_column(
+                        _id, is_acl, **{column_name: column_value})
+                    success_list.append(employee)
+                except Exception as e:
+                    err_list.append({
+                        'employee_id': _id,
+                        'err': str(e),
+                    })
+            return err_list
+        else:
+            return EmployeeCRUD.batch_edit_column(column_name, employee_id_list, column_value, is_acl)
+
+    @staticmethod
+    def batch_edit_column(column_name, employee_id_list, column_value, is_acl=False):
+        err_list = []
+        for _id in employee_id_list:
+            try:
+                EmployeeCRUD.edit_employee_single_column(
+                    _id, is_acl, **{column_name: column_value})
+            except Exception as e:
+                err_list.append({
+                    'employee_id': _id,
+                    'err': str(e),
+                })
+
+        return err_list
+
+    @staticmethod
+    def edit_employee_single_column(_id, is_acl=False, **kwargs):
+        existed = EmployeeCRUD.get_employee_by_id(_id)
+        if 'direct_supervisor_id' in kwargs.keys():
+            if kwargs['direct_supervisor_id'] == existed.direct_supervisor_id:
+                raise Exception(ErrFormat.direct_supervisor_is_not_self)
+
+        if is_acl:
+            return edit_acl_user(existed.acl_uid, **kwargs)
+
+        try:
+            for column in employee_pop_columns:
+                if kwargs.get(column):
+                    kwargs.pop(column)
+
+            return existed.update(**kwargs)
+        except Exception as e:
+            return abort(400, str(e))
+
+    @staticmethod
+    def edit_employee_block_column(_id, is_acl=False, **kwargs):
+        existed = EmployeeCRUD.get_employee_by_id(_id)
+        value = get_block_value(kwargs.get('block'))
+        if value is True:
+            check_department_director_id_or_direct_supervisor_id(_id)
+            value = 1
+        else:
+            value = 0
+
+        if is_acl:
+            kwargs['block'] = value
+            edit_acl_user(existed.acl_uid, **kwargs)
+
+        existed.update(block=value)
+        data = existed.to_dict()
+        return data
+
+    @staticmethod
+    def batch_employee(column_name, column_value, employee_id_list):
+        if column_value is None:
+            abort(400, ErrFormat.value_is_required)
+        if column_name in ['password', 'block']:
+            return EmployeeCRUD.batch_edit_password_or_block_column(column_name, employee_id_list, column_value, True)
+
+        elif column_name in ['department_id']:
+            return EmployeeCRUD.batch_edit_employee_department(employee_id_list, column_value)
+
+        elif column_name in [
+            'direct_supervisor_id', 'position_name'
+        ]:
+            return EmployeeCRUD.batch_edit_column(column_name, employee_id_list, column_value, False)
+
+        else:
+            abort(400, ErrFormat.column_name_not_support)
+
 
 def get_user_map(key='uid', acl=None):
     """
@@ -641,7 +762,8 @@ class CreateEmployee(object):
             **kwargs
         )
 
-    def get_department_by_name(self, d_name):
+    @staticmethod
+    def get_department_by_name(d_name):
         return Department.get_by(first=True, department_name=d_name)
 
     def get_end_department_id(self, department_name_list, department_name_map):
