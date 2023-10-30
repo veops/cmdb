@@ -10,9 +10,6 @@ from api.models.common_setting import Employee, Department
 
 
 class InitEmployee(object):
-    """
-    初始化员工
-    """
 
     def __init__(self):
         self.log = current_app.logger
@@ -58,7 +55,8 @@ class InitEmployee(object):
                 self.log.error(ErrFormat.acl_import_user_failed.format(user['username'], str(e)))
                 self.log.error(e)
 
-    def get_rid_by_uid(self, uid):
+    @staticmethod
+    def get_rid_by_uid(uid):
         from api.models.acl import Role
         role = Role.get_by(first=True, uid=uid)
         return role['id'] if role is not None else 0
@@ -71,7 +69,8 @@ class InitDepartment(object):
     def init(self):
         self.init_wide_company()
 
-    def hard_delete(self, department_id, department_name):
+    @staticmethod
+    def hard_delete(department_id, department_name):
         existed_deleted_list = Department.query.filter(
             Department.department_name == department_name,
             Department.department_id == department_id,
@@ -80,11 +79,12 @@ class InitDepartment(object):
         for existed in existed_deleted_list:
             existed.delete()
 
-    def get_department(self, department_name):
+    @staticmethod
+    def get_department(department_name):
         return Department.query.filter(
             Department.department_name == department_name,
             Department.deleted == 0,
-        ).order_by(Department.created_at.asc()).first()
+        ).first()
 
     def run(self, department_id, department_name, department_parent_id):
         self.hard_delete(department_id, department_name)
@@ -94,7 +94,7 @@ class InitDepartment(object):
             if res.department_id == department_id:
                 return
             else:
-                new_d = res.update(
+                res.update(
                     department_id=department_id,
                     department_parent_id=department_parent_id,
                 )
@@ -108,11 +108,11 @@ class InitDepartment(object):
         new_d = self.get_department(department_name)
 
         if new_d.department_id != department_id:
-            new_d = new_d.update(
+            new_d.update(
                 department_id=department_id,
                 department_parent_id=department_parent_id,
             )
-        self.log.info(f"初始化 {department_name} 部门成功.")
+        self.log.info(f"init {department_name} success.")
 
     def run_common(self, department_id, department_name, department_parent_id):
         try:
@@ -123,19 +123,14 @@ class InitDepartment(object):
             raise Exception(e)
 
     def init_wide_company(self):
-        """
-        创建 id 0, name 全公司 的部门
-        """
         department_id = 0
         department_name = '全公司'
         department_parent_id = -1
 
         self.run_common(department_id, department_name, department_parent_id)
 
-    def create_acl_role_with_department(self):
-        """
-        当前所有部门，在ACL创建 role
-        """
+    @staticmethod
+    def create_acl_role_with_department():
         acl = ACLManager('acl')
         role_name_map = {role['name']: role for role in acl.get_all_roles()}
 
@@ -146,7 +141,7 @@ class InitDepartment(object):
                 continue
 
             role = role_name_map.get(department.department_name)
-            if role is None:
+            if not role:
                 payload = {
                     'app_id': 'acl',
                     'name': department.department_name,
@@ -208,25 +203,20 @@ class InitDepartment(object):
             if acl_rid > 0:
                 acl.grant_resource(acl_rid, resource['id'], perms)
 
-    def check_app(self, app_name):
+    @staticmethod
+    def check_app(app_name):
         acl = ACLManager(app_name)
         payload = dict(
             name=app_name,
             description=app_name
         )
-        try:
-            app = acl.validate_app()
-            if not app:
-                acl.create_app(payload)
-            return acl
-        except Exception as e:
-            current_app.logger.error(e)
-            if '不存在' in str(e):
-                acl.create_app(payload)
-                return acl
-            raise Exception(e)
+        app = acl.validate_app()
+        if not app:
+            acl.create_app(payload)
+        return acl
 
-    def get_admin_user_rid(self):
+    @staticmethod
+    def get_admin_user_rid():
         admin = Employee.get_by(first=True, username='admin', to_dict=False)
         return admin.acl_rid if admin else 0
 
@@ -261,17 +251,19 @@ def common_check_new_columns():
     from api.extensions import db
     from sqlalchemy import inspect, text
 
-    def get_model_by_table_name(table_name):
-        for model in db.Model.registry._class_registry.values():
-            if hasattr(model, '__tablename__') and model.__tablename__ == table_name:
-                return model
+    def get_model_by_table_name(_table_name):
+        registry = getattr(db.Model, 'registry', None)
+        class_registry = getattr(registry, '_class_registry', None)
+        for _model in class_registry.values():
+            if hasattr(_model, '__tablename__') and _model.__tablename__ == _table_name:
+                return _model
         return None
 
-    def add_new_column(table_name, new_column):
+    def add_new_column(target_table_name, new_column):
         column_type = new_column.type.compile(engine.dialect)
         default_value = new_column.default.arg if new_column.default else None
 
-        sql = f"ALTER TABLE {table_name} ADD COLUMN {new_column.name} {column_type} "
+        sql = "ALTER TABLE " + target_table_name + " ADD COLUMN " + new_column.name + " " + column_type
         if new_column.comment:
             sql += f" comment '{new_column.comment}'"
 
@@ -297,7 +289,8 @@ def common_check_new_columns():
         model = get_model_by_table_name(table_name)
         if model is None:
             continue
-        model_columns = model.__table__.columns._all_columns
+
+        model_columns = getattr(getattr(getattr(model, '__table__'), 'columns'), '_all_columns')
         for column in model_columns:
             if column.name not in existed_column_name_list:
                 try:
