@@ -1,10 +1,9 @@
+from flask import request
+
 from api.lib.perm.auth import auth_abandoned
-from api.resource import APIView
 from api.lib.secrets.inner import KeyManage
 from api.lib.secrets.secrets import InnerKVManger
-
-from flask import current_app
-from flask import request
+from api.resource import APIView
 
 
 class InnerSecretUnSealView(APIView):

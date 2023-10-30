@@ -319,6 +319,9 @@ def cmdb_index_table_upgrade():
 
 
 def valid_address(address):
+    if not address:
+        return False
+
     if not address.startswith(("http://127.0.0.1", "https://127.0.0.1")):
         response = {
             "message": "Address should start with http://127.0.0.1 or https://127.0.0.1",
@@ -326,6 +329,7 @@ def valid_address(address):
         }
         KeyManage.print_response(response)
         return False
+
     return True
 
 

@@ -1,21 +1,22 @@
+import os
+import secrets
+import sys
 from base64 import b64decode, b64encode
+
+from Cryptodome.Protocol.SecretSharing import Shamir
 from colorama import Back
 from colorama import Fore
-from colorama import init as colorama_init
 from colorama import Style
-from Cryptodome.Protocol.SecretSharing import Shamir
+from colorama import init as colorama_init
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import padding
-from cryptography.hazmat.primitives.ciphers import algorithms
 from cryptography.hazmat.primitives.ciphers import Cipher
+from cryptography.hazmat.primitives.ciphers import algorithms
 from cryptography.hazmat.primitives.ciphers import modes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from flask import current_app
-import os
-import secrets
-import sys
 
 global_iv_length = 16
 global_key_shares = 5  # Number of generated key shares
@@ -64,10 +65,11 @@ class KeyManage:
             self.backend = Backend(backend)
 
     def init_app(self, app, backend=None):
-        if sys.argv[0].endswith("gunicorn") or sys.argv[1] == "run":
+        if sys.argv[0].endswith("gunicorn") or (len(sys.argv) > 1 and sys.argv[1] == "run"):
             self.trigger = app.config.get("INNER_TRIGGER_TOKEN")
             if not self.trigger:
                 return
+
             self.backend = backend
             resp = self.auto_unseal()
             self.print_response(resp)
