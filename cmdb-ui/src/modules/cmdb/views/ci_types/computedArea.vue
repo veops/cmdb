@@ -42,7 +42,7 @@ export default {
     return {
       activeKey: 'expr', // expr script
       compute_expr: '',
-      compute_script: 'def computed(): \n   return',
+      compute_script: 'def computed(): \n    return',
       cmOptions: {
         lineNumbers: true,
         mode: 'python',
@@ -66,7 +66,7 @@ export default {
     setData(data) {
       const { compute_expr, compute_script } = data
       this.compute_expr = compute_expr
-      this.compute_script = compute_script || 'def computed(): \n   return'
+      this.compute_script = compute_script || 'def computed(): \n    return'
       if (compute_script) {
         this.activeKey = 'script'
       } else {

@@ -1102,7 +1102,7 @@ export default {
     handleEditActived() {
       const passwordCol = this.columns.filter((col) => col.is_password)
       this.$nextTick(() => {
-        const editRecord = this.$refs.xTable.getVxetableRef().getEditRecord()
+        const editRecord = this.$refs.xTable.getEditRecord()
         const { row, column } = editRecord
         if (passwordCol.length && this.lastEditCiId !== row._id) {
           this.$nextTick(async () => {
@@ -1113,10 +1113,10 @@ export default {
               })
             }
             this.isContinueCloseEdit = false
-            await this.$refs.xTable.getVxetableRef().clearEdit()
+            await this.$refs.xTable.clearEdit()
             this.isContinueCloseEdit = true
             this.$nextTick(() => {
-              this.$refs.xTable.getVxetableRef().setEditCell(row, column.field)
+              this.$refs.xTable.setEditCell(row, column.field)
             })
           })
         }
