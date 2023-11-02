@@ -329,7 +329,6 @@ def valid_address(address):
         }
         KeyManage.print_response(response)
         return False
-
     return True
 
 
@@ -444,6 +443,7 @@ def cmdb_password_data_migrate():
 
             value_table = CIIndexValueText if attr.is_index else CIValueText
 
+            failed = False
             for i in value_table.get_by(attr_id=attr.id, to_dict=False):
                 if current_app.config.get("SECRETS_ENGINE", 'inner') == 'inner':
                     _, status = InnerCrypt().decrypt(i.value)
@@ -454,6 +454,7 @@ def cmdb_password_data_migrate():
                     if status:
                         CIValueText.create(ci_id=i.ci_id, attr_id=attr.id, value=encrypt_value)
                     else:
+                        failed = True
                         continue
                 elif current_app.config.get("SECRETS_ENGINE") == 'vault':
                     if i.value == '******':
@@ -464,8 +465,12 @@ def cmdb_password_data_migrate():
                         vault.update("/{}/{}".format(i.ci_id, i.attr_id), dict(v=i.value))
                     except Exception as e:
                         print('save password to vault failed: {}'.format(e))
+                        failed = True
                         continue
                 else:
                     continue
 
                 i.delete()
+
+                if not failed and attr.is_index:
+                    attr.update(is_index=False)
