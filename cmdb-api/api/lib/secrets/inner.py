@@ -65,7 +65,8 @@ class KeyManage:
             self.backend = Backend(backend)
 
     def init_app(self, app, backend=None):
-        if sys.argv[0].endswith("gunicorn") or (len(sys.argv) > 1 and sys.argv[1] == "run"):
+        if (sys.argv[0].endswith("gunicorn") or
+                (len(sys.argv) > 1 and sys.argv[1] in ("run", "cmdb-password-data-migrate"))):
             self.trigger = app.config.get("INNER_TRIGGER_TOKEN")
             if not self.trigger:
                 return
