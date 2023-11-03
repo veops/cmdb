@@ -336,9 +336,6 @@ class AttributeManager(object):
     def update(self, _id, **kwargs):
         attr = Attribute.get_by_id(_id) or abort(404, ErrFormat.attribute_not_found.format("id={}".format(_id)))
 
-        if not self._can_edit_attribute(attr):
-            return abort(403, ErrFormat.cannot_edit_attribute)
-
         if kwargs.get("name"):
             other = Attribute.get_by(name=kwargs['name'], first=True, to_dict=False)
             if other and other.id != attr.id:
@@ -378,6 +375,14 @@ class AttributeManager(object):
             kwargs['default'] = dict(default=kwargs['default'])
 
         kwargs.get('is_computed') and self.can_create_computed_attribute()
+
+        is_changed = False
+        for k in kwargs:
+            if kwargs[k] != getattr(attr, k, None):
+                is_changed = True
+
+        if is_changed and not self._can_edit_attribute(attr):
+            return abort(403, ErrFormat.cannot_edit_attribute)
 
         attr.update(flush=True, filter_none=False, **kwargs)
 
