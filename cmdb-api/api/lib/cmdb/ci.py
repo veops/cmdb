@@ -45,8 +45,8 @@ from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import validate_permission
 from api.lib.secrets.inner import InnerCrypt
 from api.lib.secrets.vault import VaultClient
-from api.lib.utils import handle_arg_list
 from api.lib.utils import Lock
+from api.lib.utils import handle_arg_list
 from api.lib.webhook import webhook_request
 from api.models.cmdb import AttributeHistory
 from api.models.cmdb import AutoDiscoveryCI
@@ -639,6 +639,9 @@ class CIManager(object):
                     _fields.append(str(attr.id))
             filter_fields_sql = "WHERE A.attr_id in ({0})".format(",".join(_fields))
 
+        ci2pos = {int(_id): _pos for _pos, _id in enumerate(ci_ids)}
+        res = [None] * len(ci_ids)
+
         ci_ids = ",".join(map(str, ci_ids))
         if value_tables is None:
             value_tables = ValueTypeMap.table_name.values()
@@ -649,7 +652,6 @@ class CIManager(object):
         # current_app.logger.debug(query_sql)
         cis = db.session.execute(query_sql).fetchall()
         ci_set = set()
-        res = list()
         ci_dict = dict()
         unique_id2obj = dict()
         excludes = excludes and set(excludes)
@@ -669,7 +671,7 @@ class CIManager(object):
                 ci_dict["unique"] = unique_id2obj[ci_type.unique_id] and unique_id2obj[ci_type.unique_id].name
                 ci_dict["unique_alias"] = unique_id2obj[ci_type.unique_id] and unique_id2obj[ci_type.unique_id].alias
                 ci_set.add(ci_id)
-                res.append(ci_dict)
+                res[ci2pos[ci_id]] = ci_dict
 
             if ret_key == RetKey.NAME:
                 attr_key = attr_name
