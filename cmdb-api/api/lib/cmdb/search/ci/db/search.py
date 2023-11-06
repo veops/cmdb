@@ -9,6 +9,7 @@ import time
 from flask import current_app
 from flask_login import current_user
 from jinja2 import Template
+from sqlalchemy import text
 
 from api.extensions import db
 from api.lib.cmdb.cache import AttributeCache
@@ -312,7 +313,7 @@ class Search(object):
         start = time.time()
         execute = db.session.execute
         # current_app.logger.debug(v_query_sql)
-        res = execute(v_query_sql).fetchall()
+        res = execute(text(v_query_sql)).fetchall()
         end_time = time.time()
         current_app.logger.debug("query ci ids time is: {0}".format(end_time - start))
 
@@ -525,7 +526,7 @@ class Search(object):
             if k:
                 table_name = TableMap(attr=attr).table_name
                 query_sql = FACET_QUERY.format(table_name, self.query_sql, attr.id)
-                result = db.session.execute(query_sql).fetchall()
+                result = db.session.execute(text(query_sql)).fetchall()
                 facet[k] = result
 
         facet_result = dict()
