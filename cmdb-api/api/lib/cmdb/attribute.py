@@ -81,8 +81,9 @@ class AttributeManager(object):
         elif choice_other.get('script'):
             try:
                 x = compile(choice_other['script'], '', "exec")
-                exec(x)
-                res = locals()['ChoiceValue']().values() or []
+                local_ns = {}
+                exec(x, {}, local_ns)
+                res = local_ns['ChoiceValue']().values() or []
                 return [[i, {}] for i in res]
             except Exception as e:
                 current_app.logger.error("get choice values from script: {}".format(e))
