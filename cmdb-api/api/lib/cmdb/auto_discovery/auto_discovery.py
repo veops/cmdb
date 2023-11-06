@@ -36,9 +36,10 @@ def parse_plugin_script(script):
     attributes = []
     try:
         x = compile(script, '', "exec")
-        exec(x)
-        unique_key = locals()['AutoDiscovery']().unique_key
-        attrs = locals()['AutoDiscovery']().attributes() or []
+        local_ns = {}
+        exec(x, {}, local_ns)
+        unique_key = local_ns['AutoDiscovery']().unique_key
+        attrs = local_ns['AutoDiscovery']().attributes() or []
     except Exception as e:
         return abort(400, str(e))
 
