@@ -12,7 +12,9 @@ from api.lib.cmdb.const import CITypeOperateType
 from api.lib.cmdb.const import ConstraintEnum
 from api.lib.cmdb.const import OperateType
 from api.lib.cmdb.const import ValueTypeEnum
-from api.lib.database import Model, Model2
+from api.lib.database import Model
+from api.lib.database import Model2
+from api.lib.utils import Crypto
 
 
 # template
@@ -89,12 +91,36 @@ class Attribute(Model):
     compute_expr = db.Column(db.Text)
     compute_script = db.Column(db.Text)
 
-    choice_web_hook = db.Column(db.JSON)
+    _choice_web_hook = db.Column('choice_web_hook', db.JSON)
     choice_other = db.Column(db.JSON)
 
     uid = db.Column(db.Integer, index=True)
 
     option = db.Column(db.JSON)
+
+    def _get_webhook(self):
+        if self._choice_web_hook:
+            if self._choice_web_hook.get('headers') and "Cookie" in self._choice_web_hook['headers']:
+                self._choice_web_hook['headers']['Cookie'] = Crypto.decrypt(self._choice_web_hook['headers']['Cookie'])
+
+            if self._choice_web_hook.get('authorization'):
+                for k, v in self._choice_web_hook['authorization'].items():
+                    self._choice_web_hook['authorization'][k] = Crypto.decrypt(v)
+
+        return self._choice_web_hook
+
+    def _set_webhook(self, data):
+        if data:
+            if data.get('headers') and "Cookie" in data['headers']:
+                data['headers']['Cookie'] = Crypto.encrypt(data['headers']['Cookie'])
+
+            if data.get('authorization'):
+                for k, v in data['authorization'].items():
+                    data['authorization'][k] = Crypto.encrypt(v)
+
+        self._choice_web_hook = data
+
+    choice_web_hook = db.synonym("_choice_web_hook", descriptor=property(_get_webhook, _set_webhook))
 
 
 class CITypeAttribute(Model):
@@ -130,7 +156,25 @@ class CITypeTrigger(Model):
 
     type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'), nullable=False)
     attr_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"))
-    option = db.Column('notify', db.JSON)
+    _option = db.Column('notify', db.JSON)
+
+    def _get_option(self):
+        if self._option and self._option.get('webhooks'):
+            if self._option['webhooks'].get('authorization'):
+                for k, v in self._option['webhooks']['authorization'].items():
+                    self._option['webhooks']['authorization'][k] = Crypto.decrypt(v)
+
+        return self._option
+
+    def _set_option(self, data):
+        if data and data.get('webhooks'):
+            if data['webhooks'].get('authorization'):
+                for k, v in data['webhooks']['authorization'].items():
+                    data['webhooks']['authorization'][k] = Crypto.encrypt(v)
+
+        self._option = data
+
+    option = db.synonym("_option", descriptor=property(_get_option, _set_option))
 
 
 class CITriggerHistory(Model):
