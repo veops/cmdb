@@ -10,14 +10,18 @@ from api.lib.exception import CommitException
 
 class FormatMixin(object):
     def to_dict(self):
-        res = dict([(k, getattr(self, k) if not isinstance(
-            getattr(self, k), (datetime.datetime, datetime.date, datetime.time)) else str(
-            getattr(self, k))) for k in getattr(self, "__mapper__").c.keys()])
-        # FIXME: getattr(cls, "__table__").columns  k.name
+        res = dict()
+        for k in getattr(self, "__mapper__").c.keys():
+            if k in {'password', '_password', 'secret', '_secret'}:
+                continue
 
-        res.pop('password', None)
-        res.pop('_password', None)
-        res.pop('secret', None)
+            if k.startswith('_'):
+                k = k[1:]
+
+            if not isinstance(getattr(self, k), (datetime.datetime, datetime.date, datetime.time)):
+                res[k] = getattr(self, k)
+            else:
+                res[k] = str(getattr(self, k))
 
         return res
     

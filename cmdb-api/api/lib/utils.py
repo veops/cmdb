@@ -12,6 +12,9 @@ from Crypto.Cipher import AES
 from elasticsearch import Elasticsearch
 from flask import current_app
 
+from api.lib.secrets.inner import InnerCrypt
+from api.lib.secrets.inner import KeyManage
+
 
 class BaseEnum(object):
     _ALL_ = set()  # type: Set[str]
@@ -286,3 +289,33 @@ class AESCrypto(object):
         text_decrypted = cipher.decrypt(encode_bytes)
 
         return cls.unpad(text_decrypted).decode('utf8')
+
+
+class Crypto(AESCrypto):
+    @classmethod
+    def encrypt(cls, data):
+        from api.lib.secrets.secrets import InnerKVManger
+
+        if not KeyManage(backend=InnerKVManger()).is_seal():
+            res, status = InnerCrypt().encrypt(data)
+            if status:
+                return res
+
+        return AESCrypto().encrypt(data)
+
+    @classmethod
+    def decrypt(cls, data):
+        from api.lib.secrets.secrets import InnerKVManger
+
+        if not KeyManage(backend=InnerKVManger()).is_seal():
+            try:
+                res, status = InnerCrypt().decrypt(data)
+                if status:
+                    return res
+            except:
+                pass
+
+        try:
+            return AESCrypto().decrypt(data)
+        except:
+            return data
