@@ -29,7 +29,6 @@ from api.lib.perm.acl.cache import AppCache
 from api.lib.perm.acl.resource import ResourceCRUD
 from api.lib.perm.acl.resource import ResourceTypeCRUD
 from api.lib.perm.acl.role import RoleCRUD
-from api.lib.perm.acl.user import UserCRUD
 from api.lib.secrets.inner import KeyManage
 from api.lib.secrets.inner import global_key_threshold
 from api.lib.secrets.secrets import InnerKVManger
@@ -152,57 +151,6 @@ def cmdb_init_acl():
                                             RoleEnum.CMDB_READ_ALL,
                                             ResourceTypeEnum.RELATION_VIEW,
                                             [PermEnum.READ])
-
-
-@click.command()
-@click.option(
-    '-u',
-    '--user',
-    help='username'
-)
-@click.option(
-    '-p',
-    '--password',
-    help='password'
-)
-@click.option(
-    '-m',
-    '--mail',
-    help='mail'
-)
-@with_appcontext
-def add_user(user, password, mail):
-    """
-    create a user
-
-    is_admin: default is False
-
-    Example:  flask add-user -u <username> -p <password> -m <mail>
-    """
-    assert user is not None
-    assert password is not None
-    assert mail is not None
-    UserCRUD.add(username=user, password=password, email=mail)
-
-
-@click.command()
-@click.option(
-    '-u',
-    '--user',
-    help='username'
-)
-@with_appcontext
-def del_user(user):
-    """
-    delete a user
-
-    Example:  flask del-user -u <username>
-    """
-    assert user is not None
-    from api.models.acl import User
-
-    u = User.get_by(username=user, first=True, to_dict=False)
-    u and UserCRUD.delete(u.uid)
 
 
 @click.command()
