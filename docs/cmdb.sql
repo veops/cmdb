@@ -239,11 +239,6 @@ CREATE TABLE `acl_operation_records` (
 -- Dumping data for table `acl_operation_records`
 --
 
-LOCK TABLES `acl_operation_records` WRITE;
-/*!40000 ALTER TABLE `acl_operation_records` DISABLE KEYS */;
-INSERT INTO `acl_operation_records` VALUES (NULL,0,'2023-07-11 16:48:37',NULL,11,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 16:49:09',NULL,12,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 16:49:21',NULL,13,NULL,'admin','0','[\"ACL\"]'),(NULL,0,'2023-07-11 16:49:22',NULL,14,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 16:50:38',NULL,15,NULL,'admin','0','[\"ACL\"]'),(NULL,0,'2023-07-11 16:50:38',NULL,16,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 16:57:53',NULL,17,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 17:08:22',NULL,18,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 17:12:20',NULL,19,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 17:12:24',NULL,20,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 17:13:11',NULL,21,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 17:15:17',NULL,22,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 17:22:31',NULL,23,NULL,'admin','0','[\"ACL\"]'),(NULL,0,'2023-07-11 17:22:31',NULL,24,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 17:27:19',NULL,25,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 17:28:49',NULL,26,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 17:36:06',NULL,27,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 17:36:10',NULL,28,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 17:37:06',NULL,29,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 17:39:05',NULL,30,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 17:39:10',NULL,31,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 17:46:52',NULL,32,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 17:54:00',NULL,33,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 18:03:56',NULL,34,NULL,'admin','0','[\"ACL\"]'),(NULL,0,'2023-07-11 18:03:56',NULL,35,'backend','cmdb_agent','1','[\"resources\"]'),(NULL,0,'2023-07-11 18:03:57',NULL,36,'backend','cmdb_agent','1','[\"resources\"]');
-/*!40000 ALTER TABLE `acl_operation_records` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `acl_permissions`
@@ -658,12 +653,6 @@ CREATE TABLE `c_ad_ci_types` (
 --
 -- Dumping data for table `c_ad_ci_types`
 --
-
-LOCK TABLES `c_ad_ci_types` WRITE;
-/*!40000 ALTER TABLE `c_ad_ci_types` DISABLE KEYS */;
-INSERT INTO `c_ad_ci_types` VALUES (NULL,0,'2023-07-11 17:11:52',NULL,2,4,9,NULL,NULL,0,NULL,NULL,300,NULL,NULL,1),(NULL,0,'2023-07-11 17:19:23','2023-07-11 17:19:25',3,5,10,'{}',NULL,0,'','',300,NULL,NULL,1);
-/*!40000 ALTER TABLE `c_ad_ci_types` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `c_ad_rules`
@@ -2248,7 +2237,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (NULL,0,1,'admin','admin',NULL,NULL,'admin@one-ops.com',NULL,'e10adc3949ba59abbe56e057f20f883e','','',NULL,'2023-07-11 18:03:55',0,1,NULL,'0000',NULL,NULL),(NULL,0,2,'cmdb_agent','cmdb_agent',NULL,NULL,'cmdb_agent@one-ops.com',NULL,NULL,'ef086550acb543828d9930d15b21a037','U~83O&PT2Qxsd1$H9df2v#*FcsiG1l?n',NULL,NULL,0,NULL,NULL,NULL,NULL,NULL),(NULL,0,3,'worker','worker',NULL,NULL,'worker@one-ops.com',NULL,'b34cd51b4a6e2f96547e4aeb81566a83','0577dfa24e4547ad91bfb23b62951845','~0g7tkFG$@wdHKe*r2rYu2RC2v1?d8I5',NULL,NULL,0,NULL,NULL,NULL,NULL,NULL),(NULL,0,46,'demo','demo',NULL,NULL,'demo@veops.cn',NULL,'e10adc3949ba59abbe56e057f20f883e','0ec692fb318b47e4b739c241d56c12e7','JDcAc563I4L47ji2R?fah1dZ6KPb!Ty0','2023-07-10 08:19:01','2023-07-11 16:30:42',0,1,NULL,'0036',NULL,NULL);
+INSERT INTO `users` VALUES (NULL,0,1,'admin','admin',NULL,NULL,'admin@one-ops.com',NULL,'e10adc3949ba59abbe56e057f20f883e','','',NULL,'2023-07-11 18:03:55',0,1,NULL,'0001',NULL,NULL),(NULL,0,2,'cmdb_agent','cmdb_agent',NULL,NULL,'cmdb_agent@one-ops.com',NULL,NULL,'ef086550acb543828d9930d15b21a037','U~83O&PT2Qxsd1$H9df2v#*FcsiG1l?n',NULL,NULL,0,NULL,NULL,'0002',NULL,NULL),(NULL,0,3,'worker','worker',NULL,NULL,'worker@one-ops.com',NULL,'b34cd51b4a6e2f96547e4aeb81566a83','0577dfa24e4547ad91bfb23b62951845','~0g7tkFG$@wdHKe*r2rYu2RC2v1?d8I5',NULL,NULL,0,NULL,NULL,'0003',NULL,NULL),(NULL,0,46,'demo','demo',NULL,NULL,'demo@veops.cn',NULL,'e10adc3949ba59abbe56e057f20f883e','0ec692fb318b47e4b739c241d56c12e7','JDcAc563I4L47ji2R?fah1dZ6KPb!Ty0','2023-07-10 08:19:01','2023-07-11 16:30:42',0,1,NULL,'0004',NULL,NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
