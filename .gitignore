@@ -70,6 +70,7 @@ settings.py
 # UI
 cmdb-ui/node_modules
 cmdb-ui/dist
+cmdb-ui/yarn.lock
 
 # Log files
 cmdb-ui/npm-debug.log*
