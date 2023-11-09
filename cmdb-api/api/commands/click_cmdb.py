@@ -127,10 +127,10 @@ def cmdb_init_acl():
 
     # 3. add resource and grant
     ci_types = CIType.get_by(to_dict=False)
-    type_id = ResourceType.get_by(name=ResourceTypeEnum.CI, first=True, to_dict=False).id
+    resource_type_id = ResourceType.get_by(name=ResourceTypeEnum.CI, first=True, to_dict=False).id
     for ci_type in ci_types:
         try:
-            ResourceCRUD.add(ci_type.name, type_id, app_id)
+            ResourceCRUD.add(ci_type.name, resource_type_id, app_id)
         except AbortException:
             pass
 
@@ -140,10 +140,10 @@ def cmdb_init_acl():
                                             [PermEnum.READ])
 
     relation_views = PreferenceRelationView.get_by(to_dict=False)
-    type_id = ResourceType.get_by(name=ResourceTypeEnum.RELATION_VIEW, first=True, to_dict=False).id
+    resource_type_id = ResourceType.get_by(name=ResourceTypeEnum.RELATION_VIEW, first=True, to_dict=False).id
     for view in relation_views:
         try:
-            ResourceCRUD.add(view.name, type_id, app_id)
+            ResourceCRUD.add(view.name, resource_type_id, app_id)
         except AbortException:
             pass
 
@@ -422,3 +422,39 @@ def cmdb_password_data_migrate():
 
                 if not failed and attr.is_index:
                     attr.update(is_index=False)
+
+
+@click.command()
+@with_appcontext
+def cmdb_agent_init():
+    """
+    Initialize the agent's permissions and obtain the key and secret
+    """
+
+    from api.models.acl import User
+
+    user = User.get_by(username="cmdb_agent", first=True, to_dict=False)
+    if user is None:
+        click.echo(
+            click.style('user cmdb_agent does not exist, please use flask add-user to create it first', fg='red'))
+        return
+
+    # grant
+    _app = AppCache.get('cmdb') or App.create(name='cmdb')
+    app_id = _app.id
+
+    ci_types = CIType.get_by(to_dict=False)
+    resource_type_id = ResourceType.get_by(name=ResourceTypeEnum.CI, first=True, to_dict=False).id
+    for ci_type in ci_types:
+        try:
+            ResourceCRUD.add(ci_type.name, resource_type_id, app_id)
+        except AbortException:
+            pass
+
+        ACLManager().grant_resource_to_role(ci_type.name,
+                                            "cmdb_agent",
+                                            ResourceTypeEnum.CI,
+                                            [PermEnum.READ, PermEnum.UPDATE, PermEnum.ADD, PermEnum.DELETE])
+
+    click.echo("Key   : {}".format(click.style(user.key, bg='red')))
+    click.echo("Secret: {}".format(click.style(user.secret, bg='red')))
