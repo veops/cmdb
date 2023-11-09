@@ -276,7 +276,6 @@ class ResourceCRUD(object):
 
         from api.tasks.acl import apply_trigger
         triggers = TriggerCRUD.match_triggers(app_id, r.name, r.resource_type_id, uid)
-        current_app.logger.info(triggers)
         for trigger in triggers:
             # auto trigger should be no uid
             apply_trigger.apply_async(args=(trigger.id,),
