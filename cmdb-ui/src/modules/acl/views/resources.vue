@@ -68,6 +68,7 @@
           ref="xTable"
           row-id="id"
           show-overflow
+          resizable
         >
           <!-- 1 -->
           <vxe-table-column type="checkbox" fixed="left" :width="45"></vxe-table-column>
