@@ -38,7 +38,6 @@ def string_to_bytes(value):
         byte_string = value
     else:
         byte_string = value.encode("utf-8")
-
     return byte_string
 
 
@@ -314,7 +313,7 @@ class KeyManage:
         secrets_root_key = current_app.config.get("secrets_root_key")
         msg, ok = self.is_valid_root_key(secrets_root_key)
         if not ok:
-            return {"message": msg, "status": "failed"}
+            return true
         status = self.backend.get(backend_seal_key)
         return status == "block"
 
