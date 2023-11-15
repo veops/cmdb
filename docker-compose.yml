@@ -24,6 +24,8 @@ services:
   cmdb-cache:
     image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-cache:3.0
     container_name: cmdb-cache
+    environment:
+      TZ: Asia/Shanghai
     networks:
       new:
         aliases:
