@@ -22,7 +22,7 @@ cp cmdb-api/settings.example.py cmdb-api/settings.py
   - 后端: `cd cmdb-api && pipenv run pipenv install && cd ..`
   - 前端: `cd cmdb-ui && yarn install && cd ..`
 - 可以将 docs/cmdb.sql 导入到数据库里，登录用户和密码分别是:demo/123456
-- 创建数据库表: 进入**cmdb-api**目录执行 `pipenv run flask db-setup && pipenv run flask cmdb-init-cache`
+- 创建数据库表: 进入**cmdb-api**目录执行 `pipenv run flask db-setup && pipenv run flask common-check-new-columns && pipenv run flask cmdb-init-cache`
 - 启动服务
 
   - 后端: 进入**cmdb-api**目录执行 `pipenv run flask run -h 0.0.0.0`
