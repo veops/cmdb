@@ -17,7 +17,7 @@
   - frontend: `cd cmdb-ui && yarn install && cd ..`
 - Suggest step: (default: user:demo,password:123456)
 - Create tables of cmdb database:
-  in **cmdb-api** directory: `pipenv run flask db-setup && pipenv run flask cmdb-init-cache`
+  in **cmdb-api** directory: `pipenv run flask db-setup && pipenv run flask common-check-new-columns && pipenv run flask cmdb-init-cache`
 
   ` source docs/cmdb.sql`
 
