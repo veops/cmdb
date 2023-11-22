@@ -29,7 +29,6 @@ from api.lib.perm.acl.cache import AppCache
 from api.lib.perm.acl.resource import ResourceCRUD
 from api.lib.perm.acl.resource import ResourceTypeCRUD
 from api.lib.perm.acl.role import RoleCRUD
-from api.lib.perm.acl.user import UserCRUD
 from api.lib.secrets.inner import KeyManage
 from api.lib.secrets.inner import global_key_threshold
 from api.lib.secrets.secrets import InnerKVManger
@@ -128,10 +127,10 @@ def cmdb_init_acl():
 
     # 3. add resource and grant
     ci_types = CIType.get_by(to_dict=False)
-    type_id = ResourceType.get_by(name=ResourceTypeEnum.CI, first=True, to_dict=False).id
+    resource_type_id = ResourceType.get_by(name=ResourceTypeEnum.CI, first=True, to_dict=False).id
     for ci_type in ci_types:
         try:
-            ResourceCRUD.add(ci_type.name, type_id, app_id)
+            ResourceCRUD.add(ci_type.name, resource_type_id, app_id)
         except AbortException:
             pass
 
@@ -141,10 +140,10 @@ def cmdb_init_acl():
                                             [PermEnum.READ])
 
     relation_views = PreferenceRelationView.get_by(to_dict=False)
-    type_id = ResourceType.get_by(name=ResourceTypeEnum.RELATION_VIEW, first=True, to_dict=False).id
+    resource_type_id = ResourceType.get_by(name=ResourceTypeEnum.RELATION_VIEW, first=True, to_dict=False).id
     for view in relation_views:
         try:
-            ResourceCRUD.add(view.name, type_id, app_id)
+            ResourceCRUD.add(view.name, resource_type_id, app_id)
         except AbortException:
             pass
 
@@ -152,57 +151,6 @@ def cmdb_init_acl():
                                             RoleEnum.CMDB_READ_ALL,
                                             ResourceTypeEnum.RELATION_VIEW,
                                             [PermEnum.READ])
-
-
-@click.command()
-@click.option(
-    '-u',
-    '--user',
-    help='username'
-)
-@click.option(
-    '-p',
-    '--password',
-    help='password'
-)
-@click.option(
-    '-m',
-    '--mail',
-    help='mail'
-)
-@with_appcontext
-def add_user(user, password, mail):
-    """
-    create a user
-
-    is_admin: default is False
-
-    Example:  flask add-user -u <username> -p <password> -m <mail>
-    """
-    assert user is not None
-    assert password is not None
-    assert mail is not None
-    UserCRUD.add(username=user, password=password, email=mail)
-
-
-@click.command()
-@click.option(
-    '-u',
-    '--user',
-    help='username'
-)
-@with_appcontext
-def del_user(user):
-    """
-    delete a user
-
-    Example:  flask del-user -u <username>
-    """
-    assert user is not None
-    from api.models.acl import User
-
-    u = User.get_by(username=user, first=True, to_dict=False)
-    u and UserCRUD.delete(u.uid)
 
 
 @click.command()
@@ -474,3 +422,39 @@ def cmdb_password_data_migrate():
 
                 if not failed and attr.is_index:
                     attr.update(is_index=False)
+
+
+@click.command()
+@with_appcontext
+def cmdb_agent_init():
+    """
+    Initialize the agent's permissions and obtain the key and secret
+    """
+
+    from api.models.acl import User
+
+    user = User.get_by(username="cmdb_agent", first=True, to_dict=False)
+    if user is None:
+        click.echo(
+            click.style('user cmdb_agent does not exist, please use flask add-user to create it first', fg='red'))
+        return
+
+    # grant
+    _app = AppCache.get('cmdb') or App.create(name='cmdb')
+    app_id = _app.id
+
+    ci_types = CIType.get_by(to_dict=False)
+    resource_type_id = ResourceType.get_by(name=ResourceTypeEnum.CI, first=True, to_dict=False).id
+    for ci_type in ci_types:
+        try:
+            ResourceCRUD.add(ci_type.name, resource_type_id, app_id)
+        except AbortException:
+            pass
+
+        ACLManager().grant_resource_to_role(ci_type.name,
+                                            "cmdb_agent",
+                                            ResourceTypeEnum.CI,
+                                            [PermEnum.READ, PermEnum.UPDATE, PermEnum.ADD, PermEnum.DELETE])
+
+    click.echo("Key   : {}".format(click.style(user.key, bg='red')))
+    click.echo("Secret: {}".format(click.style(user.secret, bg='red')))
