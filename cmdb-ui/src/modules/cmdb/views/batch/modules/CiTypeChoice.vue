@@ -40,7 +40,7 @@
         全选
       </a-checkbox>
       <br />
-      <a-checkbox-group v-model="checkedAttrs">
+      <a-checkbox-group style="width:100%" v-model="checkedAttrs">
         <a-row>
           <a-col :span="6" v-for="item in selectCiTypeAttrList.attributes" :key="item.alias || item.name">
             <a-checkbox :disabled="item.name === selectCiTypeAttrList.unique" :value="item.alias || item.name">
@@ -87,10 +87,11 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import { downloadExcel } from '../../../utils/helper'
 import { getCITypes } from '@/modules/cmdb/api/CIType'
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
-import { getCITypeParent } from '@/modules/cmdb/api/CITypeRelation'
+import { getCITypeParent, getCanEditByParentIdChildId } from '@/modules/cmdb/api/CITypeRelation'
 
 export default {
   name: 'CiTypeChoice',
@@ -107,6 +108,7 @@ export default {
       parentsType: [],
       parentsForm: {},
       checkedParents: [],
+      canEdit: {},
     }
   },
   created: function() {
@@ -143,8 +145,17 @@ export default {
     },
 
     openModal() {
-      getCITypeParent(this.selectNum).then((res) => {
-        this.parentsType = res.parents
+      getCITypeParent(this.selectNum).then(async (res) => {
+        for (let i = 0; i < res.parents.length; i++) {
+          await getCanEditByParentIdChildId(res.parents[i].id, this.selectNum).then((p_res) => {
+            this.canEdit = {
+              ..._.cloneDeep(this.canEdit),
+              [res.parents[i].id]: p_res.result,
+            }
+          })
+        }
+        this.parentsType = res.parents.filter((parent) => this.canEdit[parent.id])
+
         const _parentsForm = {}
         res.parents.forEach((item) => {
           const _find = item.attributes.find((attr) => attr.id === item.unique_id)

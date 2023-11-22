@@ -15,6 +15,7 @@
           <div class="ci-detail-relation-table-title">
             {{ parent.alias || parent.name }}
             <a
+              :disabled="!canEdit[parent.id]"
               @click="
                 () => {
                   $refs.addTableModal.openModal({ [`${ci.unique}`]: ci[ci.unique] }, ci._id, parent.id, 'parents')
@@ -23,6 +24,7 @@
             ><a-icon
               type="plus-square"
             /></a>
+            <span v-if="!canEdit[parent.id]">（当前模型关系为多对多，请前往关系视图进行增删操作）</span>
           </div>
           <vxe-grid
             v-if="firstCIs[parent.name]"
@@ -38,7 +40,14 @@
           >
             <template #operation_default="{ row }">
               <a-popconfirm arrowPointAtCenter title="确认删除关系？" @confirm="deleteRelation(row._id, ciId)">
-                <a :style="{ color: 'red' }"><a-icon type="delete"/></a>
+                <a
+                  :disabled="!canEdit[parent.id]"
+                  :style="{
+                    color: !canEdit[parent.id] ? 'rgba(0, 0, 0, 0.25)' : 'red',
+                  }"
+                ><a-icon
+                  type="delete"
+                /></a>
               </a-popconfirm>
             </template>
           </vxe-grid>
@@ -50,6 +59,7 @@
           <div class="ci-detail-relation-table-title">
             {{ child.alias || child.name }}
             <a
+              :disabled="!canEdit[child.id]"
               @click="
                 () => {
                   $refs.addTableModal.openModal({ [`${ci.unique}`]: ci[ci.unique] }, ci._id, child.id, 'children')
@@ -58,6 +68,7 @@
             ><a-icon
               type="plus-square"
             /></a>
+            <span v-if="!canEdit[child.id]">（当前模型关系为多对多，请前往关系视图进行增删操作）</span>
           </div>
           <vxe-grid
             v-if="secondCIs[child.name]"
@@ -72,7 +83,14 @@
           >
             <template #operation_default="{ row }">
               <a-popconfirm arrowPointAtCenter title="确认删除关系？" @confirm="deleteRelation(ciId, row._id)">
-                <a :style="{ color: 'red' }"><a-icon type="delete"/></a>
+                <a
+                  :disabled="!canEdit[child.id]"
+                  :style="{
+                    color: !canEdit[child.id] ? 'rgba(0, 0, 0, 0.25)' : 'red',
+                  }"
+                ><a-icon
+                  type="delete"
+                /></a>
               </a-popconfirm>
             </template>
           </vxe-grid>
@@ -85,7 +103,7 @@
 
 <script>
 import _ from 'lodash'
-import { getCITypeChildren, getCITypeParent } from '@/modules/cmdb/api/CITypeRelation'
+import { getCITypeChildren, getCITypeParent, getCanEditByParentIdChildId } from '@/modules/cmdb/api/CITypeRelation'
 import { searchCIRelation, deleteCIRelationView } from '@/modules/cmdb/api/CIRelation'
 import CiDetailRelationTopo from './ciDetailRelationTopo/index.vue'
 import Node from './ciDetailRelationTopo/node.js'
@@ -118,6 +136,7 @@ export default {
       secondCIColumns: {},
       firstCIJsonAttr: {},
       secondCIJsonAttr: {},
+      canEdit: {},
     }
   },
   computed: {
@@ -293,76 +312,85 @@ export default {
         .catch((e) => {})
     },
     async getParentCITypes() {
-      await getCITypeParent(this.typeId)
-        .then((res) => {
-          this.parentCITypes = res.parents
-
-          const firstCIColumns = {}
-          const firstCIJsonAttr = {}
-          res.parents.forEach((item) => {
-            const columns = []
-            const jsonAttr = []
-            item.attributes.forEach((attr) => {
-              columns.push({ key: 'p_' + attr.id, field: attr.name, title: attr.alias, minWidth: '100px' })
-              if (attr.value_type === '6') {
-                jsonAttr.push(attr.name)
-              }
-            })
-            firstCIJsonAttr[item.id] = jsonAttr
-            firstCIColumns[item.id] = columns
-            firstCIColumns[item.id].push({
-              key: 'p_operation',
-              field: 'operation',
-              title: '操作',
-              width: '60px',
-              fixed: 'right',
-              slots: {
-                default: 'operation_default',
-              },
-              align: 'center',
-            })
-          })
-
-          this.firstCIColumns = firstCIColumns
-          this.firstCIJsonAttr = firstCIJsonAttr
+      const res = await getCITypeParent(this.typeId)
+      this.parentCITypes = res.parents
+      for (let i = 0; i < res.parents.length; i++) {
+        await getCanEditByParentIdChildId(res.parents[i].id, this.typeId).then((p_res) => {
+          this.canEdit = {
+            ..._.cloneDeep(this.canEdit),
+            [res.parents[i].id]: p_res.result,
+          }
         })
-        .catch((e) => {})
+      }
+      const firstCIColumns = {}
+      const firstCIJsonAttr = {}
+      res.parents.forEach((item) => {
+        const columns = []
+        const jsonAttr = []
+        item.attributes.forEach((attr) => {
+          columns.push({ key: 'p_' + attr.id, field: attr.name, title: attr.alias, minWidth: '100px' })
+          if (attr.value_type === '6') {
+            jsonAttr.push(attr.name)
+          }
+        })
+        firstCIJsonAttr[item.id] = jsonAttr
+        firstCIColumns[item.id] = columns
+        firstCIColumns[item.id].push({
+          key: 'p_operation',
+          field: 'operation',
+          title: '操作',
+          width: '60px',
+          fixed: 'right',
+          slots: {
+            default: 'operation_default',
+          },
+          align: 'center',
+        })
+      })
+
+      this.firstCIColumns = firstCIColumns
+      this.firstCIJsonAttr = firstCIJsonAttr
     },
     async getChildCITypes() {
-      await getCITypeChildren(this.typeId)
-        .then((res) => {
-          this.childCITypes = res.children
+      const res = await getCITypeChildren(this.typeId)
 
-          const secondCIColumns = {}
-          const secondCIJsonAttr = {}
-          res.children.forEach((item) => {
-            const columns = []
-            const jsonAttr = []
-            item.attributes.forEach((attr) => {
-              columns.push({ key: 'c_' + attr.id, field: attr.name, title: attr.alias, minWidth: '100px' })
-              if (attr.value_type === '6') {
-                jsonAttr.push(attr.name)
-              }
-            })
-            secondCIJsonAttr[item.id] = jsonAttr
-            secondCIColumns[item.id] = columns
-            secondCIColumns[item.id].push({
-              key: 'c_operation',
-              field: 'operation',
-              title: '操作',
-              width: '60px',
-              fixed: 'right',
-              slots: {
-                default: 'operation_default',
-              },
-              align: 'center',
-            })
-          })
-
-          this.secondCIColumns = secondCIColumns
-          this.secondCIJsonAttr = secondCIJsonAttr
+      this.childCITypes = res.children
+      for (let i = 0; i < res.children.length; i++) {
+        await getCanEditByParentIdChildId(this.typeId, res.children[i].id).then((c_res) => {
+          this.canEdit = {
+            ..._.cloneDeep(this.canEdit),
+            [res.children[i].id]: c_res.result,
+          }
         })
-        .catch((e) => {})
+      }
+      const secondCIColumns = {}
+      const secondCIJsonAttr = {}
+      res.children.forEach((item) => {
+        const columns = []
+        const jsonAttr = []
+        item.attributes.forEach((attr) => {
+          columns.push({ key: 'c_' + attr.id, field: attr.name, title: attr.alias, minWidth: '100px' })
+          if (attr.value_type === '6') {
+            jsonAttr.push(attr.name)
+          }
+        })
+        secondCIJsonAttr[item.id] = jsonAttr
+        secondCIColumns[item.id] = columns
+        secondCIColumns[item.id].push({
+          key: 'c_operation',
+          field: 'operation',
+          title: '操作',
+          width: '60px',
+          fixed: 'right',
+          slots: {
+            default: 'operation_default',
+          },
+          align: 'center',
+        })
+      })
+
+      this.secondCIColumns = secondCIColumns
+      this.secondCIJsonAttr = secondCIJsonAttr
     },
     reload() {
       this.init()

@@ -68,3 +68,10 @@ export function getRecursive_level2children(type_id) {
     method: 'GET'
   })
 }
+
+export function getCanEditByParentIdChildId(parent_id, child_id) {
+  return axios({
+    url: `/v0.1/ci_type_relations/${parent_id}/${child_id}/can_edit`,
+    method: 'GET'
+  })
+}
