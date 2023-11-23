@@ -16,6 +16,7 @@ from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import REDIS_PREFIX_CI
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
+from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION2
 from api.lib.decorator import flush_db
 from api.lib.decorator import reconnect_db
 from api.lib.perm.acl.cache import UserCache
@@ -97,16 +98,30 @@ def ci_delete_trigger(trigger, operate_type, ci_dict):
 @celery.task(name="cmdb.ci_relation_cache", queue=CMDB_QUEUE)
 @flush_db
 @reconnect_db
-def ci_relation_cache(parent_id, child_id):
+def ci_relation_cache(parent_id, child_id, ancestor_ids):
     with Lock("CIRelation_{}".format(parent_id)):
-        children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
-        children = json.loads(children) if children is not None else {}
+        if ancestor_ids is None:
+            children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
+            children = json.loads(children) if children is not None else {}
 
-        cr = CIRelation.get_by(first_ci_id=parent_id, second_ci_id=child_id, first=True, to_dict=False)
-        if str(child_id) not in children:
-            children[str(child_id)] = cr.second_ci.type_id
+            cr = CIRelation.get_by(first_ci_id=parent_id, second_ci_id=child_id, ancestor_ids=ancestor_ids,
+                                   first=True, to_dict=False)
+            if str(child_id) not in children:
+                children[str(child_id)] = cr.second_ci.type_id
 
-        rd.create_or_update({parent_id: json.dumps(children)}, REDIS_PREFIX_CI_RELATION)
+            rd.create_or_update({parent_id: json.dumps(children)}, REDIS_PREFIX_CI_RELATION)
+
+        else:
+            key = "{},{}".format(ancestor_ids, parent_id)
+            grandson = rd.get([key], REDIS_PREFIX_CI_RELATION2)[0]
+            grandson = json.loads(grandson) if grandson is not None else {}
+
+            cr = CIRelation.get_by(first_ci_id=parent_id, second_ci_id=child_id, ancestor_ids=ancestor_ids,
+                                   first=True, to_dict=False)
+            if cr and str(cr.second_ci_id) not in grandson:
+                grandson[str(cr.second_ci_id)] = cr.second_ci.type_id
+
+            rd.create_or_update({key: json.dumps(grandson)}, REDIS_PREFIX_CI_RELATION2)
 
     current_app.logger.info("ADD ci relation cache: {0} -> {1}".format(parent_id, child_id))
 
@@ -156,20 +171,31 @@ def ci_relation_add(parent_dict, child_id, uid):
                     try:
                         db.session.commit()
                     except:
-                        pass
+                        db.session.rollback()
 
 
 @celery.task(name="cmdb.ci_relation_delete", queue=CMDB_QUEUE)
 @reconnect_db
-def ci_relation_delete(parent_id, child_id):
+def ci_relation_delete(parent_id, child_id, ancestor_ids):
     with Lock("CIRelation_{}".format(parent_id)):
-        children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
-        children = json.loads(children) if children is not None else {}
+        if ancestor_ids is None:
+            children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
+            children = json.loads(children) if children is not None else {}
 
-        if str(child_id) in children:
-            children.pop(str(child_id))
+            if str(child_id) in children:
+                children.pop(str(child_id))
 
-        rd.create_or_update({parent_id: json.dumps(children)}, REDIS_PREFIX_CI_RELATION)
+            rd.create_or_update({parent_id: json.dumps(children)}, REDIS_PREFIX_CI_RELATION)
+
+        else:
+            key = "{},{}".format(ancestor_ids, parent_id)
+            grandson = rd.get([key], REDIS_PREFIX_CI_RELATION2)[0]
+            grandson = json.loads(grandson) if grandson is not None else {}
+
+            if str(child_id) in grandson:
+                grandson.pop(str(child_id))
+
+            rd.create_or_update({key: json.dumps(grandson)}, REDIS_PREFIX_CI_RELATION2)
 
     current_app.logger.info("DELETE ci relation cache: {0} -> {1}".format(parent_id, child_id))
 

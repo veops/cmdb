@@ -637,6 +637,16 @@ class CITypeRelationManager(object):
             current_app.logger.warning(str(e))
             return abort(400, ErrFormat.circular_dependency_error)
 
+        if constraint == ConstraintEnum.Many2Many:
+            other_c = CITypeRelation.get_by(parent_id=p.id, constraint=ConstraintEnum.Many2Many,
+                                            to_dict=False, first=True)
+            other_p = CITypeRelation.get_by(child_id=c.id, constraint=ConstraintEnum.Many2Many,
+                                            to_dict=False, first=True)
+            if other_c and other_c.child_id != c.id:
+                return abort(400, ErrFormat.m2m_relation_constraint.format(p.name, other_c.child.name))
+            if other_p and other_p.parent_id != p.id:
+                return abort(400, ErrFormat.m2m_relation_constraint.format(other_p.parent.name, c.name))
+
         existed = cls._get(p.id, c.id)
         if existed is not None:
             existed.update(relation_type_id=relation_type_id,
@@ -685,6 +695,24 @@ class CITypeRelationManager(object):
         ctr = cls._get(parent, child)
 
         cls.delete(ctr.id)
+
+    @staticmethod
+    def get_level2constraint(root_id, level):
+        level = level + 1 if level == 1 else level
+        ci = CI.get_by_id(root_id)
+        if ci is None:
+            return dict()
+
+        root_id = ci.type_id
+        level2constraint = dict()
+        for lv in range(1, int(level) + 1):
+            for i in CITypeRelation.get_by(parent_id=root_id, to_dict=False):
+                if i.constraint == ConstraintEnum.Many2Many:
+                    root_id = i.child_id
+                    level2constraint[lv] = ConstraintEnum.Many2Many
+                    break
+
+        return level2constraint
 
 
 class CITypeAttributeGroupManager(object):

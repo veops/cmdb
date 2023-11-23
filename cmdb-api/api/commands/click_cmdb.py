@@ -19,6 +19,7 @@ from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import REDIS_PREFIX_CI
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
+from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION2
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.const import ValueTypeEnum
@@ -49,12 +50,17 @@ def cmdb_init_cache():
 
     ci_relations = CIRelation.get_by(to_dict=False)
     relations = dict()
+    relations2 = dict()
     for cr in ci_relations:
         relations.setdefault(cr.first_ci_id, {}).update({cr.second_ci_id: cr.second_ci.type_id})
+        if cr.ancestor_ids:
+            relations2.setdefault(cr.ancestor_ids, {}).update({cr.second_ci_id: cr.second_ci.type_id})
     for i in relations:
         relations[i] = json.dumps(relations[i])
     if relations:
         rd.create_or_update(relations, REDIS_PREFIX_CI_RELATION)
+    if relations2:
+        rd.create_or_update(relations2, REDIS_PREFIX_CI_RELATION2)
 
     es = None
     if current_app.config.get("USE_ES"):
