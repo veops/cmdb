@@ -73,19 +73,33 @@
 ## 安装
 
 ### Docker 一键快速构建
-- 进入主目录（先安装 docker 环境, 注意要clone整个项目）
-
+> 方法一
+- 第一步: 先安装 docker 环境, 以及docker-compose
+- 第二步: 拷贝项目
+```shell 
+git clone https://github.com/veops/cmdb.git
+```
+- 第三步：进入主目录，执行:
 ```
 docker-compose up -d
 ```
-
-- 浏览器打开: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-- username: demo 或者 admin
-- password: 123456
+> 方法二, 该方法适用于linux系统
+- 第一步： 先安装 docker 环境, 以及docker-compose
+- 第二步： 直接使用项目根目录下的install.sh 文件进行 `安装`、`启动`、`暂停`、`查状态`、`删除`、`卸载`
+```shell
+curl -so install.sh https://raw.githubusercontent.com/veops/cmdb/master/install.sh
+sh install.sh install
+```
 
 ### [本地开发环境搭建](docs/local.md)
 
 ### [Makefile 安装](docs/makefile.md)
+
+## 验证
+- 浏览器打开: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- username: demo 或者 admin
+- password: 123456
+
 
 ---
 
