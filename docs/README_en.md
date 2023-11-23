@@ -86,11 +86,6 @@ curl -so install.sh https://raw.githubusercontent.com/veops/cmdb/master/install.
 sh install.sh install
 ```
 
-- In directory cmdb
-  ```
-  docker-compose up -d
-  ```
-
 
 ### [Local Setup](local_en.md)
 
