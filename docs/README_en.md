@@ -78,11 +78,11 @@ git clone https://github.com/veops/cmdb.git
 ```
 docker-compose up -d
 ```
-> Method 2  
+> Method 2  Usefull for linux os.
 - step 1: **Prepare: install docker and docker-compose**
-- step 2: directly use the install.sh file in the project's root directory to `install`, `start`, `pause`, `status`, `delete`, and `uninstall` the application. only usefull for linux os.
+- step 2: directly use the install.sh file in the project's root directory to `install`, `start`, `pause`, `status`, `delete`, and `uninstall` the application. 
 ```shell
-curl -ssL https://raw.githubusercontent.com/veops/cmdb/master/install.sh -o install.sh 
+curl -so install.sh https://raw.githubusercontent.com/veops/cmdb/master/install.sh 
 sh istall.sh install
 ```
 
