@@ -74,15 +74,18 @@
 
 ### Docker 一键快速构建
 > 方法一
-- 第一步: 拷贝项目
+- 第一步: 先安装 docker 环境, 以及docker-compose
+- 第二步: 拷贝项目
 ```shell 
 git clone https://github.com/veops/cmdb.git
 ```
-- 第二步：进入主目录（先安装 docker 环境, 以及docker-compose）
+- 第三步：进入主目录，执行:
 ```
 docker-compose up -d
 ```
-> 方法二, 该方法适用于linux系统
+> 方法二, 该方法适用于linux系统, 即
+- 第一步： 先安装 docker 环境, 以及docker-compose
+- 第二步： 直接使用项目根目录下的install.sh 文件进行 `安装`、`启动`、`暂停`、`查状态`、`删除`、`卸载`，对于类linux系统有用。
 ```shell
 curl -ssL https://raw.githubusercontent.com/veops/cmdb/dev_install/install.sh -o install.sh 
 sh istall.sh install

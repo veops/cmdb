@@ -1,25 +1,19 @@
 #!/bin/bash
 
-cmdb_dir="~/apps"
+current_path=$(pwd)
+cmdb_dir=$(cd ~ && pwd)/apps
 
 check_docker() {
-    if [ -x "$(command -v docker)" ]; then
-        if pgrep "dockerd" >/dev/null; then
-            :
-        else
-            echo "error: please install docker firstly"
-            exit 1
-        fi
-    else
-        echo "error: please install docker firstly"
+    docker info >/dev/null 2>&1
+    if ! [ $? -eq 0 ]; then
+        echo "error: please install and start docker firstly"
         exit 1
     fi
 }
 
 check_docker_compose() {
-    if [ -x "$(command -v docker-compose)" ]; then
-        :
-    else
+    docker-compose --version >/dev/null 2>&1
+    if ! [ $? -eq 0 ]; then
         echo "error: please install docker-compose firstly"
         exit 1
     fi
@@ -43,48 +37,35 @@ change_directory() {
 }
 
 install_service() {
-    check_docker
-    check_docker_compose
-
     echo ""
     echo "Installing the service $1..."
-    current_path=$(pwd)
     change_directory "$cmdb_dir"
 
     if [ -d "${cmdb_dir}/cmdb" ]; then
-	echo "directory ${cmdb_dir}/cmdb already exist"
+        echo "directory ${cmdb_dir}/cmdb already exist"
         exit 1
     fi
 
     clone_repo "https://githubfast.com/veops/cmdb.git" || clone_repo "https://github.com/veops/cmdb.git"
     cd ${cmdb_dir}/cmdb || exit 1
     docker-compose pull
-    if [ $? -eq 0 ];then
+    if [ $? -eq 0 ]; then
         echo "successfully install package in directory: ${cmdb_dir}/cmdb"
     fi
     cd $current_path || exit 1
 }
 
 start_service() {
-    check_docker
-    check_docker_compose
-
     echo "Starting the service $1..."
-    current_path=$(pwd)
     cd ${cmdb_dir}/cmdb
     docker-compose up -d
     cd $current_path
 }
 
 pause_service() {
-    check_docker
-    check_docker_compose
-
     case $2 in
     "" | cmdb-api | cmdb-ui | cmdb-db | cmdb-cache)
         echo "Pausing the service ..."
-
-        current_path=$(pwd)
 
         cd ${cmdb_dir}/cmdb || exit 1
         docker-compose stop $2
@@ -98,21 +79,13 @@ pause_service() {
 }
 
 delete_service() {
-    check_docker
-    check_docker_compose
-
     echo "Deleting the service ..."
-    current_path=$(pwd)
     cd ${cmdb_dir}/cmdb || exit 1
     docker-compose down
     cd $current_path || exit 1
 }
 
 status_service() {
-    check_docker
-    check_docker_compose
-
-    current_path=$(pwd)
     cd ${cmdb_dir}/cmdb || exit 1
     docker-compose ps
     cd $current_path || exit 1
@@ -120,18 +93,21 @@ status_service() {
 }
 
 uninstall_service() {
-    check_docker
-    check_docker_compose
+    if ! [ -d "${cmdb_dir}/cmdb" ]; then
+        echo "directory ${cmdb_dir}/cmdb already not exist"
+        exit 0
+    fi
 
     read -p "Are you sure to uninstall the all the application and data? y/n:" input
     if [ $input = "y" ]; then
-        echo "Uninstalling the service $1..."
-        current_path=$(pwd)
+        echo "Uninstalling the service ..."
+
         cd ${cmdb_dir}/cmdb || exit 1
         docker-compose down -v
-        if [ $? -eq 0 ];then
+        if [ $? -eq 0 ]; then
             rm -fr ${cmdb_dir}/cmdb
         fi
+
         cd $current_path || exit 1
     fi
 }
@@ -139,23 +115,34 @@ uninstall_service() {
 echo "Welcome to the CMDB service management script!"
 echo ""
 
+check_depend() {
+    check_docker
+    check_docker_compose
+}
+
 case $1 in
 install)
+    check_depend
     install_service $2
     ;;
 start)
+    check_depend
     start_service $2
     ;;
 status)
+    check_depend
     status_service $2
     ;;
 pause)
+    check_depend
     pause_service $2
     ;;
 delete)
+    check_depend
     delete_service $2
     ;;
 uninstall)
+    check_depend
     uninstall_service $2
     ;;
 *)
