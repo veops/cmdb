@@ -68,19 +68,40 @@
 
 ### One-Click Docker Quick Build
 
-- Prepare: install docker and docker-compose
+> Method 1
+- step 1: **Prepare: install docker and docker-compose**
+- step 2:  copy the repository
+```shell 
+git clone https://github.com/veops/cmdb.git
+```
+- step 3: In directory cmdb:
+```
+docker-compose up -d
+```
+> Method 2  
+- step 1: **Prepare: install docker and docker-compose**
+- step 2: 
+```shell
+curl -ssL https://raw.githubusercontent.com/veops/cmdb/master/install.sh -o install.sh 
+sh istall.sh install
+```
+
 - In directory cmdb
   ```
   docker-compose up -d
   ```
-- View: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-- username: demo or admin
-- password: 123456
+
 
 
 ### [Local Setup](local_en.md)
 
 ### [Installation with Makefile](makefile_en.md)
+
+## Validation
+
+- View: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- username: demo or admin
+- password: 123456
 
 ## Contributing
 

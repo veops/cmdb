@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cmdb_dir="/home/$(whoami)/apps"
+cmdb_dir="~/apps"
 
 check_docker() {
     if [ -x "$(command -v docker)" ]; then
@@ -129,6 +129,9 @@ uninstall_service() {
         current_path=$(pwd)
         cd ${cmdb_dir}/cmdb || exit 1
         docker-compose down -v
+        if [ $? -eq 0 ];then
+            rm -fr ${cmdb_dir}/cmdb
+        fi
         cd $current_path || exit 1
     fi
 }
