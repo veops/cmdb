@@ -83,7 +83,7 @@ docker-compose up -d
 - step 2: directly use the install.sh file in the project's root directory to `install`, `start`, `pause`, `status`, `delete`, and `uninstall` the application. 
 ```shell
 curl -so install.sh https://raw.githubusercontent.com/veops/cmdb/master/install.sh 
-sh istall.sh install
+sh install.sh install
 ```
 
 - In directory cmdb

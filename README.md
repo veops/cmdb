@@ -88,7 +88,7 @@ docker-compose up -d
 - 第二步： 直接使用项目根目录下的install.sh 文件进行 `安装`、`启动`、`暂停`、`查状态`、`删除`、`卸载`
 ```shell
 curl -so install.sh https://raw.githubusercontent.com/veops/cmdb/master/install.sh
-sh istall.sh install
+sh install.sh install
 ```
 
 ### [本地开发环境搭建](docs/local.md)
