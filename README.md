@@ -87,7 +87,7 @@ docker-compose up -d
 - 第一步： 先安装 docker 环境, 以及docker-compose
 - 第二步： 直接使用项目根目录下的install.sh 文件进行 `安装`、`启动`、`暂停`、`查状态`、`删除`、`卸载`
 ```shell
-curl -so install.sh https://raw.githubusercontent.com/veops/cmdb/master/install.sh
+curl -so install.sh https://raw.githubusercontent.com/veops/cmdb/deploy_on_kylin_docker/install.sh
 sh install.sh install
 ```
 
