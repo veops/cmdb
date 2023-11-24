@@ -392,6 +392,7 @@ export default {
       origShowTypes: [],
       leaf2showTypes: {},
       node2ShowTypes: {},
+      level2constraint: {},
       leaf: [],
       typeId: null,
       viewId: null,
@@ -595,6 +596,17 @@ export default {
         }
       } else {
         q += `&root_id=${this.treeKeys[this.treeKeys.length - 1].split('%')[0]}`
+
+        if (
+          Object.keys(this.level2constraint).some(
+            (le) => le < Object.keys(this.level2constraint).length && this.level2constraint[le] === '2'
+          )
+        ) {
+          q += `&ancestor_ids=${this.treeKeys
+            .slice(0, this.treeKeys.length - 1)
+            .map((item) => item.split('%')[0])
+            .join(',')}`
+        }
         const typeId = parseInt(this.treeKeys[this.treeKeys.length - 1].split('%')[1])
 
         let level = []
@@ -649,7 +661,19 @@ export default {
 
         if (refreshType === 'refreshNumber') {
           const promises = this.treeKeys.map((key, index) => {
+            let ancestor_ids
+            if (
+              Object.keys(this.level2constraint).some(
+                (le) => le < Object.keys(this.level2constraint).length && this.level2constraint[le] === '2'
+              )
+            ) {
+              ancestor_ids = `${this.treeKeys
+                .slice(0, index)
+                .map((item) => item.split('%')[0])
+                .join(',')}`
+            }
             statisticsCIRelation({
+              ancestor_ids,
               root_ids: key.split('%')[0],
               level: this.treeKeys.length - index,
               type_ids: this.showTypes.map((type) => type.id).join(','),
@@ -780,16 +804,36 @@ export default {
       const index = topo_flatten.findIndex((id) => id === typeId)
       const _type = topo_flatten[index + 1]
       if (_type) {
-        searchCIRelation(`q=_type:${_type}&root_id=${rootId}&level=1&count=10000`).then(async (res) => {
+        let q = `q=_type:${_type}&root_id=${rootId}&level=1&count=10000`
+        if (
+          Object.keys(this.level2constraint).some(
+            (le) => le < Object.keys(this.level2constraint).length && this.level2constraint[le] === '2'
+          )
+        ) {
+          q += `&ancestor_ids=${this.treeKeys
+            .slice(0, this.treeKeys.length - 1)
+            .map((item) => item.split('%')[0])
+            .join(',')}`
+        }
+        searchCIRelation(q).then(async (res) => {
           const facet = []
           const ciIds = []
           res.result.forEach((item) => {
             facet.push([item[item.unique], 0, item._id, item._type, item.unique])
             ciIds.push(item._id)
           })
+          let ancestor_ids
+          if (
+            Object.keys(this.level2constraint).some(
+              (le) => le < Object.keys(this.level2constraint).length && this.level2constraint[le] === '2'
+            )
+          ) {
+            ancestor_ids = `${this.treeKeys.map((item) => item.split('%')[0]).join(',')}`
+          }
           const promises = level.map((_level) => {
             if (_level > 1) {
               return statisticsCIRelation({
+                ancestor_ids,
                 root_ids: ciIds.join(','),
                 level: _level - 1,
                 type_ids: this.showTypes.map((type) => type.id).join(','),
@@ -889,6 +933,7 @@ export default {
           this.origShowTypeIds = showTypeIds
           this.leaf2showTypes = this.relationViews.views[this.viewName].leaf2show_types
           this.node2ShowTypes = this.relationViews.views[this.viewName].node2show_types
+          this.level2constraint = this.relationViews.views[this.viewName].level2constraint
           this.leaf = this.relationViews.views[this.viewName].leaf
           this.currentView = `${this.viewId}`
           this.typeId = this.levels[0][0]
@@ -923,6 +968,17 @@ export default {
         const _tempTree = splitTreeKey[splitTreeKey.length - 1].split('%')
         const firstCIObj = JSON.parse(_tempTree[2])
         const firstCIId = _tempTree[0]
+        let ancestor_ids
+        if (
+          Object.keys(this.level2constraint).some(
+            (le) => le < Object.keys(this.level2constraint).length && this.level2constraint[le] === '2'
+          )
+        ) {
+          const ancestor = treeKey
+            .split('@^@')
+            .slice(0, menuKey === 'delete' ? treeKey.split('@^@').length - 2 : treeKey.split('@^@').length - 1)
+          ancestor_ids = ancestor.map((item) => item.split('%')[0]).join(',')
+        }
         if (menuKey === 'delete') {
           const _tempTreeParent = splitTreeKey[splitTreeKey.length - 2].split('%')
           const that = this
@@ -935,16 +991,17 @@ export default {
               </div>
             ),
             onOk() {
-              deleteCIRelationView(_tempTreeParent[0], _tempTree[0]).then((res) => {
+              deleteCIRelationView(_tempTreeParent[0], _tempTree[0], { ancestor_ids }).then((res) => {
                 that.$message.success('删除成功！')
-                that.reload()
+                setTimeout(() => {
+                  that.reload()
+                }, 500)
               })
             },
           })
         } else {
           const childTypeId = menuKey
-          console.log(menuKey)
-          this.$refs.addTableModal.openModal(firstCIObj, firstCIId, childTypeId, 'children')
+          this.$refs.addTableModal.openModal(firstCIObj, firstCIId, childTypeId, 'children', ancestor_ids)
         }
       }
     },
@@ -964,9 +1021,21 @@ export default {
         onOk() {
           const _tempTree = that.treeKeys[that.treeKeys.length - 1].split('%')
           const first_ci_id = Number(_tempTree[0])
+          let ancestor_ids
+          if (
+            Object.keys(that.level2constraint).some(
+              (le) => le < Object.keys(that.level2constraint).length && that.level2constraint[le] === '2'
+            )
+          ) {
+            ancestor_ids = `${that.treeKeys
+              .slice(0, that.treeKeys.length - 1)
+              .map((item) => item.split('%')[0])
+              .join(',')}`
+          }
           batchDeleteCIRelation(
             that.selectedRowKeys.map((item) => item._id),
-            [first_ci_id]
+            [first_ci_id],
+            ancestor_ids
           ).then((res) => {
             that.$refs.xTable.clearCheckboxRow()
             that.$refs.xTable.clearCheckboxReserve()
@@ -1130,7 +1199,10 @@ export default {
       const $table = this.$refs['xTable']
       const data = {}
       this.columns.forEach((item) => {
-        if (!(item.field in this.initialPasswordValue) && !_.isEqual(row[item.field], this.initialInstanceList[rowIndex][item.field])) {
+        if (
+          !(item.field in this.initialPasswordValue) &&
+          !_.isEqual(row[item.field], this.initialInstanceList[rowIndex][item.field])
+        ) {
           data[item.field] = row[item.field] ?? null
         }
       })
@@ -1180,7 +1252,18 @@ export default {
     },
     sumbitFromCreateInstance({ ci_id }) {
       const first_ci_id = this.treeKeys[this.treeKeys.length - 1].split('%')[0]
-      addCIRelationView(first_ci_id, ci_id).then((res) => {
+      let ancestor_ids
+      if (
+        Object.keys(this.level2constraint).some(
+          (le) => le < Object.keys(this.level2constraint).length && this.level2constraint[le] === '2'
+        )
+      ) {
+        ancestor_ids = `${this.treeKeys
+          .slice(0, this.treeKeys.length - 1)
+          .map((item) => item.split('%')[0])
+          .join(',')}`
+      }
+      addCIRelationView(first_ci_id, ci_id, { ancestor_ids }).then((res) => {
         setTimeout(() => {
           this.loadData({}, 'refreshNumber')
         }, 500)
@@ -1270,9 +1353,7 @@ export default {
           })
           Promise.all(promises)
             .then((res) => {
-              that.$message.success({
-                message: '删除成功',
-              })
+              that.$message.success('删除成功')
             })
             .catch((e) => {
               console.log(e)

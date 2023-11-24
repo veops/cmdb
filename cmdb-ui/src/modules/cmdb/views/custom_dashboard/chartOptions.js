@@ -24,7 +24,7 @@ export const category_1_bar_options = (data, options) => {
     })
     return {
 
-        color: (options?.chartColor ?? '#6592FD,#6EE3EB,#44C2FD,#5F59F7,#1A348F,#7D8FCF,#A6D1E5,#8E56DD').split(','),
+        color: (options?.chartColor ?? '#5DADF2,#86DFB7,#5A6F96,#7BD5FF,#FFB980,#4D58D6,#D9B6E9,#8054FF').split(','),
         grid: {
             top: 15,
             left: 'left',
@@ -83,7 +83,7 @@ export const category_1_bar_options = (data, options) => {
 export const category_1_line_options = (data, options) => {
     const xData = Object.keys(data)
     return {
-        color: (options?.chartColor ?? '#6592FD,#6EE3EB,#44C2FD,#5F59F7,#1A348F,#7D8FCF,#A6D1E5,#8E56DD').split(','),
+        color: (options?.chartColor ?? '#5DADF2,#86DFB7,#5A6F96,#7BD5FF,#FFB980,#4D58D6,#D9B6E9,#8054FF').split(','),
         grid: {
             top: 15,
             left: 'left',
@@ -117,7 +117,7 @@ export const category_1_line_options = (data, options) => {
                         x2: 0,
                         y2: 1,
                         colorStops: [{
-                            offset: 0, color: (options?.chartColor ?? '#6592FD,#6EE3EB,#44C2FD,#5F59F7,#1A348F,#7D8FCF,#A6D1E5,#8E56DD').split(',')[0] // 0% 处的颜色
+                            offset: 0, color: (options?.chartColor ?? '#5DADF2,#86DFB7,#5A6F96,#7BD5FF,#FFB980,#4D58D6,#D9B6E9,#8054FF').split(',')[0] // 0% 处的颜色
                         }, {
                             offset: 1, color: '#ffffff' // 100% 处的颜色
                         }],
@@ -131,7 +131,7 @@ export const category_1_line_options = (data, options) => {
 
 export const category_1_pie_options = (data, options) => {
     return {
-        color: (options?.chartColor ?? '#6592FD,#6EE3EB,#44C2FD,#5F59F7,#1A348F,#7D8FCF,#A6D1E5,#8E56DD').split(','),
+        color: (options?.chartColor ?? '#5DADF2,#86DFB7,#5A6F96,#7BD5FF,#FFB980,#4D58D6,#D9B6E9,#8054FF').split(','),
         grid: {
             top: 10,
             left: 'left',
@@ -181,7 +181,7 @@ export const category_2_bar_options = (data, options, chartType) => {
     })
     const legend = [...new Set(_legend)]
     return {
-        color: (options?.chartColor ?? '#6592FD,#6EE3EB,#44C2FD,#5F59F7,#1A348F,#7D8FCF,#A6D1E5,#8E56DD').split(','),
+        color: (options?.chartColor ?? '#5DADF2,#86DFB7,#5A6F96,#7BD5FF,#FFB980,#4D58D6,#D9B6E9,#8054FF').split(','),
         grid: {
             top: 15,
             left: 'left',
@@ -249,7 +249,7 @@ export const category_2_bar_options = (data, options, chartType) => {
                         x2: 0,
                         y2: 1,
                         colorStops: [{
-                            offset: 0, color: (options?.chartColor ?? '#6592FD,#6EE3EB,#44C2FD,#5F59F7,#1A348F,#7D8FCF,#A6D1E5,#8E56DD').split(',')[index % 8] // 0% 处的颜色
+                            offset: 0, color: (options?.chartColor ?? '#5DADF2,#86DFB7,#5A6F96,#7BD5FF,#FFB980,#4D58D6,#D9B6E9,#8054FF').split(',')[index % 8] // 0% 处的颜色
                         }, {
                             offset: 1, color: '#ffffff' // 100% 处的颜色
                         }],
@@ -269,7 +269,7 @@ export const category_2_pie_options = (data, options) => {
         })
     })
     return {
-        color: (options?.chartColor ?? '#6592FD,#6EE3EB,#44C2FD,#5F59F7,#1A348F,#7D8FCF,#A6D1E5,#8E56DD').split(','),
+        color: (options?.chartColor ?? '#5DADF2,#86DFB7,#5A6F96,#7BD5FF,#FFB980,#4D58D6,#D9B6E9,#8054FF').split(','),
         grid: {
             top: 15,
             left: 'left',

@@ -1,13 +1,13 @@
 import { axios } from '@/utils/request'
 
-export function getFirstCIs(ciId) {
+export function getFirstCIsByCiId(ciId) {
   return axios({
     url: '/v0.1/ci_relations/' + ciId + '/first_cis',
     method: 'GET'
   })
 }
 
-export function getSecondCIs(ciId) {
+export function getSecondCIsByCiId(ciId) {
   return axios({
     url: '/v0.1/ci_relations/' + ciId + '/second_cis',
     method: 'GET'
@@ -30,11 +30,11 @@ export function statisticsCIRelation(params) {
 }
 
 // 批量添加子节点
-export function batchUpdateCIRelationChildren(ciIds, parents) {
+export function batchUpdateCIRelationChildren(ciIds, parents, ancestor_ids = undefined) {
   return axios({
     url: '/v0.1/ci_relations/batch',
     method: 'POST',
-    data: { ci_ids: ciIds, parents: parents }
+    data: { ci_ids: ciIds, parents, ancestor_ids }
   })
 }
 
@@ -48,26 +48,28 @@ export function batchUpdateCIRelationParents(ciIds, children) {
 }
 
 // 批量删除
-export function batchDeleteCIRelation(ciIds, parents) {
+export function batchDeleteCIRelation(ciIds, parents, ancestor_ids = undefined) {
   return axios({
     url: '/v0.1/ci_relations/batch',
     method: 'DELETE',
-    data: { ci_ids: ciIds, parents: parents }
+    data: { ci_ids: ciIds, parents, ancestor_ids }
   })
 }
 
 // 单个添加
-export function addCIRelationView(firstCiId, secondCiId) {
+export function addCIRelationView(firstCiId, secondCiId, data) {
   return axios({
     url: `/v0.1/ci_relations/${firstCiId}/${secondCiId}`,
     method: 'POST',
+    data
   })
 }
 
 // 单个删除
-export function deleteCIRelationView(firstCiId, secondCiId) {
+export function deleteCIRelationView(firstCiId, secondCiId, data) {
   return axios({
     url: `/v0.1/ci_relations/${firstCiId}/${secondCiId}`,
     method: 'DELETE',
+    data
   })
 }
