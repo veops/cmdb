@@ -182,6 +182,9 @@ class CIManager(object):
         need_children and res.update(CIRelationManager.get_children(ci_id, ret_key=ret_key))  # one floor
 
         ci_type = CITypeCache.get(ci.type_id)
+        if not ci_type:
+            return res
+
         res["ci_type"] = ci_type.name
 
         fields = CITypeAttributeManager.get_attr_names_by_type_id(ci.type_id) if not fields else fields
@@ -518,11 +521,13 @@ class CIManager(object):
                 item.delete(commit=False)
 
         for item in CIRelation.get_by(first_ci_id=ci_id, to_dict=False):
-            ci_relation_delete.apply_async(args=(item.first_ci_id, item.second_ci_id), queue=CMDB_QUEUE)
+            ci_relation_delete.apply_async(
+                args=(item.first_ci_id, item.second_ci_id, item.ancestor_ids), queue=CMDB_QUEUE)
             item.delete(commit=False)
 
         for item in CIRelation.get_by(second_ci_id=ci_id, to_dict=False):
-            ci_relation_delete.apply_async(args=(item.first_ci_id, item.second_ci_id), queue=CMDB_QUEUE)
+            ci_relation_delete.apply_async(
+                args=(item.first_ci_id, item.second_ci_id, item.ancestor_ids), queue=CMDB_QUEUE)
             item.delete(commit=False)
 
         ad_ci = AutoDiscoveryCI.get_by(ci_id=ci_id, to_dict=False, first=True)
@@ -886,12 +891,14 @@ class CIRelationManager(object):
 
     @classmethod
     def get_ancestor_ids(cls, ci_ids, level=1):
-        for _ in range(level):
-            cis = db.session.query(CIRelation.first_ci_id).filter(
+        level2ids = dict()
+        for _level in range(1, level + 1):
+            cis = db.session.query(CIRelation.first_ci_id, CIRelation.ancestor_ids).filter(
                 CIRelation.second_ci_id.in_(ci_ids)).filter(CIRelation.deleted.is_(False))
             ci_ids = [i.first_ci_id for i in cis]
+            level2ids[_level + 1] = {int(i.ancestor_ids.split(',')[-1]) for i in cis if i.ancestor_ids}
 
-        return ci_ids
+        return ci_ids, level2ids
 
     @staticmethod
     def _check_constraint(first_ci_id, first_type_id, second_ci_id, second_type_id, type_relation):
@@ -918,13 +925,14 @@ class CIRelationManager(object):
                     return abort(400, ErrFormat.relation_constraint.format("1-N"))
 
     @classmethod
-    def add(cls, first_ci_id, second_ci_id, more=None, relation_type_id=None):
+    def add(cls, first_ci_id, second_ci_id, more=None, relation_type_id=None, ancestor_ids=None):
 
         first_ci = CIManager.confirm_ci_existed(first_ci_id)
         second_ci = CIManager.confirm_ci_existed(second_ci_id)
 
         existed = CIRelation.get_by(first_ci_id=first_ci_id,
                                     second_ci_id=second_ci_id,
+                                    ancestor_ids=ancestor_ids,
                                     to_dict=False,
                                     first=True)
         if existed is not None:
@@ -960,11 +968,12 @@ class CIRelationManager(object):
 
                 existed = CIRelation.create(first_ci_id=first_ci_id,
                                             second_ci_id=second_ci_id,
-                                            relation_type_id=relation_type_id)
+                                            relation_type_id=relation_type_id,
+                                            ancestor_ids=ancestor_ids)
 
                 CIRelationHistoryManager().add(existed, OperateType.ADD)
 
-                ci_relation_cache.apply_async(args=(first_ci_id, second_ci_id), queue=CMDB_QUEUE)
+                ci_relation_cache.apply_async(args=(first_ci_id, second_ci_id, ancestor_ids), queue=CMDB_QUEUE)
 
         if more is not None:
             existed.upadte(more=more)
@@ -988,53 +997,56 @@ class CIRelationManager(object):
         his_manager = CIRelationHistoryManager()
         his_manager.add(cr, operate_type=OperateType.DELETE)
 
-        ci_relation_delete.apply_async(args=(cr.first_ci_id, cr.second_ci_id), queue=CMDB_QUEUE)
+        ci_relation_delete.apply_async(args=(cr.first_ci_id, cr.second_ci_id, cr.ancestor_ids), queue=CMDB_QUEUE)
 
         return cr_id
 
     @classmethod
-    def delete_2(cls, first_ci_id, second_ci_id):
+    def delete_2(cls, first_ci_id, second_ci_id, ancestor_ids=None):
         cr = CIRelation.get_by(first_ci_id=first_ci_id,
                                second_ci_id=second_ci_id,
+                               ancestor_ids=ancestor_ids,
                                to_dict=False,
                                first=True)
 
-        ci_relation_delete.apply_async(args=(first_ci_id, second_ci_id), queue=CMDB_QUEUE)
+        ci_relation_delete.apply_async(args=(first_ci_id, second_ci_id, ancestor_ids), queue=CMDB_QUEUE)
 
-        return cls.delete(cr.id)
+        return cr and cls.delete(cr.id)
 
     @classmethod
-    def batch_update(cls, ci_ids, parents, children):
+    def batch_update(cls, ci_ids, parents, children, ancestor_ids=None):
         """
         only for many to one
         :param ci_ids:
         :param parents:
         :param children:
+        :param ancestor_ids:
         :return:
         """
         if isinstance(parents, list):
             for parent_id in parents:
                 for ci_id in ci_ids:
-                    cls.add(parent_id, ci_id)
+                    cls.add(parent_id, ci_id, ancestor_ids=ancestor_ids)
 
         if isinstance(children, list):
             for child_id in children:
                 for ci_id in ci_ids:
-                    cls.add(ci_id, child_id)
+                    cls.add(ci_id, child_id, ancestor_ids=ancestor_ids)
 
     @classmethod
-    def batch_delete(cls, ci_ids, parents):
+    def batch_delete(cls, ci_ids, parents, ancestor_ids=None):
         """
         only for many to one
         :param ci_ids:
         :param parents:
+        :param ancestor_ids:
         :return:
         """
 
         if isinstance(parents, list):
             for parent_id in parents:
                 for ci_id in ci_ids:
-                    cls.delete_2(parent_id, ci_id)
+                    cls.delete_2(parent_id, ci_id, ancestor_ids=ancestor_ids)
 
 
 class CITriggerManager(object):

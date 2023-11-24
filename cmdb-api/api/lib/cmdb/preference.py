@@ -14,7 +14,10 @@ from api.lib.cmdb.attribute import AttributeManager
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.cache import CITypeCache
-from api.lib.cmdb.const import PermEnum, ResourceTypeEnum, RoleEnum
+from api.lib.cmdb.const import ConstraintEnum
+from api.lib.cmdb.const import PermEnum
+from api.lib.cmdb.const import ResourceTypeEnum
+from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.exception import AbortException
@@ -229,14 +232,28 @@ class PreferenceManager(object):
                 if not parents:
                     return
 
-            for l in leaf:
-                _find_parent(l)
+            for _l in leaf:
+                _find_parent(_l)
 
             for node_id in node2show_types:
                 node2show_types[node_id] = [CITypeCache.get(i).to_dict() for i in set(node2show_types[node_id])]
 
+            topo_flatten = list(toposort.toposort_flatten(topo))
+            level2constraint = {}
+            for i, _ in enumerate(topo_flatten[1:]):
+                ctr = CITypeRelation.get_by(
+                    parent_id=topo_flatten[i], child_id=topo_flatten[i + 1], first=True, to_dict=False)
+                level2constraint[i + 1] = ctr and ctr.constraint
+
+            if leaf2show_types.get(topo_flatten[-1]):
+                ctr = CITypeRelation.get_by(
+                    parent_id=topo_flatten[-1],
+                    child_id=leaf2show_types[topo_flatten[-1]][0], first=True, to_dict=False)
+                level2constraint[len(topo_flatten)] = ctr and ctr.constraint
+
             result[view_name] = dict(topo=list(map(list, toposort.toposort(topo))),
-                                     topo_flatten=list(toposort.toposort_flatten(topo)),
+                                     topo_flatten=topo_flatten,
+                                     level2constraint=level2constraint,
                                      leaf=leaf,
                                      leaf2show_types=leaf2show_types,
                                      node2show_types=node2show_types,
@@ -338,3 +355,29 @@ class PreferenceManager(object):
 
         for i in PreferenceTreeView.get_by(type_id=type_id, uid=uid, to_dict=False):
             i.soft_delete()
+
+    @staticmethod
+    def can_edit_relation(parent_id, child_id):
+        views = PreferenceRelationView.get_by(to_dict=False)
+        for view in views:
+            has_m2m = False
+            last_node_id = None
+            for cr in view.cr_ids:
+                _rel = CITypeRelation.get_by(parent_id=cr['parent_id'], child_id=cr['child_id'],
+                                             first=True, to_dict=False)
+                if _rel and _rel.constraint == ConstraintEnum.Many2Many:
+                    has_m2m = True
+
+                    if parent_id == _rel.parent_id and child_id == _rel.child_id:
+                        return False
+
+                if _rel:
+                    last_node_id = _rel.child_id
+
+            if parent_id == last_node_id:
+                rels = CITypeRelation.get_by(parent_id=last_node_id, to_dict=False)
+                for rel in rels:
+                    if rel.child_id == child_id and has_m2m:
+                        return False
+
+        return True

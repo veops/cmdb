@@ -9,6 +9,7 @@ from api.lib.cmdb.ci_type import CITypeRelationManager
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RoleEnum
+from api.lib.cmdb.preference import PreferenceManager
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.decorator import args_required
 from api.lib.perm.acl.acl import ACLManager
@@ -109,3 +110,10 @@ class CITypeRelationRevokeView(APIView):
         acl.revoke_resource_from_role_by_rid(resource_name, rid, ResourceTypeEnum.CI_TYPE_RELATION, perms)
 
         return self.jsonify(code=200)
+
+
+class CITypeRelationCanEditView(APIView):
+    url_prefix = "/ci_type_relations/<int:parent_id>/<int:child_id>/can_edit"
+
+    def get(self, parent_id, child_id):
+        return self.jsonify(result=PreferenceManager.can_edit_relation(parent_id, child_id))

@@ -35,6 +35,7 @@ class CIRelationSearchView(APIView):
         count = get_page_size(request.values.get("count") or request.values.get("page_size"))
 
         root_id = request.values.get('root_id')
+        ancestor_ids = request.values.get('ancestor_ids') or None  # only for many to many
         level = list(map(int, handle_arg_list(request.values.get('level', '1'))))
 
         query = request.values.get('q', "")
@@ -44,7 +45,7 @@ class CIRelationSearchView(APIView):
         reverse = request.values.get("reverse") in current_app.config.get('BOOL_TRUE')
 
         start = time.time()
-        s = Search(root_id, level, query, fl, facet, page, count, sort, reverse)
+        s = Search(root_id, level, query, fl, facet, page, count, sort, reverse, ancestor_ids=ancestor_ids)
         try:
             response, counter, total, page, numfound, facet = s.search()
         except SearchError as e:
@@ -67,9 +68,10 @@ class CIRelationStatisticsView(APIView):
         root_ids = list(map(int, handle_arg_list(request.values.get('root_ids'))))
         level = request.values.get('level', 1)
         type_ids = set(map(int, handle_arg_list(request.values.get('type_ids', []))))
+        ancestor_ids = request.values.get('ancestor_ids') or None  # only for many to many
 
         start = time.time()
-        s = Search(root_ids, level)
+        s = Search(root_ids, level, ancestor_ids=ancestor_ids)
         try:
             result = s.statistics(type_ids)
         except SearchError as e:
@@ -121,14 +123,18 @@ class CIRelationView(APIView):
     url_prefix = "/ci_relations/<int:first_ci_id>/<int:second_ci_id>"
 
     def post(self, first_ci_id, second_ci_id):
+        ancestor_ids = request.values.get('ancestor_ids') or None
+
         manager = CIRelationManager()
-        res = manager.add(first_ci_id, second_ci_id)
+        res = manager.add(first_ci_id, second_ci_id, ancestor_ids=ancestor_ids)
 
         return self.jsonify(cr_id=res)
 
     def delete(self, first_ci_id, second_ci_id):
+        ancestor_ids = request.values.get('ancestor_ids') or None
+
         manager = CIRelationManager()
-        manager.delete_2(first_ci_id, second_ci_id)
+        manager.delete_2(first_ci_id, second_ci_id, ancestor_ids=ancestor_ids)
 
         return self.jsonify(message="CIType Relation is deleted")
 
@@ -151,8 +157,9 @@ class BatchCreateOrUpdateCIRelationView(APIView):
         ci_ids = list(map(int, request.values.get('ci_ids')))
         parents = list(map(int, request.values.get('parents', [])))
         children = list(map(int, request.values.get('children', [])))
+        ancestor_ids = request.values.get('ancestor_ids') or None
 
-        CIRelationManager.batch_update(ci_ids, parents, children)
+        CIRelationManager.batch_update(ci_ids, parents, children, ancestor_ids=ancestor_ids)
 
         return self.jsonify(code=200)
 
@@ -166,7 +173,8 @@ class BatchCreateOrUpdateCIRelationView(APIView):
     def delete(self):
         ci_ids = list(map(int, request.values.get('ci_ids')))
         parents = list(map(int, request.values.get('parents', [])))
+        ancestor_ids = request.values.get('ancestor_ids') or None
 
-        CIRelationManager.batch_delete(ci_ids, parents)
+        CIRelationManager.batch_delete(ci_ids, parents, ancestor_ids=ancestor_ids)
 
         return self.jsonify(code=200)
