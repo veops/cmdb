@@ -372,7 +372,7 @@ export default {
       width: 3,
       fontColor: '#ffffff',
       bgColor: ['#6ABFFE', '#5375EB'],
-      chartColor: '#6592FD,#6EE3EB,#44C2FD,#5F59F7,#1A348F,#7D8FCF,#A6D1E5,#8E56DD', // 图表颜色
+      chartColor: '#5DADF2,#86DFB7,#5A6F96,#7BD5FF,#FFB980,#4D58D6,#D9B6E9,#8054FF', // 图表颜色
       isShowPreview: false,
       filterExp: undefined,
       previewData: null,
@@ -410,7 +410,7 @@ export default {
       this.width = width
       this.chartType = chartType
       this.filterExp = item?.options?.filter ?? ''
-      this.chartColor = item?.options?.chartColor ?? '#6592FD,#6EE3EB,#44C2FD,#5F59F7,#1A348F,#7D8FCF,#A6D1E5,#8E56DD'
+      this.chartColor = item?.options?.chartColor ?? '#5DADF2,#86DFB7,#5A6F96,#7BD5FF,#FFB980,#4D58D6,#D9B6E9,#8054FF'
       this.isShadow = item?.options?.isShadow ?? false
 
       if (chartType === 'count') {

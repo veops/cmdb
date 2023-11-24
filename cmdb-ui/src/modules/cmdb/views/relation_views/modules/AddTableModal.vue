@@ -86,6 +86,7 @@ export default {
       isFocusExpression: false,
       type: 'children',
       preferenceAttrList: [],
+      ancestor_ids: undefined,
     }
   },
   computed: {
@@ -101,13 +102,13 @@ export default {
   },
   watch: {},
   methods: {
-    async openModal(ciObj, ciId, addTypeId, type) {
-      console.log(ciObj, addTypeId)
+    async openModal(ciObj, ciId, addTypeId, type, ancestor_ids = undefined) {
       this.visible = true
       this.ciObj = ciObj
       this.ciId = ciId
       this.addTypeId = addTypeId
       this.type = type
+      this.ancestor_ids = ancestor_ids
       await getSubscribeAttributes(addTypeId).then((res) => {
         this.preferenceAttrList = res.attributes // 已经订阅的全部列
       })
@@ -168,13 +169,15 @@ export default {
       const ciIds = [...selectRecordsCurrent, ...selectRecordsReserved].map((record) => record._id)
       if (ciIds.length) {
         if (this.type === 'children') {
-          await batchUpdateCIRelationChildren(ciIds, [this.ciId])
+          await batchUpdateCIRelationChildren(ciIds, [this.ciId], this.ancestor_ids)
         } else {
           await batchUpdateCIRelationParents(ciIds, [this.ciId])
         }
-        this.$message.success('添加成功！')
-        this.handleClose()
-        this.$emit('reload')
+        setTimeout(() => {
+          this.$message.success('添加成功！')
+          this.handleClose()
+          this.$emit('reload')
+        }, 500)
       }
     },
     handleSearch() {

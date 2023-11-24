@@ -122,12 +122,12 @@
         <a-button type="primary" ghost icon="plus" @click="handleAdd">新增修改字段</a-button>
       </a-form>
     </template>
-    <!-- </a-form> -->
     <JsonEditor ref="jsonEditor" @jsonEditorOk="jsonEditorOk" />
   </CustomDrawer>
 </template>
 
 <script>
+import _ from 'lodash'
 import moment from 'moment'
 import { Select, Option } from 'element-ui'
 import { getCIType, getCITypeGroupById } from '@/modules/cmdb/api/CIType'
@@ -135,7 +135,7 @@ import { addCI } from '@/modules/cmdb/api/ci'
 import JsonEditor from '../../../components/JsonEditor/jsonEditor.vue'
 import { valueTypeMap } from '../../../utils/const'
 import CreateInstanceFormByGroup from './createInstanceFormByGroup.vue'
-import { getCITypeParent } from '@/modules/cmdb/api/CITypeRelation'
+import { getCITypeParent, getCanEditByParentIdChildId } from '@/modules/cmdb/api/CITypeRelation'
 
 export default {
   name: 'CreateInstanceForm',
@@ -166,6 +166,7 @@ export default {
       attributesByGroup: [],
       parentsType: [],
       parentsForm: {},
+      canEdit: {},
     }
   },
   computed: {
@@ -300,8 +301,16 @@ export default {
           this.batchUpdateLists = [{ name: this.attributeList[0].name }]
         })
         if (action === 'create') {
-          getCITypeParent(this.typeId).then((res) => {
-            this.parentsType = res.parents
+          getCITypeParent(this.typeId).then(async (res) => {
+            for (let i = 0; i < res.parents.length; i++) {
+              await getCanEditByParentIdChildId(res.parents[i].id, this.typeId).then((p_res) => {
+                this.canEdit = {
+                  ..._.cloneDeep(this.canEdit),
+                  [res.parents[i].id]: p_res.result,
+                }
+              })
+            }
+            this.parentsType = res.parents.filter((parent) => this.canEdit[parent.id])
             const _parentsForm = {}
             res.parents.forEach((item) => {
               const _find = item.attributes.find((attr) => attr.id === item.unique_id)
