@@ -218,6 +218,8 @@ class CIRelation(Model):
     relation_type_id = db.Column(db.Integer, db.ForeignKey("c_relation_types.id"), nullable=False)
     more = db.Column(db.Integer, db.ForeignKey("c_cis.id"))
 
+    ancestor_ids = db.Column(db.String(128), index=True)
+
     first_ci = db.relationship("CI", primaryjoin="CI.id==CIRelation.first_ci_id")
     second_ci = db.relationship("CI", primaryjoin="CI.id==CIRelation.second_ci_id")
     relation_type = db.relationship("RelationType", backref="c_ci_relations.relation_type_id")

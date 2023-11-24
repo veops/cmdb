@@ -31,6 +31,7 @@ class ErrFormat(CommonErrFormat):
     unique_key_required = "主键字段 {} 缺失"
     ci_is_already_existed = "CI 已经存在!"
     relation_constraint = "关系约束: {}, 校验失败 "
+    m2m_relation_constraint = "多对多关系 限制: 模型 {} <-> {} 已经存在多对多关系!"
     relation_not_found = "CI关系: {} 不存在"
     ci_search_Parentheses_invalid = "搜索表达式里小括号前不支持: 或、非"
 
