@@ -135,7 +135,7 @@ class AttributeHistoryManger(object):
         from api.lib.cmdb.ci import CIManager
         cis = CIManager().get_cis_by_ids(list(ci_ids),
                                          unique_required=True)
-        cis = {i['_id']: i for i in cis}
+        cis = {i['_id']: i for i in cis if i}
 
         return total, res, cis
 
