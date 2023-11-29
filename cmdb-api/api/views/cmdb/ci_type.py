@@ -105,6 +105,7 @@ class CITypeGroupView(APIView):
 
         return self.jsonify(group.to_dict())
 
+    @role_required(RoleEnum.CONFIG)
     @args_validate(CITypeGroupManager.cls)
     def put(self, gid=None):
         if "/order" in request.url:
@@ -506,3 +507,4 @@ class CITypeFilterPermissionView(APIView):
     @auth_with_app_token
     def get(self, type_id):
         return self.jsonify(CIFilterPermsCRUD().get(type_id))
+
