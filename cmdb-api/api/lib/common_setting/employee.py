@@ -726,6 +726,7 @@ class CreateEmployee(object):
         try:
             existed = self.check_acl_user(user_data)
             if not existed:
+                user_data['add_from'] = 'common'
                 return self.acl.create_user(user_data)
             return existed
         except Exception as e:
