@@ -63,20 +63,23 @@ export default {
       this.success = 0
       this.errorNum = 0
       this.errorItems = []
-      for (let i = 0; i < this.total; i++) {
-        // await this.sleep(20)
-        const item = this.upLoadData[i]
-        await uploadData(this.ciType, item)
+      const floor = Math.ceil(this.total / 6)
+      for (let i = 0; i < floor; i++) {
+        const itemList = this.upLoadData.slice(6 * i, 6 * i + 6)
+        const promises = itemList.map((x) => uploadData(this.ciType, x))
+        await Promise.allSettled(promises)
           .then((res) => {
-            console.log(res)
-            this.success += 1
-          })
-          .catch((err) => {
-            this.errorNum += 1
-            this.errorItems.push(((err.response || {}).data || {}).message || '请求出现错误，请稍后再试')
+            res.forEach((r) => {
+              if (r.status === 'fulfilled') {
+                this.success += 1
+              } else {
+                this.errorItems.push(r?.reason?.response?.data.message ?? '请求出现错误，请稍后再试')
+                this.errorNum += 1
+              }
+            })
           })
           .finally(() => {
-            this.complete += 1
+            this.complete += 6
           })
       }
     },
