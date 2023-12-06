@@ -654,13 +654,19 @@ export default {
       let errorNum = 0
       this.loading = true
       this.loadTip = `正在删除...`
-      for (let i = 0; i < this.selectedRowKeys.length; i++) {
-        await deleteCI(this.selectedRowKeys[i], false)
-          .then(() => {
-            successNum += 1
-          })
-          .catch(() => {
-            errorNum += 1
+      const floor = Math.ceil(this.selectedRowKeys.length / 6)
+      for (let i = 0; i < floor; i++) {
+        const itemList = this.selectedRowKeys.slice(6 * i, 6 * i + 6)
+        const promises = itemList.map((x) => deleteCI(x, false))
+        await Promise.allSettled(promises)
+          .then((res) => {
+            res.forEach((r) => {
+              if (r.status === 'fulfilled') {
+                successNum += 1
+              } else {
+                errorNum += 1
+              }
+            })
           })
           .finally(() => {
             this.loadTip = `正在删除，共${this.selectedRowKeys.length}个，成功${successNum}个，失败${errorNum}个`
