@@ -192,10 +192,11 @@ def configure_logger(app):
         app.logger.addHandler(handler)
 
     log_file = app.config['LOG_PATH']
-    file_handler = RotatingFileHandler(log_file,
-                                       maxBytes=2 ** 30,
-                                       backupCount=7)
-    file_handler.setLevel(getattr(logging, app.config['LOG_LEVEL']))
-    file_handler.setFormatter(formatter)
-    app.logger.addHandler(file_handler)
+    if log_file and log_file != "/dev/stdout":
+        file_handler = RotatingFileHandler(log_file,
+                                           maxBytes=2 ** 30,
+                                           backupCount=7)
+        file_handler.setLevel(getattr(logging, app.config['LOG_LEVEL']))
+        file_handler.setFormatter(formatter)
+        app.logger.addHandler(file_handler)
     app.logger.setLevel(getattr(logging, app.config['LOG_LEVEL']))
