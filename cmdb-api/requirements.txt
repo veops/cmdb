@@ -50,3 +50,4 @@ WTForms==3.0.0
 shamir~=17.12.0
 pycryptodomex>=3.19.0
 colorama>=0.4.6
+lz4>=4.3.2
