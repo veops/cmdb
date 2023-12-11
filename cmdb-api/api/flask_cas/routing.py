@@ -1,7 +1,5 @@
 # -*- coding:utf-8 -*-
 
-import json
-
 import bs4
 from flask import Blueprint
 from flask import current_app, session, request, url_for, redirect
@@ -34,8 +32,7 @@ def login():
     if request.values.get("next"):
         session["next"] = request.values.get("next")
 
-    _service = url_for('cas.login', _external=True, next=session["next"]) \
-        if session.get("next") else url_for('cas.login', _external=True)
+    _service = url_for('cas.login', _external=True)
     redirect_url = create_cas_login_url(
         current_app.config['CAS_SERVER'],
         current_app.config['CAS_LOGIN_ROUTE'],
@@ -47,8 +44,7 @@ def login():
     if request.args.get('ticket'):
 
         if validate(request.args['ticket']):
-            redirect_url = session.get("next") or \
-                           current_app.config.get("CAS_AFTER_LOGIN")
+            redirect_url = session.get("next") or current_app.config.get("CAS_AFTER_LOGIN")
             username = session.get("CAS_USERNAME")
             user = UserCache.get(username)
             login_user(user)
@@ -115,21 +111,19 @@ def validate(ticket):
 
     try:
         response = urlopen(cas_validate_url).read()
-        ticketid = _parse_tag(response, "cas:user")
-        strs = [s.strip() for s in ticketid.split('|') if s.strip()]
+        ticket_id = _parse_tag(response, "cas:user")
+        strs = [s.strip() for s in ticket_id.split('|') if s.strip()]
         username, is_valid = None, False
         if len(strs) == 1:
             username = strs[0]
             is_valid = True
-        user_info = json.loads(_parse_tag(response, "cas:other"))
-        current_app.logger.info(user_info)
     except ValueError:
         current_app.logger.error("CAS returned unexpected result")
         is_valid = False
         return is_valid
 
     if is_valid:
-        current_app.logger.debug("valid")
+        current_app.logger.debug("{}: {}".format(cas_username_session_key, username))
         session[cas_username_session_key] = username
         user = UserCache.get(username)
 
@@ -164,4 +158,5 @@ def _parse_tag(string, tag):
 
     if soup.find(tag) is None:
         return ''
+
     return soup.find(tag).string.strip()
