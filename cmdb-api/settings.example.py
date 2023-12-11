@@ -70,11 +70,17 @@ ONCE = {
 # # SSO
 CAS_SERVER = "http://sso.xxx.com"
 CAS_VALIDATE_SERVER = "http://sso.xxx.com"
-CAS_LOGIN_ROUTE = "/cas/login"
-CAS_LOGOUT_ROUTE = "/cas/logout"
-CAS_VALIDATE_ROUTE = "/cas/serviceValidate"
+CAS_LOGIN_ROUTE = "/cas/built-in/cas/login"
+CAS_LOGOUT_ROUTE = "/cas/built-in/cas/logout"
+CAS_VALIDATE_ROUTE = "/cas/built-in/cas/serviceValidate"
 CAS_AFTER_LOGIN = "/"
-DEFAULT_SERVICE = "http://127.0.0.1:8000"
+CAS_USER_MAP = {
+    "username": {"tag": "cas:user"},
+    "nickname": {"tag": "cas:attribute", "attrs": {"name": "displayName"}},
+    "email": {"tag": "cas:attribute", "attrs": {"name": "email"}},
+    "mobile": {"tag": "cas:attribute", "attrs": {"name": "phone"}},
+    "avatar": {"tag": "cas:attribute", "attrs": {"name": "avatar"}},
+}
 
 # # ldap
 AUTH_WITH_LDAP = False
