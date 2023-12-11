@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+import uuid
 
 import bs4
 from flask import Blueprint
@@ -126,6 +127,19 @@ def validate(ticket):
         current_app.logger.debug("{}: {}".format(cas_username_session_key, username))
         session[cas_username_session_key] = username
         user = UserCache.get(username)
+        if user is None:
+            current_app.logger.info("create user: {}".format(username))
+            from api.lib.perm.acl.user import UserCRUD
+            soup = bs4.BeautifulSoup(response)
+            cas_user_map = current_app.config.get('CAS_USER_MAP')
+
+            user_dict = dict()
+            for k in cas_user_map:
+                v = soup.find(cas_user_map[k]['tag'], cas_user_map[k].get('attrs', {}))
+                user_dict[k] = v and v.text or None
+            user_dict['password'] = uuid.uuid4().hex
+
+            UserCRUD.add(**user_dict)
 
         from api.lib.perm.acl.acl import ACLManager
         user_info = ACLManager.get_user_info(username)
