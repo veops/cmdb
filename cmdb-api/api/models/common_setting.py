@@ -96,3 +96,11 @@ class NoticeConfig(Model):
 
     platform = db.Column(db.VARCHAR(255), nullable=False)
     info = db.Column(db.JSON)
+
+
+class CommonFile(Model):
+    __tablename__ = 'common_file'
+
+    file_name = db.Column(db.VARCHAR(512), nullable=False, index=True)
+    origin_name = db.Column(db.VARCHAR(512), nullable=False)
+    binary = db.Column(db.LargeBinary(16777216), nullable=False)
