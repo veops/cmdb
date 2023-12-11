@@ -299,3 +299,10 @@ def common_check_new_columns():
                 except Exception as e:
                     current_app.logger.error(f"add new column [{column.name}] in table [{table_name}] err:")
                     current_app.logger.error(e)
+
+
+@click.command()
+@with_appcontext
+def common_sync_file_to_db():
+    from api.lib.common_setting.upload_file import CommonFileCRUD
+    CommonFileCRUD.sync_file_to_db()

@@ -8,6 +8,9 @@ class ErrFormat(CommonErrFormat):
 
     no_file_part = "没有文件部分"
     file_is_required = "文件是必须的"
+    file_not_found = "文件不存在"
+    file_type_not_allowed = "文件类型不允许"
+    upload_failed = "上传失败: {}"
 
     direct_supervisor_is_not_self = "直属上级不能是自己"
     parent_department_is_not_self = "上级部门不能是自己"
