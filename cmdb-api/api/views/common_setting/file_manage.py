@@ -3,9 +3,10 @@ import os
 
 from flask import request, abort, current_app, send_from_directory
 from werkzeug.utils import secure_filename
+import lz4.frame
 
 from api.lib.common_setting.resp_format import ErrFormat
-from api.lib.common_setting.upload_file import allowed_file, generate_new_file_name
+from api.lib.common_setting.upload_file import allowed_file, generate_new_file_name, CommonFileCRUD
 from api.resource import APIView
 
 prefix = '/file'
@@ -28,7 +29,8 @@ class GetFileView(APIView):
     url_prefix = (f'{prefix}/<string:_filename>',)
 
     def get(self, _filename):
-        return send_from_directory(current_app.config['UPLOAD_DIRECTORY_FULL'], _filename, as_attachment=True)
+        file_stream = CommonFileCRUD.get_file(_filename)
+        return self.send_file(file_stream, as_attachment=True, download_name=_filename)
 
 
 class PostFileView(APIView):
@@ -53,11 +55,20 @@ class PostFileView(APIView):
                 filename = file.filename
 
         if allowed_file(filename, current_app.config.get('ALLOWED_EXTENSIONS', ALLOWED_EXTENSIONS)):
-            filename = generate_new_file_name(filename)
-            filename = secure_filename(filename)
-            file.save(os.path.join(
-                current_app.config['UPLOAD_DIRECTORY_FULL'], filename))
+            new_filename = generate_new_file_name(filename)
+            new_filename = secure_filename(new_filename)
+            file_content = file.read()
+            compressed_data = lz4.frame.compress(file_content)
+            try:
+                CommonFileCRUD.add_file(
+                    origin_name=filename,
+                    file_name=new_filename,
+                    binary=compressed_data,
+                )
 
-            return self.jsonify(file_name=filename)
+                return self.jsonify(file_name=new_filename)
+            except Exception as e:
+                current_app.logger.error(e)
+                abort(400, ErrFormat.upload_failed.format(e))
 
-        abort(400, 'Extension not allow')
+        abort(400, ErrFormat.file_type_not_allowed.format(filename))
