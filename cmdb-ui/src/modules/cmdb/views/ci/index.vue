@@ -879,6 +879,10 @@ export default {
     unsubscribe(ciType, type = 'all') {
       const promises = [subscribeCIType(this.typeId, ''), subscribeTreeView(this.typeId, '')]
       Promise.all(promises).then(() => {
+        const lastTypeId = window.localStorage.getItem('ops_ci_typeid') || undefined
+        if (Number(ciType) === Number(lastTypeId)) {
+          localStorage.setItem('ops_ci_typeid', '')
+        }
         this.$message.success('取消订阅成功')
         this.resetRoute()
         this.$router.push('/cmdb/preference')

@@ -314,6 +314,12 @@ export default {
           }
 
           Promise.all(promises).then(() => {
+            if (type === 'all' || type === 'ci') {
+              const lastTypeId = window.localStorage.getItem('ops_ci_typeid') || undefined
+              if (Number(ciType.id) === Number(lastTypeId)) {
+                localStorage.setItem('ops_ci_typeid', '')
+              }
+            }
             that.$message.success('取消订阅成功')
             that.resetRoute()
           })
