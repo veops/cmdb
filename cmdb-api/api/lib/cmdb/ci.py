@@ -514,9 +514,9 @@ class CIManager(object):
                 ci_delete_trigger.apply_async(args=(trigger, OperateType.DELETE, ci_dict), queue=CMDB_QUEUE)
 
         attrs = CITypeAttribute.get_by(type_id=ci.type_id, to_dict=False)
-        attr_names = set([AttributeCache.get(attr.attr_id).name for attr in attrs])
-        for attr_name in attr_names:
-            value_table = TableMap(attr_name=attr_name).table
+        attrs = [AttributeCache.get(attr.attr_id) for attr in attrs]
+        for attr in attrs:
+            value_table = TableMap(attr=attr).table
             for item in value_table.get_by(ci_id=ci_id, to_dict=False):
                 item.delete(commit=False)
 
