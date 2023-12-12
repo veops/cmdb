@@ -19,7 +19,9 @@ from flask.json.provider import DefaultJSONProvider
 import api.views.entry
 from api.extensions import (bcrypt, cache, celery, cors, db, es, login_manager, migrate, rd)
 from api.extensions import inner_secrets
-from api.flask_cas import CAS
+from api.lib.perm.authentication.cas import CAS
+from api.lib.perm.authentication.oauth2 import OAuth2
+from api.lib.perm.authentication.oidc import OIDC
 from api.lib.secrets.secrets import InnerKVManger
 from api.models.acl import User
 
@@ -96,6 +98,8 @@ def create_app(config_object="settings"):
     register_shell_context(app)
     register_commands(app)
     CAS(app)
+    OIDC(app)
+    OAuth2(app)
     app.wsgi_app = ReverseProxy(app.wsgi_app)
     configure_upload_dir(app)
 
