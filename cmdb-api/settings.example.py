@@ -68,6 +68,7 @@ ONCE = {
 }
 
 # # SSO
+AUTH_WITH_CAS = False
 CAS_SERVER = "http://sso.xxx.com"
 CAS_VALIDATE_SERVER = "http://sso.xxx.com"
 CAS_LOGIN_ROUTE = "/cas/built-in/cas/login"
