@@ -67,10 +67,12 @@ ONCE = {
     }
 }
 
-# # SSO
+# =============================== Authentication ===========================================================
+
+# # CAS
 AUTH_WITH_CAS = False
-CAS_SERVER = "http://sso.xxx.com"
-CAS_VALIDATE_SERVER = "http://sso.xxx.com"
+CAS_SERVER = "https://{your-casdoor-hostname}"
+CAS_VALIDATE_SERVER = "https://{your-casdoor-hostname}"
 CAS_LOGIN_ROUTE = "/cas/built-in/cas/login"
 CAS_LOGOUT_ROUTE = "/cas/built-in/cas/logout"
 CAS_VALIDATE_ROUTE = "/cas/built-in/cas/serviceValidate"
@@ -83,11 +85,40 @@ CAS_USER_MAP = {
     "avatar": {"tag": "cas:attribute", "attrs": {"name": "avatar"}},
 }
 
-# # ldap
+# # OAuth2.0
+AUTH_WITH_OAUTH2 = False
+OAUTH2_CLIENT_ID = ""
+OAUTH2_CLIENT_SECRET = ""
+OAUTH2_AUTHORIZE_URL = "https://{your-casdoor-hostname}/login/oauth/authorize"
+OAUTH2_TOKEN_URL = "https://{your-casdoor-hostname}/api/login/oauth/access_token"
+OAUTH2_USER_INFO = {
+    "url": "https://{your-casdoor-hostname}/api/userinfo",
+    "email": lambda x: x['email'],
+    "username": lambda x: x['name']
+}
+OAUTH2_SCOPES = ["profile email"]
+OAUTH2_AFTER_LOGIN = "/"
+
+# # OIDC
+AUTH_WITH_OIDC = False
+OIDC_CLIENT_ID = ""
+OIDC_CLIENT_SECRET = ""
+OIDC_AUTHORIZE_URL = "https://{your-casdoor-hostname}/login/oauth/authorize"
+OIDC_TOKEN_URL = "https://{your-casdoor-hostname}/api/login/oauth/access_token"
+OIDC_USER_INFO = {
+    "url": "https://{your-casdoor-hostname}/api/userinfo",
+    "email": lambda x: x['email'],
+    "username": lambda x: x['name']
+}
+OIDC_SCOPES = ["openid profile email"]
+OIDC_AFTER_LOGIN = "/"
+
+# # LDAP
 AUTH_WITH_LDAP = False
 LDAP_SERVER = ''
 LDAP_DOMAIN = ''
 LDAP_USER_DN = 'cn={},ou=users,dc=xxx,dc=com'
+# ==========================================================================================================
 
 # # pagination
 DEFAULT_PAGE_COUNT = 50

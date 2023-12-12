@@ -15,7 +15,7 @@ try:
 except ImportError:
     from flask import _request_ctx_stack as stack
 
-from api.flask_cas import routing
+from . import routing
 
 
 class CAS(object):
