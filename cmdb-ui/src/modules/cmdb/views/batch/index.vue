@@ -29,7 +29,6 @@
 </template>
 
 <script>
-import moment from 'moment'
 import { mapState } from 'vuex'
 import CiTypeChoice from './modules/CiTypeChoice'
 import CiUploadTable from './modules/CiUploadTable'
@@ -74,22 +73,6 @@ export default {
           const _ele = {}
           item.forEach((ele, j) => {
             if (ele !== undefined && ele !== null) {
-              const _find = this.ciTypeAttrs.attributes.find(
-                (attr) => attr.alias === dataList[0][j] || attr.name === dataList[0][j]
-              )
-              if (_find?.value_type === '4') {
-                _ele[dataList[0][j]] = moment(ele).add(1, 'days').format('YYYY-MM-DD')
-              } else if (_find?.value_type === '3') {
-                _ele[dataList[0][j]] = moment(ele)
-                  .add(43, 'seconds')
-                  .format('YYYY-MM-DD HH:mm:ss')
-              } else if (_find?.value_type === '5') {
-                _ele[dataList[0][j]] = moment(ele)
-                  .subtract(5, 'minutes')
-                  .format('HH:mm:ss')
-              } else {
-                _ele[dataList[0][j]] = ele
-              }
               _ele[dataList[0][j]] = ele
             }
           })
