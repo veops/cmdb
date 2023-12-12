@@ -8,7 +8,6 @@
       class="ops-stripe-table"
       :max-height="200"
       :data="dataSource"
-      resizable
     >
       <vxe-column type="seq" width="40" />
       <vxe-column
