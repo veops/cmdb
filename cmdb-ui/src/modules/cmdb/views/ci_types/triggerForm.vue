@@ -372,7 +372,7 @@ export default {
     },
     async open(property, attrList) {
       this.visible = true
-      this.getNoticeConfigAppBot()
+      await this.getNoticeConfigAppBot()
       this.attrList = attrList
       if (property.has_trigger) {
         this.triggerId = property.trigger.id
