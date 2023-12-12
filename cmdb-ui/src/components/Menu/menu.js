@@ -95,6 +95,10 @@ export default {
           const unsubTree = subscribeTreeView(citypeId, '')
           Promise.all([unsubCIType, unsubTree]).then(() => {
             that.$message.success('取消订阅成功')
+            const lastTypeId = window.localStorage.getItem('ops_ci_typeid') || undefined
+            if (Number(citypeId) === Number(lastTypeId)) {
+              localStorage.setItem('ops_ci_typeid', '')
+            }
             // 删除路由
             const href = window.location.href
             const hrefSplit = href.split('/')
