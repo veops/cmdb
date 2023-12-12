@@ -7,7 +7,7 @@ export function processFile(fileObj) {
     reader.readAsBinaryString(fileObj)
     reader.onload = function (e) {
       const data = e.target.result
-      const workbook = XLSX.read(data, { type: 'binary' })
+      const workbook = XLSX.read(data, { type: 'binary', cellDates: true, })
       const sheet = workbook.Sheets[workbook.SheetNames[0]]
       const lt = XLSX.utils.sheet_to_json(sheet, { header: 1 })
       resolve(lt)
@@ -56,7 +56,6 @@ export function any(ArrayList) {
 
 // 去除一个二维数组 底下为空的部分
 export function filterNull(twoDimArray) {
-  console.log(twoDimArray)
   const newArray = []
   for (let i = 0; i < twoDimArray.length; i++) {
     if (any(twoDimArray[i])) {
