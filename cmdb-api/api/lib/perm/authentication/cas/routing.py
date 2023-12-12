@@ -3,8 +3,13 @@ import uuid
 
 import bs4
 from flask import Blueprint
-from flask import current_app, session, request, url_for, redirect
-from flask_login import login_user, logout_user
+from flask import current_app
+from flask import redirect
+from flask import request
+from flask import session
+from flask import url_for
+from flask_login import login_user
+from flask_login import logout_user
 from six.moves.urllib_request import urlopen
 
 from api.lib.perm.acl.cache import UserCache
@@ -15,7 +20,8 @@ from .cas_urls import create_cas_validate_url
 blueprint = Blueprint('cas', __name__)
 
 
-@blueprint.route('/api/sso/login')
+@blueprint.route('/api/cas/login')
+# @blueprint.route('/api/sso/login')
 def login():
     """
     This route has two purposes. First, it is used by the user
@@ -63,7 +69,8 @@ def login():
     return redirect(redirect_url)
 
 
-@blueprint.route('/api/sso/logout')
+@blueprint.route('/api/cas/logout')
+# @blueprint.route('/api/sso/logout')
 def logout():
     """
     When the user accesses this route they are logged out.
