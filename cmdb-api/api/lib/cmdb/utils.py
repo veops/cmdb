@@ -12,7 +12,7 @@ import api.models.cmdb as model
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.const import ValueTypeEnum
 
-TIME_RE = re.compile(r"^20|21|22|23|[0-1]\d:[0-5]\d:[0-5]\d$")
+TIME_RE = re.compile(r'(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d')
 
 
 def string2int(x):
