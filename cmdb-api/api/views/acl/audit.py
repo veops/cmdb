@@ -24,6 +24,7 @@ class AuditLogView(APIView):
             'role': AuditCRUD.search_role,
             'trigger': AuditCRUD.search_trigger,
             'resource': AuditCRUD.search_resource,
+            'login': AuditCRUD.search_login,
         }
         if name not in func_map:
             abort(400, f'wrong {name}, please use {func_map.keys()}')
