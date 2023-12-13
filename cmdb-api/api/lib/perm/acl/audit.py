@@ -1,14 +1,19 @@
 # -*- coding:utf-8 -*-
+
+import datetime
 import itertools
 import json
 from enum import Enum
 from typing import List
 
-from flask import has_request_context, request
+from flask import has_request_context
+from flask import request
 from flask_login import current_user
 from sqlalchemy import func
 
+from api.extensions import db
 from api.lib.perm.acl import AppCache
+from api.models.acl import AuditLoginLog
 from api.models.acl import AuditPermissionLog
 from api.models.acl import AuditResourceLog
 from api.models.acl import AuditRoleLog
@@ -283,6 +288,27 @@ class AuditCRUD(object):
 
         return data
 
+    @staticmethod
+    def search_login(_, q=None, page=1, page_size=10, start=None, end=None):
+        query = db.session.query(AuditLoginLog)
+
+        if start:
+            query = query.filter(AuditLoginLog.login_at >= start)
+        if end:
+            query = query.filter(AuditLoginLog.login_at <= end)
+
+        if q:
+            query = query.filter(AuditLoginLog.username == q)
+
+        records = query.order_by(
+            AuditLoginLog.id.desc()).offset((page - 1) * page_size).limit(page_size).all()
+
+        data = {
+            'data': [r.to_dict() for r in records],
+        }
+
+        return data
+
     @classmethod
     def add_role_log(cls, app_id, operate_type: AuditOperateType,
                      scope: AuditScope, link_id: int, origin: dict, current: dict, extra: dict,
@@ -348,3 +374,24 @@ class AuditCRUD(object):
         AuditTriggerLog.create(app_id=app_id, trigger_id=trigger_id, operate_uid=user_id,
                                operate_type=operate_type.value,
                                origin=origin, current=current, extra=extra, source=source.value)
+
+    @classmethod
+    def add_login_log(cls, username, is_ok, description, _id=None, logout_at=None):
+        if _id is not None:
+            existed = AuditLoginLog.get_by_id(_id)
+            if existed is not None:
+                existed.update(logout_at=logout_at)
+                return
+
+        payload = dict(username=username,
+                       is_ok=is_ok,
+                       description=description,
+                       logout_at=logout_at,
+                       ip=request.headers.get('X-Real-IP') or request.remote_addr,
+                       browser=request.headers.get('User-Agent'),
+                       )
+
+        if logout_at is None:
+            payload['login_at'] = datetime.datetime.now()
+
+        return AuditLoginLog.create(**payload).id

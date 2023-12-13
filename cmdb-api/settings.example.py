@@ -11,10 +11,10 @@ from environs import Env
 env = Env()
 env.read_env()
 
-ENV = env.str("FLASK_ENV", default="production")
-DEBUG = ENV == "development"
-SECRET_KEY = env.str("SECRET_KEY")
-BCRYPT_LOG_ROUNDS = env.int("BCRYPT_LOG_ROUNDS", default=13)
+ENV = env.str('FLASK_ENV', default='production')
+DEBUG = ENV == 'development'
+SECRET_KEY = env.str('SECRET_KEY')
+BCRYPT_LOG_ROUNDS = env.int('BCRYPT_LOG_ROUNDS', default=13)
 DEBUG_TB_ENABLED = DEBUG
 DEBUG_TB_INTERCEPT_REDIRECTS = False
 
@@ -23,7 +23,7 @@ ERROR_CODES = [400, 401, 403, 404, 405, 500, 502]
 # # database
 SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{user}:{password}@127.0.0.1:3306/{db}?charset=utf8'
 SQLALCHEMY_BINDS = {
-    "user": 'mysql+pymysql://{user}:{password}@127.0.0.1:3306/{db}?charset=utf8'
+    'user': 'mysql+pymysql://{user}:{password}@127.0.0.1:3306/{db}?charset=utf8'
 }
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -32,11 +32,11 @@ SQLALCHEMY_ENGINE_OPTIONS = {
 }
 
 # # cache
-CACHE_TYPE = "redis"
-CACHE_REDIS_HOST = "127.0.0.1"
+CACHE_TYPE = 'redis'
+CACHE_REDIS_HOST = '127.0.0.1'
 CACHE_REDIS_PORT = 6379
-CACHE_REDIS_PASSWORD = ""
-CACHE_KEY_PREFIX = "CMDB::"
+CACHE_REDIS_PASSWORD = ''
+CACHE_KEY_PREFIX = 'CMDB::'
 CACHE_DEFAULT_TIMEOUT = 3000
 
 # # log
@@ -55,10 +55,10 @@ DEFAULT_MAIL_SENDER = ''
 
 # # queue
 CELERY = {
-    "broker_url": 'redis://127.0.0.1:6379/2',
-    "result_backend": "redis://127.0.0.1:6379/2",
-    "broker_vhost": "/",
-    "broker_connection_retry_on_startup": True
+    'broker_url': 'redis://127.0.0.1:6379/2',
+    'result_backend': 'redis://127.0.0.1:6379/2',
+    'broker_vhost': '/',
+    'broker_connection_retry_on_startup': True
 }
 ONCE = {
     'backend': 'celery_once.backends.Redis',
@@ -70,68 +70,78 @@ ONCE = {
 # =============================== Authentication ===========================================================
 
 # # CAS
-AUTH_WITH_CAS = False
-CAS_SERVER = "https://{your-casdoor-hostname}"
-CAS_VALIDATE_SERVER = "https://{your-casdoor-hostname}"
-CAS_LOGIN_ROUTE = "/cas/built-in/cas/login"
-CAS_LOGOUT_ROUTE = "/cas/built-in/cas/logout"
-CAS_VALIDATE_ROUTE = "/cas/built-in/cas/serviceValidate"
-CAS_AFTER_LOGIN = "/"
-CAS_USER_MAP = {
-    "username": {"tag": "cas:user"},
-    "nickname": {"tag": "cas:attribute", "attrs": {"name": "displayName"}},
-    "email": {"tag": "cas:attribute", "attrs": {"name": "email"}},
-    "mobile": {"tag": "cas:attribute", "attrs": {"name": "phone"}},
-    "avatar": {"tag": "cas:attribute", "attrs": {"name": "avatar"}},
-}
+CAS = dict(
+    enabled=False,
+    cas_server='https://{your-CASServer-hostname}',
+    cas_validate_server='https://{your-CASServer-hostname}',
+    cas_login_route='/cas/built-in/cas/login',
+    cas_logout_route='/cas/built-in/cas/logout',
+    cas_validate_route='/cas/built-in/cas/serviceValidate',
+    cas_after_login='/',
+    cas_user_map={
+        'username': {'tag': 'cas:user'},
+        'nickname': {'tag': 'cas:attribute', 'attrs': {'name': 'displayName'}},
+        'email': {'tag': 'cas:attribute', 'attrs': {'name': 'email'}},
+        'mobile': {'tag': 'cas:attribute', 'attrs': {'name': 'phone'}},
+        'avatar': {'tag': 'cas:attribute', 'attrs': {'name': 'avatar'}},
+    }
+)
 
 # # OAuth2.0
-AUTH_WITH_OAUTH2 = False
-OAUTH2_CLIENT_ID = ""
-OAUTH2_CLIENT_SECRET = ""
-OAUTH2_AUTHORIZE_URL = "https://{your-casdoor-hostname}/login/oauth/authorize"
-OAUTH2_TOKEN_URL = "https://{your-casdoor-hostname}/api/login/oauth/access_token"
-OAUTH2_USER_INFO = {
-    "url": "https://{your-casdoor-hostname}/api/userinfo",
-    "email": lambda x: x['email'],
-    "username": lambda x: x['name']
-}
-OAUTH2_SCOPES = ["profile email"]
-OAUTH2_AFTER_LOGIN = "/"
+OAUTH2 = dict(
+    enabled=False,
+    client_id='',
+    client_secret='',
+    authorize_url='https://{your-OAuth2Server-hostname}/login/oauth/authorize',
+    token_url='https://{your-OAuth2Server-hostname}/api/login/oauth/access_token',
+    scopes=['profile', 'email'],
+    user_info={
+        'url': 'https://{your-OAuth2Server-hostname}/api/userinfo',
+        'email': 'email',
+        'username': 'name',
+        'avatar': 'picture'
+    },
+    after_login='/'
+)
 
 # # OIDC
-AUTH_WITH_OIDC = False
-OIDC_CLIENT_ID = ""
-OIDC_CLIENT_SECRET = ""
-OIDC_AUTHORIZE_URL = "https://{your-casdoor-hostname}/login/oauth/authorize"
-OIDC_TOKEN_URL = "https://{your-casdoor-hostname}/api/login/oauth/access_token"
-OIDC_USER_INFO = {
-    "url": "https://{your-casdoor-hostname}/api/userinfo",
-    "email": lambda x: x['email'],
-    "username": lambda x: x['name']
-}
-OIDC_SCOPES = ["openid profile email"]
-OIDC_AFTER_LOGIN = "/"
+OIDC = dict(
+    enabled=False,
+    client_id='',
+    client_secret='',
+    authorize_url='https://{your-OIDCServer-hostname}/login/oauth/authorize',
+    token_url='https://{your-OIDCServer-hostname}/api/login/oauth/access_token',
+    scopes=['openid', 'profile', 'email'],
+    user_info={
+        'url': 'https://{your-OIDCServer-hostname}/api/userinfo',
+        'email': 'email',
+        'username': 'name',
+        'avatar': 'picture'
+    },
+    after_login='/'
+)
 
 # # LDAP
-AUTH_WITH_LDAP = False
-LDAP_SERVER = ''
-LDAP_DOMAIN = ''
-LDAP_USER_DN = 'cn={},ou=users,dc=xxx,dc=com'
+LDAP = dict(
+    enabled=False,
+    ldap_server='',
+    ldap_domain='',
+    ldap_user_dn='cn={},ou=users,dc=xxx,dc=com'
+)
 # ==========================================================================================================
 
 # # pagination
 DEFAULT_PAGE_COUNT = 50
 
 # # permission
-WHITE_LIST = ["127.0.0.1"]
+WHITE_LIST = ['127.0.0.1']
 USE_ACL = True
 
 # # elastic search
 ES_HOST = '127.0.0.1'
 USE_ES = False
 
-BOOL_TRUE = ['true', 'TRUE', 'True', True, '1', 1, "Yes", "YES", "yes", 'Y', 'y']
+BOOL_TRUE = ['true', 'TRUE', 'True', True, '1', 1, 'Yes', 'YES', 'yes', 'Y', 'y']
 
 # # messenger
 USE_MESSENGER = True
