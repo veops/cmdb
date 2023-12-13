@@ -1,11 +1,16 @@
 <template>
   <div class="cmdb-batch-upload" :style="{ height: `${windowHeight - 64}px` }">
     <div id="title">
-      <ci-type-choice @getCiTypeAttr="showCiType" />
+      <ci-type-choice ref="ciTypeChoice" @getCiTypeAttr="showCiType" />
     </div>
     <a-row>
       <a-col :span="12">
-        <upload-file-form :ciType="ciType" ref="uploadFileForm" @uploadDone="uploadDone"></upload-file-form>
+        <upload-file-form
+          :isUploading="isUploading"
+          :ciType="ciType"
+          ref="uploadFileForm"
+          @uploadDone="uploadDone"
+        ></upload-file-form>
       </a-col>
       <a-col :span="24" v-if="ciType && uploadData.length">
         <CiUploadTable :ciTypeAttrs="ciTypeAttrs" ref="ciUploadTable" :uploadData="uploadData"></CiUploadTable>
@@ -13,15 +18,19 @@
           <a-space size="large">
             <a-button type="primary" ghost @click="handleCancel">取消</a-button>
             <a-button @click="handleUpload" type="primary">上传</a-button>
+            <a-button v-if="hasError && !isUploading" @click="downloadError" type="primary">失败下载</a-button>
           </a-space>
         </div>
       </a-col>
-      <a-col :span="24">
+      <a-col :span="24" v-if="ciType">
         <upload-result
           ref="uploadResult"
           :upLoadData="uploadData"
           :ciType="ciType"
           :unique-field="uniqueField"
+          :isUploading="isUploading"
+          @uploadResultDone="uploadResultDone"
+          @uploadResultError="uploadResultError"
         ></upload-result>
       </a-col>
     </a-row>
@@ -52,7 +61,8 @@ export default {
       ciType: 0,
       uniqueField: '',
       uniqueId: 0,
-      displayUpload: true,
+      isUploading: false,
+      hasError: false,
     }
   },
   computed: {
@@ -60,13 +70,12 @@ export default {
       windowHeight: (state) => state.windowHeight,
     }),
   },
-  inject: ['reload'],
   methods: {
     showCiType(message) {
-      this.ciTypeAttrs = message
-      this.ciType = message.type_id
-      this.uniqueField = message.unique
-      this.uniqueId = message.unique_id
+      this.ciTypeAttrs = message ?? {}
+      this.ciType = message?.type_id ?? 0
+      this.uniqueField = message?.unique ?? ''
+      this.uniqueId = message?.unique_id ?? 0
     },
     uploadDone(dataList) {
       const _uploadData = filterNull(dataList).map((item, i) => {
@@ -77,13 +86,13 @@ export default {
               const _find = this.ciTypeAttrs.attributes.find(
                 (attr) => attr.alias === dataList[0][j] || attr.name === dataList[0][j]
               )
-              if (_find?.value_type === '4') {
+              if (_find?.value_type === '4' && typeof ele === 'number') {
                 _ele[dataList[0][j]] = moment(Math.round((ele - 25569) * 86400 * 1000 - 28800000)).format('YYYY-MM-DD')
-              } else if (_find?.value_type === '3') {
+              } else if (_find?.value_type === '3' && typeof ele === 'number') {
                 _ele[dataList[0][j]] = moment(Math.round((ele - 25569) * 86400 * 1000 - 28800000)).format(
                   'YYYY-MM-DD HH:mm:ss'
                 )
-              } else if (_find?.value_type === '5') {
+              } else if (_find?.value_type === '5' && typeof ele === 'number') {
                 _ele[dataList[0][j]] = moment(Math.round(ele * 86400 * 1000 - 28800000)).format('HH:mm:ss')
               } else {
                 _ele[dataList[0][j]] = ele
@@ -95,6 +104,9 @@ export default {
         return item
       })
       this.uploadData = _uploadData.slice(1)
+      this.hasError = false
+      this.isUploading = false
+      this.$refs.uploadResult.visible = false
     },
     handleUpload() {
       if (!this.ciType) {
@@ -102,6 +114,7 @@ export default {
         return
       }
       if (this.uploadData && this.uploadData.length > 0) {
+        this.isUploading = true
         this.$nextTick(() => {
           this.$refs.uploadResult.upload2Server()
         })
@@ -110,7 +123,24 @@ export default {
       }
     },
     handleCancel() {
-      this.reload()
+      if (!this.isUploading) {
+        this.showCiType(null)
+        this.$refs.ciTypeChoice.selectNum = null
+        this.hasError = false
+      } else {
+        this.$message.warning('批量上传已取消')
+        this.isUploading = false
+      }
+    },
+    uploadResultDone() {
+      this.isUploading = false
+    },
+    uploadResultError(index) {
+      this.hasError = true
+      this.$refs.ciUploadTable.uploadResultError(index)
+    },
+    downloadError() {
+      this.$refs.ciUploadTable.downloadError()
     },
   },
 }
