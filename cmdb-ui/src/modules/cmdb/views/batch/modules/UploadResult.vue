@@ -34,6 +34,10 @@ export default {
       required: true,
       type: String,
     },
+    isUploading: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function() {
     return {
@@ -51,13 +55,6 @@ export default {
     },
   },
   methods: {
-    async sleep(n) {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve()
-        }, n || 5)
-      })
-    },
     async upload2Server() {
       this.visible = true
       this.success = 0
@@ -65,22 +62,31 @@ export default {
       this.errorItems = []
       const floor = Math.ceil(this.total / 6)
       for (let i = 0; i < floor; i++) {
-        const itemList = this.upLoadData.slice(6 * i, 6 * i + 6)
-        const promises = itemList.map((x) => uploadData(this.ciType, x))
-        await Promise.allSettled(promises)
-          .then((res) => {
-            res.forEach((r) => {
-              if (r.status === 'fulfilled') {
-                this.success += 1
-              } else {
-                this.errorItems.push(r?.reason?.response?.data.message ?? '请求出现错误，请稍后再试')
-                this.errorNum += 1
-              }
+        if (this.isUploading) {
+          const itemList = this.upLoadData.slice(6 * i, 6 * i + 6)
+          const promises = itemList.map((x) => uploadData(this.ciType, x))
+          await Promise.allSettled(promises)
+            .then((res) => {
+              res.forEach((r, j) => {
+                if (r.status === 'fulfilled') {
+                  this.success += 1
+                } else {
+                  this.errorItems.push(r?.reason?.response?.data.message ?? '请求出现错误，请稍后再试')
+                  this.errorNum += 1
+                  this.$emit('uploadResultError', 6 * i + j)
+                }
+              })
             })
-          })
-          .finally(() => {
-            this.complete += 6
-          })
+            .finally(() => {
+              this.complete += 6
+            })
+        } else {
+          break
+        }
+      }
+      if (this.isUploading) {
+        this.$emit('uploadResultDone')
+        this.$message.success('批量上传已完成')
       }
     },
   },

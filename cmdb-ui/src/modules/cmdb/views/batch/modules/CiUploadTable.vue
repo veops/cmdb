@@ -1,6 +1,7 @@
 <template>
   <div class="cmdb-batch-upload-table">
     <vxe-table
+      ref="xTable"
       stripe
       show-header-overflow
       show-overflow=""
@@ -9,6 +10,7 @@
       :max-height="200"
       :data="dataSource"
       resizable
+      :row-style="rowStyle"
     >
       <vxe-column type="seq" width="40" />
       <vxe-column
@@ -37,7 +39,9 @@ export default {
     },
   },
   data() {
-    return {}
+    return {
+      errorIndexList: [],
+    }
   },
   computed: {
     columns() {
@@ -65,7 +69,33 @@ export default {
       return _.cloneDeep(this.uploadData)
     },
   },
-  methods: {},
+  watch: {
+    uploadData() {
+      this.errorIndexList = []
+    },
+  },
+  methods: {
+    uploadResultError(index) {
+      const _errorIndexList = _.cloneDeep(this.errorIndexList)
+      _errorIndexList.push(index)
+      this.errorIndexList = _errorIndexList
+    },
+    rowStyle({ rowIndex }) {
+      if (this.errorIndexList.includes(rowIndex)) {
+        return 'color:red;'
+      }
+    },
+    downloadError() {
+      const data = this.uploadData.filter((item, index) => this.errorIndexList.includes(index))
+      this.$refs.xTable.exportData({
+        data,
+        type: 'xlsx',
+        columnFilterMethod({ column }) {
+          return column.property
+        },
+      })
+    },
+  },
 }
 </script>
 <style lang="less" scoped>
