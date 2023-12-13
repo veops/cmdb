@@ -7,7 +7,7 @@
       accept=".xls,.xlsx"
       :showUploadList="false"
       :fileList="fileList"
-      :disabled="!ciType"
+      :disabled="!ciType || isUploading"
     >
       <img :style="{ width: '80px', height: '80px' }" src="@/assets/file_upload.png" />
       <p class="ant-upload-text">点击或拖拽文件至此上传！</p>
@@ -29,7 +29,11 @@ export default {
     ciType: {
       type: Number,
       default: 0,
-    }
+    },
+    isUploading: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -40,7 +44,20 @@ export default {
       percent: 0,
     }
   },
-
+  watch: {
+    ciType: {
+      handler(newValue) {
+        if (!newValue) {
+          this.ciItemNum = 0
+          this.fileList = []
+          this.dataList = []
+          this.progressStatus = 'active'
+          this.percent = 0
+          this.$emit('uploadDone', this.dataList)
+        }
+      },
+    },
+  },
   methods: {
     customRequest(data) {
       this.fileList = [data.file]

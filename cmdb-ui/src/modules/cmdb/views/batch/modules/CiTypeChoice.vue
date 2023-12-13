@@ -8,6 +8,7 @@
       :style="{ width: '300px' }"
       class="ops-select"
       :filter-option="filterOption"
+      v-model="selectNum"
     >
       <a-select-option v-for="ciType in ciTypeList" :key="ciType.name" :value="ciType.id">{{
         ciType.alias
@@ -99,7 +100,7 @@ export default {
     return {
       ciTypeList: [],
       ciTypeName: '',
-      selectNum: 0,
+      selectNum: null,
       selectCiTypeAttrList: [],
       visible: false,
       checkedAttrs: [],
@@ -131,7 +132,6 @@ export default {
   methods: {
     selectCiType(el) {
       // 当选择好模板类型时的回调函数
-      this.selectNum = el
       getCITypeAttributesById(el).then((res) => {
         this.$emit('getCiTypeAttr', res)
         this.selectCiTypeAttrList = res
@@ -155,7 +155,6 @@ export default {
           })
         }
         this.parentsType = res.parents.filter((parent) => this.canEdit[parent.id])
-
         const _parentsForm = {}
         res.parents.forEach((item) => {
           const _find = item.attributes.find((attr) => attr.id === item.unique_id)

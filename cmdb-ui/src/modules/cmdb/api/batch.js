@@ -16,12 +16,14 @@ export function processFile(fileObj) {
 }
 
 export function uploadData(ciId, data) {
-  data.ci_type = ciId
-  data.exist_policy = 'replace'
   return axios({
     url: '/v0.1/ci',
     method: 'POST',
-    data,
+    data: {
+      ...data,
+      ci_type: ciId,
+      exist_policy: 'replace'
+    },
     isShowMessage: false
   })
 }
