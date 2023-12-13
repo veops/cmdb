@@ -563,6 +563,7 @@ class EmployeeCRUD(object):
             for column in direct_columns:
                 tmp[column] = d.get(column, '')
             notice_info = d.get('notice_info', {})
+            notice_info = copy.deepcopy(notice_info) if notice_info else {}
             tmp.update(**notice_info)
             results.append(tmp)
         return results
