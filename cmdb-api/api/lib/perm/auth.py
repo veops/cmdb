@@ -93,6 +93,9 @@ def _auth_with_token():
 
 
 def _auth_with_ip_white_list():
+    if request.url.endswith("acl/users/info"):
+        return False
+    
     ip = request.headers.get('X-Real-IP') or request.remote_addr
     key = request.values.get('_key')
     secret = request.values.get('_secret')

@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+import datetime
 import uuid
 
 import bs4
@@ -12,7 +13,11 @@ from flask_login import login_user
 from flask_login import logout_user
 from six.moves.urllib_request import urlopen
 
+from api.lib.common_setting.common_data import AuthenticateDataCRUD
+from api.lib.common_setting.const import AuthenticateType
+from api.lib.perm.acl.audit import AuditCRUD
 from api.lib.perm.acl.cache import UserCache
+from api.lib.perm.acl.resp_format import ErrFormat
 from .cas_urls import create_cas_login_url
 from .cas_urls import create_cas_logout_url
 from .cas_urls import create_cas_validate_url
@@ -21,7 +26,7 @@ blueprint = Blueprint('cas', __name__)
 
 
 @blueprint.route('/api/cas/login')
-# @blueprint.route('/api/sso/login')
+@blueprint.route('/api/sso/login')
 def login():
     """
     This route has two purposes. First, it is used by the user
@@ -34,6 +39,7 @@ def login():
     If validation was successful the logged in username is saved in
     the user's session under the key `CAS_USERNAME_SESSION_KEY`.
     """
+    config = AuthenticateDataCRUD(AuthenticateType.CAS).get()
 
     cas_token_session_key = current_app.config['CAS_TOKEN_SESSION_KEY']
     if request.values.get("next"):
@@ -41,8 +47,8 @@ def login():
 
     _service = url_for('cas.login', _external=True)
     redirect_url = create_cas_login_url(
-        current_app.config['CAS_SERVER'],
-        current_app.config['CAS_LOGIN_ROUTE'],
+        config['cas_server'],
+        config['cas_login_route'],
         _service)
 
     if 'ticket' in request.args:
@@ -51,30 +57,38 @@ def login():
     if request.args.get('ticket'):
 
         if validate(request.args['ticket']):
-            redirect_url = session.get("next") or current_app.config.get("CAS_AFTER_LOGIN")
+            redirect_url = session.get("next") or config.get("cas_after_login") or "/"
             username = session.get("CAS_USERNAME")
             user = UserCache.get(username)
             login_user(user)
 
             session.permanent = True
 
+            _id = AuditCRUD.add_login_log(username, True, ErrFormat.login_succeed)
+            session['LOGIN_ID'] = _id
+
         else:
             del session[cas_token_session_key]
             redirect_url = create_cas_login_url(
-                current_app.config['CAS_SERVER'],
-                current_app.config['CAS_LOGIN_ROUTE'],
+                config['cas_server'],
+                config['cas_login_route'],
                 url_for('cas.login', _external=True),
                 renew=True)
+
+            AuditCRUD.add_login_log(session.get("CAS_USERNAME"), False, ErrFormat.invalid_password)
+
     current_app.logger.info("redirect to: {0}".format(redirect_url))
     return redirect(redirect_url)
 
 
 @blueprint.route('/api/cas/logout')
-# @blueprint.route('/api/sso/logout')
+@blueprint.route('/api/sso/logout')
 def logout():
     """
     When the user accesses this route they are logged out.
     """
+    config = AuthenticateDataCRUD(AuthenticateType.CAS).get()
+    current_app.logger.info(config)
 
     cas_username_session_key = current_app.config['CAS_USERNAME_SESSION_KEY']
     cas_token_session_key = current_app.config['CAS_TOKEN_SESSION_KEY']
@@ -86,11 +100,13 @@ def logout():
     "next" in session and session.pop("next")
 
     redirect_url = create_cas_logout_url(
-        current_app.config['CAS_SERVER'],
-        current_app.config['CAS_LOGOUT_ROUTE'],
+        config['cas_server'],
+        config['cas_logout_route'],
         url_for('cas.login', _external=True, next=request.referrer))
 
     logout_user()
+
+    AuditCRUD.add_login_log(None, None, None, _id=session.get('LOGIN_ID'), logout_at=datetime.datetime.now())
 
     current_app.logger.debug('Redirecting to: {0}'.format(redirect_url))
 
@@ -104,14 +120,15 @@ def validate(ticket):
     and the validated username is saved in the session under the
     key `CAS_USERNAME_SESSION_KEY`.
     """
+    config = AuthenticateDataCRUD(AuthenticateType.CAS).get()
 
     cas_username_session_key = current_app.config['CAS_USERNAME_SESSION_KEY']
 
     current_app.logger.debug("validating token {0}".format(ticket))
 
     cas_validate_url = create_cas_validate_url(
-        current_app.config['CAS_VALIDATE_SERVER'],
-        current_app.config['CAS_VALIDATE_ROUTE'],
+        config['cas_validate_server'],
+        config['cas_validate_route'],
         url_for('cas.login', _external=True),
         ticket)
 
@@ -138,14 +155,12 @@ def validate(ticket):
             current_app.logger.info("create user: {}".format(username))
             from api.lib.perm.acl.user import UserCRUD
             soup = bs4.BeautifulSoup(response)
-            cas_user_map = current_app.config.get('CAS_USER_MAP')
-
+            cas_user_map = config.get('cas_user_map')
             user_dict = dict()
             for k in cas_user_map:
                 v = soup.find(cas_user_map[k]['tag'], cas_user_map[k].get('attrs', {}))
                 user_dict[k] = v and v.text or None
             user_dict['password'] = uuid.uuid4().hex
-
             UserCRUD.add(**user_dict)
 
         from api.lib.perm.acl.acl import ACLManager

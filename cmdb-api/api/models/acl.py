@@ -5,17 +5,18 @@ import copy
 import hashlib
 from datetime import datetime
 
-from ldap3 import Server, Connection, ALL
-from ldap3.core.exceptions import LDAPBindError, LDAPCertificateError
 from flask import current_app
+from flask import session
 from flask_sqlalchemy import BaseQuery
 
 from api.extensions import db
 from api.lib.database import CRUDModel
 from api.lib.database import Model
+from api.lib.database import Model2
 from api.lib.database import SoftDeleteMixin
 from api.lib.perm.acl.const import ACL_QUEUE
 from api.lib.perm.acl.const import OperateType
+from api.lib.perm.acl.resp_format import ErrFormat
 
 
 class App(Model):
@@ -28,20 +29,25 @@ class App(Model):
 
 
 class UserQuery(BaseQuery):
-    def _join(self, *args, **kwargs):
-        super(UserQuery, self)._join(*args, **kwargs)
 
     def authenticate(self, login, password):
+        from api.lib.perm.acl.audit import AuditCRUD
+
         user = self.filter(db.or_(User.username == login,
                                   User.email == login)).filter(User.deleted.is_(False)).filter(User.block == 0).first()
         if user:
-            current_app.logger.info(user)
             authenticated = user.check_password(password)
             if authenticated:
-                from api.tasks.acl import op_record
-                op_record.apply_async(args=(None, login, OperateType.LOGIN, ["ACL"]), queue=ACL_QUEUE)
+                _id = AuditCRUD.add_login_log(login, True, ErrFormat.login_succeed)
+                session['LOGIN_ID'] = _id
+            else:
+                AuditCRUD.add_login_log(login, False, ErrFormat.invalid_password)
         else:
             authenticated = False
+
+            AuditCRUD.add_login_log(login, False, ErrFormat.user_not_found.format(login))
+
+        current_app.logger.info(("login", login, user, authenticated))
 
         return user, authenticated
 
@@ -56,38 +62,6 @@ class UserQuery(BaseQuery):
             authenticated = False
 
         return user, authenticated
-
-    def authenticate_with_ldap(self, username, password):
-        server = Server(current_app.config.get('LDAP_SERVER'), get_info=ALL)
-        if '@' in username:
-            email = username
-            who = current_app.config.get('LDAP_USER_DN').format(username.split('@')[0])
-        else:
-            who = current_app.config.get('LDAP_USER_DN').format(username)
-            email = "{}@{}".format(who, current_app.config.get('LDAP_DOMAIN'))
-
-        username = username.split('@')[0]
-        user = self.get_by_username(username)
-        try:
-            if not password:
-                raise LDAPCertificateError
-
-            conn = Connection(server, user=who, password=password)
-            conn.bind()
-            if conn.result['result'] != 0:
-                raise LDAPBindError
-            conn.unbind()
-
-            if not user:
-                from api.lib.perm.acl.user import UserCRUD
-                user = UserCRUD.add(username=username, email=email)
-
-            from api.tasks.acl import op_record
-            op_record.apply_async(args=(None, username, OperateType.LOGIN, ["ACL"]), queue=ACL_QUEUE)
-
-            return user, True
-        except LDAPBindError:
-            return user, False
 
     def search(self, key):
         query = self.filter(db.or_(User.email == key,
@@ -138,6 +112,7 @@ class User(CRUDModel, SoftDeleteMixin):
     wx_id = db.Column(db.String(32))
     employee_id = db.Column(db.String(16), index=True)
     avatar = db.Column(db.String(128))
+
     # apps = db.Column(db.JSON)
 
     def __str__(self):
@@ -168,8 +143,6 @@ class User(CRUDModel, SoftDeleteMixin):
 
 
 class RoleQuery(BaseQuery):
-    def _join(self, *args, **kwargs):
-        super(RoleQuery, self)._join(*args, **kwargs)
 
     def authenticate(self, login, password):
         role = self.filter(Role.name == login).first()
@@ -377,3 +350,16 @@ class AuditTriggerLog(Model):
     current = db.Column(db.JSON, default=dict(), comment='当前数据')
     extra = db.Column(db.JSON, default=dict(), comment='权限名')
     source = db.Column(db.String(16), default='', comment='来源')
+
+
+class AuditLoginLog(Model2):
+    __tablename__ = "acl_audit_login_logs"
+
+    username = db.Column(db.String(64), index=True)
+    channel = db.Column(db.Enum('web', 'api'), default="web")
+    ip = db.Column(db.String(15))
+    browser = db.Column(db.String(256))
+    description = db.Column(db.String(128))
+    is_ok = db.Column(db.Boolean)
+    login_at = db.Column(db.DateTime)
+    logout_at = db.Column(db.DateTime)

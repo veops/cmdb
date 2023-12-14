@@ -94,7 +94,7 @@ class CRUDMixin(FormatMixin):
         if any((isinstance(_id, six.string_types) and _id.isdigit(),
                 isinstance(_id, (six.integer_types, float))), ):
             obj = getattr(cls, "query").get(int(_id))
-            if obj and not obj.deleted:
+            if obj and not getattr(obj, 'deleted', False):
                 return obj
 
     @classmethod

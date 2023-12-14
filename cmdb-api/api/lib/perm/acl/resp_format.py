@@ -4,6 +4,9 @@ from api.lib.resp_format import CommonErrFormat
 
 
 class ErrFormat(CommonErrFormat):
+    login_succeed = "登录成功"
+    ldap_connection_failed = "连接LDAP服务失败"
+    invalid_password = "密码验证失败"
     auth_only_with_app_token_failed = "应用 Token验证失败"
     session_invalid = "您不是应用管理员 或者 session失效(尝试一下退出重新登录)"
 
@@ -17,11 +20,11 @@ class ErrFormat(CommonErrFormat):
     role_exists = "角色 {} 已经存在!"
     global_role_not_found = "全局角色 {} 不存在!"
     global_role_exists = "全局角色 {} 已经存在!"
-    user_role_delete_invalid = "删除用户角色, 请在 用户管理 页面操作!"
 
     resource_no_permission = "您没有资源: {} 的 {} 权限"
     admin_required = "需要管理员权限"
     role_required = "需要角色: {}"
+    user_role_delete_invalid = "删除用户角色, 请在 用户管理 页面操作!"
 
     app_is_ready_existed = "应用 {} 已经存在"
     app_not_found = "应用 {} 不存在!"
