@@ -306,3 +306,13 @@ def common_check_new_columns():
 def common_sync_file_to_db():
     from api.lib.common_setting.upload_file import CommonFileCRUD
     CommonFileCRUD.sync_file_to_db()
+
+
+@click.command()
+@with_appcontext
+@click.option('--value', type=click.INT, default=-1)
+def set_auth_auto_redirect_enable(value):
+    if value < 0:
+        return
+    from api.lib.common_setting.common_data import CommonDataCRUD
+    CommonDataCRUD.set_auth_auto_redirect_enable(value)
