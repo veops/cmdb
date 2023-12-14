@@ -66,3 +66,10 @@ class ErrFormat(CommonErrFormat):
     notice_bind_failed = "绑定失败: {}"
     notice_bind_success = "绑定成功"
     notice_remove_bind_success = "解绑成功"
+
+    not_support_test = "不支持的测试类型: {}"
+    not_support_auth_type = "不支持的认证类型: {}"
+    ldap_server_connect_timeout = "LDAP服务器连接超时"
+    ldap_test_unknown_error = "LDAP测试未知错误: {}"
+    common_data_not_support_auth_type = "通用数据不支持auth类型: {}"
+

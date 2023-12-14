@@ -19,3 +19,14 @@ BotNameMap = {
     'feishuApp': 'feishuBot',
     'dingdingApp': 'dingdingBot',
 }
+
+
+class AuthenticateType(BaseEnum):
+    CAS = 'CAS'
+    OAUTH2 = 'OAUTH2'
+    OIDC = 'OIDC'
+    LDAP = 'LDAP'
+
+
+AuthCommonConfig = 'AuthCommonConfig'
+AuthCommonConfigAutoRedirect = 'auto_redirect'
