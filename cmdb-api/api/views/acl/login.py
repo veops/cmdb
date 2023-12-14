@@ -8,11 +8,15 @@ from flask import abort
 from flask import current_app
 from flask import request
 from flask import session
-from flask_login import login_user, logout_user
+from flask_login import login_user
+from flask_login import logout_user
 
+from api.lib.common_setting.common_data import AuthenticateDataCRUD
+from api.lib.common_setting.const import AuthenticateType
 from api.lib.decorator import args_required
 from api.lib.decorator import args_validate
 from api.lib.perm.acl.acl import ACLManager
+from api.lib.perm.acl.audit import AuditCRUD
 from api.lib.perm.acl.cache import RoleCache
 from api.lib.perm.acl.cache import User
 from api.lib.perm.acl.cache import UserCache
@@ -34,8 +38,10 @@ class LoginView(APIView):
         username = request.values.get("username") or request.values.get("email")
         password = request.values.get("password")
         _role = None
-        if current_app.config.get('AUTH_WITH_LDAP'):
-            user, authenticated = User.query.authenticate_with_ldap(username, password)
+        config = AuthenticateDataCRUD(AuthenticateType.LDAP).get()
+        if config.get('LDAP', {}).get('enabled'):
+            from api.lib.perm.authentication.ldap import authenticate_with_ldap
+            user, authenticated = authenticate_with_ldap(username, password)
         else:
             user, authenticated = User.query.authenticate(username, password)
             if not user:
@@ -176,4 +182,7 @@ class LogoutView(APIView):
     @auth_abandoned
     def post(self):
         logout_user()
+
+        AuditCRUD.add_login_log(None, None, None, _id=session.get('LOGIN_ID'), logout_at=datetime.datetime.now())
+
         self.jsonify(code=200)
