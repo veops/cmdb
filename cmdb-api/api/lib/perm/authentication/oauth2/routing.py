@@ -36,7 +36,7 @@ def login(auth_type):
 
     qs = urlencode({
         'client_id': config['client_id'],
-        'redirect_uri': url_for('oauth2.callback', _external=True),
+        'redirect_uri': url_for('oauth2.callback', auth_type=auth_type.lower(), _external=True),
         'response_type': current_app.config[f'{auth_type}_RESPONSE_TYPE'],
         'scope': ' '.join(config['scopes'] or []),
         'state': session[f'{auth_type.lower()}_state'],
@@ -50,7 +50,7 @@ def callback(auth_type):
     auth_type = auth_type.upper()
     config = AuthenticateDataCRUD(auth_type).get()
 
-    redirect_url = session.get("next") or config.get('after_login')
+    redirect_url = session.get("next") or config.get('after_login') or '/'
 
     if request.values['state'] != session.get(f'{auth_type.lower()}_state'):
         return abort(401, "state is invalid")
@@ -63,7 +63,7 @@ def callback(auth_type):
         'client_secret': config['client_secret'],
         'code': request.values['code'],
         'grant_type': current_app.config[f'{auth_type}_GRANT_TYPE'],
-        'redirect_uri': url_for('oauth2.callback', _external=True),
+        'redirect_uri': url_for('oauth2.callback', auth_type=auth_type.lower(), _external=True),
     }, headers={'Accept': 'application/json'})
     if response.status_code != 200:
         current_app.logger.error(response.text)
@@ -123,7 +123,7 @@ def logout(auth_type):
     f'{auth_type}_state' in session and session.pop(f'{auth_type}_state')
     "next" in session and session.pop("next")
 
-    redirect_url = url_for('oauth2.login', _external=True, next=request.referrer)
+    redirect_url = url_for('oauth2.login', auth_type=auth_type, _external=True, next=request.referrer)
 
     logout_user()
 

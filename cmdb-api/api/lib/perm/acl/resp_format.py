@@ -5,6 +5,7 @@ from api.lib.resp_format import CommonErrFormat
 
 class ErrFormat(CommonErrFormat):
     login_succeed = "登录成功"
+    ldap_connection_failed = "连接LDAP服务失败"
     invalid_password = "密码验证失败"
     auth_only_with_app_token_failed = "应用 Token验证失败"
     session_invalid = "您不是应用管理员 或者 session失效(尝试一下退出重新登录)"

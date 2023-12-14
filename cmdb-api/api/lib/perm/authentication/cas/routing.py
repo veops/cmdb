@@ -57,7 +57,7 @@ def login():
     if request.args.get('ticket'):
 
         if validate(request.args['ticket']):
-            redirect_url = session.get("next") or config.get("cas_after_login")
+            redirect_url = session.get("next") or config.get("cas_after_login") or "/"
             username = session.get("CAS_USERNAME")
             user = UserCache.get(username)
             login_user(user)

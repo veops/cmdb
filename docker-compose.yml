@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   cmdb-db:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-db:3.0
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-db:2.3
     container_name: cmdb-db
     environment:
       TZ: Asia/Shanghai
@@ -22,7 +22,7 @@ services:
       - '23306:3306'
 
   cmdb-cache:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-cache:3.0
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-cache:2.3
     container_name: cmdb-cache
     environment:
       TZ: Asia/Shanghai
