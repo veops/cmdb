@@ -6,6 +6,475 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "38566548",
+      "name": "OAuth2.0",
+      "font_class": "OAUTH2",
+      "unicode": "e8d8",
+      "unicode_decimal": 59608
+    },
+    {
+      "icon_id": "38566584",
+      "name": "OIDC",
+      "font_class": "OIDC",
+      "unicode": "e8d6",
+      "unicode_decimal": 59606
+    },
+    {
+      "icon_id": "38566578",
+      "name": "cas",
+      "font_class": "CAS",
+      "unicode": "e8d7",
+      "unicode_decimal": 59607
+    },
+    {
+      "icon_id": "38547395",
+      "name": "setting-authentication",
+      "font_class": "ops-setting-auth",
+      "unicode": "e8d5",
+      "unicode_decimal": 59605
+    },
+    {
+      "icon_id": "38547389",
+      "name": "setting-authentication-selected",
+      "font_class": "ops-setting-auth-selected",
+      "unicode": "e8d4",
+      "unicode_decimal": 59604
+    },
+    {
+      "icon_id": "38533133",
+      "name": "itsm-knowledge (2)",
+      "font_class": "a-itsm-knowledge2",
+      "unicode": "e8d2",
+      "unicode_decimal": 59602
+    },
+    {
+      "icon_id": "38531868",
+      "name": "itsm-QRcode",
+      "font_class": "itsm-qrdownload",
+      "unicode": "e8d3",
+      "unicode_decimal": 59603
+    },
+    {
+      "icon_id": "38413515",
+      "name": "oneterm-playback",
+      "font_class": "oneterm-playback",
+      "unicode": "e8d1",
+      "unicode_decimal": 59601
+    },
+    {
+      "icon_id": "38413481",
+      "name": "oneterm-disconnect",
+      "font_class": "oneterm-disconnect",
+      "unicode": "e8d0",
+      "unicode_decimal": 59600
+    },
+    {
+      "icon_id": "38407867",
+      "name": "oneterm-key-selected",
+      "font_class": "ops-oneterm-publickey-selected",
+      "unicode": "e8cf",
+      "unicode_decimal": 59599
+    },
+    {
+      "icon_id": "38407915",
+      "name": "oneterm-key",
+      "font_class": "ops-oneterm-publickey",
+      "unicode": "e8ce",
+      "unicode_decimal": 59598
+    },
+    {
+      "icon_id": "38311855",
+      "name": "oneterm-gateway",
+      "font_class": "ops-oneterm-gateway",
+      "unicode": "e8b9",
+      "unicode_decimal": 59577
+    },
+    {
+      "icon_id": "38311938",
+      "name": "oneterm-gateway-selected",
+      "font_class": "ops-oneterm-gateway-selected",
+      "unicode": "e8bf",
+      "unicode_decimal": 59583
+    },
+    {
+      "icon_id": "38311957",
+      "name": "oneterm-account",
+      "font_class": "ops-oneterm-account",
+      "unicode": "e8c0",
+      "unicode_decimal": 59584
+    },
+    {
+      "icon_id": "38311961",
+      "name": "oneterm-account-selected",
+      "font_class": "ops-oneterm-account-selected",
+      "unicode": "e8c1",
+      "unicode_decimal": 59585
+    },
+    {
+      "icon_id": "38311974",
+      "name": "oneterm-command",
+      "font_class": "ops-oneterm-command",
+      "unicode": "e8c2",
+      "unicode_decimal": 59586
+    },
+    {
+      "icon_id": "38311976",
+      "name": "oneterm-command-selected",
+      "font_class": "ops-oneterm-command-selected",
+      "unicode": "e8c3",
+      "unicode_decimal": 59587
+    },
+    {
+      "icon_id": "38311979",
+      "name": "oneterm-asset_list",
+      "font_class": "ops-oneterm-assetlist",
+      "unicode": "e8c4",
+      "unicode_decimal": 59588
+    },
+    {
+      "icon_id": "38311985",
+      "name": "oneterm-asset_list-selected",
+      "font_class": "ops-oneterm-assetlist-selected",
+      "unicode": "e8c5",
+      "unicode_decimal": 59589
+    },
+    {
+      "icon_id": "38312030",
+      "name": "oneterm-online",
+      "font_class": "ops-oneterm-sessiononline",
+      "unicode": "e8c6",
+      "unicode_decimal": 59590
+    },
+    {
+      "icon_id": "38312152",
+      "name": "oneterm-online-selected",
+      "font_class": "ops-oneterm-sessiononline-selected",
+      "unicode": "e8c7",
+      "unicode_decimal": 59591
+    },
+    {
+      "icon_id": "38312154",
+      "name": "oneterm-history-selected",
+      "font_class": "ops-oneterm-sessionhistory-selected",
+      "unicode": "e8c8",
+      "unicode_decimal": 59592
+    },
+    {
+      "icon_id": "38312155",
+      "name": "oneterm-history",
+      "font_class": "ops-oneterm-sessionhistory",
+      "unicode": "e8c9",
+      "unicode_decimal": 59593
+    },
+    {
+      "icon_id": "38312404",
+      "name": "oneterm-entry_log",
+      "font_class": "ops-oneterm-login",
+      "unicode": "e8ca",
+      "unicode_decimal": 59594
+    },
+    {
+      "icon_id": "38312423",
+      "name": "oneterm-entry_log-selected",
+      "font_class": "ops-oneterm-login-selected",
+      "unicode": "e8cb",
+      "unicode_decimal": 59595
+    },
+    {
+      "icon_id": "38312426",
+      "name": "oneterm-operation_log",
+      "font_class": "ops-oneterm-operation",
+      "unicode": "e8cc",
+      "unicode_decimal": 59596
+    },
+    {
+      "icon_id": "38312445",
+      "name": "oneterm-operation_log-selected",
+      "font_class": "ops-oneterm-operation-selected",
+      "unicode": "e8cd",
+      "unicode_decimal": 59597
+    },
+    {
+      "icon_id": "38307876",
+      "name": "oneterm-workstation-selected",
+      "font_class": "ops-oneterm-workstation-selected",
+      "unicode": "e8b7",
+      "unicode_decimal": 59575
+    },
+    {
+      "icon_id": "38307871",
+      "name": "oneterm-workstation",
+      "font_class": "ops-oneterm-workstation",
+      "unicode": "e8b8",
+      "unicode_decimal": 59576
+    },
+    {
+      "icon_id": "38302246",
+      "name": "oneterm-file-selected",
+      "font_class": "oneterm-file-selected",
+      "unicode": "e8be",
+      "unicode_decimal": 59582
+    },
+    {
+      "icon_id": "38302255",
+      "name": "oneterm-file",
+      "font_class": "oneterm-file",
+      "unicode": "e8bc",
+      "unicode_decimal": 59580
+    },
+    {
+      "icon_id": "38203528",
+      "name": "oneterm-time",
+      "font_class": "oneterm-time",
+      "unicode": "e8bd",
+      "unicode_decimal": 59581
+    },
+    {
+      "icon_id": "38203331",
+      "name": "oneterm-download",
+      "font_class": "oneterm-download",
+      "unicode": "e8bb",
+      "unicode_decimal": 59579
+    },
+    {
+      "icon_id": "38201351",
+      "name": "oneterm-command record",
+      "font_class": "oneterm-commandrecord",
+      "unicode": "e8ba",
+      "unicode_decimal": 59578
+    },
+    {
+      "icon_id": "38199341",
+      "name": "oneterm-connected assets",
+      "font_class": "oneterm-asset",
+      "unicode": "e8b6",
+      "unicode_decimal": 59574
+    },
+    {
+      "icon_id": "38199350",
+      "name": "oneterm-total assets",
+      "font_class": "oneterm-total_asset",
+      "unicode": "e8b5",
+      "unicode_decimal": 59573
+    },
+    {
+      "icon_id": "38199303",
+      "name": "oneterm-switch (3)",
+      "font_class": "oneterm-switch",
+      "unicode": "e8b4",
+      "unicode_decimal": 59572
+    },
+    {
+      "icon_id": "38199317",
+      "name": "oneterm-session",
+      "font_class": "oneterm-session",
+      "unicode": "e8b3",
+      "unicode_decimal": 59571
+    },
+    {
+      "icon_id": "38199339",
+      "name": "oneterm-connection",
+      "font_class": "oneterm-connect",
+      "unicode": "e8b2",
+      "unicode_decimal": 59570
+    },
+    {
+      "icon_id": "38198321",
+      "name": "oneterm-log in",
+      "font_class": "oneterm-login",
+      "unicode": "e8b1",
+      "unicode_decimal": 59569
+    },
+    {
+      "icon_id": "38194554",
+      "name": "oneterm-dashboard",
+      "font_class": "ops-oneterm-dashboard",
+      "unicode": "e8af",
+      "unicode_decimal": 59567
+    },
+    {
+      "icon_id": "38194525",
+      "name": "oneterm-dashboard-selected",
+      "font_class": "ops-oneterm-dashboard-selected",
+      "unicode": "e8b0",
+      "unicode_decimal": 59568
+    },
+    {
+      "icon_id": "38194352",
+      "name": "oneterm-recent session",
+      "font_class": "oneterm-recentsession",
+      "unicode": "e8ae",
+      "unicode_decimal": 59566
+    },
+    {
+      "icon_id": "38194383",
+      "name": "oneterm-my assets",
+      "font_class": "oneterm-myassets",
+      "unicode": "e8ad",
+      "unicode_decimal": 59565
+    },
+    {
+      "icon_id": "38194089",
+      "name": "oneterm-log",
+      "font_class": "ops-oneterm-log",
+      "unicode": "e8aa",
+      "unicode_decimal": 59562
+    },
+    {
+      "icon_id": "38194088",
+      "name": "oneterm-conversation-selected",
+      "font_class": "ops-oneterm-session-selected",
+      "unicode": "e8ab",
+      "unicode_decimal": 59563
+    },
+    {
+      "icon_id": "38194065",
+      "name": "oneterm-conversation",
+      "font_class": "ops-oneterm-session",
+      "unicode": "e8ac",
+      "unicode_decimal": 59564
+    },
+    {
+      "icon_id": "38194105",
+      "name": "oneterm-log-selected",
+      "font_class": "ops-oneterm-log-selected",
+      "unicode": "e8a9",
+      "unicode_decimal": 59561
+    },
+    {
+      "icon_id": "38194054",
+      "name": "oneterm-assets",
+      "font_class": "ops-oneterm-assets",
+      "unicode": "e8a7",
+      "unicode_decimal": 59559
+    },
+    {
+      "icon_id": "38194055",
+      "name": "oneterm-assets-selected",
+      "font_class": "ops-oneterm-assets-selected",
+      "unicode": "e8a8",
+      "unicode_decimal": 59560
+    },
+    {
+      "icon_id": "38123087",
+      "name": "itsm-down",
+      "font_class": "itsm-down",
+      "unicode": "e8a5",
+      "unicode_decimal": 59557
+    },
+    {
+      "icon_id": "38123084",
+      "name": "itsm-up",
+      "font_class": "itsm-up",
+      "unicode": "e8a6",
+      "unicode_decimal": 59558
+    },
+    {
+      "icon_id": "38105374",
+      "name": "itsm-download",
+      "font_class": "itsm-download",
+      "unicode": "e8a4",
+      "unicode_decimal": 59556
+    },
+    {
+      "icon_id": "38105235",
+      "name": "itsm-print",
+      "font_class": "itsm-print",
+      "unicode": "e8a3",
+      "unicode_decimal": 59555
+    },
+    {
+      "icon_id": "38104997",
+      "name": "itsm-view",
+      "font_class": "itsm-view",
+      "unicode": "e8a2",
+      "unicode_decimal": 59554
+    },
+    {
+      "icon_id": "38105129",
+      "name": "itsm-word",
+      "font_class": "itsm-word",
+      "unicode": "e8a1",
+      "unicode_decimal": 59553
+    },
+    {
+      "icon_id": "38095730",
+      "name": "datainsight-custom",
+      "font_class": "datainsight-custom",
+      "unicode": "e89e",
+      "unicode_decimal": 59550
+    },
+    {
+      "icon_id": "38095729",
+      "name": "datainsight-prometheus",
+      "font_class": "datainsight-prometheus",
+      "unicode": "e89f",
+      "unicode_decimal": 59551
+    },
+    {
+      "icon_id": "38095728",
+      "name": "datainsight-zabbix",
+      "font_class": "datainsight-zabbix",
+      "unicode": "e8a0",
+      "unicode_decimal": 59552
+    },
+    {
+      "icon_id": "37944507",
+      "name": "setting-main people",
+      "font_class": "setting-mainpeople",
+      "unicode": "e89a",
+      "unicode_decimal": 59546
+    },
+    {
+      "icon_id": "37944503",
+      "name": "setting-deputy people",
+      "font_class": "setting-deputypeople",
+      "unicode": "e89d",
+      "unicode_decimal": 59549
+    },
+    {
+      "icon_id": "37940080",
+      "name": "ops-setting-duty",
+      "font_class": "ops-setting-duty",
+      "unicode": "e89c",
+      "unicode_decimal": 59548
+    },
+    {
+      "icon_id": "37940033",
+      "name": "ops-setting-duty-selected",
+      "font_class": "ops-setting-duty-selected",
+      "unicode": "e89b",
+      "unicode_decimal": 59547
+    },
+    {
+      "icon_id": "37841524",
+      "name": "datainsight-sequential",
+      "font_class": "datainsight-sequential",
+      "unicode": "e899",
+      "unicode_decimal": 59545
+    },
+    {
+      "icon_id": "37841535",
+      "name": "datainsight-close",
+      "font_class": "datainsight-close",
+      "unicode": "e898",
+      "unicode_decimal": 59544
+    },
+    {
+      "icon_id": "37841537",
+      "name": "datainsight-handle",
+      "font_class": "datainsight-handle",
+      "unicode": "e897",
+      "unicode_decimal": 59543
+    },
+    {
+      "icon_id": "37841515",
+      "name": "datainsight-table",
+      "font_class": "datainsight-table",
+      "unicode": "e896",
+      "unicode_decimal": 59542
+    },
+    {
       "icon_id": "37830610",
       "name": "icon-xianxing-password",
       "font_class": "icon-xianxing-password",
@@ -22,14 +491,14 @@
     {
       "icon_id": "37822199",
       "name": "itsm-oneclick download",
-      "font_class": "a-itsm-oneclickdownload",
+      "font_class": "itsm-download-all",
       "unicode": "e892",
       "unicode_decimal": 59538
     },
     {
       "icon_id": "37822198",
       "name": "itsm-package download",
-      "font_class": "a-itsm-packagedownload",
+      "font_class": "itsm-download-package",
       "unicode": "e893",
       "unicode_decimal": 59539
     },

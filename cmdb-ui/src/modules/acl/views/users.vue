@@ -133,8 +133,8 @@ export default {
         if (newVal) {
           this.tableData = this.allUsers.filter(
             (item) =>
-              item.username.toLowerCase().includes(newVal.toLowerCase()) ||
-              item.nickname.toLowerCase().includes(newVal.toLowerCase())
+              (item.username && item.username.toLowerCase().includes(newVal.toLowerCase())) ||
+              (item.nickname && item.nickname.toLowerCase().includes(newVal.toLowerCase()))
           )
         } else {
           this.tableData = this.allUsers

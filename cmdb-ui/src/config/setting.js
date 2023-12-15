@@ -1,6 +1,5 @@
 /**
  * 项目默认配置项
- * useSSO - 是否启用单点登录, 默认为否, 可以根据需要接入到公司的单点登录系统
  * primaryColor - 默认主题色, 如果修改颜色不生效，请清理 localStorage
  * navTheme - sidebar theme ['dark', 'light'] 两种主题
  * colorWeak - 色盲模式
@@ -15,8 +14,6 @@
  */
 
 export default {
-  useSSO: false,
-  ssoLoginUrl: '/api/sso/login',
   primaryColor: '#1890ff', // primary color of ant design
   navTheme: 'dark', // theme for nav menu
   layout: 'sidemenu', // nav menu position: sidemenu or topmenu

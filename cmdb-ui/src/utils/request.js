@@ -1,9 +1,7 @@
 /* eslint-dsiable */
 import Vue from 'vue'
 import axios from 'axios'
-import store from '@/store'
 import { VueAxios } from './axios'
-import config from '@/config/setting'
 import message from 'ant-design-vue/es/message'
 import notification from 'ant-design-vue/es/notification'
 import { ACCESS_TOKEN } from '@/store/global/mutation-types'
@@ -52,8 +50,8 @@ const err = (error) => {
   }
   if (error.response) {
     console.log(error.config.url)
-    if (error.response.status === 401 && config.useSSO) {
-      store.dispatch('Login')
+    if (error.response.status === 401) {
+      window.location.href = '/user/logout'
     }
   }
   return Promise.reject(error)
