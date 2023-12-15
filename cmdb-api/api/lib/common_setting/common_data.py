@@ -60,7 +60,7 @@ class CommonDataCRUD(object):
 
     @staticmethod
     def check_auth_type(data_type):
-        if data_type not in list(AuthenticateType.all()) + [AuthCommonConfig]:
+        if data_type in list(AuthenticateType.all()) + [AuthCommonConfig]:
             abort(400, ErrFormat.common_data_not_support_auth_type.format(data_type))
 
     @staticmethod
