@@ -51,21 +51,32 @@
             class="login-button"
             :loading="state.loginBtn"
             :disabled="state.loginBtn"
-          >确定</a-button
+          >登录</a-button
           >
         </a-form-item>
       </a-form>
+      <template v-if="_enable_list && _enable_list.length >= 1">
+        <a-divider style="font-size:14px">其他登录方式</a-divider>
+        <div style="text-align:center">
+          <span v-for="(item, index) in _enable_list" :key="item.auth_type">
+            <ops-icon :type="item.auth_type"/>
+            <a @click="otherLogin(item.auth_type)">{{ item.auth_type }}</a>
+            <a-divider v-if="index < _enable_list.length - 1" type="vertical" />
+          </span>
+        </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script>
 import md5 from 'md5'
-import { mapActions } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import { timeFix } from '@/utils/util'
 import appConfig from '@/config/app.js'
 
 export default {
+  name: 'Login',
   data() {
     return {
       customActiveKey: 'tab1',
@@ -84,9 +95,21 @@ export default {
       },
     }
   },
+  computed: {
+    ...mapState({ auth_enable: (state) => state?.user?.auth_enable ?? {} }),
+    enable_list() {
+      return this.auth_enable.enable_list ?? []
+    },
+    _enable_list() {
+      return this.enable_list.filter((en) => en.auth_type !== 'LDAP')
+    },
+  },
   created() {},
+  async mounted() {
+    await this.GetAuthDataEnable()
+  },
   methods: {
-    ...mapActions(['Login', 'Logout']),
+    ...mapActions(['Login', 'GetAuthDataEnable']),
     // handler
     handleUsernameOrEmail(rule, value, callback) {
       const { state } = this
@@ -118,7 +141,8 @@ export default {
           delete loginParams.username
           loginParams[!state.loginType ? 'email' : 'username'] = values.username
           loginParams.password = appConfig.useEncryption ? md5(values.password) : values.password
-          Login(loginParams)
+          localStorage.setItem('ops_auth_type', '')
+          Login({ userInfo: loginParams })
             .then((res) => this.loginSuccess(res))
             .finally(() => {
               state.loginBtn = false
@@ -130,10 +154,11 @@ export default {
         }
       })
     },
-
+    otherLogin(auth_type) {
+      this.Login({ userInfo: {}, auth_type })
+    },
     loginSuccess(res) {
-      console.log(res)
-      this.$router.push({ path: this.$route.query.redirect })
+      this.$router.push({ path: this.$route.query?.redirect ?? '/' })
       // 延迟 1 秒显示欢迎信息
       setTimeout(() => {
         this.$notification.success({

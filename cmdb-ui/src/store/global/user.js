@@ -6,6 +6,7 @@ import { getAllUsers } from '../../api/login'
 import { searchPermResourceByRoleId } from '@/modules/acl/api/permission'
 import { getEmployeeByUid, getEmployeeList } from '@/api/employee'
 import { getAllDepartmentList } from '@/api/company'
+import { getAuthDataEnable } from '@/api/auth'
 
 const user = {
   state: {
@@ -44,7 +45,8 @@ const user = {
     nickname: '',
     sex: '',
     position_name: '',
-    direct_supervisor_id: null
+    direct_supervisor_id: null,
+    auth_enable: {}
   },
 
   mutations: {
@@ -87,13 +89,27 @@ const user = {
         ...data
       } : state.detailPermissions
     },
+    SET_AUTH_ENABLE: (state, data) => {
+      state.auth_enable = data
+    }
   },
 
   actions: {
-    // 登录
-    Login({ commit }, userInfo) {
+     // 获取enable_list
+     GetAuthDataEnable({ commit }, userInfo) {
       return new Promise((resolve, reject) => {
-        login(userInfo).then(response => {
+        getAuthDataEnable().then(res => {
+          commit('SET_AUTH_ENABLE', res)
+          resolve()
+        }).catch(error => {
+          reject(error)
+        })
+      })
+    },
+    // 登录
+    Login({ commit }, { userInfo, auth_type = undefined }) {
+      return new Promise((resolve, reject) => {
+        login(userInfo, auth_type).then(response => {
           Vue.ls.set(ACCESS_TOKEN, response.token, 7 * 24 * 60 * 60 * 1000)
           commit('SET_TOKEN', response.token)
           resolve()
@@ -159,10 +175,11 @@ const user = {
         Vue.ls.remove(ACCESS_TOKEN)
 
         logout(state.token).then(() => {
-          window.location.reload()
           resolve()
         }).catch(() => {
           resolve()
+        }).finally(() => {
+          window.location.href = '/user/logout'
         })
       })
     },

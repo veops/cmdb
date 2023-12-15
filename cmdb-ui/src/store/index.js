@@ -9,7 +9,6 @@ import logo from './global/logo'
 import notice from './global/notice'
 import getters from './global/getters'
 import appConfig from '@/config/app'
-console.log(appConfig)
 
 Vue.use(Vuex)
 

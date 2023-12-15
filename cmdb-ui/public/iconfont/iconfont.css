@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1698273699449') format('woff2'),
-       url('iconfont.woff?t=1698273699449') format('woff'),
-       url('iconfont.ttf?t=1698273699449') format('truetype');
+  src: url('iconfont.woff2?t=1702544951995') format('woff2'),
+       url('iconfont.woff?t=1702544951995') format('woff'),
+       url('iconfont.ttf?t=1702544951995') format('truetype');
 }
 
 .iconfont {
@@ -13,6 +13,274 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.OAUTH2:before {
+  content: "\e8d8";
+}
+
+.OIDC:before {
+  content: "\e8d6";
+}
+
+.CAS:before {
+  content: "\e8d7";
+}
+
+.ops-setting-auth:before {
+  content: "\e8d5";
+}
+
+.ops-setting-auth-selected:before {
+  content: "\e8d4";
+}
+
+.a-itsm-knowledge2:before {
+  content: "\e8d2";
+}
+
+.itsm-qrdownload:before {
+  content: "\e8d3";
+}
+
+.oneterm-playback:before {
+  content: "\e8d1";
+}
+
+.oneterm-disconnect:before {
+  content: "\e8d0";
+}
+
+.ops-oneterm-publickey-selected:before {
+  content: "\e8cf";
+}
+
+.ops-oneterm-publickey:before {
+  content: "\e8ce";
+}
+
+.ops-oneterm-gateway:before {
+  content: "\e8b9";
+}
+
+.ops-oneterm-gateway-selected:before {
+  content: "\e8bf";
+}
+
+.ops-oneterm-account:before {
+  content: "\e8c0";
+}
+
+.ops-oneterm-account-selected:before {
+  content: "\e8c1";
+}
+
+.ops-oneterm-command:before {
+  content: "\e8c2";
+}
+
+.ops-oneterm-command-selected:before {
+  content: "\e8c3";
+}
+
+.ops-oneterm-assetlist:before {
+  content: "\e8c4";
+}
+
+.ops-oneterm-assetlist-selected:before {
+  content: "\e8c5";
+}
+
+.ops-oneterm-sessiononline:before {
+  content: "\e8c6";
+}
+
+.ops-oneterm-sessiononline-selected:before {
+  content: "\e8c7";
+}
+
+.ops-oneterm-sessionhistory-selected:before {
+  content: "\e8c8";
+}
+
+.ops-oneterm-sessionhistory:before {
+  content: "\e8c9";
+}
+
+.ops-oneterm-login:before {
+  content: "\e8ca";
+}
+
+.ops-oneterm-login-selected:before {
+  content: "\e8cb";
+}
+
+.ops-oneterm-operation:before {
+  content: "\e8cc";
+}
+
+.ops-oneterm-operation-selected:before {
+  content: "\e8cd";
+}
+
+.ops-oneterm-workstation-selected:before {
+  content: "\e8b7";
+}
+
+.ops-oneterm-workstation:before {
+  content: "\e8b8";
+}
+
+.oneterm-file-selected:before {
+  content: "\e8be";
+}
+
+.oneterm-file:before {
+  content: "\e8bc";
+}
+
+.oneterm-time:before {
+  content: "\e8bd";
+}
+
+.oneterm-download:before {
+  content: "\e8bb";
+}
+
+.oneterm-commandrecord:before {
+  content: "\e8ba";
+}
+
+.oneterm-asset:before {
+  content: "\e8b6";
+}
+
+.oneterm-total_asset:before {
+  content: "\e8b5";
+}
+
+.oneterm-switch:before {
+  content: "\e8b4";
+}
+
+.oneterm-session:before {
+  content: "\e8b3";
+}
+
+.oneterm-connect:before {
+  content: "\e8b2";
+}
+
+.oneterm-login:before {
+  content: "\e8b1";
+}
+
+.ops-oneterm-dashboard:before {
+  content: "\e8af";
+}
+
+.ops-oneterm-dashboard-selected:before {
+  content: "\e8b0";
+}
+
+.oneterm-recentsession:before {
+  content: "\e8ae";
+}
+
+.oneterm-myassets:before {
+  content: "\e8ad";
+}
+
+.ops-oneterm-log:before {
+  content: "\e8aa";
+}
+
+.ops-oneterm-session-selected:before {
+  content: "\e8ab";
+}
+
+.ops-oneterm-session:before {
+  content: "\e8ac";
+}
+
+.ops-oneterm-log-selected:before {
+  content: "\e8a9";
+}
+
+.ops-oneterm-assets:before {
+  content: "\e8a7";
+}
+
+.ops-oneterm-assets-selected:before {
+  content: "\e8a8";
+}
+
+.itsm-down:before {
+  content: "\e8a5";
+}
+
+.itsm-up:before {
+  content: "\e8a6";
+}
+
+.itsm-download:before {
+  content: "\e8a4";
+}
+
+.itsm-print:before {
+  content: "\e8a3";
+}
+
+.itsm-view:before {
+  content: "\e8a2";
+}
+
+.itsm-word:before {
+  content: "\e8a1";
+}
+
+.datainsight-custom:before {
+  content: "\e89e";
+}
+
+.datainsight-prometheus:before {
+  content: "\e89f";
+}
+
+.datainsight-zabbix:before {
+  content: "\e8a0";
+}
+
+.setting-mainpeople:before {
+  content: "\e89a";
+}
+
+.setting-deputypeople:before {
+  content: "\e89d";
+}
+
+.ops-setting-duty:before {
+  content: "\e89c";
+}
+
+.ops-setting-duty-selected:before {
+  content: "\e89b";
+}
+
+.datainsight-sequential:before {
+  content: "\e899";
+}
+
+.datainsight-close:before {
+  content: "\e898";
+}
+
+.datainsight-handle:before {
+  content: "\e897";
+}
+
+.datainsight-table:before {
+  content: "\e896";
+}
+
 .icon-xianxing-password:before {
   content: "\e894";
 }
@@ -21,11 +289,11 @@
   content: "\e895";
 }
 
-.a-itsm-oneclickdownload:before {
+.itsm-download-all:before {
   content: "\e892";
 }
 
-.a-itsm-packagedownload:before {
+.itsm-download-package:before {
   content: "\e893";
 }
 
