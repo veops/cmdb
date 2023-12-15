@@ -66,10 +66,8 @@ export default {
 
       this.$confirm({
         title: '提示',
-        content: '真的要注销登录吗 ?',
+        content: '确认注销登录 ?',
         onOk() {
-          // localStorage.removeItem('ops_cityps_currentId')
-          localStorage.clear()
           return that.Logout()
         },
         onCancel() {},

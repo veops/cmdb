@@ -92,7 +92,13 @@ export const generatorDynamicRouter = async () => {
             meta: { title: '飞书', icon: 'ops-setting-notice-feishu', selectedIcon: 'ops-setting-notice-feishu-selected' },
             component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/notice/feishu')
           }]
-        }
+        },
+        {
+          path: '/setting/auth',
+          name: 'company_auth',
+          meta: { title: '认证设置', appName: 'backend', icon: 'ops-setting-auth', selectedIcon: 'ops-setting-auth-selected', permission: ['acl_admin'] },
+          component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/auth/index')
+        },
       ]
     },])
   return routes
@@ -111,6 +117,11 @@ export const constantRouterMap = [
     path: '/user/login',
     name: 'login',
     component: () => import(/* webpackChunkName: "user" */ '@/views/user/Login'),
+  },
+  {
+    path: '/user/logout',
+    name: 'logout',
+    component: () => import(/* webpackChunkName: "user" */ '@/views/user/Logout'),
   },
   {
     path: '/user',

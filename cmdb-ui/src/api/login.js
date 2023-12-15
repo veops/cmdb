@@ -1,6 +1,5 @@
 import api from './index'
 import { axios } from '@/utils/request'
-import config from '@/config/setting'
 /**
  * login func
  * parameter: {
@@ -12,9 +11,10 @@ import config from '@/config/setting'
  * @param parameter
  * @returns {*}
  */
-export function login(data) {
-  if (config.useSSO) {
-    window.location.href = config.ssoLoginUrl
+export function login(data, auth_type) {
+  if (auth_type) {
+    localStorage.setItem('ops_auth_type', auth_type)
+    window.location.href = `/api/${auth_type.toLowerCase()}/login`
   } else {
     return axios({
       url: api.Login,
@@ -43,17 +43,15 @@ export function getInfo() {
 }
 
 export function logout() {
-  if (config.useSSO) {
-    window.location.replace(api.Logout)
-  } else {
-    return axios({
-      url: api.Logout,
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json;charset=UTF-8'
-      }
-    })
-  }
+  const auth_type = localStorage.getItem('ops_auth_type')
+  localStorage.clear()
+  return axios({
+    url: auth_type ? `/${auth_type.toLowerCase()}/logout` : api.Logout,
+    method: auth_type ? 'get' : 'post',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    }
+  })
 }
 
 /**
