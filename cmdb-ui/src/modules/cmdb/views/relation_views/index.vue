@@ -25,7 +25,7 @@
               :expandedKeys="expandedKeys"
             >
               <a-icon slot="switcherIcon" type="down" />
-              <template #title="{ key: treeKey, title,isLeaf }">
+              <template #title="{ key: treeKey, title, isLeaf }">
                 <ContextMenu
                   :title="title"
                   :treeKey="treeKey"
@@ -58,12 +58,8 @@
             />
             <div class="relation-views-right-bar">
               <a-space>
-                <a-button
-                  v-if="isLeaf"
-                  type="primary"
-                  size="small"
-                  @click="$refs.create.handleOpen(true, 'create')"
-                >新建</a-button
+                <a-button v-if="isLeaf" type="primary" size="small" @click="$refs.create.handleOpen(true, 'create')"
+                  >新建</a-button
                 >
 
                 <div class="ops-list-batch-action" v-if="isLeaf && isShowBatchIcon">
@@ -135,7 +131,7 @@
                     {{ col.title }}</span
                   >
                 </template>
-                <template v-if="col.is_choice || col.is_password" #edit="{ row }">
+                <template v-if="col.is_choice || col.is_password || col.is_list" #edit="{ row }">
                   <vxe-input v-if="col.is_password" v-model="passwordValue[col.field]" />
                   <a-select
                     :getPopupContainer="(trigger) => trigger.parentElement"
@@ -171,6 +167,18 @@
                         {{ choice[0] }}
                       </span>
                     </a-select-option>
+                  </a-select>
+                  <a-select
+                    :getPopupContainer="(trigger) => trigger.parentElement"
+                    :style="{ width: '100%', height: '32px' }"
+                    v-model="row[col.field]"
+                    placeholder="请选择"
+                    v-else-if="col.is_list"
+                    :showArrow="false"
+                    mode="tags"
+                    class="ci-table-edit-select"
+                    allowClear
+                  >
                   </a-select>
                 </template>
                 <template
@@ -483,11 +491,11 @@ export default {
   },
   inject: ['reload'],
   watch: {
-    '$route.path': function(newPath, oldPath) {
+    '$route.path': function (newPath, oldPath) {
       this.viewId = this.$route.params.viewId
       this.reload()
     },
-    pageNo: function(newPage, oldPage) {
+    pageNo: function (newPage, oldPage) {
       this.loadData({ pageNo: newPage }, undefined, this.sortByTable)
     },
   },

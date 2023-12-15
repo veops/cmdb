@@ -28,7 +28,6 @@
             placeholder="请选择"
             v-if="attr.is_choice"
             :mode="attr.is_list ? 'multiple' : 'default'"
-            :multiple="attr.is_list"
             showSearch
             allowClear
           >
