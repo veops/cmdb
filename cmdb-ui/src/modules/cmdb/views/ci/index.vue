@@ -108,7 +108,7 @@
                 <span>{{ col.title }}</span>
               </span>
             </template>
-            <template v-if="col.is_choice || col.is_password" #edit="{ row }">
+            <template v-if="col.is_choice || col.is_password || col.is_list" #edit="{ row }">
               <vxe-input v-if="col.is_password" v-model="passwordValue[col.field]" />
               <a-select
                 :getPopupContainer="(trigger) => trigger.parentElement"
@@ -144,6 +144,18 @@
                     {{ choice[0] }}
                   </span>
                 </a-select-option>
+              </a-select>
+              <a-select
+                :getPopupContainer="(trigger) => trigger.parentElement"
+                :style="{ width: '100%', height: '32px' }"
+                v-model="row[col.field]"
+                placeholder="请选择"
+                v-else-if="col.is_list"
+                :showArrow="false"
+                mode="tags"
+                class="ci-table-edit-select"
+                allowClear
+              >
               </a-select>
             </template>
             <template

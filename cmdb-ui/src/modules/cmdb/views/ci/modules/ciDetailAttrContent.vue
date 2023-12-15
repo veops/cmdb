@@ -59,6 +59,9 @@
           {{ ci[attr.name] }}
         </span>
       </template>
+      <template v-else-if="attr.is_list">
+        <span> {{ ci[attr.name].join(',') }}</span>
+      </template>
       <template v-else>{{ getName(ci[attr.name]) }}</template>
     </span>
     <template v-else>
@@ -75,7 +78,6 @@
             placeholder="请选择"
             v-if="attr.is_choice"
             :mode="attr.is_list ? 'multiple' : 'default'"
-            :multiple="attr.is_list"
             showSearch
             allowClear
             size="small"
@@ -102,6 +104,23 @@
                 {{ choice[0] }}
               </span>
             </a-select-option>
+          </a-select>
+          <a-select
+            :style="{ width: '100%' }"
+            v-decorator="[
+              attr.name,
+              {
+                rules: [{ required: attr.is_required }],
+              },
+            ]"
+            placeholder="请选择"
+            v-else-if="attr.is_list"
+            mode="tags"
+            showSearch
+            allowClear
+            size="small"
+            :getPopupContainer="(trigger) => trigger.parentElement"
+          >
           </a-select>
           <a-input-number
             size="small"
@@ -222,7 +241,7 @@ export default {
       this.$nextTick(async () => {
         if (this.attr.is_list && !this.attr.is_choice) {
           this.form.setFieldsValue({
-            [`${this.attr.name}`]: this.ci[this.attr.name].join(',') || null,
+            [`${this.attr.name}`]: this.ci[this.attr.name]|| null,
           })
           return
         }
