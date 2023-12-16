@@ -3,11 +3,6 @@ import datetime
 import json
 import os
 
-from flask import abort
-from flask import current_app
-from flask_login import current_user
-from sqlalchemy import func
-
 from api.extensions import db
 from api.lib.cmdb.auto_discovery.const import ClOUD_MAP
 from api.lib.cmdb.cache import CITypeAttributeCache
@@ -28,6 +23,10 @@ from api.lib.utils import AESCrypto
 from api.models.cmdb import AutoDiscoveryCI
 from api.models.cmdb import AutoDiscoveryCIType
 from api.models.cmdb import AutoDiscoveryRule
+from flask import abort
+from flask import current_app
+from flask_login import current_user
+from sqlalchemy import func
 
 PWD = os.path.abspath(os.path.dirname(__file__))
 
@@ -251,20 +250,17 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
                 current_app.logger.warning(e)
                 return abort(400, str(e))
 
-    def _can_add(self, **kwargs):
-        self.cls.get_by(type_id=kwargs['type_id'], adr_id=kwargs.get('adr_id') or None) and abort(
-            400, ErrFormat.ad_duplicate)
-
-        # self.__valid_exec_target(kwargs.get('agent_id'), kwargs.get('query_expr'))
+    @staticmethod
+    def _can_add(**kwargs):
 
         if kwargs.get('adr_id'):
-            adr = AutoDiscoveryRule.get_by_id(kwargs['adr_id']) or abort(
+            AutoDiscoveryRule.get_by_id(kwargs['adr_id']) or abort(
                 404, ErrFormat.adr_not_found.format("id={}".format(kwargs['adr_id'])))
-            if not adr.is_plugin:
-                other = self.cls.get_by(adr_id=adr.id, first=True, to_dict=False)
-                if other:
-                    ci_type = CITypeCache.get(other.type_id)
-                    return abort(400, ErrFormat.adr_default_ref_once.format(ci_type.alias))
+            # if not adr.is_plugin:
+            #     other = self.cls.get_by(adr_id=adr.id, first=True, to_dict=False)
+            #     if other:
+            #         ci_type = CITypeCache.get(other.type_id)
+            #         return abort(400, ErrFormat.adr_default_ref_once.format(ci_type.alias))
 
         if kwargs.get('is_plugin') and kwargs.get('plugin_script'):
             kwargs = check_plugin_script(**kwargs)
