@@ -59,6 +59,7 @@ class ErrFormat(CommonErrFormat):
     email_send_timeout = "邮件发送超时"
 
     common_data_not_found = "ID {} 找不到记录"
+    common_data_already_existed = "{} 已存在"
     notice_platform_existed = "{} 已存在"
     notice_not_existed = "{} 配置项不存在"
     notice_please_config_messenger_first = "请先配置 messenger"
@@ -74,4 +75,3 @@ class ErrFormat(CommonErrFormat):
     ldap_test_unknown_error = "LDAP测试未知错误: {}"
     common_data_not_support_auth_type = "通用数据不支持auth类型: {}"
     ldap_test_username_required = "LDAP测试用户名必填"
-

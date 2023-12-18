@@ -17,7 +17,7 @@
             <a-space>
               <a-button :loading="loading" type="primary" @click="handleSave">保存</a-button>
               <template v-if="item.value === 'LDAP'">
-                <a-button :loading="loading" ghost type="primary" @click="handleTest('connect')">测试链接</a-button>
+                <a-button :loading="loading" ghost type="primary" @click="handleTest('connect')">测试连接</a-button>
                 <a-button :loading="loading" ghost type="primary" @click="handleTest('login')">测试登录</a-button>
               </template>
               <a-button :loading="loading" @click="handleReset">重置</a-button>
