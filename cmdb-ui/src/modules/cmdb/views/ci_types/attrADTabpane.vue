@@ -14,6 +14,7 @@
         <span>编辑</span>
       </a-space>
     </a>
+    <div>别名：<a-input v-model="alias" style="width:200px;" /></div>
     <div class="attr-ad-header">字段映射</div>
     <vxe-table
       v-if="adrType === 'agent'"
@@ -56,7 +57,7 @@
       :ruleName="adrName"
       :ciTypeAttributes="ciTypeAttributes"
       :adCITypeList="adCITypeList"
-      :currentTab="currentTab"
+      :currentTab="adr_id"
       :style="{ marginBottom: '20px' }"
     />
     <a-form-model
@@ -133,7 +134,7 @@ export default {
   name: 'AttrADTabpane',
   components: { Vcrontab, HttpSnmpAD, CMDBExprDrawer, MonitorNodeSetting },
   props: {
-    currentTab: {
+    adr_id: {
       type: Number,
       default: 0,
     },
@@ -187,6 +188,7 @@ export default {
         },
       ],
       form3: this.$form.createForm(this, { name: 'snmp_form' }),
+      alias: '',
     }
   },
   computed: {
@@ -205,7 +207,7 @@ export default {
     },
     agentTypeRadioList() {
       const { permissions = [] } = this.userRoles
-      if (permissions.includes('cmdb_admin') || permissions.includes('admin')) {
+      if ((permissions.includes('cmdb_admin') || permissions.includes('admin')) && this.adrType !== 'http') {
         return [
           { value: 'all', label: '所有节点' },
           { value: 'agent_id', label: '指定节点' },
@@ -221,8 +223,9 @@ export default {
   mounted() {},
   methods: {
     init() {
-      const _find = this.adrList.find((item) => Number(item.id) === Number(this.currentTab))
-      const _findADT = this.adCITypeList.find((item) => Number(item.adr_id) === Number(this.currentTab))
+      const _find = this.adrList.find((item) => Number(item.id) === Number(this.adr_id))
+      const _findADT = this.adCITypeList.find((item) => Number(item.id) === Number(this.currentAdt.id))
+      this.alias = _findADT?.extra_option?.alias ?? ''
       if (this.adrType === 'http') {
         const { category = undefined, key = '', secret = '' } = _findADT?.extra_option ?? {}
         this.form2 = {
@@ -294,7 +297,7 @@ export default {
       this.cron = cron
     },
     handleSave() {
-      const { currentAdt } = this
+      const { currentAdt, alias } = this
       let params
       if (this.adrType === 'http') {
         params = {
@@ -360,9 +363,15 @@ export default {
           return
         }
       }
-
+      if (params.extra_option) {
+        params.extra_option.alias = alias
+      } else {
+        params.extra_option = {}
+        params.extra_option.alias = alias
+      }
       putCITypeDiscovery(currentAdt.id, params).then((res) => {
         this.$message.success('保存成功')
+        this.$emit('handleSave')
       })
     },
     handleOpenCmdb() {
