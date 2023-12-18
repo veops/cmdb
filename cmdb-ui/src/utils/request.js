@@ -5,6 +5,7 @@ import { VueAxios } from './axios'
 import message from 'ant-design-vue/es/message'
 import notification from 'ant-design-vue/es/notification'
 import { ACCESS_TOKEN } from '@/store/global/mutation-types'
+import router from '@/router'
 
 // 创建 axios 实例
 const service = axios.create({
@@ -50,7 +51,7 @@ const err = (error) => {
   }
   if (error.response) {
     console.log(error.config.url)
-    if (error.response.status === 401) {
+    if (error.response.status === 401 && router.path === '/user/login') {
       window.location.href = '/user/logout'
     }
   }
