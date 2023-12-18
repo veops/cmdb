@@ -1,9 +1,10 @@
 from flask import abort, request
 
+from api.lib.common_setting.common_data import AuthenticateDataCRUD
+from api.lib.common_setting.const import TestType
+from api.lib.common_setting.resp_format import ErrFormat
 from api.lib.perm.acl.acl import role_required
 from api.resource import APIView
-from api.lib.common_setting.common_data import AuthenticateDataCRUD
-from api.lib.common_setting.resp_format import ErrFormat
 
 prefix = '/auth_config'
 

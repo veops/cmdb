@@ -21,7 +21,7 @@ from api.models.acl import User
 
 
 def authenticate_with_ldap(username, password):
-    config = AuthenticateDataCRUD(AuthenticateType.CAS).get()
+    config = AuthenticateDataCRUD(AuthenticateType.LDAP).get()
 
     server = Server(config.get('LDAP').get('ldap_server'), get_info=ALL, connect_timeout=3)
     if '@' in username:
