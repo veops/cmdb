@@ -11,7 +11,7 @@ from api.extensions import db
 from api.lib.common_setting.resp_format import ErrFormat
 from api.models.common_setting import CommonData
 from api.lib.utils import AESCrypto
-from api.lib.common_setting.const import AuthCommonConfig, AuthenticateType, AuthCommonConfigAutoRedirect
+from api.lib.common_setting.const import AuthCommonConfig, AuthenticateType, AuthCommonConfigAutoRedirect, TestType
 
 
 class CommonDataCRUD(object):
@@ -29,6 +29,7 @@ class CommonDataCRUD(object):
     def create_new_data(data_type, **kwargs):
         try:
             CommonDataCRUD.check_auth_type(data_type)
+
             return CommonData.create(data_type=data_type, **kwargs)
         except Exception as e:
             db.session.rollback()
@@ -143,6 +144,9 @@ class AuthenticateDataCRUD(object):
 
     def create(self, data) -> CommonData:
         self.check_by_type()
+        encrypt = data.pop('encrypt', None)
+        if encrypt is False:
+            return CommonData.create(data_type=self._type, data=data)
         encrypted_data = self.encrypt(data)
         try:
             return CommonData.create(data_type=self._type, data=encrypted_data)
@@ -151,6 +155,9 @@ class AuthenticateDataCRUD(object):
             abort(400, str(e))
 
     def update_by_record(self, record, data) -> CommonData:
+        encrypt = data.pop('encrypt', None)
+        if encrypt is False:
+            return record.update(data=data)
         encrypted_data = self.encrypt(data)
         try:
             return record.update(data=encrypted_data)
@@ -228,25 +235,33 @@ class AuthenticateDataCRUD(object):
             auth_auto_redirect=auth_auto_redirect,
         )
 
-    def test(self, data):
+    def test(self, test_type, data):
         type_lower = self._type.lower()
         func_name = f'test_{type_lower}'
         if hasattr(self, func_name):
             try:
-                return getattr(self, f'test_{type_lower}')(data)
+                return getattr(self, f'test_{type_lower}')(test_type, data)
             except Exception as e:
                 abort(400, str(e))
         abort(400, ErrFormat.not_support_test.format(self._type))
 
     @staticmethod
-    def test_ldap(data):
+    def test_ldap(test_type, data):
         ldap_server = data.get('ldap_server')
         ldap_user_dn = data.get('ldap_user_dn', '{}')
-        username = data.get('username', '')
-        user = ldap_user_dn.format(username)
-        password = data.get('password', '')
 
         server = Server(ldap_server, connect_timeout=2)
+        if not server.check_availability():
+            raise Exception(ErrFormat.ldap_server_connect_not_available)
+        else:
+            if test_type == TestType.Connect:
+                return True
+
+        username = data.get('username', None)
+        if not username:
+            raise Exception(ErrFormat.ldap_test_username_required)
+        user = ldap_user_dn.format(username)
+        password = data.get('password', None)
 
         try:
             Connection(server, user=user, password=password, auto_bind=AUTO_BIND_NO_TLS)
