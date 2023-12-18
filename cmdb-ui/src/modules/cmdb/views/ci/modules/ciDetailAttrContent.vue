@@ -241,7 +241,7 @@ export default {
       this.$nextTick(async () => {
         if (this.attr.is_list && !this.attr.is_choice) {
           this.form.setFieldsValue({
-            [`${this.attr.name}`]: this.ci[this.attr.name]|| null,
+            [`${this.attr.name}`]: this.ci[this.attr.name] || null,
           })
           return
         }

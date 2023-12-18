@@ -61,7 +61,7 @@
       </vxe-column>
       <vxe-column field="type_id" title="模型" width="150px">
         <template #default="{ row }">
-          {{ row.operate_type === '删除模型' ? row.change.alias : row.type_id}}
+          {{ row.operate_type === '删除模型' ? row.change.alias : row.type_id }}
         </template>
       </vxe-column>
       <vxe-column field="changeDescription" title="描述">
