@@ -58,8 +58,12 @@
             />
             <div class="relation-views-right-bar">
               <a-space>
-                <a-button v-if="isLeaf" type="primary" size="small" @click="$refs.create.handleOpen(true, 'create')"
-                  >新建</a-button
+                <a-button
+                  v-if="isLeaf"
+                  type="primary"
+                  size="small"
+                  @click="$refs.create.handleOpen(true, 'create')"
+                >新建</a-button
                 >
 
                 <div class="ops-list-batch-action" v-if="isLeaf && isShowBatchIcon">

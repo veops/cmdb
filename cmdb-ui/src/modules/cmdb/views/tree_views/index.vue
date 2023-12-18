@@ -14,12 +14,16 @@
               }
             "
             class="cmdb-views-header-metadata"
-            ><a-icon type="info-circle" />
+          ><a-icon type="info-circle" />
             属性说明
           </span>
         </span>
-        <a-button size="small" icon="plus" type="primary" @click="$refs.create.handleOpen(true, 'create')"
-          >新建</a-button
+        <a-button
+          size="small"
+          icon="plus"
+          type="primary"
+          @click="$refs.create.handleOpen(true, 'create')"
+        >新建</a-button
         >
       </div>
       <SplitPane
