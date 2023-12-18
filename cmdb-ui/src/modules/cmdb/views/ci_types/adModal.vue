@@ -53,8 +53,8 @@ export default {
           return postCITypeDiscovery(this.CITypeId, { adr_id: id, interval: type === 'agent' ? 300 : 3600 })
         })
         await Promise.all(promises)
-          .then(() => {
-            this.getCITypeDiscovery(this.selectedIds[0].id)
+          .then((res) => {
+            this.getCITypeDiscovery(res[0].id)
             this.$message.success('添加成功')
           })
           .catch(() => {
