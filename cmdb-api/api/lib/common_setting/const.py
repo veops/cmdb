@@ -30,3 +30,8 @@ class AuthenticateType(BaseEnum):
 
 AuthCommonConfig = 'AuthCommonConfig'
 AuthCommonConfigAutoRedirect = 'auto_redirect'
+
+
+class TestType(BaseEnum):
+    Connect = 'connect'
+    Login = 'login'

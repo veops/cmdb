@@ -2,7 +2,7 @@ from flask import abort, request
 
 from api.lib.perm.acl.acl import role_required
 from api.resource import APIView
-from api.lib.common_setting.common_data import AuthenticateDataCRUD, CommonDataCRUD
+from api.lib.common_setting.common_data import AuthenticateDataCRUD
 from api.lib.common_setting.resp_format import ErrFormat
 
 prefix = '/auth_config'
@@ -33,7 +33,8 @@ class AuthConfigView(APIView):
 
         params = request.json
         if auth_type in cli.common_type_list:
-            CommonDataCRUD.create_new_data(auth_type, **params)
+            params['encrypt'] = False
+            cli.create(**params)
         else:
             cli.create(params.get('data', {}))
 
@@ -51,10 +52,12 @@ class AuthConfigViewWithId(APIView):
             abort(400, ErrFormat.not_support_auth_type.format(auth_type))
 
         params = request.json
+        data = params.get('data', {})
         if auth_type in cli.common_type_list:
-            res = CommonDataCRUD.update_data(_id, **params)
+            data['encrypt'] = False
+            res = cli.update(_id, data)
         else:
-            res = cli.update(_id, params.get('data', {}))
+            res = cli.update(_id, data)
 
         return self.jsonify(res.to_dict())
 
@@ -81,5 +84,6 @@ class AuthConfigTestView(APIView):
     url_prefix = (f'{prefix}/<string:auth_type>/test',)
 
     def post(self, auth_type):
+        test_type = request.values.get('test_type', TestType.Connect)
         params = request.json
-        return self.jsonify(AuthenticateDataCRUD(auth_type).test(params.get('data')))
+        return self.jsonify(AuthenticateDataCRUD(auth_type).test(test_type, params.get('data')))
