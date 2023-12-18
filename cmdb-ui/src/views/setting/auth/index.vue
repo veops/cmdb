@@ -12,13 +12,20 @@
       </span>
       <div class="setting-auth">
         <components :ref="item.value" :is="item.value === 'OIDC' ? 'OAUTH2' : item.value" :data_type="item.value" />
-        <div class="setting-auth-operation">
-          <a-space>
-            <a-button :loading="loading" type="primary" @click="handleSave">保存</a-button>
-            <a-button :loading="loading" @click="handleReset">重置</a-button>
-          </a-space>
-        </div>
+        <a-row>
+          <a-col :offset="item.value === 'AuthCommonConfig' ? 5 : 3">
+            <a-space>
+              <a-button :loading="loading" type="primary" @click="handleSave">保存</a-button>
+              <template v-if="item.value === 'LDAP'">
+                <a-button :loading="loading" ghost type="primary" @click="handleTest('connect')">测试链接</a-button>
+                <a-button :loading="loading" ghost type="primary" @click="handleTest('login')">测试登录</a-button>
+              </template>
+              <a-button :loading="loading" @click="handleReset">重置</a-button>
+            </a-space>
+          </a-col>
+        </a-row>
       </div>
+      <LoginModal v-if="item.value === 'LDAP'" ref="loginModal" @handleOK="(values) => handleTest('login', values)" />
     </a-tab-pane>
   </a-tabs>
 </template>
@@ -29,10 +36,11 @@ import LDAP from './ldap.vue'
 import CAS from './cas.vue'
 import AuthCommonConfig from './common.vue'
 import OAUTH2 from './oauth2.vue'
-import { getAuthData, postAuthData, putAuthData, getAuthDataEnable } from '@/api/auth'
+import LoginModal from './loginModal.vue'
+import { getAuthData, postAuthData, putAuthData, getAuthDataEnable, testLDAP } from '@/api/auth'
 export default {
   name: 'Auth',
-  components: { LDAP, CAS, AuthCommonConfig, OAUTH2 },
+  components: { LDAP, CAS, AuthCommonConfig, OAUTH2, LoginModal },
   data() {
     const authList = [
       {
@@ -76,7 +84,7 @@ export default {
     },
     changeActiveKey() {
       getAuthData(this.activeKey).then((res) => {
-       const _res = _.cloneDeep(res)
+        const _res = _.cloneDeep(res)
         this.$refs[this.activeKey][0].setData(_res?.data ?? null)
         if (_res && JSON.stringify(_res) !== '{}') {
           this.dataTypeId = _res.id
@@ -105,6 +113,29 @@ export default {
     handleReset() {
       this.changeActiveKey()
     },
+    handleTest(type, values = null) {
+      this.$refs[this.activeKey][0].getData(async (data) => {
+        if (type === 'login' && !values) {
+          this.$refs.loginModal[0].open()
+        } else {
+          this.loading = true
+          let _data = _.cloneDeep(data)
+          if (values) {
+            _data = {
+              ..._data,
+              ...values,
+            }
+          }
+          testLDAP(type, { data: _data })
+            .then((res) => {
+              this.$message.success('测试成功')
+            })
+            .finally(() => {
+              this.loading = false
+            })
+        }
+      })
+    },
   },
 }
 </script>
@@ -116,10 +147,6 @@ export default {
   overflow: auto;
   border-radius: 0 5px 5px 5px;
   padding-top: 24px;
-  .setting-auth-operation {
-    padding: 0 100px 24px 100px;
-    text-align: right;
-  }
 }
 </style>
 
