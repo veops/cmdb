@@ -29,3 +29,12 @@ export function getAuthDataEnable() {
         method: 'get',
     })
 }
+
+
+export function testLDAP(test_type, data) {
+    return axios({
+        url: `/common-setting/v1/auth_config/LDAP/test?test_type=${test_type}`,
+        method: 'post',
+        data,
+    })
+}
