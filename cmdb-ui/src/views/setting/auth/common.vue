@@ -15,13 +15,13 @@
         "
       />
     </a-form-model-item>
-    <a-form-model-item
+    <!-- <a-form-model-item
       label="API服务地址"
       prop="api_host"
       help="如果服务的部署没使用DNS, 如果要启用CAS、OAuth2.0、OIDC的，则须填API服务地址"
     >
       <a-input v-model="form.api_host" placeholder="http://127.0.0.1:5000" />
-    </a-form-model-item>
+    </a-form-model-item> -->
   </a-form-model>
 </template>
 
