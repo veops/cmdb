@@ -12,8 +12,10 @@ from flask import redirect
 from flask import request
 from flask import session
 from flask import url_for
-from flask_login import login_user, logout_user
+from flask_login import login_user
+from flask_login import logout_user
 from six.moves.urllib.parse import urlencode
+from six.moves.urllib.parse import urlparse
 
 from api.lib.common_setting.common_data import AuthenticateDataCRUD
 from api.lib.perm.acl.audit import AuditCRUD
@@ -34,9 +36,12 @@ def login(auth_type):
 
     auth_type = auth_type.upper()
 
+    redirect_uri = "{}://{}{}".format(urlparse(request.referrer).scheme,
+                                      urlparse(request.referrer).netloc,
+                                      url_for('oauth2.callback', auth_type=auth_type.lower()))
     qs = urlencode({
         'client_id': config['client_id'],
-        'redirect_uri': url_for('oauth2.callback', auth_type=auth_type.lower(), _external=True),
+        'redirect_uri': redirect_uri,
         'response_type': current_app.config[f'{auth_type}_RESPONSE_TYPE'],
         'scope': ' '.join(config['scopes'] or []),
         'state': session[f'{auth_type.lower()}_state'],
