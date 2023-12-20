@@ -11,6 +11,7 @@ from flask import session
 from flask import url_for
 from flask_login import login_user
 from flask_login import logout_user
+from six.moves.urllib.parse import urlparse
 from six.moves.urllib_request import urlopen
 
 from api.lib.common_setting.common_data import AuthenticateDataCRUD
@@ -45,7 +46,11 @@ def login():
     if request.values.get("next"):
         session["next"] = request.values.get("next")
 
-    _service = url_for('cas.login', _external=True)
+    # _service = url_for('cas.login', _external=True)
+    _service = "{}://{}{}".format(urlparse(request.referrer).scheme,
+                                  urlparse(request.referrer).netloc,
+                                  url_for('cas.login'))
+
     redirect_url = create_cas_login_url(
         config['cas_server'],
         config['cas_login_route'],
@@ -161,6 +166,9 @@ def validate(ticket):
                 v = soup.find(cas_user_map[k]['tag'], cas_user_map[k].get('attrs', {}))
                 user_dict[k] = v and v.text or None
             user_dict['password'] = uuid.uuid4().hex
+            if "email" not in user_dict:
+                user_dict['email'] = username
+
             UserCRUD.add(**user_dict)
 
         from api.lib.perm.acl.acl import ACLManager
