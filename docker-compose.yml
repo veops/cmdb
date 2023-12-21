@@ -93,6 +93,10 @@ services:
 
 volumes:
   db-data:
+    driver: local
+    name: cmdb_db-data
 
 networks:
   new:
+    driver: bridge
+    name: cmdb_network
