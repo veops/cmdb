@@ -77,7 +77,7 @@ const genCmdbRoutes = async () => {
         path: '/cmdb/ci_types',
         name: 'ci_type',
         component: () => import('../views/ci_types/index'),
-        meta: { title: '模型配置', icon: 'ops-cmdb-citype', selectedIcon: 'ops-cmdb-citype-selected', keepAlive: false }
+        meta: { title: '模型配置', icon: 'ops-cmdb-citype', selectedIcon: 'ops-cmdb-citype-selected', keepAlive: false, permission: ['cmdb_admin', 'admin'] }
       },
       {
         path: '/cmdb/disabled3',
