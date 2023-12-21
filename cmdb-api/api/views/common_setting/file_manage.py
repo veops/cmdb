@@ -46,6 +46,8 @@ class PostFileView(APIView):
         if not file:
             abort(400, ErrFormat.file_is_required)
         extension = file.mimetype.split('/')[-1]
+        if '+' in extension:
+            extension = file.filename.split('.')[-1]
         if file.filename == '':
             filename = f'.{extension}'
         else:
