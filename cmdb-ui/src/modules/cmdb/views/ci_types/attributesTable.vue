@@ -98,6 +98,7 @@
               :property="item"
               @ok="handleOk"
               :CITypeId="CITypeId"
+              :attributes="attributes"
             />
             <i></i> <i></i> <i></i> <i></i> <i></i>
           </draggable>
@@ -137,6 +138,7 @@
             :property="item"
             @ok="handleOk"
             :CITypeId="CITypeId"
+            :attributes="attributes"
           />
           <i></i> <i></i> <i></i> <i></i> <i></i>
         </draggable>
