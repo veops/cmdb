@@ -65,8 +65,7 @@ const genAclRoutes = async () => {
         path: `/acl/operate_history`,
         name: 'acl_operate_history',
         component: () => import('../views/operation_history/index.vue'),
-        // meta: { title: '操作审计', icon: 'search', permission: ['acl_admin'] },
-        meta: { title: '操作审计', icon: 'search' }
+        meta: { title: '操作审计', icon: 'search', permission: ['acl_admin'] },
       },
       {
         path: `/acl/user`,
