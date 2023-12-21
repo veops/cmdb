@@ -293,6 +293,7 @@ import SplitPane from '@/components/SplitPane'
 import CMDBGrant from '../../components/cmdbGrant'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
 import AttributeStore from './attributeStore.vue'
+import { getAllDepAndEmployee } from '@/api/company'
 
 export default {
   name: 'CITypes',
@@ -342,6 +343,8 @@ export default {
 
       orderSelectionOptions: [],
       default_order_asc: '1',
+
+      allTreeDepAndEmp: [],
     }
   },
   computed: {
@@ -405,9 +408,13 @@ export default {
       resource_type: () => {
         return this.resource_type
       },
+      provide_allTreeDepAndEmp: () => {
+        return this.allTreeDepAndEmp
+      },
     }
   },
   mounted() {
+    this.getAllDepAndEmployee()
     const _currentId = localStorage.getItem('ops_cityps_currentId')
     if (_currentId) {
       this.currentId = _currentId
@@ -419,6 +426,11 @@ export default {
     this.getAttributes()
   },
   methods: {
+    getAllDepAndEmployee() {
+      getAllDepAndEmployee({ block: 0 }).then((res) => {
+        this.allTreeDepAndEmp = res
+      })
+    },
     async loadCITypes(isResetCurrentId = false) {
       const groups = await getCITypeGroupsConfig({ need_other: true })
       let alreadyReset = false
