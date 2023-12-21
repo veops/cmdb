@@ -1,4 +1,6 @@
 import { generatorDynamicRouter, constantRouterMap } from '@/router/config'
+import { searchPermResourceByRoleId } from '@/modules/acl/api/permission'
+import store from '@/store'
 import user from './user'
 /**
  * 过滤账户是否拥有某一个权限，并将菜单从加载列表移除
@@ -7,37 +9,46 @@ import user from './user'
  * @param route
  * @returns {boolean}
  */
-function hasPermission(permission, route) {
-  const { detailPermissions } = user.state
-  if (route.meta && route.meta.permission) {
-    // let flag = false
-    // for (let i = 0, len = permission.length; i < len; i++) {
-    //   flag = (route.meta.permission || []).includes(permission[i])
-    //   if (flag) {
-    //     return true
-    //   }
-    // }
-    // return false
-    const totalPer = [...route.meta.appName && detailPermissions[`${route.meta.appName}`] ? detailPermissions[`${route.meta.appName}`].map(item => item.name) : [], ...permission]
-    return route.meta.permission.some(item => totalPer.includes(item))
-  }
-  return true
+async function hasPermission(permission, route) {
+  return new Promise(async (resolve, reject) => {
+    const { detailPermissions } = user.state
+    if (route.meta && route.meta.permission) {
+      const totalPer = [...route.meta.appName && detailPermissions[`${route.meta.appName}`] ? detailPermissions[`${route.meta.appName}`].map(item => item.name) : [], ...permission]
+      let flag = false
+      if (route.name === 'ci_type') {
+        await searchPermResourceByRoleId(store.state.user.rid, {
+          resource_type_id: 'page',
+          app_id: 'cmdb',
+        }).then(res => {
+          const { resources } = res
+          const _idx = resources.findIndex(item => item.name === '模型配置')
+          flag = flag || (_idx > -1)
+        })
+      }
+      resolve(route.meta.permission.some(item => totalPer.includes(item)) || flag)
+    }
+    resolve(true)
+  })
 }
 
-function filterAsyncRouter(routerMap, roles) {
-  return routerMap.filter(route => {
+async function filterAsyncRouter(routerMap, roles) {
+  const filteredRoutes = []
+  for (let i = 0; i < routerMap.length; i++) {
+    const route = routerMap[i]
     const default_route = ['company_info', 'company_structure', 'company_group']
     if (default_route.includes(route.name)) {
-      return true
+      filteredRoutes.push(route)
     }
-    if (hasPermission(roles.permissions, route)) {
-      if (route.children && route.children.length) {
-        route.children = filterAsyncRouter(route.children, roles)
+    await hasPermission(roles.permissions, route).then(async flag => {
+      if (flag) {
+        if (route.children && route.children.length) {
+          route.children = await filterAsyncRouter(route.children, roles)
+        }
+        filteredRoutes.push(route)
       }
-      return true
-    }
-    return false
-  })
+    })
+  }
+  return filteredRoutes
 }
 
 const routes = {
@@ -55,8 +66,8 @@ const routes = {
     GenerateRoutes({ commit }, data) {
       return new Promise(resolve => {
         const { roles } = data
-        generatorDynamicRouter().then(routers => {
-          const accessedRouters = filterAsyncRouter(routers, roles)
+        generatorDynamicRouter().then(async routers => {
+          const accessedRouters = await filterAsyncRouter(routers, roles)
           commit('SET_ROUTERS', accessedRouters)
           resolve(accessedRouters)
         })
