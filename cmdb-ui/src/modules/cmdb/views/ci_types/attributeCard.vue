@@ -104,6 +104,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    attributes: {
+      type: Array,
+      default: () => []
+    }
   },
   data() {
     const propertyList = [
@@ -160,7 +164,7 @@ export default {
       })
     },
     openTrigger() {
-      this.$refs.triggerForm.open(this.property)
+      this.$refs.triggerForm.open(this.property, this.attributes)
     },
     handleCalcComputed() {
       const that = this

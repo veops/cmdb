@@ -71,7 +71,6 @@ import _ from 'lodash'
 import { getTriggerList, deleteTrigger, updateTrigger } from '../../api/CIType'
 import { getCITypeAttributesById } from '../../api/CITypeAttr'
 import TriggerForm from './triggerForm.vue'
-import { getAllDepAndEmployee } from '@/api/company'
 
 export default {
   name: 'TriggerTable',
@@ -86,7 +85,6 @@ export default {
     return {
       tableData: [],
       attrList: [],
-      allTreeDepAndEmp: [],
     }
   },
   computed: {
@@ -97,20 +95,9 @@ export default {
   provide() {
     return {
       refresh: this.getTableData,
-      provide_allTreeDepAndEmp: () => {
-        return this.allTreeDepAndEmp
-      },
     }
   },
-  mounted() {
-    this.getAllDepAndEmployee()
-  },
   methods: {
-    getAllDepAndEmployee() {
-      getAllDepAndEmployee({ block: 0 }).then((res) => {
-        this.allTreeDepAndEmp = res
-      })
-    },
     async getTableData() {
       const [triggerList, attrList] = await Promise.all([
         getTriggerList(this.CITypeId),
