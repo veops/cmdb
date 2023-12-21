@@ -38,15 +38,16 @@ async function filterAsyncRouter(routerMap, roles) {
     const default_route = ['company_info', 'company_structure', 'company_group']
     if (default_route.includes(route.name)) {
       filteredRoutes.push(route)
-    }
-    await hasPermission(roles.permissions, route).then(async flag => {
-      if (flag) {
-        if (route.children && route.children.length) {
-          route.children = await filterAsyncRouter(route.children, roles)
+    } else {
+      await hasPermission(roles.permissions, route).then(async flag => {
+        if (flag) {
+          if (route.children && route.children.length) {
+            route.children = await filterAsyncRouter(route.children, roles)
+          }
+          filteredRoutes.push(route)
         }
-        filteredRoutes.push(route)
-      }
-    })
+      })
+    }
   }
   return filteredRoutes
 }
