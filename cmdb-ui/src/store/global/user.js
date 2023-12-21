@@ -54,13 +54,14 @@ const user = {
       state.token = token
     },
 
-    SET_USER_INFO: (state, { name, welcome, avatar, roles, info, uid, username, mobile, department_id, employee_id, email, nickname, sex, position_name, direct_supervisor_id, annual_leave }) => {
+    SET_USER_INFO: (state, { name, welcome, avatar, roles, info, uid, rid, username, mobile, department_id, employee_id, email, nickname, sex, position_name, direct_supervisor_id, annual_leave }) => {
       state.name = name
       state.welcome = welcome
       state.avatar = avatar
       state.roles = roles
       state.info = info
       state.uid = uid
+      state.rid = rid
       state.authed = true
       state.username = username
       state.mobile = mobile
@@ -149,6 +150,7 @@ const user = {
               welcome: welcome(),
               avatar: result.avatar,
               uid: result.uid,
+              rid: result.rid,
               username: result.username,
               mobile: res.mobile,
               department_id: res.department_id,

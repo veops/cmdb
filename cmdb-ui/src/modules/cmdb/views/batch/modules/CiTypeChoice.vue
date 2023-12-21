@@ -89,10 +89,12 @@
 
 <script>
 import _ from 'lodash'
+import { mapState } from 'vuex'
 import { downloadExcel } from '../../../utils/helper'
 import { getCITypes } from '@/modules/cmdb/api/CIType'
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
 import { getCITypeParent, getCanEditByParentIdChildId } from '@/modules/cmdb/api/CITypeRelation'
+import { searchPermResourceByRoleId } from '@/modules/acl/api/permission'
 
 export default {
   name: 'CiTypeChoice',
@@ -112,9 +114,21 @@ export default {
       canEdit: {},
     }
   },
-  created: function() {
+  computed: {
+    ...mapState({
+      rid: (state) => state.user.rid,
+    }),
+  },
+  async created() {
+    const { resources } = await searchPermResourceByRoleId(this.rid, {
+      resource_type_id: 'CIType',
+      app_id: 'cmdb',
+    })
     getCITypes().then((res) => {
-      this.ciTypeList = res.ci_types
+      this.ciTypeList = res.ci_types.filter((type) => {
+        const _findRe = resources.find((re) => re.name === type.name)
+        return _findRe?.permissions.includes('create') ?? false
+      })
     })
   },
   watch: {
