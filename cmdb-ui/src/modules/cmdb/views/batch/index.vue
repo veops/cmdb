@@ -106,7 +106,6 @@ export default {
       this.uploadData = _uploadData.slice(1)
       this.hasError = false
       this.isUploading = false
-      this.$refs.uploadResult.visible = false
     },
     handleUpload() {
       if (!this.ciType) {

@@ -40,20 +40,18 @@
                   <a-menu-item key="0">
                     <a-upload
                       name="file"
-                      accept="json"
+                      accept=".json"
                       :showUploadList="false"
                       style="display: inline-block"
-                      action="/api/v0.1/ci_types/template/import/file "
+                      action="/api/v0.1/ci_types/template/import/file"
+                      @change="changeUploadFile"
                     >
-                      <a-space
-                      ><a><a-icon type="upload"/></a><a>导入</a></a-space
-                      >
+                      <a><a-icon type="upload"/></a><a> 导入</a>
                     </a-upload>
                   </a-menu-item>
                   <a-menu-item key="1">
                     <a-space>
-                      <a><a-icon type="download"/></a>
-                      <a href="/api/v0.1/ci_types/template/export/file">导出</a>
+                      <a href="/api/v0.1/ci_types/template/export/file"><a-icon type="download" /> 导出</a>
                     </a-space>
                   </a-menu-item>
                 </a-menu>
@@ -134,6 +132,12 @@
                   <a-space class="ci-types-left-detail-action">
                     <a><a-icon type="user-add" @click="(e) => handlePerm(e, ci)"/></a>
                     <a><a-icon type="edit" @click="(e) => handleEdit(e, ci)"/></a>
+                    <a
+                      v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')"
+                      @click="(e) => handleDownloadCiType(e, ci)"
+                    ><a-icon
+                      type="download"
+                    /></a>
                     <a style="color: red" @click="(e) => handleDelete(e, ci)"><a-icon type="delete"/></a>
                   </a-space>
                 </div>
@@ -309,6 +313,7 @@ export default {
     OpsMoveIcon,
     AttributeStore,
   },
+  inject: ['reload'],
   data() {
     return {
       emptyImage,
@@ -716,6 +721,21 @@ export default {
         },
       })
     },
+    handleDownloadCiType(e, ci) {
+      e.preventDefault()
+      e.stopPropagation()
+      const x = new XMLHttpRequest()
+      x.open('GET', `/api/v0.1/ci_types/${ci.id}/template/export`, true)
+      x.responseType = 'blob'
+      x.onload = function(e) {
+        const url = window.URL.createObjectURL(x.response)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${ci.alias || ci.name}.json`
+        a.click()
+      }
+      x.send()
+    },
     resetRoute() {
       resetRouter()
       const roles = store.getters.roles
@@ -779,6 +799,19 @@ export default {
           this.$message.error('权限不足！')
         }
       })
+    },
+    changeUploadFile({ file, fileList, event }) {
+      const key = 'upload'
+      if (file.status === 'uploading') {
+        this.$message.loading({ content: '正在导入中', key, duration: 0 })
+      }
+      if (file.status === 'done') {
+        this.$message.success({ content: '导入成功', key, duration: 2 })
+        this.reload()
+      }
+      if (file.status === 'error') {
+        this.$message.error({ content: '导入失败，请稍后重试', key, duration: 2 })
+      }
     },
   },
 }

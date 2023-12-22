@@ -276,15 +276,16 @@ export default {
     },
     mergeRowMethod({ row, _rowIndex, column, visibleData }) {
       const fields = ['created_at', 'username']
-      const cellValue = row[column.property]
-      if (cellValue && fields.includes(column.property)) {
+      const cellValue1 = row['created_at']
+      const cellValue2 = row['username']
+      if (cellValue1 && cellValue2 && fields.includes(column.property)) {
         const prevRow = visibleData[_rowIndex - 1]
         let nextRow = visibleData[_rowIndex + 1]
-        if (prevRow && prevRow[column.property] === cellValue) {
+        if (prevRow && prevRow['created_at'] === cellValue1 && prevRow['username'] === cellValue2) {
           return { rowspan: 0, colspan: 0 }
         } else {
           let countRowspan = 1
-          while (nextRow && nextRow[column.property] === cellValue) {
+          while (nextRow && nextRow['created_at'] === cellValue1 && nextRow['username'] === cellValue2) {
             nextRow = visibleData[++countRowspan + _rowIndex]
           }
           if (countRowspan > 1) {
