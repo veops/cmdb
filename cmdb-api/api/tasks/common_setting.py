@@ -1,24 +1,24 @@
 # -*- coding:utf-8 -*-
-import requests
 from flask import current_app
 
 from api.extensions import celery
-from api.extensions import db
 from api.lib.common_setting.acl import ACLManager
-from api.lib.common_setting.const import COMMON_SETTING_QUEUE
+from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.common_setting.resp_format import ErrFormat
-from api.models.common_setting import Department
+from api.models.common_setting import Department, Employee
+from api.lib.decorator import flush_db
+from api.lib.decorator import reconnect_db
 
 
-@celery.task(name="common_setting.edit_employee_department_in_acl", queue=COMMON_SETTING_QUEUE)
+@celery.task(name="common_setting.edit_employee_department_in_acl", queue=CMDB_QUEUE)
+@flush_db
+@reconnect_db
 def edit_employee_department_in_acl(e_list, new_d_id, op_uid):
     """
     :param e_list:{acl_rid: 11, department_id: 22}
     :param new_d_id
     :param op_uid
     """
-    db.session.remove()
-
     result = []
     new_department = Department.get_by(
         first=True, department_id=new_d_id, to_dict=False)
@@ -75,3 +75,41 @@ def edit_employee_department_in_acl(e_list, new_d_id, op_uid):
             result.append(ErrFormat.acl_add_user_to_role_failed.format(str(e)))
 
     return result
+
+
+@celery.task(name="common_setting.refresh_employee_acl_info", queue=CMDB_QUEUE)
+@flush_db
+@reconnect_db
+def refresh_employee_acl_info():
+    acl = ACLManager('acl')
+    role_map = {role['name']: role for role in acl.get_all_roles()}
+
+    criterion = [
+        Employee.deleted == 0
+    ]
+    query = Employee.query.filter(*criterion).order_by(
+        Employee.created_at.desc()
+    )
+
+    for em in query.all():
+        if em.acl_uid and em.acl_rid:
+            continue
+        role = role_map.get(em.username, None)
+        if not role:
+            continue
+
+        params = dict()
+        if not em.acl_uid:
+            params['acl_uid'] = role.get('uid', 0)
+
+        if not em.acl_rid:
+            params['acl_rid'] = role.get('id', 0)
+
+        try:
+            em.update(**params)
+            current_app.logger.info(
+                f"refresh_employee_acl_info success, employee_id: {em.employee_id}, uid: {em.acl_uid}, "
+                f"rid: {em.acl_rid}")
+        except Exception as e:
+            current_app.logger.error(str(e))
+            continue
