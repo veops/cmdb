@@ -692,6 +692,27 @@ class EmployeeCRUD(object):
         else:
             abort(400, ErrFormat.column_name_not_support)
 
+    @staticmethod
+    def update_last_login_by_uid(uid, last_login=None):
+        employee = Employee.get_by(acl_uid=uid, first=True, to_dict=False)
+        if not employee:
+            return
+        if last_login:
+            try:
+                last_login = datetime.strptime(last_login, '%Y-%m-%d %H:%M:%S')
+            except Exception as e:
+                last_login = datetime.now()
+        else:
+            last_login = datetime.now()
+
+        try:
+            employee.update(
+                last_login=last_login
+            )
+            return last_login
+        except Exception as e:
+            return
+
 
 def get_user_map(key='uid', acl=None):
     """
