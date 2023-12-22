@@ -130,22 +130,27 @@ export default {
         exp = expression.match(regQ) ? expression.match(regQ)[0] : null
       }
 
-      const res = await searchCI({
+      await searchCI({
         q: `_type:${this.addTypeId}${exp ? `,${exp}` : ''}${fuzzySearch ? `,*${fuzzySearch}*` : ''}`,
         count: 50,
         page: this.currentPage,
         sort,
       })
-      this.tableData = res.result
-      this.totalNumber = res.numfound
-      this.columns = this.getColumns(res.result, this.preferenceAttrList)
-      this.$nextTick(() => {
-        const _table = this.$refs.xTable
-        if (_table) {
-          _table.refreshColumn()
-        }
-        this.loading = false
-      })
+        .then((res) => {
+          this.tableData = res.result
+          this.totalNumber = res.numfound
+          this.columns = this.getColumns(res.result, this.preferenceAttrList)
+          this.$nextTick(() => {
+            const _table = this.$refs.xTable
+            if (_table) {
+              _table.refreshColumn()
+            }
+            this.loading = false
+          })
+        })
+        .catch(() => {
+          this.loading = false
+        })
     },
     getColumns(data, attrList) {
       const modalDom = document.getElementById('add-table-modal')

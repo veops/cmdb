@@ -136,8 +136,8 @@ export default {
     async getCITypeDiscovery(currentTab) {
       await getCITypeDiscovery(this.CITypeId).then((res) => {
         this.adCITypeList = res.filter((item) => item.adr_id)
-        if (res && res.length && !this.currentTab) {
-          this.currentTab = res[0].id
+        if (this.adCITypeList && this.adCITypeList.length && !this.currentTab) {
+          this.currentTab = this.adCITypeList[0].id
         }
         if (currentTab) {
           this.currentTab = currentTab
