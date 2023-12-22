@@ -189,7 +189,8 @@ class AttributeManager(object):
         return attr
 
     def get_attribute(self, key, choice_web_hook_parse=True, choice_other_parse=True):
-        attr = AttributeCache.get(key).to_dict()
+        attr = AttributeCache.get(key) or dict()
+        attr = attr and attr.to_dict()
         if attr.get("is_choice"):
             attr["choice_value"] = self.get_choice_values(
                 attr["id"],

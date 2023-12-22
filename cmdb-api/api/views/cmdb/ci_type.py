@@ -105,7 +105,6 @@ class CITypeGroupView(APIView):
 
         return self.jsonify(group.to_dict())
 
-    @role_required(RoleEnum.CONFIG)
     @args_validate(CITypeGroupManager.cls)
     def put(self, gid=None):
         if "/order" in request.url:
@@ -167,7 +166,8 @@ class CITypeAttributeView(APIView):
         t = CITypeCache.get(type_id) or CITypeCache.get(type_name) or abort(404, ErrFormat.ci_type_not_found)
         type_id = t.id
         unique_id = t.unique_id
-        unique = AttributeCache.get(unique_id).name
+        unique = AttributeCache.get(unique_id)
+        unique = unique and unique.name
 
         attr_filter = CIFilterPermsCRUD.get_attr_filter(type_id)
         attributes = CITypeAttributeManager.get_attributes_by_type_id(type_id)
@@ -319,12 +319,14 @@ class CITypeAttributeGroupView(APIView):
 
 
 class CITypeTemplateView(APIView):
-    url_prefix = ("/ci_types/template/import", "/ci_types/template/export")
+    url_prefix = ("/ci_types/template/import", "/ci_types/template/export", "/ci_types/<int:type_id>/template/export")
 
     @role_required(RoleEnum.CONFIG)
-    def get(self):  # export
-        return self.jsonify(
-            dict(ci_type_template=CITypeTemplateManager.export_template()))
+    def get(self, type_id=None):  # export
+        if type_id is not None:
+            return self.jsonify(dict(ci_type_template=CITypeTemplateManager.export_template_by_type(type_id)))
+
+        return self.jsonify(dict(ci_type_template=CITypeTemplateManager.export_template()))
 
     @role_required(RoleEnum.CONFIG)
     def post(self):  # import
@@ -458,11 +460,10 @@ class CITypeGrantView(APIView):
         _type = CITypeCache.get(type_id)
         type_name = _type and _type.name or abort(404, ErrFormat.ci_type_not_found)
         acl = ACLManager('cmdb')
-        if not acl.has_permission(type_name, ResourceTypeEnum.CI_TYPE, PermEnum.GRANT) and \
-                not is_app_admin('cmdb'):
+        if not acl.has_permission(type_name, ResourceTypeEnum.CI_TYPE, PermEnum.GRANT) and not is_app_admin('cmdb'):
             return abort(403, ErrFormat.no_permission.format(type_name, PermEnum.GRANT))
 
-        acl.grant_resource_to_role_by_rid(type_name, rid, ResourceTypeEnum.CI_TYPE, perms)
+        acl.grant_resource_to_role_by_rid(type_name, rid, ResourceTypeEnum.CI_TYPE, perms, rebuild=False)
 
         CIFilterPermsCRUD().add(type_id=type_id, rid=rid, **request.values)
 
@@ -482,21 +483,27 @@ class CITypeRevokeView(APIView):
         _type = CITypeCache.get(type_id)
         type_name = _type and _type.name or abort(404, ErrFormat.ci_type_not_found)
         acl = ACLManager('cmdb')
-        if not acl.has_permission(type_name, ResourceTypeEnum.CI_TYPE, PermEnum.GRANT) and \
-                not is_app_admin('cmdb'):
+        if not acl.has_permission(type_name, ResourceTypeEnum.CI_TYPE, PermEnum.GRANT) and not is_app_admin('cmdb'):
             return abort(403, ErrFormat.no_permission.format(type_name, PermEnum.GRANT))
 
-        acl.revoke_resource_from_role_by_rid(type_name, rid, ResourceTypeEnum.CI_TYPE, perms)
+        acl.revoke_resource_from_role_by_rid(type_name, rid, ResourceTypeEnum.CI_TYPE, perms, rebuild=False)
 
+        app_id = AppCache.get('cmdb').id
+        resource = None
         if PermEnum.READ in perms:
-            CIFilterPermsCRUD().delete(type_id=type_id, rid=rid)
+            resource = CIFilterPermsCRUD().delete(type_id=type_id, rid=rid)
 
-            app_id = AppCache.get('cmdb').id
             users = RoleRelationCRUD.get_users_by_rid(rid, app_id)
             for i in (users or []):
                 if i.get('role', {}).get('id') and not RoleCRUD.has_permission(
                         i.get('role').get('id'), type_name, ResourceTypeEnum.CI_TYPE, app_id, PermEnum.READ):
                     PreferenceManager.delete_by_type_id(type_id, i.get('uid'))
+
+        if not resource:
+            from api.tasks.acl import role_rebuild
+            from api.lib.perm.acl.const import ACL_QUEUE
+
+            role_rebuild.apply_async(args=(app_id, rid), queue=ACL_QUEUE)
 
         return self.jsonify(type_id=type_id, rid=rid)
 
@@ -507,4 +514,3 @@ class CITypeFilterPermissionView(APIView):
     @auth_with_app_token
     def get(self, type_id):
         return self.jsonify(CIFilterPermsCRUD().get(type_id))
-

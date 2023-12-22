@@ -5,8 +5,10 @@ import copy
 import toposort
 from flask import abort
 from flask import current_app
+from flask import session
 from flask_login import current_user
 from toposort import toposort_flatten
+from werkzeug.exceptions import BadRequest
 
 from api.extensions import db
 from api.lib.cmdb.attribute import AttributeManager
@@ -75,12 +77,13 @@ class CITypeManager(object):
     def get_ci_types(type_name=None):
         resources = None
         if current_app.config.get('USE_ACL') and not is_app_admin('cmdb'):
-            resources = set([i.get('name') for i in ACLManager().get_resources("CIType")])
+            resources = set([i.get('name') for i in ACLManager().get_resources(ResourceTypeEnum.CI_TYPE)])
 
         ci_types = CIType.get_by() if type_name is None else CIType.get_by_like(name=type_name)
         res = list()
         for type_dict in ci_types:
-            type_dict["unique_key"] = AttributeCache.get(type_dict["unique_id"]).name
+            attr = AttributeCache.get(type_dict["unique_id"])
+            type_dict["unique_key"] = attr and attr.name
             if resources is None or type_dict['name'] in resources:
                 res.append(type_dict)
 
@@ -113,6 +116,9 @@ class CITypeManager(object):
     @classmethod
     @kwargs_required("name")
     def add(cls, **kwargs):
+        if current_app.config.get('USE_ACL') and not is_app_admin('cmdb'):
+            if ErrFormat.ci_type_config not in {i['name'] for i in ACLManager().get_resources(ResourceTypeEnum.PAGE)}:
+                return abort(403, ErrFormat.no_permission2)
 
         unique_key = kwargs.pop("unique_key", None) or kwargs.pop("unique_id", None)
         unique_key = AttributeCache.get(unique_key) or abort(404, ErrFormat.unique_key_not_define)
@@ -131,7 +137,11 @@ class CITypeManager(object):
         CITypeCache.clean(ci_type.name)
 
         if current_app.config.get("USE_ACL"):
-            ACLManager().add_resource(ci_type.name, ResourceTypeEnum.CI)
+            try:
+                ACLManager().add_resource(ci_type.name, ResourceTypeEnum.CI)
+            except BadRequest:
+                pass
+
             ACLManager().grant_resource_to_role(ci_type.name,
                                                 RoleEnum.CMDB_READ_ALL,
                                                 ResourceTypeEnum.CI,
@@ -243,7 +253,6 @@ class CITypeGroupManager(object):
             else:
                 resources = {i['name']: i['permissions'] for i in resources if PermEnum.READ in i.get("permissions")}
 
-        current_app.logger.info(resources)
         groups = sorted(CITypeGroup.get_by(), key=lambda x: x['order'] or 0)
         group_types = set()
         for group in groups:
@@ -283,7 +292,10 @@ class CITypeGroupManager(object):
         """
         existed = CITypeGroup.get_by_id(gid) or abort(
             404, ErrFormat.ci_type_group_not_found.format("id={}".format(gid)))
-        if name is not None:
+        if name is not None and name != existed.name:
+            if RoleEnum.CONFIG not in session.get("acl", {}).get("parentRoles", []) and not is_app_admin("cmdb"):
+                return abort(403, ErrFormat.role_required.format(RoleEnum.CONFIG))
+
             existed.update(name=name)
 
         max_order = max([i.order or 0 for i in CITypeGroupItem.get_by(group_id=gid, to_dict=False)] or [0])
@@ -725,7 +737,7 @@ class CITypeAttributeGroupManager(object):
         grouped = list()
 
         attributes = CITypeAttributeManager.get_attributes_by_type_id(type_id)
-        id2attr = {i['id']: i for i in attributes}
+        id2attr = {i.get('id'): i for i in attributes}
 
         for group in groups:
             items = CITypeAttributeGroupItem.get_by(group_id=group["id"], to_dict=False)
@@ -891,97 +903,58 @@ class CITypeAttributeGroupManager(object):
 
 class CITypeTemplateManager(object):
     @staticmethod
-    def __import(cls, data):
-        id2obj_dicts = {i['id']: i for i in data}
-        existed = cls.get_by(deleted=None, to_dict=False)
-        id2existed = {i.id: i for i in existed}
-        existed_ids = [i.id for i in existed]
-        existed_no_delete_ids = [i.id for i in existed if not i.deleted]
+    def __import(cls, data, unique_key='name'):
+        id2obj_dicts = {i[unique_key]: i for i in data}
+        existed = cls.get_by(to_dict=False)
+        id2existed = {getattr(i, unique_key): i for i in existed}
+        existed_ids = [getattr(i, unique_key) for i in existed]
 
+        id_map = dict()
         # add
         for added_id in set(id2obj_dicts.keys()) - set(existed_ids):
+            _id = id2obj_dicts[added_id].pop('id', None)
+            id2obj_dicts[added_id].pop('created_at', None)
+            id2obj_dicts[added_id].pop('updated_at', None)
+            id2obj_dicts[added_id].pop('uid', None)
+
             if cls == CIType:
-                CITypeManager.add(**id2obj_dicts[added_id])
+                __id = CITypeManager.add(**id2obj_dicts[added_id])
+                CITypeCache.clean(__id)
             elif cls == CITypeRelation:
-                CITypeRelationManager.add(id2obj_dicts[added_id].get('parent_id'),
-                                          id2obj_dicts[added_id].get('child_id'),
-                                          id2obj_dicts[added_id].get('relation_type_id'),
-                                          id2obj_dicts[added_id].get('constraint'),
-                                          )
+                __id = CITypeRelationManager.add(id2obj_dicts[added_id].get('parent_id'),
+                                                 id2obj_dicts[added_id].get('child_id'),
+                                                 id2obj_dicts[added_id].get('relation_type_id'),
+                                                 id2obj_dicts[added_id].get('constraint'),
+                                                 )
             else:
-                cls.create(flush=True, **id2obj_dicts[added_id])
+                obj = cls.create(flush=True, **id2obj_dicts[added_id])
+                if cls == Attribute:
+                    AttributeCache.clean(obj)
+                __id = obj.id
+
+            id_map[_id] = __id
 
         # update
         for updated_id in set(id2obj_dicts.keys()) & set(existed_ids):
+            _id = id2obj_dicts[updated_id].pop('id', None)
+
+            id2existed[updated_id].update(flush=True, **id2obj_dicts[updated_id])
+
+            id_map[_id] = id2existed[updated_id].id
+
+            if cls == Attribute:
+                AttributeCache.clean(id2existed[updated_id])
+
             if cls == CIType:
-                deleted = id2existed[updated_id].deleted
-                CITypeManager.update(updated_id, **id2obj_dicts[updated_id])
-                if deleted and current_app.config.get("USE_ACL"):
-                    type_name = id2obj_dicts[updated_id]['name']
-                    ACLManager().add_resource(type_name, ResourceTypeEnum.CI)
-                    ACLManager().grant_resource_to_role(type_name,
-                                                        RoleEnum.CMDB_READ_ALL,
-                                                        ResourceTypeEnum.CI,
-                                                        permissions=[PermEnum.READ])
-                    ACLManager().grant_resource_to_role(type_name,
-                                                        current_user.username,
-                                                        ResourceTypeEnum.CI)
+                CITypeCache.clean(id2existed[updated_id].id)
 
-            else:
-                id2existed[updated_id].update(flush=True, **id2obj_dicts[updated_id])
-
-        # delete
-        for deleted_id in set(existed_no_delete_ids) - set(id2obj_dicts.keys()):
-            if cls == CIType:
-                id2existed[deleted_id].soft_delete(flush=True)
-
-                CITypeCache.clean(deleted_id)
-
-                CITypeHistoryManager.add(CITypeOperateType.DELETE, deleted_id, change=id2existed[deleted_id].to_dict())
-
-                if current_app.config.get("USE_ACL"):
-                    ACLManager().del_resource(id2existed[deleted_id].name, ResourceTypeEnum.CI)
-            else:
-                id2existed[deleted_id].soft_delete(flush=True)
         try:
             db.session.commit()
         except Exception as e:
             db.session.rollback()
             raise Exception(str(e))
 
-    def _import_ci_types(self, ci_types):
-        for i in ci_types:
-            i.pop("unique_key", None)
-
-        self.__import(CIType, ci_types)
-
-    def _import_ci_type_groups(self, ci_type_groups):
-        _ci_type_groups = copy.deepcopy(ci_type_groups)
-        for i in _ci_type_groups:
-            i.pop('ci_types', None)
-
-        self.__import(CITypeGroup, _ci_type_groups)
-
-        # import group type items
-        for group in ci_type_groups:
-            existed = CITypeGroupItem.get_by(group_id=group['id'], to_dict=False)
-            for i in existed:
-                i.soft_delete()
-
-            for order, ci_type in enumerate(group.get('ci_types') or []):
-                payload = dict(group_id=group['id'], type_id=ci_type['id'], order=order)
-                CITypeGroupItem.create(**payload)
-
-    def _import_relation_types(self, relation_types):
-        self.__import(RelationType, relation_types)
-
-    def _import_ci_type_relations(self, ci_type_relations):
-        for i in ci_type_relations:
-            i.pop('parent', None)
-            i.pop('child', None)
-            i.pop('relation_type', None)
-
-        self.__import(CITypeRelation, ci_type_relations)
+        return id_map
 
     def _import_attributes(self, type2attributes):
         attributes = [attr for type_id in type2attributes for attr in type2attributes[type_id]]
@@ -990,122 +963,262 @@ class CITypeTemplateManager(object):
             i.pop('default_show', None)
             i.pop('is_required', None)
             i.pop('order', None)
+            i.pop('choice_web_hook', None)
+            i.pop('choice_other', None)
+            i.pop('order', None)
             choice_value = i.pop('choice_value', None)
+            if not choice_value:
+                i['is_choice'] = False
 
             attrs.append((i, choice_value))
 
-        self.__import(Attribute, [i[0] for i in attrs])
+        attr_id_map = self.__import(Attribute, [i[0] for i in copy.deepcopy(attrs)])
 
         for i, choice_value in attrs:
-            if choice_value:
-                AttributeManager.add_choice_values(i['id'], i['value_type'], choice_value)
+            if choice_value and not i.get('choice_web_hook') and not i.get('choice_other'):
+                AttributeManager.add_choice_values(attr_id_map.get(i['id'], i['id']), i['value_type'], choice_value)
+
+        return attr_id_map
+
+    def _import_ci_types(self, ci_types, attr_id_map):
+        for i in ci_types:
+            i.pop("unique_key", None)
+            i['unique_id'] = attr_id_map.get(i['unique_id'], i['unique_id'])
+            i['uid'] = current_user.uid
+
+        return self.__import(CIType, ci_types)
+
+    def _import_ci_type_groups(self, ci_type_groups, type_id_map):
+        _ci_type_groups = copy.deepcopy(ci_type_groups)
+        for i in _ci_type_groups:
+            i.pop('ci_types', None)
+
+        group_id_map = self.__import(CITypeGroup, _ci_type_groups)
+
+        # import group type items
+        for group in ci_type_groups:
+            for order, ci_type in enumerate(group.get('ci_types') or []):
+                payload = dict(group_id=group_id_map.get(group['id'], group['id']),
+                               type_id=type_id_map.get(ci_type['id'], ci_type['id']),
+                               order=order)
+                existed = CITypeGroupItem.get_by(group_id=payload['group_id'], type_id=payload['type_id'],
+                                                 first=True, to_dict=False)
+                if existed is None:
+                    CITypeGroupItem.create(flush=True, **payload)
+                else:
+                    existed.update(flush=True, **payload)
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise Exception(str(e))
+
+    def _import_relation_types(self, relation_types):
+        return self.__import(RelationType, relation_types)
 
     @staticmethod
-    def _import_type_attributes(type2attributes):
-        # add type attribute
+    def _import_ci_type_relations(ci_type_relations, type_id_map, relation_type_id_map):
+        for i in ci_type_relations:
+            i.pop('parent', None)
+            i.pop('child', None)
+            i.pop('relation_type', None)
+
+            i['parent_id'] = type_id_map.get(i['parent_id'], i['parent_id'])
+            i['child_id'] = type_id_map.get(i['child_id'], i['child_id'])
+            i['relation_type_id'] = relation_type_id_map.get(i['relation_type_id'], i['relation_type_id'])
+
+            try:
+                CITypeRelationManager.add(i.get('parent_id'),
+                                          i.get('child_id'),
+                                          i.get('relation_type_id'),
+                                          i.get('constraint'),
+                                          )
+            except BadRequest:
+                pass
+
+    @staticmethod
+    def _import_type_attributes(type2attributes, type_id_map, attr_id_map):
+        for type_id in type2attributes:
+            CITypeAttributesCache.clean(type_id_map.get(int(type_id), type_id))
 
         for type_id in type2attributes:
-            existed = CITypeAttribute.get_by(type_id=type_id, to_dict=False)
-            existed_attr_ids = {i.attr_id: i for i in existed}
-            new_attr_ids = {i['id']: i for i in type2attributes[type_id]}
+            existed = CITypeAttributesCache.get2(type_id_map.get(int(type_id), type_id))
+            existed_attr_names = {attr.name: ta for ta, attr in existed}
 
+            handled = set()
             for attr in type2attributes[type_id]:
-                payload = dict(type_id=type_id,
-                               attr_id=attr['id'],
+                payload = dict(type_id=type_id_map.get(int(type_id), type_id),
+                               attr_id=attr_id_map.get(attr['id'], attr['id']),
                                default_show=attr['default_show'],
                                is_required=attr['is_required'],
                                order=attr['order'])
-                if attr['id'] not in existed_attr_ids:  # new
-                    CITypeAttribute.create(flush=True, **payload)
-                else:  # update
-                    existed_attr_ids[attr['id']].update(**payload)
+                if attr['name'] not in handled:
+                    if attr['name'] not in existed_attr_names:  # new
+                        CITypeAttribute.create(flush=True, **payload)
+                    else:  # update
+                        existed_attr_names[attr['name']].update(flush=True, **payload)
 
-            # delete
-            for i in existed:
-                if i.attr_id not in new_attr_ids:
-                    i.soft_delete()
+                    handled.add(attr['name'])
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise Exception(str(e))
+
+        for type_id in type2attributes:
+            CITypeAttributesCache.clean(type_id_map.get(int(type_id), type_id))
 
     @staticmethod
-    def _import_attribute_group(type2attribute_group):
+    def _import_attribute_group(type2attribute_group, type_id_map, attr_id_map):
         for type_id in type2attribute_group:
-            existed = CITypeAttributeGroup.get_by(type_id=type_id, to_dict=False)
-            for i in existed:
-                i.soft_delete()
-
             for group in type2attribute_group[type_id] or []:
                 _group = copy.deepcopy(group)
                 _group.pop('attributes', None)
                 _group.pop('id', None)
-                new = CITypeAttributeGroup.create(**_group)
+                existed = CITypeAttributeGroup.get_by(name=_group['name'],
+                                                      type_id=type_id_map.get(_group['type_id'], _group['type_id']),
+                                                      first=True, to_dict=False)
+                if existed is None:
+                    _group['type_id'] = type_id_map.get(_group['type_id'], _group['type_id'])
 
-                existed = CITypeAttributeGroupItem.get_by(group_id=new.id, to_dict=False)
-                for i in existed:
-                    i.soft_delete()
+                    existed = CITypeAttributeGroup.create(flush=True, **_group)
 
                 for order, attr in enumerate(group['attributes'] or []):
-                    CITypeAttributeGroupItem.create(group_id=new.id, attr_id=attr['id'], order=order)
+                    item_existed = CITypeAttributeGroupItem.get_by(group_id=existed.id,
+                                                                   attr_id=attr_id_map.get(attr['id'], attr['id']),
+                                                                   first=True, to_dict=False)
+                    if item_existed is None:
+                        CITypeAttributeGroupItem.create(group_id=existed.id,
+                                                        attr_id=attr_id_map.get(attr['id'], attr['id']),
+                                                        order=order)
+                    else:
+                        item_existed.update(flush=True, order=order)
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise Exception(str(e))
 
     @staticmethod
     def _import_auto_discovery_rules(rules):
         from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryRuleCRUD
         from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryCITypeCRUD
+
         for rule in rules:
             ci_type = CITypeCache.get(rule.pop('type_name', None))
+            adr = rule.pop('adr', {}) or {}
+
             if ci_type:
                 rule['type_id'] = ci_type.id
             if rule.get('adr_name'):
                 ad_rule = AutoDiscoveryRuleCRUD.get_by_name(rule.pop("adr_name"))
+                adr.pop('created_at', None)
+                adr.pop('updated_at', None)
+                adr.pop('id', None)
+
                 if ad_rule:
                     rule['adr_id'] = ad_rule.id
+                    ad_rule.update(**adr)
+
+                elif adr:
+                    ad_rule = AutoDiscoveryRuleCRUD().add(**adr)
+                    rule['adr_id'] = ad_rule.id
+                else:
+                    continue
 
             rule.pop("id", None)
             rule.pop("created_at", None)
             rule.pop("updated_at", None)
 
             rule['uid'] = current_user.uid
-            try:
-                AutoDiscoveryCITypeCRUD.add(**rule)
-            except Exception as e:
-                current_app.logger.warning("import auto discovery rules failed: {}".format(e))
+
+            existed = False
+            for i in AutoDiscoveryCIType.get_by(type_id=ci_type.id, adr_id=rule['adr_id'], to_dict=False):
+                if ((i.extra_option or {}).get('alias') or None) == (
+                        (rule.get('extra_option') or {}).get('alias') or None):
+                    existed = True
+                    AutoDiscoveryCITypeCRUD().update(i.id, **rule)
+                    break
+
+            if not existed:
+                try:
+                    AutoDiscoveryCITypeCRUD().add(**rule)
+                except Exception as e:
+                    current_app.logger.warning("import auto discovery rules failed: {}".format(e))
+
+    @staticmethod
+    def _import_icons(icons):
+        from api.lib.common_setting.upload_file import CommonFileCRUD
+        for icon_name in icons:
+            if icons[icon_name]:
+                try:
+                    CommonFileCRUD().save_str_to_file(icon_name, icons[icon_name])
+                except Exception as e:
+                    current_app.logger.warning("save icon failed: {}".format(e))
 
     def import_template(self, tpt):
         import time
         s = time.time()
-        self._import_attributes(tpt.get('type2attributes') or {})
+        attr_id_map = self._import_attributes(tpt.get('type2attributes') or {})
         current_app.logger.info('import attributes cost: {}'.format(time.time() - s))
 
         s = time.time()
-        self._import_ci_types(tpt.get('ci_types') or [])
+        ci_type_id_map = self._import_ci_types(tpt.get('ci_types') or [], attr_id_map)
         current_app.logger.info('import ci_types cost: {}'.format(time.time() - s))
 
         s = time.time()
-        self._import_ci_type_groups(tpt.get('ci_type_groups') or [])
+        self._import_ci_type_groups(tpt.get('ci_type_groups') or [], ci_type_id_map)
         current_app.logger.info('import ci_type_groups cost: {}'.format(time.time() - s))
 
         s = time.time()
-        self._import_relation_types(tpt.get('relation_types') or [])
+        relation_type_id_map = self._import_relation_types(tpt.get('relation_types') or [])
         current_app.logger.info('import relation_types cost: {}'.format(time.time() - s))
 
         s = time.time()
-        self._import_ci_type_relations(tpt.get('ci_type_relations') or [])
+        self._import_ci_type_relations(tpt.get('ci_type_relations') or [], ci_type_id_map, relation_type_id_map)
         current_app.logger.info('import ci_type_relations cost: {}'.format(time.time() - s))
 
         s = time.time()
-        self._import_type_attributes(tpt.get('type2attributes') or {})
+        self._import_type_attributes(tpt.get('type2attributes') or {}, ci_type_id_map, attr_id_map)
         current_app.logger.info('import type2attributes cost: {}'.format(time.time() - s))
 
         s = time.time()
-        self._import_attribute_group(tpt.get('type2attribute_group') or {})
+        self._import_attribute_group(tpt.get('type2attribute_group') or {}, ci_type_id_map, attr_id_map)
         current_app.logger.info('import type2attribute_group cost: {}'.format(time.time() - s))
 
         s = time.time()
         self._import_auto_discovery_rules(tpt.get('ci_type_auto_discovery_rules') or [])
         current_app.logger.info('import ci_type_auto_discovery_rules cost: {}'.format(time.time() - s))
 
+        s = time.time()
+        self._import_icons(tpt.get('icons') or {})
+        current_app.logger.info('import icons cost: {}'.format(time.time() - s))
+
     @staticmethod
     def export_template():
         from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryCITypeCRUD
         from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryRuleCRUD
+        from api.lib.common_setting.upload_file import CommonFileCRUD
+
+        tpt = dict(
+            ci_types=CITypeManager.get_ci_types(),
+            ci_type_groups=CITypeGroupManager.get(),
+            relation_types=[i.to_dict() for i in RelationTypeManager.get_all()],
+            ci_type_relations=CITypeRelationManager.get(),
+            ci_type_auto_discovery_rules=list(),
+            type2attributes=dict(),
+            type2attribute_group=dict(),
+            icons=dict()
+        )
+
+        def get_icon_value(icon):
+            try:
+                return CommonFileCRUD().get_file_binary_str(icon)
+            except:
+                return ""
 
         ad_rules = AutoDiscoveryCITypeCRUD.get_all()
         rules = []
@@ -1116,22 +1229,90 @@ class CITypeTemplateManager(object):
             if r.get('adr_id'):
                 adr = AutoDiscoveryRuleCRUD.get_by_id(r.pop('adr_id'))
                 r['adr_name'] = adr and adr.name
+                r['adr'] = adr and adr.to_dict() or {}
+
+                icon_url = r['adr'].get('option', {}).get('icon', {}).get('url')
+                if icon_url and icon_url not in tpt['icons']:
+                    tpt['icons'][icon_url] = get_icon_value(icon_url)
 
             rules.append(r)
 
-        tpt = dict(
-            ci_types=CITypeManager.get_ci_types(),
-            ci_type_groups=CITypeGroupManager.get(),
-            relation_types=[i.to_dict() for i in RelationTypeManager.get_all()],
-            ci_type_relations=CITypeRelationManager.get(),
-            ci_type_auto_discovery_rules=rules,
-            type2attributes=dict(),
-            type2attribute_group=dict()
-        )
+        tpt['ci_type_auto_discovery_rules'] = rules
 
         for ci_type in tpt['ci_types']:
+            if ci_type['icon'] and len(ci_type['icon'].split('$$')) > 3:
+                icon_url = ci_type['icon'].split('$$')[3]
+                if icon_url not in tpt['icons']:
+                    tpt['icons'][icon_url] = get_icon_value(icon_url)
+
             tpt['type2attributes'][ci_type['id']] = CITypeAttributeManager.get_attributes_by_type_id(
                 ci_type['id'], choice_web_hook_parse=False, choice_other_parse=False)
+
+            for attr in tpt['type2attributes'][ci_type['id']]:
+                for i in (attr.get('choice_value') or []):
+                    if (i[1] or {}).get('icon', {}).get('url') and len(i[1]['icon']['url'].split('$$')) > 3:
+                        icon_url = i[1]['icon']['url'].split('$$')[3]
+                        if icon_url not in tpt['icons']:
+                            tpt['icons'][icon_url] = get_icon_value(icon_url)
+
+            tpt['type2attribute_group'][ci_type['id']] = CITypeAttributeGroupManager.get_by_type_id(ci_type['id'])
+
+        return tpt
+
+    @staticmethod
+    def export_template_by_type(type_id):
+        ci_type = CITypeCache.get(type_id) or abort(404, ErrFormat.ci_type_not_found2.format("id={}".format(type_id)))
+
+        from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryCITypeCRUD
+        from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryRuleCRUD
+        from api.lib.common_setting.upload_file import CommonFileCRUD
+
+        tpt = dict(
+            ci_types=CITypeManager.get_ci_types(type_name=ci_type.name),
+            ci_type_auto_discovery_rules=list(),
+            type2attributes=dict(),
+            type2attribute_group=dict(),
+            icons=dict()
+        )
+
+        def get_icon_value(icon):
+            try:
+                return CommonFileCRUD().get_file_binary_str(icon)
+            except:
+                return ""
+
+        ad_rules = AutoDiscoveryCITypeCRUD.get_by_type_id(ci_type.id)
+        rules = []
+        for r in ad_rules:
+            r = r.to_dict()
+            r['type_name'] = ci_type and ci_type.name
+            if r.get('adr_id'):
+                adr = AutoDiscoveryRuleCRUD.get_by_id(r.pop('adr_id'))
+                r['adr_name'] = adr and adr.name
+                r['adr'] = adr and adr.to_dict() or {}
+
+                icon_url = r['adr'].get('option', {}).get('icon', {}).get('url')
+                if icon_url and icon_url not in tpt['icons']:
+                    tpt['icons'][icon_url] = get_icon_value(icon_url)
+
+            rules.append(r)
+        tpt['ci_type_auto_discovery_rules'] = rules
+
+        for ci_type in tpt['ci_types']:
+            if ci_type['icon'] and len(ci_type['icon'].split('$$')) > 3:
+                icon_url = ci_type['icon'].split('$$')[3]
+                if icon_url not in tpt['icons']:
+                    tpt['icons'][icon_url] = get_icon_value(icon_url)
+
+            tpt['type2attributes'][ci_type['id']] = CITypeAttributeManager.get_attributes_by_type_id(
+                ci_type['id'], choice_web_hook_parse=False, choice_other_parse=False)
+
+            for attr in tpt['type2attributes'][ci_type['id']]:
+                for i in (attr.get('choice_value') or []):
+                    if (i[1] or {}).get('icon', {}).get('url') and len(i[1]['icon']['url'].split('$$')) > 3:
+                        icon_url = i[1]['icon']['url'].split('$$')[3]
+                        if icon_url not in tpt['icons']:
+                            tpt['icons'][icon_url] = get_icon_value(icon_url)
 
             tpt['type2attribute_group'][ci_type['id']] = CITypeAttributeGroupManager.get_by_type_id(ci_type['id'])
 
