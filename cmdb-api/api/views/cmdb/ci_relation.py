@@ -43,9 +43,11 @@ class CIRelationSearchView(APIView):
         facet = handle_arg_list(request.values.get("facet", ""))
         sort = request.values.get("sort")
         reverse = request.values.get("reverse") in current_app.config.get('BOOL_TRUE')
+        has_m2m = request.values.get("has_m2m") in current_app.config.get('BOOL_TRUE')
 
         start = time.time()
-        s = Search(root_id, level, query, fl, facet, page, count, sort, reverse, ancestor_ids=ancestor_ids)
+        s = Search(root_id, level, query, fl, facet, page, count, sort, reverse,
+                   ancestor_ids=ancestor_ids, has_m2m=has_m2m)
         try:
             response, counter, total, page, numfound, facet = s.search()
         except SearchError as e:
@@ -69,9 +71,10 @@ class CIRelationStatisticsView(APIView):
         level = request.values.get('level', 1)
         type_ids = set(map(int, handle_arg_list(request.values.get('type_ids', []))))
         ancestor_ids = request.values.get('ancestor_ids') or None  # only for many to many
+        has_m2m = request.values.get("has_m2m") in current_app.config.get('BOOL_TRUE')
 
         start = time.time()
-        s = Search(root_ids, level, ancestor_ids=ancestor_ids)
+        s = Search(root_ids, level, ancestor_ids=ancestor_ids, has_m2m=has_m2m)
         try:
             result = s.statistics(type_ids)
         except SearchError as e:

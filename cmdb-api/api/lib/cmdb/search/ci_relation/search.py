@@ -28,7 +28,8 @@ class Search(object):
                  count=None,
                  sort=None,
                  reverse=False,
-                 ancestor_ids=None):
+                 ancestor_ids=None,
+                 has_m2m=None):
         self.orig_query = query
         self.fl = fl
         self.facet_field = facet_field
@@ -45,14 +46,15 @@ class Search(object):
             level[0] if isinstance(level, list) and level else level)
 
         self.ancestor_ids = ancestor_ids
-        self.has_m2m = False
-        if self.ancestor_ids:
-            self.has_m2m = True
-        else:
-            level = level[0] if isinstance(level, list) and level else level
-            for _l, c in self.level2constraint.items():
-                if _l < int(level) and c == ConstraintEnum.Many2Many:
-                    self.has_m2m = True
+        self.has_m2m = has_m2m or False
+        if not self.has_m2m:
+            if self.ancestor_ids:
+                self.has_m2m = True
+            else:
+                level = level[0] if isinstance(level, list) and level else level
+                for _l, c in self.level2constraint.items():
+                    if _l < int(level) and c == ConstraintEnum.Many2Many:
+                        self.has_m2m = True
 
     def _get_ids(self, ids):
         if self.level[-1] == 1 and len(ids) == 1:
@@ -90,11 +92,11 @@ class Search(object):
                         key = list(set(["{},{}".format(i, j) for idx, i in enumerate(key) for j in _tmp[idx]]))
                         prefix = REDIS_PREFIX_CI_RELATION2
 
+                _tmp = list(map(lambda x: json.loads(x).keys() if x else [], rd.get(key, prefix) or []))
+                ids = [j for i in _tmp for j in i]
+
             if not key:
                 return []
-
-            _tmp = list(map(lambda x: json.loads(x).keys() if x else [], rd.get(key, prefix) or []))
-            ids = [j for i in _tmp for j in i]
 
             if level in self.level:
                 merge_ids.extend(ids)
