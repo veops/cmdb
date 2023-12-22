@@ -29,6 +29,7 @@ from api.models.acl import Trigger
              name="acl.role_rebuild",
              queue=ACL_QUEUE,
              once={"graceful": True, "unlock_before_run": True})
+@flush_db
 @reconnect_db
 def role_rebuild(rids, app_id):
     rids = rids if isinstance(rids, list) else [rids]
@@ -190,18 +191,18 @@ def cancel_trigger(_id, resource_id=None, operator_uid=None):
 
 @celery.task(name="acl.op_record", queue=ACL_QUEUE)
 @reconnect_db
-def op_record(app, rolename, operate_type, obj):
+def op_record(app, role_name, operate_type, obj):
     if isinstance(app, int):
         app = AppCache.get(app)
         app = app and app.name
 
-    if isinstance(rolename, int):
-        u = UserCache.get(rolename)
+    if isinstance(role_name, int):
+        u = UserCache.get(role_name)
         if u:
-            rolename = u.username
+            role_name = u.username
         if not u:
-            r = RoleCache.get(rolename)
+            r = RoleCache.get(role_name)
             if r:
-                rolename = r.name
+                role_name = r.name
 
-    OperateRecordCRUD.add(app, rolename, operate_type, obj)
+    OperateRecordCRUD.add(app, role_name, operate_type, obj)

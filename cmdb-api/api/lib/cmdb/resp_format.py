@@ -4,6 +4,8 @@ from api.lib.resp_format import CommonErrFormat
 
 
 class ErrFormat(CommonErrFormat):
+    ci_type_config = "模型配置"
+
     invalid_relation_type = "无效的关系类型: {}"
     ci_type_not_found = "模型不存在!"
     argument_attributes_must_be_list = "参数 attributes 类型必须是列表"

@@ -145,7 +145,7 @@ class User(CRUDModel, SoftDeleteMixin):
 class RoleQuery(BaseQuery):
 
     def authenticate(self, login, password):
-        role = self.filter(Role.name == login).first()
+        role = self.filter(Role.name == login).filter(Role.deleted.is_(False)).first()
         if role:
             authenticated = role.check_password(password)
 

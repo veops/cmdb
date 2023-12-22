@@ -394,4 +394,10 @@ class AuditCRUD(object):
         if logout_at is None:
             payload['login_at'] = datetime.datetime.now()
 
+        try:
+            from api.lib.common_setting.employee import EmployeeCRUD
+            EmployeeCRUD.update_last_login_by_uid(current_user.uid)
+        except:
+            pass
+
         return AuditLoginLog.create(**payload).id
