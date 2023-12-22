@@ -395,8 +395,9 @@ class CIManager(object):
                         k not in ci_type_attrs_alias and _no_attribute_policy == ExistPolicy.REJECT):
                     return abort(400, ErrFormat.attribute_not_found.format(k))
 
-                if limit_attrs and ci_type_attrs_name.get(k) not in limit_attrs and (
-                        ci_type_attrs_alias.get(k) not in limit_attrs):
+                _attr_name = ((ci_type_attrs_name.get(k) and ci_type_attrs_name[k].name) or
+                              (ci_type_attrs_alias.get(k) and ci_type_attrs_alias[k].name))
+                if limit_attrs and _attr_name not in limit_attrs:
                     return abort(403, ErrFormat.ci_filter_perm_attr_no_permission.format(k))
 
             ci_dict = {k: v for k, v in ci_dict.items() if k in ci_type_attrs_name or k in ci_type_attrs_alias}
