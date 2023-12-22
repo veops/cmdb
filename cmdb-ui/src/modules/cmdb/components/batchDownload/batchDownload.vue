@@ -111,12 +111,14 @@ export default {
   },
   methods: {
     ...mapMutations('cmdbStore', ['SET_IS_TABLE_LOADING']),
-    open({ preferenceAttrList }) {
+    open({ preferenceAttrList, ciTypeName = undefined }) {
       this.preferenceAttrList = preferenceAttrList
       this.visible = true
       this.$nextTick((res) => {
         this.form.setFieldsValue({
-          filename: `cmdb-${moment().format('YYYYMMDDHHmmss')}`,
+          filename: ciTypeName
+            ? `cmdb-${ciTypeName}-${moment().format('YYYYMMDDHHmmss')}`
+            : `cmdb-${moment().format('YYYYMMDDHHmmss')}`,
         })
         if (this.treeType === 'tree') {
           const _check = ['ci_type_alias']

@@ -576,7 +576,10 @@ export default {
     },
 
     async openBatchDownload() {
-      this.$refs.batchDownload.open({ preferenceAttrList: this.preferenceAttrList })
+      this.$refs.batchDownload.open({
+        preferenceAttrList: this.preferenceAttrList,
+        ciTypeName: this.$route.meta.title || this.$route.meta.name,
+      })
     },
     batchDownload({ filename, type, checkedKeys }) {
       const jsonAttrList = []

@@ -322,6 +322,7 @@
       v-else-if="relationViews.name2id && !relationViews.name2id.length"
     ></a-alert>
     <AddTableModal ref="addTableModal" @reload="reload" />
+    <!-- <GrantDrawer ref="grantDrawer" resourceTypeName="RelationView" app_id="cmdb" /> -->
     <CMDBGrant ref="cmdbGrant" resourceType="RelationView" app_id="cmdb" />
 
     <ci-detail ref="detail" :typeId="Number(currentTypeId[0])" />
@@ -378,6 +379,7 @@ export default {
     SearchForm,
     AddTableModal,
     ContextMenu,
+    // GrantDrawer,
     CMDBGrant,
     SplitPane,
     ElTree: Tree,
@@ -651,6 +653,9 @@ export default {
         } else {
           q = `q=_type:${this.currentTypeId[0]},` + q
         }
+        if (Object.values(this.level2constraint).includes('2')) {
+          q = q + `&&has_m2m=1`
+        }
         if (this.currentTypeId[0]) {
           const res = await searchCIRelation(q)
 
@@ -689,6 +694,7 @@ export default {
               root_ids: key.split('%')[0],
               level: this.treeKeys.length - index,
               type_ids: this.showTypes.map((type) => type.id).join(','),
+              has_m2m: Number(Object.values(this.level2constraint).includes('2')),
             }).then((res) => {
               let result
               const getTreeItem = (data, id) => {
@@ -742,7 +748,10 @@ export default {
         _showTypes = JSON.parse(JSON.stringify(this.origShowTypes))
       }
       const promises = _showTypeIds.map((typeId) => {
-        const _q = (`q=_type:${typeId},` + q).replace(/count=\d*/, 'count=1')
+        let _q = (`q=_type:${typeId},` + q).replace(/count=\d*/, 'count=1')
+        if (Object.values(this.level2constraint).includes('2')) {
+          _q = _q + `&&has_m2m=1`
+        }
         console.log(_q)
         if (this.treeKeys.length === 0) {
           return searchCI2(_q).then((res) => {
@@ -798,6 +807,7 @@ export default {
             root_ids: ciIds.join(','),
             level: level,
             type_ids: this.showTypes.map((type) => type.id).join(','),
+            has_m2m: Number(Object.values(this.level2constraint).includes('2')),
           }).then((num) => {
             facet.forEach((item, idx) => {
               item[1] += num[ciIds[idx] + '']
@@ -827,6 +837,9 @@ export default {
             .map((item) => item.split('%')[0])
             .join(',')}`
         }
+        if (Object.values(this.level2constraint).includes('2')) {
+          q = q + `&&has_m2m=1`
+        }
         searchCIRelation(q).then(async (res) => {
           const facet = []
           const ciIds = []
@@ -849,6 +862,7 @@ export default {
                 root_ids: ciIds.join(','),
                 level: _level - 1,
                 type_ids: this.showTypes.map((type) => type.id).join(','),
+                has_m2m: Number(Object.values(this.level2constraint).includes('2')),
               }).then((num) => {
                 facet.forEach((item, idx) => {
                   item[1] += num[ciIds[idx] + '']
@@ -1322,7 +1336,10 @@ export default {
       })
     },
     async openBatchDownload() {
-      this.$refs.batchDownload.open({ preferenceAttrList: this.preferenceAttrList })
+      this.$refs.batchDownload.open({
+        preferenceAttrList: this.preferenceAttrList,
+        ciTypeName: this.$route.meta.name,
+      })
     },
     batchDownload({ filename, type, checkedKeys }) {
       const jsonAttrList = []
