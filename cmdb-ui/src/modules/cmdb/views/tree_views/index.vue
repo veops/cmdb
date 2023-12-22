@@ -1054,7 +1054,10 @@ export default {
       this.$refs.jsonEditor.open(column, row)
     },
     async openBatchDownload() {
-      this.$refs.batchDownload.open({ preferenceAttrList: this.currentAttrList })
+      this.$refs.batchDownload.open({
+        preferenceAttrList: this.currentAttrList,
+        ciTypeName: this.$route.meta.title || this.$route.meta.name,
+      })
     },
     batchDownload({ filename, type, checkedKeys }) {
       console.log(filename, type)
