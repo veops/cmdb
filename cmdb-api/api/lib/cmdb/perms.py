@@ -143,10 +143,13 @@ class CIFilterPermsCRUD(DBMixin):
                               first=True, to_dict=False)
 
         if obj is not None:
+            resource = None
             if current_app.config.get('USE_ACL'):
-                ACLManager().del_resource(str(obj.id), ResourceTypeEnum.CI_FILTER)
+                resource = ACLManager().del_resource(str(obj.id), ResourceTypeEnum.CI_FILTER)
 
             obj.soft_delete()
+
+            return resource
 
 
 def has_perm_for_ci(arg_name, resource_type, perm, callback=None, app=None):

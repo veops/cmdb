@@ -69,6 +69,7 @@ class ResourceTypeEnum(BaseEnum):
     CI_TYPE_RELATION = "CITypeRelation"  # create/delete/grant
     RELATION_VIEW = "RelationView"  # read/update/delete/grant
     CI_FILTER = "CIFilter"  # read
+    PAGE = "page"  # read
 
 
 class PermEnum(BaseEnum):

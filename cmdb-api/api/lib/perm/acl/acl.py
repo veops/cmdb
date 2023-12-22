@@ -117,15 +117,15 @@ class ACLManager(object):
             if group:
                 PermissionCRUD.grant(role.id, permissions, group_id=group.id)
 
-    def grant_resource_to_role_by_rid(self, name, rid, resource_type_name=None, permissions=None):
+    def grant_resource_to_role_by_rid(self, name, rid, resource_type_name=None, permissions=None, rebuild=True):
         resource = self._get_resource(name, resource_type_name)
 
         if resource:
-            PermissionCRUD.grant(rid, permissions, resource_id=resource.id)
+            PermissionCRUD.grant(rid, permissions, resource_id=resource.id, rebuild=rebuild)
         else:
             group = self._get_resource_group(name)
             if group:
-                PermissionCRUD.grant(rid, permissions, group_id=group.id)
+                PermissionCRUD.grant(rid, permissions, group_id=group.id, rebuild=rebuild)
 
     def revoke_resource_from_role(self, name, role, resource_type_name=None, permissions=None):
         resource = self._get_resource(name, resource_type_name)
@@ -138,20 +138,22 @@ class ACLManager(object):
             if group:
                 PermissionCRUD.revoke(role.id, permissions, group_id=group.id)
 
-    def revoke_resource_from_role_by_rid(self, name, rid, resource_type_name=None, permissions=None):
+    def revoke_resource_from_role_by_rid(self, name, rid, resource_type_name=None, permissions=None, rebuild=True):
         resource = self._get_resource(name, resource_type_name)
 
         if resource:
-            PermissionCRUD.revoke(rid, permissions, resource_id=resource.id)
+            PermissionCRUD.revoke(rid, permissions, resource_id=resource.id, rebuild=rebuild)
         else:
             group = self._get_resource_group(name)
             if group:
-                PermissionCRUD.revoke(rid, permissions, group_id=group.id)
+                PermissionCRUD.revoke(rid, permissions, group_id=group.id, rebuild=rebuild)
 
     def del_resource(self, name, resource_type_name=None):
         resource = self._get_resource(name, resource_type_name)
         if resource:
             ResourceCRUD.delete(resource.id)
+
+        return resource
 
     def has_permission(self, resource_name, resource_type, perm, resource_id=None):
         if is_app_admin(self.app_id):

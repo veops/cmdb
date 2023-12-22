@@ -63,6 +63,7 @@ class UserCRUD(object):
         AuditCRUD.add_role_log(None, AuditOperateType.create,
                                AuditScope.user, user.uid, {}, user.to_dict(), {}, {}
                                )
+
         if add_from != 'common':
             from api.lib.common_setting.employee import EmployeeCRUD
             payload = {column: getattr(user, column) for column in ['uid', 'username', 'nickname', 'email', 'block']}
