@@ -117,7 +117,15 @@ def cmdb_init_acl():
     # 1. add resource type
     for resource_type in ResourceTypeEnum.all():
         try:
-            ResourceTypeCRUD.add(app_id, resource_type, '', PermEnum.all())
+            perms = PermEnum.all()
+            if resource_type in (ResourceTypeEnum.CI_FILTER, ResourceTypeEnum.PAGE):
+                perms = [PermEnum.READ]
+            elif resource_type == ResourceTypeEnum.CI_TYPE_RELATION:
+                perms = [PermEnum.ADD, PermEnum.DELETE, PermEnum.GRANT]
+            elif resource_type == ResourceTypeEnum.RELATION_VIEW:
+                perms = [PermEnum.READ, PermEnum.UPDATE, PermEnum.DELETE, PermEnum.GRANT]
+
+            ResourceTypeCRUD.add(app_id, resource_type, '', perms)
         except AbortException:
             pass
 
