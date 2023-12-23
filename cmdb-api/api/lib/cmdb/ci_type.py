@@ -24,6 +24,7 @@ from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.cmdb.history import CITypeHistoryManager
+from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.cmdb.relation_type import RelationTypeManager
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.value import AttributeValueManager
@@ -588,6 +589,11 @@ class CITypeRelationManager(object):
         ci_type_dict = CITypeCache.get(type_id).to_dict()
         ci_type_dict["ctr_id"] = relation_inst.id
         ci_type_dict["attributes"] = CITypeAttributeManager.get_attributes_by_type_id(ci_type_dict["id"])
+        attr_filter = CIFilterPermsCRUD.get_attr_filter(type_id)
+        if attr_filter:
+            ci_type_dict["attributes"] = [attr for attr in (ci_type_dict["attributes"] or [])
+                                          if attr['name'] in attr_filter]
+
         ci_type_dict["relation_type"] = relation_inst.relation_type.name
         ci_type_dict["constraint"] = relation_inst.constraint
 

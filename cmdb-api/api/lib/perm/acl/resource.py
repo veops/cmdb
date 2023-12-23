@@ -328,6 +328,8 @@ class ResourceCRUD(object):
         AuditCRUD.add_resource_log(resource.app_id, AuditOperateType.delete,
                                    AuditScope.resource, resource.id, origin, {}, {})
 
+        return rebuilds
+
     @classmethod
     def delete_by_name(cls, name, type_id, app_id):
         resource = Resource.get_by(name=name, resource_type_id=type_id, app_id=app_id) or abort(
