@@ -465,7 +465,14 @@ class CITypeGrantView(APIView):
 
         acl.grant_resource_to_role_by_rid(type_name, rid, ResourceTypeEnum.CI_TYPE, perms, rebuild=False)
 
-        CIFilterPermsCRUD().add(type_id=type_id, rid=rid, **request.values)
+        if request.values.get('ci_filter') or request.values.get('attr_filter'):
+            CIFilterPermsCRUD().add(type_id=type_id, rid=rid, **request.values)
+        else:
+            from api.tasks.acl import role_rebuild
+            from api.lib.perm.acl.const import ACL_QUEUE
+
+            app_id = AppCache.get('cmdb').id
+            role_rebuild.apply_async(args=(rid, app_id), queue=ACL_QUEUE)
 
         return self.jsonify(code=200)
 
@@ -490,7 +497,7 @@ class CITypeRevokeView(APIView):
 
         app_id = AppCache.get('cmdb').id
         resource = None
-        if PermEnum.READ in perms:
+        if PermEnum.READ in perms or not perms:
             resource = CIFilterPermsCRUD().delete(type_id=type_id, rid=rid)
 
             users = RoleRelationCRUD.get_users_by_rid(rid, app_id)
@@ -503,7 +510,7 @@ class CITypeRevokeView(APIView):
             from api.tasks.acl import role_rebuild
             from api.lib.perm.acl.const import ACL_QUEUE
 
-            role_rebuild.apply_async(args=(app_id, rid), queue=ACL_QUEUE)
+            role_rebuild.apply_async(args=(rid, app_id), queue=ACL_QUEUE)
 
         return self.jsonify(type_id=type_id, rid=rid)
 
