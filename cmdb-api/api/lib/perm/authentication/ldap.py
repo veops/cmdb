@@ -23,13 +23,13 @@ from api.models.acl import User
 def authenticate_with_ldap(username, password):
     config = AuthenticateDataCRUD(AuthenticateType.LDAP).get()
 
-    server = Server(config.get('LDAP').get('ldap_server'), get_info=ALL, connect_timeout=3)
+    server = Server(config.get('ldap_server'), get_info=ALL, connect_timeout=3)
     if '@' in username:
         email = username
-        who = config['LDAP'].get('ldap_user_dn').format(username.split('@')[0])
+        who = config.get('ldap_user_dn').format(username.split('@')[0])
     else:
-        who = config['LDAP'].get('ldap_user_dn').format(username)
-        email = "{}@{}".format(who, config['LDAP'].get('ldap_domain'))
+        who = config.get('ldap_user_dn').format(username)
+        email = "{}@{}".format(who, config.get('ldap_domain'))
 
     username = username.split('@')[0]
     user = User.query.get_by_username(username)
@@ -41,7 +41,7 @@ def authenticate_with_ldap(username, password):
             conn = Connection(server, user=who, password=password, auto_bind=AUTO_BIND_NO_TLS)
         except LDAPBindError:
             conn = Connection(server,
-                              user=f"{username}@{config['LDAP'].get('ldap_domain')}",
+                              user=f"{username}@{config.get('ldap_domain')}",
                               password=password,
                               auto_bind=AUTO_BIND_NO_TLS)
 
