@@ -25,10 +25,8 @@ from api.models.acl import Role
 from api.models.acl import Trigger
 
 
-@celery.task(base=QueueOnce,
-             name="acl.role_rebuild",
-             queue=ACL_QUEUE,
-             once={"graceful": True, "unlock_before_run": True})
+@celery.task(name="acl.role_rebuild",
+             queue=ACL_QUEUE,)
 @flush_db
 @reconnect_db
 def role_rebuild(rids, app_id):
