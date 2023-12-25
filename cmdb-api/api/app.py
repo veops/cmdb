@@ -12,12 +12,14 @@ from pathlib import Path
 from flask import Flask
 from flask import jsonify
 from flask import make_response
+from flask import request
 from flask.blueprints import Blueprint
 from flask.cli import click
 from flask.json.provider import DefaultJSONProvider
+from flask_babel.speaklater import LazyString
 
 import api.views.entry
-from api.extensions import (bcrypt, cache, celery, cors, db, es, login_manager, migrate, rd)
+from api.extensions import (bcrypt, babel, cache, celery, cors, db, es, login_manager, migrate, rd)
 from api.extensions import inner_secrets
 from api.lib.perm.authentication.cas import CAS
 from api.lib.perm.authentication.oauth2 import OAuth2
@@ -72,7 +74,7 @@ class ReverseProxy(object):
 
 class MyJSONEncoder(DefaultJSONProvider):
     def default(self, o):
-        if isinstance(o, (decimal.Decimal, datetime.date, datetime.time)):
+        if isinstance(o, (decimal.Decimal, datetime.date, datetime.time, LazyString)):
             return str(o)
 
         if isinstance(o, datetime.datetime):
@@ -117,7 +119,13 @@ def configure_upload_dir(app):
 
 def register_extensions(app):
     """Register Flask extensions."""
+
+    def get_locale():
+        accept_languages = app.config.get('ACCEPT_LANGUAGES', ['en', 'zh'])
+        return request.accept_languages.best_match(accept_languages)
+
     bcrypt.init_app(app)
+    babel.init_app(app, locale_selector=get_locale)
     cache.init_app(app)
     db.init_app(app)
     cors.init_app(app)
