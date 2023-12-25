@@ -43,7 +43,8 @@ cmdb-api/api/uploaded_files
 cmdb-api/migrations/versions
 
 # Translations
-*.mo
+#*.mo
+messages.pot
 
 # Mr Developer
 .mr.developer.cfg
