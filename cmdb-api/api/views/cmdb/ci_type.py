@@ -472,7 +472,9 @@ class CITypeGrantView(APIView):
             from api.lib.perm.acl.const import ACL_QUEUE
 
             app_id = AppCache.get('cmdb').id
+            current_app.logger.info((rid, app_id))
             role_rebuild.apply_async(args=(rid, app_id), queue=ACL_QUEUE)
+            current_app.logger.info('done')
 
         return self.jsonify(code=200)
 
@@ -500,17 +502,17 @@ class CITypeRevokeView(APIView):
         if PermEnum.READ in perms or not perms:
             resource = CIFilterPermsCRUD().delete(type_id=type_id, rid=rid)
 
-            users = RoleRelationCRUD.get_users_by_rid(rid, app_id)
-            for i in (users or []):
-                if i.get('role', {}).get('id') and not RoleCRUD.has_permission(
-                        i.get('role').get('id'), type_name, ResourceTypeEnum.CI_TYPE, app_id, PermEnum.READ):
-                    PreferenceManager.delete_by_type_id(type_id, i.get('uid'))
-
         if not resource:
             from api.tasks.acl import role_rebuild
             from api.lib.perm.acl.const import ACL_QUEUE
 
             role_rebuild.apply_async(args=(rid, app_id), queue=ACL_QUEUE)
+
+        users = RoleRelationCRUD.get_users_by_rid(rid, app_id)
+        for i in (users or []):
+            if i.get('role', {}).get('id') and not RoleCRUD.has_permission(
+                    i.get('role').get('id'), type_name, ResourceTypeEnum.CI_TYPE, app_id, PermEnum.READ):
+                PreferenceManager.delete_by_type_id(type_id, i.get('uid'))
 
         return self.jsonify(type_id=type_id, rid=rid)
 
