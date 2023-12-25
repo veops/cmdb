@@ -39,7 +39,7 @@ class LoginView(APIView):
         password = request.values.get("password")
         _role = None
         config = AuthenticateDataCRUD(AuthenticateType.LDAP).get()
-        if config.get('LDAP', {}).get('enabled') or config.get('LDAP', {}).get('enable'):
+        if config.get('enabled') or config.get('enable'):
             from api.lib.perm.authentication.ldap import authenticate_with_ldap
             user, authenticated = authenticate_with_ldap(username, password)
         else:
