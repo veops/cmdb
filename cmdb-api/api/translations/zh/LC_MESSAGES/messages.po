@@ -1,0 +1,564 @@
+# Chinese translations for PROJECT.
+# Copyright (C) 2023 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2023-12-25 20:21+0800\n"
+"PO-Revision-Date: 2023-12-25 20:21+0800\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: zh\n"
+"Language-Team: zh <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.13.1\n"
+
+#: api/lib/resp_format.py:7
+msgid "unauthorized"
+msgstr "未认证"
+
+#: api/lib/resp_format.py:8
+msgid "unknown error"
+msgstr "未知错误"
+
+#: api/lib/resp_format.py:10
+msgid "Illegal request"
+msgstr "不合法的请求"
+
+#: api/lib/resp_format.py:11
+msgid "Invalid operation"
+msgstr "无效的操作"
+
+#: api/lib/resp_format.py:13
+msgid "does not exist"
+msgstr "不存在"
+
+#: api/lib/resp_format.py:15
+msgid "There is a circular dependency!"
+msgstr "存在循环依赖!"
+
+#: api/lib/resp_format.py:17
+msgid "Unknown search error"
+msgstr "未知搜索错误"
+
+#: api/lib/resp_format.py:20
+msgid "The json format seems to be incorrect, please confirm carefully!"
+msgstr "# json格式似乎不正确了, 请仔细确认一下!"
+
+#: api/lib/resp_format.py:23
+msgid ""
+"The format of parameter {} is incorrect, the format must be: yyyy-mm-dd "
+"HH:MM:SS"
+msgstr "参数 {} 格式不正确, 格式必须是: yyyy-mm-dd HH:MM:SS"
+
+#: api/lib/resp_format.py:25
+msgid "The value of parameter {} cannot be empty!"
+msgstr "参数 {} 的值不能为空!"
+
+#: api/lib/resp_format.py:26
+msgid "The request is missing parameters {}"
+msgstr "请求缺少参数 {}"
+
+#: api/lib/resp_format.py:27
+msgid "Invalid value for parameter {}"
+msgstr "参数 {} 的值无效"
+
+#: api/lib/resp_format.py:28
+msgid "The length of parameter {} must be <= {}"
+msgstr "参数 {} 的长度必须 <= {}"
+
+#: api/lib/resp_format.py:30
+msgid "Role {} can only operate!"
+msgstr "角色 {} 才能操作!"
+
+#: api/lib/resp_format.py:31
+msgid "User {} does not exist"
+msgstr "用户 {} 不存在"
+
+#: api/lib/resp_format.py:32
+msgid "You do not have {} permission for resource: {}!"
+msgstr "您没有资源: {} 的{}权限!"
+
+#: api/lib/resp_format.py:33
+msgid "You do not have permission to operate!"
+msgstr "您没有操作权限!"
+
+#: api/lib/resp_format.py:34
+msgid "Only the creator or administrator has permission!"
+msgstr "只有创建人或者管理员才有权限!"
+
+#: api/lib/cmdb/resp_format.py:9
+msgid "CI Model"
+msgstr "模型配置"
+
+#: api/lib/cmdb/resp_format.py:11
+msgid "Invalid relation type: {}"
+msgstr "无效的关系类型: {}"
+
+#: api/lib/cmdb/resp_format.py:12
+msgid "CIType is not found"
+msgstr "模型不存在!"
+
+#: api/lib/cmdb/resp_format.py:15
+msgid "The type of parameter attributes must be a list"
+msgstr "参数 attributes 类型必须是列表"
+
+#: api/lib/cmdb/resp_format.py:16
+msgid "The file doesn't seem to be uploaded"
+msgstr "文件似乎并未上传"
+
+#: api/lib/cmdb/resp_format.py:18
+msgid "Attribute {} does not exist!"
+msgstr "属性 {} 不存在!"
+
+#: api/lib/cmdb/resp_format.py:19
+msgid ""
+"This attribute is the unique identifier of the model and cannot be "
+"deleted!"
+msgstr "该属性是模型的唯一标识，不能被删除!"
+
+#: api/lib/cmdb/resp_format.py:21
+msgid "This attribute is referenced by model {} and cannot be deleted!"
+msgstr "该属性被模型 {} 引用, 不能删除!"
+
+#: api/lib/cmdb/resp_format.py:23
+msgid "The value type of the attribute is not allowed to be modified!"
+msgstr "属性的值类型不允许修改!"
+
+#: api/lib/cmdb/resp_format.py:25
+msgid "Multiple values are not allowed to be modified!"
+msgstr "多值不被允许修改!"
+
+#: api/lib/cmdb/resp_format.py:27
+msgid "Modifying the index is not allowed for non-administrators!"
+msgstr "修改索引 非管理员不被允许!"
+
+#: api/lib/cmdb/resp_format.py:28
+msgid "Index switching failed!"
+msgstr "索引切换失败!"
+
+#: api/lib/cmdb/resp_format.py:29
+msgid "The predefined value is of the wrong type!"
+msgstr "预定义值的类型不对！"
+
+#: api/lib/cmdb/resp_format.py:30
+msgid "Duplicate attribute name {}"
+msgstr "重复的属性名 {}"
+
+#: api/lib/cmdb/resp_format.py:31
+msgid "Failed to create attribute {}!"
+msgstr "创建属性 {} 失败!"
+
+#: api/lib/cmdb/resp_format.py:32
+msgid "Modify attribute {} failed!"
+msgstr "修改属性 {} 失败!"
+
+#: api/lib/cmdb/resp_format.py:33
+msgid "You do not have permission to modify this attribute!"
+msgstr "您没有权限修改该属性!"
+
+#: api/lib/cmdb/resp_format.py:34
+msgid "Only creators and administrators are allowed to delete attributes!"
+msgstr "目前只允许 属性创建人、管理员 删除属性!"
+
+#: api/lib/cmdb/resp_format.py:37
+msgid ""
+"Attribute field names cannot be built-in fields: id, _id, ci_id, type, "
+"_type, ci_type"
+msgstr "属性字段名不能是内置字段: id, _id, ci_id, type, _type, ci_type"
+
+#: api/lib/cmdb/resp_format.py:39
+msgid "Predefined value: Other model request parameters are illegal!"
+msgstr "预定义值: 其他模型请求参数不合法!"
+
+#: api/lib/cmdb/resp_format.py:42
+msgid "CI {} does not exist"
+msgstr "CI {} 不存在"
+
+#: api/lib/cmdb/resp_format.py:43
+msgid "Multiple attribute joint unique verification failed: {}"
+msgstr "多属性联合唯一校验不通过: {}"
+
+#: api/lib/cmdb/resp_format.py:44
+msgid "The model's primary key {} does not exist!"
+msgstr "模型的主键 {} 不存在!"
+
+#: api/lib/cmdb/resp_format.py:45
+msgid "Primary key {} is missing"
+msgstr "主键字段 {} 缺失"
+
+#: api/lib/cmdb/resp_format.py:46
+msgid "CI already exists!"
+msgstr "CI 已经存在!"
+
+#: api/lib/cmdb/resp_format.py:47
+msgid "Relationship constraint: {}, verification failed"
+msgstr "关系约束: {}, 校验失败"
+
+#: api/lib/cmdb/resp_format.py:49
+msgid ""
+"Many-to-many relationship constraint: Model {} <-> {} already has a many-"
+"to-many relationship!"
+msgstr "多对多关系 限制: 模型 {} <-> {} 已经存在多对多关系!"
+
+#: api/lib/cmdb/resp_format.py:52
+msgid "CI relationship: {} does not exist"
+msgstr "CI关系: {} 不存在"
+
+#: api/lib/cmdb/resp_format.py:55
+msgid "In search expressions, not supported before parentheses: or, not"
+msgstr "搜索表达式里小括号前不支持: 或、非"
+
+#: api/lib/cmdb/resp_format.py:57
+msgid "Model {} does not exist"
+msgstr "模型 {} 不存在"
+
+#: api/lib/cmdb/resp_format.py:58
+msgid "Model {} already exists"
+msgstr "模型 {} 已经存在"
+
+#: api/lib/cmdb/resp_format.py:59
+msgid "The primary key is undefined or has been deleted"
+msgstr "主键未定义或者已被删除"
+
+#: api/lib/cmdb/resp_format.py:60
+msgid "Only the creator can delete it!"
+msgstr "只有创建人才能删除它!"
+
+#: api/lib/cmdb/resp_format.py:61
+msgid "The model cannot be deleted because the CI already exists"
+msgstr "因为CI已经存在，不能删除模型"
+
+#: api/lib/cmdb/resp_format.py:65
+msgid ""
+"The model cannot be deleted because the model is referenced by the "
+"relational view {}"
+msgstr "因为关系视图 {} 引用了该模型，不能删除模型"
+
+#: api/lib/cmdb/resp_format.py:67
+msgid "Model group {} does not exist"
+msgstr "模型分组 {} 不存在"
+
+#: api/lib/cmdb/resp_format.py:68
+msgid "Model group {} already exists"
+msgstr "模型分组 {} 已经存在"
+
+#: api/lib/cmdb/resp_format.py:69
+msgid "Model relationship {} does not exist"
+msgstr "模型关系 {} 不存在"
+
+#: api/lib/cmdb/resp_format.py:70
+msgid "Attribute group {} already exists"
+msgstr "属性分组 {} 已存在"
+
+#: api/lib/cmdb/resp_format.py:71
+msgid "Attribute group {} does not exist"
+msgstr "属性分组 {} 不存在"
+
+#: api/lib/cmdb/resp_format.py:73
+msgid "Attribute group <{0}> - attribute <{1}> does not exist"
+msgstr "属性组<{0}> - 属性<{1}> 不存在"
+
+#: api/lib/cmdb/resp_format.py:74
+msgid "The unique constraint already exists!"
+msgstr "唯一约束已经存在!"
+
+#: api/lib/cmdb/resp_format.py:76
+msgid "Uniquely constrained attributes cannot be JSON and multi-valued"
+msgstr "唯一约束的属性不能是 JSON 和 多值"
+
+#: api/lib/cmdb/resp_format.py:77
+msgid "Duplicated trigger"
+msgstr "重复的触发器"
+
+#: api/lib/cmdb/resp_format.py:78
+msgid "Trigger {} does not exist"
+msgstr "触发器 {} 不存在"
+
+#: api/lib/cmdb/resp_format.py:80
+msgid "Operation record {} does not exist"
+msgstr "操作记录 {} 不存在"
+
+#: api/lib/cmdb/resp_format.py:81
+msgid "Unique identifier cannot be deleted"
+msgstr "不能删除唯一标识"
+
+#: api/lib/cmdb/resp_format.py:82
+msgid "Cannot delete default sorted attributes"
+msgstr "不能删除默认排序的属性"
+
+#: api/lib/cmdb/resp_format.py:84
+msgid "No node selected"
+msgstr "没有选择节点"
+
+#: api/lib/cmdb/resp_format.py:85
+msgid "This search option does not exist!"
+msgstr "该搜索选项不存在!"
+
+#: api/lib/cmdb/resp_format.py:86
+msgid "This search option has a duplicate name!"
+msgstr "该搜索选项命名重复!"
+
+#: api/lib/cmdb/resp_format.py:88
+msgid "Relationship type {} already exists"
+msgstr "关系类型 {} 已经存在"
+
+#: api/lib/cmdb/resp_format.py:89
+msgid "Relationship type {} does not exist"
+msgstr "关系类型 {} 不存在"
+
+#: api/lib/cmdb/resp_format.py:91
+msgid "Invalid attribute value: {}"
+msgstr "无效的属性值: {}"
+
+#: api/lib/cmdb/resp_format.py:92
+msgid "{} Invalid value: {}"
+msgstr "无效的值: {}"
+
+#: api/lib/cmdb/resp_format.py:93
+msgid "{} is not in the predefined values"
+msgstr "{} 不在预定义值里"
+
+#: api/lib/cmdb/resp_format.py:95
+msgid "The value of attribute {} must be unique, {} already exists"
+msgstr "属性 {} 的值必须是唯一的, 当前值 {} 已存在"
+
+#: api/lib/cmdb/resp_format.py:96
+msgid "Attribute {} value must exist"
+msgstr "属性 {} 值必须存在"
+
+#: api/lib/cmdb/resp_format.py:99
+msgid "Unknown error when adding or modifying attribute value: {}"
+msgstr "新增或者修改属性值未知错误: {}"
+
+#: api/lib/cmdb/resp_format.py:101
+msgid "Duplicate custom name"
+msgstr "订制名重复"
+
+#: api/lib/cmdb/resp_format.py:103
+msgid "Number of models exceeds limit: {}"
+msgstr "模型数超过限制: {}"
+
+#: api/lib/cmdb/resp_format.py:104
+msgid "The number of CIs exceeds the limit: {}"
+msgstr "CI数超过限制: {}"
+
+#: api/lib/cmdb/resp_format.py:106
+msgid "Auto-discovery rule: {} already exists!"
+msgstr "自动发现规则: {} 已经存在!"
+
+#: api/lib/cmdb/resp_format.py:107
+msgid "Auto-discovery rule: {} does not exist!"
+msgstr "自动发现规则: {} 不存在!"
+
+#: api/lib/cmdb/resp_format.py:109
+msgid "This auto-discovery rule is referenced by the model and cannot be deleted!"
+msgstr "该自动发现规则被模型引用, 不能删除!"
+
+#: api/lib/cmdb/resp_format.py:111
+msgid "The application of auto-discovery rules cannot be defined repeatedly!"
+msgstr "自动发现规则的应用不能重复定义!"
+
+#: api/lib/cmdb/resp_format.py:112
+msgid "The auto-discovery you want to modify: {} does not exist!"
+msgstr "您要修改的自动发现: {} 不存在!"
+
+#: api/lib/cmdb/resp_format.py:113
+msgid "Attribute does not include unique identifier: {}"
+msgstr "属性字段没有包括唯一标识: {}"
+
+#: api/lib/cmdb/resp_format.py:114
+msgid "The auto-discovery instance does not exist!"
+msgstr "自动发现的实例不存在!"
+
+#: api/lib/cmdb/resp_format.py:115
+msgid "The model is not associated with this auto-discovery!"
+msgstr "模型并未关联该自动发现!"
+
+#: api/lib/cmdb/resp_format.py:116
+msgid "Only the creator can modify the Secret!"
+msgstr "只有创建人才能修改Secret!"
+
+#: api/lib/cmdb/resp_format.py:118
+msgid "This rule already has auto-discovery instances and cannot be deleted!"
+msgstr "该规则已经有自动发现的实例, 不能被删除!"
+
+#: api/lib/cmdb/resp_format.py:120
+msgid "The default auto-discovery rule is already referenced by model {}!"
+msgstr "该默认的自动发现规则 已经被模型 {} 引用!"
+
+#: api/lib/cmdb/resp_format.py:122
+msgid "The unique_key method must return a non-empty string!"
+msgstr "unique_key方法必须返回非空字符串!"
+
+#: api/lib/cmdb/resp_format.py:123
+msgid "The attributes method must return a list"
+msgstr "attributes方法必须返回的是list"
+
+#: api/lib/cmdb/resp_format.py:125
+msgid "The list returned by the attributes method cannot be empty!"
+msgstr "attributes方法返回的list不能为空!"
+
+#: api/lib/cmdb/resp_format.py:127
+msgid "Only administrators can define execution targets as: all nodes!"
+msgstr "只有管理员才可以定义执行机器为: 所有节点!"
+
+#: api/lib/cmdb/resp_format.py:128
+msgid "Execute targets permission check failed: {}"
+msgstr "执行机器权限检查不通过: {}"
+
+#: api/lib/cmdb/resp_format.py:130
+msgid "CI filter authorization must be named!"
+msgstr "CI过滤授权 必须命名!"
+
+#: api/lib/cmdb/resp_format.py:131
+msgid "CI filter authorization is currently not supported or query"
+msgstr "CI过滤授权 暂时不支持 或 查询"
+
+#: api/lib/cmdb/resp_format.py:134
+msgid "You do not have permission to operate attribute {}!"
+msgstr "您没有属性 {} 的操作权限!"
+
+#: api/lib/cmdb/resp_format.py:135
+msgid "You do not have permission to operate this CI!"
+msgstr "您没有该CI的操作权限!"
+
+#: api/lib/cmdb/resp_format.py:137
+msgid "Failed to save password: {}"
+msgstr "保存密码失败: {}"
+
+#: api/lib/cmdb/resp_format.py:138
+msgid "Failed to get password: {}"
+msgstr "获取密码失败: {}"
+
+#: api/lib/common_setting/employee.py:1349
+msgid "Not a valid date value."
+msgstr ""
+
+#: api/lib/perm/acl/resp_format.py:9
+msgid "login successful"
+msgstr "登录成功"
+
+#: api/lib/perm/acl/resp_format.py:10
+msgid "Failed to connect to LDAP service"
+msgstr "连接LDAP服务失败"
+
+#: api/lib/perm/acl/resp_format.py:11
+msgid "Password verification failed"
+msgstr "密码验证失败"
+
+#: api/lib/perm/acl/resp_format.py:12
+msgid "Application Token verification failed"
+msgstr "应用 Token验证失败"
+
+#: api/lib/perm/acl/resp_format.py:14
+msgid ""
+"You are not the application administrator or the session has expired (try"
+" logging out and logging in again)"
+msgstr "您不是应用管理员 或者 session失效(尝试一下退出重新登录)"
+
+#: api/lib/perm/acl/resp_format.py:17
+msgid "Resource type {} does not exist!"
+msgstr "资源类型 {} 不存在!"
+
+#: api/lib/perm/acl/resp_format.py:18
+msgid "Resource type {} already exists!"
+msgstr "资源类型 {} 已经存在!"
+
+#: api/lib/perm/acl/resp_format.py:20
+msgid "Because there are resources under this type, they cannot be deleted!"
+msgstr "因为该类型下有资源的存在, 不能删除!"
+
+#: api/lib/perm/acl/resp_format.py:22
+msgid "User {} does not exist!"
+msgstr "用户 {} 不存在!"
+
+#: api/lib/perm/acl/resp_format.py:23
+msgid "User {} already exists!"
+msgstr "用户 {} 已经存在!"
+
+#: api/lib/perm/acl/resp_format.py:24
+msgid "Role {} does not exist!"
+msgstr "角色 {} 不存在!"
+
+#: api/lib/perm/acl/resp_format.py:25
+msgid "Role {} already exists!"
+msgstr "角色 {} 已经存在!"
+
+#: api/lib/perm/acl/resp_format.py:26
+msgid "Global role {} does not exist!"
+msgstr "全局角色 {} 不存在!"
+
+#: api/lib/perm/acl/resp_format.py:27
+msgid "Global role {} already exists!"
+msgstr "全局角色 {} 已经存在!"
+
+#: api/lib/perm/acl/resp_format.py:29
+msgid "You do not have {} permission on resource: {}"
+msgstr "您没有资源: {} 的 {} 权限"
+
+#: api/lib/perm/acl/resp_format.py:30
+msgid "Requires administrator permissions"
+msgstr "需要管理员权限"
+
+#: api/lib/perm/acl/resp_format.py:31
+msgid "Requires role: {}"
+msgstr "需要角色: {}"
+
+#: api/lib/perm/acl/resp_format.py:33
+msgid "To delete a user role, please operate on the User Management page!"
+msgstr "删除用户角色, 请在 用户管理 页面操作!"
+
+#: api/lib/perm/acl/resp_format.py:35
+msgid "Application {} already exists"
+msgstr "应用 {} 已经存在"
+
+#: api/lib/perm/acl/resp_format.py:36
+msgid "Application {} does not exist!"
+msgstr "应用 {} 不存在!"
+
+#: api/lib/perm/acl/resp_format.py:37
+msgid "The Secret is invalid"
+msgstr "应用的Secret无效"
+
+#: api/lib/perm/acl/resp_format.py:39
+msgid "Resource {} does not exist!"
+msgstr "资源 {} 不存在!"
+
+#: api/lib/perm/acl/resp_format.py:40
+msgid "Resource {} already exists!"
+msgstr "资源 {} 已经存在!"
+
+#: api/lib/perm/acl/resp_format.py:42
+msgid "Resource group {} does not exist!"
+msgstr "资源组 {} 不存在!"
+
+#: api/lib/perm/acl/resp_format.py:43
+msgid "Resource group {} already exists!"
+msgstr "资源组 {} 已经存在!"
+
+#: api/lib/perm/acl/resp_format.py:45
+msgid "Inheritance detected infinite loop"
+msgstr "继承检测到了死循环"
+
+#: api/lib/perm/acl/resp_format.py:46
+msgid "Role relationship {} does not exist!"
+msgstr "角色关系 {} 不存在!"
+
+#: api/lib/perm/acl/resp_format.py:48
+msgid "Trigger {} does not exist!"
+msgstr "触发器 {} 不存在!"
+
+#: api/lib/perm/acl/resp_format.py:49
+msgid "Trigger {} already exists!"
+msgstr "触发器 {} 已经存在!"
+
+#: api/lib/perm/acl/resp_format.py:50
+msgid "Trigger {} has been disabled!"
+msgstr "Trigger {} has been disabled!"
+

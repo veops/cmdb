@@ -2,6 +2,7 @@
 
 
 from celery import Celery
+from flask_babel import Babel
 from flask_bcrypt import Bcrypt
 from flask_caching import Cache
 from flask_cors import CORS
@@ -14,6 +15,7 @@ from api.lib.utils import ESHandler
 from api.lib.utils import RedisHandler
 
 bcrypt = Bcrypt()
+babel = Babel()
 login_manager = LoginManager()
 db = SQLAlchemy(session_options={"autoflush": False})
 migrate = Migrate()
