@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-12-25 20:21+0800\n"
+"POT-Creation-Date: 2023-12-26 09:41+0800\n"
 "PO-Revision-Date: 2023-12-25 20:21+0800\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.13.1\n"
+"Generated-By: Babel 2.14.0\n"
 
 #: api/lib/resp_format.py:7
 msgid "unauthorized"
@@ -436,9 +436,257 @@ msgstr "保存密码失败: {}"
 msgid "Failed to get password: {}"
 msgstr "获取密码失败: {}"
 
-#: api/lib/common_setting/employee.py:1349
-msgid "Not a valid date value."
-msgstr ""
+#: api/lib/common_setting/resp_format.py:8
+msgid "Company info already existed"
+msgstr "公司信息已存在,无法创建!"
+
+#: api/lib/common_setting/resp_format.py:10
+msgid "No file part"
+msgstr "没有文件部分"
+
+#: api/lib/common_setting/resp_format.py:11
+msgid "File is required"
+msgstr "文件是必须的"
+
+#: api/lib/common_setting/resp_format.py:12
+msgid "File not found"
+msgstr "文件不存在!"
+
+#: api/lib/common_setting/resp_format.py:13
+msgid "File type not allowed"
+msgstr "文件类型不允许!"
+
+#: api/lib/common_setting/resp_format.py:14
+msgid "Upload failed: {}"
+msgstr "上传失败: {}"
+
+#: api/lib/common_setting/resp_format.py:16
+msgid "Direct supervisor is not self"
+msgstr "直属上级不能是自己"
+
+#: api/lib/common_setting/resp_format.py:17
+msgid "Parent department is not self"
+msgstr "上级部门不能是自己"
+
+#: api/lib/common_setting/resp_format.py:18
+msgid "Employee list is empty"
+msgstr "员工列表为空"
+
+#: api/lib/common_setting/resp_format.py:20
+msgid "Column name not support"
+msgstr "不支持的列名"
+
+#: api/lib/common_setting/resp_format.py:21
+msgid "Password is required"
+msgstr "密码是必须的"
+
+#: api/lib/common_setting/resp_format.py:22
+msgid "Employee acl rid is zero"
+msgstr "员工ACL角色ID不能为0"
+
+#: api/lib/common_setting/resp_format.py:24
+msgid "Generate excel failed: {}"
+msgstr "生成excel失败: {}"
+
+#: api/lib/common_setting/resp_format.py:25
+msgid "Rename columns failed: {}"
+msgstr "重命名字段失败: {}"
+
+#: api/lib/common_setting/resp_format.py:26
+msgid "Cannot block this employee is other direct supervisor"
+msgstr "该员工是其他员工的直属上级, 不能禁用"
+
+#: api/lib/common_setting/resp_format.py:28
+msgid "Cannot block this employee is department manager"
+msgstr "该员工是部门负责人, 不能禁用"
+
+#: api/lib/common_setting/resp_format.py:30
+msgid "Employee id [{}] not found"
+msgstr "员工ID [{}] 不存在!"
+
+#: api/lib/common_setting/resp_format.py:31
+msgid "Value is required"
+msgstr "值是必须的"
+
+#: api/lib/common_setting/resp_format.py:32
+msgid "Email already exists"
+msgstr "邮箱已存在!"
+
+#: api/lib/common_setting/resp_format.py:33
+msgid "Query {} none keep value empty"
+msgstr "查询 {} 空值时请保持value为空"
+
+#: api/lib/common_setting/resp_format.py:34
+msgid "Not support operator: {}"
+msgstr "不支持的操作符: {}"
+
+#: api/lib/common_setting/resp_format.py:35
+msgid "Not support relation: {}"
+msgstr "不支持的关系: {}"
+
+#: api/lib/common_setting/resp_format.py:36
+msgid "Conditions field missing"
+msgstr " conditions内元素字段缺失，请检查！"
+
+#: api/lib/common_setting/resp_format.py:37
+msgid "Datetime format error: {}"
+msgstr "{}格式错误，应该为：%Y-%m-%d %H:%M:%S"
+
+#: api/lib/common_setting/resp_format.py:38
+msgid "Department level relation error"
+msgstr "部门层级关系不正确"
+
+#: api/lib/common_setting/resp_format.py:39
+msgid "Delete reserved department name"
+msgstr "保留部门，无法删除！"
+
+#: api/lib/common_setting/resp_format.py:40
+msgid "Department id is required"
+msgstr "部门ID是必须的"
+
+#: api/lib/common_setting/resp_format.py:41
+msgid "Department list is required"
+msgstr "部门列表是必须的"
+
+#: api/lib/common_setting/resp_format.py:42
+msgid "{} Cannot to be parent department"
+msgstr "{} 不能设置为上级部门"
+
+#: api/lib/common_setting/resp_format.py:43
+msgid "Department id [{}] not found"
+msgstr "部门ID [{}] 不存在"
+
+#: api/lib/common_setting/resp_format.py:44
+msgid "Parent department id must more than zero"
+msgstr "上级部门ID必须大于0"
+
+#: api/lib/common_setting/resp_format.py:45
+msgid "Department name [{}] already exists"
+msgstr "部门名称 [{}] 已存在"
+
+#: api/lib/common_setting/resp_format.py:46
+msgid "New department is none"
+msgstr "新部门是空的"
+
+#: api/lib/common_setting/resp_format.py:48
+msgid "ACL edit user failed: {}"
+msgstr "ACL 修改用户失败: {}"
+
+#: api/lib/common_setting/resp_format.py:49
+msgid "ACL uid not found: {}"
+msgstr "ACL 用户UID [{}] 不存在"
+
+#: api/lib/common_setting/resp_format.py:50
+msgid "ACL add user failed: {}"
+msgstr "ACL 添加用户失败: {}"
+
+#: api/lib/common_setting/resp_format.py:51
+msgid "ACL add role failed: {}"
+msgstr "ACL 添加角色失败: {}"
+
+#: api/lib/common_setting/resp_format.py:52
+msgid "ACL update role failed: {}"
+msgstr "ACL 更新角色失败: {}"
+
+#: api/lib/common_setting/resp_format.py:53
+msgid "ACL get all users failed: {}"
+msgstr "ACL 获取所有用户失败: {}"
+
+#: api/lib/common_setting/resp_format.py:54
+msgid "ACL remove user from role failed: {}"
+msgstr "ACL 从角色中移除用户失败: {}"
+
+#: api/lib/common_setting/resp_format.py:55
+msgid "ACL add user to role failed: {}"
+msgstr "ACL 添加用户到角色失败: {}"
+
+#: api/lib/common_setting/resp_format.py:56
+msgid "ACL import user failed: {}"
+msgstr "ACL 导入用户失败: {}"
+
+#: api/lib/common_setting/resp_format.py:58
+msgid "Nickname is required"
+msgstr "昵称不能为空"
+
+#: api/lib/common_setting/resp_format.py:59
+msgid "Username is required"
+msgstr "用户名不能为空"
+
+#: api/lib/common_setting/resp_format.py:60
+msgid "Email is required"
+msgstr "邮箱不能为空"
+
+#: api/lib/common_setting/resp_format.py:61
+msgid "Email format error"
+msgstr "邮箱格式错误"
+
+#: api/lib/common_setting/resp_format.py:62
+msgid "Email send timeout"
+msgstr "邮件发送超时"
+
+#: api/lib/common_setting/resp_format.py:64
+msgid "Common data not found {} "
+msgstr "ID {} 找不到记录"
+
+#: api/lib/common_setting/resp_format.py:65
+msgid "Common data {} already existed"
+msgstr "{} 已经存在"
+
+#: api/lib/common_setting/resp_format.py:66
+msgid "Notice platform {} existed"
+msgstr "{} 已经存在"
+
+#: api/lib/common_setting/resp_format.py:67
+msgid "Notice {} not existed"
+msgstr "{} 配置项不存在"
+
+#: api/lib/common_setting/resp_format.py:68
+msgid "Notice please config messenger first"
+msgstr "请先配置messenger URL"
+
+#: api/lib/common_setting/resp_format.py:69
+msgid "Notice bind err with empty mobile"
+msgstr "绑定错误，手机号为空"
+
+#: api/lib/common_setting/resp_format.py:70
+msgid "Notice bind failed: {}"
+msgstr "绑定失败: {}"
+
+#: api/lib/common_setting/resp_format.py:71
+msgid "Notice bind success"
+msgstr "绑定成功"
+
+#: api/lib/common_setting/resp_format.py:72
+msgid "Notice remove bind success"
+msgstr "解绑成功"
+
+#: api/lib/common_setting/resp_format.py:74
+msgid "Not support test type: {}"
+msgstr "不支持的测试类型: {}"
+
+#: api/lib/common_setting/resp_format.py:75
+msgid "Not support auth type: {}"
+msgstr "不支持的认证类型: {}"
+
+#: api/lib/common_setting/resp_format.py:76
+msgid "LDAP server connect timeout"
+msgstr "LDAP服务器连接超时"
+
+#: api/lib/common_setting/resp_format.py:77
+msgid "LDAP server connect not available"
+msgstr "LDAP服务器连接不可用"
+
+#: api/lib/common_setting/resp_format.py:78
+msgid "LDAP test unknown error: {}"
+msgstr "LDAP测试未知错误: {}"
+
+#: api/lib/common_setting/resp_format.py:79
+msgid "Common data not support auth type: {}"
+msgstr "通用数据不支持auth类型: {}"
+
+#: api/lib/common_setting/resp_format.py:80
+msgid "LDAP test username required"
+msgstr "LDAP测试用户名必填"
 
 #: api/lib/perm/acl/resp_format.py:9
 msgid "login successful"
@@ -561,4 +809,7 @@ msgstr "触发器 {} 已经存在!"
 #: api/lib/perm/acl/resp_format.py:50
 msgid "Trigger {} has been disabled!"
 msgstr "Trigger {} has been disabled!"
+
+#~ msgid "Not a valid date value."
+#~ msgstr ""
 
