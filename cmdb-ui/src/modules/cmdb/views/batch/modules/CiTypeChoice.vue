@@ -70,7 +70,11 @@
               :title="item.alias || item.name"
             >{{ item.alias || item.name }}</span
             >
-            <a-select :style="{ flex: 1 }" size="small" v-model="parentsForm[item.alias || item.name].attr">
+            <a-select
+              :style="{ flex: 1 }"
+              size="small"
+              v-model="parentsForm[item.alias || item.name].selectedParentAttr"
+            >
               <a-select-option
                 :title="attr.alias || attr.name"
                 v-for="attr in item.attributes"
@@ -90,7 +94,8 @@
 <script>
 import _ from 'lodash'
 import { mapState } from 'vuex'
-import { downloadExcel } from '../../../utils/helper'
+import ExcelJS from 'exceljs'
+import FileSaver from 'file-saver'
 import { getCITypes } from '@/modules/cmdb/api/CIType'
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
 import { getCITypeParent, getCanEditByParentIdChildId } from '@/modules/cmdb/api/CITypeRelation'
@@ -172,7 +177,7 @@ export default {
         const _parentsForm = {}
         res.parents.forEach((item) => {
           const _find = item.attributes.find((attr) => attr.id === item.unique_id)
-          _parentsForm[item.alias || item.name] = { attr: _find?.alias || _find?.name, value: '' }
+          _parentsForm[item.alias || item.name] = { ...item, selectedParentAttr: _find?.alias || _find?.name }
         })
         this.parentsForm = _parentsForm
         this.checkedParents = []
@@ -187,30 +192,68 @@ export default {
       this.visible = false
     },
     handleOk() {
-      const columns1 = this.checkedAttrs.map((item) => {
+      const excel_name = `${this.ciTypeName}.xlsx`
+      const wb = new ExcelJS.Workbook()
+      const ws = wb.addWorksheet(this.ciTypeName)
+      const choice_value_obj = {}
+      const columns1 = this.checkedAttrs.map((item, index) => {
+        const _find = this.selectCiTypeAttrList.attributes.find((attr) => item === attr.alias || item === attr.name)
+        if (_find?.choice_value && _find?.choice_value.length) {
+          choice_value_obj[item] = {
+            choice_value: _find?.choice_value,
+            columnIdx: index + 1,
+          }
+        }
         return {
-          v: item,
-          t: 's',
-          s: {
-            numFmt: 'string',
-          },
+          header: item,
+          key: item,
+          width: 20,
         }
       })
-      const columns2 = this.checkedParents.map((p) => {
+
+      const columns2 = this.checkedParents.map((p, idx) => {
+        const _selectedParentAttr = this.parentsForm[p].selectedParentAttr
+        const _find = this.parentsForm[p].attributes.find(
+          (attr) => _selectedParentAttr === attr.alias || _selectedParentAttr === attr.name
+        )
+        if (_find?.choice_value && _find?.choice_value.length) {
+          choice_value_obj[p] = {
+            choice_value: _find?.choice_value,
+            columnIdx: columns1.length + idx + 1,
+          }
+        }
         return {
-          v: `$${p}.${this.parentsForm[p].attr}`,
-          t: 's',
-          s: {
+          header: `$${p}.${this.parentsForm[p].selectedParentAttr}`,
+          key: `$${p}.${this.parentsForm[p].selectedParentAttr}`,
+          width: 40,
+          style: {
             font: {
-              color: {
-                rgb: 'FF0000',
-              },
+              color: { argb: 'ff0000' },
             },
           },
         }
       })
-      downloadExcel([[...columns1, ...columns2]], this.ciTypeName)
-      this.handleCancel()
+      ws.columns = [...columns1, ...columns2]
+
+      for (let row = 2; row < 5000; row++) {
+        Object.keys(choice_value_obj).forEach((key) => {
+          const formulae = `"${choice_value_obj[key].choice_value.map((value) => value[0]).join(',')}"`
+          if (formulae.length <= 255) {
+            ws.getCell(row, choice_value_obj[key].columnIdx).dataValidation = {
+              type: 'list',
+              formulae: [formulae],
+            }
+          }
+        })
+      }
+
+      wb.xlsx.writeBuffer().then((buffer) => {
+        const file = new Blob([buffer], {
+          type: 'application/octet-stream',
+        })
+        FileSaver.saveAs(file, excel_name)
+        this.handleCancel()
+      })
     },
     changeCheckAll(e) {
       if (e.target.checked) {
