@@ -13,12 +13,7 @@
     >
       <vxe-column field="created_at" title="创建时间" sortable width="159px"></vxe-column>
       <vxe-column field="parent.alias" title="源模型"></vxe-column>
-      <vxe-column
-        field="relation_type_id"
-        title="关系"
-        :filters="[{ data: '' }]"
-        :filter-multiple="false"
-      >
+      <vxe-column field="relation_type_id" title="关系" :filters="[{ data: '' }]" :filter-multiple="false">
         <template #default="{ row }">
           <a-tag color="cyan">
             {{ row.relation_type.name }}
@@ -63,9 +58,8 @@ export default {
   components: {
     CMDBGrant,
   },
-  async created() {
-    await this.getRelationTypes()
-    await this.getMainData()
+  created() {
+    this.refresh()
   },
   computed: {
     windowHeight() {
@@ -73,6 +67,10 @@ export default {
     },
   },
   methods: {
+    async refresh() {
+      await this.getRelationTypes()
+      await this.getMainData()
+    },
     async getMainData() {
       const res = await getCITypeRelations()
       res.forEach((item) => {
@@ -106,7 +104,7 @@ export default {
     deleteRelation(row) {
       deleteRelation(row.parent_id, row.child_id).then((res) => {
         this.$message.success(`删除成功！`)
-        this.getRelationTypes()
+        this.refresh()
       })
     },
   },
