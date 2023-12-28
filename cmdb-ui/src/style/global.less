@@ -517,12 +517,12 @@ body {
   transition: none;
 }
 .ops-side-bar.ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected {
-  background-image: url('../assets/sidebar_selected.png') !important;
-  background-repeat: no-repeat !important;
-  background: inherit;
-  background-size: 228px 38px;
-  background-position-x: -10px;
-  background-position-y: center;
+  // background-image: url('../assets/sidebar_selected.png') !important;
+  // background-repeat: no-repeat !important;
+  background: #3e4a71;
+  // background-size: 228px 38px;
+  // background-position-x: -10px;
+  // background-position-y: center;
   transition: none;
 }
 .ops-side-bar.ant-menu .ant-menu-submenu .ant-menu-item.ant-menu-item-selected {
@@ -546,13 +546,13 @@ body {
   border-right-color: transparent;
   // background: @layout-background-light-color;
   // background: url('../assets/sidebar_background.png');
-  background: #002766;
+  background: #1d264c;
   // background-position-x: center;
   // background-position-y: center;
   background-repeat: no-repeat !important;
   background-size: cover;
   .ant-menu-inline.ant-menu-sub {
-    background-color: #001a4c;
+    background-color: #000c37;
   }
   .ant-menu-submenu-content .ant-menu-item,
   .ant-menu-item {
@@ -668,7 +668,7 @@ body {
   .ant-menu-submenu.ant-menu-submenu-placement-rightTop {
     > .ant-menu {
       // background: url('../assets/sidebar_background.png');
-      background: #002766;
+      background: #1d264c;
       background-position-x: center;
       background-position-y: center;
       background-repeat: no-repeat !important;
@@ -1026,7 +1026,8 @@ body {
 }
 
 .ops-input {
-  .ant-input {
+  .ant-input,
+  .ant-time-picker-input {
     background-color: #custom_colors[color_2];
     border: none;
   }
@@ -1050,10 +1051,12 @@ body {
 }
 
 // vxe-table checkbox 选中 highlight
-.vxe-table--render-default .vxe-body--row.row--checked, .vxe-table--render-default .vxe-body--row.row--radio {
+.vxe-table--render-default .vxe-body--row.row--checked,
+.vxe-table--render-default .vxe-body--row.row--radio {
   background: aliceblue !important;
 }
-.vxe-table--render-default .vxe-body--row.row--hover.row--checked, .vxe-table--render-default .vxe-body--row.row--hover.row--radio {
+.vxe-table--render-default .vxe-body--row.row--hover.row--checked,
+.vxe-table--render-default .vxe-body--row.row--hover.row--radio {
   background: lightskyblue !important;
 }
 
