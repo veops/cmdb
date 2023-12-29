@@ -5,6 +5,7 @@ import copy
 import datetime
 import json
 import time
+import uuid
 
 import click
 import requests
@@ -176,6 +177,11 @@ def cmdb_counter():
     from api.lib.cmdb.cache import CMDBCounterCache
 
     current_app.test_request_context().push()
+    if not UserCache.get('worker'):
+        from api.lib.perm.acl.user import UserCRUD
+
+        UserCRUD.add(username='worker', password=uuid.uuid4().hex, email='worker@xxx.com')
+
     login_user(UserCache.get('worker'))
     while True:
         try:
