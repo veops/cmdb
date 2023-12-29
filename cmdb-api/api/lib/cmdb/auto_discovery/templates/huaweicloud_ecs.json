@@ -1,292 +1,284 @@
 [
-  {
-    "name": "status",
-    "type": "文本",
-    "example": "ACTIVE",
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u72b6\u6001\u3002\n\n\u53d6\u503c\u8303\u56f4:\n\nACTIVE\u3001BUILD\u3001DELETED\u3001ERROR\u3001HARD_REBOOT\u3001MIGRATING\u3001PAUSED\u3001REBOOT\u3001REBUILD\u3001RESIZE\u3001REVERT_RESIZE\u3001SHUTOFF\u3001SHELVED\u3001SHELVED_OFFLOADED\u3001SOFT_DELETED\u3001SUSPENDED\u3001VERIFY_RESIZE\n\n\u5f39\u6027\u4e91\u670d\u52a1\u5668\u72b6\u6001\u8bf4\u660e\u8bf7\u53c2\u8003[\u4e91\u670d\u52a1\u5668\u72b6\u6001](https://support.huaweicloud.com/api-ecs/ecs_08_0002.html)"
-  },
-  {
-    "name": "updated",
-    "type": "文本",
-    "example": "2019-05-22T03:30:52Z",
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u66f4\u65b0\u65f6\u95f4\u3002\n\n\u65f6\u95f4\u683c\u5f0f\u4f8b\u5982:2019-05-22T03:30:52Z"
-  },
-  {
-    "name": "auto_terminate_time",
-    "type": "文本",
-    "example": "2020-01-19T03:30:52Z",
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u81ea\u52a8\u91ca\u653e\u65f6\u95f4\u3002\n\n\u65f6\u95f4\u683c\u5f0f\u4f8b\u5982:2020-01-19T03:30:52Z"
-  },
-  {
-    "name": "hostId",
-    "type": "文本",
-    "example": "c7145889b2e3202cd295ceddb1742ff8941b827b586861fd0acedf64",
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u6240\u5728\u4e3b\u673a\u7684\u4e3b\u673aID\u3002"
-  },
-  {
-    "name": "OS-EXT-SRV-ATTR:host",
-    "type": "文本",
-    "example": "pod01.cn-north-1c",
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u6240\u5728\u4e3b\u673a\u7684\u4e3b\u673a\u540d\u79f0\u3002"
-  },
-  {
-    "name": "addresses",
-    "type": "json",
-    "example": null,
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u7684\u7f51\u7edc\u5c5e\u6027\u3002"
-  },
-  {
-    "name": "key_name",
-    "type": "文本",
-    "example": "KeyPair-test",
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u4f7f\u7528\u7684\u5bc6\u94a5\u5bf9\u540d\u79f0\u3002"
-  },
-  {
-    "name": "image",
-    "type": "json",
-    "example": null,
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u955c\u50cf\u4fe1\u606f\u3002"
-  },
-  {
-    "name": "OS-EXT-STS:task_state",
-    "type": "文本",
-    "example": "rebooting",
-    "desc": "\u6269\u5c55\u5c5e\u6027,\u5f39\u6027\u4e91\u670d\u52a1\u5668\u5f53\u524d\u4efb\u52a1\u7684\u72b6\u6001\u3002\n\n\u53d6\u503c\u8303\u56f4\u8bf7\u53c2\u8003[\u4e91\u670d\u52a1\u5668\u72b6\u6001](https://support.huaweicloud.com/api-ecs/ecs_08_0002.html)\u88683\u3002"
-  },
-  {
-    "name": "OS-EXT-STS:vm_state",
-    "type": "文本",
-    "example": "active",
-    "desc": "\u6269\u5c55\u5c5e\u6027,\u5f39\u6027\u4e91\u670d\u52a1\u5668\u5f53\u524d\u72b6\u6001\u3002\n\n\u4e91\u670d\u52a1\u5668\u72b6\u6001\u8bf4\u660e\u8bf7\u53c2\u8003[\u4e91\u670d\u52a1\u5668\u72b6\u6001](https://support.huaweicloud.com/api-ecs/ecs_08_0002.html)\u3002"
-  },
-  {
-    "name": "OS-EXT-SRV-ATTR:instance_name",
-    "type": "文本",
-    "example": "instance-0048a91b",
-    "desc": "\u6269\u5c55\u5c5e\u6027,\u5f39\u6027\u4e91\u670d\u52a1\u5668\u522b\u540d\u3002"
-  },
-  {
-    "name": "OS-EXT-SRV-ATTR:hypervisor_hostname",
-    "type": "文本",
-    "example": "nova022@36",
-    "desc": "\u6269\u5c55\u5c5e\u6027,\u5f39\u6027\u4e91\u670d\u52a1\u5668\u6240\u5728\u865a\u62df\u5316\u4e3b\u673a\u540d\u3002"
-  },
-  {
-    "name": "flavor",
-    "type": "json",
-    "example": null,
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u89c4\u683c\u4fe1\u606f\u3002"
-  },
-  {
-    "name": "id",
-    "type": "文本",
-    "example": "4f4b3dfa-eb70-47cf-a60a-998a53bd6666",
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668ID,\u683c\u5f0f\u4e3aUUID\u3002"
-  },
-  {
-    "name": "security_groups",
-    "type": "json",
-    "example": {
-      "$ref": "#/definitions/ServerSecurityGroup"
+    {
+        "name": "status",
+        "type": "string",
+        "desc": "弹性云服务器状态。\n\n取值范围:\n\nACTIVE、BUILD、DELETED、ERROR、HARD_REBOOT、MIGRATING、PAUSED、REBOOT、REBUILD、RESIZE、REVERT_RESIZE、SHUTOFF、SHELVED、SHELVED_OFFLOADED、SOFT_DELETED、SUSPENDED、VERIFY_RESIZE\n\n弹性云服务器状态说明请参考[云服务器状态](https://support.huaweicloud.com/api-ecs/ecs_08_0002.html)",
+        "example": "ACTIVE"
     },
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u6240\u5c5e\u5b89\u5168\u7ec4\u5217\u8868\u3002"
-  },
-  {
-    "name": "OS-EXT-AZ:availability_zone",
-    "type": "文本",
-    "example": "cn-north-1c",
-    "desc": "\u6269\u5c55\u5c5e\u6027,\u5f39\u6027\u4e91\u670d\u52a1\u5668\u6240\u5728\u53ef\u7528\u533a\u540d\u79f0\u3002"
-  },
-  {
-    "name": "user_id",
-    "type": "文本",
-    "example": "05498fe56b8010d41f7fc01e280b6666",
-    "desc": "\u521b\u5efa\u5f39\u6027\u4e91\u670d\u52a1\u5668\u7684\u7528\u6237ID,\u683c\u5f0f\u4e3aUUID\u3002"
-  },
-  {
-    "name": "name",
-    "type": "文本",
-    "example": "ecs-test-server",
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u540d\u79f0\u3002"
-  },
-  {
-    "name": "created",
-    "type": "文本",
-    "example": "2017-07-15T11:30:52Z",
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u521b\u5efa\u65f6\u95f4\u3002\n\n\u65f6\u95f4\u683c\u5f0f\u4f8b\u5982:2019-05-22T03:19:19Z"
-  },
-  {
-    "name": "tenant_id",
-    "type": "文本",
-    "example": "743b4c0428d94531b9f2add666646666",
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u6240\u5c5e\u79df\u6237ID,\u5373\u9879\u76eeid,\u548cproject_id\u8868\u793a\u76f8\u540c\u7684\u6982\u5ff5,\u683c\u5f0f\u4e3aUUID\u3002"
-  },
-  {
-    "name": "OS-DCF:diskConfig",
-    "type": "文本",
-    "example": "AUTO",
-    "desc": "\u6269\u5c55\u5c5e\u6027, diskConfig\u7684\u7c7b\u578b\u3002\n\n- MANUAL,\u955c\u50cf\u7a7a\u95f4\u4e0d\u4f1a\u6269\u5c55\u3002\n- AUTO,\u7cfb\u7edf\u76d8\u955c\u50cf\u7a7a\u95f4\u4f1a\u81ea\u52a8\u6269\u5c55\u4e3a\u4e0eflavor\u5927\u5c0f\u4e00\u81f4\u3002"
-  },
-  {
-    "name": "accessIPv4",
-    "type": "文本",
-    "example": null,
-    "desc": "\u9884\u7559\u5c5e\u6027\u3002"
-  },
-  {
-    "name": "accessIPv6",
-    "type": "文本",
-    "example": null,
-    "desc": "\u9884\u7559\u5c5e\u6027\u3002"
-  },
-  {
-    "name": "fault",
-    "type": "文本",
-    "example": null,
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u6545\u969c\u4fe1\u606f\u3002\n\n\u53ef\u9009\u53c2\u6570,\u5728\u5f39\u6027\u4e91\u670d\u52a1\u5668\u72b6\u6001\u4e3aERROR\u4e14\u5b58\u5728\u5f02\u5e38\u7684\u60c5\u51b5\u4e0b\u8fd4\u56de\u3002"
-  },
-  {
-    "name": "progress",
-    "type": "整数",
-    "example": null,
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u8fdb\u5ea6\u3002"
-  },
-  {
-    "name": "OS-EXT-STS:power_state",
-    "type": "整数",
-    "example": 4,
-    "desc": "\u6269\u5c55\u5c5e\u6027,\u5f39\u6027\u4e91\u670d\u52a1\u5668\u7535\u6e90\u72b6\u6001\u3002"
-  },
-  {
-    "name": "config_drive",
-    "type": "文本",
-    "example": null,
-    "desc": "config drive\u4fe1\u606f\u3002"
-  },
-  {
-    "name": "metadata",
-    "type": "json",
-    "example": null,
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u5143\u6570\u636e\u3002\n\n> \u8bf4\u660e:\n> \n> \u5143\u6570\u636e\u5305\u542b\u7cfb\u7edf\u9ed8\u8ba4\u6dfb\u52a0\u5b57\u6bb5\u548c\u7528\u6237\u8bbe\u7f6e\u7684\u5b57\u6bb5\u3002\n\n\u7cfb\u7edf\u9ed8\u8ba4\u6dfb\u52a0\u5b57\u6bb5\n\n1. charging_mode\n\u4e91\u670d\u52a1\u5668\u7684\u8ba1\u8d39\u7c7b\u578b\u3002\n\n- \u201c0\u201d:\u6309\u9700\u8ba1\u8d39(\u5373postPaid-\u540e\u4ed8\u8d39\u65b9\u5f0f)\u3002\n- \u201c1\u201d:\u6309\u5305\u5e74\u5305\u6708\u8ba1\u8d39(\u5373prePaid-\u9884\u4ed8\u8d39\u65b9\u5f0f)\u3002\"2\":\u7ade\u4ef7\u5b9e\u4f8b\u8ba1\u8d39\n\n2. metering.order_id\n\u6309\u201c\u5305\u5e74/\u5305\u6708\u201d\u8ba1\u8d39\u7684\u4e91\u670d\u52a1\u5668\u5bf9\u5e94\u7684\u8ba2\u5355ID\u3002\n\n3. metering.product_id\n\u6309\u201c\u5305\u5e74/\u5305\u6708\u201d\u8ba1\u8d39\u7684\u4e91\u670d\u52a1\u5668\u5bf9\u5e94\u7684\u4ea7\u54c1ID\u3002\n\n4. vpc_id\n\u4e91\u670d\u52a1\u5668\u6240\u5c5e\u7684\u865a\u62df\u79c1\u6709\u4e91ID\u3002\n\n5. EcmResStatus\n\u4e91\u670d\u52a1\u5668\u7684\u51bb\u7ed3\u72b6\u6001\u3002\n\n- normal:\u4e91\u670d\u52a1\u5668\u6b63\u5e38\u72b6\u6001(\u672a\u88ab\u51bb\u7ed3)\u3002\n- freeze:\u4e91\u670d\u52a1\u5668\u88ab\u51bb\u7ed3\u3002\n\n> \u5f53\u4e91\u670d\u52a1\u5668\u88ab\u51bb\u7ed3\u6216\u8005\u89e3\u51bb\u540e,\u7cfb\u7edf\u9ed8\u8ba4\u6dfb\u52a0\u8be5\u5b57\u6bb5,\u4e14\u8be5\u5b57\u6bb5\u5fc5\u9009\u3002\n\n6. metering.image_id\n\u4e91\u670d\u52a1\u5668\u64cd\u4f5c\u7cfb\u7edf\u5bf9\u5e94\u7684\u955c\u50cfID\n\n7.  metering.imagetype\n\u955c\u50cf\u7c7b\u578b,\u76ee\u524d\u652f\u6301:\n\n- \u516c\u5171\u955c\u50cf(gold)\n- \u79c1\u6709\u955c\u50cf(private)\n- \u5171\u4eab\u955c\u50cf(shared)\n\n8. metering.resourcespeccode\n\u4e91\u670d\u52a1\u5668\u5bf9\u5e94\u7684\u8d44\u6e90\u89c4\u683c\u3002\n\n9. image_name\n\u4e91\u670d\u52a1\u5668\u64cd\u4f5c\u7cfb\u7edf\u5bf9\u5e94\u7684\u955c\u50cf\u540d\u79f0\u3002\n\n10. os_bit\n\u64cd\u4f5c\u7cfb\u7edf\u4f4d\u6570,\u4e00\u822c\u53d6\u503c\u4e3a\u201c32\u201d\u6216\u8005\u201c64\u201d\u3002\n\n11. lockCheckEndpoint\n\u56de\u8c03URL,\u7528\u4e8e\u68c0\u67e5\u5f39\u6027\u4e91\u670d\u52a1\u5668\u7684\u52a0\u9501\u662f\u5426\u6709\u6548\u3002\n\n- \u5982\u679c\u6709\u6548,\u5219\u4e91\u670d\u52a1\u5668\u4fdd\u6301\u9501\u5b9a\u72b6\u6001\u3002\n- \u5982\u679c\u65e0\u6548,\u89e3\u9664\u9501\u5b9a\u72b6\u6001,\u5220\u9664\u5931\u6548\u7684\u9501\u3002\n\n12. lockSource\n\u5f39\u6027\u4e91\u670d\u52a1\u5668\u6765\u81ea\u54ea\u4e2a\u670d\u52a1\u3002\u8ba2\u5355\u52a0\u9501(ORDER)\n\n13. lockSourceId\n\u5f39\u6027\u4e91\u670d\u52a1\u5668\u7684\u52a0\u9501\u6765\u81ea\u54ea\u4e2aID\u3002lockSource\u4e3a\u201cORDER\u201d\u65f6,lockSourceId\u4e3a\u8ba2\u5355ID\u3002\n\n14. lockScene\n\u5f39\u6027\u4e91\u670d\u52a1\u5668\u7684\u52a0\u9501\u7c7b\u578b\u3002\n\n- \u6309\u9700\u8f6c\u5305\u5468\u671f(TO_PERIOD_LOCK)\n\n15. virtual_env_type\n\n- IOS\u955c\u50cf\u521b\u5efa\u865a\u62df\u673a,\"virtual_env_type\": \"IsoImage\" \u5c5e\u6027;\n- \u975eIOS\u955c\u50cf\u521b\u5efa\u865a\u62df\u673a,\u572819.5.0\u7248\u672c\u4ee5\u540e\u521b\u5efa\u7684\u865a\u62df\u673a\u5c06\u4e0d\u4f1a\u6dfb\u52a0virtual_env_type \u5c5e\u6027,\u800c\u5728\u6b64\u4e4b\u524d\u7684\u7248\u672c\u521b\u5efa\u7684\u865a\u62df\u673a\u53ef\u80fd\u4f1a\u8fd4\u56de\"virtual_env_type\": \"FusionCompute\"\u5c5e\u6027 \u3002\n\n> virtual_env_type\u5c5e\u6027\u4e0d\u5141\u8bb8\u7528\u6237\u589e\u52a0\u3001\u5220\u9664\u548c\u4fee\u6539\u3002\n\n16. metering.resourcetype\n\u4e91\u670d\u52a1\u5668\u5bf9\u5e94\u7684\u8d44\u6e90\u7c7b\u578b\u3002\n\n17. os_type\n\u64cd\u4f5c\u7cfb\u7edf\u7c7b\u578b,\u53d6\u503c\u4e3a:Linux\u3001Windows\u3002\n\n18. cascaded.instance_extrainfo\n\u7cfb\u7edf\u5185\u90e8\u865a\u62df\u673a\u6269\u5c55\u4fe1\u606f\u3002\n\n19. __support_agent_list\n\u4e91\u670d\u52a1\u5668\u662f\u5426\u652f\u6301\u4f01\u4e1a\u4e3b\u673a\u5b89\u5168\u3001\u4e3b\u673a\u76d1\u63a7\u3002\n\n- \u201chss\u201d:\u4f01\u4e1a\u4e3b\u673a\u5b89\u5168\n-  \u201cces\u201d:\u4e3b\u673a\u76d1\u63a7\n\n20. agency_name\n\u59d4\u6258\u7684\u540d\u79f0\u3002\n\n\u59d4\u6258\u662f\u7531\u79df\u6237\u7ba1\u7406\u5458\u5728\u7edf\u4e00\u8eab\u4efd\u8ba4\u8bc1\u670d\u52a1(Identity and Access Management,IAM)\u4e0a\u521b\u5efa\u7684,\u53ef\u4ee5\u4e3a\u5f39\u6027\u4e91\u670d\u52a1\u5668\u63d0\u4f9b\u8bbf\u95ee\u4e91\u670d\u52a1\u7684\u4e34\u65f6\u51ed\u8bc1\u3002"
-  },
-  {
-    "name": "OS-SRV-USG:launched_at",
-    "type": "文本",
-    "example": "2018-08-15T14:21:22.000000",
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u542f\u52a8\u65f6\u95f4\u3002\u65f6\u95f4\u683c\u5f0f\u4f8b\u5982:2019-05-22T03:23:59.000000"
-  },
-  {
-    "name": "OS-SRV-USG:terminated_at",
-    "type": "文本",
-    "example": "2019-05-22T03:23:59.000000",
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u5220\u9664\u65f6\u95f4\u3002\n\n\u65f6\u95f4\u683c\u5f0f\u4f8b\u5982:2019-05-22T03:23:59.000000"
-  },
-  {
-    "name": "os-extended-volumes:volumes_attached",
-    "type": "json",
-    "example": {
-      "$ref": "#/definitions/ServerExtendVolumeAttachment"
+    {
+        "name": "updated",
+        "type": "string",
+        "desc": "弹性云服务器更新时间。\n\n时间格式例如:2019-05-22T03:30:52Z",
+        "example": "2019-05-22T03:30:52Z"
     },
-    "desc": "\u6302\u8f7d\u5230\u5f39\u6027\u4e91\u670d\u52a1\u5668\u4e0a\u7684\u78c1\u76d8\u3002"
-  },
-  {
-    "name": "description",
-    "type": "文本",
-    "example": "ecs description",
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u7684\u63cf\u8ff0\u4fe1\u606f\u3002"
-  },
-  {
-    "name": "host_status",
-    "type": "文本",
-    "example": "UP",
-    "desc": "nova-compute\u72b6\u6001\u3002\n\n- UP:\u670d\u52a1\u6b63\u5e38\n- UNKNOWN:\u72b6\u6001\u672a\u77e5\n- DOWN:\u670d\u52a1\u5f02\u5e38\n- MAINTENANCE:\u7ef4\u62a4\u72b6\u6001\n- \u7a7a\u5b57\u7b26\u4e32:\u5f39\u6027\u4e91\u670d\u52a1\u5668\u65e0\u4e3b\u673a\u4fe1\u606f"
-  },
-  {
-    "name": "OS-EXT-SRV-ATTR:hostname",
-    "type": "文本",
-    "example": null,
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u7684\u4e3b\u673a\u540d\u3002"
-  },
-  {
-    "name": "OS-EXT-SRV-ATTR:reservation_id",
-    "type": "文本",
-    "example": "r-f06p3js8",
-    "desc": "\u6279\u91cf\u521b\u5efa\u573a\u666f,\u5f39\u6027\u4e91\u670d\u52a1\u5668\u7684\u9884\u7559ID\u3002"
-  },
-  {
-    "name": "OS-EXT-SRV-ATTR:launch_index",
-    "type": "整数",
-    "example": null,
-    "desc": "\u6279\u91cf\u521b\u5efa\u573a\u666f,\u5f39\u6027\u4e91\u670d\u52a1\u5668\u7684\u542f\u52a8\u987a\u5e8f\u3002"
-  },
-  {
-    "name": "OS-EXT-SRV-ATTR:kernel_id",
-    "type": "文本",
-    "example": null,
-    "desc": "\u82e5\u4f7f\u7528AMI\u683c\u5f0f\u7684\u955c\u50cf,\u5219\u8868\u793akernel image\u7684UUID;\u5426\u5219,\u7559\u7a7a\u3002"
-  },
-  {
-    "name": "OS-EXT-SRV-ATTR:ramdisk_id",
-    "type": "文本",
-    "example": null,
-    "desc": "\u82e5\u4f7f\u7528AMI\u683c\u5f0f\u955c\u50cf,\u5219\u8868\u793aramdisk image\u7684UUID;\u5426\u5219,\u7559\u7a7a\u3002"
-  },
-  {
-    "name": "OS-EXT-SRV-ATTR:root_device_name",
-    "type": "文本",
-    "example": "/dev/vda",
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u7cfb\u7edf\u76d8\u7684\u8bbe\u5907\u540d\u79f0\u3002"
-  },
-  {
-    "name": "OS-EXT-SRV-ATTR:user_data",
-    "type": "文本",
-    "example": "IyEvYmluL2Jhc2gKZWNobyAncm9vdDokNiRjcGRkSjckWm5WZHNiR253Z0l0SGlxUjZxbWtLTlJaeU9lZUtKd3dPbG9XSFdUeGFzWjA1STYwdnJYRTdTUTZGbEpFbWlXZ21WNGNmZ1pac1laN1BkMTBLRndyeC8nIHwgY2hwYXNzd2Q6666",
-    "desc": "\u521b\u5efa\u5f39\u6027\u4e91\u670d\u52a1\u5668\u65f6\u6307\u5b9a\u7684user_data\u3002"
-  },
-  {
-    "name": "locked",
-    "type": "boolean",
-    "example": null,
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u662f\u5426\u4e3a\u9501\u5b9a\u72b6\u6001\u3002\n\n- true:\u9501\u5b9a\n- false:\u672a\u9501\u5b9a"
-  },
-  {
-    "name": "tags",
-    "type": "文本、多值",
-    "example": {
-      "type": "文本"
+    {
+        "name": "auto_terminate_time",
+        "type": "string",
+        "desc": "弹性云服务器定时删除时间。\n\n时间格式例如:2020-01-19T03:30:52Z",
+        "example": "2020-01-19T03:30:52Z"
     },
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u6807\u7b7e\u3002"
-  },
-  {
-    "name": "os:scheduler_hints",
-    "type": "json",
-    "example": null,
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u8c03\u5ea6\u4fe1\u606f"
-  },
-  {
-    "name": "enterprise_project_id",
-    "type": "文本",
-    "example": "0",
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u6240\u5c5e\u7684\u4f01\u4e1a\u9879\u76eeID\u3002"
-  },
-  {
-    "name": "sys_tags",
-    "type": "文本、多值",
-    "example": {
-      "$ref": "#/definitions/ServerSystemTag"
+    {
+        "name": "hostId",
+        "type": "string",
+        "desc": "弹性云服务器所在主机的主机ID。",
+        "example": "c7145889b2e3202cd295ceddb1742ff8941b827b586861fd0acedf64"
     },
-    "desc": "\u5f39\u6027\u4e91\u670d\u52a1\u5668\u7cfb\u7edf\u6807\u7b7e\u3002"
-  },
-  {
-    "name": "cpu_options",
-    "type": "json",
-    "example": null,
-    "desc": "\u81ea\u5b9a\u4e49CPU\u9009\u9879\u3002"
-  },
-  {
-    "name": "hypervisor",
-    "type": "文本",
-    "example": null,
-    "desc": "hypervisor\u4fe1\u606f\u3002"
-  }
+    {
+        "name": "OS-EXT-SRV-ATTR:host",
+        "type": "string",
+        "desc": "弹性云服务器所在主机的主机名称。",
+        "example": "pod01.cn-north-1c"
+    },
+    {
+        "name": "addresses",
+        "type": "object",
+        "desc": "弹性云服务器的网络属性。",
+        "example": ""
+    },
+    {
+        "name": "key_name",
+        "type": "string",
+        "desc": "弹性云服务器使用的密钥对名称。",
+        "example": "KeyPair-test"
+    },
+    {
+        "name": "image",
+        "type": "",
+        "desc": "弹性云服务器镜像信息。",
+        "example": ""
+    },
+    {
+        "name": "OS-EXT-STS:task_state",
+        "type": "string",
+        "desc": "扩展属性,弹性云服务器当前任务的状态。\n\n取值范围请参考[云服务器状态](https://support.huaweicloud.com/api-ecs/ecs_08_0002.html)表3。",
+        "example": "rebooting"
+    },
+    {
+        "name": "OS-EXT-STS:vm_state",
+        "type": "string",
+        "desc": "扩展属性,弹性云服务器当前状态。\n\n云服务器状态说明请参考[云服务器状态](https://support.huaweicloud.com/api-ecs/ecs_08_0002.html)。",
+        "example": "active"
+    },
+    {
+        "name": "OS-EXT-SRV-ATTR:instance_name",
+        "type": "string",
+        "desc": "扩展属性,弹性云服务器别名。",
+        "example": "instance-0048a91b"
+    },
+    {
+        "name": "OS-EXT-SRV-ATTR:hypervisor_hostname",
+        "type": "string",
+        "desc": "扩展属性,弹性云服务器所在虚拟化主机名。",
+        "example": "nova022@36"
+    },
+    {
+        "name": "flavor",
+        "type": "",
+        "desc": "弹性云服务器规格信息。",
+        "example": ""
+    },
+    {
+        "name": "id",
+        "type": "string",
+        "desc": "弹性云服务器ID,格式为UUID。",
+        "example": "4f4b3dfa-eb70-47cf-a60a-998a53bd6666"
+    },
+    {
+        "name": "security_groups",
+        "type": "array",
+        "desc": "弹性云服务器所属安全组列表。",
+        "example": ""
+    },
+    {
+        "name": "OS-EXT-AZ:availability_zone",
+        "type": "string",
+        "desc": "扩展属性,弹性云服务器所在可用区名称。",
+        "example": "cn-north-1c"
+    },
+    {
+        "name": "user_id",
+        "type": "string",
+        "desc": "创建弹性云服务器的用户ID,格式为UUID。",
+        "example": "05498fe56b8010d41f7fc01e280b6666"
+    },
+    {
+        "name": "name",
+        "type": "string",
+        "desc": "弹性云服务器名称。",
+        "example": "ecs-test-server"
+    },
+    {
+        "name": "created",
+        "type": "string",
+        "desc": "弹性云服务器创建时间。\n\n时间格式例如:2019-05-22T03:19:19Z",
+        "example": "2017-07-15T11:30:52Z"
+    },
+    {
+        "name": "tenant_id",
+        "type": "string",
+        "desc": "弹性云服务器所属租户ID,即项目id,和project_id表示相同的概念,格式为UUID。",
+        "example": "743b4c0428d94531b9f2add666646666"
+    },
+    {
+        "name": "OS-DCF:diskConfig",
+        "type": "string",
+        "desc": "扩展属性, diskConfig的类型。\n\n- MANUAL,镜像空间不会扩展。\n- AUTO,系统盘镜像空间会自动扩展为与flavor大小一致。",
+        "example": "AUTO"
+    },
+    {
+        "name": "accessIPv4",
+        "type": "string",
+        "desc": "预留属性。",
+        "example": ""
+    },
+    {
+        "name": "accessIPv6",
+        "type": "string",
+        "desc": "预留属性。",
+        "example": ""
+    },
+    {
+        "name": "fault",
+        "type": "",
+        "desc": "弹性云服务器故障信息。\n\n可选参数,在弹性云服务器状态为ERROR且存在异常的情况下返回。",
+        "example": ""
+    },
+    {
+        "name": "progress",
+        "type": "integer",
+        "desc": "弹性云服务器进度。",
+        "example": 0
+    },
+    {
+        "name": "OS-EXT-STS:power_state",
+        "type": "integer",
+        "desc": "扩展属性,弹性云服务器电源状态。",
+        "example": 4
+    },
+    {
+        "name": "config_drive",
+        "type": "string",
+        "desc": "config drive信息。",
+        "example": ""
+    },
+    {
+        "name": "metadata",
+        "type": "object",
+        "desc": "弹性云服务器元数据。\n\n> 说明:\n> \n> 元数据包含系统默认添加字段和用户设置的字段。\n\n系统默认添加字段\n\n1. charging_mode\n云服务器的计费类型。\n\n- “0”:按需计费(即postPaid-后付费方式)。\n- “1”:按包年包月计费(即prePaid-预付费方式)。\"2\":竞价实例计费\n\n2. metering.order_id\n按“包年/包月”计费的云服务器对应的订单ID。\n\n3. metering.product_id\n按“包年/包月”计费的云服务器对应的产品ID。\n\n4. vpc_id\n云服务器所属的虚拟私有云ID。\n\n5. EcmResStatus\n云服务器的冻结状态。\n\n- normal:云服务器正常状态(未被冻结)。\n- freeze:云服务器被冻结。\n\n> 当云服务器被冻结或者解冻后,系统默认添加该字段,且该字段必选。\n\n6. metering.image_id\n云服务器操作系统对应的镜像ID\n\n7.  metering.imagetype\n镜像类型,目前支持:\n\n- 公共镜像(gold)\n- 私有镜像(private)\n- 共享镜像(shared)\n\n8. metering.resourcespeccode\n云服务器对应的资源规格。\n\n9. image_name\n云服务器操作系统对应的镜像名称。\n\n10. os_bit\n操作系统位数,一般取值为“32”或者“64”。\n\n11. lockCheckEndpoint\n回调URL,用于检查弹性云服务器的加锁是否有效。\n\n- 如果有效,则云服务器保持锁定状态。\n- 如果无效,解除锁定状态,删除失效的锁。\n\n12. lockSource\n弹性云服务器来自哪个服务。订单加锁(ORDER)\n\n13. lockSourceId\n弹性云服务器的加锁来自哪个ID。lockSource为“ORDER”时,lockSourceId为订单ID。\n\n14. lockScene\n弹性云服务器的加锁类型。\n\n- 按需转包周期(TO_PERIOD_LOCK)\n\n15. virtual_env_type\n\n- IOS镜像创建虚拟机,\"virtual_env_type\": \"IsoImage\" 属性;\n- 非IOS镜像创建虚拟机,在19.5.0版本以后创建的虚拟机将不会添加virtual_env_type 属性,而在此之前的版本创建的虚拟机可能会返回\"virtual_env_type\": \"FusionCompute\"属性 。\n\n> virtual_env_type属性不允许用户增加、删除和修改。\n\n16. metering.resourcetype\n云服务器对应的资源类型。\n\n17. os_type\n操作系统类型,取值为:Linux、Windows。\n\n18. cascaded.instance_extrainfo\n系统内部虚拟机扩展信息。\n\n19. __support_agent_list\n云服务器是否支持企业主机安全、主机监控。\n\n- “hss”:企业主机安全\n-  “ces”:主机监控\n\n20. agency_name\n委托的名称。\n\n委托是由租户管理员在统一身份认证服务(Identity and Access Management,IAM)上创建的,可以为弹性云服务器提供访问云服务的临时凭证。",
+        "example": ""
+    },
+    {
+        "name": "OS-SRV-USG:launched_at",
+        "type": "string",
+        "desc": "弹性云服务器启动时间。时间格式例如:2019-05-22T03:23:59.000000",
+        "example": "2018-08-15T14:21:22.000000"
+    },
+    {
+        "name": "OS-SRV-USG:terminated_at",
+        "type": "string",
+        "desc": "弹性云服务器删除时间。\n\n时间格式例如:2019-05-22T03:23:59.000000",
+        "example": "2019-05-22T03:23:59.000000"
+    },
+    {
+        "name": "os-extended-volumes:volumes_attached",
+        "type": "array",
+        "desc": "挂载到弹性云服务器上的磁盘。",
+        "example": ""
+    },
+    {
+        "name": "description",
+        "type": "string",
+        "desc": "弹性云服务器的描述信息。",
+        "example": "ecs description"
+    },
+    {
+        "name": "host_status",
+        "type": "string",
+        "desc": "nova-compute状态。\n\n- UP:服务正常\n- UNKNOWN:状态未知\n- DOWN:服务异常\n- MAINTENANCE:维护状态\n- 空字符串:弹性云服务器无主机信息",
+        "example": "UP"
+    },
+    {
+        "name": "OS-EXT-SRV-ATTR:hostname",
+        "type": "string",
+        "desc": "弹性云服务器的主机名。",
+        "example": ""
+    },
+    {
+        "name": "OS-EXT-SRV-ATTR:reservation_id",
+        "type": "string",
+        "desc": "批量创建场景,弹性云服务器的预留ID。",
+        "example": "r-f06p3js8"
+    },
+    {
+        "name": "OS-EXT-SRV-ATTR:launch_index",
+        "type": "integer",
+        "desc": "批量创建场景,弹性云服务器的启动顺序。",
+        "example": 0
+    },
+    {
+        "name": "OS-EXT-SRV-ATTR:kernel_id",
+        "type": "string",
+        "desc": "若使用AMI格式的镜像,则表示kernel image的UUID;否则,留空。",
+        "example": ""
+    },
+    {
+        "name": "OS-EXT-SRV-ATTR:ramdisk_id",
+        "type": "string",
+        "desc": "若使用AMI格式镜像,则表示ramdisk image的UUID;否则,留空。",
+        "example": ""
+    },
+    {
+        "name": "OS-EXT-SRV-ATTR:root_device_name",
+        "type": "string",
+        "desc": "弹性云服务器系统盘的设备名称。",
+        "example": "/dev/vda"
+    },
+    {
+        "name": "OS-EXT-SRV-ATTR:user_data",
+        "type": "string",
+        "desc": "创建弹性云服务器时指定的user_data。",
+        "example": "IyEvYmluL2Jhc2gKZWNobyAncm9vdDokNiRjcGRkSjckWm5WZHNiR253Z0l0SGlxUjZxbWtLTlJaeU9lZUtKd3dPbG9XSFdUeGFzWjA1STYwdnJYRTdTUTZGbEpFbWlXZ21WNGNmZ1pac1laN1BkMTBLRndyeC8nIHwgY2hwYXNzd2Q6666"
+    },
+    {
+        "name": "locked",
+        "type": "boolean",
+        "desc": "弹性云服务器是否为锁定状态。\n\n- true:锁定\n- false:未锁定",
+        "example": false
+    },
+    {
+        "name": "tags",
+        "type": "array",
+        "desc": "弹性云服务器标签。",
+        "example": ""
+    },
+    {
+        "name": "os:scheduler_hints",
+        "type": "",
+        "desc": "弹性云服务器调度信息",
+        "example": ""
+    },
+    {
+        "name": "enterprise_project_id",
+        "type": "string",
+        "desc": "弹性云服务器所属的企业项目ID。",
+        "example": "0"
+    },
+    {
+        "name": "sys_tags",
+        "type": "array",
+        "desc": "弹性云服务器系统标签。",
+        "example": ""
+    },
+    {
+        "name": "cpu_options",
+        "type": "",
+        "desc": "自定义CPU选项。",
+        "example": ""
+    },
+    {
+        "name": "hypervisor",
+        "type": "",
+        "desc": "hypervisor信息。",
+        "example": ""
+    }
 ]

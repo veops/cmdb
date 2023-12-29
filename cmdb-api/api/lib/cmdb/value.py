@@ -94,8 +94,13 @@ class AttributeValueManager(object):
     @staticmethod
     def _check_is_choice(attr, value_type, value):
         choice_values = AttributeManager.get_choice_values(attr.id, value_type, attr.choice_web_hook, attr.choice_other)
-        if str(value) not in list(map(str, [i[0] for i in choice_values])):
-            return abort(400, ErrFormat.not_in_choice_values.format(value))
+        if value_type == ValueTypeEnum.FLOAT:
+            if float(value) not in list(map(float, [i[0] for i in choice_values])):
+                return abort(400, ErrFormat.not_in_choice_values.format(value))
+
+        else:
+            if str(value) not in list(map(str, [i[0] for i in choice_values])):
+                return abort(400, ErrFormat.not_in_choice_values.format(value))
 
     @staticmethod
     def _check_is_unique(value_table, attr, ci_id, type_id, value):
