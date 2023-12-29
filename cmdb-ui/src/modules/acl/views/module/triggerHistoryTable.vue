@@ -16,23 +16,23 @@
       resizable
       :height="`${windowHeight - 310}px`"
     >
-      <vxe-column field="created_at" width="144px" title="操作时间"></vxe-column>
-      <vxe-column field="operate_uid" width="130px" title="操作员"></vxe-column>
-      <vxe-column field="operate_type" width="80px" title="操作">
+      <vxe-column field="created_at" width="144px" :title="$t('acl.operateTime')"></vxe-column>
+      <vxe-column field="operate_uid" width="130px" :title="$t('acl.operator')"></vxe-column>
+      <vxe-column field="operate_type" width="100px" :title="$t('operation')">
         <template #default="{ row }">
           <a-tag :color="handleTagColor(row.operate_type)">
             {{ operateTypeMap.get(row.operate_type) }}
           </a-tag>
         </template>
       </vxe-column>
-      <vxe-column field="trigger_id" width="250px" title="触发器">
+      <vxe-column field="trigger_id" width="250px" :title="$t('acl.trigger')">
         <template #default="{ row }">
           <span>
             {{ row.current.name || row.origin.name }}
           </span>
         </template>
       </vxe-column>
-      <vxe-column title="描述">
+      <vxe-column :title="$t('desc')">
         <template #default="{ row }">
           <p>
             {{ row.changeDescription }}
@@ -95,13 +95,6 @@ export default {
       app_id: this.$route.name.split('_')[0],
       loading: true,
       tableData: [],
-      operateTypeMap: new Map([
-        ['create', '新建'],
-        ['update', '修改'],
-        ['delete', '删除'],
-        ['trigger_apply', '应用'],
-        ['trigger_cancel', '取消'],
-      ]),
       colorMap: new Map([
         ['create', 'green'],
         ['delete', 'red'],
@@ -109,41 +102,6 @@ export default {
         ['trigger_apply', 'green'],
         ['trigger_cancel', 'red'],
       ]),
-      triggerTableAttrList: [
-        {
-          alias: '日期',
-          is_choice: false,
-          name: 'datetime',
-          value_type: '3',
-        },
-        {
-          alias: '操作员',
-          is_choice: true,
-          name: 'operate_uid',
-          value_type: '2',
-          choice_value: this.allUsers,
-        },
-        {
-          alias: '操作',
-          is_choice: true,
-          name: 'operate_type',
-          value_type: '2',
-          choice_value: [
-            { 新建: 'create' },
-            { 修改: 'update' },
-            { 删除: 'delete' },
-            { 应用: 'trigger_apply' },
-            { 取消: 'trigger_cancel' },
-          ],
-        },
-        {
-          alias: '触发器',
-          is_choice: true,
-          name: 'trigger_id',
-          value_type: '2',
-          choice_value: this.allTriggers,
-        },
-      ],
       queryParams: {
         page: 1,
         page_size: 50,
@@ -164,11 +122,57 @@ export default {
     },
   },
   computed: {
+    operateTypeMap() {
+      return new Map([
+        ['create', this.$t('create')],
+        ['update', this.$t('update')],
+        ['delete', this.$t('delete')],
+        ['trigger_apply', this.$t('acl.apply')],
+        ['trigger_cancel', this.$t('cancel')],
+      ])
+    },
     windowHeight() {
       return this.$store.state.windowHeight
     },
     tableDataLength() {
       return this.tableData.length
+    },
+    triggerTableAttrList() {
+      return [
+        {
+          alias: this.$t('acl.date'),
+          is_choice: false,
+          name: 'datetime',
+          value_type: '3',
+        },
+        {
+          alias: this.$t('acl.operator'),
+          is_choice: true,
+          name: 'operate_uid',
+          value_type: '2',
+          choice_value: this.allUsers,
+        },
+        {
+          alias: this.$t('operation'),
+          is_choice: true,
+          name: 'operate_type',
+          value_type: '2',
+          choice_value: [
+            { [this.$t('create')]: 'create' },
+            { [this.$t('update')]: 'update' },
+            { [this.$t('delete')]: 'delete' },
+            { [this.$t('acl.apply')]: 'trigger_apply' },
+            { [this.$t('cancel')]: 'trigger_cancel' },
+          ],
+        },
+        {
+          alias: this.$t('acl.trigger'),
+          is_choice: true,
+          name: 'trigger_id',
+          value_type: '2',
+          choice_value: this.allTriggers,
+        },
+      ]
     },
   },
   methods: {
@@ -220,9 +224,9 @@ export default {
           const str = item.current.roles
           const newArr = str.slice(1, str.length - 1).split(', ')
           const newStr = newArr.map((i) => this.allRolesMap.get(Number(i))).join('，')
-          item.changeDescription = `新增触发器：${item.current.name}\n资源类型：${this.allResourceTypesMap.get(
+          item.changeDescription = `${this.$t('acl.addTrigger')}: ${item.current.name}\n${this.$t('acl.resourceType')}: ：${this.allResourceTypesMap.get(
             item.current.resource_type_id
-          )}，资源名：${item.current.wildcard}，角色：[${newStr}]\n权限：${item.current.permissions}\n状态：${
+          )}，this.$t('acl.resourceName')：${item.current.wildcard}，${this.$t('acl.role2')}: [${newStr}]\n${this.$t('acl.permission')}: ${item.current.permissions}\n${this.$t('status')}: ${
             item.current.enabled
           }`
           break
@@ -234,24 +238,24 @@ export default {
             const oldVal = item.origin[key]
             if (!_.isEqual(newVal, oldVal) && key !== 'updated_at' && key !== 'deleted_at' && key !== 'created_at') {
               if (oldVal === null) {
-                const str = ` 【 ${key} : 改为 ${newVal} 】 `
+                const str = ` 【 ${key} : -> ${newVal} 】 `
                 item.changeDescription += str
               } else {
-                const str = ` 【 ${key} : 由 ${oldVal} 改为 ${newVal} 】 `
-                item.changeDescription += str
+                const str = ` 【 ${key} : ${oldVal} -> ${newVal} 】 `
+                item.changeDescription += ` 【 ${key} : ${oldVal} -> ${newVal} 】 `
               }
             }
           }
-          if (!item.changeDescription) item.changeDescription = '没有修改'
+          if (!item.changeDescription) item.changeDescription = this.$t('acl.noChange')
           break
         }
         case 'delete': {
           const str = item.origin.roles
           const newArr = str.slice(1, str.length - 1).split(', ')
           const newStr = newArr.map((i) => this.allRolesMap.get(Number(i))).join('，')
-          item.changeDescription = `删除触发器：${item.origin.name}\n资源类型：${this.allResourceTypesMap.get(
+          item.changeDescription = `${this.$t('acl.deleteTrigger')}: ${item.origin.name}\n${this.$t('acl.resourceType')}: ：${this.allResourceTypesMap.get(
             item.origin.resource_type_id
-          )}，资源名：${item.origin.wildcard}，角色：[${newStr}]\n权限：${item.origin.permissions}\n状态：${
+          )}，this.$t('acl.resourceName')：${item.origin.wildcard}，${this.$t('acl.role2')}: [${newStr}]\n${this.$t('acl.permission')}: ${item.origin.permissions}\n${this.$t('status')}: ${
             item.origin.enabled
           }`
           break
@@ -260,9 +264,9 @@ export default {
           const str = item.current.roles
           const newArr = str.slice(1, str.length - 1).split(', ')
           const newStr = newArr.map((i) => this.allRolesMap.get(Number(i))).join('，')
-          item.changeDescription = `应用触发器：${item.current.name}\n资源类型：${this.allResourceTypesMap.get(
+          item.changeDescription = `${this.$t('acl.applyTrigger')}: ${item.current.name}\n${this.$t('acl.resourceType')}: ：${this.allResourceTypesMap.get(
             item.current.resource_type_id
-          )}，资源名：${item.current.wildcard}，角色：[${newStr}]\n权限：${item.current.permissions}\n状态：${
+          )}，this.$t('acl.resourceName')：${item.current.wildcard}，${this.$t('acl.role2')}: [${newStr}]\n${this.$t('acl.permission')}: ${item.current.permissions}\n${this.$t('status')}: ${
             item.current.enabled
           }`
           break
@@ -271,9 +275,9 @@ export default {
           const str = item.current.roles
           const newArr = str.slice(1, str.length - 1).split(', ')
           const newStr = newArr.map((i) => this.allRolesMap.get(Number(i))).join('，')
-          item.changeDescription = `取消触发器：${item.current.name}\n资源类型：${this.allResourceTypesMap.get(
+          item.changeDescription = `${this.$t('acl.cancelTrigger')}: ${item.current.name}\n${this.$t('acl.resourceType')}: ：${this.allResourceTypesMap.get(
             item.current.resource_type_id
-          )}，资源名：${item.current.wildcard}，角色：[${newStr}]\n权限：${item.current.permissions}\n状态：${
+          )}，this.$t('acl.resourceName')：${item.current.wildcard}，${this.$t('acl.role2')}: [${newStr}]\n${this.$t('acl.permission')}: ${item.current.permissions}\n${this.$t('status')}: ${
             item.current.enabled
           }`
           break

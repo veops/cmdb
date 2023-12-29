@@ -8,27 +8,27 @@
     width="30%"
   >
     <a-form :form="form" @submit="handleSubmit" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
-      <a-form-item label="资源名">
+      <a-form-item :label="$t('acl.resourceName')">
         <a-input
           name="name"
           placeholder=""
-          v-decorator="['name', { rules: [{ required: true, message: '请输入资源名' }] }]"
+          v-decorator="['name', { rules: [{ required: true, message: $t('acl.resourceNameInput') }] }]"
         />
       </a-form-item>
 
-      <a-form-item label="资源类型">
+      <a-form-item :label="$t('acl.resourceType')">
         <a-select v-model="selectedTypeId">
           <a-select-option v-for="type in allTypes" :key="type.id">{{ type.name }}</a-select-option>
         </a-select>
       </a-form-item>
 
-      <a-form-item label="是否组">
+      <a-form-item :label="$t('acl.isGroup')">
         <a-radio-group v-model="isGroup">
           <a-radio :value="true">
-            是
+            {{ $t('yes') }}
           </a-radio>
           <a-radio :value="false">
-            否
+            {{ $t('no') }}
           </a-radio>
         </a-radio-group>
       </a-form-item>
@@ -36,8 +36,8 @@
         <a-input name="id" type="hidden" v-decorator="['id', { rules: [] }]" />
       </a-form-item>
       <div class="custom-drawer-bottom-action">
-        <a-button @click="onClose">取消</a-button>
-        <a-button @click="handleSubmit" type="primary">确定</a-button>
+        <a-button @click="onClose">{{ $t('cancel') }}</a-button>
+        <a-button @click="handleSubmit" type="primary">{{ $t('confirm') }}</a-button>
       </div>
     </a-form>
   </CustomDrawer>
@@ -52,7 +52,6 @@ export default {
   name: 'ResourceForm',
   data() {
     return {
-      drawerTitle: '新增资源',
       drawerVisible: false,
       allTypes: [],
       isGroup: false,
@@ -68,7 +67,11 @@ export default {
     this.getAllResourceTypes()
   },
 
-  computed: {},
+  computed: {
+    drawerTitle() {
+      return this.$t('acl.addResource')
+    },
+  },
   mounted() {},
   methods: {
     getAllResourceTypes() {
@@ -95,7 +98,7 @@ export default {
           values.type_id = this.selectedTypeId
           values.app_id = this.$route.name.split('_')[0]
           if (values.id) {
-            this.$message.error('错误提示')
+            this.$message.error(this.$t('acl.errorTips'))
           } else {
             this.createResource(values)
           }
@@ -105,23 +108,17 @@ export default {
     createResource(data) {
       if (!this.isGroup) {
         addResource(data).then((res) => {
-          this.$message.success(`添加成功`)
+          this.$message.success(this.$t('addSuccess'))
           this.onClose()
         })
         // .catch(err => this.requestFailed(err))
       } else {
         addResourceGroup(data).then((res) => {
-          this.$message.success(`添加成功`)
+          this.$message.success(this.$t('addSuccess'))
           this.onClose()
         })
-        // .catch(err => this.requestFailed(err))
       }
     },
-
-    // requestFailed(err) {
-    //   const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
-    //   this.$message.error(`${msg}`)
-    // },
   },
   watch: {
     '$route.name': function(newValue, oldValue) {

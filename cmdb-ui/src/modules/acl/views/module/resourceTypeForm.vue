@@ -1,32 +1,32 @@
 <template>
   <CustomDrawer
     :closable="false"
-    :title="drawerTitle"
+    :title="$t('acl.addReourceType')"
     :visible="drawerVisible"
     @close="onClose"
     placement="right"
     width="500px"
   >
     <a-form :form="form" @submit="handleSubmit" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
-      <a-form-item label="类型名">
+      <a-form-item :label="$t('acl.typeName')">
         <a-input
           name="name"
-          placeholder="类型名称"
-          v-decorator="['name', { rules: [{ required: true, message: '请输入类型名' }] }]"
+          :placeholder="$t('acl.typeName')"
+          v-decorator="['name', { rules: [{ required: true, message: $t('acl.typeNameInput') }] }]"
         />
       </a-form-item>
 
-      <a-form-item label="描述">
+      <a-form-item :label="$t('desc')">
         <a-textarea
-          placeholder="请输入描述信息..."
+          :placeholder="$t('acl.descInput')"
           name="description"
           :rows="4"
           v-decorator="['description', { rules: [] }]"
         />
       </a-form-item>
 
-      <a-form-item label="权限">
-        <a-select mode="tags" v-model="perms" style="width: 100%" placeholder="请输入权限名..."> </a-select>
+      <a-form-item :label="$t('acl.permission')">
+        <a-select mode="tags" v-model="perms" style="width: 100%" :placeholder="$t('acl.permInput')"> </a-select>
       </a-form-item>
 
       <a-form-item>
@@ -34,8 +34,8 @@
       </a-form-item>
 
       <div class="custom-drawer-bottom-action">
-        <a-button @click="onClose">取消</a-button>
-        <a-button @click="handleSubmit" type="primary">确定</a-button>
+        <a-button @click="onClose">{{ $t('cancel') }}</a-button>
+        <a-button @click="handleSubmit" type="primary">{{ $t('confirm') }}</a-button>
       </div>
     </a-form>
   </CustomDrawer>
@@ -48,7 +48,6 @@ export default {
   name: 'ResourceForm',
   data() {
     return {
-      drawerTitle: '新增资源类型',
       drawerVisible: false,
       perms: [],
     }
@@ -104,7 +103,7 @@ export default {
     },
     updateResourceType(id, data) {
       updateResourceTypeById(id, data).then((res) => {
-        this.$message.success(`更新成功`)
+        this.$message.success(this.$t('updateSuccess'))
         this.handleOk()
         this.onClose()
       })
@@ -113,17 +112,11 @@ export default {
 
     createResourceType(data) {
       addResourceType(data).then((res) => {
-        this.$message.success(`添加成功`)
+        this.$message.success(this.$t('addSuccess'))
         this.handleOk()
         this.onClose()
       })
-      // .catch(err => this.requestFailed(err))
     },
-
-    // requestFailed (err) {
-    //   const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
-    //   this.$message.error(`${msg}`)
-    // }
   },
   watch: {},
   props: {

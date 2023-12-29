@@ -15,9 +15,9 @@
       </a-form-model-item>
       <a-form-model-item label=" " :colon="false">
         <a-space>
-          <a-button type="primary" @click="changeVisible">{{ !visible ? '查看' : '隐藏' }}</a-button>
-          <a-button type="danger" ghost @click="handleSumbit">重置</a-button>
-          <!-- <a-button @click="handleCancel">取消</a-button> -->
+          <a-button type="primary" @click="changeVisible">{{ !visible ? $t('view') : $t('hide') }}</a-button>
+          <a-button type="danger" ghost @click="handleSumbit">{{ $t('reset') }}</a-button>
+          <!-- <a-button @click="handleCancel">{{ $t('cancel') }}</a-button> -->
         </a-space>
       </a-form-model-item>
     </a-form-model>
@@ -62,13 +62,13 @@ export default {
     handleSumbit() {
       const that = this
       this.$confirm({
-        title: '重置',
-        content: '确定重置用户密钥？',
+        title: that.$t('reset'),
+        content: that.$t('acl.confirmResetSecret'),
         onOk() {
           that.$refs.secretKeyForm.validate((valid) => {
             if (valid) {
               updateSecret().then((res) => {
-                that.$message.success('重置成功')
+                that.$message.success(that.$t('operateSuccess'))
                 const { key, secret } = res
                 that.form = { key, secret }
               })

@@ -6,10 +6,10 @@
       </a-tabs>
       <div class="acl-resources-header">
         <a-space>
-          <a-button @click="handleCreate" type="primary">{{ btnName }}</a-button>
+          <a-button @click="handleCreate" type="primary">{{ $t('acl.addResource') }}</a-button>
           <a-input-search
             class="ops-input"
-            placeholder="搜索 | 资源名"
+            :placeholder="`${$t('search')} | ${$t('acl.resource')}`"
             v-model="searchName"
             @search="
               () => {
@@ -20,10 +20,10 @@
           ></a-input-search>
 
           <div v-if="!!selectedRows.length" class="ops-list-batch-action">
-            <span @click="handleBatchPerm">授权</span>
+            <span @click="handleBatchPerm">{{ $t('grant') }}</span>
             <a-divider type="vertical" />
-            <span @click="handleBatchRevoke">权限回收</span>
-            <span>选取: {{ selectedRows.length }} 项</span>
+            <span @click="handleBatchRevoke">{{ $t('acl.revoke') }}</span>
+            <span>{{ $t('selectRows', { rows: selectedRows.length }) }}</span>
           </div>
         </a-space>
 
@@ -36,7 +36,7 @@
                 $refs.resourceBatchPerm.open(currentType.id)
               }
             "
-          >便捷授权</a-button
+          >{{ $t('acl.convenient') }}</a-button
           >
           <a-switch
             v-model="isGroup"
@@ -50,7 +50,7 @@
                 $refs.xTable && $refs.xTable.getVxetableRef().clearCheckboxReserve()
               }
             "
-            un-checked-children="组"
+            :un-checked-children="$t('acl.group2')"
           ></a-switch>
         </a-space>
       </div>
@@ -62,62 +62,63 @@
           :data="tableData"
           highlight-hover-row
           :height="`${windowHeight - 250}px`"
-          :checkbox-config="{ reserve: true }"
+          :checkbox-config="{ reserve: true, highlight: true, range: true }"
           @checkbox-change="changeCheckbox"
           @checkbox-all="changeCheckbox"
+          @checkbox-range-end="onSelectRangeEnd"
           ref="xTable"
           row-id="id"
           show-overflow
           resizable
         >
           <!-- 1 -->
-          <vxe-table-column type="checkbox" fixed="left" :width="45"></vxe-table-column>
+          <vxe-table-column type="checkbox" fixed="left" :width="60"></vxe-table-column>
 
           <!-- 2 -->
 
-          <vxe-table-column field="name" title="资源名" :min-widh="150" fixed="left" show-overflow>
-            <template #title="{ row }">
-              {{ row.isGroup ? '资源组名' : '资源名' }}
+          <vxe-table-column field="name" :title="$t('acl.resourceName')" :min-widh="150" fixed="left" show-overflow>
+            <template #title="{row}">
+              {{ row.isGroup ? $t('acl.groupName') : $t('acl.resourceName') }}
             </template>
           </vxe-table-column>
 
           <!-- 3 -->
-          <vxe-table-column field="user" title="创建者" :min-widh="100"> </vxe-table-column>
+          <vxe-table-column field="user" :title="$t('acl.creator')" :min-widh="100"> </vxe-table-column>
 
           <!-- 4 -->
-          <vxe-table-column field="created_at" title="创建时间" :min-widh="220" align="center"> </vxe-table-column>
+          <vxe-table-column field="created_at" :title="$t('created_at')" :min-widh="220" align="center"> </vxe-table-column>
 
           <!-- 5 -->
-          <vxe-table-column field="updated_at" title="最后修改时间" :min-widh="220" fixed="center"> </vxe-table-column>
+          <vxe-table-column field="updated_at" :title="$t('updated_at')" :min-widh="220" fixed="center"> </vxe-table-column>
 
           <!-- 6 -->
 
           <vxe-table-column
             field="action"
-            title="操作"
+            :title="$t('operation')"
             :min-widh="200"
             fixed="right"
             align="center"
             show-overflow>
-            <template #default="{ row }">
+            <template #default="{row}">
               <span v-show="isGroup">
-                <a @click="handleDisplayMember(row)">成员</a>
+                <a @click="handleDisplayMember(row)">{{ $t('acl.member') }}</a>
                 <a-divider type="vertical" />
-                <a @click="handleGroupEdit(row)">编辑</a>
+                <a @click="handleGroupEdit(row)">{{ $t('edit') }}</a>
                 <a-divider type="vertical" />
               </span>
-              <a-tooltip title="查看授权">
-                <a @click="handlePerm(row)"><a-icon type="eye" /></a>
+              <a-tooltip :title="$t('acl.viewAuth')">
+                <a @click="handlePerm(row)"><a-icon type="eye"/></a>
               </a-tooltip>
               <a-divider type="vertical" />
-              <a-tooltip title="授权">
+              <a-tooltip :title="$t('grant')">
                 <a :style="{ color: '#4bbb13' }" @click="handlePermManage(row)">
                   <a-icon type="usergroup-add" />
                 </a>
               </a-tooltip>
               <a-divider type="vertical" />
-              <a-popconfirm title="确认删除?" @confirm="handleDelete(row)" @cancel="cancel" okText="是" cancelText="否">
-                <a style="color: red"><a-icon type="delete" /></a>
+              <a-popconfirm :title="$t('confirmDelete')" @confirm="handleDelete(row)" @cancel="cancel" :okText="$t('yes')" :cancelText="$t('no')">
+                <a style="color: red"><a-icon type="delete"/></a>
               </a-popconfirm>
             </template>
           </vxe-table-column>
@@ -135,9 +136,9 @@
         </vxe-pager>
       </a-spin>
     </div>
-    <div v-else style="text-align: center; margin-top: 20%">
-      <a-icon style="font-size: 50px; margin-bottom: 20px; color: orange" type="info-circle" />
-      <h3>暂无类型信息，请先添加资源类型！</h3>
+    <div v-else style="text-align: center;margin-top:20%">
+      <a-icon style="font-size:50px; margin-bottom: 20px; color: orange" type="info-circle" />
+      <h3>{{ $t('acl.addTypeTips') }}</h3>
     </div>
     <resourceForm ref="resourceForm" @fresh="handleOk"> </resourceForm>
     <resourcePermForm ref="resourcePermForm"> </resourcePermForm>
@@ -187,7 +188,6 @@ export default {
         pageSize: 50,
       },
       tableData: [],
-      btnName: '新增资源',
       isGroup: false,
       allResourceTypes: [],
       currentType: { id: 0 },
@@ -196,7 +196,6 @@ export default {
       selectedRows: [],
     }
   },
-
   beforeCreate() {
     this.form = this.$form.createForm(this)
   },
@@ -281,22 +280,16 @@ export default {
     deleteResource(id) {
       if (!this.isGroup) {
         deleteResourceById(id, { app_id: this.$route.name.split('_')[0] }).then((res) => {
-          this.$message.success(`删除成功`)
+          this.$message.success(this.$t('deleteSuccess'))
           this.handleOk()
         })
-        // .catch(err => this.requestFailed(err))
       } else {
         deleteResourceGroup(id).then((res) => {
-          this.$message.success(`删除成功`)
+          this.$message.success(this.$t('deleteSuccess'))
           this.handleOk()
         })
-        // .catch(err => this.requestFailed(err))
       }
     },
-    // requestFailed(err) {
-    //   const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
-    //   this.$message.error(`${msg}`)
-    // },
     cancel() {},
     handlePageChange({ currentPage, pageSize }) {
       this.tablePage.currentPage = currentPage
@@ -309,6 +302,10 @@ export default {
         .getVxetableRef()
         .getCheckboxRecords()
         .concat(this.$refs.xTable.getVxetableRef().getCheckboxReserveRecords())
+        console.log(this.selectedRows)
+    },
+    onSelectRangeEnd({ records }) {
+      this.selectedRows = records
     },
     handleBatchPerm() {
       this.$refs['resourcePermManageForm'].editPerm(this.selectedRows, this.isGroup)
@@ -322,7 +319,7 @@ export default {
     },
   },
   watch: {
-    '$route.name': function (newName, oldName) {
+    '$route.name': function(newName, oldName) {
       this.isGroup = false
       this.tablePage = {
         total: 0,

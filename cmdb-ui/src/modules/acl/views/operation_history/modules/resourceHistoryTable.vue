@@ -4,7 +4,7 @@
       ref="child"
       :attrList="resourceTableAttrList"
       :hasSwitch="true"
-      switchValue="组"
+      :switchValue="$t('acl.group2')"
       @onSwitchChange="onSwitchChange"
       @expandChange="handleExpandChange"
       @search="handleSearch"
@@ -24,30 +24,30 @@
       :data="tableData"
       :height="`${windowHeight - windowHeightMinus}px`"
     >
-      <vxe-column field="created_at" width="144px" title="操作时间"></vxe-column>
-      <vxe-column field="operate_uid" width="130px" title="操作员"></vxe-column>
-      <vxe-column field="operate_type" width="80px" title="操作">
+      <vxe-column field="created_at" width="144px" :title="$t('acl.operateTime')"></vxe-column>
+      <vxe-column field="operate_uid" width="130px" :title="$t('acl.operator')"></vxe-column>
+      <vxe-column field="operate_type" width="100px" :title="$t('operation')">
         <template #default="{ row }">
           <a-tag :color="handleTagColor(row.operate_type)">
             {{ operateTypeMap.get(row.operate_type) }}
           </a-tag>
         </template>
       </vxe-column>
-      <vxe-column field="link_id" title="资源名">
+      <vxe-column field="link_id" :title="$t('acl.resouceName')">
         <template #default="{ row }">
           <span>
             {{ row.current.name || row.origin.name }}
           </span>
         </template>
       </vxe-column>
-      <vxe-column title="描述">
+      <vxe-column :title="$t('desc')">
         <template #default="{ row }">
           <p>
             {{ row.description }}
           </p>
         </template>
       </vxe-column>
-      <vxe-column field="source" width="100px" title="来源"></vxe-column>
+      <vxe-column field="source" width="100px" :title="$t('acl.source')"></vxe-column>
     </vxe-table>
     <pager
       :current-page.sync="queryParams.page"
@@ -87,47 +87,6 @@ export default {
       allApps: [],
       allUsersMap: new Map(),
       allResourcesMap: new Map(),
-      resourceTableAttrList: [
-        {
-          alias: '日期',
-          is_choice: false,
-          name: 'datetime',
-          value_type: '3',
-        },
-        {
-          alias: '应用',
-          is_choice: true,
-          name: 'app_id',
-          value_type: '2',
-          choice_value: [],
-        },
-        {
-          alias: '操作员',
-          is_choice: true,
-          name: 'operate_uid',
-          value_type: '2',
-          choice_value: [],
-        },
-        {
-          alias: '资源名',
-          is_choice: true,
-          name: 'link_id',
-          value_type: '2',
-          choice_value: [],
-        },
-        {
-          alias: '操作',
-          is_choice: true,
-          name: 'operate_type',
-          value_type: '2',
-          choice_value: [{ 新建: 'create' }, { 修改: 'update' }, { 删除: 'delete' }],
-        },
-      ],
-      operateTypeMap: new Map([
-        ['create', '新建'],
-        ['update', '修改'],
-        ['delete', '删除'],
-      ]),
       colorMap: new Map([
         ['create', 'green'],
         ['update', 'orange'],
@@ -144,10 +103,10 @@ export default {
   },
   async created() {
     this.$watch(
-      function() {
+      function () {
         return this.resourceTableAttrList[3].choice_value
       },
-      function() {
+      function () {
         delete this.$refs.child.queryParams.link_id
       }
     )
@@ -158,6 +117,13 @@ export default {
     this.$refs.xTable.$el.querySelector('.vxe-table--body-wrapper').scrollTop = 0
   },
   computed: {
+    operateTypeMap() {
+      return new Map([
+        ['create', this.$t('create')],
+        ['update', this.$t('update')],
+        ['delete', this.$t('delete')],
+      ])
+    },
     windowHeight() {
       return this.$store.state.windowHeight
     },
@@ -166,6 +132,44 @@ export default {
     },
     tableDataLength() {
       return this.tableData.length
+    },
+    resourceTableAttrList() {
+      return [
+        {
+          alias: this.$t('acl.date'),
+          is_choice: false,
+          name: 'datetime',
+          value_type: '3',
+        },
+        {
+          alias: this.$t('acl.app'),
+          is_choice: true,
+          name: 'app_id',
+          value_type: '2',
+          choice_value: [],
+        },
+        {
+          alias: this.$t('acl.operator'),
+          is_choice: true,
+          name: 'operate_uid',
+          value_type: '2',
+          choice_value: [],
+        },
+        {
+          alias: this.$t('acl.resourceName'),
+          is_choice: true,
+          name: 'link_id',
+          value_type: '2',
+          choice_value: [],
+        },
+        {
+          alias: this.$t('operation'),
+          is_choice: true,
+          name: 'operate_type',
+          value_type: '2',
+          choice_value: [{ [this.$t('create')]: 'create' }, { [this.$t('update')]: 'update' }, { [this.$t('delete')]: 'delete' }],
+        },
+      ]
     },
   },
   methods: {
@@ -347,7 +351,7 @@ export default {
       switch (operate_type) {
         // create
         case 'create': {
-          item.description = `新建资源：${item.current.name}`
+          item.description = `${this.$t('acl.newResource')}${item.current.name}`
           break
         }
         case 'update': {
@@ -357,10 +361,10 @@ export default {
             const oldVal = item.origin[key]
             if (!_.isEqual(newVal, oldVal) && key !== 'updated_at' && key !== 'deleted_at' && key !== 'created_at') {
               if (oldVal === null) {
-                const str = ` 【 ${key} : 改为 ${newVal} 】 `
+                const str = ` 【 ${key} : -> ${newVal} 】 `
                 item.description += str
               } else {
-                const str = ` 【 ${key} : 由 ${oldVal} 改为 ${newVal} 】 `
+                const str = ` 【 ${key} : ${oldVal} -> ${newVal} 】 `
                 item.description += str
               }
             }
@@ -369,18 +373,18 @@ export default {
           const currentResource_ids = item.currentResource_ids
           if (!_.isEqual(originResource_ids, currentResource_ids)) {
             if (originResource_ids.length === 0) {
-              const str = ` 【 resource_ids : 新增 ${currentResource_ids} 】 `
+              const str = ` 【 resource_ids : ${this.$t('new')} ${currentResource_ids} 】 `
               item.description += str
             } else {
-              const str = ` 【 resource_ids : 由 ${originResource_ids} 改为 ${currentResource_ids} 】 `
+              const str = ` 【 resource_ids : ${originResource_ids} -> ${currentResource_ids} 】 `
               item.description += str
             }
           }
-          if (!item.description) item.description = '没有修改'
+          if (!item.description) item.description = this.$t('acl.noChange')
           break
         }
         case 'delete': {
-          item.description = `删除资源：${item.origin.name}`
+          item.description = `${this.$t('acl.deleteResource')}${item.origin.name}`
           break
         }
       }

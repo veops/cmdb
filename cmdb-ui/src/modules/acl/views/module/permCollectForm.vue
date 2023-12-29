@@ -1,6 +1,6 @@
 <template>
   <CustomDrawer
-    :title="`权限汇总: ${user.nickname}`"
+    :title="`${$t('acl.summaryPermissions')}: ${user.nickname}`"
     :visible="visible"
     placement="left"
     width="100%"
@@ -24,7 +24,7 @@
               <vxe-table :max-height="`${windowHeight - 230}px`" :data="resources" ref="rTable">
                 <vxe-column
                   field="name"
-                  title="资源名"
+                  :title="$t('acl.resourceName')"
                   width="30%"
                   :filters="[{ data: '' }]"
                   :filter-method="filterNameMethod"
@@ -39,62 +39,17 @@
                         v-model="option.data"
                         @input="$panel.changeOption($event, !!option.data, option)"
                         @keyup.enter="$panel.confirmFilter()"
-                        placeholder="按回车确认筛选"
+                        :placeholder="$t('acl.pressEnter')"
                       />
                     </template>
                   </template>
                 </vxe-column>
-                <vxe-column field="permissions" title="权限列表" width="70%">
+                <vxe-column field="permissions" :title="$t('acl.permissionList')" width="70%">
                   <template #default="{row}">
                     <a-tag color="cyan" v-for="(r, index) in row.permissions" :key="index">{{ r }}</a-tag>
                   </template>
                 </vxe-column>
               </vxe-table>
-              <!-- <a-table
-                :columns="tableColumns"
-                :dataSource="resources"
-                :rowKey="record=>record.id"
-                :pagination="{ showTotal: (total, range) => `${range[0]}-${range[1]} 共 ${total} 条记录` }"
-                showPagination="auto"
-                ref="rTable"
-                size="middle">
-                <div slot="filterDropdown" slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }" class="custom-filter-dropdown">
-                  <a-input
-                    v-ant-ref="c => searchInput = c"
-                    :placeholder="` ${column.title}`"
-                    :value="selectedKeys[0]"
-                    @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
-                    @pressEnter="() => handleSearch(selectedKeys, confirm, column)"
-                    style="width: 188px; margin-bottom: 8px; display: block;"
-                  />
-                  <a-button
-                    type="primary"
-                    @click="() => handleSearch(selectedKeys, confirm, column)"
-                    icon="search"
-                    size="small"
-                    style="width: 90px; margin-right: 8px"
-                  >搜索</a-button>
-                  <a-button
-                    @click="() => handleReset(clearFilters, column)"
-                    size="small"
-                    style="width: 90px"
-                  >重置</a-button>
-                </div>
-                <a-icon slot="filterIcon" slot-scope="filtered" type="search" :style="{ color: filtered ? '#108ee9' : undefined }" />
-
-                <template slot="nameSearchRender" slot-scope="text">
-                  <span v-if="columnSearchText.name">
-                    <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${columnSearchText.name})|(?=${columnSearchText.name})`, 'i'))">
-                      <mark v-if="fragment.toLowerCase() === columnSearchText.name.toLowerCase()" :key="i" class="highlight">{{ fragment }}</mark>
-                      <template v-else>{{ fragment }}</template>
-                    </template>
-                  </span>
-                  <template v-else>{{ text }}</template>
-                </template>
-                <template slot="permissions" slot-scope="record">
-                  <a-tag color="cyan" v-for="(r, index) in record" :key="index">{{ r }}</a-tag>
-                </template>
-              </a-table> -->
             </a-spin>
           </a-tab-pane>
         </a-tabs>
@@ -122,33 +77,6 @@ export default {
       resourceTypes: [],
       resourceTypePerms: [],
       resources: [],
-      // tableColumns: [
-      //   {
-      //     title: '资源名',
-      //     dataIndex: 'name',
-      //     sorter: false,
-      //     width: 150,
-      //     // scopedSlots: {
-      //     //   customRender: 'nameSearchRender',
-      //     //   filterDropdown: 'filterDropdown',
-      //     //   filterIcon: 'filterIcon'
-      //     // },
-      //     // onFilter: (value, record) => record.name && record.name.toLowerCase().includes(value.toLowerCase()),
-      //     // onFilterDropdownVisibleChange: (visible) => {
-      //     //   if (visible) {
-      //     //     setTimeout(() => {
-      //     //       this.searchInput.focus()
-      //     //     }, 0)
-      //     //   }
-      //     // }
-      //   },
-      //   {
-      //     title: '权限列表',
-      //     dataIndex: 'permissions',
-      //     width: 300,
-      //     scopedSlots: { customRender: 'permissions' },
-      //   },
-      // ],
       columnSearchText: {
         name: '',
       },
@@ -156,14 +84,14 @@ export default {
   },
   computed: {
     ...mapState({
-      windowHeight: state => state.windowHeight,
+      windowHeight: (state) => state.windowHeight,
     }),
     displayApps() {
       const roles = this.$store.state.user.roles.permissions
       if (roles.includes('acl_admin')) {
         return this.apps
       }
-      return this.apps.filter(item => {
+      return this.apps.filter((item) => {
         if (roles.includes(`${item.name}_admin`)) {
           return true
         }
@@ -192,7 +120,7 @@ export default {
     },
     async loadRoles(_appId) {
       const res = await searchRole({ app_id: _appId, page_size: 9999, is_all: true })
-      this.roles = res.roles.filter(item => item.uid)
+      this.roles = res.roles.filter((item) => item.uid)
     },
     async handleSwitchApp(appId) {
       this.currentAppId = appId
@@ -218,7 +146,7 @@ export default {
     },
     async loadResource() {
       this.spinning = true
-      const fil = this.roles.filter(role => role.uid === this.user.uid)
+      const fil = this.roles.filter((role) => role.uid === this.user.uid)
       if (!fil[0]) {
         return
       }

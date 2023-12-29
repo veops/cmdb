@@ -3,42 +3,42 @@
     <a-form :form="form">
       <a-form-item>
         <div slot="label" style="display: inline-block">
-          <span>角色列表</span>
+          <span>{{ $t('acl.roleList') }}</span>
           <a-divider type="vertical" />
           <a-switch
             style="display: inline-block"
-            checked-children="用户"
-            un-checked-children="虚拟"
+            :checked-children="$t('user')"
+            :un-checked-children="$t('acl.virtual')"
             @change="handleRoleTypeChange"
           />
         </div>
         <el-select
           :style="{ width: '100%' }"
           size="small"
-          v-decorator="['roleIdList', { rules: [{ required: true, message: '请选择角色名称' }] }]"
+          v-decorator="['roleIdList', { rules: [{ required: true, message: $t('acl.role_placeholder2') }] }]"
           multiple
           filterable
-          placeholder="请选择角色名称，可多选！"
+          :placeholder="$t('acl.role_placeholder3')"
         >
           <el-option v-for="role in allRoles" :key="role.id" :value="role.id" :label="role.name"></el-option>
         </el-select>
       </a-form-item>
 
-      <a-form-item label="权限列表">
+      <a-form-item :label="$t('acl.permissionList')">
         <el-select
           :style="{ width: '100%' }"
           size="small"
           name="permName"
-          v-decorator="['permName', { rules: [{ required: true, message: '请选择权限' }] }]"
+          v-decorator="['permName', { rules: [{ required: true, message: $t('acl.permission_placeholder') }] }]"
           multiple
-          placeholder="请选择权限，可多选！"
+          :placeholder="$t('acl.permission_placeholder') "
         >
           <el-option v-for="perm in allPerms" :key="perm.name" :value="perm.name" :label="perm.name"></el-option>
         </el-select>
       </a-form-item>
       <div class="custom-drawer-bottom-action">
-        <a-button @click="closeForm">取消</a-button>
-        <a-button @click="handleSubmit" type="primary" :loading="loading">确定</a-button>
+        <a-button @click="closeForm">{{ $t('cancel') }}</a-button>
+        <a-button @click="handleSubmit" type="primary" :loading="loading">{{ $t('confirm') }}</a-button>
       </div>
     </a-form>
   </CustomDrawer>
@@ -117,16 +117,12 @@ export default {
       this.type = type
       if (Array.isArray(record)) {
         this.loadPerm(record[0]['resource_type_id'])
-        this.title = `${type === 'grant' ? '批量授权' : '批量权限回收'}`
+        this.title = `${type === 'grant' ? this.$t('acl.batchGrant') : this.$t('acl.batchRevoke')}`
       } else {
-        this.title = `添加授权：${record.name}`
+        this.title = `${this.$t('acl.editPerm')}${record.name}`
         this.loadPerm(record['resource_type_id'])
       }
     },
-    // requestFailed(err) {
-    //   const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
-    //   this.$message.error(`${msg}`)
-    // },
     handleSubmit(e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
@@ -136,16 +132,10 @@ export default {
             this.loading = true
             if (!this.isGroup) {
               if (Array.isArray(this.instance)) {
-                // const promises = this.instance.map(item => {
-                //   return setRoleResourcePerm(roleId, item.id, params)
-                // })
-                // Promise.all(promises).then(() => {
-                //   this.$message.success('添加授权成功')
-                // })
                 if (this.type === 'grant') {
                   setBatchRoleResourcePerm(roleId, { ...params, resource_ids: this.instance.map((a) => a.id) })
                     .then((res) => {
-                      this.$message.success('添加授权成功')
+                      this.$message.success(this.$t('operateSuccess'))
                     })
                     .finally(() => {
                       this.loading = false
@@ -153,7 +143,7 @@ export default {
                 } else {
                   setBatchRoleResourceRevoke(roleId, { ...params, resource_ids: this.instance.map((a) => a.id) })
                     .then((res) => {
-                      this.$message.success('批量权限回收成功')
+                      this.$message.success(this.$t('operateSuccess'))
                     })
                     .finally(() => {
                       this.loading = false
@@ -162,7 +152,7 @@ export default {
               } else {
                 setRoleResourcePerm(roleId, this.instance.id, params)
                   .then((res) => {
-                    this.$message.success('添加授权成功')
+                    this.$message.success(this.$t('operateSuccess'))
                   })
                   .finally(() => {
                     this.loading = false
@@ -170,16 +160,10 @@ export default {
               }
             } else {
               if (Array.isArray(this.instance)) {
-                // const promises = this.instance.map(item => {
-                //   return setRoleResourceGroupPerm(roleId, item.id, params)
-                // })
-                // Promise.all(promises).then(() => {
-                //   this.$message.success('添加授权成功')
-                // })
                 if (this.type === 'grant') {
                   setBatchRoleResourceGroupPerm(roleId, { ...params, group_ids: this.instance.map((a) => a.id) })
                     .then((res) => {
-                      this.$message.success('添加授权成功')
+                      this.$message.success(this.$t('operateSuccess'))
                     })
                     .finally(() => {
                       this.loading = false
@@ -190,7 +174,7 @@ export default {
                     group_ids: this.instance.map((a) => a.id),
                   })
                     .then((res) => {
-                      this.$message.success('批量权限回收成功')
+                      this.$message.success(this.$t('operateSuccess'))
                     })
                     .finally(() => {
                       this.loading = false
@@ -199,7 +183,7 @@ export default {
               } else {
                 setRoleResourceGroupPerm(roleId, this.instance.id, params)
                   .then((res) => {
-                    this.$message.success('添加授权成功')
+                    this.$message.success(this.$t('operateSuccess'))
                   })
                   .finally(() => {
                     this.loading = false
