@@ -3,6 +3,13 @@ import cs_en from '../views/setting/lang/en.js'
 import acl_en from '@/modules/acl/lang/en.js'
 
 export default {
+    commonMenu: {
+        permission: 'Permission',
+        role: 'Roles',
+        resource: 'Resources',
+        resourceType: 'Resource Types',
+        trigger: 'Triggers',
+    },
     screen: 'Big Screen',
     dashboard: 'Dashboard',
     admin: 'Admin',
