@@ -3,12 +3,12 @@
     :disable-branch-nodes="multiple ? false : true"
     :multiple="multiple"
     :options="employeeTreeSelectOption"
-    placeholder="请选择员工"
+    :placeholder="readOnly ? '' : placeholder || $t('cs.components.selectEmployee')"
     v-model="treeValue"
     :max-height="200"
-    noChildrenText="空"
-    noOptionsText="空"
-    :class="className ? className: 'ops-setting-treeselect'"
+    :noChildrenText="$t('cs.components.empty')"
+    :noOptionsText="$t('cs.components.empty')"
+    :class="className ? className : 'ops-setting-treeselect'"
     value-consists-of="LEAF_PRIORITY"
     :limit="20"
     :limitText="(count) => `+ ${count}`"
@@ -42,13 +42,37 @@ export default {
     },
     className: {
       type: String,
-      default: 'ops-setting-treeselect'
-    }
+      default: 'ops-setting-treeselect',
+    },
+    placeholder: {
+      type: String,
+      default: '',
+    },
+    idType: {
+      type: Number,
+      default: 1,
+    },
+    departmentKey: {
+      type: String,
+      default: 'department_id',
+    },
+    employeeKey: {
+      type: String,
+      default: 'employee_id',
+    },
   },
   data() {
     return {}
   },
-  inject: ['provide_allTreeDepAndEmp'],
+  inject: {
+    provide_allTreeDepAndEmp: {
+      from: 'provide_allTreeDepAndEmp',
+    },
+    readOnly: {
+      from: 'readOnly',
+      default: false,
+    },
+  },
   computed: {
     treeValue: {
       get() {
@@ -63,12 +87,11 @@ export default {
       return this.provide_allTreeDepAndEmp()
     },
     employeeTreeSelectOption() {
-      return formatOption(this.allTreeDepAndEmp)
+      return formatOption(this.allTreeDepAndEmp, this.idType, false, this.departmentKey, this.employeeKey)
     },
   },
   methods: {},
 }
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

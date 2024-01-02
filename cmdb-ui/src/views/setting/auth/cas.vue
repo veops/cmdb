@@ -1,7 +1,7 @@
 <template>
   <a-form-model ref="form" :model="form" :label-col="labelCol" :wrapper-col="wrapperCol" :rules="rules">
-    <SpanTitle>基本</SpanTitle>
-    <a-form-model-item label="是否启用" prop="enable">
+    <SpanTitle>{{ $t('cs.auth.basic') }}</SpanTitle>
+    <a-form-model-item :label="$t('cs.auth.isEnable')" prop="enable">
       <a-switch
         :checked="Boolean(form.enable)"
         @change="
@@ -11,26 +11,26 @@
         "
       />
     </a-form-model-item>
-    <a-form-model-item label="服务端地址" prop="cas_server" help="不包括url path，例如https://xxx.com">
-      <a-input v-model="form.cas_server" placeholder="请输入服务端地址" />
+    <a-form-model-item :label="$t('cs.auth.cas.server')" prop="cas_server" :help="$t('cs.auth.cas.serverHelp')">
+      <a-input v-model="form.cas_server" :placeholder="$t('cs.auth.cas.serverPlaceholder')" />
     </a-form-model-item>
-    <a-form-model-item label="验证服务端地址" prop="cas_validate_server" help="不包括url path，例如https://xxx.com">
-      <a-input v-model="form.cas_validate_server" placeholder="请输入验证服务端地址" />
+    <a-form-model-item :label="$t('cs.auth.cas.validateServer')" prop="cas_validate_server" :help="$t('cs.auth.cas.validateServerHelp')">
+      <a-input v-model="form.cas_validate_server" :placeholder="$t('cs.auth.cas.validateServerPlaceholder')" />
     </a-form-model-item>
-    <SpanTitle>其他</SpanTitle>
-    <a-form-model-item label="登录路由" prop="cas_login_route">
+    <SpanTitle>{{ $t('cs.auth.other') }}</SpanTitle>
+    <a-form-model-item :label="$t('cs.auth.cas.loginRoute')" prop="cas_login_route">
       <a-input v-model="form.cas_login_route" placeholder="/cas/built-in/cas/login" />
     </a-form-model-item>
-    <a-form-model-item label="注销路由" prop="cas_logout_route">
+    <a-form-model-item :label="$t('cs.auth.cas.logoutRoute')" prop="cas_logout_route">
       <a-input v-model="form.cas_logout_route" placeholder="/cas/built-in/cas/logout" />
     </a-form-model-item>
-    <a-form-model-item label="验证路由" prop="cas_validate_route">
+    <a-form-model-item :label="$t('cs.auth.cas.validateRoute')" prop="cas_validate_route">
       <a-input v-model="form.cas_validate_route" placeholder="/cas/built-in/cas/serviceValidate" />
     </a-form-model-item>
-    <a-form-model-item label="重定向路由" prop="cas_after_login">
-      <a-input v-model="form.cas_after_login" placeholder="请输入重定向路由" />
+    <a-form-model-item :label="$t('cs.auth.cas.afterLoginRoute')" prop="cas_after_login">
+      <a-input v-model="form.cas_after_login" :placeholder="$t('cs.auth.cas.afterLoginRoutePlaceholder')" />
     </a-form-model-item>
-    <a-form-model-item label="用户属性映射" prop="cas_user_map" :wrapper-col="{ span: 15 }">
+    <a-form-model-item :label="$t('cs.auth.cas.userMap')" prop="cas_user_map" :wrapper-col="{ span: 15 }">
       <vue-json-editor
         :style="{ '--custom-height': `${200}px` }"
         v-model="form.cas_user_map"
@@ -73,14 +73,18 @@ export default {
       labelCol: { span: 3 },
       wrapperCol: { span: 10 },
       form: _.cloneDeep(defaultForm),
-      rules: {
-        enable: [{ required: true }],
-        cas_server: [{ required: true, message: '请输入服务端地址' }],
-        cas_login_route: [{ required: true, message: '请输入登录路由' }],
-        cas_logout_route: [{ required: true, message: '请输入注销路由' }],
-        cas_validate_route: [{ required: true, message: '请输入验证路由' }],
-      },
       isJsonRight: true,
+    }
+  },
+  computed: {
+    rules() {
+      return {
+        enable: [{ required: true }],
+        cas_server: [{ required: true, message: this.$t('cs.auth.cas.serverPlaceholder') }],
+        cas_login_route: [{ required: true, message: this.$t('cs.auth.cas.loginRoutePlaceholder') }],
+        cas_logout_route: [{ required: true, message: this.$t('cs.auth.cas.logoutRoutePlaceholder') }],
+        cas_validate_route: [{ required: true, message: this.$t('cs.auth.cas.validateRoutePlaceholder') }],
+      }
     }
   },
   methods: {

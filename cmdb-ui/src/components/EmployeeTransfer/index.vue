@@ -6,17 +6,17 @@
         :flat="true"
         :multiple="true"
         :options="employeeTreeSelectOption"
-        placeholder="请输入搜索内容"
+        :placeholder="$t('placeholderSearch')"
         v-model="treeValue"
         :max-height="height - 50"
         noChildrenText="空"
         noOptionsText="空"
         :clearable="false"
         :always-open="true"
-        :default-expand-level="1"
+        :default-expand-level="showInternship ? 0 : 1"
         :class="{ 'employee-transfer': true, 'employee-transfer-has-input': !!inputValue }"
         @search-change="changeInputValue"
-        noResultsText="暂无数据"
+        :noResultsText="$t('noData')"
         openDirection="below"
       >
       </treeselect>
@@ -85,6 +85,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    showInternship: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -99,13 +103,22 @@ export default {
   },
   computed: {
     employeeTreeSelectOption() {
-      return formatOption(
+      const formatOptions = formatOption(
         this.allTreeDepAndEmp,
         2,
         this.isDisabledAllCompany,
         this.uniqueKey || 'department_id',
         this.uniqueKey || 'employee_id'
       )
+      if (this.showInternship) {
+        formatOptions.push(
+          ...[
+            { id: -2, label: '全职' },
+            { id: -3, label: '实习生' },
+          ]
+        )
+      }
+      return formatOptions
     },
     allTreeDepAndEmp() {
       if (this.getDataBySelf) {
@@ -148,11 +161,15 @@ export default {
       const department = []
       const user = []
       this.rightData.forEach((item) => {
-        const _split = item.split('-')
-        if (_split[0] === 'department') {
-          department.push(Number(_split[1]))
+        if (item === -2 || item === -3) {
+          department.push(item)
         } else {
-          user.push(Number(_split[1]))
+          const _split = item.split('-')
+          if (_split[0] === 'department') {
+            department.push(Number(_split[1]))
+          } else {
+            user.push(Number(_split[1]))
+          }
         }
       })
       const _idx = department.findIndex((item) => item === 0)
@@ -191,6 +208,12 @@ export default {
       }
     },
     getLabel(id) {
+      if (id === -2) {
+        return '全职'
+      }
+      if (id === -3) {
+        return '实习生'
+      }
       const _split = id.split('-')
       const type = _split[0]
       const _id = Number(_split[1])

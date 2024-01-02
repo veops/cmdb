@@ -1,10 +1,10 @@
 <template>
   <a-form-model ref="form" :model="form" :label-col="labelCol" :wrapper-col="wrapperCol" :rules="rules">
-    <SpanTitle>基本</SpanTitle>
+    <SpanTitle>{{ $t('cs.auth.basic') }}</SpanTitle>
     <a-form-model-item
-      label="自动跳转到第三方登录页"
+      :label="$t('cs.auth.autoRedirectLogin')"
       prop="auto_redirect"
-      help="如果关闭，则会弹出跳转到第三方登录页的确认，点取消按钮会进入系统内置的登录页"
+      :help="$t('cs.auth.autoRedirectLoginHelp')"
     >
       <a-switch
         :checked="Boolean(form.auto_redirect)"

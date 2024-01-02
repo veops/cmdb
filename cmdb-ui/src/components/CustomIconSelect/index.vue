@@ -16,7 +16,7 @@
           {{ item.label }}
         </div>
         <div :class="`${currentIconType === '4' ? 'selected' : ''}`" @click="handleChangeIconType('4')">
-          自定义
+          {{ this.$t('customIconSelect.custom') }}
         </div>
         <a-upload
           slot="description"
@@ -26,7 +26,7 @@
           accept=".svg,.png,.jpg,.jpeg"
           v-if="currentIconType === '4'"
         >
-          <a-button icon="plus" size="small" type="primary">添加</a-button>
+          <a-button icon="plus" size="small" type="primary">{{ $t('add') }}</a-button>
         </a-upload>
       </div>
       <div class="custom-icon-select-popover-content">
@@ -55,11 +55,11 @@
               @click="clickCustomIcon(icon)"
             >
               <div class="custom-icon-select-popover-content-img-box">
-                <img :src="`/api/common-setting/v1/file/${icon.data.url}`" />
+                <img v-if="icon.data && icon.data.url" :src="`/api/common-setting/v1/file/${icon.data.url}`" />
                 <a-popconfirm
                   overlayClassName="custom-icon-select-confirm-popover"
                   :getPopupContainer="(trigger) => trigger.parentNode"
-                  title="确认删除？"
+                  :title="$t('confirmDelete')"
                   @confirm="(e) => deleteIcon(e, icon)"
                   @cancel="
                     (e) => {
@@ -102,27 +102,27 @@
       </template>
       <a-form class="custom-icon-select-form" :form="form" v-show="currentIconType === '4' && formVisible">
         <a-form-item
-          label="名称"
+          :label="$t('name')"
           :labelCol="{ span: 4 }"
           :wrapperCol="{ span: 16 }"
         ><a-input
-          v-decorator="['name', { rules: [{ required: true, message: '请输入名称' }] }]"
+          v-decorator="['name', { rules: [{ required: true, message: $t('placeholder1') }] }]"
         /></a-form-item>
-        <a-form-item label="预览" :labelCol="{ span: 4 }">
+        <a-form-item :label="$t('customIconSelect.preview')" :labelCol="{ span: 4 }">
           <div class="custom-icon-select-form-img">
             <img :src="formImg" />
           </div>
         </a-form-item>
         <a-form-item label=" " :colon="false" :labelCol="{ span: 16 }">
           <a-space>
-            <a-button size="small" @click="handleCancel">取消</a-button>
-            <a-button size="small" type="primary" @click="handleOk">确定</a-button>
+            <a-button size="small" @click="handleCancel">{{ $t('cancel') }}</a-button>
+            <a-button size="small" type="primary" @click="handleOk">{{ $t('confirm') }}</a-button>
           </a-space>
         </a-form-item>
       </a-form>
     </div>
 
-    <div class="custom-icon-select-block" id="custom-icon-select-block" @click="showSelect">
+    <div class="custom-icon-select-block" :id="`custom-icon-select-block-${uuid}`" @click="showSelect">
       <img v-if="value.id && value.url" :src="`/api/common-setting/v1/file/${value.url}`" />
       <ops-icon
         v-else
@@ -134,6 +134,7 @@
 </template>
 
 <script>
+import { v4 as uuidv4 } from 'uuid'
 import { ColorPicker } from 'element-ui'
 import {
   iconTypeList,
@@ -166,7 +167,6 @@ export default {
   data() {
     return {
       form: this.$form.createForm(this),
-      iconTypeList,
       commonIconList,
       linearIconList,
       fillIconList,
@@ -177,6 +177,7 @@ export default {
       formVisible: false,
       formImg: null,
       file: null,
+      uuid: uuidv4(),
     }
   },
   computed: {
@@ -200,6 +201,9 @@ export default {
       const splitFileName = this.file.name.split('.')
       return splitFileName.splice(0, splitFileName.length - 1).join('')
     },
+    iconTypeList() {
+      return iconTypeList()
+    },
   },
   mounted() {
     document.addEventListener('click', this.eventListener)
@@ -217,7 +221,7 @@ export default {
     eventListener(e) {
       if (this.visible) {
         const dom = document.getElementById(`custom-icon-select-popover`)
-        const dom_icon = document.getElementById(`custom-icon-select-block`)
+        const dom_icon = document.getElementById(`custom-icon-select-block-${this.uuid}`)
         e.stopPropagation()
         e.preventDefault()
         if (dom) {
@@ -249,12 +253,11 @@ export default {
           color: '',
         })
       } else {
-        this.$emit('change', { name: icon.data.name, id: icon.id, url: icon.data.url })
+        this.$emit('change', { name: icon.data.name, id: icon.id, url: icon?.data?.url })
       }
     },
     showSelect() {
       this.visible = true
-      console.log(this.value)
       if (!this.value.name) {
         this.currentIconType = '3'
         return
@@ -278,7 +281,7 @@ export default {
     beforeUpload(file) {
       const isLt2M = file.size / 1024 / 1024 < 2
       if (!isLt2M) {
-        this.$message.error('图片大小不可超过2MB!')
+        this.$message.error(this.$t('customIconSelect.sizeLimit'))
         return false
       }
 
@@ -306,7 +309,7 @@ export default {
         this.form.validateFields((err, values) => {
           if (!err) {
             addFileData('ops-custom-icon', { data: { name: values.name, url: res.file_name } }).then(() => {
-              this.$message.success('上传成功！')
+              this.$message.success(this.$t('uploadSuccess'))
               this.handleCancel()
               this.getFileData()
             })
@@ -318,7 +321,7 @@ export default {
       e.stopPropagation()
       e.preventDefault()
       deleteFileData('ops-custom-icon', icon.id).then(() => {
-        this.$message.success('删除成功！')
+        this.$message.success(this.$t('deleteSuccess'))
         this.handleCancel()
         this.getFileData()
       })

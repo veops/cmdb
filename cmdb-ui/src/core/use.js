@@ -38,11 +38,18 @@ import CardTitle from '@/components/CardTitle'
 import ElementUI from 'element-ui'
 import Treeselect from '@riophae/vue-treeselect'
 import OpsTable from '@/components/OpsTable'
+import VueI18n from 'vue-i18n'
+import i18n from '@/lang'
 
 Vue.config.productionTip = false
 Vue.prototype.$bus = EventBus
+
+VXETable.setup({
+  i18n: (key, args) => i18n.t(key, args)
+})
 Vue.use(VXETable)
 VXETable.use(VXETablePluginExportXLSX)
+Vue.use(VueI18n)
 
 Vue.config.productionTip = false
 
@@ -75,4 +82,3 @@ Vue.component('CustomRadio', CustomRadio)
 Vue.component('CardTitle', CardTitle)
 Vue.component('Treeselect', Treeselect)
 Vue.component('OpsTable', OpsTable)
-

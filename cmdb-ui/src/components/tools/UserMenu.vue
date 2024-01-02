@@ -10,9 +10,10 @@
       >
         <a-icon type="setting" />
       </span>
+      <span class="locale" @click="changeLang">{{ locale === 'zh' ? 'English' : '中文' }}</span>
       <a-popover
         trigger="click"
-        :overlayStyle="{ width: '120px' }"
+        :overlayStyle="{ width: '150px' }"
         placement="bottomRight"
         overlayClassName="custom-user"
       >
@@ -20,12 +21,12 @@
           <router-link :to="{ name: 'setting_person' }" :style="{ color: '#000000a6' }">
             <div class="custom-user-item">
               <a-icon type="user" :style="{ marginRight: '10px' }" />
-              <span>个人中心</span>
+              <span>{{ $t('topMenu.personalCenter') }}</span>
             </div>
           </router-link>
           <div @click="handleLogout" class="custom-user-item">
             <a-icon type="logout" :style="{ marginRight: '10px' }" />
-            <span>退出登录</span>
+            <span>{{ $t('topMenu.logout') }}</span>
           </div>
         </template>
         <span class="action ant-dropdown-link user-dropdown-menu">
@@ -44,8 +45,9 @@
 </template>
 
 <script>
+import { mapState, mapActions, mapGetters, mapMutations } from 'vuex'
 import DocumentLink from './DocumentLink.vue'
-import { mapState, mapActions, mapGetters } from 'vuex'
+import { setDocumentTitle, domTitle } from '@/utils/domUtil'
 
 export default {
   name: 'UserMenu',
@@ -53,21 +55,24 @@ export default {
     DocumentLink,
   },
   computed: {
-    ...mapState(['user']),
+    ...mapState(['user', 'locale']),
     hasBackendPermission() {
-      return this.user?.roles?.permissions.includes('acl_admin', 'backend_admin') || false
+      return this.user?.detailPermissions?.backend?.length
     },
   },
   methods: {
     ...mapActions(['Logout']),
     ...mapGetters(['nickname', 'avatar']),
+    ...mapMutations(['SET_LOCALE']),
     handleLogout() {
       const that = this
 
       this.$confirm({
         title: '提示',
-        content: '确认注销登录 ?',
+        content: '真的要注销登录吗 ?',
         onOk() {
+          // localStorage.removeItem('ops_cityps_currentId')
+          localStorage.clear()
           return that.Logout()
         },
         onCancel() {},
@@ -76,9 +81,22 @@ export default {
     handleClick() {
       this.$router.push('/setting')
     },
+    changeLang() {
+      if (this.locale === 'zh') {
+        this.SET_LOCALE('en')
+        this.$i18n.locale = 'en'
+      } else {
+        this.SET_LOCALE('zh')
+        this.$i18n.locale = 'zh'
+      }
+      this.$nextTick(() => {
+        setDocumentTitle(`${this.$t(this.$route.meta.title)} - ${domTitle}`)
+      })
+    },
   },
 }
 </script>
+
 <style lang="less">
 @import '~@/style/static.less';
 .color {
@@ -96,6 +114,13 @@ export default {
   .ant-popover-inner-content {
     padding: 0;
     color: #000000a6;
+  }
+}
+
+.locale {
+  cursor: pointer;
+  &:hover {
+    color: #custom_colors[color_1];
   }
 }
 </style>

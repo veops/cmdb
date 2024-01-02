@@ -2,12 +2,12 @@
   <treeselect
     :multiple="false"
     :options="departemntTreeSelectOption"
-    placeholder="请选择部门"
+    :placeholder="readOnly ? '' : $t('cs.companyStructure.selectDepartment')"
     v-model="treeValue"
     :normalizer="normalizer"
-    noChildrenText="空"
-    noOptionsText="空"
-    class="ops-setting-treeselect"
+    :noChildrenText="$t('cs.components.empty')"
+    :noOptionsText="$t('cs.components.empty')"
+    :class="className ? className : 'ops-setting-treeselect'"
     v-bind="$attrs"
     appendToBody
     :zIndex="1050"
@@ -28,6 +28,10 @@ export default {
       type: [String, Array, Number, null],
       default: null,
     },
+    className: {
+      type: String,
+      default: 'ops-setting-treeselect',
+    },
   },
   data() {
     return {
@@ -46,7 +50,15 @@ export default {
       },
     }
   },
-  inject: ['provide_allTreeDepartment'],
+  inject: {
+    provide_allTreeDepartment: {
+      from: 'provide_allTreeDepartment',
+    },
+    readOnly: {
+      from: 'readOnly',
+      default: false,
+    },
+  },
   computed: {
     departemntTreeSelectOption() {
       return this.provide_allTreeDepartment()

@@ -34,6 +34,7 @@ export const generatorDynamicRouter = async () => {
       name: 'notice_center',
       component: BasicLayout,
       children: [{
+        hidden: true,
         path: '/noticecenter',
         name: 'notice_center',
         meta: { title: '消息中心' },
@@ -50,53 +51,53 @@ export const generatorDynamicRouter = async () => {
           hidden: true,
           path: '/setting/person',
           name: 'setting_person',
-          meta: { title: '个人中心', },
+          meta: { title: 'cs.menu.person', },
           component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/person/index')
         },
         {
           path: '/setting/companyinfo',
           name: 'company_info',
-          meta: { title: '公司信息', appName: 'backend', icon: 'ops-setting-companyInfo', selectedIcon: 'ops-setting-companyInfo-selected', permission: ['acl_admin', 'backend_admin'] },
+          meta: { title: 'cs.menu.companyInfo', appName: 'backend', icon: 'ops-setting-companyInfo', selectedIcon: 'ops-setting-companyInfo-selected', permission: ['公司信息', 'backend_admin'] },
           component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/companyInfo/index')
         },
         {
           path: '/setting/companystructure',
           name: 'company_structure',
-          meta: { title: '公司架构', appName: 'backend', icon: 'ops-setting-companyStructure', selectedIcon: 'ops-setting-companyStructure-selected', permission: ['acl_admin', 'backend_admin'] },
+          meta: { title: 'cs.menu.companyStructure', appName: 'backend', icon: 'ops-setting-companyStructure', selectedIcon: 'ops-setting-companyStructure-selected', permission: ['公司架构', 'backend_admin'] },
           component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/companyStructure/index')
         },
         {
           path: '/setting/notice',
           name: 'notice',
           component: RouteView,
-          meta: { title: '通知设置', appName: 'backend', icon: 'ops-setting-notice', selectedIcon: 'ops-setting-notice-selected', permission: ['通知设置', 'backend_admin'] },
+          meta: { title: 'cs.menu.notice', appName: 'backend', icon: 'ops-setting-notice', selectedIcon: 'ops-setting-notice-selected', permission: ['通知设置', 'backend_admin'] },
           redirect: '/setting/notice/email',
           children: [{
             path: '/setting/notice/email',
             name: 'notice_email',
-            meta: { title: '邮件设置', icon: 'ops-setting-notice-email', selectedIcon: 'ops-setting-notice-email-selected' },
+            meta: { title: 'cs.menu.email', icon: 'ops-setting-notice-email', selectedIcon: 'ops-setting-notice-email-selected' },
             component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/notice/email/index')
           }, {
             path: '/setting/notice/wx',
             name: 'notice_wx',
-            meta: { title: '企业微信', icon: 'ops-setting-notice-wx', selectedIcon: 'ops-setting-notice-wx-selected' },
+            meta: { title: 'cs.menu.wx', icon: 'ops-setting-notice-wx', selectedIcon: 'ops-setting-notice-wx-selected' },
             component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/notice/wx')
           }, {
             path: '/setting/notice/dingding',
             name: 'notice_dingding',
-            meta: { title: '钉钉', icon: 'ops-setting-notice-dingding', selectedIcon: 'ops-setting-notice-dingding-selected' },
+            meta: { title: 'cs.menu.dingding', icon: 'ops-setting-notice-dingding', selectedIcon: 'ops-setting-notice-dingding-selected' },
             component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/notice/dingding')
           }, {
             path: '/setting/notice/feishu',
             name: 'notice_feishu',
-            meta: { title: '飞书', icon: 'ops-setting-notice-feishu', selectedIcon: 'ops-setting-notice-feishu-selected' },
+            meta: { title: 'cs.menu.feishu', icon: 'ops-setting-notice-feishu', selectedIcon: 'ops-setting-notice-feishu-selected' },
             component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/notice/feishu')
           }]
         },
         {
           path: '/setting/auth',
           name: 'company_auth',
-          meta: { title: '认证设置', appName: 'backend', icon: 'ops-setting-auth', selectedIcon: 'ops-setting-auth-selected', permission: ['acl_admin'] },
+          meta: { title: 'cs.menu.auth', appName: 'backend', icon: 'ops-setting-auth', selectedIcon: 'ops-setting-auth-selected', permission: ['acl_admin'] },
           component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/auth/index')
         },
       ]

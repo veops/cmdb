@@ -21,7 +21,7 @@
               :class="{ 'group-selected': groupIndex === activeGroupIndex }"
             >
               <div class="ops-setting-structure-sidebar-group-header-avatar">
-                <a-icon :type="group.icon" />
+                <a-icon :type="group.icon"/>
               </div>
               <span
                 class="ops-setting-structure-sidebar-group-header-title"
@@ -46,7 +46,7 @@
                 >
                   <div class="ops-setting-structure-sidebar-group-category-item-title" @click="clickSelectItem(0)">
                     <div class="item-title">
-                      在职员工
+                      {{ $t('cs.companyStructure.activeEmployee') }}
                     </div>
                     <div class="item-count">
                       <div class="item-count-before">{{ activeEmployeeCount }}</div>
@@ -61,7 +61,7 @@
                 >
                   <div class="ops-setting-structure-sidebar-group-category-item-title" @click="clickSelectItem(1)">
                     <div class="item-title">
-                      停用员工
+                      {{ $t('cs.companyStructure.blockEmployee') }}
                     </div>
                     <div class="item-count">
                       <div class="item-count-before">{{ deactiveEmployeeCount }}</div>
@@ -70,7 +70,7 @@
                 </div>
               </div>
             </CollapseTransition>
-            <ul :style="{ marginTop: '10px' }" v-if="activeGroupIndex === groupIndex && activeGroupIndex === 1" >
+            <ul :style="{ marginTop: '10px' }" v-if="activeGroupIndex === groupIndex && activeGroupIndex === 1">
               <CategroyTree
                 v-for="(subTree, subIndex) in departmentList"
                 :id="subTree.id"
@@ -96,7 +96,7 @@
                     v-model="filterName"
                     :style="{ minWidth: '200px' }"
                     class="ops-input ops-input-radius"
-                    placeholder="请输入姓名/邮箱"
+                    :placeholder="$t('cs.role.inputNameOrEmail')"
                     @search="updateTableDataByFilter()"
                   />
                 </div>
@@ -123,16 +123,16 @@
                       </div>
                     </template>
                     <span :style="{ whiteSpace: 'nowrap' }">
-                      <a-icon class="screening-box-scene-icon" type="filter" />
+                      <a-icon class="screening-box-scene-icon" type="filter"/>
                       {{ getCurrentSceneLabel() }}
-                      <a-icon class="screening-box-scene-icon" :type="displayTimeIcon" />
+                      <a-icon class="screening-box-scene-icon" :type="displayTimeIcon"/>
                     </span>
                   </a-popover>
                 </div>
                 <SearchForm
                   ref="search"
                   :canSearchPreferenceAttrList="canSearchPreferenceAttrList"
-                  @refresh="handleSearch" />
+                  @refresh="handleSearch"/>
               </div>
               <div>
                 <a-space v-if="isEditable">
@@ -144,10 +144,12 @@
                     icon="plus"
                     ghost
                   />
-                  <a-button type="primary" size="small" ghost @click="batchUpload"> 批量导入 </a-button>
+                  <a-button type="primary" size="small" ghost @click="batchUpload">
+                    {{ $t('cs.companyStructure.batchImport') }}
+                  </a-button>
                   <template v-if="activeGroupIndex === 1 && selectDepartment.hasOwnProperty('id')">
                     <a-button type="primary" size="small" ghost @click="openDepartmentModal('add')">
-                      创建子部门
+                      {{ $t('cs.companyStructure.createSubDepartment') }}
                     </a-button>
                     <a-button
                       type="primary"
@@ -156,10 +158,10 @@
                       @click="openDepartmentModal('edit')"
                       v-if="selectDepartment.id"
                     >
-                      编辑部门
+                      {{ $t('cs.companyStructure.editDepartment') }}
                     </a-button>
                     <a-button v-if="selectDepartment.id" type="danger" size="small" ghost @click="deleteDepartment">
-                      删除部门
+                      {{ $t('cs.companyStructure.deleteDepartment') }}
                     </a-button>
                   </template>
                 </a-space>
@@ -168,25 +170,26 @@
             <div class="ops-setting-batch">
               <div>
                 <div :style="{ marginTop: '8px' }" class="ops-list-batch-action" v-show="!!selectedRowKeys.length">
-                  <span @click="downloadEmployeeAll">下载全部</span>
-                  <a-divider type="vertical" />
-                  <span @click="exportSelectEvent">下载选中</span>
-                  <a-divider type="vertical" />
-                  <span @click="openBatchModal('department_id')">编辑部门</span>
-                  <a-divider type="vertical" />
-                  <span @click="openBatchModal('direct_supervisor_id')">编辑上级</span>
-                  <a-divider type="vertical" />
-                  <span @click="openBatchModal('position_name')">编辑岗位</span>
-                  <a-divider type="vertical" />
-                  <span @click="openBatchModal('annual_leave')">编辑年假</span>
-                  <a-divider type="vertical" />
-                  <span @click="openBatchModal('password')">重置密码</span>
-                  <a-divider type="vertical" />
-                  <span @click="openBatchModal('block', null, 1)">禁用</span>
-                  <a-divider type="vertical" />
-                  <span @click="openBatchModal('block', null, 0)">恢复</span>
-                  <a-divider type="vertical" />
-                  <span>选取: {{ selectedRowKeys.length }} 项</span>
+                  <span @click="downloadEmployeeAll">{{ $t('cs.companyStructure.downloadAll') }}</span>
+                  <a-divider type="vertical"/>
+                  <span @click="exportSelectEvent">{{ $t('cs.companyStructure.downloadSelected') }}</span>
+                  <a-divider type="vertical"/>
+                  <span @click="openBatchModal('department_id')">{{ $t('cs.companyStructure.editDepartment') }}</span>
+                  <a-divider type="vertical"/>
+                  <span
+                    @click="openBatchModal('direct_supervisor_id')">{{ $t('cs.companyStructure.editDirectSupervisor') }}</span>
+                  <a-divider type="vertical"/>
+                  <span @click="openBatchModal('position_name')">{{ $t('cs.companyStructure.editPosition') }}</span>
+                  <a-divider type="vertical"/>
+                  <span @click="openBatchModal('annual_leave')">{{ $t('cs.companyStructure.editAnnualLeave') }}</span>
+                  <a-divider type="vertical"/>
+                  <span @click="openBatchModal('password')">{{ $t('cs.companyStructure.resetPassword') }}</span>
+                  <a-divider type="vertical"/>
+                  <span @click="openBatchModal('block', null, 1)">{{ $t('cs.companyStructure.block') }}</span>
+                  <a-divider type="vertical"/>
+                  <span @click="openBatchModal('block', null, 0)">{{ $t('cs.companyStructure.recover') }}</span>
+                  <a-divider type="vertical"/>
+                  <span>{{ $t('selectRows', {rows: selectedRowKeys.length}) }}</span>
                 </div>
               </div>
               <!-- <div>
@@ -197,14 +200,15 @@
             </div>
           </div>
           <!-- 批量操作对话框 -->
-          <BatchModal ref="BatchModal" @refresh="updateAll" />
+          <BatchModal ref="BatchModal" @refresh="updateAll"/>
           <!-- 部门表单对话框 -->
-          <DepartmentModal ref="DepartmentModal" @refresh="clickSelectGroup(1)" />
+          <DepartmentModal ref="DepartmentModal" @refresh="clickSelectGroup(1)"/>
           <!-- 员工表单对话框 -->
-          <EmployeeModal ref="EmployeeModal" @refresh="updateAll" />
+          <EmployeeModal ref="EmployeeModal" @refresh="updateAll"/>
 
           <!-- 表格展示 -->
           <EmployeeTable
+            ref="employeeTable"
             :tableData="tableData"
             :tableHeight="tableHeight"
             @sortChangeEvent="sortChangeEvent"
@@ -226,15 +230,15 @@
               :page-size-options="pageSizeOptions"
               :current="tablePage.currentPage"
               :total="tablePage.totalResult"
-              :show-total="(total, range) => `当前展示 ${range[0]}-${range[1]} 条数据, 共 ${total} 条`"
+              :show-total="(total, range) => $t('pagination.total', { range0: range[0], range1: range[1], total:total })"
               :page-size="tablePage.pageSize"
               :default-current="1"
               @change="pageOrSizeChange"
               @showSizeChange="pageOrSizeChange"
             >
               <template #buildOptionText="props">
-                <span v-if="props.value !== '9999'">{{ props.value }}条/页</span>
-                <span v-else>全部</span>
+                <span v-if="props.value !== '9999'">{{ props.value }}{{ $t('itemsPerPage') }}</span>
+                <span v-else>{{ $t('all') }}</span>
               </template>
             </a-pagination>
           </div>
@@ -288,74 +292,16 @@ export default {
     SearchForm
   },
   data() {
-    const canSearchPreferenceAttrList = [
-        { label: '姓名', value: 'nickname' },
-        { label: '用户名', value: 'username' },
-        { label: '邮箱', value: 'email' },
-        { label: '性别', value: 'sex', is_choice: true, choice_value: [{ label: '男', value: '男' }, { label: '女', value: '女' }] },
-        { label: '手机号', value: 'mobile' },
-        { label: '部门', value: 'department_name' },
-        { label: '岗位', value: 'position_name' },
-        { label: '直接上级', value: 'direct_supervisor_id' },
-        { label: '年假', value: 'annual_leave' },
-        { label: '目前所属主体', value: 'current_company' },
-        { label: '初始入职日期', value: 'dfc_entry_date' },
-        { label: '目前主体入职日期', value: 'entry_date' },
-        { label: '正式/实习生', value: 'is_internship', is_choice: true, choice_value: [{ label: '正式', value: 0 }, { label: '实习生', value: 1 }] },
-        { label: '离职日期', value: 'leave_date' },
-        { label: '身份证号码', value: 'id_card' },
-        { label: '民族', value: 'nation' },
-        { label: '籍贯', value: 'id_place' },
-        { label: '组织关系', value: 'party', is_choice: true, choice_value: [{ label: '党员', value: '党员' }, { label: '团员', value: '团员' }, { label: '群众', value: '群众' }] },
-        { label: '户籍类型', value: 'household_registration_type', is_choice: true, choice_value: [{ label: '城镇', value: '城镇' }, { label: '农业', value: '农业' }] },
-        { label: '户口所在地', value: 'hometown' },
-        { label: '婚姻情况', value: 'marry', is_choice: true, choice_value: [{ label: '未婚', value: '未婚' }, { label: '已婚', value: '已婚' }] },
-        { label: '最高学历', value: 'max_degree', is_choice: true, choice_value: [{ label: '博士', value: '博士' }, { label: '硕士', value: '硕士' }, { label: '本科', value: '本科' }, { label: '专科', value: '专科' }, { label: '高中', value: '高中' }] },
-        { label: '紧急联系人', value: 'emergency_person' },
-        { label: '紧急联系电话', value: 'emergency_phone' },
-        { label: '卡号', value: 'bank_card_number' },
-        { label: '银行', value: 'bank_card_name' },
-        { label: '开户行', value: 'opening_bank' },
-        { label: '开户地', value: 'account_opening_location' },
-        { label: '上次登录时间', value: 'last_login' },
-      ]
-
     return {
       isActive: '',
       visible: true,
-      sceneList: [
-        {
-          label: '全部',
-          value: -1,
-        },
-        {
-          label: '在职员工',
-          value: 0,
-        },
-        {
-          label: '停用员工',
-          value: 1,
-        },
-      ],
-      localStorageKey: 'setting-company-strcutre',
+      localStorageKey: 'itsm-company-strcutre',
       localStoragePaneLengthPixel: 'setting-structure-paneLengthPixel',
       displayTimeIcon: 'down',
       currentScene: '',
       // historySceneitemSelected: 'history-scene-item-selected',
       // historySceneItem: 'history-scene-item',
       paneLengthPixel: 204,
-      groupData: [
-        {
-          id: 0,
-          title: '员工',
-          icon: 'user',
-        },
-        {
-          id: 1,
-          title: '部门',
-          icon: 'apartment',
-        },
-      ],
       tableData: [],
       activeEmployeeCount: 0,
       deactiveEmployeeCount: 0,
@@ -378,7 +324,6 @@ export default {
       allTreeDepartment: [],
       allTreeDepAndEmp: [],
       isFolder: false,
-      canSearchPreferenceAttrList,
       attributes: [],
       pageSizeOptions: ['50', '100', '200', '9999'],
       expression: [],
@@ -413,6 +358,115 @@ export default {
     isEditable() {
       return this.hasDetailPermission('backend', '公司架构', ['update'])
     },
+    canSearchPreferenceAttrList() {
+      return [
+        { label: this.$t('cs.companyStructure.nickname'), value: 'nickname' },
+        { label: this.$t('cs.companyStructure.username'), value: 'username' },
+        { label: this.$t('cs.companyStructure.email'), value: 'email' },
+        {
+          label: this.$t('cs.companyStructure.sex'),
+          value: 'sex',
+          is_choice: true,
+          choice_value: [
+              { label: this.$t('cs.companyStructure.male'), value: '男' },
+            { label: this.$t('cs.companyStructure.female'), value: '女' }]
+        },
+        { label: this.$t('cs.companyStructure.mobile'), value: 'mobile' },
+        { label: this.$t('cs.companyStructure.departmentName'), value: 'department_name' },
+        { label: this.$t('cs.companyStructure.positionName'), value: 'position_name' },
+        { label: this.$t('cs.companyStructure.departmentDirector'), value: 'direct_supervisor_id' },
+        { label: this.$t('cs.companyStructure.annualLeave'), value: 'annual_leave' },
+        { label: this.$t('cs.companyStructure.currentCompany'), value: 'current_company' },
+        { label: this.$t('cs.companyStructure.dfcEntryDate'), value: 'dfc_entry_date' },
+        { label: this.$t('cs.companyStructure.entryDate'), value: 'entry_date' },
+        {
+          label: this.$t('cs.companyStructure.isInternship'),
+          value: 'is_internship',
+          is_choice: true,
+          choice_value: [{ label: this.$t('cs.companyStructure.fullTime'), value: 0 },
+            { label: this.$t('cs.companyStructure.internship'), value: 1 }]
+        },
+        { label: this.$t('cs.companyStructure.leaveDate'), value: 'leave_date' },
+        { label: this.$t('cs.companyStructure.idCard'), value: 'id_card' },
+        { label: this.$t('cs.companyStructure.nation'), value: 'nation' },
+        { label: this.$t('cs.companyStructure.idPlace'), value: 'id_place' },
+        {
+          label: this.$t('cs.companyStructure.party'),
+          value: 'party',
+          is_choice: true,
+          choice_value: [
+              { label: this.$t('cs.companyStructure.partyMember'), value: '党员' },
+            { label: this.$t('cs.companyStructure.member'), value: '团员' },
+            { label: this.$t('cs.companyStructure.masses'), value: '群众' }]
+        },
+        {
+          label: this.$t('cs.companyStructure.householdRegistrationType'),
+          value: 'household_registration_type',
+          is_choice: true,
+          choice_value: [{ label: this.$t('cs.companyStructure.town'), value: '城镇' }, { label: this.$t('cs.companyStructure.agriculture'), value: '农业' }]
+        },
+        { label: this.$t('cs.companyStructure.hometown'), value: 'hometown' },
+        {
+          label: this.$t('cs.companyStructure.marry'),
+          value: 'marry',
+          is_choice: true,
+          choice_value: [{ label: this.$t('cs.companyStructure.unmarried'), value: '未婚' }, { label: this.$t('cs.companyStructure.married'), value: '已婚' }]
+        },
+        {
+          label: this.$t('cs.companyStructure.maxDegree'),
+          value: 'max_degree',
+          is_choice: true,
+          choice_value: [{ label: this.$t('cs.companyStructure.phd'), value: '博士' }, { label: this.$t('cs.companyStructure.master'), value: '硕士' }, {
+            label: this.$t('cs.companyStructure.undergraduate'),
+            value: '本科'
+          }, { label: this.$t('cs.companyStructure.specialist'), value: '专科' }, { label: this.$t('cs.companyStructure.highSchool'), value: '高中' }]
+        },
+        { label: this.$t('cs.companyStructure.emergencyPerson'), value: 'emergency_person' },
+        { label: this.$t('cs.companyStructure.emergencyPhone'), value: 'emergency_phone' },
+        { label: this.$t('cs.companyStructure.bankCardNumber'), value: 'bank_card_number' },
+        { label: this.$t('cs.companyStructure.bankCardName'), value: 'bank_card_name' },
+        { label: this.$t('cs.companyStructure.openingBank'), value: 'opening_bank' },
+        { label: this.$t('cs.companyStructure.accountOpeningLocation'), value: 'account_opening_location' },
+        { label: this.$t('cs.companyStructure.birthDate'), value: 'birth_date' },
+        { label: this.$t('cs.companyStructure.nationalityRegion'), value: 'nationality_region' },
+        { label: this.$t('cs.companyStructure.birthPlace'), value: 'birth_place' },
+        { label: this.$t('cs.companyStructure.firstEntryDate'), value: 'first_entry_date' },
+        { label: this.$t('cs.companyStructure.estimatedDepartureDate'), value: 'estimated_departure_date' },
+        // { label: '角色', value: 'roles' },
+        { label: this.$t('cs.companyStructure.lastLogin'), value: 'last_login' },
+
+      ]
+    },
+    sceneList () {
+      return [
+        {
+          label: this.$t('all'),
+          value: -1,
+        },
+        {
+          label: this.$t('cs.companyStructure.activeEmployee'),
+          value: 0,
+        },
+        {
+          label: this.$t('cs.companyStructure.blockEmployee'),
+          value: 1,
+        },
+      ]
+    },
+    groupData () {
+      return [
+        {
+          id: 0,
+          title: this.$t('cs.companyStructure.employee'),
+          icon: 'user',
+        },
+        {
+          id: 1,
+          title: this.$t('cs.companyStructure.departmentName'),
+          icon: 'apartment',
+        },
+      ]
+    }
   },
   provide() {
     return {
@@ -470,6 +524,9 @@ export default {
     Bus.$on('clickSelectGroup', async (index) => {
       this.clickSelectGroup(index)
     })
+    Bus.$on('changeSelectedRowKeys', (selectedRowKeys) => {
+      this.selectedRowKeys = selectedRowKeys
+    })
     this.getAllFlatEmployees()
     this.getAllFlatDepartment()
     this.getAllTreeDepartment()
@@ -480,6 +537,7 @@ export default {
     Bus.$off('updateAllIncludeDepartment')
     Bus.$off('selectDepartment')
     Bus.$off('reqChildren')
+    Bus.$off('changeSelectedRowKeys')
   },
   methods: {
     // mouseOver: function() {
@@ -579,55 +637,7 @@ export default {
           order: this.tableSortData || 'direct_supervisor_id',
         })
       }
-      //   console.log(this.activeGroupIndex, reqEmployeeData)
-      this.tableData = reqEmployeeData.data_list
-      if (reqEmployeeData.data_list.length) {
-        // 筛选教育经历数组中学历最高的一条记录
-        if (reqEmployeeData.data_list[0].educational_experience) {
-          reqEmployeeData.data_list.forEach((row, row_index) => {
-            const educational_experience = row.educational_experience
-            if (educational_experience.length > 1) {
-              let max_index = 0
-              educational_experience.forEach((item, index) => {
-                if (index < educational_experience.length - 1) {
-                  max_index = item.graduation_year > educational_experience[index + 1].graduation_year ? index : index + 1
-                }
-              })
-            this.tableData[row_index].school = educational_experience[max_index].school
-            this.tableData[row_index].major = educational_experience[max_index].major
-            this.tableData[row_index].education = educational_experience[max_index].education
-            this.tableData[row_index].graduation_year = educational_experience[max_index].graduation_year
-            } else if (educational_experience.length === 1) {
-                this.tableData[row_index].school = educational_experience[0].school
-                this.tableData[row_index].major = educational_experience[0].major
-                this.tableData[row_index].education = educational_experience[0].education
-                this.tableData[row_index].graduation_year = educational_experience[0].graduation_year
-            } else {
-                this.tableData[row_index].school = ''
-                this.tableData[row_index].major = ''
-                this.tableData[row_index].education = ''
-                this.tableData[row_index].graduation_year = ''
-            }
-          })
-        }
-        // 筛选子女信息中第一位展示在employeeTable
-        if (reqEmployeeData.data_list[0].children_information) {
-          reqEmployeeData.data_list.forEach((row, row_index) => {
-            const children_information = row.children_information
-            if (children_information.length) {
-              this.tableData[row_index].name = children_information[0].name
-              this.tableData[row_index].gender = children_information[0].gender
-              this.tableData[row_index].birthday = children_information[0].birthday
-              this.tableData[row_index].parental_leave_left = children_information[0].parental_leave_left
-            } else {
-                this.tableData[row_index].name = ''
-                this.tableData[row_index].gender = ''
-                this.tableData[row_index].birthday = ''
-                this.tableData[row_index].parental_leave_left = ''
-            }
-          })
-        }
-      }
+      this.tableData = this.FilterTableData(reqEmployeeData)
       this.tablePage = {
         ...this.tablePage,
         currentPage: reqEmployeeData.page,
@@ -661,57 +671,7 @@ export default {
           order: this.tableSortData || 'direct_supervisor_id',
         })
       }
-      const tableData = reqEmployeeData.data_list
-      // 筛选教育经历数组中学历最高的一条记录
-      if (reqEmployeeData.data_list.length) {
-        if (reqEmployeeData.data_list[0].educational_experience) {
-          // reqEmployeeData.data_list.forEach((row, row_index) => {
-          for (let index = 0, len = reqEmployeeData.data_list.length; index < len; index++) {
-            const educational_experience = reqEmployeeData.data_list[index].educational_experience
-            if (educational_experience.length > 1) {
-              let max_index = 0
-              educational_experience.forEach((item, index) => {
-                if (index < educational_experience.length - 1) {
-                  max_index = item.graduation_year > educational_experience[index + 1].graduation_year ? index : index + 1
-                }
-              })
-            tableData[index].school = educational_experience[max_index].school
-            tableData[index].major = educational_experience[max_index].major
-            tableData[index].education = educational_experience[max_index].education
-            tableData[index].graduation_year = educational_experience[max_index].graduation_year
-            } else if (educational_experience.length === 1) {
-                tableData[index].school = educational_experience[0].school
-                tableData[index].major = educational_experience[0].major
-                tableData[index].education = educational_experience[0].education
-                tableData[index].graduation_year = educational_experience[0].graduation_year
-            } else {
-                tableData[index].school = ''
-                tableData[index].major = ''
-                tableData[index].education = ''
-                tableData[index].graduation_year = ''
-            }
-          }
-        }
-        // 筛选子女信息中第一位展示在employeeTable
-        if (reqEmployeeData.data_list[0].children_information) {
-          // reqEmployeeData.data_list.forEach((row, row_index) => {
-            for (let row_index = 0, len = reqEmployeeData.data_list.length; row_index < len; row_index++) {
-            const children_information = reqEmployeeData.data_list[row_index].children_information
-            if (children_information.length) {
-              tableData[row_index].name = children_information[0].name
-              tableData[row_index].gender = children_information[0].gender
-              tableData[row_index].birthday = children_information[0].birthday
-              tableData[row_index].parental_leave_left = children_information[0].parental_leave_left
-            } else {
-                tableData[row_index].name = ''
-                tableData[row_index].gender = ''
-                tableData[row_index].birthday = ''
-                tableData[row_index].parental_leave_left = ''
-            }
-          }
-        }
-      }
-      this.tableData = tableData
+      this.tableData = this.FilterTableData(reqEmployeeData)
       this.tablePage = {
         ...this.tablePage,
         currentPage: reqEmployeeData.page,
@@ -719,6 +679,63 @@ export default {
         totalResult: reqEmployeeData.total,
       }
       this.loading = false
+    },
+    FilterTableData(reqEmployeeData) {
+      const tableData = reqEmployeeData.data_list
+      // 筛选教育经历数组中学历最高的一条记录
+      if (reqEmployeeData.data_list.length) {
+        if (reqEmployeeData.data_list[0].educational_experience) {
+          // reqEmployeeData.data_list.forEach((row, row_index) => {
+          for (let index = 0, len = reqEmployeeData.data_list.length; index < len; index++) {
+            const educational_experience = reqEmployeeData.data_list[index].educational_experience
+            if (educational_experience) {
+              if (educational_experience.length > 1) {
+                let max_index = 0
+                educational_experience.forEach((item, index) => {
+                  if (index < educational_experience.length - 1) {
+                    max_index = item.graduation_year > educational_experience[index + 1].graduation_year ? index : index + 1
+                  }
+                })
+                tableData[index].school = educational_experience[max_index].school
+                tableData[index].major = educational_experience[max_index].major
+                tableData[index].education = educational_experience[max_index].education
+                tableData[index].graduation_year = educational_experience[max_index].graduation_year
+              } else if (educational_experience.length === 1) {
+                tableData[index].school = educational_experience[0].school
+                tableData[index].major = educational_experience[0].major
+                tableData[index].education = educational_experience[0].education
+                tableData[index].graduation_year = educational_experience[0].graduation_year
+              } else {
+                tableData[index].school = ''
+                tableData[index].major = ''
+                tableData[index].education = ''
+                tableData[index].graduation_year = ''
+              }
+            }
+          }
+        }
+        // 筛选子女信息中第一位展示在employeeTable
+        if (reqEmployeeData.data_list[0].children_information) {
+          // reqEmployeeData.data_list.forEach((row, row_index) => {
+          for (let row_index = 0, len = reqEmployeeData.data_list.length; row_index < len; row_index++) {
+            const children_information = reqEmployeeData.data_list[row_index].children_information
+            if (children_information) {
+              if (children_information.length) {
+                tableData[row_index].name = children_information[0].name
+                tableData[row_index].gender = children_information[0].gender
+                tableData[row_index].birthday = children_information[0].birthday
+                tableData[row_index].parental_leave_left = children_information[0].parental_leave_left
+              } else {
+                tableData[row_index].name = ''
+                tableData[row_index].gender = ''
+                tableData[row_index].birthday = ''
+                tableData[row_index].parental_leave_left = ''
+              }
+            }
+          }
+        }
+      }
+      return tableData
     },
     updateAll() {
       // this.expression = []
@@ -771,6 +788,11 @@ export default {
         a.click()
         window.URL.revokeObjectURL(url)
       })
+      this.$refs.employeeTable.getVxetableRef().clearCheckboxRow()
+      this.$refs.employeeTable.getVxetableRef().clearCheckboxReserve()
+      this.$refs.employeeTable.getVxetableRef().clearSort()
+      this.tableSortData = undefined
+      this.selectedRowKeys = []
     },
     reset() {
       this.filterName = ''
@@ -842,18 +864,18 @@ export default {
       if (this.selectDepartment.hasOwnProperty('id')) {
         this.$refs.DepartmentModal.open({ type, selectDepartment: this.selectDepartment })
       } else {
-        this.$message.error('请选择部门')
+        this.$message.error(this.$t('cs.companyStructure.selectDepartment'))
       }
     },
     async deleteDepartment() {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: `确认删除 【${this.selectDepartment.title}】？`,
+        title: this.$t('warning'),
+        content: this.$t('confirmDelete2', { name: this.selectDepartment.title }),
         onOk() {
           deleteDepartmentById(that.selectDepartment.id).then((res) => {
             that.clickSelectGroup(1)
-            that.$message.success('删除成功！')
+            that.$message.success(that.$t('deleteSuccess'))
             Bus.$emit('updateAllIncludeDepartment')
           })
         },
@@ -876,14 +898,20 @@ export default {
     },
     sortChangeEvent({ sortList }) {
       this.tableSortData = sortList
-        .map((item) => {
-          return `${item.order === 'asc' ? '' : '-'}${item.property}`
-        })
-        .join(',')
+          .map((item) => {
+            return `${item.order === 'asc' ? '' : '-'}${item.property}`
+          })
+          .join(',')
       this.updateTableDataByFilter()
     },
     filterChangeEvent({ column, property, values, datas, filterList, $event }) {
-        if (property === 'is_internship') {
+      if (property === 'roles') {
+        this.tableFilterData = {
+          ...this.tableFilterData,
+          // role_id_list: values && values.length ? values.join(',') : undefined,
+          role_id_list: values && values.length ? values : undefined,
+        }
+      } else if (property === 'is_internship') {
         this.tableFilterData = {
           ...this.tableFilterData,
           is_internship: values && values.length ? values[0] : undefined,
@@ -1098,7 +1126,8 @@ export default {
           }
         }
       }
-      .ops-setting-batch{
+
+      .ops-setting-batch {
         width: 100%;
         display: flex;
         justify-content: space-between;

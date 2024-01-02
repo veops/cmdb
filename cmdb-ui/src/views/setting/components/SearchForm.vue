@@ -9,7 +9,7 @@
       >
         <div slot="popover_item" class="search-form-bar-filter">
           <a-icon :class="filterExp.length ? 'search-form-bar-filter-icon' : 'search-form-bar-filter-icon_selected'" type="filter"/>
-          条件过滤
+          {{ $t('cs.components.conditionFilter') }}
           <a-icon :class="filterExp.length ? 'search-form-bar-filter-icon' : 'search-form-bar-filter-icon_selected'" type="down"/>
         </div>
       </FilterComp>

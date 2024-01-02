@@ -7,6 +7,7 @@ import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import { setDocumentTitle, domTitle } from '@/utils/domUtil'
 import { ACCESS_TOKEN } from './store/global/mutation-types'
+import i18n from '@/lang'
 
 NProgress.configure({ showSpinner: false })
 
@@ -17,7 +18,7 @@ const whitePath = ['/user/login', '/user/logout', '/user/register', '/api/sso/lo
 //  登录页面处理处理 是否使用单点登录
 router.beforeEach(async (to, from, next) => {
   NProgress.start() // start progress bar
-  to.meta && (!!to.meta.title && setDocumentTitle(`${to.meta.title} - ${domTitle}`))
+  to.meta && (!!to.meta.title && setDocumentTitle(`${i18n.t(to.meta.title)} - ${domTitle}`))
 
   const authed = store.state.authed
   const auth_type = localStorage.getItem('ops_auth_type')
