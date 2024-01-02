@@ -1,9 +1,9 @@
 <template>
   <div :style="{ marginBottom: '-24px' }">
     <div v-if="!subscribeTreeViewCiTypesLoading && subscribeTreeViewCiTypes.length === 0">
-      <a-alert message="请先到 我的订阅 页面完成订阅!" banner></a-alert>
+      <a-alert :message="$t('cmdb.tree.tips1')" banner></a-alert>
     </div>
-    <div class="tree-views">
+    <div class="tree-views" v-else>
       <div class="cmdb-views-header">
         <span>
           <span class="cmdb-views-header-title">{{ currentCiTypeName }}</span>
@@ -15,16 +15,12 @@
             "
             class="cmdb-views-header-metadata"
           ><a-icon type="info-circle" />
-            属性说明
+            {{ $t('cmdb.components.attributeDesc') }}
           </span>
         </span>
-        <a-button
-          size="small"
-          icon="plus"
-          type="primary"
-          @click="$refs.create.handleOpen(true, 'create')"
-        >新建</a-button
-        >
+        <a-button size="small" icon="plus" type="primary" @click="$refs.create.handleOpen(true, 'create')">{{
+          $t('create')
+        }}</a-button>
       </div>
       <SplitPane
         :min="200"
@@ -82,12 +78,12 @@
                   </span>
                   <span class="tree-views-left-header-name">{{ ciType.alias || ciType.name }}</span>
                   <div class="actions">
-                    <a-tooltip title="取消订阅">
+                    <a-tooltip :title="$t('cmdb.preference.cancelSub')">
                       <div class="action" @click="(e) => cancelSubscribe(e, ciType)">
                         <a-icon type="star" />
                       </div>
                     </a-tooltip>
-                    <a-tooltip title="订阅设置">
+                    <a-tooltip :title="$t('cmdb.tree.subSettings')">
                       <div class="action" @click="(e) => subscribeSetting(e, ciType)">
                         <a-icon type="setting" />
                       </div>
@@ -132,12 +128,12 @@
               />
               <div class="ops-list-batch-action">
                 <template v-if="selectedRowKeys.length">
-                  <span @click="$refs.create.handleOpen(true, 'update')">修改</span>
+                  <span @click="$refs.create.handleOpen(true, 'update')">{{ $t('update') }}</span>
                   <a-divider type="vertical" />
-                  <span @click="openBatchDownload">下载</span>
+                  <span @click="openBatchDownload">{{ $t('download') }}</span>
                   <a-divider type="vertical" />
-                  <span @click="batchDelete">删除</span>
-                  <span>选取：{{ selectedRowKeys.length }} 项</span>
+                  <span @click="batchDelete">{{ $t('delete') }}</span>
+                  <span>{{ $t('cmdb.ci.selectRows', { rows: selectedRowKeys.length }) }}</span>
                 </template>
               </div>
             </div>
@@ -199,7 +195,7 @@
                     :getPopupContainer="(trigger) => trigger.parentElement"
                     :style="{ width: '100%', height: '32px' }"
                     v-model="row[col.field]"
-                    placeholder="请选择"
+                    :placeholder="$t('placeholder2')"
                     v-if="col.is_choice"
                     :showArrow="false"
                     :mode="col.is_list ? 'multiple' : 'default'"
@@ -234,7 +230,7 @@
                     :getPopupContainer="(trigger) => trigger.parentElement"
                     :style="{ width: '100%', height: '32px' }"
                     v-model="row[col.field]"
-                    placeholder="请选择"
+                    :placeholder="$t('placeholder2')"
                     v-else-if="col.is_list"
                     :showArrow="false"
                     mode="tags"
@@ -314,9 +310,9 @@
                   </template>
                 </template>
               </vxe-table-column>
-              <vxe-table-column align="left" field="operate" fixed="right" width="80">
+              <vxe-table-column align="left" field="operate" fixed="right" width="120">
                 <template #header>
-                  <span>操作</span>
+                  <span>{{ $t('operation') }}</span>
                   <EditAttrsPopover :typeId="Number(typeId)" class="operation-icon" @refresh="refreshAfterEditAttrs" />
                 </template>
                 <template #default="{ row }">
@@ -324,13 +320,13 @@
                     <a @click="$refs.detail.create(row.ci_id || row._id)">
                       <a-icon type="unordered-list" />
                     </a>
-                    <a-tooltip title="添加关系">
+                    <a-tooltip :title="$t('cmdb.ci.addRelation')">
                       <a @click="$refs.detail.create(row.ci_id || row._id, 'tab_2', '2')">
                         <a-icon type="retweet" />
                       </a>
                     </a-tooltip>
                     <template>
-                      <a-tooltip title="删除实例">
+                      <a-tooltip :title="$t('cmdb.ciType.deleteInstance')">
                         <a @click="deleteCI(row)" :style="{ color: 'red' }">
                           <a-icon type="delete" />
                         </a>
@@ -340,14 +336,14 @@
                 </template>
               </vxe-table-column>
               <template #empty>
-                <div v-if="loading" style="height: 200px; line-height: 200px">加载中...</div>
+                <div v-if="loading" style="height: 200px; line-height: 200px">{{ $t('loading') }}</div>
                 <div v-else>
                   <img :style="{ width: '200px' }" :src="require('@/assets/data_empty.png')" />
-                  <div>暂无数据</div>
+                  <div>{{ $t('noData') }}</div>
                 </div>
               </template>
               <template #loading>
-                <div style="height: 200px; line-height: 200px">{{ loadTip || '加载中...' }}</div>
+                <div style="height: 200px; line-height: 200px">{{ loadTip || $t('loading') }}</div>
               </template>
             </ops-table>
             <div :style="{ textAlign: 'right', marginTop: '4px' }">
@@ -359,7 +355,14 @@
                 show-quick-jumper
                 :page-size="pageSize"
                 :page-size-options="pageSizeOptions"
-                :show-total="(total, range) => `当前${range[0]}-${range[1]} 共 ${total}条记录`"
+                :show-total="
+                  (total, range) =>
+                    $t('pagination.total', {
+                      range0: range[0],
+                      range1: range[1],
+                      total,
+                    })
+                "
                 :style="{ alignSelf: 'flex-end' }"
                 @showSizeChange="onShowSizeChange"
                 @change="
@@ -370,8 +373,8 @@
                 "
               >
                 <template slot="buildOptionText" slot-scope="props">
-                  <span v-if="props.value !== '100000'">{{ props.value }}条/页</span>
-                  <span v-if="props.value === '100000'">全部</span>
+                  <span v-if="props.value !== '100000'">{{ props.value }}{{ $t('itemsPerPage') }}</span>
+                  <span v-if="props.value === '100000'">{{ $t('all') }}</span>
                 </template>
               </a-pagination>
             </div>
@@ -516,7 +519,7 @@ export default {
     },
   },
   watch: {
-    '$route.path': function (newPath, oldPath) {
+    '$route.path': function(newPath, oldPath) {
       this.newLoad = true
       this.typeId = this.$route.params.typeId
       this.initPage()
@@ -539,9 +542,6 @@ export default {
   },
   inject: ['reload'],
   async created() {
-    // const res = await getSubscribeTreeView()
-    // this.subscribeTreeViewCiTypes = res
-    // await this.initPage()
     await this.getTreeViews()
   },
   mounted() {
@@ -780,15 +780,13 @@ export default {
       e.preventDefault()
       const that = this
       this.$confirm({
-        title: '警告',
+        title: that.$t('warning'),
         content: (h) => (
-          <div>
-            确认要取消订阅 <span style={{ fontWeight: 700, color: 'black' }}>{ciType.alias || ciType.name}</span>？
-          </div>
+          <div>{that.$t('cmdb.preference.confirmcancelSub2', { name: ciType.alias || ciType.name })}</div>
         ),
         onOk() {
           subscribeTreeView(ciType.type_id, []).then(() => {
-            that.$message.success('取消订阅成功')
+            that.$message.success(that.$t('cmdb.preference.cancelSubSuccess'))
             if (Number(that.$route.params.typeId) === Number(ciType.type_id)) {
               that.$router.history.push('/cmdb/treeviews')
               that.reload()
@@ -902,34 +900,17 @@ export default {
     deleteCI(record) {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: '确认删除？',
+        title: that.$t('warning'),
+        content: that.$t('confirmDelete'),
         onOk() {
           deleteCI(record.ci_id || record._id).then((res) => {
-            that.$message.success('删除成功！')
+            that.$message.success(that.$t('deleteSuccess'))
             that.reload()
           })
         },
       })
     },
     onSelectChange(e) {
-      /* const current = records.map((i) => i._id)
-
-      const cached = new Set(this.selectedRowKeys)
-      if (checked) {
-        current.forEach((i) => {
-          cached.add(i)
-        })
-      } else {
-        if (row) {
-          cached.delete(row._id)
-        } else {
-          this.instanceList.map((row) => {
-            cached.delete(row._id)
-          })
-        }
-      }
-      this.selectedRowKeys = Array.from(cached) */
       const xTable = this.$refs.xTable.getVxetableRef()
       const records = [...xTable.getCheckboxRecords(), ...xTable.getCheckboxReserveRecords()]
       this.selectedRowKeys = records.map((i) => i.ci_id || i._id)
@@ -1001,7 +982,7 @@ export default {
       if (JSON.stringify(data) !== '{}') {
         updateCI(row._id, data)
           .then(() => {
-            this.$message.success('保存成功！')
+            this.$message.success(this.$t('saveSuccess'))
             const arr1 = this.treeViewsLevels.map((item) => item.name)
             const arr2 = Object.keys(data)
             const arr3 = arr1.filter((item) => {
@@ -1054,10 +1035,7 @@ export default {
       this.$refs.jsonEditor.open(column, row)
     },
     async openBatchDownload() {
-      this.$refs.batchDownload.open({
-        preferenceAttrList: this.currentAttrList,
-        ciTypeName: this.$route.meta.title || this.$route.meta.name,
-      })
+      this.$refs.batchDownload.open({ preferenceAttrList: this.currentAttrList, ciTypeName: this.currentCiTypeName })
     },
     batchDownload({ filename, type, checkedKeys }) {
       console.log(filename, type)
@@ -1090,8 +1068,8 @@ export default {
     batchDelete() {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: '确认删除？',
+        title: that.$t('warning'),
+        content: that.$t('confirmDelete'),
         onOk() {
           that.batchDeleteAsync()
         },
@@ -1101,7 +1079,7 @@ export default {
       let successNum = 0
       let errorNum = 0
       this.loading = true
-      this.loadTip = `正在删除...`
+      this.loadTip = this.$t('cmdb.ci.batchDeleting')
       const floor = Math.ceil(this.selectedRowKeys.length / 6)
       for (let i = 0; i < floor; i++) {
         const itemList = this.selectedRowKeys.slice(6 * i, 6 * i + 6)
@@ -1117,7 +1095,11 @@ export default {
             })
           })
           .finally(() => {
-            this.loadTip = `正在删除，共${this.selectedRowKeys.length}个，成功${successNum}个，失败${errorNum}个`
+            this.loadTip = this.$t('cmdb.ci.batchDeleting2', {
+              total: this.selectedRowKeys.length,
+              successNum: successNum,
+              errorNum: errorNum,
+            })
           })
       }
       this.loading = false
@@ -1130,8 +1112,8 @@ export default {
     batchUpdateFromCreateInstance(values) {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: '确认要批量修改吗 ?',
+        title: that.$t('warning'),
+        content: that.$t('cmdb.ci.batchUpdateConfirm'),
         onOk() {
           that.batchUpdateAsync(values)
         },
@@ -1141,7 +1123,7 @@ export default {
       let successNum = 0
       let errorNum = 0
       this.loading = true
-      this.loadTip = `正在批量修改...`
+      this.loadTip = this.$t('cmdb.ci.batchUpdateInProgress')
       const payload = {}
       Object.keys(values).forEach((key) => {
         if (values[key] || values[key] === 0) {
@@ -1163,7 +1145,11 @@ export default {
             errorNum += 1
           })
           .finally(() => {
-            this.loadTip = `正在批量修改，共${this.selectedRowKeys.length}个，成功${successNum}个，失败${errorNum}个`
+            this.loadTip = this.$t('cmdb.ci.batchUpdateInProgress2', {
+              total: this.selectedRowKeys.length,
+              successNum: successNum,
+              errorNum: errorNum,
+            })
           })
       }
       this.loading = false
@@ -1217,10 +1203,10 @@ export default {
       const text = `q=_type:${this.typeId}${exp ? `,${exp}` : ''}${fuzzySearch ? `,*${fuzzySearch}*` : ''}`
       this.$copyText(text)
         .then(() => {
-          this.$message.success('复制成功！')
+          this.$message.success(this.$t('copySuccess'))
         })
         .catch(() => {
-          this.$message.error('复制失败！')
+          this.$message.error(this.$t('cmdb.ci.copyFailed'))
         })
     },
   },

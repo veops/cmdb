@@ -9,10 +9,10 @@
           <a-dropdown class="dropdown" size="small" placement="topCenter" :trigger="['click']" :disabled="dropdownIsDisabled">
             <a-menu slot="overlay">
               <a-menu-item v-for="(size,index) in pageSizes" :key="index" @click="handleItemClick(size)">
-                {{ size }}条/页
+                {{ size }}{{ $t('itemsPerPage') }}
               </a-menu-item>
             </a-menu>
-            <a-button size="small"> {{ pageSize }}条/页 <a-icon type="down" /> </a-button>
+            <a-button size="small"> {{ pageSize }}{{ $t('itemsPerPage') }}<a-icon type="down" /> </a-button>
           </a-dropdown>
         </a-space>
       </a-col>

@@ -1,7 +1,7 @@
 <template>
   <CustomDrawer
     :hasFooter="false"
-    title="正则匹配结果"
+    :title="$t('acl.viewMatchResult')"
     :visible="patternVisible"
     width="500"
     @close="
@@ -16,16 +16,16 @@
       class="ops-stripe-table"
       :data="tableData"
       :max-height="`${windowHeight - 110}px`">
-      <vxe-table-column field="name" title="资源名"></vxe-table-column>
-      <vxe-table-column field="uid" title="创建人">
+      <vxe-table-column field="name" :title="$t('acl.resourceName')"></vxe-table-column>
+      <vxe-table-column field="uid" :title="$t('acl.creator')">
         <template #default="{row}">
           {{ getRoleName(row.uid) }}
         </template>
       </vxe-table-column>
-      <vxe-table-column field="created_at" title="创建时间"></vxe-table-column>
+      <vxe-table-column field="created_at" :title="$t('created_at')"></vxe-table-column>
       <template slot="empty">
         <img :src="require(`@/assets/data_empty.png`)" />
-        <p style="font-size: 14px; line-height: 17px; color: rgba(0, 0, 0, 0.6)">暂无数据</p>
+        <p style="font-size: 14px; line-height: 17px; color: rgba(0, 0, 0, 0.6)">{{ $t('noData') }}</p>
       </template>
     </vxe-table>
   </CustomDrawer>

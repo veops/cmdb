@@ -7,7 +7,7 @@
         width: '200px',
         height: `${height}px`,
       }"
-      :titles="['未选属性', '已选属性']"
+      :titles="[$t('cmdb.components.unselectAttributes'), $t('cmdb.components.selectAttributes')]"
       :render="(item) => item.title"
       :targetKeys="targetKeys"
       @change="handleChange"
@@ -16,7 +16,7 @@
       :filterOption="filterOption"
       class="cmdb-transfer"
     >
-      <span slot="notFoundContent">暂无数据</span>
+      <span slot="notFoundContent">{{ $t('noData') }}</span>
       <template slot="children" slot-scope="{ props: { direction, filteredItems } }">
         <div class="ant-transfer-list-content" v-if="direction === 'right'">
           <draggable :value="targetKeys" animation="300" @end="dragEnd" :disabled="!isSortable">
@@ -27,10 +27,11 @@
               :style="{ height: '38px' }"
             >
               <li
-                :class="{
-                  'ant-transfer-list-content-item': true,
-                  'ant-transfer-list-content-item-selected': selectedKeys.includes(item.key),
-                }"
+                :class="
+                  `ant-transfer-list-content-item ${
+                    selectedKeys.includes(item.key) ? 'ant-transfer-list-content-item-selected' : ''
+                  }`
+                "
                 @click="setSelectedKeys(item)"
               >
                 <OpsMoveIcon class="move-icon" />
@@ -62,9 +63,11 @@
             :style="{ height: '38px' }"
           >
             <li
-              :class="`ant-transfer-list-content-item ${
-                selectedKeys.includes(item.key) ? 'ant-transfer-list-content-item-selected' : ''
-              }`"
+              :class="
+                `ant-transfer-list-content-item ${
+                  selectedKeys.includes(item.key) ? 'ant-transfer-list-content-item-selected' : ''
+                }`
+              "
               @click="setSelectedKeys(item)"
             >
               <div class="ant-transfer-list-content-item-text" style="display: inline">
@@ -83,7 +86,7 @@
       </template>
     </a-transfer>
     <div v-if="hasFooter" :style="{ marginTop: '5px', height: '20px' }">
-      <a-button :style="{ float: 'right' }" size="small" @click="handleSubmit" type="primary">确定</a-button>
+      <a-button :style="{ float: 'right' }" size="small" @click="handleSubmit" type="primary">{{ $t('confirm') }}</a-button>
     </div>
   </div>
 </template>
@@ -110,12 +113,12 @@ export default {
       default: true,
     },
     isSortable: {
-      // 右侧是否可排序
+      // Is the right side sortable?
       type: Boolean,
       default: true,
     },
     isFixable: {
-      // 右侧是否可固定
+      // Can the right side be fixed?
       type: Boolean,
       default: true,
     },

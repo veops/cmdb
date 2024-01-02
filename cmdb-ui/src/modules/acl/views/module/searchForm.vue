@@ -19,7 +19,7 @@
               @popupScroll="loadMoreData(attr.name, $event)"
               @search="(value) => fetchData(value, attr.name)"
               v-model="queryParams[attr.name]"
-              placeholder="请选择"
+              :placeholder="$t('placeholder2')"
               v-if="attr.is_choice"
               show-search
               :filter-option="filterOption"
@@ -38,7 +38,6 @@
               @change="onChange"
               :style="{ width: '100%' }"
               format="YYYY-MM-DD HH:mm:ss"
-              :placeholder="['开始时间', '结束时间']"
               :show-time="{
                 hideDisabledOptions: true,
                 defaultValue: [moment('00:00:00', 'HH:mm:ss'), moment('23:59:59', 'HH:mm:ss')],
@@ -67,7 +66,7 @@
                 @popupScroll="loadMoreData(item.name, $event)"
                 @search="(value) => fetchData(value, item.name)"
                 v-model="queryParams[item.name]"
-                placeholder="请选择"
+                :placeholder="$t('placeholder2')"
                 v-if="item.is_choice"
                 show-search
                 :filter-option="filterOption"
@@ -85,7 +84,7 @@
                 :style="{ width: '100%' }"
                 @change="onChange"
                 format="YYYY-MM-DD HH:mm"
-                :placeholder="['开始时间', '结束时间']"
+                :placeholder="[$t('acl.startAt'), $t('acl.endAt')]"
                 v-else-if="valueTypeMap[item.value_type] == 'date' || valueTypeMap[item.value_type] == 'datetime'"
                 :show-time="{
                   hideDisabledOptions: true,
@@ -107,13 +106,13 @@
             v-model="checked"
           />
           <a-button :style="{ marginLeft: '8px' }" type="primary" html-type="submit" @click="handleSearch">
-            查询
+            {{ $t('query') }}
           </a-button>
           <a-button :style="{ marginLeft: '8px' }" @click="handleReset">
-            重置
+            {{ $t('reset') }}
           </a-button>
           <a :style="{ marginLeft: '8px', fontSize: '12px' }" @click="toggle" v-if="attrList.length >= 5">
-            {{ expand ? '隐藏' : '展开' }} <a-icon :type="expand ? 'up' : 'down'" />
+            {{ expand ? $t('expand') : $t('expand') }} <a-icon :type="expand ? 'up' : 'down'" />
           </a>
         </a-col>
       </a-row>

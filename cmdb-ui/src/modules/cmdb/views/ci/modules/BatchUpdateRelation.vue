@@ -1,6 +1,6 @@
 <template>
   <a-drawer
-    title="批量添加关系"
+    :title="$t('cmdb.ci.batchAddRelation')"
     width="50%"
     @close="() => { visible = false; $emit('refresh', true) }"
     :visible="visible"

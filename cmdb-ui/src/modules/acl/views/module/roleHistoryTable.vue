@@ -4,7 +4,7 @@
       ref="child"
       :attrList="roleTableAttrList"
       :hasSwitch="true"
-      switchValue="角色关系"
+      :switchValue="$t('acl.roleRelation')"
       @onSwitchChange="onSwitchChange"
       @search="handleSearch"
       @searchFormReset="searchFormReset"
@@ -19,16 +19,16 @@
       resizable
       :height="`${windowHeight - 310}px`"
     >
-      <vxe-column field="created_at" width="144px" title="操作时间"></vxe-column>
-      <vxe-column field="operate_uid" title="操作员" width="130px"></vxe-column>
-      <vxe-column field="operate_type" title="操作" width="112px">
+      <vxe-column field="created_at" width="144px" :title="$t('acl.operateTime')"></vxe-column>
+      <vxe-column field="operate_uid" :title="$t('acl.operator')" width="130px"></vxe-column>
+      <vxe-column field="operate_type" :title="$t('operation')" width="112px">
         <template #default="{ row }">
           <template>
             <a-tag :color="handleTagColor(row.operate_type)">{{ operateTypeMap.get(row.operate_type) }}</a-tag>
           </template>
         </template>
       </vxe-column>
-      <vxe-column :title="checked ? '角色' : '角色'">
+      <vxe-column :title="checked ? $t('acl.role2') : $t('acl.role2')">
         <template #default="{ row }">
           <template v-if="!checked">
             <a-tag color="blue">{{ row.current.name || row.origin.name }}</a-tag>
@@ -40,7 +40,7 @@
           </template>
         </template>
       </vxe-column>
-      <vxe-column :title="checked ? '继承自' : '管理员'" :width="checked ? '350px' : '80px'">
+      <vxe-column :title="checked ? $t('acl.inheritedFrom') : $t('acl.admin')" :width="checked ? '350px' : '80px'">
         <template #default="{ row }">
           <template v-if="!checked">
             <a-icon type="check" v-if="row.current.is_app_admin" />
@@ -52,14 +52,14 @@
           </template>
         </template>
       </vxe-column>
-      <vxe-column title="描述" v-if="!checked">
+      <vxe-column :title="$t('desc')" v-if="!checked">
         <template #default="{ row }">
           <p>
             {{ row.description }}
           </p>
         </template>
       </vxe-column>
-      <vxe-column field="source" title="来源" width="100px"></vxe-column>
+      <vxe-column field="source" :title="$t('acl.source')" width="100px"></vxe-column>
     </vxe-table>
     <pager
       :current-page.sync="queryParams.page"
@@ -105,13 +105,6 @@ export default {
       checked: false,
       tableData: [],
       app_id: this.$route.name.split('_')[0],
-      operateTypeMap: new Map([
-        ['create', '新建'],
-        ['delete', '删除'],
-        ['update', '修改'],
-        ['role_relation_add', '添加角色关系'],
-        ['role_relation_delete', '删除角色关系'],
-      ]),
       colorMap: new Map([
         ['create', 'green'],
         ['delete', 'red'],
@@ -127,42 +120,53 @@ export default {
         start: '',
         end: '',
       },
-      roleTableAttrList: [
+    }
+  },
+  computed: {
+    operateTypeMap() {
+      return new Map([
+        ['create', this.$t('create')],
+        ['update', this.$t('update')],
+        ['delete', this.$t('delete')],
+        ['role_relation_add', this.$t('acl.roleRelationAdd')],
+        ['role_relation_delete', this.$t('acl.roleRelationDelete')],
+      ])
+    },
+    windowHeight() {
+      return this.$store.state.windowHeight
+    },
+    tableDataLength() {
+      return this.tableData.length
+    },
+    roleTableAttrList() {
+      return [
         {
-          alias: '日期',
+          alias: this.$t('acl.date'),
           is_choice: false,
           name: 'datetime',
           value_type: '3',
         },
         {
-          alias: '操作员',
+          alias: this.$t('acl.operator'),
           is_choice: true,
           name: 'operate_uid',
           value_type: '2',
           choice_value: this.allUsers,
         },
         {
-          alias: '操作',
+          alias: this.$t('operation'),
           is_choice: true,
           name: 'operate_type',
           value_type: '2',
           choice_value: [
-            { 新建: 'create' },
-            { 修改: 'update' },
-            { 删除: 'delete' },
-            { 添加角色关系: 'role_relation_add' },
-            { 删除角色关系: 'role_relation_delete' },
+            { [this.$t('create')]: 'create' },
+            { [this.$t('update')]: 'update' },
+            { [this.$t('delete')]: 'delete' },
+            { [this.$t('acl.roleRelationAdd')]: 'role_relation_add' },
+            { [this.$t('acl.roleRelationDelete')]: 'role_relation_delete' },
           ],
         },
-      ],
-    }
-  },
-  computed: {
-    windowHeight() {
-      return this.$store.state.windowHeight
-    },
-    tableDataLength() {
-      return this.tableData.length
+      ]
     },
   },
   async created() {
@@ -273,7 +277,7 @@ export default {
       switch (operate_type) {
         // create
         case 'create': {
-          item.description = `新建角色：${item.current.name}`
+          item.description = `${this.$t('acl.addRole')}${item.current.name}`
           break
         }
         case 'update': {
@@ -283,15 +287,15 @@ export default {
             const oldVal = item.origin[key]
             if (!_.isEqual(newVal, oldVal) && key !== 'updated_at' && key !== 'deleted_at' && key !== 'created_at') {
               if (oldVal === null) {
-                const str = ` 【 ${key} : 改为 ${newVal} 】 `
+                const str = ` 【 ${key} : -> ${newVal} 】 `
                 item.description += str
               } else {
-                const str = ` 【 ${key} : 由 ${oldVal} 改为 ${newVal} 】 `
-                item.description += str
+                const str = ` 【 ${key} : ${oldVal} -> ${newVal} 】 `
+                item.description += ` 【 ${key} : ${oldVal} -> ${newVal} 】 `
               }
             }
           }
-          if (!item.description) item.description = '没有修改'
+          if (!item.description) item.description = this.$t('acl.noChange')
           break
         }
         case 'delete': {
@@ -321,7 +325,7 @@ export default {
           resourceMap.forEach((value, key) => {
             permsArr.push(`${id2resources[key].name}：${value}`)
           })
-          item.description = `继承者：${child_ids}\n继承自：${parent_ids}\n涉及资源及权限：\n${permsArr.join(`\n`)}`
+          item.description = `${this.$t('acl.heir')}：${child_ids}\n${this.$t('acl.inheritedFrom')}：${parent_ids}\n${this.$t('acl.involvingRP')}：\n${permsArr.join(`\n`)}`
           break
         }
       }

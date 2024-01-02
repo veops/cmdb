@@ -15,19 +15,19 @@
       :edit-config="isEdit ? { trigger: 'click', mode: 'cell' } : {}"
     >
       <template v-if="isEdit">
-        <vxe-colgroup title="自动发现">
-          <vxe-column field="name" title="名称" width="100"> </vxe-column>
-          <vxe-column field="type" title="类型" width="80"> </vxe-column>
-          <vxe-column field="example" title="示例值">
+        <vxe-colgroup :title="$t('cmdb.ciType.autoDiscovery')">
+          <vxe-column field="name" :title="$t('name')" width="100"> </vxe-column>
+          <vxe-column field="type" :title="$t('type')" width="80"> </vxe-column>
+          <vxe-column field="example" :title="$t('cmdb.components.example')">
             <template #default="{row}">
               <span v-if="row.type === 'json'">{{ JSON.stringify(row.example) }}</span>
               <span v-else>{{ row.example }}</span>
             </template>
           </vxe-column>
-          <vxe-column field="desc" title="描述"> </vxe-column>
+          <vxe-column field="desc" :title="$t('desc')"> </vxe-column>
         </vxe-colgroup>
-        <vxe-colgroup title="模型属性">
-          <vxe-column field="attr" title="名称" :edit-render="{}">
+        <vxe-colgroup :title="$t('cmdb.ciType.attributes')">
+          <vxe-column field="attr" :title="$t('name')" :edit-render="{}">
             <template #default="{row}">
               {{ row.attr }}
             </template>
@@ -45,15 +45,15 @@
         </vxe-colgroup>
       </template>
       <template v-else>
-        <vxe-column field="name" title="名称" width="100"> </vxe-column>
-        <vxe-column field="type" title="类型" width="80"> </vxe-column>
-        <vxe-column field="example" title="示例值">
+        <vxe-column field="name" :title="$t('name')" width="100"> </vxe-column>
+        <vxe-column field="type" :title="$t('type')" width="80"> </vxe-column>
+        <vxe-column field="example" :title="$t('cmdb.components.example')">
           <template #default="{row}">
             <span v-if="row.type === 'object'">{{ JSON.stringify(row.example) }}</span>
             <span v-else>{{ row.example }}</span>
           </template>
         </vxe-column>
-        <vxe-column field="desc" title="描述"> </vxe-column>
+        <vxe-column field="desc" :title="$t('desc')"> </vxe-column>
       </template>
     </vxe-table>
   </div>
@@ -61,12 +61,6 @@
 
 <script>
 import { getHttpCategories, getHttpAttributes, getSnmpAttributes } from '../../api/discovery'
-const httpMap = {
-  阿里云: { name: 'aliyun' },
-  腾讯云: { name: 'tencentcloud' },
-  华为云: { name: 'huaweicloud' },
-  AWS: { name: 'aws' },
-}
 export default {
   name: 'HttpSnmpAD',
   props: {
@@ -107,13 +101,21 @@ export default {
       const { ruleType, ruleName } = this
       return { ruleType, ruleName }
     },
+    httpMap() {
+      return {
+        [this.$t('cmdb.components.aliyun')]: { name: 'aliyun' },
+        [this.$t('cmdb.components.tencentcloud')]: { name: 'tencentcloud' },
+        [this.$t('cmdb.components.huaweicloud')]: { name: 'huaweicloud' },
+        AWS: { name: 'aws' },
+      }
+    },
   },
   watch: {
     currentCate: {
       immediate: true,
       handler(newVal) {
         if (newVal) {
-          getHttpAttributes(httpMap[`${this.ruleName}`].name, { category: newVal }).then((res) => {
+          getHttpAttributes(this.httpMap[`${this.ruleName}`].name, { category: newVal }).then((res) => {
             if (this.isEdit) {
               this.formatTableData(res)
             } else {
@@ -139,7 +141,7 @@ export default {
             })
           }
           if (ruleType === 'http' && ruleName) {
-            getHttpCategories(httpMap[`${this.ruleName}`].name).then((res) => {
+            getHttpCategories(this.httpMap[`${this.ruleName}`].name).then((res) => {
               this.categories = res
               if (res && res.length) {
                 this.currentCate = res[0]

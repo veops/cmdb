@@ -1,11 +1,11 @@
 <template>
   <div class="acl-trigger">
     <div class="acl-trigger-header">
-      <a-button type="primary" @click="handleCreateTrigger">新增触发器</a-button>
+      <a-button type="primary" @click="handleCreateTrigger">{{ $t('acl.addTrigger') }}</a-button>
       <a-input-search
         class="ops-input"
         :style="{ display: 'inline', marginLeft: '10px', width: '200px' }"
-        placeholder="搜索 | 名称"
+        :placeholder="`${$t('search')} | ${$t('name')}`"
         v-model="searchName"
         allowClear
         @search="filter"
@@ -46,18 +46,18 @@
         <a-tag v-for="(p, index) in row.permissions" :key="index">{{ p }}</a-tag>
       </template>
       <template #enabled_default="{row}">
-        <a-tag v-if="row.enabled" color="#2db7f5">启用</a-tag>
-        <a-tag v-else color="grey">禁用</a-tag>
+        <a-tag v-if="row.enabled" color="#2db7f5">{{ $t('acl.enable') }}</a-tag>
+        <a-tag v-else color="grey">{{ $t('acl.disable') }}</a-tag>
       </template>
       <template #action_default="{row}">
         <a-space>
-          <a-tooltip title="应用">
+          <a-tooltip :title="$t('acl.apply')">
             <a @click="handleApplyTrigger(row)" :style="{ color: '#0f9d58' }"><a-icon type="appstore"/></a>
           </a-tooltip>
-          <a-tooltip title="取消">
+          <a-tooltip :title="$t('cancel')">
             <a @click="handleCancelTrigger(row)" :style="{ color: 'orange' }"><a-icon type="stop"/></a>
           </a-tooltip>
-          <a-tooltip title="查看正则匹配结果">
+          <a-tooltip :title="$t('acl.viewMatchResult')">
             <a @click="handlePattern(row)" :style="{ color: 'purple' }"><a-icon type="eye"/></a>
           </a-tooltip>
           <a @click="handleEditTrigger(row)"><a-icon type="edit"/></a>
@@ -67,7 +67,7 @@
       <template slot="empty">
         <div>
           <img :style="{ width: '100px' }" :src="require('@/assets/data_empty.png')" />
-          <div>暂无数据</div>
+          <div>{{ $t('noData') }}</div>
         </div>
       </template>
     </vxe-grid>
@@ -102,9 +102,19 @@ export default {
       triggers: [],
       id2parents: [],
       id2perms: {},
-      tableColumns: [
+    }
+  },
+  computed: {
+    ...mapState({
+      windowHeight: (state) => state.windowHeight,
+    }),
+    app_id() {
+      return this.$route.name.split('_')[0]
+    },
+    tableColumns() {
+      return [
         {
-          title: '名称',
+          title: this.$t('name'),
           field: 'name',
           sortable: true,
           minWidth: '150px',
@@ -112,7 +122,7 @@ export default {
           showOverflow: 'tooltip',
         },
         {
-          title: '资源名',
+          title: this.$t('acl.resource'),
           field: 'wildcard',
           minWidth: '250px',
           showOverflow: 'tooltip',
@@ -121,15 +131,15 @@ export default {
           },
         },
         {
-          title: '资源类型',
+          title: this.$t('acl.resourceType'),
           field: 'resource_type_id',
-          minWidth: '100px',
+          minWidth: '120px',
           slots: {
             default: 'resourceTypeRender_default',
           },
         },
         {
-          title: '创建人',
+          title: this.$t('acl.creator'),
           field: 'users',
           minWidth: '150px',
           showOverflow: 'tooltip',
@@ -138,7 +148,7 @@ export default {
           },
         },
         {
-          title: '角色',
+          title: this.$t('acl.allRole'),
           field: 'roles',
           minWidth: '150px',
           slots: {
@@ -172,7 +182,7 @@ export default {
           },
         },
         {
-          title: '权限',
+          title: this.$t('acl.permission'),
           field: 'permissions',
           minWidth: '250px',
           slots: {
@@ -180,7 +190,7 @@ export default {
           },
         },
         {
-          title: '状态',
+          title: this.$t('status'),
           field: 'enabled',
           minWidth: '100px',
           slots: {
@@ -188,7 +198,7 @@ export default {
           },
         },
         {
-          title: '操作',
+          title: this.$t('operation'),
           field: 'action',
           width: '120px',
           fixed: 'right',
@@ -196,8 +206,8 @@ export default {
             default: 'action_default',
           },
         },
-      ],
-    }
+      ]
+    },
   },
   created() {
     this.loadRoles()
@@ -205,15 +215,6 @@ export default {
   },
   beforeMount() {
     this.loadTriggers()
-  },
-
-  computed: {
-    ...mapState({
-      windowHeight: (state) => state.windowHeight,
-    }),
-    app_id() {
-      return this.$route.name.split('_')[0]
-    },
   },
   methods: {
     loadTriggers() {
@@ -244,11 +245,11 @@ export default {
     handleDeleteTrigger(record) {
       const that = this
       this.$confirm({
-        title: '删除',
-        content: '确认删除该触发器吗？',
+        title: that.$t('warning'),
+        content: that.$t('acl.confirmDeleteTrigger'),
         onOk() {
           deleteTrigger(record.id).then((res) => {
-            that.$message.success('删除成功')
+            that.$message.success(that.$t('deleteSuccess'))
             that.loadTriggers()
           })
           // .catch(err => that.$httpError(err))
@@ -258,11 +259,11 @@ export default {
     handleApplyTrigger(record) {
       const that = this
       this.$confirm({
-        title: '规则应用',
-        content: '是否确定应用该触发器？',
+        title: that.$t('acl.ruleApply'),
+        content: that.$t('acl.triggerTip1'),
         onOk() {
           applyTrigger(record.id).then((res) => {
-            that.$message.success('提交成功!')
+            that.$message.success(that.$t('operateSuccess'))
           })
           // .catch(err => that.$httpError(err))
         },
@@ -271,11 +272,11 @@ export default {
     handleCancelTrigger(record) {
       const that = this
       this.$confirm({
-        title: '规则应用',
-        content: '是否取消应用该触发器?',
+        title: that.$t('acl.ruleApply'),
+        content: that.$t('acl.triggerTip2'),
         onOk() {
           cancelTrigger(record.id).then((res) => {
-            that.$message.success('提交成功！')
+            that.$message.success(that.$t('operateSuccess'))
           })
           // .catch(err => that.$httpError(err))
         },

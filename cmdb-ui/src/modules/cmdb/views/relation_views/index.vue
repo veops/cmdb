@@ -3,7 +3,7 @@
     <div v-if="relationViews.name2id && relationViews.name2id.length" class="relation-views-wrapper">
       <div class="cmdb-views-header">
         <span class="cmdb-views-header-title">{{ $route.meta.name }}</span>
-        <a-button size="small" icon="user-add" type="primary" ghost @click="handlePerm">授权</a-button>
+        <a-button size="small" icon="user-add" type="primary" ghost @click="handlePerm">{{ $t('grant') }}</a-button>
       </div>
       <SplitPane
         :min="200"
@@ -63,19 +63,19 @@
                   type="primary"
                   size="small"
                   @click="$refs.create.handleOpen(true, 'create')"
-                >新建</a-button
+                >{{ $t('create') }}</a-button
                 >
 
                 <div class="ops-list-batch-action" v-if="isLeaf && isShowBatchIcon">
                   <template v-if="selectedRowKeys.length">
-                    <span @click="$refs.create.handleOpen(true, 'update')">修改</span>
+                    <span @click="$refs.create.handleOpen(true, 'update')">{{ $t('update') }}</span>
                     <a-divider type="vertical" />
-                    <span @click="openBatchDownload">下载</span>
+                    <span @click="openBatchDownload">{{ $t('download') }}</span>
                     <a-divider type="vertical" />
-                    <span @click="batchDelete">删除实例</span>
+                    <span @click="batchDelete">{{ $t('cmdb.ciType.deleteInstance') }}</span>
                     <a-divider type="vertical" />
-                    <span @click="batchDeleteCIRelation">删除关系</span>
-                    <span>选取：{{ selectedRowKeys.length }} 项</span>
+                    <span @click="batchDeleteCIRelation">{{ $t('cmdb.history.deleteRelation') }}</span>
+                    <span>{{ $t('cmdb.ci.selectRows', { rows: selectedRowKeys.length }) }}</span>
                   </template>
                 </div>
                 <PreferenceSearch
@@ -141,7 +141,7 @@
                     :getPopupContainer="(trigger) => trigger.parentElement"
                     :style="{ width: '100%', height: '32px' }"
                     v-model="row[col.field]"
-                    placeholder="请选择"
+                    :placeholder="$t('placeholder2')"
                     v-if="col.is_choice"
                     :showArrow="false"
                     :mode="col.is_list ? 'multiple' : 'default'"
@@ -176,7 +176,7 @@
                     :getPopupContainer="(trigger) => trigger.parentElement"
                     :style="{ width: '100%', height: '32px' }"
                     v-model="row[col.field]"
-                    placeholder="请选择"
+                    :placeholder="$t('placeholder2')"
                     v-else-if="col.is_list"
                     :showArrow="false"
                     mode="tags"
@@ -256,9 +256,9 @@
                   </template>
                 </template>
               </vxe-table-column>
-              <vxe-column align="left" field="operate" fixed="right" width="80">
+              <vxe-column align="left" field="operate" fixed="right" width="120">
                 <template #header>
-                  <span>操作</span>
+                  <span>{{ $t('operation') }}</span>
                   <EditAttrsPopover
                     :typeId="Number(currentTypeId[0])"
                     class="operation-icon"
@@ -270,13 +270,13 @@
                     <a @click="$refs.detail.create(row.ci_id || row._id)">
                       <a-icon type="unordered-list" />
                     </a>
-                    <a-tooltip title="添加关系">
+                    <a-tooltip :title="$t('cmdb.ci.addRelation')">
                       <a @click="$refs.detail.create(row.ci_id || row._id, 'tab_2', '2')">
                         <a-icon type="retweet" />
                       </a>
                     </a-tooltip>
                     <template v-if="isLeaf">
-                      <a-tooltip title="删除实例">
+                      <a-tooltip :title="$t('cmdb.ciType.deleteInstance')">
                         <a @click="deleteCI(row)" :style="{ color: 'red' }">
                           <a-icon type="delete" />
                         </a>
@@ -286,10 +286,10 @@
                 </template>
               </vxe-column>
               <template #empty>
-                <div v-if="loading" style="height: 200px; line-height: 200px">加载中...</div>
+                <div v-if="loading" style="height: 200px; line-height: 200px">{{ $t('loading') }}</div>
                 <div v-else>
                   <img :style="{ width: '200px' }" :src="require('@/assets/data_empty.png')" />
-                  <div>暂无数据</div>
+                  <div>{{ $t('noData') }}</div>
                 </div>
               </template>
             </vxe-table>
@@ -303,12 +303,19 @@
                 :page-size="pageSize"
                 :page-size-options="pageSizeOptions"
                 @showSizeChange="onShowSizeChange"
-                :show-total="(total, range) => `当前${range[0]}-${range[1]} 共 ${total}条记录`"
+                :show-total="
+                  (total, range) =>
+                    $t('pagination.total', {
+                      range0: range[0],
+                      range1: range[1],
+                      total,
+                    })
+                "
                 :style="{ alignSelf: 'flex-end', marginRight: '12px' }"
               >
                 <template slot="buildOptionText" slot-scope="props">
-                  <span v-if="props.value !== '100000'">{{ props.value }}条/页</span>
-                  <span v-if="props.value === '100000'">全部</span>
+                  <span v-if="props.value !== '100000'">{{ props.value }}{{ $t('cmdb.history.itemsPerPage') }}</span>
+                  <span v-if="props.value === '100000'">{{ $t('cmdb.components.all') }}</span>
                 </template>
               </a-pagination>
             </div>
@@ -317,7 +324,7 @@
       </SplitPane>
     </div>
     <a-alert
-      message="管理员 还未配置业务关系, 或者你无权限访问!"
+      :message="$t('cmdb.serviceTreealert1')"
       banner
       v-else-if="relationViews.name2id && !relationViews.name2id.length"
     ></a-alert>
@@ -497,11 +504,11 @@ export default {
   },
   inject: ['reload'],
   watch: {
-    '$route.path': function (newPath, oldPath) {
+    '$route.path': function(newPath, oldPath) {
       this.viewId = this.$route.params.viewId
       this.reload()
     },
-    pageNo: function (newPage, oldPage) {
+    pageNo: function(newPage, oldPage) {
       this.loadData({ pageNo: newPage }, undefined, this.sortByTable)
     },
   },
@@ -1010,15 +1017,15 @@ export default {
           const that = this
 
           this.$confirm({
-            title: '警告',
+            title: that.$t('warning'),
             content: (h) => (
               <div>
-                确认删除 <strong>{Object.values(firstCIObj)[0]}</strong>？
+                {that.$t('confirmDelete2', { name: Object.values(firstCIObj)[0] })}
               </div>
             ),
             onOk() {
               deleteCIRelationView(_tempTreeParent[0], _tempTree[0], { ancestor_ids }).then((res) => {
-                that.$message.success('删除成功！')
+                that.$message.success(that.$t('deleteSuccess'))
                 setTimeout(() => {
                   that.reload()
                 }, 500)
@@ -1038,10 +1045,10 @@ export default {
       const currentShowType = this.showTypes.find((item) => item.id === Number(this.currentTypeId[0]))
       const that = this
       this.$confirm({
-        title: '警告',
+        title: that.$t('warning'),
         content: (h) => (
           <div>
-            确认将选中的 <strong>{currentShowType.alias || currentShowType.name}</strong> 从当前关系中删除？
+            {that.$t('cmdb.serviceTreedeleteRelationConfirm', { name: currentShowType.alias || currentShowType.name })}
           </div>
         ),
         onOk() {
@@ -1101,7 +1108,7 @@ export default {
             })
           })
         } else {
-          this.$message.error('权限不足！')
+          this.$message.error(this.$t('noPermission'))
         }
       })
     },
@@ -1242,7 +1249,7 @@ export default {
       if (JSON.stringify(data) !== '{}') {
         updateCI(row.ci_id || row._id, data)
           .then(() => {
-            this.$message.success('保存成功！')
+            this.$message.success(this.$t('saveSuccess'))
             $table.reloadRow(row, null)
             const _initialInstanceList = _.cloneDeep(this.initialInstanceList)
             _initialInstanceList[rowIndex] = {
@@ -1266,11 +1273,11 @@ export default {
     deleteCI(record) {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: '确认删除？',
+        title: that.$t('warning'),
+        content: that.$t('confirmDelete'),
         onOk() {
           deleteCI(record.ci_id || record._id).then((res) => {
-            that.$message.success('删除成功！')
+            that.$message.success(that.$t('deleteSuccess'))
             that.loadData({}, 'refreshNumber')
           })
         },
@@ -1298,8 +1305,8 @@ export default {
     batchUpdateFromCreateInstance(values) {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: '确认要批量修改吗 ?',
+        title: that.$t('warning'),
+        content: that.$t('cmdb.ci.batchUpdateConfirm'),
         onOk() {
           that.loading = true
           const payload = {}
@@ -1320,7 +1327,7 @@ export default {
           })
           Promise.all(promises)
             .then((res) => {
-              that.$message.success('批量修改成功')
+              that.$message.success(that.$t('updateSuccess'))
               that.$refs.create.visible = false
             })
             .catch((e) => {
@@ -1371,8 +1378,8 @@ export default {
     batchDelete() {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: '确认删除？',
+        title: that.$t('warning'),
+        content: that.$t('confirmDelete'),
         onOk() {
           that.loading = true
           const promises = that.selectedRowKeys.map((c) => {
@@ -1382,7 +1389,7 @@ export default {
           })
           Promise.all(promises)
             .then((res) => {
-              that.$message.success('删除成功')
+              that.$message.success(that.$t('deleteSuccess'))
             })
             .catch((e) => {
               console.log(e)
@@ -1445,10 +1452,10 @@ export default {
       const text = `q=_type:${this.currentTypeId[0]}${exp ? `,${exp}` : ''}${fuzzySearch ? `,*${fuzzySearch}*` : ''}`
       this.$copyText(text)
         .then(() => {
-          this.$message.success('复制成功！')
+          this.$message.success(this.$t('copySuccess'))
         })
         .catch(() => {
-          this.$message.error('复制失败！')
+          this.$message.error(this.$t('cmdb.serviceTreecopyFailed'))
         })
     },
   },

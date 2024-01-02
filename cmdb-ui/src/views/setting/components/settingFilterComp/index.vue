@@ -7,7 +7,7 @@
     @visibleChange="visibleChange"
   >
     <slot name="popover_item">
-      <a-button type="primary" ghost>条件过滤<a-icon type="filter"/></a-button>
+      <a-button type="primary" ghost>{{ $t('cs.components.conditionFilter') }}<a-icon type="filter"/></a-button>
     </slot>
     <template slot="content">
       <svg
@@ -106,7 +106,7 @@
           searchable
           v-if="isChoiceByProperty(item.column) && (item.operator === 1 || item.operator === 2)"
           :options="getChoiceValueByProperty(item.column)"
-          placeholder="请选择"
+          :placeholder="$t('cs.components.selectPlaceholder')"
           :normalizer="
             (node) => {
               return {
@@ -133,26 +133,26 @@
           v-else-if="item.operator !== 7 && item.operator !== 8"
           size="small"
           v-model="item.value"
-          :placeholder="item.exp === 'in' || item.exp === '~in' ? '以 ; 分隔' : ''"
+          :placeholder="item.exp === 'in' || item.exp === '~in' ? $t('cs.components.operatorInPlaceholder') : ''"
           class="ops-input"
         ></a-input>
         <!-- <div v-else :style="{ width: '175px' }"></div> -->
-        <a-tooltip title="复制">
+        <a-tooltip :title="$t('cs.components.copy')">
           <a class="operation" @click="handleCopyRule(item)"><a-icon type="copy"/></a>
         </a-tooltip>
-        <a-tooltip title="删除">
+        <a-tooltip :title="$t('delete')">
           <a class="operation" @click="handleDeleteRule(item)" :style="{ color: 'red' }"><a-icon type="delete"/></a>
         </a-tooltip>
 
       </a-space>
       <div class="table-filter-add">
-        <a @click="handleAddRule">+ 新增</a>
+        <a @click="handleAddRule">+ {{ $t('new') }}</a>
       </div>
       <a-divider :style="{ margin: '10px 0' }" />
       <div style="width:534px">
         <a-space :style="{ display: 'flex', justifyContent: 'flex-end' }">
-          <a-button type="primary" size="small" @click="handleSubmit">确定</a-button>
-          <a-button size="small" @click="handleClear">清空</a-button>
+          <a-button type="primary" size="small" @click="handleSubmit">{{ $t('confirm') }}</a-button>
+          <a-button size="small" @click="handleClear">{{ $t('clear') }}</a-button>
         </a-space>
       </div>
     </template>

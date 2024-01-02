@@ -1,9 +1,9 @@
 <template>
   <div>
     <div class="headers-header">
-      <span>请求参数</span>
+      <span>{{ $t('cmdb.components.requestParam') }}</span>
       <a-space>
-        <a-tooltip title="清空">
+        <a-tooltip :title="$t('cmdb.components.clear')">
           <ops-icon
             type="icon-xianxing-delete"
             @click="
@@ -19,7 +19,7 @@
             "
           />
         </a-tooltip>
-        <a-tooltip title="新增">
+        <a-tooltip :title="$t('new')">
           <a-icon type="plus" @click="add" />
         </a-tooltip>
       </a-space>
@@ -27,8 +27,8 @@
     <div class="headers-box">
       <table>
         <tr v-for="(item, index) in headers" :key="item.id">
-          <td><a-input class="headers-input" v-model="item.key" :placeholder="`参数${index + 1}`" /></td>
-          <td><a-input class="headers-input" v-model="item.value" :placeholder="`值${index + 1}`" /></td>
+          <td><a-input class="headers-input" v-model="item.key" :placeholder="$t('cmdb.components.param', { param: `${index + 1}` })" /></td>
+          <td><a-input class="headers-input" v-model="item.value" :placeholder="$t('cmdb.components.value', { value: `${index + 1}` })" /></td>
           <td>
             <a style="color:red">
               <ops-icon type="icon-xianxing-delete" @click="deleteParam(index)" />

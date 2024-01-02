@@ -25,10 +25,10 @@
     <div style="margin-top:10px">
       <table v-if="authorizationType === 'BasicAuth'">
         <tr>
-          <td><a-input class="authorization-input" v-model="BasicAuth.username" placeholder="用户名" /></td>
+          <td><a-input class="authorization-input" v-model="BasicAuth.username" :placeholder="$t('cmdb.ciType.username')" /></td>
         </tr>
         <tr>
-          <td><a-input class="authorization-input" v-model="BasicAuth.password" placeholder="密码" /></td>
+          <td><a-input class="authorization-input" v-model="BasicAuth.password" :placeholder="$t('cmdb.ciType.password')" /></td>
         </tr>
       </table>
 
@@ -87,7 +87,7 @@
         }"
       >
         <img slot="image" :src="require('@/assets/data_empty.png')" />
-        <span slot="description"> 暂无请求认证 </span>
+        <span slot="description"> {{ $t('cmdb.components.noAuthRequest') }} </span>
       </a-empty>
     </div>
   </div>

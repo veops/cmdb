@@ -1,9 +1,9 @@
 <template>
   <a-space>
-    <span>模板类型：</span>
+    <span>{{ $t('cmdb.ciType.ciType') }}: </span>
     <a-select
       showSearch
-      placeholder="请选择模板类型"
+      :placeholder="$t('cmdb.batch.selectCITypeTips')"
       @change="selectCiType"
       :style="{ width: '300px' }"
       class="ops-select"
@@ -20,7 +20,7 @@
       type="primary"
       class="ops-button-primary"
       icon="download"
-    >下载模板</a-button
+    >{{ $t('cmdb.batch.downloadTemplate') }}</a-button
     >
     <a-modal
       :bodyStyle="{ paddingTop: 0 }"
@@ -31,14 +31,14 @@
       @ok="handleOk"
       wrapClassName="ci-type-choice-modal"
     >
-      <a-divider orientation="left">模型属性</a-divider>
+      <a-divider orientation="left">{{ $t('cmdb.ciType.attributes') }}</a-divider>
       <a-checkbox
         @change="changeCheckAll"
         :style="{ marginBottom: '20px' }"
         :indeterminate="indeterminate"
         :checked="checkAll"
       >
-        全选
+        {{ $t('checkAll') }}
       </a-checkbox>
       <br />
       <a-checkbox-group style="width:100%" v-model="checkedAttrs">
@@ -52,7 +52,7 @@
         </a-row>
       </a-checkbox-group>
       <template v-if="parentsType && parentsType.length">
-        <a-divider orientation="left">模型关联</a-divider>
+        <a-divider orientation="left">{{ $t('cmdb.ciType.relation') }}</a-divider>
         <a-row :gutter="[24, 24]" align="top" type="flex">
           <a-col :style="{ display: 'inline-flex' }" :span="12" v-for="item in parentsType" :key="item.id">
             <a-checkbox @click="clickParent(item)" :checked="checkedParents.includes(item.alias || item.name)">
@@ -150,7 +150,7 @@ export default {
   },
   methods: {
     selectCiType(el) {
-      // 当选择好模板类型时的回调函数
+      // Callback function when a template type is selected
       getCITypeAttributesById(el).then((res) => {
         this.$emit('getCiTypeAttr', res)
         this.selectCiTypeAttrList = res

@@ -18,7 +18,7 @@
         searchable
         :options="methodList"
         value-consists-of="LEAF_PRIORITY"
-        placeholder="请选择方式"
+        :placeholder="$t('cmdb.components.selectMethods')"
       >
       </treeselect>
       <a-input :style="{ display: 'inline-block', width: 'calc(100% - 100px)' }" v-model="url" />

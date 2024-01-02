@@ -1,8 +1,8 @@
 <template>
   <div>
-    <a-modal v-model="addGroupModal" title="新增分组" @cancel="handleCancelCreateGroup" @ok="handleCreateGroup">
+    <a-modal v-model="addGroupModal" :title="$t('cmdb.ciType.addGroup')" @cancel="handleCancelCreateGroup" @ok="handleCreateGroup">
       <span>
-        <a-form-item label="名称" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
+        <a-form-item :label="$t('name')" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
           <a-input type="text" v-model.trim="newGroupName" />
         </a-form-item>
       </span>
@@ -15,14 +15,14 @@
           size="small"
           class="ops-button-primary"
           icon="plus"
-        >分组</a-button
+        >{{ $t('cmdb.ciType.group') }}</a-button
         >
         <a-button
           type="primary"
           @click="handleOpenUniqueConstraint"
           size="small"
           class="ops-button-primary"
-        >唯一校验</a-button
+        >{{ $t('cmdb.ciType.uniqueConstraint') }}</a-button
         >
       </a-space>
       <div :key="CITypeGroup.id" v-for="(CITypeGroup, index) in CITypeGroups">
@@ -45,18 +45,18 @@
                 ref="editGroupInput"
                 v-model.trim="CITypeGroup.name"
               />
-              <a @click="handleSaveGroupName(index, CITypeGroup)" style="margin-right: 0.5rem">保存</a>
-              <a @click="handleCancelGroupName(index, CITypeGroup)">取消</a>
+              <a @click="handleSaveGroupName(index, CITypeGroup)" style="margin-right: 0.5rem">{{ $t('save') }}</a>
+              <a @click="handleCancelGroupName(index, CITypeGroup)">{{ $t('cancel') }}</a>
             </span>
           </template>
           <a-space style="float: right">
             <a-tooltip v-if="index">
-              <template slot="title">上移</template>
+              <template slot="title">{{ $t('cmdb.ciType.up') }}</template>
               <a><a-icon type="arrow-up" v-if="index" @click="handleMoveGroup(index, index - 1)"/></a>
             </a-tooltip>
 
             <a-tooltip v-if="index !== CITypeGroups.length - 1">
-              <template slot="title">下移</template>
+              <template slot="title">{{ $t('cmdb.ciType.up') }}</template>
               <a
               ><a-icon
                 type="arrow-down"
@@ -66,11 +66,11 @@
             </a-tooltip>
 
             <a-tooltip>
-              <template slot="title">添加属性</template>
+              <template slot="title">{{ $t('cmdb.ciType.selectAttribute') }}</template>
               <a><a-icon type="plus" @click="handleAddGroupAttr(index)"/></a>
             </a-tooltip>
             <a-tooltip>
-              <template slot="title">删除分组</template>
+              <template slot="title">{{ $t('cmdb.ciType.deleteGroup') }}</template>
               <a style="color:red;"><a-icon type="delete" @click="handleDeleteGroup(CITypeGroup)"/></a>
             </a-tooltip>
           </a-space>
@@ -106,12 +106,12 @@
       </div>
       <div>
         <div :style="{ height: '32px', lineHeight: '32px', display: 'inline-block', fontSize: '14px' }">
-          <span style="font-weight:700">其他</span>
+          <span style="font-weight:700">{{ $t('other') }}</span>
           <span style="color: #c3cdd7;margin-left:5px;">({{ otherGroupAttributes.length }})</span>
         </div>
         <div style="float: right">
           <a-tooltip>
-            <template slot="title">添加属性</template>
+            <template slot="title">{{ $t('cmdb.ciType.selectAttribute') }}</template>
             <a @click="handleAddGroupAttr(undefined)"><a-icon type="plus"/></a>
           </a-tooltip>
         </div>
@@ -304,7 +304,7 @@ export default {
       if (CITypeGroup.name === CITypeGroup.originName) {
         this.handleCancelGroupName(index, CITypeGroup)
       } else if (this.CITypeGroups.map((x) => x.originName).includes(CITypeGroup.name)) {
-        this.$message.error('分组名称已存在')
+        this.$message.error(this.$t('cmdb.ciType.groupExisted'))
       } else {
         updateCITypeGroupById(CITypeGroup.id, {
           name: CITypeGroup.name,
@@ -313,7 +313,7 @@ export default {
         }).then((res) => {
           CITypeGroup.editable = false
           this.$set(this.CITypeGroups, index, CITypeGroup)
-          this.$message.success('修改成功')
+          this.$message.success(this.$t('updateSuccess'))
         })
       }
     },
@@ -350,7 +350,7 @@ export default {
       const fromGroupId = this.CITypeGroups[beforeIndex].id
       const toGroupId = this.CITypeGroups[afterIndex].id
       transferCITypeGroupIndex(this.CITypeId, { from: fromGroupId, to: toGroupId }).then((res) => {
-        this.$message.success('操作成功')
+        this.$message.success(this.$t('operateSuccess'))
         const beforeGroup = this.CITypeGroups[beforeIndex]
         this.CITypeGroups[beforeIndex] = this.CITypeGroups[afterIndex]
 
@@ -403,8 +403,8 @@ export default {
     handleDeleteGroup(group) {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: `确定要删除分组 【${group.name}】 吗？`,
+        title: that.$t('warning'),
+        content: that.$t('cmdb.ciType.confirmDeleteGroup', { groupName: `${group.name}` }),
         onOk() {
           deleteCITypeGroupById(group.id).then((res) => {
             that.CITypeGroups = that.CITypeGroups.filter((g) => g.id !== group.id)
@@ -417,13 +417,13 @@ export default {
       console.log('changess')
       if (e.hasOwnProperty('moved') && e.moved.oldIndex !== e.moved.newIndex) {
         if (group === -1) {
-          this.$message.error('其他分组中的属性不能进行排序，如需排序请先拖至自定义的分组！')
+          this.$message.error(this.$t('cmdb.ciType.attributeSortedTips'))
         } else {
           transferCITypeAttrIndex(this.CITypeId, {
             from: { attr_id: e.moved.element.id, group_id: group > -1 ? group : null },
             to: { order: e.moved.newIndex, group_id: group > -1 ? group : null },
           })
-            .then((res) => this.$message.success('保存成功'))
+            .then((res) => this.$message.success(this.$t('updateSuccess')))
             .catch(() => {
               this.abortDraggable()
             })
@@ -440,7 +440,7 @@ export default {
             from: { attr_id: e.removed.element.id, group_id: group > -1 ? group : null },
             to: { group_id: this.addRemoveGroupFlag.to.group_id, order: this.addRemoveGroupFlag.to.order },
           })
-            .then((res) => this.$message.success('保存成功'))
+            .then((res) => this.$message.success(this.$t('saveSuccess')))
             .catch(() => {
               this.abortDraggable()
             })
@@ -456,9 +456,9 @@ export default {
       })
     },
     updatePropertyIndex() {
-      const attributes = [] // 全部属性
-      let attributeOrder = 0 // 属性组
-      let groupOrder = 0 // 组排序
+      const attributes = [] // All attributes
+      let attributeOrder = 0 // attribute group
+      let groupOrder = 0 // group sort
       const promises = []
 
       this.CITypeGroups.forEach((group) => {
@@ -509,7 +509,7 @@ export default {
 
       const that = this
       Promise.all(promises).then((values) => {
-        that.$message.success(`修改成功`)
+        that.$message.success(that.$t('updateSuccess'))
         that.getCITypeGroupData()
         that.modalVisible = false
       })

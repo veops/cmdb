@@ -10,7 +10,7 @@
         searchable
         :options="ciTypeADTAttributes"
         value-consists-of="LEAF_PRIORITY"
-        placeholder="请选择属性"
+        :placeholder="$t('cmdb.ciType.selectAttributes')"
         :normalizer="
           (node) => {
             return {
@@ -35,15 +35,15 @@
         searchable
         :options="ciTypeGroup"
         value-consists-of="LEAF_PRIORITY"
-        placeholder="请选择模型"
+        :placeholder="$t('cmdb.ciType.selectCIType')"
         :disableBranchNodes="true"
         @select="changeType(item)"
         :normalizer="
           (node) => {
             return {
-              id: node.name || '其他',
-              label: node.alias || node.name || '其他',
-              title: node.alias || node.name || '其他',
+              id: node.name || $t('other'),
+              label: node.alias || node.name || $t('other'),
+              title: node.alias || node.name || $t('other'),
               children: node.ci_types,
             }
           }
@@ -67,7 +67,7 @@
         searchable
         :options="item.attributes"
         value-consists-of="LEAF_PRIORITY"
-        placeholder="请选择属性"
+        :placeholder="$t('cmdb.ciType.selectAttributes')"
         :normalizer="
           (node) => {
             return {
@@ -89,7 +89,7 @@
       </treeselect>
     </div>
     <div class="relation-ad-footer">
-      <a-button type="primary" @click="handleSave">保存</a-button>
+      <a-button type="primary" @click="handleSave">{{ $t('save') }}</a-button>
     </div>
   </div>
 </template>
@@ -148,7 +148,7 @@ export default {
     },
     getCITypeDiscovery() {
       getCITypeDiscovery(this.CITypeId).then(async (res) => {
-        // 第一个下拉框的options
+        // Options for the first drop-down box
         const _ciTypeADTAttributes = []
         res
           .filter((adt) => adt.adr_id)
@@ -160,7 +160,7 @@ export default {
           })
         console.log(_ciTypeADTAttributes)
         this.ciTypeADTAttributes = _.uniqBy(_ciTypeADTAttributes, 'name')
-        // 第一个下拉框的options
+        // Options for the first drop-down box
         const _find = res.find((adt) => !adt.adr_id)
         if (_find) {
           this.adt_id = _find.id
@@ -242,7 +242,7 @@ export default {
         } else {
           await postCITypeDiscovery(this.CITypeId, { relation: _relation })
         }
-        this.$message.success('保存成功')
+        this.$message.success(this.$t('saveSuccess'))
         this.getCITypeDiscovery()
       }
     },

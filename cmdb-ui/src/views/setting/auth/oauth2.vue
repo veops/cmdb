@@ -1,7 +1,7 @@
 <template>
   <a-form-model ref="form" :model="form" :label-col="labelCol" :wrapper-col="wrapperCol" :rules="rules">
-    <SpanTitle>基本</SpanTitle>
-    <a-form-model-item label="是否启用" prop="enable">
+    <SpanTitle>{{ $t('cs.auth.basic') }}</SpanTitle>
+    <a-form-model-item :label="$t('cs.auth.isEnable')" prop="enable">
       <a-switch
         :checked="Boolean(form.enable)"
         @change="
@@ -11,20 +11,20 @@
         "
       />
     </a-form-model-item>
-    <a-form-model-item label="客户端ID" prop="client_id">
-      <a-input v-model="form.client_id" placeholder="请输入客户端ID" />
+    <a-form-model-item :label="$t('cs.auth.oauth2.clientId')" prop="client_id">
+      <a-input v-model="form.client_id" :placeholder="$t('cs.auth.oauth2.clientIdPlaceholder')" />
     </a-form-model-item>
-    <a-form-model-item label="客户端密钥" prop="client_secret">
-      <a-input v-model="form.client_secret" placeholder="请输入客户端密钥" />
+    <a-form-model-item :label="$t('cs.auth.oauth2.clientSecret')" prop="client_secret">
+      <a-input v-model="form.client_secret" :placeholder="$t('cs.auth.oauth2.clientSecretPlaceholder')" />
     </a-form-model-item>
-    <a-form-model-item label="授权链接" prop="authorize_url">
-      <a-input v-model="form.authorize_url" placeholder="请输入授权链接" />
+    <a-form-model-item :label="$t('cs.auth.oauth2.authorizeUrl')" prop="authorize_url">
+      <a-input v-model="form.authorize_url" :placeholder="$t('cs.auth.oauth2.authorizeUrlPlaceholder')" />
     </a-form-model-item>
-    <a-form-model-item label="令牌链接" prop="token_url">
-      <a-input v-model="form.token_url" placeholder="请输入令牌链接" />
+    <a-form-model-item :label="$t('cs.auth.oauth2.tokenUrl')" prop="token_url">
+      <a-input v-model="form.token_url" :placeholder="$t('cs.auth.oauth2.tokenUrlPlaceholder')" />
     </a-form-model-item>
     <SpanTitle>其他</SpanTitle>
-    <a-form-model-item label="用户信息" prop="user_info" :wrapper-col="{ span: 15 }">
+    <a-form-model-item :label="$t('cs.auth.oauth2.userInfo')" prop="user_info" :wrapper-col="{ span: 15 }">
       <vue-json-editor
         :style="{ '--custom-height': `${200}px` }"
         v-model="form.user_info"
@@ -35,11 +35,11 @@
         @has-error="onJsonError"
       />
     </a-form-model-item>
-    <a-form-model-item label="范围" prop="scopes">
-      <a-select mode="tags" v-model="form.scopes" placeholder="请输入范围" />
+    <a-form-model-item :label="$t('cs.auth.oauth2.scopes')" prop="scopes">
+      <a-select mode="tags" v-model="form.scopes" :placeholder="$t('cs.auth.oauth2.scopesPlaceholder')" />
     </a-form-model-item>
-    <a-form-model-item label="重定向路由" prop="after_login">
-      <a-input v-model="form.after_login" placeholder="请输入重定向路由" />
+    <a-form-model-item :label="$t('cs.auth.cas.afterLoginRoute')" prop="after_login">
+      <a-input v-model="form.after_login" :placeholder="$t('cs.auth.cas.afterLoginRoutePlaceholder')" />
     </a-form-model-item>
   </a-form-model>
 </template>
@@ -78,12 +78,16 @@ export default {
       labelCol: { span: 3 },
       wrapperCol: { span: 10 },
       form: _.cloneDeep(defaultForm),
-      rules: {
-        enable: [{ required: true }],
-        client_id: [{ required: true, message: '请输入客户端ID' }],
-        client_secret: [{ required: true, message: '请输入客户端密钥' }],
-      },
       isJsonRight: true,
+    }
+  },
+  computed: {
+    rules() {
+      return {
+        enable: [{ required: true }],
+        client_id: [{ required: true, message: this.$t('cs.auth.oauth2.clientIdPlaceholder') }],
+        client_secret: [{ required: true, message: this.$t('cs.auth.oauth2.clientSecretPlaceholder') }],
+      }
     }
   },
   methods: {

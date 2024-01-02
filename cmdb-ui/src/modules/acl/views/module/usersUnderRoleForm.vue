@@ -1,6 +1,6 @@
 <template>
-  <CustomDrawer :closable="true" :visible="visible" width="500px" @close="handleClose" title="组用户">
-    <a-form-item label="添加用户" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+  <CustomDrawer :closable="true" :visible="visible" width="500px" @close="handleClose" :title="$t('acl.groupUser')">
+    <a-form-item :label="$t('acl.addUser')" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
       <a-row>
         <a-col span="15">
           <el-select v-model="selectedChildrenRole" multiple collapse-tags size="small" filterable>
@@ -14,14 +14,14 @@
           </el-select>
         </a-col>
         <a-col span="5" offset="1">
-          <a-button style="display: inline-block" @click="handleAddRole">确定</a-button>
+          <a-button style="display: inline-block" @click="handleAddRole">{{ $t('confirm') }}</a-button>
         </a-col>
       </a-row>
     </a-form-item>
     <a-card>
       <a-row :gutter="24" v-for="(record, index) in records" :key="record.id" :style="{ marginBottom: '5px' }">
         <a-col :span="20">{{ index + 1 }}、{{ record.nickname }}</a-col>
-        <a-col :span="4"><a-button type="danger" size="small" @click="handleRevokeUser(record)">移除</a-button></a-col>
+        <a-col :span="4"><a-button type="danger" size="small" @click="handleRevokeUser(record)">{{ $t('acl.remove') }}</a-button></a-col>
       </a-row>
     </a-card>
   </CustomDrawer>
@@ -63,34 +63,22 @@ export default {
       this.visible = true
       this.loadRecords(roleId)
     },
-    // filterOption(input, option) {
-    //   return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
-    // },
     async handleAddRole() {
-      // await this.selectedChildrenRole.forEach(item => {
-      //   addParentRole(item, this.roleId, { app_id: this.$route.name.split('_')[0] }).then(res => {
-      //     this.$message.success('添加成功')
-      //   })
-      //   // .catch(err=>{
-      //   //   this.$httpError(err)
-      //   // })
-
-      // })
       await addBatchParentRole(this.roleId, {
         child_ids: this.selectedChildrenRole,
         app_id: this.$route.name.split('_')[0],
       })
       this.loadRecords(this.roleId)
-      this.$message.success('添加完成')
+      this.$message.success(this.$t('addSuccess'))
       this.selectedChildrenRole = []
     },
     handleRevokeUser(record) {
       const that = this
       this.$confirm({
-        content: '是否确定要移除该用户',
+        content: that.$t('acl.deleteUserConfirm'),
         onOk() {
           delParentRole(record.role.id, that.roleId, { app_id: that.$route.name.split('_')[0] }).then((res) => {
-            that.$message.success('删除成功！')
+            that.$message.success(that.$t('deleteSuccess'))
             that.loadRecords(that.roleId)
           })
           // .catch(err=>that.$httpError(err))

@@ -1,47 +1,47 @@
 <template>
   <div class="ops-setting-companyinfo" :style="{ height: `${windowHeight - 64}px` }">
     <a-form-model ref="infoData" :model="infoData" :label-col="labelCol" :wrapper-col="wrapperCol" :rules="rule">
-      <SpanTitle>公司描述</SpanTitle>
-      <a-form-model-item label="名称" prop="name">
-        <a-input v-model="infoData.name" :disabled="!isEditable" />
+      <SpanTitle>{{ $t('cs.companyInfo.spanCompany') }}</SpanTitle>
+      <a-form-model-item :label="$t('cs.companyInfo.name')" prop="name">
+        <a-input v-model="infoData.name" :disabled="!isEditable"/>
       </a-form-model-item>
-      <a-form-model-item label="描述">
-        <a-input v-model="infoData.description" type="textarea" :disabled="!isEditable" />
+      <a-form-model-item :label="$t('cs.companyInfo.description')">
+        <a-input v-model="infoData.description" type="textarea" :disabled="!isEditable"/>
       </a-form-model-item>
-      <SpanTitle>公司地址</SpanTitle>
-      <a-form-model-item label="国家/地区">
-        <a-input v-model="infoData.country" :disabled="!isEditable" />
+      <SpanTitle>{{ $t('cs.companyInfo.spanAddress') }}</SpanTitle>
+      <a-form-model-item :label="$t('cs.companyInfo.country')">
+        <a-input v-model="infoData.country" :disabled="!isEditable"/>
       </a-form-model-item>
-      <a-form-model-item label="城市">
-        <a-input v-model="infoData.city" :disabled="!isEditable" />
+      <a-form-model-item :label="$t('cs.companyInfo.city')">
+        <a-input v-model="infoData.city" :disabled="!isEditable"/>
       </a-form-model-item>
-      <a-form-model-item label="地址">
-        <a-input v-model="infoData.address" :disabled="!isEditable" />
+      <a-form-model-item :label="$t('cs.companyInfo.address')">
+        <a-input v-model="infoData.address" :disabled="!isEditable"/>
       </a-form-model-item>
-      <a-form-model-item label="邮编">
-        <a-input v-model="infoData.postCode" :disabled="!isEditable" />
+      <a-form-model-item :label="$t('cs.companyInfo.postcode')">
+        <a-input v-model="infoData.postCode" :disabled="!isEditable"/>
       </a-form-model-item>
-      <SpanTitle>联系方式</SpanTitle>
-      <a-form-model-item label="网站">
-        <a-input v-model="infoData.website" :disabled="!isEditable" />
+      <SpanTitle>{{ $t('cs.companyInfo.spanContract') }}</SpanTitle>
+      <a-form-model-item :label="$t('cs.companyInfo.website')">
+        <a-input v-model="infoData.website" :disabled="!isEditable"/>
       </a-form-model-item>
-      <a-form-model-item label="电话号码" prop="phone">
-        <a-input v-model="infoData.phone" :disabled="!isEditable" />
+      <a-form-model-item :label="$t('cs.companyInfo.phone')" prop="phone">
+        <a-input v-model="infoData.phone" :disabled="!isEditable"/>
       </a-form-model-item>
-      <a-form-model-item label="传真号码" prop="faxCode">
-        <a-input v-model="infoData.faxCode" :disabled="!isEditable" />
+      <a-form-model-item :label="$t('cs.companyInfo.faxCode')" prop="faxCode">
+        <a-input v-model="infoData.faxCode" :disabled="!isEditable"/>
       </a-form-model-item>
-      <a-form-model-item label="电子邮箱" prop="email">
-        <a-input v-model="infoData.email" :disabled="!isEditable" />
+      <a-form-model-item :label="$t('cs.companyInfo.email')" prop="email">
+        <a-input v-model="infoData.email" :disabled="!isEditable"/>
       </a-form-model-item>
-      <SpanTitle>公司标识</SpanTitle>
-      <a-form-model-item label="Messenger地址" prop="messenger">
-        <a-input v-model="infoData.messenger" :disabled="!isEditable" />
+      <SpanTitle>{{ $t('cs.companyInfo.spanLogo') }}</SpanTitle>
+      <a-form-model-item :label="$t('cs.companyInfo.messenger')" prop="messenger">
+        <a-input v-model="infoData.messenger" :disabled="!isEditable"/>
       </a-form-model-item>
-      <a-form-model-item label="部署域名" prop="domainName">
-        <a-input v-model="infoData.domainName" :disabled="!isEditable" />
+      <a-form-model-item :label="$t('cs.companyInfo.domainName')" prop="domainName">
+        <a-input v-model="infoData.domainName" :disabled="!isEditable"/>
       </a-form-model-item>
-      <a-form-model-item label="公司logo">
+      <a-form-model-item :label="$t('cs.companyInfo.logo')">
         <a-space>
           <a-upload
             :disabled="!isEditable"
@@ -60,7 +60,7 @@
               :style="{ width: '400px', height: '80px' }"
               @click="eidtImageOption.type = 'Logo'"
             >
-              <img :src="`/api/common-setting/v1/file/${infoData.logoName}`" alt="avatar" />
+              <img :src="`/api/common-setting/v1/file/${infoData.logoName}`" alt="avatar"/>
               <a-icon
                 v-if="isEditable"
                 type="minus-circle"
@@ -70,8 +70,8 @@
               />
             </div>
             <div v-else @click="eidtImageOption.type = 'Logo'">
-              <a-icon type="plus" />
-              <div class="ant-upload-text">上传</div>
+              <a-icon type="plus"/>
+              <div class="ant-upload-text">{{ $t('cs.companyInfo.upload') }}</div>
             </div>
           </a-upload>
 
@@ -92,7 +92,7 @@
               :style="{ width: '82px', height: '82px' }"
               @click="eidtImageOption.type = 'SmallLogo'"
             >
-              <img :src="`/api/common-setting/v1/file/${infoData.smallLogoName}`" alt="avatar" />
+              <img :src="`/api/common-setting/v1/file/${infoData.smallLogoName}`" alt="avatar"/>
               <a-icon
                 v-if="isEditable"
                 type="minus-circle"
@@ -102,15 +102,15 @@
               />
             </div>
             <div v-else @click="eidtImageOption.type = 'SmallLogo'">
-              <a-icon type="plus" />
-              <div class="ant-upload-text">上传</div>
+              <a-icon type="plus"/>
+              <div class="ant-upload-text">{{ $t('cs.companyInfo.upload') }}</div>
             </div>
           </a-upload>
         </a-space>
       </a-form-model-item>
       <a-form-model-item :wrapper-col="{ span: 14, offset: 3 }" v-if="isEditable">
-        <a-button type="primary" @click="onSubmit"> 保存 </a-button>
-        <a-button ghost type="primary" style="margin-left: 28px" @click="resetForm"> 重置 </a-button>
+        <a-button type="primary" @click="onSubmit"> {{ $t('save') }}</a-button>
+        <a-button ghost type="primary" style="margin-left: 28px" @click="resetForm"> {{ $t('reset') }}</a-button>
       </a-form-model-item>
     </a-form-model>
     <edit-image
@@ -132,6 +132,7 @@ import { mapMutations, mapState } from 'vuex'
 import SpanTitle from '../components/spanTitle.vue'
 import EditImage from '../components/EditImage.vue'
 import { mixinPermissions } from '@/utils/mixin'
+
 export default {
   name: 'CompanyInfo',
   mixins: [mixinPermissions],
@@ -156,48 +157,9 @@ export default {
         messenger: '',
         domainName: '',
       },
-      rule: {
-        name: [{ required: true, whitespace: true, message: '请输入名称', trigger: 'blur' }],
-        phone: [
-          {
-            required: false,
-            whitespace: true,
-            pattern: new RegExp('^([0-9]|-)+$', 'g'),
-            message: '请输入正确的电话号码',
-            trigger: 'blur',
-          },
-        ],
-        faxCode: [
-          {
-            required: false,
-            whitespace: true,
-            pattern: new RegExp('^([0-9]|-)+$', 'g'),
-            message: '请输入正确的传真号码',
-            trigger: 'blur',
-          },
-        ],
-        email: [
-          {
-            required: false,
-            whitespace: true,
-            pattern: new RegExp('^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(.[a-zA-Z0-9-]+)*.[a-zA-Z0-9]{2,6}$', 'g'),
-            message: '请输入正确的邮箱地址',
-            trigger: 'blur',
-          },
-        ],
-      },
       getId: -1,
       showEditImage: false,
-      editImage: null,
-      eidtImageOption: {
-        type: 'Logo',
-        fixedNumber: [15, 4],
-        title: '编辑企业logo',
-        previewWidth: '200px',
-        previewHeight: '40px',
-        autoCropWidth: 200,
-        autoCropHeight: 40,
-      },
+      editImage: null
     }
   },
   async mounted() {
@@ -216,6 +178,49 @@ export default {
     isEditable() {
       return this.hasDetailPermission('backend', '公司信息', ['update'])
     },
+    rule() {
+      return {
+        name: [{ required: true, whitespace: true, message: this.$t('cs.companyInfo.nameValidate'), trigger: 'blur' }],
+        phone: [
+          {
+            required: false,
+            whitespace: true,
+            pattern: new RegExp('^([0-9]|-)+$', 'g'),
+            message: this.$t('cs.companyInfo.phoneValidate'),
+            trigger: 'blur',
+          },
+        ],
+        faxCode: [
+          {
+            required: false,
+            whitespace: true,
+            pattern: new RegExp('^([0-9]|-)+$', 'g'),
+            message: this.$t('cs.companyInfo.faxCodeValidate'),
+            trigger: 'blur',
+          },
+        ],
+        email: [
+          {
+            required: false,
+            whitespace: true,
+            pattern: new RegExp('^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(.[a-zA-Z0-9-]+)*.[a-zA-Z0-9]{2,6}$', 'g'),
+            message: this.$t('cs.companyInfo.emailValidate'),
+            trigger: 'blur',
+          },
+        ],
+      }
+    },
+    eidtImageOption () {
+      return {
+        type: 'Logo',
+        fixedNumber: [15, 4],
+        title: this.$t('cs.companyInfo.editCompanyLogo'),
+        previewWidth: '200px',
+        previewHeight: '40px',
+        autoCropWidth: 200,
+        autoCropHeight: 40,
+      }
+    }
   },
   methods: {
     ...mapMutations(['SET_FILENAME', 'SET_SMALL_FILENAME']),
@@ -235,9 +240,9 @@ export default {
           }
           this.SET_FILENAME(this.infoData.logoName)
           this.SET_SMALL_FILENAME(this.infoData.smallFileName)
-          this.$message.success('保存成功')
+          this.$message.success(this.$t('saveSuccess'))
         } else {
-          this.$message.warning('检查您的输入是否正确!')
+          this.$message.warning(this.$t('cs.companyInfo.checkInputCorrect'))
           return false
         }
       })
@@ -267,7 +272,7 @@ export default {
         this.eidtImageOption = {
           type: 'Logo',
           fixedNumber: [20, 4],
-          title: '编辑企业logo',
+          title: this.$t('cs.companyInfo.editCompanyLogo'),
           previewWidth: '200px',
           previewHeight: '40px',
           autoCropWidth: 200,
@@ -277,14 +282,14 @@ export default {
         this.eidtImageOption = {
           type: 'SmallLogo',
           fixedNumber: [4, 4],
-          title: '编辑企业logo缩略图',
+          title: this.$t('cs.companyInfo.editCompanyLogoSmall'),
           previewWidth: '80px',
           previewHeight: '80px',
           autoCropWidth: 250,
           autoCropHeight: 250,
         }
       }
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         let result
         if (typeof e.target.result === 'object') {
           // 把Array Buffer转化为blob 如果是base64不需要
@@ -314,7 +319,7 @@ export default {
     beforeUpload(file) {
       const isLt2M = file.size / 1024 / 1024 < 2
       if (!isLt2M) {
-        this.$message.error('图片大小不可超过2MB!')
+        this.$message.error(this.$t('cs.companyInfo.imageSizeLimit2MB'))
       }
       return isLt2M
     },

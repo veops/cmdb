@@ -11,20 +11,20 @@
     wrapClassName="attribute-edit-form"
   >
     <a-form :form="form" :layout="formLayout">
-      <a-divider style="font-size:14px;margin-top:6px;">基础设置</a-divider>
+      <a-divider style="font-size:14px;margin-top:6px;">{{ $t('cmdb.ciType.basicConfig') }}</a-divider>
       <a-col :span="12">
-        <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="属性名(英文)">
+        <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" :label="$t('cmdb.ciType.AttributeName')">
           <a-input
             :disabled="true"
             name="name"
-            placeholder="英文"
+            :placeholder="$t('cmdb.ciType.English')"
             v-decorator="[
               'name',
               {
                 rules: [
-                  { required: true, message: '请输入属性名' },
+                  { required: true, message: $t('cmdb.ciType.inputAttributeName') },
                   {
-                    message: '不能以数字开头，可以是英文 数字以及下划线 (_)',
+                    message: $t('cmdb.ciType.attributeNameTips'),
                     pattern: RegExp('^(?!\\d)[a-zA-Z_0-9]+$'),
                   },
                 ],
@@ -35,12 +35,12 @@
       </a-col>
       <a-col
         :span="12"
-      ><a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="别名">
+      ><a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" :label="$t('alias')">
         <a-input name="alias" v-decorator="['alias', { rules: [] }]" /> </a-form-item
       ></a-col>
       <a-col
         :span="12"
-      ><a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="数据类型">
+      ><a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" :label="$t('cmdb.ciType.DataType')">
         <a-select
           :disabled="true"
           name="value_type"
@@ -56,7 +56,7 @@
         <a-form-item
           :label-col="{ span: currentValueType === '6' ? 4 : 8 }"
           :wrapper-col="{ span: currentValueType === '6' ? 18 : 12 }"
-          label="默认值"
+          :label="$t('cmdb.ciType.defaultValue')"
         >
           <template>
             <a-select
@@ -73,7 +73,7 @@
               @select="selectIntDefaultValue"
             >
               <a-select-option key="$auto_inc_id">
-                自增ID
+                {{ $t('cmdb.ciType.autoIncID') }}
               </a-select-option>
             </a-select>
             <a-input-number
@@ -100,13 +100,13 @@
               @select="changeDefaultForDatetime"
             >
               <a-select-option key="$created_at">
-                创建时间
+                {{ $t('createdAt') }}
               </a-select-option>
               <a-select-option key="$updated_at">
-                更新时间
+                {{ $t('updatedAt') }}
               </a-select-option>
               <a-select-option key="$custom_time">
-                自定义时间
+                {{ $t('cmdb.ciType.customTime') }}
               </a-select-option>
             </a-select>
             <template v-else-if="currentValueType === '4' || currentValueType === '3'">
@@ -124,10 +124,10 @@
                 <a><a-icon type="down" /> </a>
                 <a-menu slot="overlay" @click="onClick">
                   <a-menu-item key="$created_at">
-                    <a>创建时间</a>
+                    <a>{{ $t('createdAt') }}</a>
                   </a-menu-item>
                   <a-menu-item key="$updated_at">
-                    <a>更新时间</a>
+                    <a>{{ $t('updatedAt') }}</a>
                   </a-menu-item>
                 </a-menu>
               </a-dropdown>
@@ -150,7 +150,7 @@
         <a-form-item
           :label-col="horizontalFormItemLayout.labelCol"
           :wrapper-col="horizontalFormItemLayout.wrapperCol"
-          label="必须"
+          :label="$t('required')"
         >
           <a-switch
             @change="(checked) => onChange(checked, 'is_required')"
@@ -160,7 +160,7 @@
         </a-form-item>
       </a-col>
       <a-col :span="6" v-if="currentValueType !== '6' && currentValueType !== '7'">
-        <a-form-item :label-col="{ span: 8 }" :wrapper-col="horizontalFormItemLayout.wrapperCol" label="唯一">
+        <a-form-item :label-col="{ span: 8 }" :wrapper-col="horizontalFormItemLayout.wrapperCol" :label="$t('cmdb.ciType.unique')">
           <a-switch
             :disabled="isShowComputedArea"
             @change="onChange"
@@ -178,8 +178,8 @@
           <template slot="label">
             <span
               style="position:relative;white-space:pre;"
-            >{{ `索引` }}
-              <a-tooltip title="字段可被用于检索，加速查询">
+            >{{ $t('cmdb.ciType.index') }}
+              <a-tooltip :title="$t('cmdb.ciType.indexTips')">
                 <a-icon
                   style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
                   type="question-circle"
@@ -210,8 +210,8 @@
           <template slot="label">
             <span
               style="position:relative;white-space:pre;"
-            >{{ `显示` }}
-              <a-tooltip title="CI实例表格默认展示该字段">
+            >{{ $t('cmdb.ciType.defaultShow') }}
+              <a-tooltip :title="$t('cmdb.ciType.defaultShowTips')">
                 <a-icon
                   style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
                   type="question-circle"
@@ -237,7 +237,7 @@
         <a-form-item
           :label-col="currentValueType === '2' ? horizontalFormItemLayout.labelCol : { span: 8 }"
           :wrapper-col="horizontalFormItemLayout.wrapperCol"
-          label="排序"
+          :label="$t('cmdb.ciType.isSortable')"
         >
           <a-switch
             :disabled="isShowComputedArea"
@@ -256,8 +256,8 @@
           <template slot="label">
             <span
               style="position:relative;white-space:pre;"
-            >{{ `多值` }}
-              <a-tooltip title="字段的值是1个或者多个，接口返回的值的类型是list">
+            >{{ $t('cmdb.ciType.list') }}
+              <a-tooltip :title="$t('cmdb.ciType.listTips')">
                 <a-icon
                   style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
                   type="question-circle"
@@ -280,15 +280,15 @@
           />
         </a-form-item>
       </a-col>
-      <a-divider style="font-size:14px;margin-top:6px;">高级设置</a-divider>
+      <a-divider style="font-size:14px;margin-top:6px;">{{ $t('cmdb.ciType.advancedSettings') }}</a-divider>
       <a-row>
         <a-col :span="24">
-          <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" label="字体">
+          <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" :label="$t('cmdb.ciType.font')">
             <FontArea ref="fontArea" />
           </a-form-item>
         </a-col>
         <a-col :span="24" v-if="!['6', '7'].includes(currentValueType)">
-          <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" label="预定义值">
+          <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" :label="$t('cmdb.ciType.choiceValue')">
             <PreValueArea
               v-if="drawerVisible"
               :canDefineScript="canDefineScript"
@@ -302,10 +302,10 @@
             <template slot="label">
               <span
                 style="position:relative;white-space:pre;"
-              >{{ `计算属性` }}
+              >{{ $t('cmdb.ciType.computedAttribute') }}
                 <a-tooltip
                   :title="
-                    `该属性的值是通过模型的其它属性构建的表达式或者执行一段代码的方式计算而来，属性的引用方法为: {{ 属性名 }}`
+                    $t('cmdb.ciType.computedAttributeTips')
                   "
                 >
                   <a-icon
@@ -343,8 +343,8 @@
         <a-input name="id" type="hidden" v-decorator="['id', { rules: [] }]" />
       </a-form-item>
       <div class="custom-drawer-bottom-action">
-        <a-button @click="onClose">取消</a-button>
-        <a-button @click="handleSubmit(false)" type="primary">确定</a-button>
+        <a-button @click="onClose">{{ $t('cancel') }}</a-button>
+        <a-button @click="handleSubmit(false)" type="primary">{{ $t('confirm') }}</a-button>
       </div>
     </a-form>
   </CustomDrawer>
@@ -380,8 +380,7 @@ export default {
   },
   data() {
     return {
-      valueTypeMap,
-      drawerTitle: '新增属性',
+      drawerTitle: this.$t('cmdb.ciType.addAttribute'),
       drawerVisible: false,
 
       formLayout: 'horizontal',
@@ -390,7 +389,7 @@ export default {
 
       currentValueType: '0',
       default_value_json: {},
-      default_value_json_right: true, // 当前json是否正确
+      default_value_json_right: true, // Is the current json correct?
 
       canDefineComputed: false,
       isShowComputedArea: false,
@@ -404,6 +403,9 @@ export default {
   },
 
   computed: {
+    valueTypeMap() {
+      return valueTypeMap()
+    },
     formItemLayout() {
       const { formLayout } = this
       return formLayout === 'horizontal'
@@ -434,7 +436,7 @@ export default {
         this.canDefineComputed = false
       }
 
-      this.drawerTitle = '新增属性'
+      this.drawerTitle = this.$t('cmdb.ciType.addAttribute')
       this.drawerVisible = true
     },
     onClose() {
@@ -463,13 +465,13 @@ export default {
         })
       }
       if (checked && property === 'is_sortable') {
-        this.$message.warning('选中排序，则必须也要选中！')
+        this.$message.warning(this.$t('cmdb.ciType.addAttributeTips1'))
         this.form.setFieldsValue({
           is_required: true,
         })
       }
       if (!checked && property === 'is_required' && this.form.getFieldValue('is_sortable')) {
-        this.$message.warning('选中排序，则必须也要选中！')
+        this.$message.warning(this.$t('cmdb.ciType.addAttributeTips1'))
         this.$nextTick(() => {
           this.form.setFieldsValue({
             is_required: true,
@@ -492,7 +494,7 @@ export default {
       if (_record.is_link) {
         _record.value_type = '8'
       }
-      this.drawerTitle = '编辑属性'
+      this.drawerTitle = this.$t('cmdb.ciType.editAttribute')
       this.drawerVisible = true
       this.record = _record
       this.currentValueType = _record.value_type
@@ -624,7 +626,7 @@ export default {
             const computedAreaData = this.$refs.computedArea.getData()
             values = { ...values, ...computedAreaData }
           } else {
-            // 如果是非计算属性，就看看有没有预定义值
+            // If it is a non-computed attribute, check to see if there is a predefined value
             if (!['6', '7'].includes(values.value_type)) {
               const preValueAreaData = this.$refs.preValueArea.getData()
               values = { ...values, ...preValueAreaData }
@@ -652,7 +654,7 @@ export default {
       if (isCalcComputed) {
         await calcComputedAttribute(attrId)
       }
-      this.$message.success(`更新成功`)
+      this.$message.success(this.$t('updateSuccess'))
       this.handleOk()
       this.onClose()
     },

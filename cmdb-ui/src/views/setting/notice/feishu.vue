@@ -1,26 +1,26 @@
 <template>
   <div class="notice-feishu-wrapper" :style="{ height: `${windowHeight - 64}px` }">
     <a-form-model ref="feishuForm" :model="feishuData" :label-col="labelCol" :wrapper-col="wrapperCol">
-      <SpanTitle>基础设置</SpanTitle>
-      <a-form-model-item label="应用ID">
+      <SpanTitle>{{ $t('cs.duty.basicSetting') }}</SpanTitle>
+      <a-form-model-item :label="$t('cs.notice.appKey')">
         <a-input v-model="feishuData.id" :disabled="!isEditable" />
       </a-form-model-item>
-      <a-form-model-item label="应用密码">
+      <a-form-model-item :label="$t('cs.notice.appSecret')">
         <a-input v-model="feishuData.password" :disabled="!isEditable" />
       </a-form-model-item>
-      <a-form-model-item label="机器人">
+      <a-form-model-item :label="$t('cs.notice.robot')">
         <Bot
           ref="bot"
           :disabled="!isEditable"
           :columns="[
             {
               field: 'name',
-              title: '名称',
+              title: $t('cs.notice.title'),
               required: true,
             },
             {
               field: 'url',
-              title: 'Webhook地址',
+              title: $t('cs.notice.webhookAddress'),
               required: true,
             },
           ]"
@@ -29,8 +29,8 @@
       <a-row v-if="isEditable">
         <a-col :span="16" :offset="3">
           <a-form-model-item :label-col="labelCol" :wrapper-col="wrapperCol">
-            <a-button type="primary" @click="onSubmit"> 保存 </a-button>
-            <a-button ghost type="primary" style="margin-left: 28px;" @click="resetForm"> 重置 </a-button>
+            <a-button type="primary" @click="onSubmit"> {{ $t('save') }} </a-button>
+            <a-button ghost type="primary" style="margin-left: 28px;" @click="resetForm"> {{ $t('reset') }}  </a-button>
           </a-form-model-item>
         </a-col>
       </a-row>
@@ -87,14 +87,14 @@ export default {
           this.$refs.bot.getData(async (flag, bot) => {
             if (flag) {
               if (this.id) {
-                await putNoticeConfigByPlatform(this.id, { info: { ...this.feishuData, bot, label: '飞书' } })
+                await putNoticeConfigByPlatform(this.id, { info: { ...this.feishuData, bot, label: this.$t('cs.person.feishuApp') } })
               } else {
                 await postNoticeConfigByPlatform({
                   platform: 'feishuApp',
-                  info: { ...this.feishuData, bot, label: '飞书' },
+                  info: { ...this.feishuData, bot, label: this.$t('cs.person.feishuApp') },
                 })
               }
-              this.$message.success('保存成功')
+              this.$message.success(this.$t('saveSuccess'))
               this.getData()
             }
           })

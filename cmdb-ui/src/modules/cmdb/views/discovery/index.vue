@@ -3,9 +3,9 @@
     <div :style="{ textAlign: 'right' }">
       <a-space v-if="!isSelected">
         <a-upload name="file" :multiple="false" accept=".json" :fileList="[]" :beforeUpload="beforeUpload">
-          <a><a-icon type="upload" />规则导入</a>
+          <a><a-icon type="upload" />{{ $t('cmdb.ad.upload') }}</a>
         </a-upload>
-        <a @click="download"><a-icon type="download" />规则导出</a>
+        <a @click="download"><a-icon type="download" />{{ $t('cmdb.ad.download') }}</a>
       </a-space>
     </div>
     <div v-for="{ type, label } in typeCategory" :key="type">
@@ -45,22 +45,26 @@ export default {
   },
   data() {
     return {
-      typeCategory: [
+      typeCategoryChildren: { agent: [], snmp: [], http: [] },
+    }
+  },
+  computed: {
+    typeCategory() {
+      return [
         {
           type: 'agent',
-          label: '内置 & 插件',
+          label: this.$t('cmdb.ad.agent'),
         },
         {
           type: 'snmp',
-          label: '网络设备',
+          label: this.$t('cmdb.ad.snmp'),
         },
         {
           type: 'http',
-          label: '公有云资源',
+          label: this.$t('cmdb.ad.http'),
         },
-      ],
-      typeCategoryChildren: { agent: [], snmp: [], http: [] },
-    }
+      ]
+    },
   },
   provide() {
     return {
@@ -87,11 +91,11 @@ export default {
     deleteRule(rule) {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: `确认删除 【${rule.name}】？`,
+        title: that.$t('warning'),
+        content: that.$t('confirmDelete', { name: `${rule.name}` }),
         onOk() {
           deleteDiscovery(rule.id).then(() => {
-            that.$message.success('删除成功！')
+            that.$message.success(that.$t('deleteSuccess'))
             that.getDiscovery()
           })
         },
@@ -99,13 +103,14 @@ export default {
     },
     download() {
       const x = new XMLHttpRequest()
+      const that = this
       x.open('GET', `/api/v0.1/adr/template/export/file`, true)
       x.responseType = 'blob'
       x.onload = function(e) {
         const url = window.URL.createObjectURL(x.response)
         const a = document.createElement('a')
         a.href = url
-        a.download = `自动发现规则`
+        a.download = that.$t('cmdb.ad.rule')
         a.click()
       }
       x.send()
@@ -120,13 +125,13 @@ export default {
         const state = Number(xhr.readyState)
         if (state === 4) {
           if (xhr.status === 200) {
-            that.$message.success('上传成功')
+            that.$message.success(that.$t('uploadSuccess'))
             that.getDiscovery()
           }
         }
       }
       xhr.ontimeout = function() {
-        that.$httpError('超时错误')
+        that.$httpError(that.$t('cmdb.ad.timeout'))
       }
 
       xhr.send(formData)

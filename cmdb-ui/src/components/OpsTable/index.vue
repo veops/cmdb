@@ -3,9 +3,9 @@
     <slot></slot>
     <template #empty>
       <slot name="empty">
-        <div>
-          <img :style="{ width: '100px' }" :src="require('@/assets/data_empty.png')" />
-          <div>暂无数据</div>
+        <div :style="{ paddingTop: '10px' }">
+          <img :style="{ width: '100px', height: '90px' }" :src="require('@/assets/data_empty.png')" />
+          <div>{{ $t('noData') }}</div>
         </div>
       </slot>
     </template>

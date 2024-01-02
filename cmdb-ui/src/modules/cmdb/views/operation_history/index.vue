@@ -2,16 +2,16 @@
   <div>
     <a-card :bordered="false">
       <a-tabs default-active-key="1">
-        <a-tab-pane key="1" tab="CI变更">
+        <a-tab-pane key="1" :tab="$t('cmdb.history.ciChange')">
           <ci-table></ci-table>
         </a-tab-pane>
-        <a-tab-pane key="2" tab="关系变更">
+        <a-tab-pane key="2" :tab="$t('cmdb.history.relationChange')">
           <relation-table></relation-table>
         </a-tab-pane>
-        <a-tab-pane key="3" tab="模型变更">
+        <a-tab-pane key="3" :tab="$t('cmdb.history.ciTypeChange')">
           <type-table></type-table>
         </a-tab-pane>
-        <a-tab-pane key="4" tab="触发历史">
+        <a-tab-pane key="4" :tab="$t('cmdb.history.triggerHistory')">
           <TriggerTable></TriggerTable>
         </a-tab-pane>
       </a-tabs>

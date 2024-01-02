@@ -4,7 +4,7 @@
       <!-- <a-tab-pane key="1" tab="接收服务器">
         <Receive />
       </a-tab-pane> -->
-      <a-tab-pane key="2" tab="发送服务器">
+      <a-tab-pane key="2" :tab="$t('cs.notice.sendServer')">
         <Send />
       </a-tab-pane>
     </a-tabs>

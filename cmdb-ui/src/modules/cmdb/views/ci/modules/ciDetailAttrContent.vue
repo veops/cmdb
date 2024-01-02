@@ -75,7 +75,7 @@
                 rules: [{ required: attr.is_required }],
               },
             ]"
-            placeholder="请选择"
+            :placeholder="$t('placeholder2')"
             v-if="attr.is_choice"
             :mode="attr.is_list ? 'multiple' : 'default'"
             showSearch
@@ -113,7 +113,7 @@
                 rules: [{ required: attr.is_required }],
               },
             ]"
-            placeholder="请选择"
+            :placeholder="$t('placeholder2')"
             v-else-if="attr.is_list"
             mode="tags"
             showSearch
@@ -263,7 +263,7 @@ export default {
       if (!_.isEqual(this.ci[this.attr.name], newData)) {
         await updateCI(this.ci._id, { [`${this.attr.name}`]: newData })
           .then(() => {
-            this.$message.success('更新成功！')
+            this.$message.success(this.$t('updateSuccess'))
             this.$emit('updateCIByself', { [`${this.attr.name}`]: newData }, this.attr.name)
           })
           .catch(() => {
@@ -286,7 +286,7 @@ export default {
       if (!_.isEqual(this.ci[this.attr.name], jsonData)) {
         updateCI(this.ci._id, { [`${this.attr.name}`]: jsonData })
           .then(() => {
-            this.$message.success('更新成功！')
+            this.$message.success(this.$t('updateSuccess'))
             this.$emit('updateCIByself', { [`${this.attr.name}`]: jsonData }, this.attr.name)
           })
           .catch(() => {

@@ -5,8 +5,8 @@
       <a-input-search
         class="ops-input"
         allowClear
-        :style="{ display: 'inline', marginLeft: '10px' }"
-        placeholder="搜索 | 用户名、中文名"
+        :style="{ width: '300px', display: 'inline', marginLeft: '10px' }"
+        :placeholder="`${$t('search')} | ${$t('acl.nickname')} 、 ${$t('acl.username')}`"
         v-model="searchName"
       ></a-input-search>
     </div>
@@ -29,10 +29,10 @@
             <a :disabled="isAclAdmin ? false : true" @click="handleEdit(row)">
               <a-icon type="edit" />
             </a>
-            <a-tooltip title="权限汇总">
+            <a-tooltip :title="$t('acl.summaryPermissions')">
               <a @click="handlePermCollect(row)"><a-icon type="solution"/></a>
             </a-tooltip>
-            <a-popconfirm :title="`确认删除【${row.nickname || row.username}】？`" @confirm="deleteUser(row.uid)">
+            <a-popconfirm :title="$t('confirmDelete')" @confirm="deleteUser(row.uid)">
               <a :style="{ color: 'red' }"><ops-icon type="icon-xianxing-delete"/></a>
             </a-popconfirm>
           </a-space>
@@ -59,48 +59,7 @@ export default {
   data() {
     return {
       loading: false,
-      tableColumns: [
-        {
-          title: '用户名',
-          field: 'username',
-          sortable: true,
-          minWidth: '100px',
-          fixed: 'left',
-        },
-        {
-          title: '中文名',
-          field: 'nickname',
-          minWidth: '100px',
-        },
-        {
-          title: '加入时间',
-          field: 'date_joined',
-          minWidth: '160px',
-          align: 'center',
-          sortable: true,
-        },
-        {
-          title: '锁定',
-          field: 'block',
-          width: '150px',
-          align: 'center',
-          slots: {
-            default: 'block_default',
-          },
-        },
-        {
-          title: '操作',
-          field: 'action',
-          width: '150px',
-          fixed: 'right',
-          align: 'center',
-          slots: {
-            default: 'action_default',
-          },
-        },
-      ],
       onDutuUids: [],
-      btnName: '新增用户',
       allUsers: [],
       tableData: [],
       searchName: '',
@@ -124,6 +83,51 @@ export default {
       } else {
         return false
       }
+    },
+    tableColumns() {
+      return [
+        {
+          title: this.$t('acl.username'),
+          field: 'username',
+          sortable: true,
+          minWidth: '100px',
+          fixed: 'left',
+        },
+        {
+          title: this.$t('acl.nickname'),
+          field: 'nickname',
+          minWidth: '100px',
+        },
+        {
+          title: this.$t('acl.joined_at'),
+          field: 'date_joined',
+          minWidth: '160px',
+          align: 'center',
+          sortable: true,
+        },
+        {
+          title: this.$t('acl.block'),
+          field: 'block',
+          width: '150px',
+          align: 'center',
+          slots: {
+            default: 'block_default',
+          },
+        },
+        {
+          title: this.$t('operation'),
+          field: 'action',
+          width: '150px',
+          fixed: 'right',
+          align: 'center',
+          slots: {
+            default: 'action_default',
+          },
+        },
+      ]
+    },
+    btnName() {
+      return this.$t('acl.addUser')
     },
   },
   watch: {
@@ -175,7 +179,7 @@ export default {
     },
     deleteUser(uid) {
       deleteUserById(uid).then((res) => {
-        this.$message.success(`删除成功！`)
+        this.$message.success(this.$t('deleteSuccess'))
         this.handleOk()
       })
     },

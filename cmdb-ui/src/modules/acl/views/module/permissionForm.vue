@@ -1,29 +1,33 @@
 <template>
   <CustomDrawer
     :closable="false"
-    :title="drawerTitle"
+    :title="$t('acl.addReourceType')"
     :visible="drawerVisible"
     @close="onClose"
     placement="right"
     width="30%"
   >
     <a-form :form="form" :layout="formLayout" @submit="handleSubmit">
-      <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="类型名">
+      <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" :label="$t('acl.typeName')">
         <a-input
           name="name"
           placeholder=""
-          v-decorator="['name', { rules: [{ required: true, message: '请输入资源名' }] }]"
+          v-decorator="['name', { rules: [{ required: true, message: $t('acl.resourceNameInput') }] }]"
         />
       </a-form-item>
 
-      <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="描述">
-        <a-textarea placeholder="请输入描述信息..." name="description" :rows="4" />
+      <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" :label="$t('desc')">
+        <a-textarea :placeholder="$t('acl.descInput')" name="description" :rows="4" />
       </a-form-item>
 
-      <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="权限">
+      <a-form-item
+        :label-col="formItemLayout.labelCol"
+        :wrapper-col="formItemLayout.wrapperCol"
+        :label="$t('acl.permission')"
+      >
         <div :style="{ borderBottom: '1px solid #E9E9E9' }">
           <a-checkbox :indeterminate="indeterminate" @change="onCheckAllChange" :checked="checkAll">
-            全选
+            {{ $t('checkAll') }}
           </a-checkbox>
         </div>
         <br />
@@ -35,8 +39,8 @@
       </a-form-item>
 
       <div class="custom-drawer-bottom-action">
-        <a-button @click="onClose">取消</a-button>
-        <a-button @click="handleSubmit" type="primary">确定</a-button>
+        <a-button @click="onClose">{{ $t('cancel') }}</a-button>
+        <a-button @click="handleSubmit" type="primary">{{ $t('confirm') }}</a-button>
       </div>
     </a-form>
   </CustomDrawer>
@@ -49,7 +53,6 @@ export default {
   name: 'ResourceForm',
   data() {
     return {
-      drawerTitle: '新增资源类型',
       drawerVisible: false,
       formLayout: 'vertical',
       perms: ['1'],
@@ -142,8 +145,8 @@ export default {
       })
     },
     updateResourceType(id, data) {
-      updateResourceTypeById(id, data).then(res => {
-        this.$message.success(`更新成功`)
+      updateResourceTypeById(id, data).then((res) => {
+        this.$message.success(this.$t('updateSuccess'))
         this.handleOk()
         this.onClose()
       })
@@ -151,18 +154,12 @@ export default {
     },
 
     createResourceType(data) {
-      addResourceType(data).then(res => {
-        this.$message.success(`添加成功`)
+      addResourceType(data).then((res) => {
+        this.$message.success(this.$t('addSuccess'))
         this.handleOk()
         this.onClose()
       })
-      // .catch(err => this.requestFailed(err))
     },
-
-    // requestFailed (err) {
-    //   const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
-    //   this.$message.error(`${msg}`)
-    // }
   },
   watch: {},
   props: {

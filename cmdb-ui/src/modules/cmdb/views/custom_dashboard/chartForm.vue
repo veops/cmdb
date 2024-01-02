@@ -1,7 +1,7 @@
 <template>
   <a-modal
-    width="1100px"
-    :title="`${type === 'add' ? '新增' : '编辑'}图表`"
+    width="1200px"
+    :title="`${type === 'add' ? $t('cmdb.custom_dashboard.newChart') : $t('cmdb.custom_dashboard.editChart')}`"
     :visible="visible"
     @cancel="handleclose"
     @ok="handleok"
@@ -10,10 +10,10 @@
     <div class="chart-wrapper">
       <div class="chart-left">
         <a-form-model ref="chartForm" :model="form" :rules="rules" :label-col="{ span: 4 }" :wrapper-col="{ span: 18 }">
-          <a-form-model-item label="标题" prop="name">
-            <a-input v-model="form.name" placeholder="请输入图表标题"></a-input>
+          <a-form-model-item :label="$t('cmdb.custom_dashboard.title')" prop="name">
+            <a-input v-model="form.name" :placeholder="$t('cmdb.custom_dashboard.titleTips')"></a-input>
           </a-form-model-item>
-          <a-form-model-item label="类型" prop="category" v-if="chartType !== 'count' && chartType !== 'table'">
+          <a-form-model-item :label="$t('type')" prop="category" v-if="chartType !== 'count' && chartType !== 'table'">
             <a-radio-group
               @change="
                 () => {
@@ -28,7 +28,7 @@
               </a-radio-button>
             </a-radio-group>
           </a-form-model-item>
-          <a-form-model-item label="类型" prop="tableCategory" v-if="chartType === 'table'">
+          <a-form-model-item :label="$t('type')" prop="tableCategory" v-if="chartType === 'table'">
             <a-radio-group
               @change="
                 () => {
@@ -39,16 +39,16 @@
               v-model="form.tableCategory"
             >
               <a-radio-button :value="1">
-                计算指标
+                {{ $t('cmdb.custom_dashboard.calcIndicators') }}
               </a-radio-button>
               <a-radio-button :value="2">
-                资源数据
+                {{ $t('cmdb.menu.ciTable') }}
               </a-radio-button>
             </a-radio-group>
           </a-form-model-item>
           <a-form-model-item
             v-if="(chartType !== 'table' && form.category !== 2) || (chartType === 'table' && form.tableCategory === 1)"
-            label="模型"
+            :label="$t('cmdb.ciType.ciType')"
             prop="type_ids"
           >
             <a-select
@@ -56,7 +56,7 @@
               optionFilterProp="children"
               @change="changeCIType"
               v-model="form.type_ids"
-              placeholder="请选择模型"
+              :placeholder="$t('cmdb.ciType.selectCIType')"
               mode="multiple"
             >
               <a-select-option v-for="ci_type in ci_types" :key="ci_type.id" :value="ci_type.id">{{
@@ -64,13 +64,13 @@
               }}</a-select-option>
             </a-select>
           </a-form-model-item>
-          <a-form-model-item v-else label="模型" prop="type_id">
+          <a-form-model-item v-else :label="$t('cmdb.ciType.ciType')" prop="type_id">
             <a-select
               show-search
               optionFilterProp="children"
               @change="changeCIType"
               v-model="form.type_id"
-              placeholder="请选择模型"
+              :placeholder="$t('cmdb.ciType.selectCIType')"
             >
               <a-select-option v-for="ci_type in ci_types" :key="ci_type.id" :value="ci_type.id">{{
                 ci_type.alias || ci_type.name
@@ -78,7 +78,7 @@
             </a-select>
           </a-form-model-item>
           <a-form-model-item
-            label="维度"
+            :label="$t('cmdb.custom_dashboard.dimensions')"
             prop="attr_ids"
             v-if="(['bar', 'line', 'pie'].includes(chartType) && form.category === 1) || chartType === 'table'"
           >
@@ -86,7 +86,7 @@
               :filter-option="filterOption"
               @change="changeAttr"
               v-model="form.attr_ids"
-              placeholder="请选择维度"
+              :placeholder="$t('cmdb.custom_dashboard.selectDimensions')"
               mode="multiple"
               show-search
             >
@@ -100,7 +100,7 @@
           </a-form-model-item>
           <a-form-model-item
             prop="type_ids"
-            label="关系模型"
+            :label="$t('cmdb.custom_dashboard.childCIType')"
             v-if="['bar', 'line', 'pie'].includes(chartType) && form.category === 2"
           >
             <a-select
@@ -108,12 +108,12 @@
               optionFilterProp="children"
               mode="multiple"
               v-model="form.type_ids"
-              placeholder="请选择模型"
+              :placeholder="$t('cmdb.ciType.selectCIType')"
             >
               <a-select-opt-group
                 v-for="(key, index) in Object.keys(level2children)"
                 :key="key"
-                :label="`层级${index + 1}`"
+                :label="$t('cmdb.custom_dashboard.level') + `${index + 1}`"
               >
                 <a-select-option
                   @click="(e) => clickLevel2children(e, citype, index + 1)"
@@ -127,7 +127,11 @@
             </a-select>
           </a-form-model-item>
           <div :class="{ 'chart-left-preview': true, 'chart-left-preview-empty': !isShowPreview }">
-            <span class="chart-left-preview-operation" @click="showPreview"><a-icon type="play-circle" /> 预览</span>
+            <span
+              class="chart-left-preview-operation"
+              @click="showPreview"
+            ><a-icon type="play-circle" /> {{ $t('cmdb.custom_dashboard.preview') }}</span
+            >
             <template v-if="isShowPreview">
               <div v-if="chartType !== 'count'" class="cmdb-dashboard-grid-item-title">
                 <template v-if="form.showIcon && ciType">
@@ -190,14 +194,19 @@
               </div>
             </template>
           </div>
-          <a-form-model-item label="是否显示icon" prop="showIcon" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
+          <a-form-model-item
+            :label="$t('cmdb.custom_dashboard.showIcon')"
+            prop="showIcon"
+            :label-col="{ span: 5 }"
+            :wrapper-col="{ span: 18 }"
+          >
             <a-switch v-model="form.showIcon"></a-switch>
           </a-form-model-item>
         </a-form-model>
       </div>
 
       <div class="chart-right">
-        <h4>图表类型</h4>
+        <h4>{{ $t('cmdb.custom_dashboard.chartType') }}</h4>
         <div class="chart-right-type">
           <div
             :class="{ 'chart-right-type-box': true, 'chart-right-type-box-selected': chartType === t.value }"
@@ -209,7 +218,7 @@
             <span>{{ t.label }}</span>
           </div>
         </div>
-        <h4>数据筛选</h4>
+        <h4>{{ $t('cmdb.custom_dashboard.dataFilter') }}</h4>
         <FilterComp
           ref="filterComp"
           :isDropdown="false"
@@ -217,9 +226,9 @@
           @setExpFromFilter="setExpFromFilter"
           :expression="filterExp ? `q=${filterExp}` : ''"
         />
-        <h4>格式</h4>
+        <h4>{{ $t('cmdb.custom_dashboard.format') }}</h4>
         <a-form-model :colon="false" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-          <a-form-model-item label="字体颜色" v-if="chartType === 'count'">
+          <a-form-model-item :label="$t('cmdb.custom_dashboard.fontColor')" v-if="chartType === 'count'">
             <ColorPicker
               v-model="fontColor"
               :colorList="[
@@ -235,7 +244,7 @@
               ]"
             />
           </a-form-model-item>
-          <a-form-model-item label="背景颜色" v-if="chartType === 'count'">
+          <a-form-model-item :label="$t('cmdb.custom_dashboard.backgroundColor')" v-if="chartType === 'count'">
             <ColorPicker
               v-model="bgColor"
               :colorList="[
@@ -251,10 +260,10 @@
               ]"
             />
           </a-form-model-item>
-          <a-form-model-item label="图表颜色" v-else-if="chartType !== 'table'">
+          <a-form-model-item :label="$t('cmdb.custom_dashboard.chartColor')" v-else-if="chartType !== 'table'">
             <ColorListPicker v-model="chartColor" />
           </a-form-model-item>
-          <a-form-model-item label="图表长度(%)">
+          <a-form-model-item :label="$t('cmdb.custom_dashboard.chartLength') + `(%)`">
             <a-radio-group class="chart-width" style="width:100%;" v-model="width">
               <a-radio-button :value="3">
                 25
@@ -270,27 +279,23 @@
               </a-radio-button>
             </a-radio-group>
           </a-form-model-item>
-          <a-form-model-item label="柱状图类型" v-if="chartType === 'bar'">
+          <a-form-model-item :label="$t('cmdb.custom_dashboard.barType')" v-if="chartType === 'bar'">
             <a-radio-group v-model="barStack">
               <a-radio value="total">
-                堆积柱状图
+                {{ $t('cmdb.custom_dashboard.stackedBar') }}
               </a-radio>
               <a-radio value="">
-                多系列柱状图
+                {{ $t('cmdb.custom_dashboard.multipleSeriesBar') }}
               </a-radio>
             </a-radio-group>
           </a-form-model-item>
-          <a-form-model-item label="方向" v-if="chartType === 'bar'">
+          <a-form-model-item :label="$t('cmdb.custom_dashboard.direction')" v-if="chartType === 'bar'">
             <a-radio-group v-model="barDirection">
-              <a-radio value="x">
-                X轴
-              </a-radio>
-              <a-radio value="y">
-                y轴
-              </a-radio>
+              <a-radio value="x"> X {{ $t('cmdb.custom_dashboard.axis') }} </a-radio>
+              <a-radio value="y"> Y {{ $t('cmdb.custom_dashboard.axis') }} </a-radio>
             </a-radio-group>
           </a-form-model-item>
-          <a-form-model-item label="下方阴影" v-if="chartType === 'line'">
+          <a-form-model-item :label="$t('cmdb.custom_dashboard.lowerShadow')" v-if="chartType === 'line'">
             <a-switch v-model="isShadow" />
           </a-form-model-item>
         </a-form-model>
@@ -320,31 +325,7 @@ export default {
     },
   },
   data() {
-    const chartTypeList = [
-      {
-        value: 'count',
-        label: '指标',
-      },
-      {
-        value: 'bar',
-        label: '柱状图',
-      },
-      {
-        value: 'line',
-        label: '折线图',
-      },
-      {
-        value: 'pie',
-        label: '饼状图',
-      },
-      {
-        value: 'table',
-        label: '表格',
-      },
-    ]
     return {
-      dashboardCategory,
-      chartTypeList,
       visible: false,
       attributes: [],
       type: 'add',
@@ -360,11 +341,11 @@ export default {
       },
       rules: {
         category: [{ required: true, trigger: 'change' }],
-        name: [{ required: true, message: '请输入图表名称' }],
-        type_id: [{ required: true, message: '请选择模型', trigger: 'change' }],
-        type_ids: [{ required: true, message: '请选择模型', trigger: 'change' }],
-        attr_ids: [{ required: true, message: '请选择模型属性', trigger: 'change' }],
-        level: [{ required: true, message: '请输入关系层级' }],
+        name: [{ required: true, message: this.$t('cmdb.custom_dashboard.titleTips') }],
+        type_id: [{ required: true, message: this.$t('cmdb.ciType.selectCIType'), trigger: 'change' }],
+        type_ids: [{ required: true, message: this.$t('cmdb.ciType.selectCIType'), trigger: 'change' }],
+        attr_ids: [{ required: true, message: this.$t('cmdb.ciType.selectCITypeAttributes'), trigger: 'change' }],
+        level: [{ required: true, message: this.$t('cmdb.custom_dashboard.levelTips') }],
         showIcon: [{ required: false }],
       },
       item: {},
@@ -372,7 +353,7 @@ export default {
       width: 3,
       fontColor: '#ffffff',
       bgColor: ['#6ABFFE', '#5375EB'],
-      chartColor: '#5DADF2,#86DFB7,#5A6F96,#7BD5FF,#FFB980,#4D58D6,#D9B6E9,#8054FF', // 图表颜色
+      chartColor: '#5DADF2,#86DFB7,#5A6F96,#7BD5FF,#FFB980,#4D58D6,#D9B6E9,#8054FF', // chart color
       isShowPreview: false,
       filterExp: undefined,
       previewData: null,
@@ -390,6 +371,33 @@ export default {
         return _find || null
       }
       return null
+    },
+    chartTypeList() {
+      return [
+        {
+          value: 'count',
+          label: this.$t('cmdb.custom_dashboard.count'),
+        },
+        {
+          value: 'bar',
+          label: this.$t('cmdb.custom_dashboard.bar'),
+        },
+        {
+          value: 'line',
+          label: this.$t('cmdb.custom_dashboard.line'),
+        },
+        {
+          value: 'pie',
+          label: this.$t('cmdb.custom_dashboard.pie'),
+        },
+        {
+          value: 'table',
+          label: this.$t('cmdb.custom_dashboard.table'),
+        },
+      ]
+    },
+    dashboardCategory() {
+      return dashboardCategory()
     },
   },
   inject: ['layout'],

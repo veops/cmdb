@@ -1,6 +1,6 @@
 <template>
   <a-form :form="form">
-    <a-divider style="font-size: 14px; margin: 14px 0; font-weight: 700">{{ group.name || '其他' }}</a-divider>
+    <a-divider style="font-size:14px;margin:14px 0;font-weight:700;">{{ group.name || $t('other') }}</a-divider>
     <a-row :gutter="24" align="top" type="flex">
       <a-col
         :span="12"
@@ -21,11 +21,11 @@
             v-decorator="[
               attr.name,
               {
-                rules: [{ required: attr.is_required, message: `请选择${attr.alias || attr.name}` }],
+                rules: [{ required: attr.is_required, message: $t('placeholder2') + `${attr.alias || attr.name}` }],
                 initialValue: attr.default && attr.default.default ? attr.default.default : attr.is_list ? [] : null,
               },
             ]"
-            placeholder="请选择"
+            :placeholder="$t('placeholder2')"
             v-if="attr.is_choice"
             :mode="attr.is_list ? 'multiple' : 'default'"
             showSearch
@@ -60,7 +60,7 @@
             v-decorator="[
               attr.name,
               {
-                rules: [{ required: attr.is_required, message: `请选择${attr.alias || attr.name}` }],
+                rules: [{ required: attr.is_required, message: $t('placeholder2') + `${attr.alias || attr.name}` }],
                 initialValue: attr.default && attr.default.default ? attr.default.default : attr.is_list ? [] : null,
               },
             ]"
@@ -70,7 +70,7 @@
             v-decorator="[
               attr.name,
               {
-                rules: [{ required: attr.is_required, message: `请输入${attr.alias || attr.name}` }],
+                rules: [{ required: attr.is_required, message: $t('placeholder1') + `${attr.alias || attr.name}` }],
                 initialValue: attr.default && attr.default.default ? attr.default.default : null,
               },
             ]"
@@ -81,7 +81,7 @@
             v-decorator="[
               attr.name,
               {
-                rules: [{ required: attr.is_required, message: `请选择${attr.alias || attr.name}` }],
+                rules: [{ required: attr.is_required, message: $t('placeholder2') + `${attr.alias || attr.name}` }],
                 initialValue: attr.default && attr.default.default ? moment(attr.default.default) : null,
               },
             ]"
@@ -96,7 +96,7 @@
               attr.name,
               {
                 validateTrigger: ['submit'],
-                rules: [{ required: attr.is_required, message: `请输入${attr.alias || attr.name}` }],
+                rules: [{ required: attr.is_required, message: $t('placeholder1') + `${attr.alias || attr.name}` }],
                 initialValue: attr.default && attr.default.default ? JSON.stringify(attr.default.default) : '',
               },
             ]"
@@ -109,7 +109,7 @@
               attr.name,
               {
                 validateTrigger: ['submit'],
-                rules: [{ required: attr.is_required, message: `请输入${attr.alias || attr.name}` }],
+                rules: [{ required: attr.is_required, message: $t('placeholder1') + `${attr.alias || attr.name}` }],
                 initialValue: attr.default && attr.default.default ? attr.default.default : null,
               },
             ]"

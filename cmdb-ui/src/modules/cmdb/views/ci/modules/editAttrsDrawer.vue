@@ -7,7 +7,7 @@
         visible = false
       }
     "
-    title="字段设置"
+    :title="$t('cmdb.ci.attributeSettings')"
   >
     <CustomTransfer
       ref="customTransfer"
@@ -17,16 +17,16 @@
         width: '230px',
         height: '500px',
       }"
-      :titles="['未选属性', '已选属性']"
+      :titles="[$t('cmdb.components.unselectAttributes'), $t('cmdb.components.selectAttributes')]"
       :render="item => item.title"
       :targetKeys="selectedAttrList"
       @change="handleChange"
       @selectChange="selectChange"
     >
-      <span slot="notFoundContent">没数据</span>
+      <span slot="notFoundContent">{{ $t('noData') }}</span>
     </CustomTransfer>
     <div class="custom-drawer-bottom-action">
-      <a-button @click="handleSubmit" type="primary">确定</a-button>
+      <a-button @click="handleSubmit" type="primary">{{ $t('confirm') }}</a-button>
     </div>
   </CustomDrawer>
 </template>
@@ -79,16 +79,17 @@ export default {
       this.selectedAttrList = targetKeys
     },
     handleSubmit() {
+      const that = this
       if (this.selectedAttrList.length) {
         subscribeCIType(this.typeId, this.selectedAttrList).then(res => {
-          this.$message.success('订阅成功！')
+          this.$message.success(this.$t('cmdb.components.subSuccess'))
           this.visible = false
           this.$emit('refresh')
         })
       } else {
         this.$confirm({
-          title: '警告',
-          content: '必须至少选择一个字段',
+          title: that.$t('warning'),
+          content: that.$t('cmdb.ci.tips4'),
         })
       }
     },

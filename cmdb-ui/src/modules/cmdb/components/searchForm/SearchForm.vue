@@ -15,7 +15,7 @@
             :limit="1"
             :limitText="(count) => `+ ${count}`"
             value-consists-of="LEAF_PRIORITY"
-            placeholder="模型"
+            :placeholder="$t('cmdb.ciType.ciType')"
             @close="closeCiTypeGroup"
             @open="openCiTypeGroup"
             @input="inputCiTypeGroup"
@@ -23,8 +23,8 @@
               (node) => {
                 return {
                   id: node.id || -1,
-                  label: node.alias || node.name || '其他',
-                  title: node.alias || node.name || '其他',
+                  label: node.alias || node.name || $t('other'),
+                  title: node.alias || node.name || $t('other'),
                   children: node.ci_types,
                 }
               }
@@ -42,7 +42,7 @@
           <a-input
             v-model="fuzzySearch"
             :style="{ display: 'inline-block', width: '244px' }"
-            placeholder="请查找"
+            :placeholder="$t('cmdb.components.pleaseSearch')"
             @pressEnter="emitRefresh"
             class="ops-input ops-input-radius"
           >
@@ -54,7 +54,7 @@
             />
             <a-tooltip slot="prefix" placement="bottom" :overlayStyle="{ maxWidth: '550px' }">
               <template slot="title">
-                1、json属性不能搜索<br />2、搜索内容包括逗号，则需转义 \,<br />3、只搜索索引属性，非索引属性使用条件过滤
+                {{ $t('cmdb.components.ciSearchTips') }}
               </template>
               <a><a-icon type="question-circle"/></a>
             </a-tooltip>
@@ -68,7 +68,7 @@
           >
             <div slot="popover_item" class="search-form-bar-filter">
               <a-icon class="search-form-bar-filter-icon" type="filter" />
-              条件过滤
+              {{ $t('cmdb.components.conditionFilter') }}
               <a-icon class="search-form-bar-filter-icon" type="down" />
             </div>
           </FilterComp>
@@ -97,8 +97,8 @@
         </a-space>
       </div>
       <a-space>
-        <a-button @click="reset" size="small">重置</a-button>
-        <a-tooltip title="属性说明" v-if="type === 'relationView'">
+        <a-button @click="reset" size="small">{{ $t('reset') }}</a-button>
+        <a-tooltip :title="$t('cmdb.components.attributeDesc')" v-if="type === 'relationView'">
           <a
             @click="
               () => {
@@ -149,7 +149,7 @@ export default {
   },
   data() {
     return {
-      // 高级搜索 展开/关闭
+      // Advanced Search Expand/Close
       advanced: false,
       queryParam: {},
       isFocusExpression: false,
@@ -163,7 +163,7 @@ export default {
 
   computed: {
     placeholder() {
-      return this.isFocusExpression ? '例：q=hostname:*0.0.0.0*' : '表达式'
+      return this.isFocusExpression ? this.$t('cmdb.components.ciSearchTips2') : this.$t('cmdb.ciType.expr')
     },
     width() {
       return '200px'

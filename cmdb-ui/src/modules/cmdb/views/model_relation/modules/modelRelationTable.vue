@@ -11,22 +11,27 @@
       :data="tableData"
       :sort-config="{ defaultSort: { field: 'created_at', order: 'desc' } }"
     >
-      <vxe-column field="created_at" title="创建时间" sortable width="159px"></vxe-column>
-      <vxe-column field="parent.alias" title="源模型"></vxe-column>
-      <vxe-column field="relation_type_id" title="关系" :filters="[{ data: '' }]" :filter-multiple="false">
+      <vxe-column field="created_at" :title="$t('created_at')" sortable width="159px"></vxe-column>
+      <vxe-column field="parent.alias" :title="$t('cmdb.ciType.sourceCIType')"></vxe-column>
+      <vxe-column
+        field="relation_type_id"
+        :title="$t('cmdb.custom_dashboard.relation')"
+        :filters="[{ data: '' }]"
+        :filter-multiple="false"
+      >
         <template #default="{ row }">
           <a-tag color="cyan">
             {{ row.relation_type.name }}
           </a-tag>
         </template>
       </vxe-column>
-      <vxe-column field="child.alias" title="目标模型"></vxe-column>
-      <vxe-column field="constraint" title="关联约束"></vxe-column>
-      <vxe-column field="authorization" title="操作" width="89px">
+      <vxe-column field="child.alias" :title="$t('cmdb.ciType.dstCIType')"></vxe-column>
+      <vxe-column field="constraint" :title="$t('cmdb.ciType.relationConstraint')"></vxe-column>
+      <vxe-column field="authorization" :title="$t('operation')" width="89px">
         <template #default="{ row }">
           <a-space>
             <a @click="handleOpenGrant(row)"><a-icon type="user-add"/></a>
-            <a-popconfirm title="确认删除？" @confirm="deleteRelation(row)">
+            <a-popconfirm :title="$t('cmdb.ciType.confirmDelete2')" @confirm="deleteRelation(row)">
               <a :style="{ color: 'red' }"><ops-icon type="icon-xianxing-delete"/></a>
             </a-popconfirm>
           </a-space>
@@ -48,11 +53,6 @@ export default {
       drawerVisible: false,
       tableData: [],
       relationTypeList: null,
-      constraintMap: {
-        '0': '一对多',
-        '1': '一对一',
-        '2': '多对多',
-      },
     }
   },
   components: {
@@ -64,6 +64,13 @@ export default {
   computed: {
     windowHeight() {
       return this.$store.state.windowHeight
+    },
+    constraintMap() {
+      return {
+        '0': this.$t('cmdb.ciType.one2Many'),
+        '1': this.$t('cmdb.ciType.one2One'),
+        '2': this.$t('cmdb.ciType.many2Many'),
+      }
     },
   },
   methods: {
@@ -103,7 +110,8 @@ export default {
     },
     deleteRelation(row) {
       deleteRelation(row.parent_id, row.child_id).then((res) => {
-        this.$message.success(`删除成功！`)
+        this.$message.success(this.$t('deleteSuccess'))
+        this.getRelationTypes()
         this.refresh()
       })
     },

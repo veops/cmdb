@@ -10,6 +10,7 @@ import './guard' // guard permission control
 import './utils/filter' // global filter
 import Setting from './config/setting'
 import { Icon } from 'ant-design-vue'
+import i18n from './lang'
 
 import iconFont from '../public/iconfont/iconfont'
 
@@ -22,6 +23,7 @@ async function start() {
   const _vue = new Vue({
     router,
     store,
+    i18n,
     created: bootstrap,
     render: h => h(App)
   }).$mount('#app')
