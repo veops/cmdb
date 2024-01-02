@@ -3,6 +3,13 @@ import cs_zh from '../views/setting/lang/zh.js'
 import acl_zh from '@/modules/acl/lang/zh.js'
 
 export default {
+    commonMenu: {
+        permission: '权限管理',
+        role: '角色管理',
+        resource: '资源管理',
+        resourceType: '资源类型',
+        trigger: '触发器',
+    },
     screen: '大屏',
     dashboard: '仪表盘',
     admin: '管理员',
