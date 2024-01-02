@@ -1,18 +1,18 @@
 <template>
   <a-tabs v-model="activeKey" size="small" :tabBarStyle="{ borderBottom: 'none' }">
     <a-tab-pane key="expr" :disabled="!canDefineComputed">
-      <span style="font-size:12px;" slot="tab">表达式</span>
+      <span style="font-size:12px;" slot="tab">{{ $t('cmdb.ciType.expr') }}</span>
       <a-textarea v-model="compute_expr" :placeholder="`{{a}}+{{b}}`" :rows="2" :disabled="!canDefineComputed" />
     </a-tab-pane>
     <a-tab-pane key="script" :disabled="!canDefineComputed">
-      <span style="font-size:12px;" slot="tab">代码</span>
+      <span style="font-size:12px;" slot="tab">{{ $t('cmdb.ciType.code') }}</span>
       <codemirror style="z-index: 9999" :options="cmOptions" v-model="compute_script"></codemirror>
     </a-tab-pane>
     <template slot="tabBarExtraContent" v-if="showCalcComputed">
       <a-button type="primary" size="small" @click="handleCalcComputed">
-        应用
+        {{ $t('cmdb.ciType.apply') }}
       </a-button>
-      <a-tooltip title="所有CI触发计算">
+      <a-tooltip :title="$t('cmdb.ciType.computeForAllCITips')">
         <a-icon type="question-circle" style="margin-left:5px" />
       </a-tooltip>
     </template>
@@ -76,8 +76,8 @@ export default {
     handleCalcComputed() {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: `确认触发将保存当前配置及触发所有CI的计算？`,
+        title: this.$t('warning'),
+        content: this.$t('cmdb.ciType.confirmcomputeForAllCITips'),
         onOk() {
           that.$emit('handleCalcComputed')
         },

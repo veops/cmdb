@@ -18,7 +18,7 @@
           >
             <a-select
               v-model="queryParams[attr.name]"
-              placeholder="请选择"
+              :placeholder="$t('cmdb.history.pleaseSelect')"
               v-if="attr.is_choice"
               show-search
               :filter-option="filterOption"
@@ -37,7 +37,7 @@
               @change="onChange"
               :style="{width:'100%'}"
               format="YYYY-MM-DD HH:mm:ss"
-              :placeholder="['开始时间', '结束时间']"
+              :placeholder="[$t('cmdb.history.startTime'), $t('cmdb.history.endTime')]"
               :show-time="{
                 hideDisabledOptions: true,
                 defaultValue: [moment('00:00:00', 'HH:mm:ss'), moment('23:59:59', 'HH:mm:ss')],
@@ -65,7 +65,7 @@
             >
               <a-select
                 v-model="queryParams[item.name]"
-                placeholder="请选择"
+                :placeholder="$t('cmdb.history.pleaseSelect')"
                 v-if="item.is_choice"
                 show-search
                 :filter-option="filterOption"
@@ -84,7 +84,7 @@
                 :style="{width:'100%'}"
                 @change="onChange"
                 format="YYYY-MM-DD HH:mm"
-                :placeholder="['开始时间', '结束时间']"
+                :placeholder="[$t('cmdb.history.startTime'), $t('cmdb.history.endTime')]"
                 v-else-if="valueTypeMap[item.value_type] == 'date' || valueTypeMap[item.value_type] == 'datetime'"
                 :show-time="{
                   hideDisabledOptions: true,
@@ -99,13 +99,13 @@
       <a-row>
         <a-col :span="24" :style="{ textAlign: 'right' , marginBottom: '10px' }">
           <a-button type="primary" html-type="submit" @click="handleSearch">
-            查询
+            {{ $t('query') }}
           </a-button>
           <a-button :style="{ marginLeft: '8px' }" @click="handleReset">
-            重置
+            {{ $t('reset') }}
           </a-button>
           <a :style="{ marginLeft: '8px', fontSize: '12px' }" @click="toggle" v-if="attrList.length >= 4">
-            {{ expand?'隐藏':'展开' }} <a-icon :type="expand ? 'up' : 'down'" />
+            {{ expand?$t('hide'):$t('expand') }} <a-icon :type="expand ? 'up' : 'down'" />
           </a>
         </a-col>
       </a-row>
@@ -126,7 +126,6 @@ export default {
   },
   data() {
     return {
-      valueTypeMap,
       expand: false,
       queryParams: {
         page: 1,
@@ -134,6 +133,11 @@ export default {
       },
       date: undefined
     }
+  },
+  computed: {
+    valueTypeMap() {
+      return valueTypeMap()
+    },
   },
   watch: {
     queryParams: {

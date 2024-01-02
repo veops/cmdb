@@ -1,7 +1,9 @@
+import i18n from '@/lang'
+
 export const category_1_bar_options = (data, options) => {
-    // 计算一级分类
+    // Calculate first level classification
     const xData = Object.keys(data)
-    // 计算共有多少二级分类
+    // Calculate how many secondary categories there are
     const secondCategory = {}
     Object.keys(data).forEach(key => {
         if (Object.prototype.toString.call(data[key]) === '[object Object]') {
@@ -9,7 +11,7 @@ export const category_1_bar_options = (data, options) => {
                 secondCategory[key1] = Array.from({ length: xData.length }).fill(0)
             })
         } else {
-            secondCategory['其他'] = Array.from({ length: xData.length }).fill(0)
+            secondCategory[i18n.t('other')] = Array.from({ length: xData.length }).fill(0)
         }
     })
     Object.keys(secondCategory).forEach(key => {
@@ -18,7 +20,7 @@ export const category_1_bar_options = (data, options) => {
                 secondCategory[key][idx] = data[x][key]
             }
             if (typeof data[x] === 'number') {
-                secondCategory['其他'][idx] = data[x]
+                secondCategory[i18n.t('other')][idx] = data[x]
             }
         })
     })
@@ -121,7 +123,7 @@ export const category_1_line_options = (data, options) => {
                         }, {
                             offset: 1, color: '#ffffff' // 100% 处的颜色
                         }],
-                        global: false // 缺省为 false
+                        global: false // default is false
                     }
                 } : null
             }

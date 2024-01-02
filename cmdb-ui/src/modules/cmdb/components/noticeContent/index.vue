@@ -19,7 +19,7 @@
       <Editor class="notice-content-editor" :defaultConfig="editorConfig" mode="simple" @onCreated="onCreated" />
       <div class="notice-content-sidebar">
         <template v-if="needOld">
-          <div class="notice-content-sidebar-divider">变更前</div>
+          <div class="notice-content-sidebar-divider">{{ $t('cmdb.components.beforeChange') }}</div>
           <div
             @dblclick="dblclickSidebar(`old_${attr.name}`, attr.alias || attr.name)"
             class="notice-content-sidebar-item"
@@ -29,7 +29,7 @@
           >
             {{ attr.alias || attr.name }}
           </div>
-          <div class="notice-content-sidebar-divider">变更后</div>
+          <div class="notice-content-sidebar-divider">{{ $t('cmdb.components.afterChange') }}</div>
         </template>
         <div
           @dblclick="dblclickSidebar(attr.name, attr.alias || attr.name)"
@@ -65,7 +65,7 @@ export default {
   data() {
     return {
       editor: null,
-      editorConfig: { placeholder: '请输入通知内容', readOnly: this.readOnly },
+      editorConfig: { placeholder: this.$t('cmdb.components.noticeContentTips'), readOnly: this.readOnly },
       content: '',
       defaultParams: [],
       value2LabelMap: {},
@@ -74,11 +74,11 @@ export default {
   beforeDestroy() {
     const editor = this.editor
     if (editor == null) return
-    editor.destroy() // 组件销毁时，及时销毁编辑器
+    editor.destroy() // When the component is destroyed, destroy the editor in time
   },
   methods: {
     onCreated(editor) {
-      this.editor = Object.seal(editor) // 一定要用 Object.seal() ，否则会报错
+      this.editor = Object.seal(editor) // Be sure to use Object.seal(), otherwise an error will be reported
     },
     getContent() {
       const html = _.cloneDeep(this.editor.getHtml())

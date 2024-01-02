@@ -1,21 +1,30 @@
 <template>
-  <a-modal :visible="visible" title="导出数据" @cancel="handleCancel" okText="导出" @ok="handleOk">
+  <a-modal
+    :visible="visible"
+    :title="$t('cmdb.components.downloadCI')"
+    @cancel="handleCancel"
+    @ok="handleOk"
+    width="700px"
+  >
     <a-form :form="form" :label-col="{ span: 6 }" :wrapper-col="{ span: 15 }">
-      <a-form-item label="文件名">
+      <a-form-item :label="$t('cmdb.components.filename')">
         <a-input
-          placeholder="请输入文件名"
-          v-decorator="['filename', { rules: [{ required: true, message: '请输入文件名' }] }]"
+          :placeholder="$t('cmdb.components.filenameInputTips')"
+          v-decorator="['filename', { rules: [{ required: true, message: $t('cmdb.components.filenameInputTips') }] }]"
         />
       </a-form-item>
-      <a-form-item label="保存类型">
+      <a-form-item :label="$t('cmdb.components.saveType')">
         <a-select
-          placeholder="请选择保存类型"
-          v-decorator="['type', { rules: [{ required: true, message: '请选择保存类型' }], initialValue: 'xlsx' }]"
+          :placeholder="$t('cmdb.components.saveTypeTips')"
+          v-decorator="[
+            'type',
+            { rules: [{ required: true, message: $t('cmdb.components.saveTypeTips') }], initialValue: 'xlsx' },
+          ]"
         >
           <a-select-option v-for="item in typeList" :key="item.id" :values="item.id">{{ item.label }}</a-select-option>
         </a-select>
       </a-form-item>
-      <a-form-item label="选择字段">
+      <a-form-item :label="$t('cmdb.ciType.selectAttributes')">
         <div
           :style="{
             paddingLeft: '26px',
@@ -29,7 +38,7 @@
             :checked="checkAll"
             @change="onCheckAllChange"
             :style="{ marginRight: '10px' }"
-          />全选
+          />{{ $t('checkAll') }}
         </div>
         <div
           :style="{
@@ -76,30 +85,7 @@ export default {
     },
   },
   data() {
-    const typeList = [
-      {
-        id: 'xlsx',
-        label: 'Excel工作簿(*.xlsx)',
-      },
-      {
-        id: 'csv',
-        label: 'CSV(逗号分隔)(*.csv)',
-      },
-      {
-        id: 'html',
-        label: '网页(*.html)',
-      },
-      {
-        id: 'xml',
-        label: 'XML数据(*.xml)',
-      },
-      {
-        id: 'txt',
-        label: '文本文件(制表符分隔)(*.txt)',
-      },
-    ]
     return {
-      typeList,
       visible: false,
       form: this.$form.createForm(this),
       preferenceAttrList: [],
@@ -108,6 +94,32 @@ export default {
       indeterminate: false,
       defaultChecked: [],
     }
+  },
+  computed: {
+    typeList() {
+      return [
+        {
+          id: 'xlsx',
+          label: this.$t('cmdb.components.xlsx'),
+        },
+        {
+          id: 'csv',
+          label: this.$t('cmdb.components.csv'),
+        },
+        {
+          id: 'html',
+          label: this.$t('cmdb.components.html'),
+        },
+        {
+          id: 'xml',
+          label: this.$t('cmdb.components.xml'),
+        },
+        {
+          id: 'txt',
+          label: this.$t('cmdb.components.txt'),
+        },
+      ]
+    },
   },
   methods: {
     ...mapMutations('cmdbStore', ['SET_IS_TABLE_LOADING']),

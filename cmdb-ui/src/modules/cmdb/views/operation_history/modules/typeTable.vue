@@ -14,13 +14,13 @@
       :max-height="`${windowHeight - windowHeightMinus}px`"
       row-id="_XID"
       size="small"
-      :row-config="{isHover: true}"
+      :row-config="{ isHover: true }"
       stripe
       class="ops-stripe-table"
     >
-      <vxe-column field="created_at" width="159px" title="操作时间"></vxe-column>
-      <vxe-column field="user" width="116px" title="用户"></vxe-column>
-      <vxe-column field="operate_type" width="135px" title="操作">
+      <vxe-column field="created_at" width="159px" :title="$t('cmdb.history.opreateTime')"></vxe-column>
+      <vxe-column field="user" width="116px" :title="$t('cmdb.history.user')"></vxe-column>
+      <vxe-column field="operate_type" width="135px" :title="$t('operation')">
         <template #header="{ column }">
           <span>{{ column.title }}</span>
           <a-popover trigger="click" placement="bottom">
@@ -28,7 +28,7 @@
             <a slot="content">
               <a-select
                 v-model="queryParams.operate_type"
-                placeholder="选择筛选操作"
+                :placeholder="$t('cmdb.history.filterOperate')"
                 show-search
                 style="width: 200px"
                 :filter-option="filterOption"
@@ -42,16 +42,18 @@
                   {{ Object.keys(choice)[0] }}
                 </a-select-option>
               </a-select>
-              <a-button type="link" class="filterButton" @click="filterOperate">筛选</a-button>
-              <a-button type="link" class="filterResetButton" @click="filterOperateReset">重置</a-button>
+              <a-button type="link" class="filterButton" @click="filterOperate">{{
+                $t('cmdb.history.filter')
+              }}</a-button>
+              <a-button type="link" class="filterResetButton" @click="filterOperateReset">{{ $t('reset') }}</a-button>
             </a>
           </a-popover>
         </template>
         <template #default="{ row }">
-          <a-tag color="green" v-if="row.operate_type.includes('新增')">
+          <a-tag color="green" v-if="row.operate_type.includes($t('new'))">
             {{ row.operate_type }}
           </a-tag>
-          <a-tag color="orange" v-else-if="row.operate_type.includes('修改')">
+          <a-tag color="orange" v-else-if="row.operate_type.includes($t('update'))">
             {{ row.operate_type }}
           </a-tag>
           <a-tag color="red" v-else>
@@ -59,25 +61,25 @@
           </a-tag>
         </template>
       </vxe-column>
-      <vxe-column field="type_id" title="模型" width="150px">
+      <vxe-column field="type_id" :title="$t('cmdb.ciType.ciType')" width="150px">
         <template #default="{ row }">
-          {{ row.operate_type === '删除模型' ? row.change.alias : row.type_id }}
+          {{ row.operate_type === $t('cmdb.history.deleteCIType') ? row.change.alias : row.type_id }}
         </template>
       </vxe-column>
-      <vxe-column field="changeDescription" title="描述">
+      <vxe-column field="changeDescription" :title="$t('desc')">
         <template #default="{ row }">
-          <p style="color:rgba(0, 0, 0, 0.65);" v-if="row.changeDescription === '没有修改'">
+          <p style="color:rgba(0, 0, 0, 0.65);" v-if="row.changeDescription === $t('cmdb.history.noUpdate')">
             {{ row.changeDescription }}
           </p>
-          <template v-else-if="row.operate_type.includes('修改')">
+          <template v-else-if="row.operate_type.includes($t('update'))">
             <p :key="index" style="color:#fa8c16;" v-for="(tag, index) in row.changeArr">
               {{ tag }}
             </p>
           </template>
-          <p class="more-tag" style="color:#52c41a;" v-else-if="row.operate_type.includes('新增')">
+          <p class="more-tag" style="color:#52c41a;" v-else-if="row.operate_type.includes($t('new'))">
             {{ row.changeDescription }}
           </p>
-          <p style="color:#f5222d;" v-else-if="row.operate_type.includes('删除')">
+          <p style="color:#f5222d;" v-else-if="row.operate_type.includes($t('delete'))">
             {{ row.changeDescription }}
           </p>
         </template>
@@ -94,7 +96,7 @@
           :page-size="pageSize"
           @change="onChange"
           @showSizeChange="onShowSizeChange"
-          :show-total="(total) => `共 ${total} 条记录`"
+          :show-total="(total) => $t('cmdb.history.totalItems', { total: total })"
         >
         </a-pagination>
       </a-col>
@@ -104,6 +106,7 @@
 
 <script>
 import _ from 'lodash'
+import { mapState } from 'vuex'
 import SearchForm from './searchForm'
 import { getCITypesTable, getUsers } from '@/modules/cmdb/api/history'
 import { getCITypes } from '@/modules/cmdb/api/CIType'
@@ -111,59 +114,13 @@ import { getRelationTypes } from '@/modules/cmdb/api/relationType'
 export default {
   name: 'TypeTable',
   components: { SearchForm },
+  inject: ['reload'],
   data() {
     return {
       loading: true,
       relationTypeList: null,
-      operateTypeMap: new Map([
-        ['0', '新增模型'],
-        ['1', '修改模型'],
-        ['2', '删除模型'],
-        ['3', '新增属性'],
-        ['4', '修改属性'],
-        ['5', '删除属性'],
-        ['6', '新增触发器'],
-        ['7', '修改触发器'],
-        ['8', '删除触发器'],
-        ['9', '新增联合唯一'],
-        ['10', '修改联合唯一'],
-        ['11', '删除联合唯一'],
-        ['12', '新增关系'],
-        ['13', '删除关系'],
-      ]),
       typeList: null,
       userList: [],
-      typeTableAttrList: [
-        {
-          alias: '模型',
-          is_choice: true,
-          name: 'type_id',
-          value_type: '2',
-          choice_value: [],
-        },
-        {
-          alias: '操作',
-          is_choice: true,
-          name: 'operate_type',
-          value_type: '2',
-          choice_value: [
-            { 新增模型: 0 },
-            { 修改模型: 1 },
-            { 删除模型: 2 },
-            { 新增属性: 3 },
-            { 修改属性: 4 },
-            { 删除属性: 5 },
-            { 新增触发器: 6 },
-            { 修改触发器: 7 },
-            { 删除触发器: 8 },
-            { 新增联合唯一: 9 },
-            { 修改联合唯一: 10 },
-            { 删除联合唯一: 11 },
-            { 新增关系: 12 },
-            { 删除关系: 13 },
-          ],
-        },
-      ],
       pageSizeOptions: ['50', '100', '200'],
       isExpand: false,
       current: 1,
@@ -177,25 +134,71 @@ export default {
         type_id: undefined,
         operate_type: undefined,
       },
+      typeTableAttrList: [
+        {
+          alias: this.$t('cmdb.ciType.ciType'),
+          is_choice: true,
+          name: 'type_id',
+          value_type: '2',
+          choice_value: [],
+        },
+        {
+          alias: this.$t('operation'),
+          is_choice: true,
+          name: 'operate_type',
+          value_type: '2',
+          choice_value: [
+            { [this.$t('cmdb.history.addCIType')]: 0 },
+            { [this.$t('cmdb.history.updateCIType')]: 1 },
+            { [this.$t('cmdb.history.deleteCIType')]: 2 },
+            { [this.$t('cmdb.history.addAttribute')]: 3 },
+            { [this.$t('cmdb.history.updateAttribute')]: 4 },
+            { [this.$t('cmdb.history.deleteAttribute')]: 5 },
+            { [this.$t('cmdb.history.addTrigger')]: 6 },
+            { [this.$t('cmdb.history.updateTrigger')]: 7 },
+            { [this.$t('cmdb.history.deleteTrigger')]: 8 },
+            { [this.$t('cmdb.history.addUniqueConstraint')]: 9 },
+            { [this.$t('cmdb.history.updateUniqueConstraint')]: 10 },
+            { [this.$t('cmdb.history.deleteUniqueConstraint')]: 11 },
+            { [this.$t('cmdb.history.addRelation')]: 12 },
+            { [this.$t('cmdb.history.deleteRelation')]: 13 },
+          ],
+        },
+      ],
     }
   },
   async created() {
-    await Promise.all([
-      this.getRelationTypes(),
-      this.getTypes(),
-      this.getUserList(),
-    ])
+    await Promise.all([this.getRelationTypes(), this.getTypes(), this.getUserList()])
     await this.getTable(this.queryParams)
   },
   updated() {
     this.$refs.xTable.$el.querySelector('.vxe-table--body-wrapper').scrollTop = 0
   },
   computed: {
+    ...mapState(['locale']),
     windowHeight() {
       return this.$store.state.windowHeight
     },
     windowHeightMinus() {
       return this.isExpand ? 396 : 335
+    },
+    operateTypeMap() {
+      return new Map([
+        ['0', this.$t('cmdb.history.addCIType')],
+        ['1', this.$t('cmdb.history.updateCIType')],
+        ['2', this.$t('cmdb.history.deleteCIType')],
+        ['3', this.$t('cmdb.history.addAttribute')],
+        ['4', this.$t('cmdb.history.updateAttribute')],
+        ['5', this.$t('cmdb.history.deleteAttribute')],
+        ['6', this.$t('cmdb.history.addTrigger')],
+        ['7', this.$t('cmdb.history.updateTrigger')],
+        ['8', this.$t('cmdb.history.deleteTrigger')],
+        ['9', this.$t('cmdb.history.addUniqueConstraint')],
+        ['10', this.$t('cmdb.history.updateUniqueConstraint')],
+        ['11', this.$t('cmdb.history.deleteUniqueConstraint')],
+        ['12', this.$t('cmdb.history.addRelation')],
+        ['13', this.$t('cmdb.history.deleteRelation')],
+      ])
     },
   },
   watch: {
@@ -205,9 +208,11 @@ export default {
     pageSize(val) {
       this.queryParams.page_size = val
     },
+    locale() {
+      this.reload()
+    },
   },
   methods: {
-    // 获取表格数据
     async getTable(queryParams) {
       try {
         this.loading = true
@@ -228,7 +233,6 @@ export default {
         this.loading = false
       }
     },
-    // 获取模型
     async getTypes() {
       const res = await getCITypes()
       const typesArr = []
@@ -242,10 +246,8 @@ export default {
         }
       })
       this.typeList = typesMap
-      // 设置模型options选项
       this.typeTableAttrList[0].choice_value = typesArr
     },
-    // 获取用户列表
     async getUserList() {
       const res = await getUsers()
       const userListMap = new Map()
@@ -254,7 +256,6 @@ export default {
       })
       this.userList = userListMap
     },
-    // 获取关系
     async getRelationTypes() {
       const res = await getRelationTypes()
       const relationTypeMap = new Map()
@@ -275,13 +276,11 @@ export default {
     handleExpandChange(expand) {
       this.isExpand = expand
     },
-    // 处理查询
     handleSearch(queryParams) {
       this.current = 1
       this.queryParams = queryParams
       this.getTable(this.queryParams)
     },
-    // 重置表单
     searchFormReset() {
       this.queryParams = {
         page: 1,
@@ -291,31 +290,26 @@ export default {
       }
       this.getTable(this.queryParams)
     },
-    // 转换operate_type
     handleOperateType(operate_type) {
       return this.operateTypeMap.get(operate_type)
     },
-    // 转换type_id
     handleTypeId(type_id) {
       return this.typeList.get(type_id) ? this.typeList.get(type_id) : type_id
     },
-    // 转换uid
     handleUID(uid) {
       return this.userList.get(uid)
     },
-    // 转换relation_type_id
     handleRelationType(relation_type_id) {
       return this.relationTypeList.get(relation_type_id)
     },
-    // 处理改变描述
     handleChangeDescription(item, operate_type) {
       switch (operate_type) {
-        // 新增模型
+        // add CIType
         case '0': {
-          item.changeDescription = '新增模型：' + item.change.alias
+          item.changeDescription = this.$t('cmdb.history.addCIType') + ': ' + item.change.alias
           break
         }
-        // 修改模型
+        // update CIType
         case '1': {
           item.changeArr = []
           for (const key in item.change.old) {
@@ -323,30 +317,30 @@ export default {
             const oldVal = item.change.old[key]
             if (!_.isEqual(newVal, oldVal) && key !== 'updated_at') {
               if (oldVal === null) {
-                const str = ` [ ${key} : 改为 ${newVal || '""'} ] `
+                const str = ` [ ${key} :  ${newVal || '""'} ] `
                 item.changeDescription += str
                 item.changeArr.push(str)
               } else {
-                const str = ` [ ${key} : 由 ${oldVal || '""'} 改为 ${newVal || '""'} ] `
-                item.changeDescription += ` [ ${key} : 由 ${oldVal || '""'} 改为 ${newVal || '""'} ] `
+                const str = ` [ ${key} :  ${oldVal || '""'} -> ${newVal || '""'} ] `
+                item.changeDescription += ` [ ${key} :  ${oldVal || '""'} -> ${newVal || '""'} ] `
                 item.changeArr.push(str)
               }
             }
           }
-          if (!item.changeDescription) item.changeDescription = '没有修改'
+          if (!item.changeDescription) item.changeDescription = this.$t('cmdb.history.noModifications')
           break
         }
-        // 删除模型
+        // delete CIType
         case '2': {
-          item.changeDescription = `删除模型：${item.change.alias}`
+          item.changeDescription = this.$t('cmdb.history.addCIType') + ': ' + `${item.change.alias}`
           break
         }
-        // 新增属性
+        // add Attribute
         case '3': {
-          item.changeDescription = `属性名：${item.change.alias}`
+          item.changeDescription = `${this.$t('cmdb.history.attr')}：${item.change.alias}`
           break
         }
-        // 修改属性
+        // update Attribute
         case '4': {
           item.changeArr = []
           for (const key in item.change.old) {
@@ -363,74 +357,86 @@ export default {
               if (Object.prototype.toString.call(oldStr) === '[object Object]') {
                 oldStr = JSON.stringify(oldStr)
               }
-              const str = `${key} : ${oldStr ? `由 ${oldStr || '""'} ` : ''} 改为 ${newStr || '""'}`
+              const str = `${key} : ${oldStr ? ` ${oldStr || '""'} ` : ''} -> ${newStr || '""'}`
               item.changeDescription += ` [ ${str} ] `
               item.changeArr.push(str)
             }
           }
-          if (!item.changeDescription) item.changeDescription = '没有修改'
+          if (!item.changeDescription) item.changeDescription = this.$t('cmdb.history.noModifications')
           break
         }
-        // 删除属性
+        // delete Attribute
         case '5': {
-          item.changeDescription = `删除：${item.change.alias}`
+          item.changeDescription = `${this.$t('delete')}：${item.change.alias}`
           break
         }
-        // 新增触发器
+        // add trigger
         case '6': {
-          item.changeDescription = `属性ID：${item.change.attr_id}，提前：${item.change.option.before_days}天，主题：${item.change.option.subject}\n内容：${item.change.option.body}\n通知时间：${item.change.option.notify_at}`
+          item.changeDescription = this.$t('cmdb.history.noModifications', {
+            attr_id: item.change.attr_id,
+            before_days: item.change.option.before_days,
+            subject: item.change.option.subject,
+            body: item.change.option.body,
+            notify_at: item.change.option.notify_at,
+          })
           break
         }
-        // 修改触发器
+        // update trigger
         case '7': {
           item.changeArr = []
           for (const key in item.change.old.option) {
             const newVal = item.change.new.option[key]
             const oldVal = item.change.old.option[key]
             if (!_.isEqual(newVal, oldVal) && key !== 'updated_at') {
-              const str = ` [ ${key} : 由 ${oldVal} 改为 ${newVal} ] `
+              const str = ` [ ${key} :  ${oldVal} -> ${newVal} ] `
               item.changeDescription += str
               item.changeArr.push(str)
             }
           }
-          if (!item.changeDescription) item.changeDescription = '没有修改'
+          if (!item.changeDescription) item.changeDescription = this.$t('cmdb.history.noModifications')
           break
         }
-        // 删除触发器
+        // delete trigger
         case '8': {
-          item.changeDescription = `属性ID：${item.change.attr_id}，提前：${item.change.option.before_days}天，主题：${item.change.option.subject}\n内容：${item.change.option.body}\n通知时间：${item.change.option.notify_at}`
+          item.changeDescription = this.$t('cmdb.history.noModifications', {
+            attr_id: item.change.attr_id,
+            before_days: item.change.option.before_days,
+            subject: item.change.option.subject,
+            body: item.change.option.body,
+            notify_at: item.change.option.notify_at,
+          })
           break
         }
-        // 新增联合唯一
+        // add unique constraint
         case '9': {
-          item.changeDescription = `属性id：[${item.change.attr_ids}]`
+          item.changeDescription = `${this.$t('cmdb.history.attrId')}：[${item.change.attr_ids}]`
           break
         }
-        // 修改联合唯一
+        // update unique constraint
         case '10': {
           item.changeArr = []
           const oldVal = item.change.old.attr_ids
           const newVal = item.change.new.attr_ids
-          const str = `属性id：[${oldVal}] -> [${newVal}]`
+          const str = `${this.$t('cmdb.history.attrId')}：[${oldVal}] -> [${newVal}]`
           item.changeDescription = str
           item.changeArr.push(str)
           break
         }
-        // 删除联合唯一
+        // delete unique constraint
         case '11': {
-          item.changeDescription = `属性id：[${item.change.attr_ids}]`
+          item.changeDescription = `${this.$t('cmdb.history.attrId')}：[${item.change.attr_ids}]`
           break
         }
-        // 新增关系
+        // add relation
         case '12': {
-          item.changeDescription = `新增：${item.change.parent.alias} -> ${this.handleRelationType(
+          item.changeDescription = `${this.$t('new')}：${item.change.parent.alias} -> ${this.handleRelationType(
             item.change.relation_type_id
           )} -> ${item.change.child.alias}`
           break
         }
-        // 删除关系
+        // delete relation
         case '13': {
-          item.changeDescription = `删除：${item.change.parent_id.alias} -> ${this.handleRelationType(
+          item.changeDescription = `${this.$t('delete')}：${item.change.parent_id.alias} -> ${this.handleRelationType(
             item.change.relation_type_id
           )} -> ${item.change.child.alias}`
           break
@@ -470,7 +476,7 @@ export default {
 .more-tag {
   max-width: 100%;
   overflow: hidden;
-  text-overflow:ellipsis;
+  text-overflow: ellipsis;
 }
 p {
   margin-bottom: 0;

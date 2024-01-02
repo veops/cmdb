@@ -8,8 +8,8 @@
         <div :class="{ 'attribute-card-name': true, 'attribute-card-name-default-show': property.default_show }">
           {{ property.alias || property.name }}
         </div>
-        <div v-if="property.is_password" class="attribute-card_value-type">密码</div>
-        <div v-else-if="property.is_link" class="attribute-card_value-type">链接</div>
+        <div v-if="property.is_password" class="attribute-card_value-type">{{ $t('cmdb.ciType.password') }}</div>
+        <div v-else-if="property.is_link" class="attribute-card_value-type">{{ $t('cmdb.ciType.link') }}</div>
         <div v-else class="attribute-card_value-type">{{ valueTypeMap[property.value_type] }}</div>
       </div>
       <div
@@ -53,7 +53,7 @@
 
       <a-space class="attribute-card-operation">
         <a v-if="!isStore"><a-icon type="edit" @click="handleEdit"/></a>
-        <a-tooltip title="所有CI触发计算">
+        <a-tooltip :title="$t('cmdb.ciType.computeForAllCITips')">
           <a v-if="!isStore && property.is_computed"><a-icon type="redo" @click="handleCalcComputed"/></a>
         </a-tooltip>
         <a style="color:red;"><a-icon type="delete" @click="handleDelete"/></a>
@@ -106,36 +106,40 @@ export default {
     },
     attributes: {
       type: Array,
-      default: () => []
-    }
+      default: () => [],
+    },
   },
   data() {
-    const propertyList = [
-      {
-        label: '是否唯一',
-        property: 'is_unique',
-      },
-      {
-        label: '是否选择',
-        property: 'is_choice',
-      },
-      {
-        label: '默认显示',
-        property: 'default_show',
-      },
-      {
-        label: '可排序',
-        property: 'is_sortable',
-      },
-      {
-        label: '是否索引',
-        property: 'is_index',
-      },
-    ]
-    return {
-      valueTypeMap,
-      propertyList,
-    }
+    return {}
+  },
+  computed: {
+    valueTypeMap() {
+      return valueTypeMap()
+    },
+    propertyList() {
+      return [
+        {
+          label: this.$t('cmdb.ciType.isUnique'),
+          property: 'is_unique',
+        },
+        {
+          label: this.$t('cmdb.ciType.isChoice'),
+          property: 'is_choice',
+        },
+        {
+          label: this.$t('cmdb.ciType.defaultShow'),
+          property: 'default_show',
+        },
+        {
+          label: this.$t('cmdb.ciType.isSortable'),
+          property: 'is_sortable',
+        },
+        {
+          label: this.$t('cmdb.ciType.isIndex'),
+          property: 'is_index',
+        },
+      ]
+    },
   },
   methods: {
     getPropertyStyle,
@@ -145,17 +149,17 @@ export default {
     handleDelete() {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: `确认删除 【${that.property.alias || that.property.name}】？`,
+        title: that.$t('warning'),
+        content: that.$t('cmdb.ciType.confirmDelete', { name: `${that.property.alias || that.property.name}` }),
         onOk() {
           if (that.isStore) {
             deleteAttributesById(that.property.id).then(() => {
-              that.$message.success('删除成功！')
+              that.$message.success(that.$t('deleteSuccess'))
               that.$emit('ok')
             })
           } else {
             deleteCITypeAttributesById(that.CITypeId, { attr_id: [that.property.id] }).then(() => {
-              that.$message.success('删除成功！')
+              that.$message.success(that.$t('deleteSuccess'))
               that.$emit('ok')
             })
           }
@@ -169,11 +173,11 @@ export default {
     handleCalcComputed() {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: `确认触发所有CI的计算？`,
+        title: that.$t('warning'),
+        content: that.$t('cmdb.ciType.confirmcomputeForAllCITips'),
         onOk() {
           calcComputedAttribute(that.property.id).then(() => {
-            that.$message.success('触发成功！')
+            that.$message.success(that.$t('cmdb.ciType.computeSuccess'))
           })
         },
       })

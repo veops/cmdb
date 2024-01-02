@@ -2,7 +2,9 @@
   <div class="ci-types-wrap" :style="{ height: `${windowHeight - 66}px` }">
     <div v-if="!CITypeGroups.length" class="ci-types-empty">
       <a-empty :image="emptyImage" description=""></a-empty>
-      <a-button icon="plus" size="small" type="primary" @click="handleClickAddGroup">新增分组</a-button>
+      <a-button icon="plus" size="small" type="primary" @click="handleClickAddGroup">{{
+        $t('cmdb.ciType.addGroup')
+      }}</a-button>
     </div>
     <SplitPane
       v-else
@@ -23,7 +25,7 @@
               icon="plus"
               @click="handleClickAddGroup"
               class="ops-button-primary"
-            >分组</a-button
+            >{{ $t('cmdb.ciType.group') }}</a-button
             >
             <a-space>
               <a
@@ -32,10 +34,10 @@
                     $refs.attributeStore.open()
                   }
                 "
-              >属性库</a
+              >{{ $t('cmdb.ciType.attributeLibray') }}</a
               >
               <a-dropdown v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')">
-                <a><ops-icon type="ops-menu"/></a>
+                <a><ops-icon type="ops-menu" /></a>
                 <a-menu slot="overlay">
                   <a-menu-item key="0">
                     <a-upload
@@ -46,12 +48,12 @@
                       action="/api/v0.1/ci_types/template/import/file"
                       @change="changeUploadFile"
                     >
-                      <a><a-icon type="upload"/></a><a> 导入</a>
+                      <a><a-icon type="upload" /></a><a> {{ $t('upload') }}</a>
                     </a-upload>
                   </a-menu-item>
                   <a-menu-item key="1">
                     <a-space>
-                      <a href="/api/v0.1/ci_types/template/export/file"><a-icon type="download" /> 导出</a>
+                      <a href="/api/v0.1/ci_types/template/export/file"><a-icon type="download" /> {{ $t('download') }}</a>
                     </a-space>
                   </a-menu-item>
                 </a-menu>
@@ -61,33 +63,31 @@
           <draggable class="ci-types-left-content" :list="CITypeGroups" @end="handleChangeGroups" filter=".undraggable">
             <div v-for="g in CITypeGroups" :key="g.id || g.name">
               <div
-                :class="
-                  `${currentGId === g.id && !currentCId ? 'selected' : ''} ci-types-left-group ${
-                    g.id === -1 ? 'undraggable' : ''
-                  }`
-                "
+                :class="`${currentGId === g.id && !currentCId ? 'selected' : ''} ci-types-left-group ${
+                  g.id === -1 ? 'undraggable' : ''
+                }`"
                 @click="handleClickGroup(g.id)"
               >
                 <div>
                   <OpsMoveIcon
                     style="width: 17px; height: 17px; display: none; position: absolute; left: -3px; top: 10px"
                   />
-                  <span style="font-weight:700">{{ g.name || '其他' }}</span>
+                  <span style="font-weight: 700">{{ g.name || $t('other') }}</span>
                   <span :style="{ color: '#c3cdd7' }">({{ g.ci_types.length }})</span>
                 </div>
                 <a-space>
                   <a-tooltip>
-                    <template slot="title">在该组中新增CI模型</template>
-                    <a><a-icon type="plus" @click="handleCreate(g)"/></a>
+                    <template slot="title">{{ $t('cmdb.ciType.addCITypeInGroup') }}</template>
+                    <a><a-icon type="plus" @click="handleCreate(g)" /></a>
                   </a-tooltip>
                   <template v-if="g.id !== -1">
                     <a-tooltip>
-                      <template slot="title">编辑组名称</template>
-                      <a><a-icon type="edit" @click="handleEditGroup(g)"/></a>
+                      <template slot="title">{{ $t('cmdb.ciType.editGroup') }}</template>
+                      <a><a-icon type="edit" @click="handleEditGroup(g)" /></a>
                     </a-tooltip>
                     <a-tooltip>
-                      <template slot="title">删除该组</template>
-                      <a style="color: red"><a-icon type="delete" @click="handleDeleteGroup(g)"/></a>
+                      <template slot="title">{{ $t('cmdb.ciType.deleteGroup') }}</template>
+                      <a style="color: red"><a-icon type="delete" @click="handleDeleteGroup(g)" /></a>
                     </a-tooltip>
                   </template>
                 </a-space>
@@ -130,15 +130,14 @@
                   </div>
                   <span class="ci-types-left-detail-title">{{ ci.alias || ci.name }}</span>
                   <a-space class="ci-types-left-detail-action">
-                    <a><a-icon type="user-add" @click="(e) => handlePerm(e, ci)"/></a>
-                    <a><a-icon type="edit" @click="(e) => handleEdit(e, ci)"/></a>
+                    <a><a-icon type="user-add" @click="(e) => handlePerm(e, ci)" /></a>
+                    <a><a-icon type="edit" @click="(e) => handleEdit(e, ci)" /></a>
                     <a
                       v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')"
-                      @click="(e) => handleDownloadCiType(e, ci)"
-                    ><a-icon
-                      type="download"
-                    /></a>
-                    <a style="color: red" @click="(e) => handleDelete(e, ci)"><a-icon type="delete"/></a>
+                      @click="(e) => handleDownloadCiType(e, ci)">
+                      <a-icon type="download"/>
+                    </a>
+                    <a style="color: red" @click="(e) => handleDelete(e, ci)"><a-icon type="delete" /></a>
                   </a-space>
                 </div>
               </draggable>
@@ -151,13 +150,15 @@
           <CITypeDetail v-if="currentCId" :CITypeId="currentCId" :CITypeName="currentCName" />
           <div v-else class="ci-types-right-empty">
             <a-empty :image="emptyImage" description=""></a-empty>
-            <a-button icon="plus" size="small" type="primary" @click="handleCreateCiFromEmpty">新增CI模型</a-button>
+            <a-button icon="plus" size="small" type="primary" @click="handleCreateCiFromEmpty">{{
+              $t('cmdb.ciType.addCIType')
+            }}</a-button>
           </div>
         </div>
       </template>
     </SplitPane>
     <a-modal v-model="modalVisible" :title="modalTitle" @ok="handleSubmitEditGroup">
-      <a-form-item label="名称" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
+      <a-form-item :label="$t('name')" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
         <a-input v-model="editingInput" />
       </a-form-item>
     </a-modal>
@@ -167,7 +168,7 @@
       :visible="drawerVisible"
       @close="onClose"
       placement="right"
-      width="820px"
+      width="900px"
       :destroyOnClose="true"
     >
       <a-form
@@ -176,17 +177,17 @@
         :label-col="formItemLayout.labelCol"
         :wrapper-col="formItemLayout.wrapperCol"
       >
-        <a-form-item label="模型名(英文)">
+        <a-form-item :label="$t('cmdb.ciType.CITypeName')">
           <a-input
             name="name"
-            placeholder="英文"
+            :placeholder="$t('cmdb.ciType.English')"
             v-decorator="[
               'name',
               {
                 rules: [
-                  { required: true, message: '请输入属性名' },
+                  { required: true, message: $t('cmdb.ciType.inputAttributeName') },
                   {
-                    message: '不能以数字开头，可以是英文 数字以及下划线 (_)',
+                    message: $t('cmdb.ciType.attributeNameTips'),
                     pattern: RegExp('^(?!\\d)[a-zA-Z_0-9]+$'),
                   },
                 ],
@@ -194,18 +195,21 @@
             ]"
           />
         </a-form-item>
-        <a-form-item label="别名">
+        <a-form-item :label="$t('alias')">
           <a-input name="alias" v-decorator="['alias', { rules: [] }]" />
         </a-form-item>
-        <a-form-item label="图标">
+        <a-form-item :label="$t('icon')">
           <IconArea class="ci_types-icon-area" ref="iconArea" />
         </a-form-item>
-        <a-form-item label="默认排序" v-if="drawerTitle === '编辑模型'">
+        <a-form-item :label="$t('cmdb.ciType.defaultSort')" v-if="drawerTitle === $t('cmdb.ciType.editCIType')">
           <el-select
             size="small"
             filterable
             clearable
-            v-decorator="['default_order_attr', { rules: [{ required: false, message: '请选择默认排序字段' }] }]"
+            v-decorator="[
+              'default_order_attr',
+              { rules: [{ required: false, message: $t('cmdb.ciType.selectDefaultOrderAttr') }] },
+            ]"
           >
             <el-option
               :key="item.name"
@@ -214,29 +218,30 @@
               :label="item.alias || item.name"
             >
               <span> {{ item.alias || item.name }}</span>
-              <span :title="item.name" style="font-size:10px;color:#afafaf;"> {{ item.name }}</span>
+              <span :title="item.name" style="font-size: 10px; color: #afafaf"> {{ item.name }}</span>
             </el-option>
             <a-divider :style="{ margin: '5px 0' }" />
             <div :style="{ textAlign: 'right' }">
               <a-radio-group v-model="default_order_asc">
                 <a-radio value="1">
-                  正序
+                  {{ $t('cmdb.ciType.asec') }}
                 </a-radio>
                 <a-radio value="2">
-                  倒序
+                  {{ $t('cmdb.ciType.desc') }}
                 </a-radio>
               </a-radio-group>
             </div>
           </el-select>
         </a-form-item>
-        <a-form-item label="唯一标识">
+        <a-form-item :label="$t('cmdb.ciType.uniqueKey')">
           <el-select
             size="small"
             filterable
             optionFilterProp="children"
             name="unique_key"
             :filter-method="filterOption"
-            v-decorator="['unique_key', { rules: [{ required: true, message: '请选择唯一标识' }] }]"
+            v-decorator="['unique_key', { rules: [{ required: true, message: $t('cmdb.ciType.uniqueKeySelect') }] }]"
+            :placeholder="$t('placeholder2')"
           >
             <el-option
               :key="item.id"
@@ -245,11 +250,11 @@
               :label="item.alias || item.name"
             >
               <span> {{ item.alias || item.name }}</span>
-              <span :title="item.name" style="font-size:10px;color:#afafaf;"> {{ item.name }}</span>
+              <span :title="item.name" style="font-size: 10px; color: #afafaf"> {{ item.name }}</span>
             </el-option>
           </el-select>
           <a-divider type="vertical" />
-          <a @click="handleCreatNewAttr">找不到想要的?</a>
+          <a @click="handleCreatNewAttr">{{ $t('cmdb.ciType.notfound') }}</a>
         </a-form-item>
         <div v-if="newAttrAreaVisible" :style="{ padding: '15px 8px 0 8px', backgroundColor: '#fafafa' }">
           <create-new-attribute
@@ -262,8 +267,10 @@
           <a-input name="id" type="hidden" v-decorator="['id', { rules: [] }]" />
         </a-form-item>
         <div class="custom-drawer-bottom-action">
-          <a-button @click="handleSubmit" :loading="loading" type="primary" style="margin-right: 1rem">确定</a-button>
-          <a-button @click="onClose">取消</a-button>
+          <a-button @click="handleSubmit" :loading="loading" type="primary" style="margin-right: 1rem">{{
+            $t('confirm')
+          }}</a-button>
+          <a-button @click="onClose">{{ $t('cancel') }}</a-button>
         </div>
       </a-form>
     </CustomDrawer>
@@ -317,7 +324,7 @@ export default {
   data() {
     return {
       emptyImage,
-      modalTitle: '新增分组',
+      modalTitle: this.$t('cmdb.ciType.addGroup'),
       modalVisible: false,
       editingGroup: null,
       editingInput: '',
@@ -329,7 +336,7 @@ export default {
       form: this.$form.createForm(this),
       drawerVisible: false,
       drawerTitle: '',
-      selectGroup: {}, // 在当前group下新增ci type
+      selectGroup: {}, // add CIType in group
 
       formLayout: 'horizontal',
       newAttrAreaVisible: false,
@@ -394,7 +401,7 @@ export default {
       return null
     },
     filterAttributes() {
-      // 唯一标识 排除掉choice password 计算属性  json
+      // unique key, excludes: choice  password computed json
       const _attributes = this.allAttributes.filter(
         (item) => !item.is_choice && !item.is_computed && !['6', '7'].includes(item.value_type)
       )
@@ -445,7 +452,7 @@ export default {
       this.$nextTick(() => {
         groups.forEach((g) => {
           if (!g.id) {
-            // 给未分组增加一个假的id
+            // Add a fake id to ungrouped
             g.id = -1
           }
           if (isResetCurrentId && !alreadyReset && g.ci_types && g.ci_types.length) {
@@ -468,7 +475,7 @@ export default {
     handleClickAddGroup() {
       this.editingGroup = {}
       this.editingInput = ''
-      this.modalTitle = '新增分组'
+      this.modalTitle = this.$t('cmdb.ciType.addGroup')
       this.modalVisible = true
     },
     async handleSubmitEditGroup() {
@@ -477,11 +484,11 @@ export default {
           name: this.editingInput,
           type_ids: this.editingGroup.ci_types.map((i) => i.id),
         })
-        this.$message.success('更新成功!')
+        this.$message.success(this.$t('updateSuccess'))
       } else {
         const { id } = await postCITypeGroup({ name: this.editingInput })
         this.currentId = `${id}%null%null`
-        this.$message.success('新增成功!')
+        this.$message.success(this.$t('addSuccess'))
       }
       this.modalVisible = false
       localStorage.setItem('ops_cityps_currentId', this.currentId)
@@ -502,7 +509,7 @@ export default {
       })
     },
     handleCreate(g) {
-      this.drawerTitle = '新增模型'
+      this.drawerTitle = this.$t('cmdb.ciType.addCIType')
       this.drawerVisible = true
       this.selectGroup = g
       this.$nextTick(() => {
@@ -510,7 +517,7 @@ export default {
       })
     },
     handleCreateCiFromEmpty() {
-      this.drawerTitle = '新增模型'
+      this.drawerTitle = this.$t('cmdb.ciType.addCIType')
       this.drawerVisible = true
       const _find = this.CITypeGroups.find((item) => item.id === this.currentGId)
       this.selectGroup = _find
@@ -521,21 +528,21 @@ export default {
     handleEditGroup(g) {
       this.editingGroup = g
       this.editingInput = g.name
-      this.modalTitle = '修改分组'
+      this.modalTitle = this.$t('cmdb.ciType.editGroup')
       this.modalVisible = true
     },
     async handleDeleteGroup(g) {
       if (g.ci_types && g.ci_types.length > 0) {
-        this.$message.error('该分组下有数据, 不能删除！')
+        this.$message.error(this.$t('cmdb.ciType.cannotDeleteGroupTips'))
         return
       }
       const that = this
       this.$confirm({
-        title: '警告',
-        content: `确定要删除分组 【${g.name}】 吗？`,
+        title: that.$t('warning'),
+        content: that.$t('cmdb.ciType.confirmDeleteGroup', { groupName: `${g.name}` }),
         onOk() {
           deleteCITypeGroup(g.id).then((res) => {
-            that.$message.info(`删除成功！`)
+            that.$message.info(that.$t('deleteSuccess'))
             that.loadCITypes(true)
           })
         },
@@ -582,11 +589,12 @@ export default {
     end(g) {
       console.log('end', g)
       this.endId = g.id
+      const that = this
       if (this.startId === g.id && g.id !== -1 && this.addId !== -1) {
-        // 通过一个group内部换位置
+        // Changing positions within a group
         putCITypeGroupByGId(g.id, { name: g.name, type_ids: g.ci_types.map((i) => i.id) })
           .then(() => {
-            this.$message.success('保存成功!')
+            this.$message.success(that.$t('saveSuccess'))
           })
           .catch(() => {
             this.loadCITypes(!this.currentId)
@@ -598,7 +606,7 @@ export default {
           })
       }
       if (this.startId === g.id && g.id !== -1 && this.addId === -1) {
-        // 从一个group换到其他
+        // Change from one group to another
         const changedCiTypes = this.startGroup.ci_types
           .filter((ciType) => {
             const _find = g.ci_types.find((gCiType) => ciType.id === gCiType.id)
@@ -610,7 +618,7 @@ export default {
           .map((item) => item.id)
         deleteCITypeGroup(g.id, { name: g.name, type_ids: changedCiTypes })
           .then(() => {
-            this.$message.success('保存成功!')
+            this.$message.success(that.$t('saveSuccess'))
           })
           .catch(() => {
             this.loadCITypes(!this.currentId)
@@ -625,11 +633,12 @@ export default {
     add(g) {
       console.log('add', g)
       this.addId = g.id
+      const that = this
       if (g.id && g.id !== -1) {
-        // 跨组换位置 不换到其他
+        // Change positions across groups without changing to others
         putCITypeGroupByGId(g.id, { name: g.name, type_ids: g.ci_types.map((i) => i.id) })
           .then(() => {
-            this.$message.success('保存成功!')
+            this.$message.success(that.$t('saveSuccess'))
           })
           .catch(() => {
             this.loadCITypes(!this.currentId)
@@ -642,10 +651,11 @@ export default {
       }
     },
     async handleChangeCITypes(e, g) {
+      const that = this
       if (g.id && g.id !== -1) {
         putCITypeGroupByGId(g.id, { name: g.name, type_ids: g.ci_types.map((i) => i.id) })
           .then(() => {
-            this.$message.success('保存成功!')
+            this.$message.success(that.$t('saveSuccess'))
           })
           .catch(() => {
             this.loadCITypes(!this.currentId)
@@ -653,9 +663,10 @@ export default {
       }
     },
     async handleChangeGroups() {
+      const that = this
       putCITypeGroups({ group_ids: this.CITypeGroups.filter((c) => c.id).map((c) => c.id) })
         .then(() => {
-          this.$message.success('保存成功!')
+          this.$message.success(that.$t('saveSuccess'))
         })
         .catch(() => {
           this.loadCITypes(!this.currentId)
@@ -665,7 +676,7 @@ export default {
       const { type_id } = await createCIType(data).catch(() => {
         this.loading = false
       })
-      this.$message.success(`添加成功`)
+      this.$message.success(this.$t('addSuccess'))
       if (this.selectGroup && this.selectGroup.id && this.selectGroup.id !== -1) {
         const ids = this.selectGroup.ci_types.map((i) => i.id)
         ids.push(type_id)
@@ -684,9 +695,10 @@ export default {
       }, 1000)
     },
     async updateCIType(CITypeId, data) {
+      const that = this
       await updateCIType(CITypeId, data)
         .then((res) => {
-          this.$message.success(`修改成功`)
+          this.$message.success(that.$t('updateSuccess'))
 
           const _currentId = this.currentId
           this.currentId = null
@@ -710,11 +722,11 @@ export default {
       e.stopPropagation()
       const that = this
       this.$confirm({
-        title: '警告',
-        content: `确定要删除模型 【${record.alias || record.name}】 吗？`,
+        title: that.$t('warning'),
+        content: that.$t('cmdb.ciType.confirmDeleteCIType', { typeName: `${record.alias || record.name}` }),
         onOk() {
           deleteCIType(record.id).then((res) => {
-            that.$message.success(`删除成功！`)
+            that.$message.success(that.$t('deleteSuccess'))
             that.loadCITypes(true)
             that.resetRoute()
           })
@@ -727,7 +739,7 @@ export default {
       const x = new XMLHttpRequest()
       x.open('GET', `/api/v0.1/ci_types/${ci.id}/template/export`, true)
       x.responseType = 'blob'
-      x.onload = function(e) {
+      x.onload = function (e) {
         const url = window.URL.createObjectURL(x.response)
         const a = document.createElement('a')
         a.href = url
@@ -746,7 +758,7 @@ export default {
     handleEdit(e, record) {
       e.preventDefault()
       e.stopPropagation()
-      this.drawerTitle = '编辑模型'
+      this.drawerTitle = this.$t('cmdb.ciType.editCIType')
       this.drawerVisible = true
       getCITypeAttributesById(record.id).then((res) => {
         this.orderSelectionOptions = res.attributes.filter((item) => item.is_required)
@@ -796,21 +808,21 @@ export default {
         if (res.result) {
           this.$refs.cmdbGrant.open({ name: ci.name, cmdbGrantType: 'ci_type', CITypeId: ci.id })
         } else {
-          this.$message.error('权限不足！')
+          this.$message.error(this.$t('noPermission'))
         }
       })
     },
     changeUploadFile({ file, fileList, event }) {
       const key = 'upload'
       if (file.status === 'uploading') {
-        this.$message.loading({ content: '正在导入中', key, duration: 0 })
+        this.$message.loading({ content: this.$t('cmdb.ciType.uploading'), key, duration: 0 })
       }
       if (file.status === 'done') {
-        this.$message.success({ content: '导入成功', key, duration: 2 })
+        this.$message.success({ content: this.$t('uploadSuccess'), key, duration: 2 })
         this.reload()
       }
       if (file.status === 'error') {
-        this.$message.error({ content: '导入失败，请稍后重试', key, duration: 2 })
+        this.$message.error({ content: this.$t('cmdb.ciType.uploadFailed'), key, duration: 2 })
       }
     },
   },

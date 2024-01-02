@@ -26,9 +26,9 @@ export default {
   computed: {
     title() {
       if (this.type === 'depart') {
-        return '授权用户/部门'
+        return this.$t('cmdb.components.grantUser')
       }
-      return '授权角色'
+      return this.$t('cmdb.components.grantRole')
     },
   },
   methods: {

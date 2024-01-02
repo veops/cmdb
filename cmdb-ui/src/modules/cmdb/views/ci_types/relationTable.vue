@@ -7,7 +7,7 @@
       size="small"
       class="ops-button-primary"
       icon="plus"
-    >新增关系</a-button
+    >{{ $t('cmdb.ciType.addRelation') }}</a-button
     >
     <vxe-table
       stripe
@@ -20,15 +20,15 @@
       class="ops-stripe-table"
       :row-class-name="rowClass"
     >
-      <vxe-column field="source_ci_type_name" title="源模型英文名"></vxe-column>
-      <vxe-column field="relation_type" title="关联类型">
+      <vxe-column field="source_ci_type_name" :title="$t('cmdb.ciType.sourceCIType')"></vxe-column>
+      <vxe-column field="relation_type" :title="$t('cmdb.ciType.relationType')">
         <template #default="{row}">
-          <span style="color:#2f54eb" v-if="row.isParent">被</span>
+          <span style="color:#2f54eb" v-if="row.isParent">{{ $t('cmdb.ciType.isParent') }}</span>
           {{ row.relation_type }}
         </template>
       </vxe-column>
-      <vxe-column field="alias" title="目标模型名"></vxe-column>
-      <vxe-column field="constraint" title="关系约束">
+      <vxe-column field="alias" :title="$t('cmdb.ciType.dstCIType')"></vxe-column>
+      <vxe-column field="constraint" :title="$t('cmdb.ciType.relationConstraint')">
         <template #default="{row}">
           <span v-if="row.isParent && constraintMap[row.constraint]">{{
             constraintMap[row.constraint]
@@ -39,11 +39,11 @@
           <span v-else>{{ constraintMap[row.constraint] }}</span>
         </template>
       </vxe-column>
-      <vxe-column field="operation" title="操作" width="100">
+      <vxe-column field="operation" :title="$t('operation')" width="100">
         <template #default="{row}">
           <a-space v-if="!row.isParent && row.source_ci_type_id">
             <a @click="handleOpenGrant(row)"><a-icon type="user-add"/></a>
-            <a-popconfirm title="确认删除？" @confirm="handleDelete(row)">
+            <a-popconfirm :title="$t('cmdb.ciType.confirmDelete2')" @confirm="handleDelete(row)">
               <a style="color: red;"><a-icon type="delete"/></a>
             </a-popconfirm>
           </a-space>
@@ -52,7 +52,7 @@
       <template #empty>
         <div>
           <img :style="{ width: '100px' }" :src="require('@/assets/data_empty.png')" />
-          <div>暂无数据</div>
+          <div>{{ $t('noData') }}</div>
         </div>
       </template>
     </vxe-table>
@@ -65,21 +65,24 @@
       width="500px"
     >
       <a-form :form="form" @submit="handleSubmit" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
-        <a-form-item label="源模型">
+        <a-form-item :label="$t('cmdb.ciType.sourceCIType')">
           <a-select
             name="source_ci_type_id"
-            v-decorator="['source_ci_type_id', { rules: [{ required: true, message: '请选择源模型' }] }]"
+            v-decorator="[
+              'source_ci_type_id',
+              { rules: [{ required: true, message: $t('cmdb.ciType.sourceCITypeTips') }] },
+            ]"
           >
             <a-select-option :value="CIType.id" :key="CIType.id" v-for="CIType in displayCITypes">{{
               CIType.alias
             }}</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="目标模型">
+        <a-form-item :label="$t('cmdb.ciType.dstCIType')">
           <a-select
             showSearch
             name="ci_type_id"
-            v-decorator="['ci_type_id', { rules: [{ required: true, message: '请选择目标模型' }] }]"
+            v-decorator="['ci_type_id', { rules: [{ required: true, message: $t('cmdb.ciType.dstCITypeTips') }] }]"
             :filterOption="filterOption"
           >
             <a-select-option :value="CIType.id" :key="CIType.id" v-for="CIType in CITypes">
@@ -88,10 +91,13 @@
           </a-select>
         </a-form-item>
 
-        <a-form-item label="关联关系">
+        <a-form-item :label="$t('cmdb.ciType.relationType')">
           <a-select
             name="relation_type_id"
-            v-decorator="['relation_type_id', { rules: [{ required: true, message: '请选择关联关系' }] }]"
+            v-decorator="[
+              'relation_type_id',
+              { rules: [{ required: true, message: $t('cmdb.ciType.relationTypeTips') }] },
+            ]"
           >
             <a-select-option :value="relationType.id" :key="relationType.id" v-for="relationType in relationTypes">{{
               relationType.name
@@ -99,11 +105,16 @@
           </a-select>
         </a-form-item>
 
-        <a-form-item label="关联约束">
-          <a-select v-decorator="['constraint', { rules: [{ required: true, message: '请选择关联约束' }] }]">
-            <a-select-option value="0">一对多</a-select-option>
-            <a-select-option value="1">一对一</a-select-option>
-            <a-select-option value="2">多对多</a-select-option>
+        <a-form-item :label="$t('cmdb.ciType.relationConstraint')">
+          <a-select
+            v-decorator="[
+              'constraint',
+              { rules: [{ required: true, message: $t('cmdb.ciType.relationConstraintTips') }] },
+            ]"
+          >
+            <a-select-option value="0">{{ $t('cmdb.ciType.one2Many') }}</a-select-option>
+            <a-select-option value="1">{{ $t('cmdb.ciType.one2One') }}</a-select-option>
+            <a-select-option value="2">{{ $t('cmdb.ciType.many2Many') }}</a-select-option>
           </a-select>
         </a-form-item>
       </a-form>
@@ -145,11 +156,6 @@ export default {
       drawerTitle: '',
       CITypes: [],
       relationTypes: [],
-      constraintMap: {
-        '0': '一对多',
-        '1': '一对一',
-        '2': '多对多',
-      },
       tableData: [],
       parentTableData: [],
     }
@@ -160,6 +166,13 @@ export default {
     },
     windowHeight() {
       return this.$store.state.windowHeight
+    },
+    constraintMap() {
+      return {
+        '0': this.$t('cmdb.ciType.one2Many'),
+        '1': this.$t('cmdb.ciType.one2One'),
+        '2': this.$t('cmdb.ciType.many2Many'),
+      }
     },
   },
   async mounted() {
@@ -209,7 +222,7 @@ export default {
     },
     handleDelete(record) {
       deleteRelation(record.source_ci_type_id, record.id).then((res) => {
-        this.$message.success(`删除成功！`)
+        this.$message.success(this.$t('deleteSuccess'))
         this.handleOk()
       })
     },
@@ -218,7 +231,7 @@ export default {
     },
 
     handleCreate() {
-      this.drawerTitle = '新增关系'
+      this.drawerTitle = this.$t('cmdb.ciType.addRelation')
       this.visible = true
       this.$nextTick(() => {
         this.form.setFieldsValue({
@@ -241,7 +254,7 @@ export default {
 
           createRelation(values.source_ci_type_id, values.ci_type_id, values.relation_type_id, values.constraint).then(
             (res) => {
-              this.$message.success(`添加成功`)
+              this.$message.success(this.$t('addSuccess'))
               this.onClose()
               this.handleOk()
             }

@@ -16,7 +16,7 @@
           type="primary"
           icon="plus-circle"
           class="ops-button-primary"
-        >新增图表</a-button
+        >{{ $t('cmdb.custom_dashboard.newChart') }}</a-button
         >
       </div>
       <GridLayout
@@ -78,10 +78,10 @@
             ></a>
             <a-menu slot="overlay">
               <a-menu-item>
-                <a @click="() => openChartForm('edit', item)"><a-icon style="margin-right:5px" type="edit" />编辑</a>
+                <a @click="() => openChartForm('edit', item)"><a-icon style="margin-right:5px" type="edit" />{{ $t('edit') }}</a>
               </a-menu-item>
               <a-menu-item>
-                <a @click="deleteChart(item)"><a-icon style="margin-right:5px" type="delete" />删除</a>
+                <a @click="deleteChart(item)"><a-icon style="margin-right:5px" type="delete" />{{ $t('delete') }}</a>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
@@ -116,7 +116,7 @@
       >
         定制仪表盘
       </a-button>
-      <span v-else>管理员暂未定制仪表盘</span>
+      <span v-else>{{ $t('cmdb.custom_dashboard.noCustomDashboard') }}</span>
     </div>
     <ChartForm ref="chartForm" @refresh="refresh" :ci_types="ci_types" :totalData="totalData" />
   </div>

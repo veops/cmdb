@@ -91,7 +91,7 @@ export default {
       const newNodes = []
       const newEdges = []
       if (!res.result.length) {
-        this.$message.info('无层级关系！')
+        this.$message.info(this.$t('cmdb.ci.noLevel'))
         return
       }
       const ci_types_list = this.ci_types()

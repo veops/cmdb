@@ -18,18 +18,18 @@
             visible = false
           }
         "
-      >取消</a-button
+      >{{ $t('cancel') }}</a-button
       >
-      <a-button :loading="confirmLoading" @click="handleSubmit(false)" type="primary">继续添加</a-button>
-      <a-button :loading="confirmLoading" type="primary" @click="handleSubmit">确定</a-button>
+      <a-button :loading="confirmLoading" @click="handleSubmit(false)" type="primary">{{ $t('cmdb.ciType.continueAdd') }}</a-button>
+      <a-button :loading="confirmLoading" type="primary" @click="handleSubmit">{{ $t('confirm') }}</a-button>
     </template>
     <a-tabs v-model="activeKey">
-      <a-tab-pane key="1" tab="新建属性">
+      <a-tab-pane key="1" :tab="$t('cmdb.ciType.addAttribute')">
         <div :style="{ overflow: 'auto', maxHeight: '480px' }">
           <create-new-attribute ref="createNewAttribute" :hasFooter="false" @done="handleAddNewAttr" />
         </div>
       </a-tab-pane>
-      <a-tab-pane key="2" tab="已有属性" force-render>
+      <a-tab-pane key="2" :tab="$t('cmdb.ciType.existedAttributes')" force-render>
         <AttributesTransfer
           :dataSource="unLinkdAttrs"
           :targetKeys="targetKeys"
@@ -67,7 +67,6 @@ export default {
   },
   data() {
     return {
-      valueTypeMap,
       activeKey: '1',
       visible: false,
       attributes: [],
@@ -78,6 +77,9 @@ export default {
     }
   },
   computed: {
+    valueTypeMap() {
+      return valueTypeMap()
+    },
     windowHeight() {
       return this.$store.state.windowHeight
     },
@@ -154,7 +156,7 @@ export default {
     },
     handleClose(isCloseModal = true) {
       this.$emit('ok')
-      this.$message.success('添加成功！')
+      this.$message.success(this.$t('addSuccess'))
       if (isCloseModal) {
         this.visible = false
       }

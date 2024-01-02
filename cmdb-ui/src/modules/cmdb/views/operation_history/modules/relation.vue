@@ -21,27 +21,27 @@
       stripe
       class="ops-stripe-table"
     >
-      <vxe-column field="created_at" width="159px" title="操作时间"></vxe-column>
-      <vxe-column field="user" width="100px" title="用户">
+      <vxe-column field="created_at" width="159px" :title="$t('cmdb.history.opreateTime')"></vxe-column>
+      <vxe-column field="user" width="100px" :title="$t('cmdb.history.user')">
         <template #header="{ column }">
           <span>{{ column.title }}</span>
           <a-popover trigger="click" placement="bottom">
             <a-icon class="filter" type="filter" theme="filled" />
             <a slot="content">
               <a-input
-                placeholder="输入筛选用户名"
+                :placeholder="$t('cmdb.history.userTips')"
                 size="small"
                 v-model="queryParams.username"
                 style="width: 200px"
                 allowClear
               />
-              <a-button type="link" class="filterButton" @click="filterUser">筛选</a-button>
-              <a-button type="link" class="filterResetButton" @click="filterUserReset">重置</a-button>
+              <a-button type="link" class="filterButton" @click="filterUser">{{ $t('cmdb.history.filter') }}</a-button>
+              <a-button type="link" class="filterResetButton" @click="filterUserReset">{{ $t('reset') }}</a-button>
             </a>
           </a-popover>
         </template>
       </vxe-column>
-      <vxe-column field="operate_type" width="89px" title="操作">
+      <vxe-column field="operate_type" width="89px" :title="$t('operation')">
         <template #header="{ column }">
           <span>{{ column.title }}</span>
           <a-popover trigger="click" placement="bottom">
@@ -49,7 +49,7 @@
             <a slot="content">
               <a-select
                 v-model="queryParams.operate_type"
-                placeholder="选择筛选操作"
+                :placeholder="$t('cmdb.history.filterOperate')"
                 show-search
                 style="width: 200px"
                 :filter-option="filterOption"
@@ -63,16 +63,18 @@
                   {{ Object.keys(choice)[0] }}
                 </a-select-option>
               </a-select>
-              <a-button type="link" class="filterButton" @click="filterOperate">筛选</a-button>
-              <a-button type="link" class="filterResetButton" @click="filterOperateReset">重置</a-button>
+              <a-button type="link" class="filterButton" @click="filterOperate">{{
+                $t('cmdb.history.filter')
+              }}</a-button>
+              <a-button type="link" class="filterResetButton" @click="filterOperateReset">{{ $t('reset') }}</a-button>
             </a>
           </a-popover>
         </template>
         <template #default="{ row }">
-          <a-tag color="green" v-if="row.operate_type.includes('新增')">
+          <a-tag color="green" v-if="row.operate_type.includes($t('new'))">
             {{ row.operate_type }}
           </a-tag>
-          <a-tag color="orange" v-else-if="row.operate_type.includes('修改')">
+          <a-tag color="orange" v-else-if="row.operate_type.includes($t('update'))">
             {{ row.operate_type }}
           </a-tag>
           <a-tag color="red" v-else>
@@ -80,7 +82,7 @@
           </a-tag>
         </template>
       </vxe-column>
-      <vxe-column field="changeDescription" title="描述">
+      <vxe-column field="changeDescription" :title="$t('desc')">
         <template #default="{ row }">
           <a-tag v-if="row && row.first">
             {{
@@ -91,18 +93,18 @@
               }`
             }}
           </a-tag>
-          <a-tag v-if="row.changeDescription === '没有修改'">
+          <a-tag v-if="row.changeDescription === $t('cmdb.history.noUpdate')">
             {{ row.relation_type_id }}
           </a-tag>
-          <template v-else-if="row.operate_type.includes('修改')">
+          <template v-else-if="row.operate_type.includes($t('update'))">
             <a-tag :key="index" color="orange" v-for="(tag, index) in row.changeArr">
               {{ tag }}
             </a-tag>
           </template>
-          <a-tag color="green" v-else-if="row.operate_type.includes('新增')" :style="{ fontWeight: 'bolder' }">
+          <a-tag color="green" v-else-if="row.operate_type.includes($t('new'))" :style="{ fontWeight: 'bolder' }">
             {{ row.relation_type_id }}
           </a-tag>
-          <a-tag color="red" v-else-if="row.operate_type.includes('删除')">
+          <a-tag color="red" v-else-if="row.operate_type.includes($t('delete'))">
             {{ row.relation_type_id }}
           </a-tag>
           <a-tag v-if="row && row.second">
@@ -130,6 +132,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import SearchForm from './searchForm'
 import Pager from './pager.vue'
 import { getCITypes } from '@/modules/cmdb/api/CIType'
@@ -138,6 +141,7 @@ import { getRelationTypes } from '@/modules/cmdb/api/relationType'
 export default {
   name: 'RelationTable',
   components: { SearchForm, Pager },
+  inject: ['reload'],
   data() {
     return {
       visible: false,
@@ -147,11 +151,6 @@ export default {
       relationTypeList: null,
       total: 0,
       userList: [],
-      operateTypeMap: new Map([
-        ['0', '新增'],
-        ['1', '删除'],
-        ['2', '修改'],
-      ]),
       queryParams: {
         page: 1,
         page_size: 50,
@@ -164,13 +163,13 @@ export default {
       },
       relationTableAttrList: [
         {
-          alias: '日期',
+          alias: this.$t('cmdb.ciType.date'),
           is_choice: false,
           name: 'datetime',
           value_type: '3',
         },
         {
-          alias: '用户',
+          alias: this.$t('cmdb.history.user'),
           is_choice: true,
           name: 'username',
           value_type: '2',
@@ -191,36 +190,44 @@ export default {
           choice_value: [],
         },
         {
-          alias: '操作',
+          alias: this.$t('operation'),
           is_choice: true,
           name: 'operate_type',
           value_type: '2',
-          choice_value: [{ 新增: 0 }, { 删除: 1 }, { 修改: 2 }],
+          choice_value: [{ [this.$t('new')]: 0 }, { [this.$t('delete')]: 1 }, { [this.$t('update')]: 2 }],
         },
       ],
     }
   },
   async created() {
-    await Promise.all([
-      this.getRelationTypes(),
-      this.getUserList(),
-      this.getTypes(),
-    ])
+    await Promise.all([this.getRelationTypes(), this.getUserList(), this.getTypes()])
     await this.getTable(this.queryParams)
   },
   updated() {
     this.$refs.xTable.$el.querySelector('.vxe-table--body-wrapper').scrollTop = 0
   },
   computed: {
+    ...mapState(['locale']),
     windowHeight() {
       return this.$store.state.windowHeight
     },
     windowHeightMinus() {
       return this.isExpand ? 396 : 331
     },
+    operateTypeMap() {
+      return new Map([
+        ['0', this.$t('new')],
+        ['1', this.$t('delete')],
+        ['2', this.$t('update')],
+      ])
+    },
+  },
+  watch: {
+    locale() {
+      this.reload()
+    },
   },
   methods: {
-    // 获取表格数据
     async getTable(queryParams) {
       try {
         this.loading = true
@@ -242,7 +249,6 @@ export default {
         this.loading = false
       }
     },
-    // 获取用户列表
     async getUserList() {
       const res = await getUsers()
       this.userList = res.map((x) => {
@@ -254,7 +260,6 @@ export default {
       })
       this.relationTableAttrList[1].choice_value = this.userList
     },
-    // 获取模型
     async getTypes() {
       const res = await getCITypes()
       const typesArr = []
@@ -268,7 +273,6 @@ export default {
       this.relationTableAttrList[2].choice_value = typesArr
       this.relationTableAttrList[3].choice_value = typesArr
     },
-    // 获取关系
     async getRelationTypes() {
       const res = await getRelationTypes()
       const relationTypeMap = new Map()
@@ -289,12 +293,10 @@ export default {
     handleExpandChange(expand) {
       this.isExpand = expand
     },
-    // 处理查询
     handleSearch(queryParams) {
       this.queryParams = queryParams
       this.getTable(queryParams)
     },
-    // 重置表单
     searchFormReset() {
       this.queryParams = {
         page: 1,
@@ -308,28 +310,20 @@ export default {
       }
       this.getTable(this.queryParams)
     },
-    // 转换operate_type
     handleOperateType(operate_type) {
       return this.operateTypeMap.get(operate_type)
     },
-    // 转换relation_type_id
     handleRelationType(relation_type_id) {
       return this.relationTypeList.get(relation_type_id)
     },
-    // 合并表格
     mergeRowMethod({ row, _rowIndex, column, visibleData }) {
       const fields = ['created_at', 'user']
-      // 单元格值 = 行[列.属性] 确定一格
       const cellValue = row[column.property]
       const created_at = row['created_at']
-      // 如果单元格值不为空且作用域包含当前列
       if (column.property === 'created_at') {
         if (cellValue && fields.includes(column.property)) {
-          // 前一行
           const prevRow = visibleData[_rowIndex - 1]
-          // 下一行
           let nextRow = visibleData[_rowIndex + 1]
-          // 如果前一行不为空且前一行单元格的值与cellValue相同
           if (prevRow && prevRow[column.property] === cellValue) {
             return { rowspan: 0, colspan: 0 }
           } else {
@@ -344,11 +338,8 @@ export default {
         }
       } else if (column.property === 'user') {
         if (cellValue && fields.includes(column.property)) {
-          // 前一行
           const prevRow = visibleData[_rowIndex - 1]
-          // 下一行
           let nextRow = visibleData[_rowIndex + 1]
-          // 如果前一行不为空且前一行单元格的值与cellValue相同
           if (prevRow && prevRow[column.property] === cellValue && prevRow['created_at'] === created_at) {
             return { rowspan: 0, colspan: 0 }
           } else {
