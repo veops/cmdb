@@ -9,33 +9,33 @@
       :data="tableData"
       v-bind="ci_id ? { maxHeight: `${windowHeight - 94}px` } : { height: `${windowHeight - 225}px` }"
     >
-      <vxe-column field="trigger_name" title="触发器名称"> </vxe-column>
-      <vxe-column field="type" title="类型">
+      <vxe-column field="trigger_name" :title="$t('cmdb.history.triggerName')"> </vxe-column>
+      <vxe-column field="type" :title="$t('type')">
         <template #default="{ row }">
-          <span v-if="row.trigger && row.trigger.attr_id">日期属性</span>
-          <span v-else-if="row.trigger && !row.trigger.attr_id">数据变更</span>
+          <span v-if="row.trigger && row.trigger.attr_id">{{ $t('cmdb.ciType.triggerDate') }}</span>
+          <span v-else-if="row.trigger && !row.trigger.attr_id">{{ $t('cmdb.ciType.triggerDataChange') }}</span>
         </template>
       </vxe-column>
-      <vxe-column title="事件">
+      <vxe-column :title="$t('cmdb.history.event')">
         <template #default="{ row }">
-          <span v-if="row.operate_type === '0'">新增实例</span>
-          <span v-else-if="row.operate_type === '1'">删除实例</span>
-          <span v-else-if="row.operate_type === '2'">实例变更</span>
+          <span v-if="row.operate_type === '0'">{{ $t('cmdb.ciType.addInstance') }}</span>
+          <span v-else-if="row.operate_type === '1'">{{ $t('cmdb.ciType.deleteInstance') }}</span>
+          <span v-else-if="row.operate_type === '2'">{{ $t('cmdb.ciType.changeInstance') }}</span>
         </template>
       </vxe-column>
-      <vxe-column title="动作">
+      <vxe-column :title="$t('cmdb.history.action')">
         <template #default="{ row }">
           <span v-if="row.webhook">Webhook</span>
-          <span v-else-if="row.notify">通知</span>
+          <span v-else-if="row.notify">{{ $t('cmdb.ciType.notify') }}</span>
         </template>
       </vxe-column>
-      <vxe-column title="状态">
+      <vxe-column :title="$t('cmdb.history.status')">
         <template #default="{ row }">
-          <a-tag color="green" v-if="row.is_ok">已完成</a-tag>
-          <a-tag color="red" v-else>未完成</a-tag>
+          <a-tag color="green" v-if="row.is_ok">{{ $t('cmdb.history.done') }}</a-tag>
+          <a-tag color="red" v-else>{{ $t('cmdb.history.undone') }}</a-tag>
         </template>
       </vxe-column>
-      <vxe-column title="触发时间">
+      <vxe-column :title="$t('cmdb.history.triggerTime')">
         <template #default="{row}">
           {{ row.updated_at || row.created_at }}
         </template>
@@ -49,7 +49,7 @@
         :page-size-options="pageSizeOptions"
         :current="tablePage.currentPage"
         :total="tablePage.totalResult"
-        :show-total="(total, range) => `共 ${total} 条记录`"
+        :show-total="(total, range) => $t('cmdb.history.totalItems', { total: total })"
         :page-size="tablePage.pageSize"
         :default-current="1"
         @change="pageOrSizeChange"

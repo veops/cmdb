@@ -2,30 +2,30 @@
   <CustomDrawer
     @close="handleClose"
     width="500"
-    :title="`${triggerId ? '修改' : '新建'}触发器`"
+    :title="`${triggerId ? $t('update') : $t('create')}${$t('acl.trigger')}`"
     :visible="visible"
     :maskClosable="false"
   >
     <a-form :form="form" :label-col="{ span: 6 }" :wrapper-col="{ span: 15 }">
-      <a-form-item label="触发器名">
-        <a-input size="large" v-decorator="['name', { rules: [{ required: true, message: '请输入触发器名' }] }]">
+      <a-form-item :label="$t('name')">
+        <a-input size="large" v-decorator="['name', { rules: [{ required: true, message: $t('acl.triggerNameInput') }] }]">
         </a-input>
       </a-form-item>
-      <a-form-item label="资源名">
-        <a-input size="large" v-decorator="['wildcard']" placeholder="优先正则模式（次通配符）"> </a-input>
+      <a-form-item :label="$t('acl.resourceName')">
+        <a-input size="large" v-decorator="['wildcard']" :placeholder="$t('acl.triggerTips1')"> </a-input>
       </a-form-item>
-      <a-form-item label="创建人">
+      <a-form-item :label="$t('acl.creator')">
         <el-select :style="{ width: '100%' }" filterable multiple v-decorator="['uid']">
           <template v-for="role in roles">
             <el-option v-if="role.uid" :key="role.id" :value="role.uid" :label="role.name">{{ role.name }}</el-option>
           </template>
         </el-select>
       </a-form-item>
-      <a-form-item label="资源类型">
+      <a-form-item :label="$t('acl.resourceType')">
         <el-select
           :style="{ width: '100%' }"
           @change="handleRTChange"
-          v-decorator="['resource_type_id', { rules: [{ required: true, message: '请选择资源类型' }] }]"
+          v-decorator="['resource_type_id', { rules: [{ required: true, message: $t('acl.pleaseSelectType') }] }]"
         >
           <el-option
             v-for="resourceType in resourceTypeList"
@@ -34,25 +34,25 @@
             :label="resourceType.name"
           ></el-option>
         </el-select>
-        <a-tooltip title="查看正则匹配结果">
+        <a-tooltip :title="$t('acl.viewMatchResult')">
           <a class="trigger-form-pattern" @click="handlePattern"><a-icon type="eye"/></a>
         </a-tooltip>
       </a-form-item>
-      <a-form-item label="角色">
+      <a-form-item :label="$t('acl.role2')">
         <el-select
           :style="{ width: '100%' }"
           filterable
           multiple
-          v-decorator="['roles', { rules: [{ required: true, message: '请选择角色' }] }]"
+          v-decorator="['roles', { rules: [{ required: true, message: $t('acl.role_placeholder2') }] }]"
         >
           <el-option v-for="role in roles" :key="role.id" :value="role.id" :label="role.name"></el-option>
         </el-select>
       </a-form-item>
-      <a-form-item label="权限">
+      <a-form-item :label="$t('acl.permission')">
         <el-select
           :style="{ width: '100%' }"
           multiple
-          v-decorator="['permissions', { rules: [{ required: true, message: '请选择权限' }] }]"
+          v-decorator="['permissions', { rules: [{ required: true, message: $t('acl.permission_placeholder') }] }]"
         >
           <el-option
             v-for="perm in selectResourceTypePerms"
@@ -62,13 +62,13 @@
           ></el-option>
         </el-select>
       </a-form-item>
-      <a-form-item label="启用/禁用">
+      <a-form-item :label="$t('acl.enable')/$t('acl.disable')">
         <a-switch v-decorator="['enabled', { rules: [], valuePropName: 'checked', initialValue: true }]" />
       </a-form-item>
     </a-form>
     <div class="custom-drawer-bottom-action">
-      <a-button @click="handleClose">取消</a-button>
-      <a-button @click="handleSubmit" type="primary">提交</a-button>
+      <a-button @click="handleClose">{{ $t('cancel') }}</a-button>
+      <a-button @click="handleSubmit" type="primary">{{ $t('submit') }}</a-button>
     </div>
     <TriggerPattern ref="triggerPattern" :roles="roles" />
   </CustomDrawer>
@@ -159,13 +159,13 @@ export default {
         if (this.triggerId) {
           updateTrigger(this.triggerId, { ...values, app_id: this.app_id }).then((res) => {
             this.visible = false
-            this.$message.success('修改成功！')
+            this.$message.success(this.$t('updateSuccess'))
             this.$emit('refresh')
           })
         } else {
           addTrigger({ ...values, app_id: this.app_id }).then((res) => {
             this.visible = false
-            this.$message.success('创建成功!')
+            this.$message.success(this.$t('addSuccess'))
             this.$emit('refresh')
           })
         }

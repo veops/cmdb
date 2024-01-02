@@ -11,7 +11,7 @@
         :xs="24">
         <a-card>
           <a-card-meta :title="app.name">
-            <div slot="description" :title="app.description || ''">{{ app.description || '无' }}</div>
+            <div slot="description" :title="app.description || ''">{{ app.description || $t('none') }}</div>
             <a-avatar style="background-color: #5dc2f1" slot="avatar">{{ app.name[0].toUpperCase() }}</a-avatar>
           </a-card-meta>
           <template slot="actions">
@@ -65,11 +65,11 @@ export default {
     handleDeleteApp(app) {
       const that = this
       this.$confirm({
-        title: '危险操作',
-        content: '确定要删除该App吗？',
+        title: that.$t('danger'),
+        content: that.$t('confirmDeleteApp'),
         onOk() {
           deleteApp(app.id).then((res) => {
-            that.$message.success(`删除成功：${app.name}`)
+            that.$message.success(that.$t('deleteSuccess'))
             that.loadApps()
           })
         },

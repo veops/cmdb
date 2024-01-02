@@ -10,54 +10,54 @@
   >
     <a-form-model v-if="visible && batchProps.type === 'department_id'">
       <div :style="{ width: '420px', display: 'inline-block', margin: '0 7px' }">
-        <div :style="{ height: '40px', lineHeight: '40px' }">选择部门:</div>
+        <div :style="{ height: '40px', lineHeight: '40px' }">{{ $t('cs.companyStructure.selectDepartment') }}:</div>
         <DepartmentTreeSelect v-model="batchForm.value"> </DepartmentTreeSelect>
       </div>
     </a-form-model>
     <a-form-model v-else-if="batchProps.type === 'direct_supervisor_id'" ref="ruleForm">
       <div :style="{ width: '420px', display: 'inline-block', margin: '0 7px' }">
-        <div :style="{ height: '40px', lineHeight: '40px' }">选择上级:</div>
+        <div :style="{ height: '40px', lineHeight: '40px' }">{{ $t('cs.companyStructure.selectDirectSupervisor') }}:</div>
         <EmployeeTreeSelect v-model="batchForm.value" />
       </div>
     </a-form-model>
     <a-form-model v-else-if="batchProps.type === 'position_name'">
-      <a-form-model-item label="编辑岗位">
+      <a-form-model-item :label="$t('cs.companyStructure.editPosition')">
         <a-input v-model="batchForm.value" />
       </a-form-model-item>
     </a-form-model>
     <a-form-model v-else-if="batchProps.type === 'annual_leave'">
-      <a-form-model-item label="编辑年假">
+      <a-form-model-item :label="$t('cs.companyStructure.editAnnualLeave')">
         <a-input-number
           :min="0"
           :step="1"
           :style="{ width: '100%' }"
           v-model="batchForm.value"
-          placeholder="请输入年假"
-          :formatter="(value) => `${value} 天`"
+          :placeholder="$t('cs.companyStructure.annualLeavePlaceholder')"
+          :formatter="(value) => `${value} $t('cs.companyStructure.day')`"
         />
       </a-form-model-item>
     </a-form-model>
     <a-form-model v-else-if="batchProps.type === 'password'" ref="batchForm" :model="batchForm" :rules="rules">
-      <a-form-model-item label="重置密码" prop="password">
+      <a-form-model-item :label="$t('cs.companyStructure.resetPassword')" prop="password">
         <a-input-password v-model="batchForm.value" />
       </a-form-model-item>
-      <a-form-model-item label="确认密码" prop="repeatPassword">
+      <a-form-model-item :label="$t('cs.companyStructure.confirmPassword')" prop="repeatPassword">
         <a-input-password v-model="batchForm.confirmValue" />
       </a-form-model-item>
     </a-form-model>
     <a-form-model v-else-if="batchProps.type === 'block' && batchProps.state === 1">
       <a-icon type="info-circle" :style="{ color: '#FF9E58', fontSize: '16px', marginRight: '10px' }" />
-      <span v-if="batchProps.selectedRowKeys.length > 1">这些用户将会被禁用，是否继续?</span>
-      <span v-else>该用户将会被禁用，是否继续?</span>
+      <span v-if="batchProps.selectedRowKeys.length > 1">{{ $t('cs.companyStructure.batchBlockUserConfirm') }}</span>
+      <span v-else>{{ $t('cs.companyStructure.blockUserConfirm') }}</span>
     </a-form-model>
     <a-form-model v-else-if="batchProps.type === 'block' && batchProps.state === 0">
       <a-icon type="info-circle" :style="{ color: '#FF9E58', fontSize: '16px', marginRight: '10px' }" />
-      <span v-if="batchProps.selectedRowKeys.length > 1">这些用户将会被恢复，是否继续?</span>
-      <span v-else>该用户将会被恢复，是否继续?</span>
+      <span v-if="batchProps.selectedRowKeys.length > 1">{{ $t('cs.companyStructure.batchRecoverUserConfirm') }}</span>
+      <span v-else>{{ $t('cs.companyStructure.recoverUserConfirm') }}</span>
     </a-form-model>
     <template slot="footer">
-      <a-button key="back" @click="close"> 取消 </a-button>
-      <a-button key="submit" type="primary" @click="batchModalHandleOk"> 确定 </a-button>
+      <a-button key="back" @click="close"> {{ $t('cancel') }} </a-button>
+      <a-button key="submit" type="primary" @click="batchModalHandleOk"> {{ $t('confirm') }} </a-button>
     </template>
   </a-modal>
 </template>
@@ -75,7 +75,7 @@ export default {
     const validatePass = (rule, value, callback) => {
       console.log(this.batchForm)
       if (this.batchForm.value === '') {
-        callback(new Error('请输入密码'))
+        callback(new Error(this.$t('cs.companyStructure.password_placeholder')))
       } else {
         this.$refs.batchForm.validateField('repeatPassword')
         callback()
@@ -84,9 +84,9 @@ export default {
     const validatePass2 = (rule, value, callback) => {
       console.log(this.batchForm)
       if (this.batchForm.confirmValue === '') {
-        callback(new Error('请输入密码'))
+        callback(new Error(this.$t('cs.companyStructure.passwordPlaceholder')))
       } else if (this.batchForm.confirmValue !== this.batchForm.value) {
-        callback(new Error('两次密码不一致'))
+        callback(new Error(this.$t('cs.person.thePasswordEnteredTwiceIsInconsistent')))
       } else {
         callback()
       }
@@ -115,19 +115,19 @@ export default {
       this.visible = true
       this.batchProps = batchProps
       const { type, selectedRowKeys, state } = batchProps
-      this.title = '批量编辑'
+      this.title = this.$t('cs.companyStructure.batchEdit')
       if (type === 'department_id') {
         this.batchForm.value = null
       } else if (type === 'direct_supervisor_id') {
         this.batchForm.value = undefined
       } else if (type === 'password') {
         if (selectedRowKeys.length <= 1) {
-          this.title = '重置密码'
+          this.title = this.$t('cs.companyStructure.resetPassword')
         }
       } else if (type === 'block') {
         this.batchForm.value = state
         if (selectedRowKeys.length <= 1) {
-          this.title = state ? '禁用' : '恢复'
+          this.title = state ? this.$t('cs.companyStructure.block') : this.$t('cs.companyStructure.recover')
         }
       }
     },
@@ -163,7 +163,7 @@ export default {
       })
       if (res.length) {
         this.$notification.error({
-          message: '操作失败',
+          message: this.$t('cs.companyStructure.opFailed'),
           description: res
             .map((item) => `${getDirectorName(this.allFlatEmployees, item.employee_id)}：${item.err}`)
             .join('\n'),
@@ -175,7 +175,7 @@ export default {
           },
         })
       } else {
-        this.$message.success('操作成功')
+        this.$message.success(this.$t('cs.companyStructure.opSuccess'))
       }
       if (this.batchProps.type === 'department_id') {
         Bus.$emit('clickSelectGroup', 1)

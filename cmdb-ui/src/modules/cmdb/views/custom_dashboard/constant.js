@@ -1,4 +1,8 @@
-export const dashboardCategory = {
-    1: { label: '默认' },
-    2: { label: '关系' }
+import i18n from '@/lang'
+
+export const dashboardCategory = () => {
+    return {
+        1: { label: i18n.t('cmdb.custom_dashboard.default') },
+        2: { label: i18n.t('cmdb.custom_dashboard.relation') }
+    }
 }

@@ -3,9 +3,9 @@
     <Discovery :isSelected="true" :style="{ maxHeight: '75vh', overflow: 'auto' }" />
     <template #footer>
       <a-space>
-        <a-button @click="handleCancel">取消</a-button>
-        <a-button type="primary" @click="handleOK">确认</a-button>
-        <a-button type="primary" @click="addPlugin">新建plugin</a-button>
+        <a-button @click="handleCancel">{{ $t('cancel') }}</a-button>
+        <a-button type="primary" @click="handleOK">{{ $t('confirm') }}</a-button>
+        <a-button type="primary" @click="addPlugin">{{ $t('cmdb.ciType.addPlugin') }}</a-button>
       </a-space>
     </template>
   </a-modal>
@@ -55,7 +55,7 @@ export default {
         await Promise.all(promises)
           .then((res) => {
             this.getCITypeDiscovery(res[0].id)
-            this.$message.success('添加成功')
+            this.$message.success(this.$t('addSuccess'))
           })
           .catch(() => {
             this.getCITypeDiscovery()

@@ -29,7 +29,7 @@
           slot="tabBarExtraContent"
           :style="{ cursor: 'pointer' }"
         >
-          <ops-icon type="icon-xianxing-tianjia" :style="{ color: '#2F54EB' }" /><a>添加</a>
+          <ops-icon type="icon-xianxing-tianjia" :style="{ color: '#2F54EB' }" /><a>{{ $t('add') }}</a>
         </a-space>
       </a-tabs>
     </div>
@@ -40,7 +40,7 @@
       }"
     >
       <img slot="image" :src="require('@/assets/data_empty.png')" />
-      <span slot="description"> 暂无数据 </span>
+      <span slot="description"> {{ $t('noData') }} </span>
       <a-button
         @click="
           () => {
@@ -52,7 +52,7 @@
         icon="plus"
         class="ops-button-primary"
       >
-        添加
+        {{ $t('add') }}
       </a-button>
     </a-empty>
     <ADModal ref="adModal" :CITypeId="CITypeId" @addPlugin="openEditDrawer(null, 'add', 'agent')" />
@@ -158,10 +158,10 @@ export default {
       e.stopPropagation()
       const that = this
       this.$confirm({
-        title: `确认删除 【${item?.extra_option?.alias || this.getADCITypeParam(item.adr_id)}】`,
+        title: that.$t('cmdb.ciType.confirmDeleteADT', { pluginName: `${item?.extra_option?.alias || this.getADCITypeParam(item.adr_id)}` }),
         content: (h) => (
           <div>
-            <a-checkbox v-model={that.deletePlugin}>删除插件</a-checkbox>
+            <a-checkbox v-model={that.deletePlugin}>{that.$t('cmdb.ciType.deletePlugin')}</a-checkbox>
           </div>
         ),
         onOk() {
@@ -169,7 +169,7 @@ export default {
             if (that.currentTab === item.id) {
               that.currentTab = ''
             }
-            that.$message.success('删除成功！')
+            that.$message.success(that.$t('deleteSuccess'))
             that.getCITypeDiscovery()
             if (that.deletePlugin) {
               await deleteDiscovery(item.adr_id).finally(() => {

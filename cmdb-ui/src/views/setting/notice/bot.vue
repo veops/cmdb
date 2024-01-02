@@ -15,7 +15,7 @@
           <vxe-input v-model="row[col.field]" type="text"></vxe-input>
         </template>
       </vxe-column>
-      <vxe-column title="操作" width="80" v-if="!disabled">
+      <vxe-column :title="$t('operation')" width="80" v-if="!disabled">
         <template #default="{ row }">
           <template v-if="$refs.xTable.isActiveByRow(row)">
             <a @click="saveRowEvent(row)"><a-icon type="save"/></a>
@@ -27,15 +27,10 @@
         </template>
       </vxe-column>
     </vxe-table>
-    <div :style="{ color: '#f5222d' }" v-if="errorFlag">请完整填写机器人配置</div>
-    <a-button
-      v-if="!disabled"
-      icon="plus-circle"
-      class="ops-button-primary"
-      type="primary"
-      @click="insertEvent"
-    >添加</a-button
-    >
+    <div :style="{ color: '#f5222d' }" v-if="errorFlag">{{ $t('cs.notice.robotConfigErrorTips') }}</div>
+    <a-button v-if="!disabled" icon="plus-circle" class="ops-button-primary" type="primary" @click="insertEvent">{{
+      $t('add')
+    }}</a-button>
   </div>
 </template>
 
@@ -45,18 +40,7 @@ export default {
   props: {
     columns: {
       type: Array,
-      default: () => [
-        {
-          field: 'name',
-          title: '名称',
-          required: true,
-        },
-        {
-          field: 'url',
-          title: 'Webhook地址',
-          required: true,
-        },
-      ],
+      default: () => [],
     },
     disabled: {
       type: Boolean,

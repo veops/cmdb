@@ -16,10 +16,10 @@
   >
     <a-tabs v-model="activeTabKey" @change="changeTab">
       <a-tab-pane key="tab_1">
-        <span slot="tab"><a-icon type="book" />属性</span>
+        <span slot="tab"><a-icon type="book" />{{ $t('cmdb.attribute') }}</span>
         <div :style="{ maxHeight: `${windowHeight - 44}px`, overflow: 'auto', padding: '24px' }" class="ci-detail-attr">
           <el-descriptions
-            :title="group.name || '其他'"
+            :title="group.name || $t('other')"
             :key="group.name"
             v-for="group in attributeGroups"
             border
@@ -36,13 +36,13 @@
         </div>
       </a-tab-pane>
       <a-tab-pane key="tab_2">
-        <span slot="tab"><a-icon type="branches" />关系</span>
+        <span slot="tab"><a-icon type="branches" />{{ $t('cmdb.relation') }}</span>
         <div :style="{ padding: '24px' }">
           <CiDetailRelation ref="ciDetailRelation" :ciId="ciId" :typeId="typeId" :ci="ci" />
         </div>
       </a-tab-pane>
       <a-tab-pane key="tab_3">
-        <span slot="tab"><a-icon type="clock-circle" />操作历史</span>
+        <span slot="tab"><a-icon type="clock-circle" />{{ $t('cmdb.ci.history') }}</span>
         <div :style="{ padding: '24px', height: 'calc(100vh - 44px)' }">
           <vxe-table
             ref="xTable"
@@ -54,22 +54,22 @@
             :scroll-y="{ enabled: false }"
             class="ops-stripe-table"
           >
-            <vxe-table-column sortable field="created_at" title="时间"></vxe-table-column>
+            <vxe-table-column sortable field="created_at" :title="$t('created_at')"></vxe-table-column>
             <vxe-table-column
               field="username"
-              title="用户"
+              :title="$t('user')"
               :filters="[]"
               :filter-method="filterUsernameMethod"
             ></vxe-table-column>
             <vxe-table-column
               field="operate_type"
               :filters="[
-                { value: 0, label: '新增' },
-                { value: 1, label: '删除' },
-                { value: 3, label: '修改' },
+                { value: 0, label: $t('new') },
+                { value: 1, label: $t('delete') },
+                { value: 3, label: $t('update') },
               ]"
               :filter-method="filterOperateMethod"
-              title="操作"
+              :title="$t('operation')"
             >
               <template #default="{ row }">
                 {{ operateTypeMap[row.operate_type] }}
@@ -77,17 +77,17 @@
             </vxe-table-column>
             <vxe-table-column
               field="attr_alias"
-              title="属性"
+              :title="$t('cmdb.attribute')"
               :filters="[]"
               :filter-method="filterAttrMethod"
             ></vxe-table-column>
-            <vxe-table-column field="old" title="旧"></vxe-table-column>
-            <vxe-table-column field="new" title="新"></vxe-table-column>
+            <vxe-table-column field="old" :title="$t('cmdb.history.old')"></vxe-table-column>
+            <vxe-table-column field="new" :title="$t('cmdb.history.new')"></vxe-table-column>
           </vxe-table>
         </div>
       </a-tab-pane>
       <a-tab-pane key="tab_4">
-        <span slot="tab"><ops-icon type="itsm_auto_trigger" />触发历史</span>
+        <span slot="tab"><ops-icon type="itsm_auto_trigger" />{{ $t('cmdb.history.triggerHistory') }}</span>
         <div :style="{ padding: '24px', height: 'calc(100vh - 44px)' }">
           <TriggerTable :ci_id="ci._id" />
         </div>
@@ -125,13 +125,7 @@ export default {
     },
   },
   data() {
-    const operateTypeMap = {
-      0: '新增',
-      1: '删除',
-      2: '修改',
-    }
     return {
-      operateTypeMap,
       visible: false,
       ci: {},
       attributeGroups: [],
@@ -145,6 +139,14 @@ export default {
   computed: {
     windowHeight() {
       return this.$store.state.windowHeight
+    },
+
+    operateTypeMap() {
+      return {
+        0: this.$t('new'),
+        1: this.$t('delete'),
+        2: this.$t('update'),
+      }
     },
   },
   provide() {

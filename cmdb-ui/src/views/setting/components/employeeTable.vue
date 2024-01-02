@@ -26,7 +26,7 @@
     <vxe-column
       field="nickname"
       min-width="100px"
-      title="姓名"
+      :title="$t('cs.companyStructure.nickname')"
       sortable
       v-if="checkedCols.findIndex((v) => v == 'nickname') !== -1 && attributes.findIndex((v) => v == 'nickname') !== -1"
       key="nickname"
@@ -49,7 +49,7 @@
     </vxe-column>
     <vxe-column
       field="username"
-      title="用户名"
+      :title="$t('cs.companyStructure.username')"
       min-width="120px"
       sortable
       v-if="checkedCols.findIndex((v) => v == 'username') !== -1 && attributes.findIndex((v) => v == 'username') !== -1"
@@ -58,13 +58,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>用户名</span>
+          <span>{{ $t('cs.companyStructure.username') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="email"
-      title="邮箱"
+      :title="$t('cs.companyStructure.email')"
       min-width="140px"
       sortable
       v-if="checkedCols.findIndex((v) => v == 'email') !== -1 && attributes.findIndex((v) => v == 'email') !== -1"
@@ -73,13 +73,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>邮箱</span>
+          <span>{{ $t('cs.companyStructure.email') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="sex"
-      title="性别"
+      :title="$t('cs.companyStructure.sex')"
       width="70px"
       sortable
       align="center"
@@ -89,13 +89,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>性别</span>
+          <span>{{ $t('cs.companyStructure.sex') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="mobile"
-      title="手机号"
+      :title="$t('cs.companyStructure.mobile')"
       min-width="100px"
       v-if="checkedCols.findIndex((v) => v == 'mobile') !== -1 && attributes.findIndex((v) => v == 'mobile') !== -1"
       sortable
@@ -104,13 +104,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>手机号</span>
+          <span>{{ $t('cs.companyStructure.mobile') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="department_name"
-      title="部门"
+      :title="$t('cs.companyStructure.departmentName')"
       min-width="90px"
       sortable
       v-if="
@@ -122,7 +122,7 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>部门</span>
+          <span>{{ $t('cs.companyStructure.departmentName') }}</span>
         </span>
       </template>
       <template #default="{ row }">
@@ -132,7 +132,7 @@
     </vxe-column>
     <vxe-column
       field="position_name"
-      title="岗位"
+      :title="$t('cs.companyStructure.positionName')"
       min-width="120px"
       sortable
       v-if="
@@ -144,13 +144,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>岗位</span>
+          <span>{{ $t('cs.companyStructure.positionName') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="direct_supervisor_id"
-      title="直接上级"
+      :title="$t('cs.companyStructure.supervisor')"
       min-width="120px"
       sortable
       v-if="
@@ -162,7 +162,7 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>直接上级</span>
+          <span>{{ $t('cs.companyStructure.supervisor') }}</span>
         </span>
       </template>
       <template #default="{ row }">
@@ -173,7 +173,7 @@
     </vxe-column>
     <vxe-column
       field="annual_leave"
-      title="年假"
+      :title="$t('cs.companyStructure.annualLeave')"
       sortable
       min-width="80"
       v-if="
@@ -186,13 +186,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>年假</span>
+          <span>{{ $t('cs.companyStructure.annualLeave') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="virtual_annual_leave"
-      title="虚拟年假"
+      :title="$t('cs.companyStructure.virtualAnnualLeave')"
       sortable
       min-width="100"
       v-if="
@@ -205,13 +205,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>虚拟年假</span>
+          <span>{{ $t('cs.companyStructure.virtualAnnualLeave') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="parenting_leave"
-      title="育儿假"
+      :title="$t('cs.companyStructure.parentingLeave')"
       sortable
       min-width="100"
       v-if="
@@ -224,13 +224,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>育儿假</span>
+          <span>{{ $t('cs.companyStructure.parentingLeave') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="entry_date"
-      title="目前主体入职日期"
+      :title="$t('cs.companyStructure.entryDate')"
       sortable
       min-width="150"
       v-if="
@@ -243,13 +243,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>目前主体入职日期</span>
+          <span>{{ $t('cs.companyStructure.entryDate') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="is_internship"
-      title="正式/实习生"
+      :title="$t('cs.companyStructure.isInternship')"
       sortable
       min-width="140"
       v-bind="tableType === 'structure' ? { filters: internOptions, 'filter-multiple': false } : {}"
@@ -263,7 +263,7 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>正式/实习生</span>
+          <span>{{ $t('cs.companyStructure.isInternship') }}</span>
         </span>
       </template>
       <template #default="{ row }">
@@ -272,7 +272,7 @@
     >I
     <vxe-column
       field="leave_date"
-      title="离职日期"
+      :title="$t('cs.companyStructure.leaveDate')"
       sortable
       min-width="100"
       v-if="
@@ -285,13 +285,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>离职日期</span>
+          <span>{{ $t('cs.companyStructure.leaveDate') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="id_card"
-      title="身份证号码"
+      :title="$t('cs.companyStructure.idCard')"
       sortable
       min-width="120"
       v-if="
@@ -304,13 +304,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>身份证号码</span>
+          <span>{{ $t('cs.companyStructure.idCard') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="nation"
-      title="民族"
+      :title="$t('cs.companyStructure.nation')"
       sortable
       min-width="80"
       v-if="
@@ -323,13 +323,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>民族</span>
+          <span>{{ $t('cs.companyStructure.idPlace') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="id_place"
-      title="籍贯"
+      :title="$t('cs.companyStructure.nation')"
       sortable
       min-width="120"
       v-if="
@@ -342,13 +342,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>籍贯</span>
+          <span>{{ $t('cs.companyStructure.idPlace') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="party"
-      title="组织关系"
+      :title="$t('cs.companyStructure.party')"
       sortable
       min-width="100"
       v-if="
@@ -361,13 +361,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>组织关系</span>
+          <span>{{ $t('cs.companyStructure.party') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="household_registration_type"
-      title="户籍类型"
+      :title="$t('cs.companyStructure.householdRegistrationType')"
       sortable
       min-width="100"
       v-if="
@@ -380,13 +380,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>户籍类型</span>
+          <span>{{ $t('cs.companyStructure.hometown') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="hometown"
-      title="户口所在地"
+      :title="$t('cs.companyStructure.householdRegistrationType') "
       sortable
       min-width="120"
       v-if="
@@ -399,13 +399,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>户口所在地</span>
+          <span>{{ $t('cs.companyStructure.hometown') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="marry"
-      title="婚姻情况"
+      :title="$t('cs.companyStructure.marry')"
       sortable
       min-width="100"
       v-if="
@@ -418,13 +418,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>婚姻情况</span>
+          <span>{{ $t('cs.companyStructure.marry') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="max_degree"
-      title="最高学历"
+      :title="$t('cs.companyStructure.maxDegree')"
       sortable
       min-width="100"
       v-if="
@@ -437,13 +437,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>最高学历</span>
+          <span>{{ $t('cs.companyStructure.maxDegree') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="emergency_person"
-      title="紧急联系人"
+      :title="$t('cs.companyStructure.emergencyPerson')"
       sortable
       min-width="110"
       v-if="
@@ -456,13 +456,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>紧急联系人</span>
+          <span>{{ $t('cs.companyStructure.emergencyPerson') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="emergency_phone"
-      title="紧急联系电话"
+      :title="$t('cs.companyStructure.emergencyPhone')"
       sortable
       min-width="120"
       v-if="
@@ -475,13 +475,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>紧急联系电话</span>
+          <span>{{ $t('cs.companyStructure.emergencyPhone') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="bank_card_number"
-      title="卡号"
+      :title="$t('cs.companyStructure.bankCardNumber')"
       sortable
       min-width="120"
       v-if="
@@ -494,13 +494,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>卡号</span>
+          <span>{{ $t('cs.companyStructure.bankCardNumber') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="bank_card_name"
-      title="银行"
+      :title="$t('cs.companyStructure.bankCardName')"
       sortable
       min-width="100"
       v-if="
@@ -513,13 +513,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>银行</span>
+          <span>{{ $t('cs.companyStructure.bankCardName') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="opening_bank"
-      title="开户行"
+      :title="$t('cs.companyStructure.openingBank')"
       sortable
       min-width="100"
       v-if="
@@ -532,13 +532,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>开户行</span>
+          <span>{{ $t('cs.companyStructure.openingBank') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="account_opening_location"
-      title="开户地"
+      :title="$t('cs.companyStructure.accountOpeningLocation')"
       sortable
       min-width="120"
       v-if="
@@ -551,13 +551,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>开户地</span>
+          <span>{{ $t('cs.companyStructure.accountOpeningLocation') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="school"
-      title="学校"
+      :title="$t('cs.companyStructure.school')"
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'school') !== -1 &&
@@ -569,13 +569,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>学校</span>
+          <span>{{ $t('cs.companyStructure.school') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="major"
-      title="专业"
+      :title="$t('cs.companyStructure.major')"
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'major') !== -1 &&
@@ -587,13 +587,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>专业</span>
+          <span>{{ $t('cs.companyStructure.major') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="education"
-      title="学历"
+      :title="$t('cs.companyStructure.education')"
       min-width="80"
       v-if="
         checkedCols.findIndex((v) => v == 'education') !== -1 &&
@@ -605,13 +605,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>学历</span>
+          <span>{{ $t('cs.companyStructure.education') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="graduation_year"
-      title="毕业年份"
+      :title="$t('cs.companyStructure.graduationYear')"
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'graduation_year') !== -1 &&
@@ -623,13 +623,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>毕业年份</span>
+          <span>{{ $t('cs.companyStructure.graduationYear') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="name"
-      title="子女姓名"
+      :title="$t('cs.companyStructure.childrenName')"
       min-width="80"
       v-if="
         checkedCols.findIndex((v) => v == 'name') !== -1 &&
@@ -641,13 +641,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>子女姓名</span>
+          <span>{{ $t('cs.companyStructure.childrenName') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="gender"
-      title="子女性别"
+      :title="$t('cs.companyStructure.sex')"
       min-width="80"
       v-if="
         checkedCols.findIndex((v) => v == 'gender') !== -1 &&
@@ -659,13 +659,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>子女性别</span>
+          <span>{{ $t('cs.companyStructure.sex') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="birthday"
-      title="子女出生日期"
+      :title="$t('cs.companyStructure.birthDate')"
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'birthday') !== -1 &&
@@ -677,13 +677,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>子女出生日期</span>
+          <span>{{ $t('cs.companyStructure.birthDate') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="parental_leave_left"
-      title="剩余育儿假"
+      :title="$t('cs.companyStructure.leftParentingLeave')"
       min-width="100"
       v-if="
         checkedCols.findIndex((v) => v == 'parental_leave_left') !== -1 &&
@@ -695,13 +695,103 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>剩余育儿假</span>
+          <span>{{ $t('cs.companyStructure.leftParentingLeave') }}</span>
+        </span>
+      </template>
+    </vxe-column>
+    <vxe-column
+      field="birth_date"
+      :title="$t('cs.companyStructure.birthDate')"
+      min-width="100"
+      v-if="
+        checkedCols.findIndex((v) => v == 'birth_date') !== -1 &&
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'birth_date') !== -1
+      "
+      key="birth_date"
+    >
+      <template #header>
+        <span class="vxe-handle">
+          <OpsMoveIcon class="move-icon" />
+          <span>{{ $t('cs.companyStructure.birthDate') }}</span>
+        </span>
+      </template>
+    </vxe-column>
+    <vxe-column
+      field="birth_place"
+      :title="$t('cs.companyStructure.birthPlace')"
+      min-width="100"
+      v-if="
+        checkedCols.findIndex((v) => v == 'birth_place') !== -1 &&
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'birth_place') !== -1
+      "
+      key="birth_place"
+    >
+      <template #header>
+        <span class="vxe-handle">
+          <OpsMoveIcon class="move-icon" />
+          <span>{{ $t('cs.companyStructure.birthPlace') }}</span>
+        </span>
+      </template>
+    </vxe-column>
+    <vxe-column
+      field="nationality_region"
+      :title="$t('cs.companyStructure.nationalityRegion')"
+      min-width="100"
+      v-if="
+        checkedCols.findIndex((v) => v == 'nationality_region') !== -1 &&
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'nationality_region') !== -1
+      "
+      key="nationality_region"
+    >
+      <template #header>
+        <span class="vxe-handle">
+          <OpsMoveIcon class="move-icon" />
+          <span>{{ $t('cs.companyStructure.nationalityRegion') }}</span>
+        </span>
+      </template>
+    </vxe-column>
+    <vxe-column
+      field="first_entry_date"
+      :title="$t('cs.companyStructure.firstEntryDate')"
+      min-width="100"
+      v-if="
+        checkedCols.findIndex((v) => v == 'first_entry_date') !== -1 &&
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'first_entry_date') !== -1
+      "
+      key="first_entry_date"
+    >
+      <template #header>
+        <span class="vxe-handle">
+          <OpsMoveIcon class="move-icon" />
+          <span>{{ $t('cs.companyStructure.firstEntryDate') }}</span>
+        </span>
+      </template>
+    </vxe-column>
+    <vxe-column
+      field="estimated_departure_date"
+      :title="$t('cs.companyStructure.estimatedDepartureDate')"
+      min-width="100"
+      v-if="
+        checkedCols.findIndex((v) => v == 'estimated_departure_date') !== -1 &&
+          tableType == 'structure' &&
+          attributes.findIndex((v) => v == 'estimated_departure_date') !== -1
+      "
+      key="estimated_departure_date"
+    >
+      <template #header>
+        <span class="vxe-handle">
+          <OpsMoveIcon class="move-icon" />
+          <span>{{ $t('cs.companyStructure.estimatedDepartureDate') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="last_login"
-      title="上次登录时间"
+      :title="$t('cs.companyStructure.lastLogin')"
       min-width="140px"
       sortable
       :formatter="formatDate"
@@ -715,7 +805,7 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>上次登录时间</span>
+          <span>{{ $t('cs.companyStructure.lastLogin') }}</span>
         </span>
       </template>
     </vxe-column>
@@ -728,10 +818,10 @@
       key="control"
     >
       <template #header>
-        <span>操作</span>
+        <span>{{ $t('operation') }}</span>
         <template>
           <a-popover
-            title="请选择需要展示的列"
+            :title="$t('cs.companyStructure.selectDisplayColumn')"
             placement="bottom"
             v-model="visible"
             trigger="click"
@@ -741,7 +831,7 @@
           >
             <template slot="content">
               <div :style="{ maxHeight: `${windowHeight - 320}px`, overflowY: 'auto', width: '160px' }">
-                <a-checkbox-group v-model="unsbmitCheckedCols" :options="options" style="display: grid">
+                <a-checkbox-group v-model="unsbmitCheckedCols" :options="options" style="display: grid;">
                 </a-checkbox-group>
               </div>
               <div
@@ -753,36 +843,44 @@
                   justifyContent: 'flex-end',
                 }"
               >
-                <a-button :style="{ marginRight: '10px' }" size="small" @click="handleCancel">取消</a-button>
-                <a-button size="small" @click="handleSubmit" type="primary">确定</a-button>
+                <a-button :style="{ marginRight: '10px' }" size="small" @click="handleCancel">{{ $t('cancel') }}</a-button>
+                <a-button size="small" @click="handleSubmit" type="primary">{{ $t('confirm') }}</a-button>
               </div>
             </template>
-            <a-icon type="control" style="cursor: pointer" />
+            <a-icon type="control" style="cursor: pointer;" />
           </a-popover>
         </template>
       </template>
       <template #default="{ row }">
         <a-space v-if="tableType === 'structure'">
-          <a><a-icon type="edit" @click="openEmployeeModal(row, 'edit')" /></a>
+          <a><a-icon type="edit" @click="openEmployeeModal(row, 'edit')"/></a>
           <a-tooltip>
-            <template slot="title"> 重置密码 </template>
-            <a><a-icon type="reload" @click="openBatchModal('password', row)" /></a>
+            <template slot="title">
+              {{ $t('cs.companyStructure.resetPassword') }}
+            </template>
+            <a><a-icon type="reload" @click="openBatchModal('password', row)"/></a>
           </a-tooltip>
           <a-tooltip v-if="!row.block">
-            <template slot="title"> 禁用 </template>
+            <template slot="title">
+              {{ $t('cs.companyStructure.block') }}
+            </template>
             <a :style="{ color: 'red' }" @click="openBatchModal('block', row, 1)">
               <ops-icon type="icon-xianxing-weilianjie" />
             </a>
           </a-tooltip>
           <a-tooltip v-else>
-            <template slot="title"> 恢复 </template>
+            <template slot="title">
+              {{ $t('cs.companyStructure.recover') }}
+            </template>
             <a @click="openBatchModal('block', row, 0)">
               <ops-icon type="icon-xianxing-yilianjie" />
             </a>
           </a-tooltip>
         </a-space>
         <a-tooltip v-else>
-          <template slot="title"> 移除 </template>
+          <template slot="title">
+            {{ $t('cs.role.remove') }}
+          </template>
           <a :style="{ color: 'red' }" @click="removeEmployee(row)">
             <ops-icon type="icon-xianxing-shanchuyonghu" />
           </a>
@@ -792,7 +890,7 @@
     <template #empty>
       <div>
         <img :style="{ width: '200px' }" :src="require('@/assets/data_empty.png')" />
-        <div>暂无数据</div>
+        <div>{{ $t('noData') }}</div>
       </div>
     </template>
   </vxe-table>
@@ -833,46 +931,49 @@ export default {
   },
   data() {
     const options = [
-      { label: '姓名', value: 'nickname' },
-      { label: '用户名', value: 'username' },
-      { label: '邮箱', value: 'email' },
-      { label: '性别', value: 'sex' },
-      { label: '手机号', value: 'mobile' },
-      { label: '部门', value: 'department_name' },
-      { label: '岗位', value: 'position_name' },
-      { label: '直接上级', value: 'direct_supervisor_id' },
-      { label: '年假', value: 'annual_leave' },
-      { label: '虚拟年假', value: 'virtual_annual_leave' },
-      { label: '育儿假', value: 'parenting_leave' },
-      { label: '目前所属主体', value: 'current_company' },
-      { label: '初始入职日期', value: 'dfc_entry_date' },
-      { label: '目前主体入职日期', value: 'entry_date' },
-      { label: '正式/实习生', value: 'is_internship' },
-      { label: '离职日期', value: 'leave_date' },
-      { label: '身份证号码', value: 'id_card' },
-      { label: '民族', value: 'nation' },
-      { label: '籍贯', value: 'id_place' },
-      { label: '组织关系', value: 'party' },
-      { label: '户籍类型', value: 'household_registration_type' },
-      { label: '户口所在地', value: 'hometown' },
-      { label: '婚姻情况', value: 'marry' },
-      { label: '最高学历', value: 'max_degree' },
-      { label: '紧急联系人', value: 'emergency_person' },
-      { label: '紧急联系电话', value: 'emergency_phone' },
-      { label: '卡号', value: 'bank_card_number' },
-      { label: '银行', value: 'bank_card_name' },
-      { label: '开户行', value: 'opening_bank' },
-      { label: '开户地', value: 'account_opening_location' },
-      { label: '学校', value: 'school' },
-      { label: '专业', value: 'major' },
-      { label: '学历', value: 'education' },
-      { label: '毕业年份', value: 'graduation_year' },
-      { label: '子女姓名', value: 'name' },
-      { label: '子女性别', value: 'gender' },
-      { label: '子女出生日期', value: 'birthday' },
-      { label: '剩余育儿假', value: 'parental_leave_left' },
-      { label: '角色', value: 'roles' },
-      { label: '上次登录时间', value: 'last_login' },
+      { label: this.$t('cs.companyStructure.nickname'), value: 'nickname' },
+      { label: this.$t('cs.companyStructure.username'), value: 'username' },
+      { label: this.$t('cs.companyStructure.email'), value: 'email' },
+      { label: this.$t('cs.companyStructure.sex'), value: 'sex' },
+      { label: this.$t('cs.companyStructure.mobile'), value: 'mobile' },
+      { label: this.$t('cs.companyStructure.departmentName'), value: 'department_name' },
+      { label: this.$t('cs.companyStructure.positionName'), value: 'position_name' },
+      { label: this.$t('cs.companyStructure.supervisor'), value: 'direct_supervisor_id' },
+      { label: this.$t('cs.companyStructure.annualLeave'), value: 'annual_leave' },
+      { label: this.$t('cs.companyStructure.virtualAnnualLeave'), value: 'virtual_annual_leave' },
+      { label: this.$t('cs.companyStructure.parentingLeave'), value: 'parenting_leave' },
+      { label: this.$t('cs.companyStructure.entryDate'), value: 'entry_date' },
+      { label: this.$t('cs.companyStructure.isInternship'), value: 'is_internship' },
+      { label: this.$t('cs.companyStructure.leaveDate'), value: 'leave_date' },
+      { label: this.$t('cs.companyStructure.idCard'), value: 'id_card' },
+      { label: this.$t('cs.companyStructure.nation'), value: 'nation' },
+      { label: this.$t('cs.companyStructure.idPlace'), value: 'id_place' },
+      { label: this.$t('cs.companyStructure.party'), value: 'party' },
+      { label: this.$t('cs.companyStructure.householdRegistrationType'), value: 'household_registration_type' },
+      { label: this.$t('cs.companyStructure.hometown'), value: 'hometown' },
+      { label: this.$t('cs.companyStructure.marry'), value: 'marry' },
+      { label: this.$t('cs.companyStructure.maxDegree'), value: 'max_degree' },
+      { label: this.$t('cs.companyStructure.emergencyPerson'), value: 'emergency_person' },
+      { label: this.$t('cs.companyStructure.emergencyPhone'), value: 'emergency_phone' },
+      { label: this.$t('cs.companyStructure.bankCardNumber'), value: 'bank_card_number' },
+      { label: this.$t('cs.companyStructure.bankCardName'), value: 'bank_card_name' },
+      { label: this.$t('cs.companyStructure.openingBank'), value: 'opening_bank' },
+      { label: this.$t('cs.companyStructure.accountOpeningLocation'), value: 'account_opening_location' },
+      { label: this.$t('cs.companyStructure.school'), value: 'school' },
+      { label: this.$t('cs.companyStructure.major'), value: 'major' },
+      { label: this.$t('cs.companyStructure.education'), value: 'education' },
+      { label: this.$t('cs.companyStructure.graduationYear'), value: 'graduation_year' },
+      { label: this.$t('cs.companyStructure.childrenName'), value: 'name' },
+      { label: this.$t('cs.companyStructure.childrenGender'), value: 'gender' },
+      { label: this.$t('cs.companyStructure.childrenBirthday'), value: 'birthday' },
+      { label: this.$t('cs.companyStructure.leftParentingLeave'), value: 'parental_leave_left' },
+      { label: this.$t('cs.companyStructure.birthDate'), value: 'birth_date' },
+      { label: this.$t('cs.companyStructure.nationalityRegion'), value: 'nationality_region' },
+      { label: this.$t('cs.companyStructure.birthPlace'), value: 'birth_place' },
+      { label: this.$t('cs.companyStructure.firstEntryDate'), value: 'first_entry_date' },
+      { label: this.$t('cs.companyStructure.estimatedDepartureDate'), value: 'estimated_departure_date' },
+      { label: this.$t('cs.companyStructure.role'), value: 'roles' },
+      { label: this.$t('cs.companyStructure.lastLogin'), value: 'last_login' },
     ]
     const checkedCols = JSON.parse(localStorage.getItem('setting-table-CheckedCols')) || [
       'nickname',
@@ -889,7 +990,6 @@ export default {
       'roles',
       'last_login',
       'current_company',
-      'dfc_entry_date',
       'is_internship',
       'entry_date',
       'leave_date',
@@ -924,24 +1024,28 @@ export default {
       visible: false,
       tableDragClassName: [], // 表格拖拽的参数
       attributes: [],
-      internMap: [
-        {
-          id: 0,
-          label: '正式',
-        },
-        {
-          id: 1,
-          label: '实习生',
-        },
-      ],
-      internOptions: [
-        { label: '正式', value: 0 },
-        { label: '实习生', value: 1 },
-      ],
     }
   },
   inject: ['provide_allFlatEmployees', 'provide_allFlatDepartments'],
   computed: {
+    internOptions() {
+      return [
+        { label: this.$t('cs.companyStructure.fullTime'), value: 0 },
+        { label: this.$t('cs.companyStructure.internship'), value: 1 },
+      ]
+    },
+    internMap() {
+      return [
+        {
+          id: 0,
+          label: this.$t('cs.companyStructure.fullTime'),
+        },
+        {
+          id: 1,
+          label: this.$t('cs.companyStructure.internship'),
+        },
+      ]
+    },
     allFlatEmployees() {
       return this.provide_allFlatEmployees()
     },
@@ -956,9 +1060,6 @@ export default {
     Bus.$on('reqExportSelectEvent', () => {
       this.exportExcel()
     })
-    this.options = this.options
-      .filter((item) => item.label !== '目前所属主体')
-      .filter((item) => item.label !== '初始入职日期')
     this.unsbmitCheckedCols = this.checkedCols
   },
   beforeDestroy() {
@@ -1064,8 +1165,8 @@ export default {
     removeEmployee(row) {
       const that = this
       this.$confirm({
-        title: '提示',
-        content: '确认移除该员工?',
+        title: that.$t('warning'),
+        content: that.$t('cs.role.confirmRemoveEmployee'),
         onOk() {
           that.$emit('removeEmployee', row)
         },
@@ -1140,7 +1241,7 @@ export default {
         useStyle: true, // 是否导出样式
         isFooter: false, // 是否导出表尾（比如合计）
         // 过滤那个字段导出
-        columnFilterMethod: function (column, $columnIndex) {
+        columnFilterMethod: function(column, $columnIndex) {
           return !(column.$columnIndex === 0)
           // 0是复选框 不导出
         },

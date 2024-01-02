@@ -21,22 +21,22 @@
       :height="`${windowHeight - windowHeightMinus}px`"
       :scroll-y="{ enabled: false }"
     >
-      <vxe-column field="created_at" width="144px" title="操作时间">
+      <vxe-column field="created_at" width="144px" :title="$t('acl.operateTime')">
         <template #default="{ row }">
           <span>{{ row.deleted_at || row.updated_at || row.created_at }}</span>
         </template>
       </vxe-column>
-      <vxe-column field="operate_uid" width="130px" title="操作员"></vxe-column>
-      <vxe-column field="operate_type" width="80px" title="操作">
+      <vxe-column field="operate_uid" width="130px" :title="$t('acl.operator')"></vxe-column>
+      <vxe-column field="operate_type" width="100px" :title="$t('operation')">
         <template #default="{ row }">
           <a-tag :color="row.operate_type === 'grant' ? 'green' : 'red'">{{
             operateTypeMap.get(row.operate_type)
           }}</a-tag>
         </template>
       </vxe-column>
-      <vxe-column field="rid" title="用户"></vxe-column>
-      <vxe-column field="resource_type_id" title="资源类型"></vxe-column>
-      <vxe-column field="resources" title="资源">
+      <vxe-column field="rid" :title="$t('user')"></vxe-column>
+      <vxe-column field="resource_type_id" :title="$t('acl.resourceType')"></vxe-column>
+      <vxe-column field="resources" :title="$t('acl.resource')">
         <template #default="{ row }">
           <template v-if="row.resource_ids.length > 0">
             <a-tooltip placement="top">
@@ -55,14 +55,14 @@
           </template>
         </template>
       </vxe-column>
-      <vxe-column title="权限">
+      <vxe-column :title="$t('acl.permission')">
         <template #default="{ row }">
           <a-tag v-for="(perm, index) in row.permission_ids" :key="'perms_' + perm + index">
             {{ perm }}
           </a-tag>
         </template>
       </vxe-column>
-      <vxe-column field="source" width="100px" title="来源"></vxe-column>
+      <vxe-column field="source" width="100px" :title="$t('acl.source')"></vxe-column>
     </vxe-table>
     <pager
       :current-page.sync="queryParams.page"
@@ -122,10 +122,6 @@ export default {
       loading: true,
       app_id: this.$route.name.split('_')[0],
       tableData: [],
-      operateTypeMap: new Map([
-        ['grant', '授权'],
-        ['revoke', '撤销'],
-      ]),
       queryParams: {
         page: 1,
         page_size: 50,
@@ -133,49 +129,6 @@ export default {
         start: '',
         end: '',
       },
-      permissionTableAttrList: [
-        {
-          alias: '日期',
-          is_choice: false,
-          name: 'datetime',
-          value_type: '3',
-        },
-        {
-          alias: '操作员',
-          is_choice: true,
-          name: 'operate_uid',
-          value_type: '2',
-          choice_value: this.allUsers,
-        },
-        {
-          alias: '用户',
-          is_choice: true,
-          name: 'rid',
-          value_type: '2',
-          choice_value: this.allRoles,
-        },
-        {
-          alias: '资源类型',
-          is_choice: true,
-          name: 'resource_type_id',
-          value_type: '2',
-          choice_value: this.allResourceTypes,
-        },
-        {
-          alias: '资源',
-          is_choice: true,
-          name: 'resource_id',
-          value_type: '2',
-          choice_value: this.allResources,
-        },
-        {
-          alias: '操作',
-          is_choice: true,
-          name: 'operate_type',
-          value_type: '2',
-          choice_value: [{ 授权: 'grant' }, { 撤销: 'revoke' }],
-        },
-      ],
     }
   },
   async created() {
@@ -198,6 +151,12 @@ export default {
     },
   },
   computed: {
+    operateTypeMap() {
+      return new Map([
+        ['grant', this.$t('grant')],
+        ['revoke', this.$t('acl.cancel')],
+      ])
+    },
     windowHeight() {
       return this.$store.state.windowHeight
     },
@@ -206,6 +165,51 @@ export default {
     },
     tableDataLength() {
       return this.tableData.length
+    },
+    permissionTableAttrList() {
+      return [
+        {
+          alias: this.$t('acl.date'),
+          is_choice: false,
+          name: 'datetime',
+          value_type: '3',
+        },
+        {
+          alias: this.$t('acl.operator'),
+          is_choice: true,
+          name: 'operate_uid',
+          value_type: '2',
+          choice_value: this.allUsers,
+        },
+        {
+          alias: this.$t('user'),
+          is_choice: true,
+          name: 'rid',
+          value_type: '2',
+          choice_value: this.allRoles,
+        },
+        {
+          alias: this.$t('acl.resourceType'),
+          is_choice: true,
+          name: 'resource_type_id',
+          value_type: '2',
+          choice_value: this.allResourceTypes,
+        },
+        {
+          alias: this.$t('acl.resource'),
+          is_choice: true,
+          name: 'resource_id',
+          value_type: '2',
+          choice_value: this.allResources,
+        },
+        {
+          alias: this.$t('operation'),
+          is_choice: true,
+          name: 'operate_type',
+          value_type: '2',
+          choice_value: [{ [this.$t('grant')]: 'grant' }, { [this.$t('acl.cancel')]: 'revoke' }],
+        },
+      ]
     },
   },
   methods: {

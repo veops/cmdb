@@ -8,40 +8,29 @@
     width="500px"
   >
     <a-form :form="form" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }" @submit="handleSubmit">
-      <a-form-item label="角色名">
+      <a-form-item :label="$t('acl.role')">
         <a-input
           name="name"
-          placeholder="角色名"
-          v-decorator="['name', { rules: [{ required: true, message: '请输入角色名' }] }]"
+          :placeholder="$t('acl.role_placeholder1')"
+          v-decorator="['name', { rules: [{ required: true, message: $t('acl.role_placeholder1') }] }]"
         />
       </a-form-item>
-      <a-form-item v-if="$route.name.split('_')[0] !== 'acl'" label="密码">
-        <a-input name="password" placeholder="密码" v-decorator="['password', { rules: [{ required: false }] }]" />
+      <a-form-item v-if="$route.name.split('_')[0] !== 'acl'" :label="$t('acl.password')">
+        <a-input name="password" :placeholder="$t('acl.password')" v-decorator="['password', { rules: [{ required: false }] }]" />
       </a-form-item>
-      <!-- <a-form-item label="继承自">
-        <a-select
-          showSearch
-          v-model="selectedParents"
-          :filterOption="false"
-          placeholder="可选择继承角色"
-          mode="multiple"
-        >
-          <a-select-option v-for="role in scrollData" :key="role.id">{{ role.name }}</a-select-option>
-        </a-select>
-      </a-form-item> -->
-      <a-form-item label="继承自">
+      <a-form-item :label="$t('acl.inheritedFrom')">
         <el-select
           :style="{ width: '100%' }"
           size="small"
           v-model="selectedParents"
           multiple
           filterable
-          placeholder="可选择继承角色"
+          :placeholder="$t('acl.selectedParents')"
         >
           <el-option v-for="role in allRoles" :key="role.id" :value="role.id" :label="role.name"></el-option>
         </el-select>
       </a-form-item>
-      <a-form-item label="是否应用管理员">
+      <a-form-item :label="$t('acl.isAppAdmin')">
         <a-switch
           @change="onChange"
           name="is_app_admin"
@@ -53,8 +42,8 @@
       </a-form-item>
 
       <div class="custom-drawer-bottom-action">
-        <a-button @click="onClose">取消</a-button>
-        <a-button @click="handleSubmit" type="primary">确定</a-button>
+        <a-button @click="onClose">{{ $t('cancel') }}</a-button>
+        <a-button @click="handleSubmit" type="primary">{{ $t('confirm') }}</a-button>
       </div>
     </a-form>
   </CustomDrawer>
@@ -93,7 +82,7 @@ export default {
     //   return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     // },
     handleCreate() {
-      this.drawerTitle = '新增角色'
+      this.drawerTitle = this.$t('acl.addRole')
       this.drawerVisible = true
     },
     onClose() {
@@ -107,7 +96,7 @@ export default {
     },
 
     handleEdit(record) {
-      this.drawerTitle = `编辑：${record.name}`
+      this.drawerTitle = `${this.$t('edit')}: ${record.name}`
       this.drawerVisible = true
       this.current_id = record.id
       const _parents = this.id2parents[record.id]
@@ -142,7 +131,7 @@ export default {
     updateRole(id, data) {
       this.updateParents(id)
       updateRoleById(id, { ...data, app_id: this.$route.name.split('_')[0] }).then((res) => {
-        this.$message.success(`更新成功`)
+        this.$message.success(this.$t('updateSuccess'))
         this.handleOk()
         this.onClose()
       })
@@ -151,7 +140,7 @@ export default {
 
     createRole(data) {
       addRole({ ...data, app_id: this.$route.name.split('_')[0] }).then((res) => {
-        this.$message.success(`添加成功`)
+        this.$message.success(this.$t('addSuccess'))
         this.updateParents(res.id)
         this.handleOk()
         this.onClose()
@@ -171,16 +160,9 @@ export default {
             child_ids: [id],
             app_id: this.$route.name.split('_')[0],
           })
-          // addParentRole(id, item, { app_id: this.$route.name.split('_')[0] })
-          // .catch(err => this.requestFailed(err))
         }
       })
     },
-    // requestFailed(err) {
-    //   console.log(err)
-    //   const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
-    //   this.$message.error(`${msg}`)
-    // },
   },
   watch: {},
   props: {

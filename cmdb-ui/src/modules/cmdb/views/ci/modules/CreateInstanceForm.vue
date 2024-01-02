@@ -10,8 +10,8 @@
     :headerStyle="{ borderBottom: 'none' }"
   >
     <div class="custom-drawer-bottom-action">
-      <a-button @click="handleClose">取消</a-button>
-      <a-button type="primary" @click="createInstance">提交</a-button>
+      <a-button @click="handleClose">{{ $t('cancel') }}</a-button>
+      <a-button type="primary" @click="createInstance">{{ $t('submit') }}</a-button>
     </div>
     <template v-if="action === 'create'">
       <template v-for="group in attributesByGroup">
@@ -24,7 +24,7 @@
         />
       </template>
       <template v-if="parentsType && parentsType.length">
-        <a-divider style="font-size:14px;margin:14px 0;font-weight:700;">模型关系</a-divider>
+        <a-divider style="font-size:14px;margin:14px 0;font-weight:700;">{{ $t('cmdb.menu.citypeRelation') }}</a-divider>
         <a-form>
           <a-row :gutter="24" align="top" type="flex">
             <a-col :span="12" v-for="item in parentsType" :key="item.id">
@@ -40,7 +40,7 @@
                       {{ attr.alias || attr.name }}
                     </a-select-option>
                   </a-select>
-                  <a-input placeholder="多个值使用,分割" v-model="parentsForm[item.name].value" style="width: 50%" />
+                  <a-input :placeholder="$t('cmdb.ci.tips1')" v-model="parentsForm[item.name].value" style="width: 50%" />
                 </a-input-group>
               </a-form-item>
             </a-col>
@@ -50,11 +50,11 @@
     </template>
     <template v-if="action === 'update'">
       <a-form :form="form">
-        <p>可根据需要修改字段，当值为<strong>空</strong>时，则该字段<strong>置空</strong></p>
+        <p>{{ $t('cmdb.ci.tips2') }}</p>
         <a-row :gutter="24" v-for="list in batchUpdateLists" :key="list.name">
           <a-col :span="11">
             <a-form-item>
-              <el-select showSearch size="small" filterable v-model="list.name" placeholder="请选择需要修改的字段">
+              <el-select showSearch size="small" filterable v-model="list.name" :placeholder="$t('cmdb.ci.tips3')">
                 <el-option
                   v-for="attr in attributeList"
                   :key="attr.name"
@@ -71,7 +71,7 @@
               <a-select
                 :style="{ width: '100%' }"
                 v-decorator="[list.name, { rules: [{ required: false }] }]"
-                placeholder="请选择"
+                :placeholder="$t('placeholder2')"
                 v-if="getFieldType(list.name).split('%%')[0] === 'select'"
                 :mode="getFieldType(list.name).split('%%')[1] === 'multiple' ? 'multiple' : 'default'"
                 showSearch
@@ -119,7 +119,7 @@
             </a-form-item>
           </a-col>
         </a-row>
-        <a-button type="primary" ghost icon="plus" @click="handleAdd">新增修改字段</a-button>
+        <a-button type="primary" ghost icon="plus" @click="handleAdd">{{ $t('cmdb.ci.newUpdateField') }}</a-button>
       </a-form>
     </template>
     <JsonEditor ref="jsonEditor" @jsonEditorOk="jsonEditorOk" />
@@ -153,7 +153,6 @@ export default {
   },
   data() {
     return {
-      valueTypeMap,
       action: '',
       form: this.$form.createForm(this),
       visible: false,
@@ -171,13 +170,16 @@ export default {
   },
   computed: {
     title() {
-      return this.action === 'create' ? '创建 ' : '批量修改 '
+      return this.action === 'create' ? this.$t('create') + ' ' : this.$t('cmdb.ci.batchUpdate') + ' '
     },
     typeId() {
       if (this.typeIdFromRelation) {
         return this.typeIdFromRelation
       }
       return this.$router.currentRoute.meta.typeId
+    },
+    valueTypeMap() {
+      return valueTypeMap()
     },
   },
   provide() {
@@ -210,7 +212,7 @@ export default {
           (attr) => !attrHasGroupIds.includes(attr.id) && !attr.is_computed
         )
         if (otherGroupAttr.length) {
-          _attributesByGroup.push({ id: -1, name: '其他', attributes: otherGroupAttr })
+          _attributesByGroup.push({ id: -1, name: this.$t('other'), attributes: otherGroupAttr })
         }
         this.attributesByGroup = _attributesByGroup
       })
@@ -283,7 +285,7 @@ export default {
           }
         })
         addCI(values).then((res) => {
-          _this.$message.success('新增成功!')
+          _this.$message.success(this.$t('addSuccess'))
           _this.visible = false
           _this.$emit('reload', { ci_id: res.ci_id })
         })
@@ -332,7 +334,7 @@ export default {
         } else if (_find.value_type === '0' || _find.value_type === '1') {
           return 'input_number'
         } else if (_find.value_type === '4' || _find.value_type === '3') {
-          return valueTypeMap[_find.value_type]
+          return this.valueTypeMap[_find.value_type]
         } else {
           return 'input'
         }

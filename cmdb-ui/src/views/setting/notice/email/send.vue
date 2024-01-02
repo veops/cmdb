@@ -1,46 +1,46 @@
 <template>
   <div class="notice-email-wrapper" :style="{ height: `${windowHeight - 104}px` }">
     <a-form-model ref="sendForm" :model="settingData" :label-col="labelCol" :rules="rules" :wrapper-col="wrapperCol">
-      <SpanTitle>基础设置</SpanTitle>
-      <a-form-model-item label="是否加密">
+      <SpanTitle>{{ $t('cs.duty.basicSetting') }}</SpanTitle>
+      <a-form-model-item :label="$t('cs.notice.isEncrypted')">
         <a-radio-group v-model="settingData.tls" :disabled="!isEditable">
           <a-radio :value="true">
-            是
+            {{ $t('yes') }}
           </a-radio>
           <a-radio :value="false">
-            否
+            {{ $t('no') }}
           </a-radio>
         </a-radio-group>
       </a-form-model-item>
-      <a-form-model-item label="端口" prop="port">
+      <a-form-model-item :label="$t('cs.notice.port')" prop="port">
         <a-input v-model="settingData.port" :disabled="!isEditable" />
       </a-form-model-item>
-      <a-form-model-item label="邮件服务器" prop="host">
+      <a-form-model-item :label="$t('cs.notice.host')" prop="host">
         <a-input v-model="settingData.host" :disabled="!isEditable" />
       </a-form-model-item>
-      <a-form-model-item label="用户名" prop="account">
+      <a-form-model-item :label="$t('cs.notice.username')" prop="account">
         <a-input v-model="settingData.account" :disabled="!isEditable" />
       </a-form-model-item>
-      <a-form-model-item label="密码" prop="password">
+      <a-form-model-item :label="$t('cs.notice.password')" prop="password">
         <a-input-password v-model="settingData.password" :disabled="!isEditable" />
       </a-form-model-item>
-      <SpanTitle>邮件测试</SpanTitle>
-      <a-form-model-item label="测试发送邮件地址" prop="receive_address">
+      <SpanTitle>{{ $t('cs.notice.emailTest') }}</SpanTitle>
+      <a-form-model-item :label="$t('cs.notice.testSendAddress')" prop="receive_address">
         <a-input v-model="settingData.receive_address" :disabled="!isEditable">
           <span
             v-if="isEditable"
             :style="{ cursor: 'pointer' }"
             @click="testSendEmail"
             slot="addonAfter"
-          >测试邮件发送</span
+          >{{ $t('cs.notice.testMailSend') }}</span
           >
         </a-input>
       </a-form-model-item>
       <a-row v-if="isEditable">
         <a-col :span="16" :offset="3">
           <a-form-model-item :label-col="labelCol" :wrapper-col="wrapperCol">
-            <a-button type="primary" @click="onSubmit"> 保存 </a-button>
-            <a-button ghost type="primary" style="margin-left: 28px;" @click="resetForm"> 重置 </a-button>
+            <a-button type="primary" @click="onSubmit"> {{ $t('save') }} </a-button>
+            <a-button ghost type="primary" style="margin-left: 28px;" @click="resetForm"> {{ $t('reset') }} </a-button>
           </a-form-model-item>
         </a-col>
       </a-row>
@@ -74,32 +74,34 @@ export default {
         password: '',
         port: '',
         receive_address: '',
-      },
-      rules: {
-        port: [{ required: true, message: '请输入端口', trigger: 'blur' }],
-        host: [{ required: true, whitespace: true, message: '请输入服务器', trigger: 'blur' }],
-        account: [
-          { required: true, whitespace: true, message: '请输入用户名', trigger: 'blur' },
-          {
-            pattern: /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/,
-            message: '邮箱格式错误',
-            trigger: 'blur',
-          },
-        ],
-        password: [{ required: false, whitespace: true, message: '请输入密码', trigger: 'blur' }],
-        receive_address: [
-          { required: false, whitespace: true, message: '请输入测试发送邮件地址', trigger: 'blur' },
-          {
-            pattern: /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/,
-            message: '邮箱格式错误',
-            trigger: 'blur',
-          },
-        ],
-      },
+      }
     }
   },
   computed: {
     ...mapState({
+      rules() {
+        return {
+          port: [{ required: true, message: this.$t('cs.notice.portPlaceholder'), trigger: 'blur' }],
+        host: [{ required: true, whitespace: true, message: this.$t('cs.auth.ldap.serverAddressPlaceholder'), trigger: 'blur' }],
+        account: [
+          { required: true, whitespace: true, message: this.$t('cs.auth.ldap.userPlaceholder'), trigger: 'blur' },
+          {
+            pattern: /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/,
+            message: this.$t('cs.companyStructure.emailFormatErr'),
+            trigger: 'blur',
+          },
+        ],
+        password: [{ required: false, whitespace: true, message: this.$t('cs.companyStructure.passwordPlaceholder'), trigger: 'blur' }],
+        receive_address: [
+          { required: false, whitespace: true, message: this.$t('cs.notice.testSendAddressPlaceholder'), trigger: 'blur' },
+          {
+            pattern: /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/,
+            message: this.$t('cs.companyStructure.emailFormatErr'),
+            trigger: 'blur',
+          },
+        ]
+        }
+      },
       windowHeight: (state) => state.windowHeight,
     }),
     isEditable() {
@@ -135,17 +137,17 @@ export default {
       await sendTestEmail(this.settingData.receive_address, {
         info: { ...this.settingData, receive_address: undefined },
       })
-      this.$message.success('已发送邮件，请查收')
+      this.$message.success(this.$t('cs.notice.emailSendSuccess'))
     },
     onSubmit() {
       this.$refs.sendForm.validate(async (valid) => {
         if (valid) {
           if (this.id) {
-            await putNoticeConfigByPlatform(this.id, { info: { ...this.settingData, label: '邮箱' } })
+            await putNoticeConfigByPlatform(this.id, { info: { ...this.settingData, label: this.$t('cs.companyInfo.email') } })
           } else {
-            await postNoticeConfigByPlatform({ platform: 'email', info: { ...this.settingData, label: '邮箱' } })
+            await postNoticeConfigByPlatform({ platform: 'email', info: { ...this.settingData, label: this.$t('cs.companyInfo.email') } })
           }
-          this.$message.success('保存成功')
+          this.$message.success(this.$t('saveSuccess'))
           this.getData()
         }
       })

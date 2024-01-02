@@ -3,7 +3,7 @@
     <template #one>
       <div v-for="group in ci_types_list" :key="group.id">
         <div>
-          <strong>{{ group.name || '其他' }}</strong
+          <strong>{{ group.name || $t('other') }}</strong
           ><span :style="{ color: 'rgb(195, 205, 215)' }">({{ group.ci_types.length }})</span>
         </div>
         <div
@@ -33,17 +33,17 @@
     <template #two>
       <div id="discovery-ci">
         <a-input-search
-          placeholder="请查找"
+          :placeholder="$t('cmdb.components.pleaseSearch')"
           class="ops-input ops-input-radius"
           :style="{ width: '200px', marginRight: '20px', marginBottom: '10px' }"
           @search="handleSearch"
           allowClear
         />
         <div class="ops-list-batch-action" :style="{ marginBottom: '10px' }" v-show="!!selectedRowKeys.length">
-          <span @click="batchAccept">入库</span>
+          <span @click="batchAccept">{{ $t('cmdb.ad.accept') }}</span>
           <a-divider type="vertical" />
-          <span @click="batchDelete">删除</span>
-          <span>选取：{{ selectedRowKeys.length }} 项</span>
+          <span @click="batchDelete">{{ $t('delete') }}</span>
+          <span>{{ $t('cmdb.ci.selectRows', { rows: selectedRowKeys.length }) }}</span>
         </div>
         <ops-table
           show-overflow
@@ -79,33 +79,33 @@
           <vxe-column
             align="center"
             field="is_accept"
-            title="是否入库"
+            :title="$t('cmdb.ad.isAccpet')"
             v-bind="columns.length ? { width: '100px' } : { minWidth: '100px' }"
             :filters="[
-              { label: '是', value: true },
-              { label: '否', value: false },
+              { label: $t('yes'), value: true },
+              { label: $t('no'), value: false },
             ]"
           >
             <template #default="{row}">
-              {{ row.is_accept ? '是' : '否' }}
+              {{ row.is_accept ? $t('yes') : $t('no') }}
             </template>
           </vxe-column>
           <vxe-column
             field="accept_by"
-            title="入库人"
+            :title="$t('cmdb.ad.accpetBy')"
             v-bind="columns.length ? { width: '80px' } : { minWidth: '80px' }"
             :filters="[]"
           ></vxe-column>
           <vxe-column
             field="accept_time"
-            title="入库时间"
+            :title="$t('cmdb.ad.acceptTime')"
             sortable
             v-bind="columns.length ? { width: '130px' } : { minWidth: '130px' }"
           ></vxe-column>
-          <vxe-column title="操作" v-bind="columns.length ? { width: '60px' } : { minWidth: '60px' }" align="center">
+          <vxe-column :title="$t('operation')" v-bind="columns.length ? { width: '60px' } : { minWidth: '60px' }" align="center">
             <template #default="{row}">
               <a-space>
-                <a-tooltip title="入库">
+                <a-tooltip :title="$t('cmdb.ad.accept')">
                   <a v-if="!row.is_accept" @click="accept(row)"><ops-icon type="icon-xianxing-edit"/></a>
                 </a-tooltip>
                 <a :style="{ color: 'red' }" @click="deleteADC(row)"><ops-icon type="icon-xianxing-delete"/></a>
@@ -115,7 +115,7 @@
           <template #empty>
             <div>
               <img :style="{ width: '200px' }" :src="require('@/assets/data_empty.png')" />
-              <div>暂无数据</div>
+              <div>{{ $t('noData') }}</div>
             </div>
           </template>
         </ops-table>
@@ -242,11 +242,11 @@ export default {
       this.$refs.xTable.getVxetableRef().clearCheckboxReserve()
       const that = this
       this.$confirm({
-        title: '警告',
-        content: `确认入库？`,
+        title: that.$t('warning'),
+        content: that.$t('cmdb.ad.confirmAccept'),
         onOk() {
           updateADCAccept(row.id).then(() => {
-            that.$message.success('入库成功')
+            that.$message.success(that.$t('cmdb.ad.accpetSuccess'))
             that.getAdc(false)
           })
         },
@@ -258,11 +258,11 @@ export default {
       this.$refs.xTable.getVxetableRef().clearCheckboxReserve()
       const that = this
       this.$confirm({
-        title: '警告',
-        content: `确认删除该条数据？`,
+        title: that.$t('warning'),
+        content: that.$t('cmdb.ad.deleteADC'),
         onOk() {
           deleteAdc(row.id).then(() => {
-            that.$message.success('删除成功')
+            that.$message.success(that.$t('deleteSuccess'))
             that.getAdc(false)
           })
         },
@@ -273,7 +273,7 @@ export default {
       for (let i = 0; i < this.selectedRowKeys.length; i++) {
         await updateADCAccept(this.selectedRowKeys[i])
       }
-      this.$message.success('入库成功')
+      this.$message.success(this.$t('cmdb.ad.acceptSuccess'))
       this.getAdc(false)
       this.selectedRowKeys = []
       this.$refs.xTable.getVxetableRef().clearCheckboxRow()
@@ -283,13 +283,13 @@ export default {
     async batchDelete() {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: `确认删除这些数据？`,
+        title: that.$t('warning'),
+        content: that.$t('cmdb.ad.batchDelete'),
         async onOk() {
           for (let i = 0; i < that.selectedRowKeys.length; i++) {
             await deleteAdc(that.selectedRowKeys[i])
           }
-          that.$message.success('删除成功')
+          that.$message.success(that.$t('deleteSuccess'))
           that.getAdc(false)
           that.selectedRowKeys = []
           that.$refs.xTable.getVxetableRef().clearCheckboxRow()

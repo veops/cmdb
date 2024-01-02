@@ -7,7 +7,7 @@
     :tabBarStyle="{ borderBottom: 'none' }"
   >
     <a-tab-pane key="define" :disabled="disabled">
-      <span style="font-size:12px;" slot="tab">定义</span>
+      <span style="font-size:12px;" slot="tab">{{ $t('define') }}</span>
       <PreValueTag type="add" :item="[]" @add="addNewValue" :disabled="disabled">
         <template #default>
           <a-button
@@ -17,7 +17,7 @@
             :disabled="disabled"
             size="small"
           >
-            <a-icon type="plus" />添加</a-button
+            <a-icon type="plus" />{{ $t('add') }}</a-button
           >
         </template>
       </PreValueTag>
@@ -41,9 +41,9 @@
             <template slot="label">
               <span
                 style="position:relative;white-space:pre;"
-              >{{ `过滤` }}
+              >{{ $t('cmdb.ciType.filter') }}
                 <a-tooltip
-                  title="返回的结果按字段来过滤，层级嵌套用##分隔，比如k1##k2，web请求返回{k1: [{k2: 1}, {k2: 2}]}, 解析结果为[1, 2]"
+                  :title="$t('cmdb.ciType.choiceWebhookTips')"
                 >
                   <a-icon
                     style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
@@ -59,12 +59,12 @@
       </a-form-model>
     </a-tab-pane>
     <a-tab-pane key="choice_other" :disabled="disabled">
-      <span style="font-size:12px;" slot="tab">其他模型属性</span>
+      <span style="font-size:12px;" slot="tab">{{ $t('cmdb.ciType.choiceOther') }}</span>
       <a-row :gutter="[24, 24]">
         <a-col :span="12">
           <a-form-item
             :style="{ lineHeight: '24px', marginBottom: '5px' }"
-            label="模型"
+            :label="$t('cmdb.ciType.ciType')"
             :label-col="{ span: 4 }"
             :wrapper-col="{ span: 20 }"
           >
@@ -87,13 +87,13 @@
               searchable
               :options="ciTypeGroup"
               value-consists-of="LEAF_PRIORITY"
-              placeholder="请选择CMDB模型"
+              :placeholder="$t('cmdb.ciType.selectCIType')"
               :normalizer="
                 (node) => {
                   return {
                     id: node.id || -1,
-                    label: node.alias || node.name || '其他',
-                    title: node.alias || node.name || '其他',
+                    label: node.alias || node.name || $t('other'),
+                    title: node.alias || node.name || $t('other'),
                     children: node.ci_types,
                   }
                 }
@@ -120,7 +120,7 @@
         <a-col :span="12" v-if="choice_other.type_ids && choice_other.type_ids.length">
           <a-form-item
             :style="{ marginBottom: '5px' }"
-            label="属性"
+            :label="$t('cmdb.ciType.attributes')"
             :label-col="{ span: 4 }"
             :wrapper-col="{ span: 20 }"
           >
@@ -133,13 +133,13 @@
               searchable
               :options="typeAttrs"
               value-consists-of="LEAF_PRIORITY"
-              placeholder="请选择模型属性"
+              :placeholder="$t('cmdb.ciType.selectCITypeAttributes')"
               :normalizer="
                 (node) => {
                   return {
                     id: node.id || -1,
-                    label: node.alias || node.name || '其他',
-                    title: node.alias || node.name || '其他',
+                    label: node.alias || node.name || $t('other'),
+                    title: node.alias || node.name || $t('other'),
                   }
                 }
               "
@@ -161,7 +161,7 @@
           <a-form-item
             :style="{ marginBottom: '5px' }"
             class="pre-value-filter"
-            label="筛选"
+            :label="$t('cmdb.ciType.filter')"
             :label-col="{ span: 2 }"
             :wrapper-col="{ span: 22 }"
           >
@@ -177,7 +177,7 @@
       </a-row>
     </a-tab-pane>
     <a-tab-pane key="script" :disabled="disabled || !canDefineScript">
-      <span style="font-size:12px;" slot="tab">脚本</span>
+      <span style="font-size:12px;" slot="tab">{{ $t('cmdb.ciType.code') }}</span>
       <CustomCodeMirror
         codeMirrorId="cmdb-pre-value"
         ref="codemirror"
@@ -232,7 +232,7 @@ export default {
       typeAttrs: [],
       filterExp: '',
       script:
-        'class ChoiceValue(object):\n    @staticmethod\n    def values():\n        """\n        执行入口, 返回预定义值\n        :return: 返回一个列表, 值的类型同属性的类型\n        例如:\n        return ["在线", "下线"]\n        """\n        return []',
+        this.$t('cmdb.ciType.choiceScriptDemo'),
       cmOptions: {
         lineNumbers: true,
         mode: 'python',
@@ -250,7 +250,7 @@ export default {
       handler(newValue) {
         const dom = document.querySelector('#preValueArea .ant-tabs-ink-bar')
         if (newValue) {
-          // 如果是disabled 把tab 的ink-bar也置灰
+          // If it is disabled, the ink-bar of the tab will also be grayed out.
           dom.style.backgroundColor = '#00000040'
         } else {
           dom.style.backgroundColor = '#2f54eb'
@@ -282,7 +282,7 @@ export default {
       if (newValue) {
         const idx = this.valueList.findIndex((v) => v[0] === newValue)
         if (idx > -1) {
-          this.$message.warning('当前值已存在！')
+          this.$message.warning(this.$t('cmdb.ciType.valueExisted'))
         } else {
           this.valueList.push([newValue, { style: newStyle, icon: { ...newIcon } }])
         }
@@ -367,7 +367,7 @@ export default {
       }
       const dom = document.querySelector('#preValueArea .ant-tabs-ink-bar')
       if (this.disabled) {
-        // 如果是disabled 把tab 的ink-bar也置灰
+        // If it is disabled, the ink-bar of the tab will also be grayed out.
         dom.style.backgroundColor = '#00000040'
       } else {
         dom.style.backgroundColor = '#2f54eb'

@@ -10,8 +10,8 @@
       :disabled="!ciType || isUploading"
     >
       <img :style="{ width: '80px', height: '80px' }" src="@/assets/file_upload.png" />
-      <p class="ant-upload-text">点击或拖拽文件至此上传！</p>
-      <p class="ant-upload-hint">支持文件类型：xls，xlsx</p>
+      <p class="ant-upload-text">{{ $t('cmdb.batch.drawTips') }}</p>
+      <p class="ant-upload-hint">{{ $t('cmdb.batch.supportFileTypes') }}</p>
     </a-upload-dragger>
     <div v-for="item in fileList" :key="item.name" class="cmdb-batch-upload-dragger-file">
       <span><a-icon type="file" :style="{ color: '#2F54EB', marginRight: '5px' }" />{{ item.name }}</span>

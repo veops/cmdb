@@ -1,8 +1,10 @@
-export const iconTypeList = [
+import i18n from '@/lang'
+
+export const iconTypeList = () => [
   // { value: '0', label: '常用' },
-  { value: '1', label: '线性' },
-  { value: '2', label: '实底' },
-  { value: '3', label: '多色' }
+  { value: '1', label: i18n.t('customIconSelect.outlined') },
+  { value: '2', label: i18n.t('customIconSelect.filled') },
+  { value: '3', label: i18n.t('customIconSelect.multicolor') }
 ]
 
 export const commonIconList = ['changyong-ubuntu',

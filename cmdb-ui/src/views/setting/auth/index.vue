@@ -15,12 +15,12 @@
         <a-row>
           <a-col :offset="item.value === 'AuthCommonConfig' ? 5 : 3">
             <a-space>
-              <a-button :loading="loading" type="primary" @click="handleSave">保存</a-button>
+              <a-button :loading="loading" type="primary" @click="handleSave">{{ $t('save') }}</a-button>
               <template v-if="item.value === 'LDAP'">
-                <a-button :loading="loading" ghost type="primary" @click="handleTest('connect')">测试连接</a-button>
-                <a-button :loading="loading" ghost type="primary" @click="handleTest('login')">测试登录</a-button>
+                <a-button :loading="loading" ghost type="primary" @click="handleTest('connect')">{{ $t('cs.auth.testConnect') }}</a-button>
+                <a-button :loading="loading" ghost type="primary" @click="handleTest('login')">{{ $t('cs.auth.testLogin') }}</a-button>
               </template>
-              <a-button :loading="loading" @click="handleReset">重置</a-button>
+              <a-button :loading="loading" @click="handleReset">{{ $t('reset') }}</a-button>
             </a-space>
           </a-col>
         </a-row>
@@ -42,7 +42,20 @@ export default {
   name: 'Auth',
   components: { LDAP, CAS, AuthCommonConfig, OAUTH2, LoginModal },
   data() {
-    const authList = [
+    return {
+      activeKey: 'LDAP',
+      dataTypeId: null,
+      loading: false,
+      enable_list: [],
+    }
+  },
+  mounted() {
+    this.changeActiveKey()
+    this.getAuthDataEnable()
+  },
+  computed: {
+    authList() {
+      return [
       {
         value: 'LDAP',
         label: 'LDAP',
@@ -61,20 +74,10 @@ export default {
       },
       {
         value: 'AuthCommonConfig',
-        label: '通用',
+        label: this.$t('cs.auth.common'),
       },
     ]
-    return {
-      authList,
-      activeKey: 'LDAP',
-      dataTypeId: null,
-      loading: false,
-      enable_list: [],
     }
-  },
-  mounted() {
-    this.changeActiveKey()
-    this.getAuthDataEnable()
   },
   methods: {
     getAuthDataEnable() {
@@ -105,7 +108,7 @@ export default {
             this.loading = false
           })
         }
-        this.$message.success('保存成功')
+        this.$message.success(this.$t('saveSuccess'))
         this.changeActiveKey()
         this.getAuthDataEnable()
       })
@@ -128,7 +131,7 @@ export default {
           }
           testLDAP(type, { data: _data })
             .then((res) => {
-              this.$message.success('测试成功')
+              this.$message.success(this.$t('cs.auth.testSuccess'))
             })
             .finally(() => {
               this.loading = false

@@ -2,10 +2,10 @@
   <div class="cmdb-preference" :style="{ height: `${windowHeight - 40}px` }">
     <div class="cmdb-preference-left">
       <div class="cmdb-preference-left-card">
-        <span class="cmdb-preference-left-card-title">我的订阅</span>
+        <span class="cmdb-preference-left-card-title">{{ $t('cmdb.preference.mySub') }}</span>
         <span
           class="cmdb-preference-left-card-content"
-        ><ops-icon type="cmdb-ci" :style="{ marginRight: '5px' }" />资源数据：
+        ><ops-icon type="cmdb-ci" :style="{ marginRight: '5px' }" />{{ $t('cmdb.menu.ciTable') }}:
           <a-badge
             showZero
             :count="self.instance.length"
@@ -20,7 +20,7 @@
         >
         <span
           class="cmdb-preference-left-card-content"
-        ><ops-icon type="cmdb-tree" :style="{ marginRight: '5px' }" />资源层级：
+        ><ops-icon type="cmdb-tree" :style="{ marginRight: '5px' }" />{{ $t('cmdb.menu.ciTree') }}:
           <a-badge
             showZero
             :count="self.tree.length"
@@ -66,14 +66,14 @@
           </div>
           <span class="cmdb-preference-group-content-title">{{ ciType.alias || ciType.name }}</span>
           <span class="cmdb-preference-group-content-action">
-            <a-tooltip title="取消订阅">
+            <a-tooltip :title="$t('cmdb.preference.cancelSub')">
               <span
                 @click="unsubscribe(ciType, group.type)"
               ><ops-icon type="cmdb-preference-cancel-subscribe" />
               </span>
             </a-tooltip>
             <a-divider type="vertical" :style="{ margin: '0 3px' }" />
-            <a-tooltip title="编辑订阅">
+            <a-tooltip :title="$t('cmdb.preference.editSub')">
               <span
                 @click="openSubscribeSetting(ciType, `${index + 1}`)"
               ><ops-icon
@@ -126,7 +126,8 @@
               <div class="cmdb-preference-colleague">
                 <template v-if="type_id2users[item.id] && type_id2users[item.id].length">
                   <span
-                  >{{ type_id2users[item.id].length > 99 ? '99+' : type_id2users[item.id].length }}位同事已订阅</span
+                  >{{ type_id2users[item.id].length > 99 ? '99+' : type_id2users[item.id].length
+                  }}{{ $t('cmdb.preference.peopleSub') }}</span
                   >
                   <span class="cmdb-preference-colleague-name">
                     <span v-for="uid in type_id2users[item.id].slice(0, 4)" :key="uid">
@@ -135,11 +136,11 @@
                     <span class="cmdb-preference-colleague-ellipsis" v-if="type_id2users[item.id].length > 4">...</span>
                   </span>
                 </template>
-                <span v-else :style="{ marginLeft: 'auto' }">暂无同事订阅</span>
+                <span v-else :style="{ marginLeft: 'auto' }">{{ $t('cmdb.preference.noSub') }}</span>
               </div>
               <div class="cmdb-preference-progress">
                 <div class="cmdb-preference-progress-info">
-                  <span>自动发现</span>
+                  <span>{{ $t('cmdb.menu.ad') }}</span>
                   <span>{{ item.integrity }}%</span>
                 </div>
                 <div class="cmdb-preference-progress-gray">
@@ -148,15 +149,13 @@
               </div>
               <a-divider :style="{ margin: '10px 0 3px 0' }" />
               <div class="cmdb-preference-footor-subscribed" v-if="item.is_subscribed">
-                <span
-                ><a-icon type="clock-circle" :style="{ marginRight: '3px' }" />{{ getsubscribedDays(item) }}订阅</span
-                >
+                <span><a-icon type="clock-circle" :style="{ marginRight: '3px' }" />{{ getsubscribedDays(item) }}</span>
                 <span>
-                  <a-tooltip title="取消订阅">
+                  <a-tooltip :title="$t('cmdb.preference.cancelSub')">
                     <span @click="unsubscribe(item)"><ops-icon type="cmdb-preference-cancel-subscribe" /> </span>
                   </a-tooltip>
                   <a-divider type="vertical" :style="{ margin: '0 3px' }" />
-                  <a-tooltip title="编辑订阅">
+                  <a-tooltip :title="$t('cmdb.preference.editSub')">
                     <span @click="openSubscribeSetting(item)"><ops-icon type="cmdb-preference-subscribe"/></span>
                   </a-tooltip>
                 </span>
@@ -164,7 +163,9 @@
               <div v-else class="cmdb-preference-footor-unsubscribed">
                 <span
                   @click="openSubscribeSetting(item)"
-                ><ops-icon :style="{ marginRight: '3px' }" type="cmdb-preference-subscribe" />订阅</span
+                ><ops-icon :style="{ marginRight: '3px' }" type="cmdb-preference-subscribe" />{{
+                  $t('cmdb.preference.sub')
+                }}</span
                 >
               </div>
             </div>
@@ -242,7 +243,7 @@ export default {
         }
         if (!group.id) {
           group.id = -1
-          group.name = '其他'
+          group.name = this.$t('other')
         }
       })
       this.citypeData = ciTypeGroup
@@ -251,7 +252,7 @@ export default {
       this.type_id2users = type_id2users
       const _myPreferences = [
         {
-          name: '资源数据',
+          name: this.$t('cmdb.menu.ciTable'),
           ci_types: self.instance.map((item) => {
             const _find = pref.find((ci) => ci.id === item)
             return _find
@@ -260,7 +261,7 @@ export default {
           type: 'ci',
         },
         {
-          name: '资源层级',
+          name: this.$t('cmdb.menu.ciTree'),
           ci_types: self.tree.map((item) => {
             const _find = pref.find((ci) => ci.id === item)
             return _find
@@ -285,23 +286,28 @@ export default {
       moment.duration(moment().diff(moment(subscribedTime)))
       const day = moment().diff(moment(subscribedTime), 'day')
       if (day > 0 && day < 1) {
-        return `${moment().diff(moment(subscribedTime), 'hour')}小时前`
+        return `${moment().diff(moment(subscribedTime), 'hour')}` + this.$t('cmdb.preference.hoursAgo')
       } else if (day >= 1 && day <= 31) {
-        return `${day}天前`
+        return `${day} ` + this.$t('cmdb.preference.daysAgo')
       } else if (day > 31 && day < 365) {
-        return `${moment().diff(moment(subscribedTime), 'month')}月前`
+        return `${moment().diff(moment(subscribedTime), 'month')}` + this.$t('cmdb.preference.monthsAgo')
       } else if (day >= 365) {
-        return `${moment().diff(moment(subscribedTime), 'year')}年前`
+        return `${moment().diff(moment(subscribedTime), 'year')}` + this.$t('cmdb.preference.yearsAgo')
       }
-      return '刚刚'
+      return this.$t('cmdb.preference.just')
     },
     unsubscribe(ciType, type = 'all') {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: `确认取消订阅 ${ciType.alias || ciType.name} ${
-          type !== 'all' ? `的${type === 'ci' ? '资源数据' : '资源层级'}` : ''
-        } 吗？`,
+        title: that.$t('warning'),
+        content:
+          that.$t('cmdb.preference.confirmcancelSub') +
+          ` ${ciType.alias || ciType.name} ${
+            type !== 'all'
+              ? that.$t('cmdb.preference.of') +
+                `${type === 'ci' ? this.$t('cmdb.menu.ciTable') : that.$t('cmdb.menu.ciTree')}`
+              : ''
+          } ？`,
         onOk() {
           const promises = []
           if (type === 'all' || type === 'ci') {
@@ -320,7 +326,7 @@ export default {
                 localStorage.setItem('ops_ci_typeid', '')
               }
             }
-            that.$message.success('取消订阅成功')
+            that.$message.success(that.$t('cmdb.preference.cancelSubSuccess'))
             that.resetRoute()
           })
         },

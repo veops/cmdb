@@ -1,13 +1,13 @@
 <template>
   <div class="cmdb-batch-upload-result" v-if="visible">
-    <h3 class="cmdb-batch-upload-result-title">上传结果</h3>
+    <h3 class="cmdb-batch-upload-result-title">{{ $t('cmdb.batch.uploadResult') }}</h3>
     <div class="cmdb-batch-upload-result-content">
       <h4>
-        共&nbsp;<span style="color: blue">{{ total }}</span> 条，已成功
-        <span style="color: lightgreen">{{ success }}</span> 条，失败 <span style="color: red">{{ errorNum }} </span>条
+        {{ $t('cmdb.batch.total') }}&nbsp;<span style="color: blue">{{ total }}</span> {{ $t('cmdb.batch.successItems') }}
+        <span style="color: lightgreen">{{ success }}</span> {{ $t('cmdb.batch.failedItems') }} <span style="color: red">{{ errorNum }} </span>{{ $t('cmdb.batch.items') }}
       </h4>
       <div>
-        <span>错误信息：</span>
+        <span>{{ $t('cmdb.batch.errorTips') }}: </span>
         <ol>
           <li :key="item + index" v-for="(item, index) in errorItems">{{ item }}</li>
         </ol>
@@ -71,7 +71,7 @@ export default {
                 if (r.status === 'fulfilled') {
                   this.success += 1
                 } else {
-                  this.errorItems.push(r?.reason?.response?.data.message ?? '请求出现错误，请稍后再试')
+                  this.errorItems.push(r?.reason?.response?.data.message ?? this.$t('cmdb.batch.requestFailedTips'))
                   this.errorNum += 1
                   this.$emit('uploadResultError', 6 * i + j)
                 }
@@ -86,7 +86,7 @@ export default {
       }
       if (this.isUploading) {
         this.$emit('uploadResultDone')
-        this.$message.success('批量上传已完成')
+        this.$message.success(this.$t('cmdb.batch.requestSuccessTips'))
       }
     },
   },

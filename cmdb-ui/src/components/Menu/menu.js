@@ -161,6 +161,9 @@ export default {
       }
       return null
     },
+    renderI18n(title) {
+      return this.$t(`${title}`)
+    },
     renderMenuItem(menu) {
       const isShowDot = menu.path.substr(0, 22) === '/cmdb/instances/types/'
       const isShowGrant = menu.path.substr(0, 20) === '/cmdb/relationviews/'
@@ -183,7 +186,7 @@ export default {
           <tag {...{ props, attrs }}>
             {this.renderIcon({ icon: menu.meta.icon, customIcon: menu.meta.customIcon, name: menu.meta.name, typeId: menu.meta.typeId, routeName: menu.name, selectedIcon: menu.meta.selectedIcon, })}
             <span>
-              <span class={menu.meta.title.length > 10 ? 'scroll' : ''}>{menu.meta.title}</span>
+              <span class={this.renderI18n(menu.meta.title).length > 10 ? 'scroll' : ''}>{this.renderI18n(menu.meta.title)}</span>
               {isShowDot &&
                 <a-popover
                   overlayClassName="custom-menu-extra-submenu"
@@ -217,7 +220,7 @@ export default {
         <SubMenu {...{ key: menu.path }}>
           <span slot="title">
             {this.renderIcon({ icon: menu.meta.icon, selectedIcon: menu.meta.selectedIcon, routeName: menu.name })}
-            <span>{menu.meta.title}</span>
+            <span>{this.renderI18n(menu.meta.title)}</span>
           </span>
           {itemArr}
         </SubMenu>

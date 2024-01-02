@@ -75,12 +75,12 @@ export default {
             return [item, !!this.fixedList.includes(item)]
           })
         ).then((res) => {
-          this.$message.success('订阅成功！')
+          this.$message.success(this.$t('cmdb.components.subSuccess'))
           this.visible = false
           this.$emit('refresh')
         })
       } else {
-        this.$message.error('请至少选择一个字段！')
+        this.$message.error(this.$t('cmdb.ci.tips4'))
       }
     },
     setTargetKeys(targetKeys) {

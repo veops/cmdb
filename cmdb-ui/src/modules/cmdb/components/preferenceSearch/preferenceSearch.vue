@@ -11,7 +11,7 @@
         @blur="handleInputConfirm"
         @keyup.enter="handleInputConfirm"
       />
-      <a-button v-else type="primary" size="small" ghost @click="showInput">保存筛选条件</a-button>
+      <a-button v-else type="primary" size="small" ghost @click="showInput">{{ $t('cmdb.components.saveQuery') }}</a-button>
     </span>
     <template v-for="(item, index) in preferenceSearchList.slice(0, 3)">
       <span
@@ -26,7 +26,7 @@
         <a-tooltip :title="item.name">
           <span @click="clickPreferenceSearch(item)">{{ `${item.name.slice(0, 6)}...` }}</span>
         </a-tooltip>
-        <a-popconfirm title="确认删除？" @confirm="deletePreferenceSearch(item)">
+        <a-popconfirm :title="$t('cmdb.ciType.confirmDelete2')" @confirm="deletePreferenceSearch(item)">
           <a-icon type="close" />
         </a-popconfirm>
       </span>
@@ -40,7 +40,7 @@
         }"
       >
         <span @click="clickPreferenceSearch(item)">{{ item.name }}</span>
-        <a-popconfirm title="确认删除？" @confirm="deletePreferenceSearch(item)">
+        <a-popconfirm :title="$t('cmdb.ciType.confirmDelete2')" @confirm="deletePreferenceSearch(item)">
           <a-icon type="close" />
         </a-popconfirm>
       </span>
@@ -73,7 +73,7 @@
             {{ item.name }}
           </div>
           <a-popconfirm
-            title="确认删除？"
+            :title="$t('cmdb.ciType.confirmDelete2')"
             :getPopupContainer="(trigger) => trigger.parentElement"
             placement="left"
             @confirm="

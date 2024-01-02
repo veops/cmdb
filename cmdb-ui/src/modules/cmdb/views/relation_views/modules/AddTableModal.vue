@@ -11,12 +11,24 @@
   >
     <div :style="{ width: '100%' }" id="add-table-modal">
       <a-spin :spinning="loading">
+        <!-- <a-input
+          v-model="expression"
+          class="ci-searchform-expression"
+          :style="{ width, marginBottom: '10px' }"
+          :placeholder="placeholder"
+          @focus="
+            () => {
+              isFocusExpression = true
+            }
+          "
+        /> -->
         <SearchForm
           ref="searchForm"
           :typeId="addTypeId"
           :preferenceAttrList="preferenceAttrList"
           @refresh="handleSearch"
         />
+        <!-- <a @click="handleSearch"><a-icon type="search"/></a> -->
         <vxe-table
           ref="xTable"
           row-id="_id"
@@ -52,7 +64,14 @@
           :total="totalNumber"
           show-quick-jumper
           :page-size="50"
-          :show-total="(total, range) => `当前${range[0]}-${range[1]} 共 ${total}条记录`"
+          :show-total="
+            (total, range) =>
+              $t('pagination.total', {
+                range0: range[0],
+                range1: range[1],
+                total,
+              })
+          "
           :style="{ textAlign: 'right', marginTop: '10px' }"
           @change="handleChangePage"
         />
@@ -94,7 +113,7 @@ export default {
       return this.$store.state.windowHeight - 250
     },
     placeholder() {
-      return this.isFocusExpression ? '例：q=os_version:centos&sort=os_version' : '表达式搜索'
+      return this.isFocusExpression ? this.$t('cmdb.serviceTreetips1') : this.$t('cmdb.serviceTreetips2')
     },
     width() {
       return this.isFocusExpression ? '500px' : '100px'
@@ -103,6 +122,7 @@ export default {
   watch: {},
   methods: {
     async openModal(ciObj, ciId, addTypeId, type, ancestor_ids = undefined) {
+      console.log(ciObj, ciId, addTypeId, type)
       this.visible = true
       this.ciObj = ciObj
       this.ciId = ciId
@@ -121,6 +141,10 @@ export default {
     },
     async fetchData(isInit) {
       this.loading = true
+      // if (isInit) {
+      //   const subscribed = await getSubscribeAttributes(this.addTypeId)
+      //   this.preferenceAttrList = subscribed.attributes // 已经订阅的全部列
+      // }
       let sort, fuzzySearch, expression, exp
       if (!isInit) {
         fuzzySearch = this.$refs['searchForm'].fuzzySearch
@@ -179,7 +203,7 @@ export default {
           await batchUpdateCIRelationParents(ciIds, [this.ciId])
         }
         setTimeout(() => {
-          this.$message.success('添加成功！')
+          this.$message.success(this.$t('addSuccess'))
           this.handleClose()
           this.$emit('reload')
         }, 500)

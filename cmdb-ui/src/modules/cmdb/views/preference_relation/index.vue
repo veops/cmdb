@@ -12,12 +12,12 @@
                 isEdit = true
               }
             "
-          >新增业务关系</a-button
+          >{{ $t('cmdb.preference_relation.newServiceTree') }}</a-button
           >
           <template v-else>
-            <a-input v-model="newRelationViewName" placeholder="新增业务关系名"></a-input>
-            <a-checkbox v-model="is_public">公开</a-checkbox>
-            <a-button type="primary" size="small" @click="handleSaveRelationViews">保存</a-button>
+            <a-input v-model="newRelationViewName" :placeholder="$t('cmdb.preference_relation.serviceTreeName')"></a-input>
+            <a-checkbox v-model="is_public">{{ $t('cmdb.preference_relation.public') }}</a-checkbox>
+            <a-button type="primary" size="small" @click="handleSaveRelationViews">{{ $t('save') }}</a-button>
             <a-button
               type="primary"
               size="small"
@@ -29,10 +29,10 @@
                   newRelationViewName = ''
                 }
               "
-            >取消</a-button
+            >{{ $t('cancel') }}</a-button
             >
           </template>
-          <a-button type="primary" size="small" @click="handleSave">保存布局</a-button>
+          <a-button type="primary" size="small" @click="handleSave">{{ $t('cmdb.preference_relation.saveLayout') }}</a-button>
         </a-space>
       </div>
       <SeeksRelationGraph v-if="isPullConfig" ref="ciTypeRelationGraph" :options="graphOptions">
@@ -59,7 +59,7 @@
         >
           <div class="relation-views">
             <h3 :style="{ padding: '10px 0 0 20px' }">{{ view }}</h3>
-            <a-popconfirm :title="`确认删除 ${view}？`" @confirm="confirmDelete(view)">
+            <a-popconfirm :title="$t('cmdb.ciType.confirmDelete', { name: `${view}` })" @confirm="confirmDelete(view)">
               <a class="relation-views-close"><a-icon type="close"/></a>
             </a-popconfirm>
             <div :style="{ height: '250px' }">
@@ -246,7 +246,7 @@ export default {
       if (e.target.checked) {
         const graph = this.$refs.ciTypeRelationGraph
         if (!graph.getNodeById(node.id).targetTo.length) {
-          this.$message.warning(`${node.text} 不存在子节点，不能形成业务关系，请重新选择！`)
+          this.$message.warning(`${node.text} ` + this.$t('cmdb.preference_relation.childNodesNotFound'))
           return
         }
         if (!this.checkedNodes.length) {
@@ -278,7 +278,7 @@ export default {
       const idFrom = startNode.targetFrom.findIndex((item) => item.id === node.id)
       const idTo = endNode.targetTo.findIndex((item) => item.id === node.id)
       if (idFrom <= -1 && idTo <= -1) {
-        this.$message.warning(`${node.text} 不能与当前选中节点形成视图，请重新选择！`)
+        this.$message.warning(`${node.text} ` + this.$t('cmdb.preference_relation.tips1'))
         return
       }
       if (idFrom > -1) {
@@ -290,11 +290,11 @@ export default {
     },
     async handleSaveRelationViews() {
       if (!this.newRelationViewName) {
-        this.$message.warning('请输入新增业务关系名！')
+        this.$message.warning(this.$t('cmdb.preference_relation.tips2'))
         return
       }
       if (this.checkedNodes.length < 2) {
-        this.$message.warning('请选择至少两个节点！')
+        this.$message.warning(this.$t('cmdb.preference_relation.tips3'))
         return
       }
       // eslint-disable-next-line camelcase
@@ -341,7 +341,7 @@ export default {
             }
           }),
         }).then((res) => {
-          this.$message.success('保存成功！')
+          this.$message.success(this.$t('saveSuccess'))
         })
       }
     },

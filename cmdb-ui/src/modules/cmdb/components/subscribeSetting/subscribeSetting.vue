@@ -11,13 +11,13 @@
   >
     <a-tabs v-model="activeKey">
       <a-tab-pane key="1">
-        <span slot="tab"><ops-icon type="cmdb-ci" />资源数据</span>
+        <span slot="tab"><ops-icon type="cmdb-ci" />{{ $t('cmdb.menu.ciTable') }}</span>
         <div class="cmdb-subscribe-drawer-container" :style="{ height: `${windowHeight - 60}px` }">
           <div class="cmdb-subscribe-drawer-container-title">
-            <span>订阅模型：{{ ciType.alias || ciType.name }}</span>
+            <span>{{ $t('cmdb.components.subCIType') }}: {{ ciType.alias || ciType.name }}</span>
             <span :style="{ fontWeight: 500, color: instanceSubscribed ? 'green' : 'red' }">{{
-              `（${instanceSubscribed ? '已' : '未'}订阅）`
-            }}</span>
+              `（${instanceSubscribed ? $t('cmdb.components.already') : $t('cmdb.components.not')}`
+            }}{{ $t('cmdb.components.sub') }})</span>
           </div>
           <template>
             <AttributesTransfer
@@ -31,22 +31,22 @@
               :height="windowHeight - 170"
             />
             <div class="custom-drawer-bottom-action">
-              <a-button @click="subInstanceSubmit" type="primary">订阅</a-button>
+              <a-button @click="subInstanceSubmit" type="primary">{{ $t('cmdb.preference.sub') }}</a-button>
             </div>
           </template>
         </div>
       </a-tab-pane>
       <a-tab-pane key="2" force-render>
-        <span slot="tab"><ops-icon type="cmdb-tree" />资源层级</span>
+        <span slot="tab"><ops-icon type="cmdb-tree" />{{ $t('cmdb.menu.ciTree') }}</span>
         <div class="cmdb-subscribe-drawer-container" :style="{ height: `${windowHeight - 60}px` }">
           <div class="cmdb-subscribe-drawer-container-title">
-            <span>订阅模型：{{ ciType.alias || ciType.name }}</span>
+            <span>{{ $t('cmdb.components.subCIType') }}: {{ ciType.alias || ciType.name }}</span>
             <span :style="{ fontWeight: 500, color: treeSubscribed ? 'green' : 'red' }">{{
-              `（${treeSubscribed ? '已' : '未'}订阅）`
-            }}</span>
+              `（${treeSubscribed ? $t('cmdb.components.already') : $t('cmdb.components.not')}`
+            }}{{ $t('cmdb.components.sub') }})</span>
           </div>
           <div class="cmdb-subscribe-drawer-tree-header" :style="{ maxHeight: `${(windowHeight - 170) / 3 - 20}px` }">
-            <span v-if="!treeViews.length">请在下方进行选择</span>
+            <span v-if="!treeViews.length">{{ $t('cmdb.components.selectBelow') }}</span>
             <div
               class="cmdb-subscribe-drawer-tree-header-selected"
               :style="{ marginLeft: `${18 * index}px` }"
@@ -70,7 +70,7 @@
             </div>
           </div>
           <div class="custom-drawer-bottom-action">
-            <a-button @click="subTreeSubmit" type="primary">订阅</a-button>
+            <a-button @click="subTreeSubmit" type="primary">{{ $t('cmdb.preference.sub') }}</a-button>
           </div>
         </div>
       </a-tab-pane>
@@ -179,7 +179,7 @@ export default {
     },
     subTreeSubmit() {
       subscribeTreeView(this.ciType.type_id, this.treeViews).then((res) => {
-        this.$message.success('订阅成功')
+        this.$message.success(this.$t('cmdb.components.subSuccess'))
         if (this.treeViews.length > 0) {
           this.treeSubscribed = true
         } else {
@@ -194,7 +194,7 @@ export default {
           return [item, !!this.fixedList.includes(item)]
         })
       ).then((res) => {
-        this.$message.success('订阅成功')
+        this.$message.success(this.$t('cmdb.components.subSuccess'))
         this.resetRoute()
         if (this.selectedAttrList.length > 0) {
           this.instanceSubscribed = true

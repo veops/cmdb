@@ -18,14 +18,13 @@
         :img="cropperImg"
         output-type="png"
         @realTime="realTime"
-        v-bind="eidtImageOption"
       />
       <div class="ops-modal-preview">
-        <div class="ops-modal-preview-name">预览</div>
+        <div class="ops-modal-preview-name">{{ $t('cs.components.preview') }}</div>
         <img
           :style="{
-            width: eidtImageOption.previewWidth,
-            height: eidtImageOption.previewHeight,
+            width: previewWidth,
+            height: previewHeight,
             border: '1px solid #f2f2f2',
           }"
           :src="previewImg"
@@ -35,7 +34,7 @@
     </div>
 
     <div slot="footer" class="ops-modal-dialog-footer">
-      <a-button type="primary" @click="submitImage()">确定</a-button>
+      <a-button type="primary" @click="submitImage()">{{ $t('confirm') }}</a-button>
     </div>
   </a-modal>
 </template>
@@ -50,7 +49,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: '编辑头像',
+      default: () => this.$t('cs.components.editAvatar'),
     },
     show: {
       type: Boolean,
@@ -60,9 +59,13 @@ export default {
       type: String,
       default: '',
     },
-    eidtImageOption: {
-      type: Object,
-      default: () => {},
+    previewWidth: {
+      type: String,
+      default: '60px',
+    },
+    previewHeight: {
+      type: String,
+      default: '60px',
     },
   },
   data() {

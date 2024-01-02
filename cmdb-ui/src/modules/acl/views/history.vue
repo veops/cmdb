@@ -1,7 +1,7 @@
 <template>
   <div class="acl-history">
     <a-tabs default-active-key="1">
-      <a-tab-pane key="1" tab="权限变更">
+      <a-tab-pane key="1" :tab="$t('acl.permissionChange')">
         <permisson-history-table
           v-if="isloaded"
           :allResourceTypes="allResourceTypes"
@@ -17,7 +17,7 @@
           @resourceClear="resourceClear"
         ></permisson-history-table>
       </a-tab-pane>
-      <a-tab-pane key="2" tab="角色变更">
+      <a-tab-pane key="2" :tab="$t('acl.roleChange')">
         <role-history-table
           v-if="isloaded"
           :allUsers="allUsers"
@@ -26,7 +26,7 @@
           :allUsersMap="allUsersMap"
         ></role-history-table>
       </a-tab-pane>
-      <a-tab-pane key="3" tab="资源变更">
+      <a-tab-pane key="3" :tab="$t('acl.resourceChange')">
         <resource-history-table
           v-if="isloaded"
           :allResources="allResources"
@@ -41,7 +41,7 @@
           @resourceClear="resourceClear"
         ></resource-history-table>
       </a-tab-pane>
-      <a-tab-pane key="4" tab="资源类型变更">
+      <a-tab-pane key="4" :tab="$t('acl.resourceTypeChange')">
         <resource-type-history-table
           v-if="isloaded"
           :allResourceTypes="allResourceTypes"
@@ -52,7 +52,7 @@
           :allResourceTypesMap="allResourceTypesMap"
         ></resource-type-history-table>
       </a-tab-pane>
-      <a-tab-pane key="5" tab="触发器变更">
+      <a-tab-pane key="5" :tab="$t('acl.triggerChange')">
         <trigger-history-table
           v-if="isloaded"
           :allTriggers="allTriggers"

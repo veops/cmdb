@@ -2,7 +2,7 @@
   <div id="resource_search" :style="{ height: fromCronJob ? `${windowHeight - 48}px` : `${windowHeight - 90}px` }">
     <div class="cmdb-views-header">
       <span>
-        <span class="cmdb-views-header-title">资源搜索</span>
+        <span class="cmdb-views-header-title">{{ $t('cmdb.menu.ciSearch') }}</span>
       </span>
     </div>
     <div :style="{ backgroundColor: '#fff', padding: '12px', borderRadius: '15px' }">
@@ -24,7 +24,9 @@
           alignItems: 'center',
         }"
       >
-        <a-button icon="download" type="primary" ghost size="small" @click="handleExport">导出</a-button>
+        <a-button icon="download" type="primary" ghost size="small" @click="handleExport">{{
+          $t('download')
+        }}</a-button>
         <PreferenceSearch
           ref="preferenceSearch"
           @getQAndSort="getQAndSort"
@@ -68,7 +70,7 @@
       >
         <vxe-column
           v-if="instanceList.length"
-          title="模型"
+          :title="$t('cmdb.ciType.ciType')"
           field="ci_type_alias"
           :width="100"
           fixed="left"
@@ -149,11 +151,13 @@
         </vxe-colgroup>
 
         <template #empty>
-          <div v-if="loading" style="height: 200px; line-height: 200px">加载中...</div>
-          <div v-else>
+          <div>
             <img :style="{ width: '200px' }" :src="require('@/assets/data_empty.png')" />
-            <div>暂无数据</div>
+            <div>{{ $t('noData') }}</div>
           </div>
+        </template>
+        <template #loading>
+          <div style="height: 200px; line-height: 200px">{{ $t('loading') }}</div>
         </template>
       </vxe-table>
       <div :style="{ textAlign: 'right', marginTop: '4px' }">
@@ -166,7 +170,14 @@
           :page-size="pageSize"
           :page-size-options="pageSizeOptions"
           @showSizeChange="onShowSizeChange"
-          :show-total="(total, range) => `当前${range[0]}-${range[1]} 共 ${total}条记录`"
+          :show-total="
+            (total, range) =>
+              $t('pagination.total', {
+                range0: range[0],
+                range1: range[1],
+                total,
+              })
+          "
           @change="
             (page) => {
               currentPage = page
@@ -175,8 +186,8 @@
           "
         >
           <template slot="buildOptionText" slot-scope="props">
-            <span v-if="props.value !== '100000'">{{ props.value }}条/页</span>
-            <span v-if="props.value === '100000'">全部</span>
+            <span v-if="props.value !== '100000'">{{ props.value }}{{ $t('itemsPerPage') }}</span>
+            <span v-if="props.value === '100000'">{{ $t('all') }}</span>
           </template>
         </a-pagination>
       </div>
@@ -444,9 +455,11 @@ export default {
       return {}
     },
     handleExport() {
-      // this.$refs.xTable.openExport()
       this.$refs.batchDownload.open({
-        preferenceAttrList: [{ id: `ci_type_alias`, value: 'ci_type_alias', label: '模型' }, ...this.columnsGroup],
+        preferenceAttrList: [
+          { id: `ci_type_alias`, value: 'ci_type_alias', label: this.$t('cmdb.ciType.ciType') },
+          ...this.columnsGroup,
+        ],
       })
     },
     batchDownload({ filename, type, checkedKeys }) {
@@ -517,11 +530,11 @@ export default {
       }${fuzzySearch ? `,*${fuzzySearch}*` : ''}`
       this.$copyText(text)
         .then(() => {
-          this.$message.success('复制成功！')
+          this.$message.success(this.$t('copySuccess'))
           this.$emit('copySuccess', text)
         })
         .catch(() => {
-          this.$message.error('复制失败！')
+          this.$message.error(this.$t('cmdb.ci.copyFailed'))
         })
     },
   },

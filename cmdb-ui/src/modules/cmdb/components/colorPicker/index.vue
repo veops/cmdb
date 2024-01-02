@@ -132,7 +132,7 @@ export default {
       } else if (color.indexOf('rgb') !== -1) {
         hsvObj = this.rgbToHSV(color)
       } else {
-        throw new Error('初始化颜色格式错误，使用#fff或rgb格式')
+        throw new Error(this.$t('cmdb.components.colorPickerError'))
         // this.$message.error('颜色格式错误，使用16进制格式')
       }
       if (hsvObj) {

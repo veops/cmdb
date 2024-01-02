@@ -1,7 +1,7 @@
 <template>
   <a-card :bordered="false">
     <div class="action-btn">
-      <a-button @click="handleCreate" type="primary" style="margin-bottom: 15px;">新增关系类型</a-button>
+      <a-button @click="handleCreate" type="primary" style="margin-bottom: 15px;">{{ $t('cmdb.relation_type.addRelationType') }}</a-button>
     </div>
     <vxe-table
       ref="relationTypeTable"
@@ -16,20 +16,20 @@
     >
       <vxe-table-column
         field="name"
-        title="名称"
+        :title="$t('name')"
         :edit-render="{ name: 'input', attrs: { type: 'text' }, events: { keyup: customCloseEdit } }"
       ></vxe-table-column>
-      <vxe-table-column field="updateTime" title="更新时间">
+      <vxe-table-column field="updateTime" :title="$t('updated_at')">
         <template #default="{row}">
           {{ row.updated_at || row.created_at }}
         </template>
       </vxe-table-column>
-      <vxe-table-column field="operation" title="操作" align="center">
+      <vxe-table-column field="operation" :title="$t('operation')" align="center">
         <template #default="{row}">
           <template>
             <a><a-icon type="edit" @click="handleEdit(row)"/></a>
             <a-divider type="vertical" />
-            <a-popconfirm title="确认删除吗?" @confirm="handleDelete(row)" okText="是" cancelText="否">
+            <a-popconfirm :title="$t('confirmDelete')" @confirm="handleDelete(row)" :okText="$t('yes')" :cancelText="$t('no')">
               <a :style="{ color: 'red' }"><a-icon type="delete"/></a>
             </a-popconfirm>
           </template>
@@ -50,6 +50,7 @@ import {
 
 export default {
   name: 'RelationType',
+  components: {},
   data() {
     return {
       tableData: [],
@@ -97,14 +98,14 @@ export default {
     },
     updateRelationType(id, data) {
       updateRelationType(id, data).then((res) => {
-        this.$message.success('更新成功!')
+        this.$message.success(this.$t('updateSuccess'))
         this.loadData()
       })
     },
 
     createRelationType(data) {
       addRelationType(data).then((res) => {
-        this.$message.success('新增成功！')
+        this.$message.success(this.$t('addSuccess'))
         this.loadData()
       })
     },
@@ -113,12 +114,12 @@ export default {
     },
     deleteRelationType(id) {
       deleteRelationType(id).then((res) => {
-        this.$message.success('删除成功！')
+        this.$message.success(this.$t('deleteSuccess'))
         this.loadData()
       })
     },
     customCloseEdit(value, $event) {
-      // 回车结束编辑
+      // enter, close edit
       if ($event.keyCode === 13) {
         const $table = this.$refs.relationTypeTable
         $table.clearActived()

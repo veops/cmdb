@@ -16,9 +16,9 @@
         <CiUploadTable :ciTypeAttrs="ciTypeAttrs" ref="ciUploadTable" :uploadData="uploadData"></CiUploadTable>
         <div class="cmdb-batch-upload-action">
           <a-space size="large">
-            <a-button type="primary" ghost @click="handleCancel">取消</a-button>
-            <a-button @click="handleUpload" type="primary">上传</a-button>
-            <a-button v-if="hasError && !isUploading" @click="downloadError" type="primary">失败下载</a-button>
+            <a-button type="primary" ghost @click="handleCancel">{{ $t('cancel') }}</a-button>
+            <a-button @click="handleUpload" type="primary">{{ $t('upload') }}</a-button>
+            <a-button v-if="hasError && !isUploading" @click="downloadError" type="primary">{{ $t('cmdb.batch.downloadFailed') }}</a-button>
           </a-space>
         </div>
       </a-col>
@@ -109,7 +109,7 @@ export default {
     },
     handleUpload() {
       if (!this.ciType) {
-        this.$message.error('尚未选择模板类型')
+        this.$message.error(this.$t('cmdb.batch.unselectCIType'))
         return
       }
       if (this.uploadData && this.uploadData.length > 0) {
@@ -118,7 +118,7 @@ export default {
           this.$refs.uploadResult.upload2Server()
         })
       } else {
-        this.$message.error('请上传文件')
+        this.$message.error(this.$t('cmdb.batch.pleaseUploadFile'))
       }
     },
     handleCancel() {
@@ -127,7 +127,7 @@ export default {
         this.$refs.ciTypeChoice.selectNum = null
         this.hasError = false
       } else {
-        this.$message.warning('批量上传已取消')
+        this.$message.warning(this.$t('cmdb.batch.batchUploadCanceled'))
         this.isUploading = false
       }
     },

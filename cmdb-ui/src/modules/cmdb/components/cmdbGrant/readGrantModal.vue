@@ -2,9 +2,9 @@
   <a-modal :width="680" :title="title" :visible="visible" @ok="handleOk" @cancel="handleCancel">
     <CustomRadio
       :radioList="[
-        { value: 1, label: '全部' },
-        { value: 2, label: '自定义', layout: 'vertical' },
-        { value: 3, label: '无' },
+        { value: 1, label: $t('cmdb.components.all') },
+        { value: 2, label: $t('cmdb.components.customize'), layout: 'vertical' },
+        { value: 3, label: $t('cmdb.components.none') },
       ]"
       v-model="radioValue"
     >
@@ -16,7 +16,7 @@
           :clearable="true"
           searchable
           :options="attrGroup"
-          placeholder="请选择属性字段"
+          :placeholder="$t('cmdb.ciType.selectAttributes')"
           value-consists-of="LEAF_PRIORITY"
           :limit="10"
           :limitText="(count) => `+ ${count}`"
@@ -24,8 +24,8 @@
             (node) => {
               return {
                 id: node.name || -1,
-                label: node.alias || node.name || '其他',
-                title: node.alias || node.name || '其他',
+                label: node.alias || node.name || $t('other'),
+                title: node.alias || node.name || $t('other'),
                 children: node.attributes,
               }
             }
@@ -42,7 +42,7 @@
           :wrapperCol="{ span: 10 }"
           ref="form"
         >
-          <a-form-model-item label="名称" prop="name">
+          <a-form-model-item :label="$t('name')" prop="name">
             <a-input v-model="form.name" />
           </a-form-model-item>
           <FilterComp
@@ -99,16 +99,16 @@ export default {
         name: '',
       },
       rules: {
-        name: [{ required: true, message: '请输入自定义筛选条件名' }],
+        name: [{ required: true, message: this.$t('cmdb.components.customizeFilterName') }],
       },
     }
   },
   computed: {
     title() {
       if (this.colType === 'read_attr') {
-        return '字段权限'
+        return this.$t('cmdb.components.attributeGrant')
       }
-      return '实例权限'
+      return this.$t('cmdb.components.ciGrant')
     },
     attrGroup() {
       return this.provide_attrGroup()

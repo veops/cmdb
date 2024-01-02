@@ -1,7 +1,7 @@
 <template>
   <div class="cmdb-grant" :style="{ maxHeight: `${windowHeight - 104}px` }">
     <template v-if="cmdbGrantType.includes('ci_type')">
-      <div class="cmdb-grant-title">模型权限</div>
+      <div class="cmdb-grant-title">{{ $t('cmdb.components.ciTypeGrant') }}</div>
       <CiTypeGrant
         :CITypeId="CITypeId"
         :tableData="tableData"
@@ -18,7 +18,7 @@
         cmdbGrantType.includes('ci_type,ci') || (cmdbGrantType.includes('ci') && !cmdbGrantType.includes('ci_type'))
       "
     >
-      <div class="cmdb-grant-title">实例权限</div>
+      <div class="cmdb-grant-title">{{ $t('cmdb.components.ciGrant') }}</div>
       <CiTypeGrant
         :CITypeId="CITypeId"
         :tableData="tableData"
@@ -32,7 +32,7 @@
       />
     </template>
     <template v-if="cmdbGrantType.includes('type_relation')">
-      <div class="cmdb-grant-title">关系权限</div>
+      <div class="cmdb-grant-title">{{ $t('cmdb.components.relationGrant') }}</div>
       <TypeRelationGrant
         :typeRelationIds="typeRelationIds"
         :tableData="tableData"
@@ -45,7 +45,7 @@
       />
     </template>
     <template v-if="cmdbGrantType.includes('relation_view')">
-      <div class="cmdb-grant-title">{{ resourceTypeName }}权限</div>
+      <div class="cmdb-grant-title">{{ resourceTypeName }}{{ $t('cmdb.components.perm') }}</div>
       <RelationViewGrant
         :resourceTypeName="resourceTypeName"
         :tableData="tableData"
@@ -116,7 +116,7 @@ export default {
       attrGroup: [],
       filerPerimissions: {},
       loading: false,
-      addedRids: [], // 本次新增的rid
+      addedRids: [], // added rid this time
     }
   },
   computed: {
@@ -203,12 +203,12 @@ export default {
       this.tableData = perms
       this.loading = false
     },
-    // 授权common-setting中的部门  从中拿到roleid
+    // Grant the department in common-setting and get the roleid from it
     grantDepart(grantType) {
       this.$refs.grantModal.open('depart')
       this.grantType = grantType
     },
-    // 授权最古老的角色权限
+    // Grant the oldest role permissions
     grantRole(grantType) {
       this.$refs.grantModal.open('role')
       this.grantType = grantType

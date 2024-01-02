@@ -2,15 +2,15 @@
   <a-modal wrapClassName="attrbute-store-wrapper" width="80%" :visible="visible" @cancel="handleCancel">
     <template slot="title">
       <div class="attrbute-store-header">
-        <span>属性库</span>
+        <span>{{ $t('cmdb.ciType.attributeLibray') }}</span>
         <div class="attrbute-store-search">
           <a-input-group compact>
             <a-select class="attrbute-store-search-select" v-model="searchKey">
               <a-select-option value="alias">
-                别名
+                {{ $t('alias') }}
               </a-select-option>
               <a-select-option value="name">
-                名称
+                {{ $t('name') }}
               </a-select-option>
             </a-select>
             <a-input
@@ -53,7 +53,7 @@
       </a-row>
       <a-empty v-else>
         <img slot="image" :src="require('@/assets/data_empty.png')" />
-        <span slot="description"> 暂无数据 </span>
+        <span slot="description"> {{ $t('noData') }} </span>
       </a-empty>
     </a-spin>
     <template slot="footer">
@@ -63,7 +63,7 @@
         show-quick-jumper
         :current="tablePage.currentPage"
         :total="tablePage.totalResult"
-        :show-total="(total, range) => `当前展示 ${range[0]}-${range[1]} 条数据, 共 ${total} 条`"
+        :show-total="(total, range) => $t('pagination.total', { total: total, range0: range[0], range1: range[1] })"
         :page-size="tablePage.pageSize"
         :default-current="1"
         @change="pageOrSizeChange"

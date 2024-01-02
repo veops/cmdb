@@ -1,7 +1,7 @@
 <template>
   <a-form-model ref="form" :model="form" :label-col="labelCol" :wrapper-col="wrapperCol" :rules="rules">
-    <SpanTitle>基本</SpanTitle>
-    <a-form-model-item label="是否启用" prop="enable">
+    <SpanTitle>{{ $t('cs.auth.basic') }}</SpanTitle>
+    <a-form-model-item :label="$t('cs.auth.isEnable')" prop="enable">
       <a-switch
         :checked="Boolean(form.enable)"
         @change="
@@ -12,22 +12,22 @@
       />
     </a-form-model-item>
     <a-form-model-item
-      label="服务器地址"
+      :label="$t('cs.auth.ldap.serverAddress')"
       prop="ldap_server"
-      help="例如: 192.168.1.6 或者  ldap://192.168.1.6 或者 ldap://192.168.1.6:389"
+      :help="$t('cs.auth.ldap.serverAddressHelp')"
     >
-      <a-input v-model="form.ldap_server" placeholder="请输入服务器地址" />
+      <a-input v-model="form.ldap_server" :placeholder="$t('cs.auth.ldap.serverAddressPlaceholder')" />
     </a-form-model-item>
-    <a-form-model-item label="域" prop="ldap_domain">
-      <a-input v-model="form.ldap_domain" placeholder="请输入域" />
+    <a-form-model-item :label="$t('cs.auth.ldap.domain')" prop="ldap_domain">
+      <a-input v-model="form.ldap_domain" :placeholder="$t('cs.auth.ldap.domainPlaceholder')" />
     </a-form-model-item>
-    <SpanTitle>用户</SpanTitle>
+    <SpanTitle>{{ $t('cs.auth.ldap.user') }}</SpanTitle>
     <a-form-model-item
-      label="用户名称"
+      :label="$t('cs.auth.ldap.username')"
       prop="ldap_user_dn"
-      help="用户dn: cn={},ou=users,dc=xxx,dc=com   {}会替换成用户名"
+      :help="$t('cs.auth.ldap.userHelp')"
     >
-      <a-input v-model="form.ldap_user_dn" placeholder="请输入用户名称" />
+      <a-input v-model="form.ldap_user_dn" :placeholder="$t('cs.auth.ldap.userPlaceholder')" />
     </a-form-model-item>
   </a-form-model>
 </template>
@@ -46,11 +46,15 @@ export default {
         ldap_server: '',
         ldap_domain: '',
         ldap_user_dn: 'cn={},ou=users,dc=xxx,dc=com',
-      },
-      rules: {
+      }
+    }
+  },
+  computed: {
+    rules() {
+      return {
         enable: [{ required: true }],
-        ldap_server: [{ required: true, message: '请输入服务器地址' }],
-      },
+        ldap_server: [{ required: true, message: this.$t('cs.auth.ldap.domainPlaceholder') }],
+      }
     }
   },
   methods: {

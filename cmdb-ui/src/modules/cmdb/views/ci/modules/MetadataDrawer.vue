@@ -7,7 +7,7 @@
         visible = false
       }
     "
-    title="属性说明"
+    :title="$t('cmdb.ci.attributeDesc')"
     width="72%"
     :bodyStyle="{ height: '100vh' }"
   >
@@ -18,7 +18,7 @@
           :style="{ display: 'inline-block', width: '244px' }"
           class="ops-input ops-input-radius"
           type="search"
-          placeholder="搜索 名称 | 别名"
+          :placeholder="$t('cmdb.ci.tips5')"
           @keyup="searchAttributes"
         >
           <a-icon type="search" slot="suffix" />
@@ -56,8 +56,8 @@
               : index === 2
                 ? valueTypeFilters
                 : [
-                  { label: '是', value: true },
-                  { label: '否', value: false },
+                  { label: $t('yes'), value: true },
+                  { label: $t('no'), value: false },
                 ]
           "
           type="html"
@@ -82,78 +82,11 @@ import { valueTypeMap } from '@/modules/cmdb/utils/const'
 export default {
   name: 'MetadataDrawer',
   data() {
-    const columns = [
-      {
-        field: 'name',
-        title: '名称',
-        width: 150,
-        align: 'left',
-        help: null,
-      },
-      {
-        field: 'alias',
-        title: '别名',
-        width: 150,
-        align: 'left',
-        help: null,
-      },
-      {
-        field: 'value_type',
-        title: '类型',
-        width: 100,
-        align: 'left',
-        help: null,
-      },
-      {
-        field: 'is_index',
-        title: '是否索引',
-        width: 110,
-        help: '加快检索, 可以全文搜索, 无需使用条件过滤\n\n json目前不支持建索引 \n\n文本字符长度超过190不能建索引',
-      },
-      {
-        field: 'default_show',
-        title: '默认显示',
-        width: 110,
-        help: '订阅CI，默认显示在table里的属性',
-      },
-      {
-        field: 'is_unique',
-        title: '是否唯一',
-        width: 110,
-        help: null,
-      },
-      {
-        field: 'is_choice',
-        title: '是否选择',
-        width: 110,
-        help: '表现形式是下拉框, 值必须在预定义值里',
-      },
-      {
-        field: 'is_list',
-        title: '是否列表',
-        width: 110,
-        help: '多值, 比如内网IP',
-      },
-      {
-        field: 'is_sortable',
-        title: '可排序',
-        width: 100,
-        help: '仅针对前端',
-      },
-      {
-        field: 'is_computed',
-        title: '计算属性',
-        width: 110,
-        help: '模型的其他属性通过表达式的方式计算出来\n\n一个代码片段计算返回的值',
-      },
-    ]
     return {
-      columns,
       visible: false,
       list: [],
       tableData: [],
       loading: false,
-      valueTypeMap,
       valueTypeFilters: [],
       searchKey: '',
     }
@@ -161,6 +94,76 @@ export default {
   computed: {
     windowHeight() {
       return this.$store.state.windowHeight
+    },
+    valueTypeMap() {
+      return valueTypeMap()
+    },
+    columns() {
+      return [
+        {
+          field: 'name',
+          title: this.$t('name'),
+          width: 150,
+          align: 'left',
+          help: null,
+        },
+        {
+          field: 'alias',
+          title: this.$t('alias'),
+          width: 150,
+          align: 'left',
+          help: null,
+        },
+        {
+          field: 'value_type',
+          title: this.$t('type'),
+          width: 100,
+          align: 'left',
+          help: null,
+        },
+        {
+          field: 'is_index',
+          title: this.$t('cmdb.ciType.isIndex'),
+          width: 110,
+          help: this.$t('cmdb.ci.tips6'),
+        },
+        {
+          field: 'default_show',
+          title: this.$t('cmdb.ciType.defaultShow'),
+          width: 110,
+          help: this.$t('cmdb.ciType.defaultShowTips'),
+        },
+        {
+          field: 'is_unique',
+          title: this.$t('cmdb.ciType.isUnique'),
+          width: 110,
+          help: null,
+        },
+        {
+          field: 'is_choice',
+          title: this.$t('cmdb.ciType.isChoice'),
+          width: 110,
+          help: this.$t('cmdb.ci.tips7'),
+        },
+        {
+          field: 'is_list',
+          title: this.$t('cmdb.ciType.list'),
+          width: 110,
+          help: this.$t('cmdb.ci.tips8'),
+        },
+        {
+          field: 'is_sortable',
+          title: this.$t('cmdb.ciType.isSortable'),
+          width: 100,
+          help: this.$t('cmdb.ci.tips9'),
+        },
+        {
+          field: 'is_computed',
+          title: this.$t('cmdb.ciType.computedAttribute'),
+          width: 110,
+          help: this.$t('cmdb.ci.tips10'),
+        },
+      ]
     },
   },
   created: function() {

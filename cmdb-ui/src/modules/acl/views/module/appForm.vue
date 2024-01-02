@@ -1,11 +1,12 @@
 <template>
   <CustomDrawer @close="handleClose" width="500" :title="title" :visible="visible" :closable="false">
     <a-form :form="form" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
-      <a-form-item label="应用名称">
-        <a-input v-decorator="['name', { rules: [{ required: true, message: '请输入应用名称' }] }]"> </a-input>
+      <a-form-item :label="$t('acl.app')">
+        <a-input v-decorator="['name', { rules: [{ required: true, message: $t('acl.appNameInput') }] }]"> </a-input>
       </a-form-item>
-      <a-form-item label="描述">
-        <a-input v-decorator="['description', { rules: [{ required: true, message: '请输入描述' }] }]"> </a-input>
+      <a-form-item :label="$t('desc')">
+        <a-input v-decorator="['description', { rules: [{ required: true, message: $t('acl.descInput') }] }]">
+        </a-input>
       </a-form-item>
       <a-form-item label="AppId">
         <a-input v-decorator="['app_id', { rules: [{ required: false }] }]" :disabled="mode === 'update'"> </a-input>
@@ -19,8 +20,8 @@
       </a-form-item>
     </a-form>
     <div class="custom-drawer-bottom-action">
-      <a-button @click="handleClose">取消</a-button>
-      <a-button @click="handleSubmit" type="primary">提交</a-button>
+      <a-button @click="handleClose">{{ $t('cancel') }}</a-button>
+      <a-button @click="handleSubmit" type="primary">{{ $t('submit') }}</a-button>
     </div>
   </CustomDrawer>
 </template>
@@ -32,9 +33,13 @@ export default {
   data() {
     return {
       visible: false,
-      title: '创建应用',
       mode: 'create',
     }
+  },
+  computed: {
+    title() {
+      return this.$t('acl.addApp')
+    },
   },
   beforeCreate() {
     this.form = this.$form.createForm(this)
@@ -43,7 +48,7 @@ export default {
     handleEdit(ele) {
       this.visible = true
       if (ele) {
-        this.title = '修改应用'
+        this.title = this.$t('updateApp')
         this.mode = 'update'
         console.log(ele)
         const { name, description } = ele
@@ -55,7 +60,7 @@ export default {
         })
       } else {
         this.mode = 'create'
-        this.title = '创建应用'
+        this.title = this.$t('acl.addApp')
       }
     },
     handleClose() {
@@ -69,11 +74,11 @@ export default {
         }
         if (values.id) {
           await updateApp(values.id, values).then((res) => {
-            this.$message.success('修改成功！')
+            this.$message.success(this.$t('updateSuccess'))
           })
         } else {
           await addApp(values).then((res) => {
-            this.$message.success('创建成功!')
+            this.$message.success(this.$t('addSuccess'))
           })
         }
         this.handleClose()

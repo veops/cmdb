@@ -1,18 +1,18 @@
 <template>
   <CustomDrawer
     :closable="false"
-    :title="drawerTitle"
+    :title="$t('cmdb.preference_relation.newServiceTree')"
     :visible="drawerVisible"
     @close="onClose"
     placement="right"
     width="30%"
   >
     <a-form :form="form" :layout="formLayout" @submit="handleSubmit">
-      <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" label="业务关系名">
+      <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" :label="$t('cmdb.preference_relation.serviceTreeName')">
         <a-input
           name="name"
           placeholder
-          v-decorator="['name', { rules: [{ required: true, message: '请输入类型名' }] }]"
+          v-decorator="['name', { rules: [{ required: true, message: $t('cmdb.preference_relation.tips2')}] }]"
         />
       </a-form-item>
 
@@ -21,8 +21,8 @@
       </a-form-item>
 
       <div class="custom-drawer-bottom-action">
-        <a-button @click="onClose">取消</a-button>
-        <a-button @click="handleSubmit" type="primary">提交</a-button>
+        <a-button @click="onClose">{{ $t('cancel') }}</a-button>
+        <a-button @click="handleSubmit" type="primary">{{ $t('submit') }}</a-button>
       </div>
     </a-form>
   </CustomDrawer>
@@ -35,7 +35,6 @@ export default {
   name: 'RelationViewForm',
   data() {
     return {
-      drawerTitle: '新增业务关系',
       drawerVisible: false,
       formLayout: 'vertical',
       crIds: [],
@@ -95,7 +94,7 @@ export default {
     createRelationView(data) {
       data.cr_ids = this.crIds
       subscribeRelationView(data).then(res => {
-        this.$message.success('新增成功!')
+        this.$message.success(this.$t('addSuccess'))
         this.onClose()
         this.$emit('refresh')
       })

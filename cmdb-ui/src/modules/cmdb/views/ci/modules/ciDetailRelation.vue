@@ -2,10 +2,10 @@
   <div class="ci-detail-relation">
     <a-radio-group v-model="activeKey" size="small" @change="handleChangeActiveKey">
       <a-radio-button value="1">
-        拓扑
+        {{ $t('cmdb.ci.topo') }}
       </a-radio-button>
       <a-radio-button value="2">
-        表格
+        {{ $t('cmdb.ci.table') }}
       </a-radio-button>
     </a-radio-group>
     <CiDetailRelationTopo ref="ciDetailRelationTopo" v-if="activeKey === '1'" />
@@ -24,7 +24,7 @@
             ><a-icon
               type="plus-square"
             /></a>
-            <span v-if="!canEdit[parent.id]">（当前模型关系为多对多，请前往关系视图进行增删操作）</span>
+            <span v-if="!canEdit[parent.id]">（{{ $t('cmdb.ci.m2mTips') }}）</span>
           </div>
           <vxe-grid
             v-if="firstCIs[parent.name]"
@@ -39,7 +39,7 @@
             class="ops-stripe-table"
           >
             <template #operation_default="{ row }">
-              <a-popconfirm arrowPointAtCenter title="确认删除关系？" @confirm="deleteRelation(row._id, ciId)">
+              <a-popconfirm arrowPointAtCenter :title="$t('cmdb.ci.confirmDeleteRelation')" @confirm="deleteRelation(row._id, ciId)">
                 <a
                   :disabled="!canEdit[parent.id]"
                   :style="{
@@ -68,7 +68,7 @@
             ><a-icon
               type="plus-square"
             /></a>
-            <span v-if="!canEdit[child.id]">（当前模型关系为多对多，请前往关系视图进行增删操作）</span>
+            <span v-if="!canEdit[child.id]">（{{ $t('cmdb.ci.m2mTips') }}）</span>
           </div>
           <vxe-grid
             v-if="secondCIs[child.name]"
@@ -82,7 +82,7 @@
             class="ops-stripe-table"
           >
             <template #operation_default="{ row }">
-              <a-popconfirm arrowPointAtCenter title="确认删除关系？" @confirm="deleteRelation(ciId, row._id)">
+              <a-popconfirm arrowPointAtCenter :title="$t('cmdb.ci.confirmDeleteRelation')" @confirm="deleteRelation(ciId, row._id)">
                 <a
                   :disabled="!canEdit[child.id]"
                   :style="{
@@ -338,7 +338,7 @@ export default {
         firstCIColumns[item.id].push({
           key: 'p_operation',
           field: 'operation',
-          title: '操作',
+          title: this.$t('operation'),
           width: '60px',
           fixed: 'right',
           slots: {
@@ -379,7 +379,7 @@ export default {
         secondCIColumns[item.id].push({
           key: 'c_operation',
           field: 'operation',
-          title: '操作',
+          title: this.$t('operation'),
           width: '60px',
           fixed: 'right',
           slots: {

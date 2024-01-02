@@ -1,8 +1,8 @@
 <template>
   <a-dropdown :trigger="['contextmenu']">
     <a-menu slot="overlay" @click="({ key: menuKey }) => this.onContextMenuClick(this.treeKey, menuKey)">
-      <a-menu-item v-for="item in menuList" :key="item.id">新增{{ item.alias }}</a-menu-item>
-      <a-menu-item v-if="showDelete" key="delete">删除节点</a-menu-item>
+      <a-menu-item v-for="item in menuList" :key="item.id">{{ $t('new') }} {{ item.alias }}</a-menu-item>
+      <a-menu-item v-if="showDelete" key="delete">{{ $t('cmdb.serviceTree.deleteNode') }}</a-menu-item>
     </a-menu>
     <div
       :style="{

@@ -1,13 +1,17 @@
-export const valueTypeMap = {
-  '0': '整数',
-  '1': '浮点数',
-  '2': '文本',
-  '3': '日期时间',
-  '4': '日期',
-  '5': '时间',
-  '6': 'JSON',
-  '7': '密码',
-  '8': '链接'
+import i18n from '@/lang'
+
+export const valueTypeMap = () => {
+  return {
+    '0': i18n.t('cmdb.ciType.int'),
+    '1': i18n.t('cmdb.ciType.float'),
+    '2': i18n.t('cmdb.ciType.text'),
+    '3': i18n.t('cmdb.ciType.datetime'),
+    '4': i18n.t('cmdb.ciType.date'),
+    '5': i18n.t('cmdb.ciType.time'),
+    '6': 'JSON',
+    '7': i18n.t('cmdb.ciType.password'),
+    '8': i18n.t('cmdb.ciType.link')
+  }
 }
 
 export const defautValueColor = [

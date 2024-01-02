@@ -1,61 +1,70 @@
 <template>
   <CustomDrawer
     wrapClassName="trigger-form"
-    :width="700"
+    :width="910"
     :title="title"
     :visible="visible"
     @close="handleCancel"
     @ok="handleOk"
   >
     <div class="custom-drawer-bottom-action">
-      <a-button type="primary" ghost @click="handleCancel">取消</a-button>
-      <a-button v-if="triggerId" type="danger" @click="handleDetele">删除</a-button>
-      <a-button @click="handleOk" type="primary">确定</a-button>
+      <a-button type="primary" ghost @click="handleCancel">{{ $t('cancel') }}</a-button>
+      <a-button v-if="triggerId" type="danger" @click="handleDetele">{{ $t('delete') }}</a-button>
+      <a-button @click="handleOk" type="primary">{{ $t('confirm') }}</a-button>
     </div>
     <a-form-model ref="triggerForm" :model="form" :rules="rules" :label-col="{ span: 3 }" :wrapper-col="{ span: 18 }">
-      <p><strong>基本信息</strong></p>
-      <a-form-model-item label="名称" prop="name">
-        <a-input v-model="form.name" placeholder="请输入名称" />
+      <p>
+        <strong>{{ $t('cmdb.ciType.basicInfo') }}</strong>
+      </p>
+      <a-form-model-item :label="$t('name')" prop="name">
+        <a-input v-model="form.name" :placeholder="$t('cmdb.ciType.nameInputTips')" />
       </a-form-model-item>
-      <a-form-model-item label="类型">
+      <a-form-model-item :label="$t('type')">
         <a-radio-group v-model="category">
           <a-radio-button :value="1">
-            数据变更
+            {{ $t('cmdb.ciType.triggerDataChange') }}
           </a-radio-button>
           <a-radio-button :value="2">
-            日期属性
+            {{ $t('cmdb.ciType.triggerDate') }}
           </a-radio-button>
         </a-radio-group>
       </a-form-model-item>
-      <a-form-model-item label="备注" prop="description">
-        <a-input v-model="form.description" placeholder="请输入备注" />
+      <a-form-model-item :label="$t('desc')" prop="description">
+        <a-input v-model="form.description" :placeholder="$t('cmdb.ciType.descInput')" />
       </a-form-model-item>
-      <a-form-model-item label="开启" prop="enable">
+      <a-form-model-item :label="$t('cmdb.ciType.triggerEnable')" prop="enable">
         <a-switch v-model="form.enable" />
       </a-form-model-item>
       <template v-if="category === 1">
-        <p><strong>触发条件</strong></p>
-        <a-form-model-item label="事件" prop="action">
+        <p>
+          <strong>{{ $t('cmdb.ciType.triggerCondition') }}</strong>
+        </p>
+        <a-form-model-item :label="$t('cmdb.ciType.event')" prop="action">
           <a-radio-group v-model="form.action">
             <a-radio value="0">
-              新增实例
+              {{ $t('cmdb.ciType.addInstance') }}
             </a-radio>
             <a-radio value="1">
-              删除实例
+              {{ $t('cmdb.ciType.deleteInstance') }}
             </a-radio>
             <a-radio value="2">
-              实例变更
+              {{ $t('cmdb.ciType.changeInstance') }}
             </a-radio>
           </a-radio-group>
         </a-form-model-item>
-        <a-form-model-item v-if="form.action === '2'" label="属性" prop="attr_ids">
-          <a-select v-model="form.attr_ids" show-search mode="multiple" placeholder="请选择属性（多选）">
+        <a-form-model-item v-if="form.action === '2'" :label="$t('cmdb.ciType.attributes')" prop="attr_ids">
+          <a-select
+            v-model="form.attr_ids"
+            show-search
+            mode="multiple"
+            :placeholder="$t('cmdb.ciType.selectMutipleAttributes')"
+          >
             <a-select-option v-for="attr in attrList" :key="attr.id" :value="attr.id">{{
               attr.alias || attr.name
             }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item label="筛选" class="trigger-form-filter">
+        <a-form-model-item :label="$t('cmdb.ciType.filter')" class="trigger-form-filter">
           <FilterComp
             ref="filterComp"
             :isDropdown="false"
@@ -67,7 +76,9 @@
       </template>
     </a-form-model>
     <template v-if="category === 2">
-      <p><strong>触发条件</strong></p>
+      <p>
+        <strong>{{ $t('cmdb.ciType.triggerCondition') }}</strong>
+      </p>
       <a-form-model
         ref="dateForm"
         :model="dateForm"
@@ -75,14 +86,14 @@
         :label-col="{ span: 3 }"
         :wrapper-col="{ span: 18 }"
       >
-        <a-form-model-item label="属性" prop="attr_id">
-          <a-select v-model="dateForm.attr_id" placeholder="请选择属性（单选）">
+        <a-form-model-item :label="$t('cmdb.ciType.attributes')" prop="attr_id">
+          <a-select v-model="dateForm.attr_id" :placeholder="$t('cmdb.ciType.selectSingleAttribute')">
             <a-select-option v-for="attr in canAddTriggerAttr" :key="attr.id" :value="attr.id">{{
               attr.alias || attr.name
             }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item label="筛选" class="trigger-form-filter">
+        <a-form-model-item :label="$t('cmdb.ciType.filter')" class="trigger-form-filter">
           <FilterComp
             ref="filterComp"
             :isDropdown="false"
@@ -91,22 +102,24 @@
             :expression="filterExp ? `q=${filterExp}` : ''"
           />
         </a-form-model-item>
-        <a-form-model-item label="提前" prop="before_days">
+        <a-form-model-item :label="$t('cmdb.ciType.beforeDays')" prop="before_days">
           <a-input-number v-model="dateForm.before_days" :min="0" />
-          天
+          {{ $t('cmdb.ciType.days') }}
         </a-form-model-item>
-        <a-form-model-item label="发送时间" prop="notify_at">
+        <a-form-model-item :label="$t('cmdb.ciType.notifyAt')" prop="notify_at">
           <a-time-picker v-model="dateForm.notify_at" format="HH:mm" valueFormat="HH:mm" />
         </a-form-model-item>
       </a-form-model>
     </template>
-    <p><strong>触发动作</strong></p>
+    <p>
+      <strong>{{ $t('cmdb.ciType.triggerAction') }}</strong>
+    </p>
     <a-radio-group
       v-model="triggerAction"
       :style="{ width: '100%', display: 'flex', justifyContent: 'space-around', marginBottom: '10px' }"
     >
       <a-radio value="1">
-        通知
+        {{ $t('cmdb.ciType.notify') }}
       </a-radio>
       <a-radio value="2">
         Webhook
@@ -126,13 +139,13 @@
       <a-form-model-item label=" " :colon="false">
         <span class="trigger-tips">{{ tips }}</span>
       </a-form-model-item>
-      <a-form-model-item label="收件人" prop="employee_ids" class="trigger-form-employee">
+      <a-form-model-item :label="$t('cmdb.ciType.receivers')" prop="employee_ids" class="trigger-form-employee">
         <EmployeeTreeSelect multiple v-model="notifies.employee_ids" />
         <div class="trigger-form-custom-email">
           <a-textarea
             v-if="showCustomEmail"
             v-model="notifies.custom_email"
-            placeholder="请输入邮箱，多个邮箱用;分隔"
+            :placeholder="$t('cmdb.ciType.emailTips')"
             :rows="1"
           />
           <a-button
@@ -144,37 +157,41 @@
             type="primary"
             size="small"
             class="ops-button-primary"
-          >{{ `${showCustomEmail ? '删除' : '添加'}自定义收件人` }}</a-button
+          >{{ `${showCustomEmail ? $t('delete') : $t('add')}` }}{{ $t('cmdb.ciType.customEmail') }}</a-button
           >
         </div>
       </a-form-model-item>
-      <a-form-model-item label="通知标题" prop="subject">
-        <a-input v-model="notifies.subject" placeholder="请输入通知标题" />
+      <a-form-model-item :label="$t('cmdb.ciType.notifySubject')" prop="subject">
+        <a-input v-model="notifies.subject" :placeholder="$t('cmdb.ciType.notifySubjectTips')" />
       </a-form-model-item>
-      <a-form-model-item label="内容" prop="body" :wrapper-col="{ span: 21 }">
+      <a-form-model-item :label="$t('cmdb.ciType.notifyContent')" prop="body" :wrapper-col="{ span: 21 }">
         <NoticeContent :needOld="category === 1 && form.action === '2'" :attrList="attrList" ref="noticeContent" />
       </a-form-model-item>
-      <a-form-model-item label="通知方式" prop="method">
+      <a-form-model-item :label="$t('cmdb.ciType.notifyMethod')" prop="method">
         <a-checkbox-group v-model="notifies.method">
           <a-row :style="{ marginTop: '4px' }" :gutter="[0, 12]">
             <a-col :span="6">
-              <a-checkbox value="email"> <ops-icon type="email" style="margin-right:5px" />邮件 </a-checkbox>
+              <a-checkbox value="email">
+                <ops-icon type="email" style="margin-right:5px" />{{ $t('email') }}
+              </a-checkbox>
             </a-col>
             <a-col :span="6">
               <a-checkbox value="wechatApp">
-                <ops-icon type="wechatApp" style="margin-right:5px" />企业微信
+                <ops-icon type="wechatApp" style="margin-right:5px" />{{ $t('wechat') }}
               </a-checkbox>
             </a-col>
             <a-col :span="6">
               <a-checkbox value="dingdingApp">
-                <ops-icon type="dingdingApp" style="margin-right:5px" />钉钉
+                <ops-icon type="dingdingApp" style="margin-right:5px" />{{ $t('dingding') }}
               </a-checkbox>
             </a-col>
             <a-col :span="6">
-              <a-checkbox value="feishuApp"> <ops-icon type="feishuApp" style="margin-right:5px" />飞书 </a-checkbox>
+              <a-checkbox value="feishuApp">
+                <ops-icon type="feishuApp" style="margin-right:5px" />{{ $t('feishu') }}
+              </a-checkbox>
             </a-col>
             <a-col :span="4" :style="{ lineHeight: '32px' }">
-              <ops-icon type="robot" style="margin-right:5px" />机器人：
+              <ops-icon type="robot" style="margin-right:5px" />{{ $t('bot') }}：
             </a-col>
             <a-col :span="18">
               <treeselect
@@ -196,7 +213,7 @@
                 searchable
                 :options="appBot"
                 value-consists-of="LEAF_PRIORITY"
-                placeholder="请选择机器人"
+                :placeholder="$t('cmdb.ciType.botSelect')"
                 :normalizer="
                   (node) => {
                     return {
@@ -208,7 +225,7 @@
                 "
                 appendToBody
                 :zIndex="1050"
-                noChildrenText="暂无数据"
+                :noChildrenText="$t('noData')"
               >
                 <div
                   :title="node.label"
@@ -297,24 +314,22 @@ export default {
       defaultForm,
       defaultDateForm,
       defaultNotify,
-      tips: '标题、内容可以引用该模型的属性值，引用方法为: {{ attr_name }}',
-      webhookTips: '请求参数可以引用该模型的属性值，引用方法为: {{ attr_name }}',
       visible: false,
       category: 1,
       form: _.cloneDeep(defaultForm),
       rules: {
-        name: [{ required: true, message: '请填写名称' }],
+        name: [{ required: true, message: this.$t('cmdb.ciType.nameInputTips') }],
       },
       dateForm: _.cloneDeep(defaultDateForm),
       dateFormRules: {
-        attr_id: [{ required: true, message: '请选择属性' }],
+        attr_id: [{ required: true, message: this.$t('cmdb.ciType.selectAttributes') }],
       },
       notifies: _.cloneDeep(defaultNotify),
       notifiesRules: {},
       WxUsers: [],
       filterValue: '',
       triggerId: null,
-      title: '新增触发器',
+      title: this.$t('cmdb.ciType.newTrigger'),
       attrList: [],
       filterExp: '',
       triggerAction: '1',
@@ -337,6 +352,12 @@ export default {
       }
       return this.dags
     },
+    tips() {
+      return this.$t('cmdb.ciType.refAttributeTips')
+    },
+    webhookTips() {
+      return this.$t('cmdb.ciType.webhookRefAttributeTips')
+    },
   },
   inject: {
     refresh: {
@@ -356,7 +377,7 @@ export default {
       this.getNoticeConfigAppBot()
       this.attrList = attrList
       this.triggerId = null
-      this.title = '新增触发器'
+      this.title = this.$t('cmdb.ciType.newTrigger')
       this.form = _.cloneDeep(this.defaultForm)
       this.dateForm = _.cloneDeep(this.defaultDateForm)
       this.notifies = _.cloneDeep(this.defaultNotify)
@@ -376,7 +397,7 @@ export default {
       this.attrList = attrList
       if (property.has_trigger) {
         this.triggerId = property.trigger.id
-        this.title = `编辑触发器 ${property.alias || property.name}`
+        this.title = this.$t('cmdb.ciType.editTriggerTitle', { name: `${property.alias || property.name}` })
         const { name, description, enable, action = '0', attr_ids, filter = '' } = property?.trigger?.option ?? {}
         this.filterExp = filter
         this.$nextTick(() => {
@@ -437,7 +458,7 @@ export default {
           this.notifies = { employee_ids, custom_email, subject, method: _method }
         }
       } else {
-        this.title = `新增触发器 ${property.alias || property.name}`
+        this.title = this.$t('cmdb.ciType.newTriggerTitle', { name: `${property.alias || property.name}` })
         this.triggerId = null
         this.form = _.cloneDeep(this.defaultForm)
       }
@@ -556,11 +577,11 @@ export default {
     handleDetele() {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: '确认删除该触发器吗?',
+        title: that.$t('warning'),
+        content: that.$t('cmdb.ciType.confirmDeleteTrigger'),
         onOk() {
           deleteTrigger(that.CITypeId, that.triggerId).then(() => {
-            that.$message.success('删除成功！')
+            that.$message.success(that.$t('deleteSuccess'))
             that.handleCancel()
             if (that.refresh) {
               that.refresh()

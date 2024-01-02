@@ -12,7 +12,7 @@
         "
         :class="{ 'setting-person-left-item': true, 'setting-person-left-item-selected': current === '1' }"
       >
-        <ops-icon type="icon-shidi-yonghu" />个人信息
+        <ops-icon type="icon-shidi-yonghu" />{{ $t('cs.person.spanTitle') }}
       </div>
       <div
         @click="
@@ -25,7 +25,7 @@
         "
         :class="{ 'setting-person-left-item': true, 'setting-person-left-item-selected': current === '2' }"
       >
-        <a-icon type="unlock" theme="filled" />账号密码
+        <a-icon type="unlock" theme="filled" />{{ $t('cs.person.accountAndPassword') }}
       </div>
     </div>
     <div class="setting-person-right">
@@ -39,7 +39,7 @@
         :wrapperCol="{ span: 10 }"
       >
         <div v-show="current === '1'">
-          <a-form-model-item label="头像" :style="{ display: 'flex', alignItems: 'center' }">
+          <a-form-model-item :label="$t('cs.person.avatar')" :style="{ display: 'flex', alignItems: 'center' }">
             <a-space>
               <a-avatar v-if="form.avatar" :src="`/api/common-setting/v1/file/${form.avatar}`" :size="64"> </a-avatar>
               <a-avatar v-else style="backgroundColor:#F0F5FF" :size="64">
@@ -53,44 +53,44 @@
                 :style="{ width: '310px', height: '100px' }"
                 accept=".svg,.png,.jpg,.jpeg"
               >
-                <a-button type="primary" ghost size="small">更换头像</a-button>
+                <a-button type="primary" ghost size="small">{{ $t('cs.person.changeAvatar') }}</a-button>
               </a-upload>
             </a-space>
           </a-form-model-item>
-          <a-form-model-item label="姓名" prop="nickname">
+          <a-form-model-item :label="$t('cs.companyStructure.nickname')" prop="nickname">
             <a-input v-model="form.nickname" />
           </a-form-model-item>
-          <a-form-model-item label="用户名">
+          <a-form-model-item :label="$t('cs.companyStructure.username')">
             <div class="setting-person-right-disabled">{{ form.username }}</div>
           </a-form-model-item>
-          <a-form-model-item label="邮箱">
+          <a-form-model-item :label="$t('cs.companyStructure.email')">
             <div class="setting-person-right-disabled">{{ form.email }}</div>
           </a-form-model-item>
-          <a-form-model-item label="直属上级">
+          <a-form-model-item :label="$t('cs.companyStructure.supervisor')">
             <div class="setting-person-right-disabled">
               {{ getDirectorName(allFlatEmployees, form.direct_supervisor_id) }}
             </div>
           </a-form-model-item>
-          <a-form-model-item label="性别">
+          <a-form-model-item :label="$t('cs.companyStructure.sex')">
             <a-select v-model="form.sex">
-              <a-select-option value="男">男</a-select-option>
-              <a-select-option value="女">女</a-select-option>
+              <a-select-option value="男">{{ $t('cs.companyStructure.male') }}</a-select-option>
+              <a-select-option value="女">{{ $t('cs.companyStructure.female') }}</a-select-option>
             </a-select>
           </a-form-model-item>
-          <a-form-model-item label="手机号" prop="mobile">
+          <a-form-model-item :label="$t('cs.companyStructure.mobile')" prop="mobile">
             <a-input v-model="form.mobile" />
           </a-form-model-item>
-          <a-form-model-item label="部门">
+          <a-form-model-item :label="$t('cs.companyStructure.departmentName')">
             <div class="setting-person-right-disabled">
               {{ getDepartmentName(allFlatDepartments, form.department_id) }}
             </div>
           </a-form-model-item>
-          <a-form-model-item label="岗位">
+          <a-form-model-item :label="$t('cs.companyStructure.positionName')">
             <div class="setting-person-right-disabled">{{ form.position_name }}</div>
           </a-form-model-item>
-          <a-form-model-item label="绑定信息">
+          <a-form-model-item :label="$t('cs.person.bindInfo')">
             <a-space>
-              <a-tooltip title="企业微信">
+              <a-tooltip :title="$t('cs.person.wechatApp')">
                 <div
                   @click="handleBind('wechatApp', form.notice_info && form.notice_info.wechatApp)"
                   :class="{
@@ -101,7 +101,7 @@
                   <ops-icon type="ops-setting-notice-wx" />
                 </div>
               </a-tooltip>
-              <a-tooltip title="飞书">
+              <a-tooltip :title="$t('cs.person.feishuApp')">
                 <div
                   @click="handleBind('feishuApp', form.notice_info && form.notice_info.feishuApp)"
                   :class="{
@@ -112,7 +112,7 @@
                   <ops-icon type="ops-setting-notice-feishu" />
                 </div>
               </a-tooltip>
-              <a-tooltip title="钉钉">
+              <a-tooltip :title="$t('cs.person.dingdingApp')">
                 <div
                   @click="handleBind('dingdingApp', form.notice_info && form.notice_info.dingdingApp)"
                   :class="{
@@ -127,16 +127,16 @@
           </a-form-model-item>
         </div>
         <div v-show="current === '2'">
-          <a-form-model-item label="新密码" prop="password1">
+          <a-form-model-item :label="$t('cs.person.newPassword')" prop="password1">
             <a-input v-model="form.password1" />
           </a-form-model-item>
-          <a-form-model-item label="确认密码" prop="password2">
+          <a-form-model-item :label="$t('cs.person.confirmPassword')" prop="password2">
             <a-input v-model="form.password2" />
           </a-form-model-item>
         </div>
         <div style="margin-right: 120px">
           <a-form-model-item label=" ">
-            <a-button type="primary" @click="handleSave" :style="{ width: '100%' }">保存</a-button>
+            <a-button type="primary" @click="handleSave" :style="{ width: '100%' }">{{ $t('save') }}</a-button>
           </a-form-model-item>
         </div>
       </a-form-model>
@@ -150,7 +150,7 @@
       :preview-height="eidtImageOption.previewHeight"
       preview-radius="0"
       width="550px"
-      save-button-title="确定"
+      :save-button-title="$t('confirm')"
       @save="submitImage"
       @close="showEditImage = false"
     />
@@ -175,50 +175,70 @@ export default {
   name: 'Person',
   components: { EditImage },
   data() {
-    const validatePassword = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请二次确认新密码'))
-      }
-      if (value !== this.form.password1) {
-        callback(new Error('两次输入密码不一致'))
-      }
-      callback()
-    }
     return {
       current: '1',
       form: {},
-      rules1: {
-        nickname: [
-          { required: true, whitespace: true, message: '请输入姓名', trigger: 'blur' },
-          { max: 20, message: '字符数须小于20' },
-        ],
-        mobile: [
-          {
-            pattern: /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/,
-            message: '请输入正确的手机号',
-            trigger: 'blur',
-          },
-        ],
-      },
-      rules2: {
-        password1: [{ required: true, message: '请输入新密码', trigger: 'blur' }],
-        password2: [{ required: true, message: '两次输入密码不一致', trigger: 'blur', validator: validatePassword }],
-      },
       allFlatEmployees: [],
       allFlatDepartments: [],
       showEditImage: false,
-      eidtImageOption: {
-        type: 'avatar',
-        fixedNumber: [4, 4],
-        title: '编辑头像',
-        previewWidth: '60px',
-        previewHeight: '60px',
-      },
       editImage: null,
     }
   },
   computed: {
     ...mapGetters(['uid']),
+    rules1() {
+      return {
+        nickname: [
+          {
+            required: true,
+            whitespace: true,
+            message: this.$t('cs.companyStructure.nicknamePlaceholder'),
+            trigger: 'blur',
+          },
+          { max: 20, message: this.$t('cs.person.inputStrCountLimit', { limit: 20 }) },
+        ],
+        mobile: [
+          {
+            pattern: /^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\d{8}$/,
+            message: this.$t('cs.companyStructure.mobileFormatErr'),
+            trigger: 'blur',
+          },
+        ],
+      }
+    },
+    rules2() {
+      const validatePassword = (rule, value, callback) => {
+        if (!value) {
+          callback(new Error(this.$t('cs.person.pleaseConfirmNewPasswordSecondTime')))
+        }
+        if (value !== this.form.password1) {
+          callback(new Error(this.$t('cs.person.thePasswordEnteredTwiceIsInconsistent')))
+        }
+        callback()
+      }
+      return {
+        password1: [
+          { required: true, message: this.$t('cs.person.pleaseConfirmNewPasswordSecondTime'), trigger: 'blur' },
+        ],
+        password2: [
+          {
+            required: true,
+            message: this.$t('cs.person.thePasswordEnteredTwiceIsInconsistent'),
+            trigger: 'blur',
+            validator: validatePassword,
+          },
+        ],
+      }
+    },
+    eidtImageOption() {
+      return {
+        type: 'avatar',
+        fixedNumber: [4, 4],
+        title: this.$t('cs.components.editAvatar'),
+        previewWidth: '60px',
+        previewHeight: '60px',
+      }
+    },
   },
   mounted() {
     this.getAllFlatEmployees()
@@ -251,13 +271,13 @@ export default {
           const params = { nickname, mobile, sex, avatar }
           if (this.current === '1') {
             await updateEmployeeByUid(this.uid, params).then((res) => {
-              this.$message.success('保存成功！')
+              this.$message.success(this.$t('saveSuccess'))
               this.getEmployeeByUid()
               this.GetInfo()
             })
           } else {
             await updatePasswordByUid(this.uid, { password: password1 }).then((res) => {
-              this.$message.success('保存成功！')
+              this.$message.success(this.$t('saveSuccess'))
             })
           }
         }
@@ -283,7 +303,7 @@ export default {
     beforeUpload(file) {
       const isLt2M = file.size / 1024 / 1024 < 2
       if (!isLt2M) {
-        this.$message.error('图片大小不可超过2MB!')
+        this.$message.error(this.$t('cs.companyInfo.imageSizeLimit2MB'))
       }
       return isLt2M
     },
@@ -298,12 +318,12 @@ export default {
       if (isBind) {
         const that = this
         this.$confirm({
-          title: '警告',
-          content: `确认解绑？`,
+          title: this.$t('warning'),
+          content: this.$t('cs.person.confirmUnbind'),
           onOk() {
             unbindPlatformByUid(platform, that.uid)
               .then(() => {
-                that.$message.success('解绑成功！')
+                that.$message.success(this.$t('cs.person.unbindSuccess'))
               })
               .finally(() => {
                 that.getEmployeeByUid()
@@ -319,7 +339,7 @@ export default {
             await updateEmployeeByUid(this.uid, params)
             bindPlatformByUid(platform, this.uid)
               .then(() => {
-                this.$message.success('绑定成功！')
+                this.$message.success(this.$t('cs.person.bindSuccess'))
               })
               .finally(() => {
                 this.getEmployeeByUid()

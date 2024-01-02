@@ -3,7 +3,7 @@
     destroyOnClose
     width="500px"
     v-model="visible"
-    :title="type === 'add' ? '创建子部门' : '编辑部门'"
+    :title="type === 'add' ? $t('cs.companyStructure.createSubDepartment') : $t('cs.companyStructure.editDepartment')"
     layout="inline"
     @cancel="close"
   >
@@ -14,10 +14,10 @@
       :label-col="labelCol"
       :wrapper-col="wrapperCol"
     >
-      <a-form-model-item ref="title" label="部门名称" prop="department_name">
-        <a-input v-model="departmentFormData.department_name" placeholder="请输入部门名称" />
+      <a-form-model-item ref="title" :label="$t('cs.companyStructure.departmentLabel')" prop="department_name">
+        <a-input v-model="departmentFormData.department_name" :placeholder="$t('cs.companyStructure.departmentLabelPlaceholder')" />
       </a-form-model-item>
-      <a-form-model-item label="上级部门" prop="department_parent_id">
+      <a-form-model-item :label="$t('cs.companyStructure.parentDepartment')" prop="department_parent_id">
         <DepartmentTreeSelect v-model="departmentFormData.department_parent_id" />
         <!-- <Treeselect
           v-else
@@ -37,13 +37,13 @@
           "
         /> -->
       </a-form-model-item>
-      <a-form-model-item label="部门负责人" prop="department_director_id">
+      <a-form-model-item :label="$t('cs.companyStructure.departmentDirector')" prop="department_director_id">
         <EmployeeTreeSelect v-model="departmentFormData.department_director_id" />
       </a-form-model-item>
     </a-form-model>
     <template slot="footer">
-      <a-button key="back" @click="close"> 取消 </a-button>
-      <a-button key="submit" type="primary" @click="departmentModalHandleOk"> 确定 </a-button>
+      <a-button key="back" @click="close"> {{ $t('cancel') }} </a-button>
+      <a-button key="submit" type="primary" @click="departmentModalHandleOk"> {{ $t('confirm') }} </a-button>
     </template>
   </a-modal>
 </template>
@@ -67,10 +67,6 @@ export default {
         department_parent_id: '',
         department_director_id: undefined,
       },
-      rules: {
-        department_name: [{ required: true, message: '请输入部门名称' }],
-        department_parent_id: [{ required: true, message: '请选择上级部门' }],
-      },
       currentDepartmentParentList: [],
       selectDepartment: {},
       type: 'add',
@@ -81,6 +77,12 @@ export default {
     allFlatEmployees() {
       return this.provide_allFlatEmployees()
     },
+    rules () {
+      return {
+        department_name: [{ required: true, message: this.$t('cs.companyStructure.departmentLabelPlaceholder') }],
+        department_parent_id: [{ required: true, message: this.$t('cs.companyStructure.parentDepartmentPlaceholder') }],
+      }
+    }
   },
   mounted() {},
   methods: {
@@ -129,7 +131,7 @@ export default {
           } else if (this.type === 'add') {
             await postDepartment(params)
           }
-          this.$message.success('操作成功')
+          this.$message.success(this.$t('cs.companyStructure.opSuccess'))
           this.$emit('refresh')
           Bus.$emit('updateAllIncludeDepartment')
           this.close()

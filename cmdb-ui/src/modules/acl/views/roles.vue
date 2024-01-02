@@ -1,12 +1,12 @@
 <template>
   <div class="acl-roles">
     <div class="acl-roles-header">
-      <a-button @click="handleCreate" type="primary">{{ btnName }}</a-button>
+      <a-button @click="handleCreate" type="primary">{{ $t('acl.addVisualRole') }}</a-button>
       <a-input-search
         class="ops-input"
         allowClear
         :style="{ display: 'inline', marginLeft: '10px', width: '200px' }"
-        placeholder="搜索 | 角色名"
+        :placeholder="`${$t('search')} | ${$t('acl.role')}`"
         v-model="searchName"
         @search="
           () => {
@@ -15,7 +15,7 @@
           }
         "
       ></a-input-search>
-      <a-checkbox :checked="is_all" @click="handleClickBoxChange">所有角色</a-checkbox>
+      <a-checkbox :checked="is_all" @click="handleClickBoxChange">{{ $t('acl.allRole') }}</a-checkbox>
     </div>
     <a-spin :spinning="loading">
       <ops-table
@@ -31,22 +31,23 @@
       >
         <vxe-table-column
           field="name"
-          title="角色名"
+          :title="$t('acl.role')"
           :min-width="150"
           align="left"
           fixed="left"
           sortable
-          show-overflow>
+          show-overflow
+        >
         </vxe-table-column>
 
         <!-- 2 -->
-        <vxe-table-column field="is_app_admin" title="管理员" :min-width="100" align="center">
+        <vxe-table-column field="is_app_admin" :title="$t('admin')" :min-width="100" align="center">
           <template #default="{row}">
             <a-icon type="check" v-if="row.is_app_admin" />
           </template>
         </vxe-table-column>
 
-        <vxe-table-column field="id" title="继承自" :min-width="150">
+        <vxe-table-column field="id" :title="$t('acl.inheritedFrom')" :min-width="150">
           <template #default="{row}">
             <a-tag color="cyan" v-for="role in id2parents[row.id]" :key="role.id">{{ role.name }}</a-tag>
           </template>
@@ -54,12 +55,12 @@
 
         <vxe-table-column
           field="uid"
-          title="虚拟角色"
-          :width="100"
+          :title="$t('acl.visualRole')"
+          :width="120"
           align="center"
           :filters="[
-            { label: '是', value: 1 },
-            { label: '否', value: 0 },
+            { label: $t('yes'), value: 1 },
+            { label: $t('no'), value: 0 },
           ]"
           :filterMultiple="false"
           :filter-method="
@@ -69,14 +70,14 @@
           "
         >
           <template #default="{row}">
-            {{ row.uid ? '否' : '是' }}
+            {{ row.uid ? $t('no') : $t('yes') }}
           </template>
         </vxe-table-column>
 
-        <vxe-table-column field="action" title="操作" :width="120" fixed="right">
+        <vxe-table-column field="action" :title="$t('operation')" :width="120" fixed="right">
           <template #default="{row}">
             <a-space>
-              <a-tooltip title="资源列表">
+              <a-tooltip :title="$t('acl.resourceList')">
                 <a
                   v-if="$route.name !== 'acl_roles'"
                   @click="handleDisplayUserResource(row)"
@@ -85,12 +86,18 @@
                 /></a>
               </a-tooltip>
               <a-tooltip
-                title="用户列表"
+                :title="$t('acl.userList')"
                 v-if="!row.uid"
               ><a @click="handleDisplayUserUnderRole(row)"><a-icon type="team"/></a
               ></a-tooltip>
               <a @click="handleEdit(row)"><a-icon type="edit"/></a>
-              <a-popconfirm title="确认删除?" @confirm="handleDelete(row)" @cancel="cancel" okText="是" cancelText="否">
+              <a-popconfirm
+                :title="$t('confirmDelete')"
+                @confirm="handleDelete(row)"
+                @cancel="cancel"
+                :okText="$t('yes')"
+                :cancelText="$t('no')"
+              >
                 <a style="color: red"><a-icon type="delete"/></a>
               </a-popconfirm>
             </a-space>
@@ -138,52 +145,6 @@ export default {
         currentPage: 1,
         pageSize: 50,
       },
-      tableColumns: [
-        {
-          title: '角色名',
-          field: 'name',
-          sortable: true,
-          minWidth: '150px',
-          fixed: 'left',
-          showOverflow: 'tooltip',
-        },
-        {
-          title: '管理员',
-          field: 'is_app_admin',
-          minWidth: '100px',
-          align: 'center',
-          slots: { default: 'is_app_admin_default' },
-        },
-        {
-          title: '继承自',
-          field: 'id',
-          minWidth: '150px',
-          slots: { default: 'inherit_default' },
-        },
-        {
-          title: '虚拟角色',
-          field: 'uid',
-          minWidth: '100px',
-          align: 'center',
-          filters: [
-            { label: '是', value: 1 },
-            { label: '否', value: 0 },
-          ],
-          filterMultiple: false,
-          filterMethod: ({ value, row }) => {
-            return value === !row.uid
-          },
-          slots: { default: 'isVisualRole_default' },
-        },
-        {
-          title: '操作',
-          minWidth: '280px',
-          field: 'action',
-          fixed: 'right',
-          slots: { default: 'action_default' },
-        },
-      ],
-      btnName: '新增虚拟角色',
       is_all: this.$route.name === 'acl_roles',
       tableData: [],
       allRoles: [],
@@ -286,15 +247,10 @@ export default {
 
     deleteRole(id) {
       deleteRoleById(id, { app_id: this.$route.name.split('_')[0] }).then((res) => {
-        this.$message.success(`删除成功`)
+        this.$message.success(this.$t('deleteSuccess'))
         this.handleOk()
       })
-      // .catch(err => this.requestFailed(err))
     },
-    // requestFailed(err) {
-    //   const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
-    //   this.$message.error(`${msg}`)
-    // },
     cancel(e) {
       return false
     },
