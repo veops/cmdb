@@ -174,7 +174,7 @@
       <a-tooltip :title="$t('delete')">
         <a class="operation" @click="handleDeleteRule(item)"><ops-icon type="icon-xianxing-delete"/></a>
       </a-tooltip>
-      <a-tooltip :title="$t('cmdbFilterComp.addHere')" :needAddHere="needAddHere">
+      <a-tooltip :title="$t('cmdbFilterComp.addHere')" v-if="needAddHere">
         <a class="operation" @click="handleAddRuleAt(item)"><a-icon type="plus-circle"/></a>
       </a-tooltip>
     </a-space>
