@@ -385,6 +385,9 @@ class DepartmentCRUD(object):
 
             d['employee_count'] = len(list(filter(lambda e: e['department_id'] in d_ids, all_employee_list)))
 
+            if int(department_parent_id) == -1:
+                d['department_name'] = ErrFormat.company_wide
+
         return all_departments, department_id_list
 
     @staticmethod
