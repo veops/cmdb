@@ -24,7 +24,15 @@ def get_all_department_list(to_dict=True):
         *criterion
     ).order_by(Department.department_id.asc())
     results = query.all()
-    return [r.to_dict() for r in results] if to_dict else results
+    if to_dict:
+        datas = []
+        for r in results:
+            d = r.to_dict()
+            if r.department_id == 0:
+                d['department_name'] = ErrFormat.company_wide
+            datas.append(d)
+        return datas
+    return results
 
 
 def get_all_employee_list(block=0, to_dict=True):
