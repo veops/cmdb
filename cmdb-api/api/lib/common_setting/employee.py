@@ -296,6 +296,8 @@ class EmployeeCRUD(object):
         for r in pagination.items:
             d = r.Employee.to_dict()
             d['department_name'] = r.Department.department_name if r.Department else ''
+            if r.Employee.department_id == 0:
+                d['department_name'] = ErrFormat.company_wide
             employees.append(d)
 
         return {
