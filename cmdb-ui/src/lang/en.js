@@ -110,8 +110,8 @@ export default {
         total: '{range0}-{range1} of {total} items'
     },
     topMenu: {
-        personalCenter: 'Personal Center',
-        logout: 'logout',
+        personalCenter: 'My Profile',
+        logout: 'Logout',
         confirmLogout: 'Are you sure to log out?'
     },
     cmdbFilterComp: {

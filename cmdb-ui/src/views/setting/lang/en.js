@@ -1,6 +1,6 @@
 const cs_en = {
     menu: {
-      person: 'Personal Center',
+      person: 'My Profile',
       companyInfo: 'Company Info',
       companyStructure: 'Company Structure',
       notice: 'Notification Settings',
