@@ -290,7 +290,7 @@ export default {
           const description = item.current?.description === undefined ? this.$t('acl.none') : item.current?.description
           const permission =
             item.extra.permission_ids?.current === undefined ? this.$t('acl.none') : item.extra.permission_ids?.current
-          item.changeDescription = `${this.$t('acl.addReourceType')}：${item.current.name}\n${this.$t(
+          item.changeDescription = `${this.$t('acl.addResourceType')}：${item.current.name}\n${this.$t(
             'desc'
           )}：${description}\n${this.$t('acl.permission')}：${permission}`
           break

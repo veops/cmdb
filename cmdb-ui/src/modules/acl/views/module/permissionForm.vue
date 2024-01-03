@@ -1,7 +1,7 @@
 <template>
   <CustomDrawer
     :closable="false"
-    :title="$t('acl.addReourceType')"
+    :title="$t('acl.addResourceType')"
     :visible="drawerVisible"
     @close="onClose"
     placement="right"

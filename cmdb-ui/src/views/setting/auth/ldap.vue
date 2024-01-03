@@ -53,7 +53,7 @@ export default {
     rules() {
       return {
         enable: [{ required: true }],
-        ldap_server: [{ required: true, message: this.$t('cs.auth.ldap.domainPlaceholder') }],
+        ldap_server: [{ required: true, message: this.$t('cs.auth.ldap.serverAddressPlaceholder') }],
       }
     }
   },
