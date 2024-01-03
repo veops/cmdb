@@ -85,7 +85,7 @@ class DepartmentIDView(APIView):
 class DepartmentParentView(APIView):
     url_prefix = (f'{prefix}/allow_parent',)
 
-    def put(self):
+    def get(self):
         department_id = request.args.get('department_id', None)
         if department_id is None:
             abort(400, ErrFormat.department_id_is_required)
