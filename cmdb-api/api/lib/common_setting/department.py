@@ -24,7 +24,15 @@ def get_all_department_list(to_dict=True):
         *criterion
     ).order_by(Department.department_id.asc())
     results = query.all()
-    return [r.to_dict() for r in results] if to_dict else results
+    if to_dict:
+        datas = []
+        for r in results:
+            d = r.to_dict()
+            if r.department_id == 0:
+                d['department_name'] = ErrFormat.company_wide
+            datas.append(d)
+        return datas
+    return results
 
 
 def get_all_employee_list(block=0, to_dict=True):
@@ -101,6 +109,7 @@ class DepartmentTree(object):
                 employees = self.get_employees_by_d_id(department_id)
 
             top_d['employees'] = employees
+            top_d['department_name'] = ErrFormat.company_wide
             if len(sub_deps) == 0:
                 top_d[sub_departments_column_name] = []
                 d_list.append(top_d)
@@ -313,6 +322,7 @@ class DepartmentCRUD(object):
         tree_list = []
 
         for top_d in top_deps:
+            top_d['department_name'] = ErrFormat.company_wide
             tree = Tree()
             identifier_root = top_d['department_id']
             tree.create_node(
@@ -382,6 +392,9 @@ class DepartmentCRUD(object):
             d_ids = DepartmentCRUD.get_department_id_list_by_root(d['department_id'], tree_list)
 
             d['employee_count'] = len(list(filter(lambda e: e['department_id'] in d_ids, all_employee_list)))
+
+            if int(department_parent_id) == -1:
+                d['department_name'] = ErrFormat.company_wide
 
         return all_departments, department_id_list
 
