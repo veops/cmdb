@@ -30,7 +30,7 @@
         <!-- 1 -->
         <vxe-table-column
           field="name"
-          :title="$t('acl.resoureType')"
+          :title="$t('acl.resourceType')"
           :min-width="175"
           fixed="left"
           show-overflow

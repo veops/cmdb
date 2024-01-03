@@ -1,4 +1,4 @@
-<template>
+ <template>
   <CustomDrawer
     width="800px"
     placement="left"
@@ -12,7 +12,7 @@
         <a-select-option v-for="type in resourceTypes" :value="type.id" :key="type.id">{{ type.name }}</a-select-option>
       </a-select>
     </a-form-item>
-    <vxe-table
+    <ops-table
       size="mini"
       stripe
       class="ops-stripe-table"
@@ -43,7 +43,7 @@
               v-model="option.data"
               @input="$panel.changeOption($event, !!option.data, option)"
               @keyup.enter="$panel.confirmFilter()"
-              placeholder="按回车确认筛选"
+              :placeholder="$t('acl.pressEnter')"
             />
           </template>
         </template>
@@ -53,11 +53,7 @@
           <a-tag color="cyan" v-for="(r, index) in row.permissions" :key="index">{{ r }}</a-tag>
         </template>
       </vxe-column>
-      <template slot="empty">
-        <img :src="require(`@/assets/data_empty.png`)" />
-        <p style="font-size: 14px; line-height: 17px; color: rgba(0, 0, 0, 0.6)">暂无数据</p>
-      </template>
-    </vxe-table>
+    </ops-table>
   </CustomDrawer>
 </template>
 <script>
@@ -82,7 +78,7 @@ export default {
   },
   computed: {
     ...mapState({
-      windowHeight: state => state.windowHeight,
+      windowHeight: (state) => state.windowHeight,
     }),
   },
   mounted() {
@@ -97,7 +93,7 @@ export default {
     loadResourceTypes() {
       this.resourceTypes = []
       const appId = this.$route.name.split('_')[0]
-      searchResourceType({ app_id: appId }).then(res => {
+      searchResourceType({ app_id: appId }).then((res) => {
         this.resourceTypes = res.groups
         if (res.groups && res.groups.length > 0) {
           this.typeSelected = res.groups[0].id
@@ -115,7 +111,7 @@ export default {
         searchPermResourceByRoleId(this.rid, {
           resource_type_id: this.typeSelected,
           app_id: this.$route.name.split('_')[0],
-        }).then(res => {
+        }).then((res) => {
           this.records = res.resources
         })
       }
@@ -133,8 +129,8 @@ export default {
     },
     copyResourceName() {
       const val = this.records
-        .filter(item => item.name.toLowerCase().includes(this.filterName.toLowerCase()))
-        .map(item => item.name)
+        .filter((item) => item.name.toLowerCase().includes(this.filterName.toLowerCase()))
+        .map((item) => item.name)
         .join('\n')
 
       this.copy(val, () => {
