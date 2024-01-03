@@ -48,6 +48,7 @@
     "vue-codemirror": "^4.0.6",
     "vue-cropper": "^0.6.2",
     "vue-grid-layout": "2.3.12",
+    "vue-i18n": "8.28.2",
     "vue-infinite-scroll": "^2.0.2",
     "vue-json-editor": "^1.4.3",
     "vue-ls": "^3.2.1",
