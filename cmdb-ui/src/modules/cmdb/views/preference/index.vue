@@ -16,7 +16,7 @@
               height: '23px',
               fontSize: '14px',
             }"
-          />个</span
+          /></span
         >
         <span
           class="cmdb-preference-left-card-content"
@@ -31,7 +31,7 @@
               height: '23px',
               fontSize: '14px',
             }"
-          />个</span
+          /></span
         >
       </div>
       <div class="cmdb-preference-group" v-for="(group, index) in myPreferences" :key="group.name">

@@ -104,12 +104,15 @@ export default {
     max: '最大值',
     min: '最小值',
     visual: '虚拟',
+    default: '默认',
+    tip: '提示',
     pagination: {
         total: '当前展示 {range0}-{range1} 条数据， 共 {total} 条'
     },
     topMenu: {
         personalCenter: '个人中心',
         logout: '退出登录',
+        confirmLogout: '确认退出登录吗？'
     },
     cmdbFilterComp: {
         conditionFilter: '条件过滤',
@@ -139,7 +142,8 @@ export default {
         multicolor: '多色',
         custom: '自定义',
         preview: '预览',
-        sizeLimit: '图片大小不可超过2MB！'
+        sizeLimit: '图片大小不可超过2MB！',
+        nodata: '暂无自定义图标，点击此处上传'
     },
     cmdb: cmdb_zh,
     cs: cs_zh,

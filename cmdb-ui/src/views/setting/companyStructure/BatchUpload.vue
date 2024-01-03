@@ -20,19 +20,24 @@
     </div>
     <template v-if="currentStep === 1">
       <a-upload :multiple="false" :customRequest="customRequest" accept=".xlsx" :showUploadList="false">
-        <a-button :style="{ marginBottom: '20px' }" type="primary"> <a-icon type="upload" />选择文件</a-button>
+        <a-button :style="{ marginBottom: '20px' }" type="primary"> <a-icon type="upload" />{{ $t('cs.companyStructure.selectFile') }}</a-button>
       </a-upload>
       <p><a @click="download">{{ $t('cs.companyStructure.clickDownloadImportTemplate') }}</a></p>
     </template>
     <div
-      :style="{ height: '60px', display: 'flex', justifyContent: 'center', alignItems: 'center' }"
+      :style="{
+        height: '60px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        whiteSpace: 'pre-wrap',
+      }"
       v-if="currentStep === 3"
     >
-      导入总数据{{ allCount }}条, 导入成功 <span :style="{ color: '#2362FB' }">{{ allCount - errorCount }}</span> 条,
-      {{ $t('cs.companyStructure.importSuccess', {allCount: allCount}) }}<span :style="{ color: '#2362FB' }">{{ allCount - errorCount }}</span>
-      {{ $t('cs.companyStructure.count')}},
-      {{ $t('cs.companyStructure.importError') }}<span :style="{ color: '#D81E06' }">{{ errorCount }}</span
-      >{{ $t('cs.companyStructure.count')}}
+      {{ $t('cs.companyStructure.importSuccess', { allCount: allCount })
+      }}<span :style="{ color: '#2362FB' }"> {{ allCount - errorCount }} </span>{{ $t('cs.companyStructure.count') }},
+      {{ $t('cs.companyStructure.importFailed') }}<span :style="{ color: '#D81E06' }"> {{ errorCount }} </span
+      >{{ $t('cs.companyStructure.count') }}
     </div>
     <vxe-table
       v-if="currentStep === 2 || has_error"
@@ -121,39 +126,6 @@ export default {
         icon: 'icon-shidi-queren',
       },
     ]
-    const dfc_importParamsList = [
-      'email',
-      'username',
-      'nickname',
-      'password',
-      'sex',
-      'mobile',
-      'position_name',
-      'department_name',
-      'current_company',
-      'dfc_entry_date',
-      'entry_date',
-      'is_internship',
-      'leave_date',
-      'id_card',
-      'nation',
-      'id_place',
-      'party',
-      'household_registration_type',
-      'hometown',
-      'marry',
-      'max_degree',
-      'emergency_person',
-      'emergency_phone',
-      'bank_card_number',
-      'bank_card_name',
-      'opening_bank',
-      'account_opening_location',
-      'school',
-      'major',
-      'education',
-      'graduation_year',
-    ]
     const common_importParamsList = [
       'email',
       'username',
@@ -187,7 +159,6 @@ export default {
     ]
     return {
       stepList,
-      dfc_importParamsList,
       common_importParamsList,
       visible: false,
       currentStep: 1,
