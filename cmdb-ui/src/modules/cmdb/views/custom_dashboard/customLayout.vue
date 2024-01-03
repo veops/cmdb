@@ -114,7 +114,7 @@
         type="primary"
         icon="plus"
       >
-        定制仪表盘
+        {{ $t('cmdb.menu.customDashboard') }}
       </a-button>
       <span v-else>{{ $t('cmdb.custom_dashboard.noCustomDashboard') }}</span>
     </div>

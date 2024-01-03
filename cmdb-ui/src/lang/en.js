@@ -104,12 +104,15 @@ export default {
     max: 'Max',
     min: 'Min',
     visual: 'Visual',
+    default: 'default',
+    tip: 'Tip',
     pagination: {
         total: '{range0}-{range1} of {total} items'
     },
     topMenu: {
         personalCenter: 'Personal Center',
         logout: 'logout',
+        confirmLogout: 'Are you sure to log out?'
     },
     cmdbFilterComp: {
         conditionFilter: 'Conditional filtering',
@@ -139,7 +142,8 @@ export default {
         multicolor: 'Multicolor',
         custom: 'Custom',
         preview: 'Preview',
-        sizeLimit: 'The image size cannot exceed 2MB!'
+        sizeLimit: 'The image size cannot exceed 2MB!',
+        nodata: 'There are currently no custom icons available. Click here to upload'
     },
     cmdb: cmdb_en,
     cs: cs_en,
