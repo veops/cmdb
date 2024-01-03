@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-12-26 09:41+0800\n"
+"POT-Creation-Date: 2024-01-03 11:39+0800\n"
 "PO-Revision-Date: 2023-12-25 20:21+0800\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -687,6 +687,10 @@ msgstr "通用数据不支持auth类型: {}"
 #: api/lib/common_setting/resp_format.py:80
 msgid "LDAP test username required"
 msgstr "LDAP测试用户名必填"
+
+#: api/lib/common_setting/resp_format.py:82
+msgid "Company wide"
+msgstr "全公司"
 
 #: api/lib/perm/acl/resp_format.py:9
 msgid "login successful"

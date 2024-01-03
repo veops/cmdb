@@ -66,7 +66,7 @@ class ErrFormat(CommonErrFormat):
     notice_platform_existed = _l("Notice platform {} existed")  # {} 已存在
     notice_not_existed = _l("Notice {} not existed")  # {} 配置项不存在
     notice_please_config_messenger_first = _l("Notice please config messenger first")  # 请先配置messenger URL
-    notice_bind_err_with_empty_mobile = _l("Notice bind err with empty mobile") # 绑定错误，手机号为空
+    notice_bind_err_with_empty_mobile = _l("Notice bind err with empty mobile")  # 绑定错误，手机号为空
     notice_bind_failed = _l("Notice bind failed: {}")  # 绑定失败: {}
     notice_bind_success = _l("Notice bind success")  # 绑定成功
     notice_remove_bind_success = _l("Notice remove bind success")  # 解绑成功
@@ -78,3 +78,5 @@ class ErrFormat(CommonErrFormat):
     ldap_test_unknown_error = _l("LDAP test unknown error: {}")  # LDAP测试未知错误: {}
     common_data_not_support_auth_type = _l("Common data not support auth type: {}")  # 通用数据不支持auth类型: {}
     ldap_test_username_required = _l("LDAP test username required")  # LDAP测试用户名必填
+
+    company_wide = _l("Company wide")  # 全公司
