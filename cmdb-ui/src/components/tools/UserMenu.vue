@@ -68,8 +68,8 @@ export default {
       const that = this
 
       this.$confirm({
-        title: '提示',
-        content: '真的要注销登录吗 ?',
+        title: this.$t('tip'),
+        content: this.$t('topMenu.confirmLogout'),
         onOk() {
           // localStorage.removeItem('ops_cityps_currentId')
           localStorage.clear()

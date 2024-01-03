@@ -25,18 +25,6 @@
         <a-input v-model="batchForm.value" />
       </a-form-model-item>
     </a-form-model>
-    <a-form-model v-else-if="batchProps.type === 'annual_leave'">
-      <a-form-model-item :label="$t('cs.companyStructure.editAnnualLeave')">
-        <a-input-number
-          :min="0"
-          :step="1"
-          :style="{ width: '100%' }"
-          v-model="batchForm.value"
-          :placeholder="$t('cs.companyStructure.annualLeavePlaceholder')"
-          :formatter="(value) => `${value} $t('cs.companyStructure.day')`"
-        />
-      </a-form-model-item>
-    </a-form-model>
     <a-form-model v-else-if="batchProps.type === 'password'" ref="batchForm" :model="batchForm" :rules="rules">
       <a-form-model-item :label="$t('cs.companyStructure.resetPassword')" prop="password">
         <a-input-password v-model="batchForm.value" />
@@ -75,7 +63,7 @@ export default {
     const validatePass = (rule, value, callback) => {
       console.log(this.batchForm)
       if (this.batchForm.value === '') {
-        callback(new Error(this.$t('cs.companyStructure.password_placeholder')))
+        callback(new Error(this.$t('cs.companyStructure.passwordPlaceholder')))
       } else {
         this.$refs.batchForm.validateField('repeatPassword')
         callback()

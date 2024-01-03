@@ -103,9 +103,9 @@ export default {
     },
     httpMap() {
       return {
-        [this.$t('cmdb.components.aliyun')]: { name: 'aliyun' },
-        [this.$t('cmdb.components.tencentcloud')]: { name: 'tencentcloud' },
-        [this.$t('cmdb.components.huaweicloud')]: { name: 'huaweicloud' },
+        阿里云: { name: 'aliyun' },
+        腾讯云: { name: 'tencentcloud' },
+        华为云: { name: 'huaweicloud' },
         AWS: { name: 'aws' },
       }
     },

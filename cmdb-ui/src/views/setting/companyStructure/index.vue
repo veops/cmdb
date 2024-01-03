@@ -181,8 +181,6 @@
                   <a-divider type="vertical"/>
                   <span @click="openBatchModal('position_name')">{{ $t('cs.companyStructure.editPosition') }}</span>
                   <a-divider type="vertical"/>
-                  <span @click="openBatchModal('annual_leave')">{{ $t('cs.companyStructure.editAnnualLeave') }}</span>
-                  <a-divider type="vertical"/>
                   <span @click="openBatchModal('password')">{{ $t('cs.companyStructure.resetPassword') }}</span>
                   <a-divider type="vertical"/>
                   <span @click="openBatchModal('block', null, 1)">{{ $t('cs.companyStructure.block') }}</span>

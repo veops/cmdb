@@ -92,7 +92,7 @@
             :show-upload-list="false"
             accept=".svg,.png,.jpg,.jpeg"
           >
-            <a> 暂无自定义图标，点击此处上传 </a>
+            <a> {{ $t('customIconSelect.nodata') }} </a>
           </a-upload>
         </a-empty>
       </div>

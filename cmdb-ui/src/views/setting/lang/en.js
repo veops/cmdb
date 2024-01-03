@@ -50,7 +50,7 @@ const cs_en = {
     selectFile: 'Select File',
     clickDownloadImportTemplate: 'Click to download Employee Import Template',
     importSuccess: 'Imported total {allCount} items, imported successfully',
-    importFailed: 'Import failed',
+    importFailed: 'import failed',
     count: 'items',
     email: 'Email',
     emailPlaceholder: 'Please enter email',
