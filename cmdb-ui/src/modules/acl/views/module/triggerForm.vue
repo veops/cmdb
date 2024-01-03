@@ -74,7 +74,7 @@
           ></el-option>
         </el-select>
       </a-form-item>
-      <a-form-item :label="$t('acl.enable') / $t('acl.disable')">
+      <a-form-item :label="`${$t('acl.enable')} / ${$t('acl.disable')}`">
         <a-switch v-decorator="['enabled', { rules: [], valuePropName: 'checked', initialValue: true }]" />
       </a-form-item>
     </a-form>

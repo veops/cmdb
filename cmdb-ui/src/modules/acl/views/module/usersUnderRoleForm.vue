@@ -3,7 +3,7 @@
     <a-form-item :label="$t('acl.addUser')" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
       <a-row>
         <a-col span="15">
-          <el-select v-model="selectedChildrenRole" multiple collapse-tags size="small" filterable>
+          <el-select v-model="selectedChildrenRole" multiple collapse-tags size="small" filterable :placeholder="$t('placeholder2')">
             <el-option
               class="drop-down-render"
               v-for="role in allRoles"
