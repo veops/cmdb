@@ -48,6 +48,7 @@ const cs_en = {
     batchImport: 'Batch Import',
     batchEdit: 'Batch Edit',
     selectFile: 'Select File',
+    downloadTemplateName: 'Employee Import Template',
     clickDownloadImportTemplate: 'Click to download Employee Import Template',
     importSuccess: 'Imported total {allCount} items, imported successfully',
     importFailed: 'import failed',

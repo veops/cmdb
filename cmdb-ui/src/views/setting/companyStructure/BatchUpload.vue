@@ -399,7 +399,7 @@ export default {
       ]
       data[1] = data[1].filter((item) => item['v'] !== '目前所属主体')
       data[1] = data[1].filter((item) => item['v'] !== '初始入职日期')
-      downloadExcel(data, '员工导入模板')
+      downloadExcel(data, this.$t('cs.companyStructure.downloadTemplateName'))
     },
     customRequest(data) {
       this.fileList = [data.file]
