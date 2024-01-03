@@ -129,45 +129,7 @@ export default {
         start: '',
         end: '',
       },
-    }
-  },
-  async created() {
-    await this.getTable(this.queryParams)
-  },
-  updated() {
-    this.$refs.xTable.$el.querySelector('.vxe-table--body-wrapper').scrollTop = 0
-  },
-  watch: {
-    '$route.name': async function(oldName, newName) {
-      this.app_id = this.$route.name.split('_')[0]
-      await this.getTable(this.queryParams)
-    },
-    allResources: {
-      deep: true,
-      immediate: true,
-      handler(val) {
-        this.permissionTableAttrList[4].choice_value = val
-      },
-    },
-  },
-  computed: {
-    operateTypeMap() {
-      return new Map([
-        ['grant', this.$t('grant')],
-        ['revoke', this.$t('acl.cancel')],
-      ])
-    },
-    windowHeight() {
-      return this.$store.state.windowHeight
-    },
-    windowHeightMinus() {
-      return this.isExpand ? 374 : 310
-    },
-    tableDataLength() {
-      return this.tableData.length
-    },
-    permissionTableAttrList() {
-      return [
+      permissionTableAttrList: [
         {
           alias: this.$t('acl.date'),
           is_choice: false,
@@ -209,7 +171,43 @@ export default {
           value_type: '2',
           choice_value: [{ [this.$t('grant')]: 'grant' }, { [this.$t('acl.cancel')]: 'revoke' }],
         },
-      ]
+      ],
+    }
+  },
+  async created() {
+    await this.getTable(this.queryParams)
+  },
+  updated() {
+    this.$refs.xTable.$el.querySelector('.vxe-table--body-wrapper').scrollTop = 0
+  },
+  watch: {
+    '$route.name': async function(oldName, newName) {
+      this.app_id = this.$route.name.split('_')[0]
+      await this.getTable(this.queryParams)
+    },
+    allResources: {
+      deep: true,
+      immediate: true,
+      handler(val) {
+        this.permissionTableAttrList[4].choice_value = val
+      },
+    },
+  },
+  computed: {
+    operateTypeMap() {
+      return new Map([
+        ['grant', this.$t('grant')],
+        ['revoke', this.$t('acl.cancel')],
+      ])
+    },
+    windowHeight() {
+      return this.$store.state.windowHeight
+    },
+    windowHeightMinus() {
+      return this.isExpand ? 374 : 310
+    },
+    tableDataLength() {
+      return this.tableData.length
     },
   },
   methods: {

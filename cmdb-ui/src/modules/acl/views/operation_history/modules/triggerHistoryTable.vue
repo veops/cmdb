@@ -96,44 +96,7 @@ export default {
         start: '',
         end: '',
       },
-    }
-  },
-  async created() {
-    this.$watch(
-      function() {
-        return this.triggerTableAttrList[3].choice_value
-      },
-      function() {
-        delete this.$refs.child.queryParams.trigger_id
-      }
-    )
-    await Promise.all([this.getAllApps(), this.getAllUsers()])
-    await this.getTable(this.queryParams)
-  },
-  updated() {
-    this.$refs.xTable.$el.querySelector('.vxe-table--body-wrapper').scrollTop = 0
-  },
-  computed: {
-    operateTypeMap() {
-      return new Map([
-        ['create', this.$t('create')],
-        ['update', this.$t('update')],
-        ['delete', this.$t('delete')],
-        ['trigger_apply', this.$t('acl.apply')],
-        ['trigger_cancel', this.$t('cancel')],
-      ])
-    },
-    windowHeight() {
-      return this.$store.state.windowHeight
-    },
-    windowHeightMinus() {
-      return this.isExpand ? 374 : 310
-    },
-    tableDataLength() {
-      return this.tableData.length
-    },
-    triggerTableAttrList() {
-      return [
+      triggerTableAttrList: [
         {
           alias: this.$t('acl.date'),
           is_choice: false,
@@ -174,7 +137,42 @@ export default {
             { [this.$t('cancel')]: 'trigger_cancel' },
           ],
         },
-      ]
+      ],
+    }
+  },
+  async created() {
+    this.$watch(
+      function() {
+        return this.triggerTableAttrList[3].choice_value
+      },
+      function() {
+        delete this.$refs.child.queryParams.trigger_id
+      }
+    )
+    await Promise.all([this.getAllApps(), this.getAllUsers()])
+    await this.getTable(this.queryParams)
+  },
+  updated() {
+    this.$refs.xTable.$el.querySelector('.vxe-table--body-wrapper').scrollTop = 0
+  },
+  computed: {
+    operateTypeMap() {
+      return new Map([
+        ['create', this.$t('create')],
+        ['update', this.$t('update')],
+        ['delete', this.$t('delete')],
+        ['trigger_apply', this.$t('acl.apply')],
+        ['trigger_cancel', this.$t('cancel')],
+      ])
+    },
+    windowHeight() {
+      return this.$store.state.windowHeight
+    },
+    windowHeightMinus() {
+      return this.isExpand ? 374 : 310
+    },
+    tableDataLength() {
+      return this.tableData.length
     },
   },
   methods: {
@@ -292,7 +290,6 @@ export default {
                 const str = ` 【 ${key} : -> ${newVal} 】 `
                 item.changeDescription += str
               } else {
-                const str = ` 【 ${key} : ${oldVal} -> ${newVal} 】 `
                 item.changeDescription += ` 【 ${key} :${oldVal} -> ${newVal} 】 `
               }
             }
