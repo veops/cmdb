@@ -99,42 +99,7 @@ export default {
         start: '',
         end: '',
       },
-    }
-  },
-  async created() {
-    this.$watch(
-      function () {
-        return this.resourceTableAttrList[3].choice_value
-      },
-      function () {
-        delete this.$refs.child.queryParams.link_id
-      }
-    )
-    await Promise.all([this.getAllApps(), this.getAllUsers()])
-    await this.getTable(this.queryParams)
-  },
-  updated() {
-    this.$refs.xTable.$el.querySelector('.vxe-table--body-wrapper').scrollTop = 0
-  },
-  computed: {
-    operateTypeMap() {
-      return new Map([
-        ['create', this.$t('create')],
-        ['update', this.$t('update')],
-        ['delete', this.$t('delete')],
-      ])
-    },
-    windowHeight() {
-      return this.$store.state.windowHeight
-    },
-    windowHeightMinus() {
-      return this.isExpand ? 374 : 310
-    },
-    tableDataLength() {
-      return this.tableData.length
-    },
-    resourceTableAttrList() {
-      return [
+      resourceTableAttrList: [
         {
           alias: this.$t('acl.date'),
           is_choice: false,
@@ -167,9 +132,46 @@ export default {
           is_choice: true,
           name: 'operate_type',
           value_type: '2',
-          choice_value: [{ [this.$t('create')]: 'create' }, { [this.$t('update')]: 'update' }, { [this.$t('delete')]: 'delete' }],
+          choice_value: [
+            { [this.$t('create')]: 'create' },
+            { [this.$t('update')]: 'update' },
+            { [this.$t('delete')]: 'delete' },
+          ],
         },
-      ]
+      ],
+    }
+  },
+  async created() {
+    this.$watch(
+      function() {
+        return this.resourceTableAttrList[3].choice_value
+      },
+      function() {
+        delete this.$refs.child.queryParams.link_id
+      }
+    )
+    await Promise.all([this.getAllApps(), this.getAllUsers()])
+    await this.getTable(this.queryParams)
+  },
+  updated() {
+    this.$refs.xTable.$el.querySelector('.vxe-table--body-wrapper').scrollTop = 0
+  },
+  computed: {
+    operateTypeMap() {
+      return new Map([
+        ['create', this.$t('create')],
+        ['update', this.$t('update')],
+        ['delete', this.$t('delete')],
+      ])
+    },
+    windowHeight() {
+      return this.$store.state.windowHeight
+    },
+    windowHeightMinus() {
+      return this.isExpand ? 374 : 310
+    },
+    tableDataLength() {
+      return this.tableData.length
     },
   },
   methods: {
