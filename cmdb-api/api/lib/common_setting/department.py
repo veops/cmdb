@@ -255,7 +255,7 @@ class DepartmentCRUD(object):
             return abort(400, ErrFormat.acl_update_role_failed.format(str(e)))
 
         try:
-            existed.update(**kwargs)
+            return existed.update(**kwargs)
         except Exception as e:
             return abort(400, str(e))
 
