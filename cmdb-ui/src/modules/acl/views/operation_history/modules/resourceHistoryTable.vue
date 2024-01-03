@@ -33,7 +33,7 @@
           </a-tag>
         </template>
       </vxe-column>
-      <vxe-column field="link_id" :title="$t('acl.resouceName')">
+      <vxe-column field="link_id" :title="$t('acl.resourceName')">
         <template #default="{ row }">
           <span>
             {{ row.current.name || row.origin.name }}
