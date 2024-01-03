@@ -1,4 +1,4 @@
-<template>
+ <template>
   <CustomDrawer
     @close="handleClose"
     width="500"
@@ -8,14 +8,23 @@
   >
     <a-form :form="form" :label-col="{ span: 6 }" :wrapper-col="{ span: 15 }">
       <a-form-item :label="$t('name')">
-        <a-input size="large" v-decorator="['name', { rules: [{ required: true, message: $t('acl.triggerNameInput') }] }]">
+        <a-input
+          size="large"
+          v-decorator="['name', { rules: [{ required: true, message: $t('acl.triggerNameInput') }] }]"
+        >
         </a-input>
       </a-form-item>
       <a-form-item :label="$t('acl.resourceName')">
         <a-input size="large" v-decorator="['wildcard']" :placeholder="$t('acl.triggerTips1')"> </a-input>
       </a-form-item>
       <a-form-item :label="$t('acl.creator')">
-        <el-select :style="{ width: '100%' }" filterable multiple v-decorator="['uid']">
+        <el-select
+          :style="{ width: '100%' }"
+          filterable
+          multiple
+          v-decorator="['uid']"
+          :placeholder="$t('placeholder2')"
+        >
           <template v-for="role in roles">
             <el-option v-if="role.uid" :key="role.id" :value="role.uid" :label="role.name">{{ role.name }}</el-option>
           </template>
@@ -25,6 +34,7 @@
         <el-select
           :style="{ width: '100%' }"
           @change="handleRTChange"
+          :placeholder="$t('placeholder2')"
           v-decorator="['resource_type_id', { rules: [{ required: true, message: $t('acl.pleaseSelectType') }] }]"
         >
           <el-option
@@ -43,6 +53,7 @@
           :style="{ width: '100%' }"
           filterable
           multiple
+          :placeholder="$t('placeholder2')"
           v-decorator="['roles', { rules: [{ required: true, message: $t('acl.role_placeholder2') }] }]"
         >
           <el-option v-for="role in roles" :key="role.id" :value="role.id" :label="role.name"></el-option>
@@ -50,6 +61,7 @@
       </a-form-item>
       <a-form-item :label="$t('acl.permission')">
         <el-select
+          :placeholder="$t('placeholder2')"
           :style="{ width: '100%' }"
           multiple
           v-decorator="['permissions', { rules: [{ required: true, message: $t('acl.permission_placeholder') }] }]"
@@ -62,7 +74,7 @@
           ></el-option>
         </el-select>
       </a-form-item>
-      <a-form-item :label="$t('acl.enable')/$t('acl.disable')">
+      <a-form-item :label="$t('acl.enable') / $t('acl.disable')">
         <a-switch v-decorator="['enabled', { rules: [], valuePropName: 'checked', initialValue: true }]" />
       </a-form-item>
     </a-form>

@@ -2,7 +2,7 @@
   <div class="acl-resource-types">
     <div class="acl-resource-types-header">
       <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem">{{
-        $t('acl.addReourceType')
+        $t('acl.addResourceType')
       }}</a-button>
       <a-input-search
         class="ops-input"

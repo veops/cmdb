@@ -240,7 +240,7 @@ export default {
       switch (operate_type) {
         // create
         case 'create': {
-          item.changeDescription = `${this.$t('acl.addReourceType')}：${item.current.name}\n${this.$t('desc')}：${
+          item.changeDescription = `${this.$t('acl.addResourceType')}：${item.current.name}\n${this.$t('desc')}：${
             item.current.description
           }\n${this.$t('acl.permission')}: ${item.extra.permission_ids.current}`
           break
