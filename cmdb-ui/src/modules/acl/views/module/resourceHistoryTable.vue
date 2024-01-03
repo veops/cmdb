@@ -112,6 +112,39 @@ export default {
         start: '',
         end: '',
       },
+      resourceTableAttrList: [
+        {
+          alias: this.$t('acl.date'),
+          is_choice: false,
+          name: 'datetime',
+          value_type: '3',
+        },
+        {
+          alias: this.$t('acl.operator'),
+          is_choice: true,
+          name: 'operate_uid',
+          value_type: '2',
+          choice_value: this.allUsers,
+        },
+        {
+          alias: this.$t('operation'),
+          is_choice: true,
+          name: 'operate_type',
+          value_type: '2',
+          choice_value: [
+            { [this.$t('create')]: 'create' },
+            { [this.$t('update')]: 'update' },
+            { [this.$t('delete')]: 'delete' },
+          ],
+        },
+        {
+          alias: this.$t('acl.resourceName'),
+          is_choice: true,
+          name: 'link_id',
+          value_type: '2',
+          choice_value: this.allResources,
+        },
+      ],
     }
   },
   async created() {
@@ -145,37 +178,6 @@ export default {
     },
     tableDataLength() {
       return this.tableData.length
-    },
-    resourceTableAttrList() {
-      return [
-        {
-          alias: this.$t('acl.date'),
-          is_choice: false,
-          name: 'datetime',
-          value_type: '3',
-        },
-        {
-          alias: this.$t('acl.operator'),
-          is_choice: true,
-          name: 'operate_uid',
-          value_type: '2',
-          choice_value: this.allUsers,
-        },
-        {
-          alias: this.$t('operation'),
-          is_choice: true,
-          name: 'operate_type',
-          value_type: '2',
-          choice_value: [{ [this.$t('create')]: 'create' }, { [this.$t('update')]: 'update' }, { [this.$t('delete')]: 'delete' }],
-        },
-        {
-          alias: this.$t('acl.resourceName'),
-          is_choice: true,
-          name: 'link_id',
-          value_type: '2',
-          choice_value: this.allResources,
-        },
-      ]
     },
   },
   methods: {

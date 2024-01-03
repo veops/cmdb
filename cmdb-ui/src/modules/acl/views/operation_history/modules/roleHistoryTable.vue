@@ -108,26 +108,7 @@ export default {
         start: '',
         end: '',
       },
-    }
-  },
-  computed: {
-    operateTypeMap() {
-      return new Map([
-        ['create', this.$t('create')],
-        ['update', this.$t('update')],
-        ['delete', this.$t('delete')],
-        ['role_relation_add', this.$t('acl.roleRelationAdd')],
-        ['role_relation_delete', this.$t('acl.roleRelationDelete')],
-      ])
-    },
-    windowHeight() {
-      return this.$store.state.windowHeight
-    },
-    tableDataLength() {
-      return this.tableData.length
-    },
-    roleTableAttrList() {
-      return [
+      roleTableAttrList: [
         {
           alias: this.$t('acl.date'),
           is_choice: false,
@@ -161,7 +142,24 @@ export default {
             { [this.$t('acl.roleRelationDelete')]: 'role_relation_delete' },
           ],
         },
-      ]
+      ],
+    }
+  },
+  computed: {
+    operateTypeMap() {
+      return new Map([
+        ['create', this.$t('create')],
+        ['update', this.$t('update')],
+        ['delete', this.$t('delete')],
+        ['role_relation_add', this.$t('acl.roleRelationAdd')],
+        ['role_relation_delete', this.$t('acl.roleRelationDelete')],
+      ])
+    },
+    windowHeight() {
+      return this.$store.state.windowHeight
+    },
+    tableDataLength() {
+      return this.tableData.length
     },
   },
   async created() {
@@ -294,7 +292,6 @@ export default {
                 const str = ` 【 ${key} : -> ${newVal} 】 `
                 item.description += str
               } else {
-                const str = ` 【 ${key} : ${oldVal} -> ${newVal} 】 `
                 item.description += ` 【 ${key} : ${oldVal} -> ${newVal} 】 `
               }
             }
@@ -329,7 +326,9 @@ export default {
           resourceMap.forEach((value, key) => {
             permsArr.push(`${id2resources[key].name}：${value}`)
           })
-          item.description = `${this.$t('acl.heir')}：${child_ids}\n${this.$t('acl.inheritedFrom')}：${parent_ids}\n${this.$t('acl.involvingRP')}：\n${permsArr.join(`\n`)}`
+          item.description = `${this.$t('acl.heir')}：${child_ids}\n${this.$t(
+            'acl.inheritedFrom'
+          )}：${parent_ids}\n${this.$t('acl.involvingRP')}：\n${permsArr.join(`\n`)}`
           break
         }
       }
