@@ -62,7 +62,7 @@ class DepartmentView(APIView):
 class DepartmentIDView(APIView):
     url_prefix = (f'{prefix}/<int:_id>',)
 
-    def get(self, _id):
+    def put(self, _id):
         form = DepartmentForm(MultiDict(request.json))
         if not form.validate():
             abort(400, ','.join(['{}: {}'.format(filed, ','.join(msg))
