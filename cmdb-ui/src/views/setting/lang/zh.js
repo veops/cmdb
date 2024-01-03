@@ -48,6 +48,7 @@ const cs_zh = {
     batchImport: '批量导入',
     batchEdit: '批量编辑',
     selectFile: '选择文件',
+    downloadTemplateName: '员工导入模板',
     clickDownloadImportTemplate: '点击下载《员工导入模板》',
     importSuccess: '导入总数据 {allCount} 条, 导入成功',
     importFailed: '导入失败',

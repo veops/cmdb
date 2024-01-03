@@ -373,66 +373,6 @@ export default {
         { label: this.$t('cs.companyStructure.departmentName'), value: 'department_name' },
         { label: this.$t('cs.companyStructure.positionName'), value: 'position_name' },
         { label: this.$t('cs.companyStructure.departmentDirector'), value: 'direct_supervisor_id' },
-        { label: this.$t('cs.companyStructure.annualLeave'), value: 'annual_leave' },
-        { label: this.$t('cs.companyStructure.currentCompany'), value: 'current_company' },
-        { label: this.$t('cs.companyStructure.dfcEntryDate'), value: 'dfc_entry_date' },
-        { label: this.$t('cs.companyStructure.entryDate'), value: 'entry_date' },
-        {
-          label: this.$t('cs.companyStructure.isInternship'),
-          value: 'is_internship',
-          is_choice: true,
-          choice_value: [{ label: this.$t('cs.companyStructure.fullTime'), value: 0 },
-            { label: this.$t('cs.companyStructure.internship'), value: 1 }]
-        },
-        { label: this.$t('cs.companyStructure.leaveDate'), value: 'leave_date' },
-        { label: this.$t('cs.companyStructure.idCard'), value: 'id_card' },
-        { label: this.$t('cs.companyStructure.nation'), value: 'nation' },
-        { label: this.$t('cs.companyStructure.idPlace'), value: 'id_place' },
-        {
-          label: this.$t('cs.companyStructure.party'),
-          value: 'party',
-          is_choice: true,
-          choice_value: [
-              { label: this.$t('cs.companyStructure.partyMember'), value: '党员' },
-            { label: this.$t('cs.companyStructure.member'), value: '团员' },
-            { label: this.$t('cs.companyStructure.masses'), value: '群众' }]
-        },
-        {
-          label: this.$t('cs.companyStructure.householdRegistrationType'),
-          value: 'household_registration_type',
-          is_choice: true,
-          choice_value: [{ label: this.$t('cs.companyStructure.town'), value: '城镇' }, { label: this.$t('cs.companyStructure.agriculture'), value: '农业' }]
-        },
-        { label: this.$t('cs.companyStructure.hometown'), value: 'hometown' },
-        {
-          label: this.$t('cs.companyStructure.marry'),
-          value: 'marry',
-          is_choice: true,
-          choice_value: [{ label: this.$t('cs.companyStructure.unmarried'), value: '未婚' }, { label: this.$t('cs.companyStructure.married'), value: '已婚' }]
-        },
-        {
-          label: this.$t('cs.companyStructure.maxDegree'),
-          value: 'max_degree',
-          is_choice: true,
-          choice_value: [{ label: this.$t('cs.companyStructure.phd'), value: '博士' }, { label: this.$t('cs.companyStructure.master'), value: '硕士' }, {
-            label: this.$t('cs.companyStructure.undergraduate'),
-            value: '本科'
-          }, { label: this.$t('cs.companyStructure.specialist'), value: '专科' }, { label: this.$t('cs.companyStructure.highSchool'), value: '高中' }]
-        },
-        { label: this.$t('cs.companyStructure.emergencyPerson'), value: 'emergency_person' },
-        { label: this.$t('cs.companyStructure.emergencyPhone'), value: 'emergency_phone' },
-        { label: this.$t('cs.companyStructure.bankCardNumber'), value: 'bank_card_number' },
-        { label: this.$t('cs.companyStructure.bankCardName'), value: 'bank_card_name' },
-        { label: this.$t('cs.companyStructure.openingBank'), value: 'opening_bank' },
-        { label: this.$t('cs.companyStructure.accountOpeningLocation'), value: 'account_opening_location' },
-        { label: this.$t('cs.companyStructure.birthDate'), value: 'birth_date' },
-        { label: this.$t('cs.companyStructure.nationalityRegion'), value: 'nationality_region' },
-        { label: this.$t('cs.companyStructure.birthPlace'), value: 'birth_place' },
-        { label: this.$t('cs.companyStructure.firstEntryDate'), value: 'first_entry_date' },
-        { label: this.$t('cs.companyStructure.estimatedDepartureDate'), value: 'estimated_departure_date' },
-        // { label: '角色', value: 'roles' },
-        { label: this.$t('cs.companyStructure.lastLogin'), value: 'last_login' },
-
       ]
     },
     sceneList () {
