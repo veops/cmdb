@@ -134,7 +134,7 @@
 <script>
 import { mapState } from 'vuex'
 import SearchForm from './searchForm'
-import Pager from './pager.vue'
+import Pager from '@/components/Pager'
 import { getCITypes } from '@/modules/cmdb/api/CIType'
 import { getRelationTable, getUsers } from '@/modules/cmdb/api/history'
 import { getRelationTypes } from '@/modules/cmdb/api/relationType'

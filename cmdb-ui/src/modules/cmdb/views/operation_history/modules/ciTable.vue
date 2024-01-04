@@ -102,7 +102,7 @@
 </template>
 <script>
 import { mapState } from 'vuex'
-import Pager from './pager.vue'
+import Pager from '@/components/Pager'
 import SearchForm from './searchForm.vue'
 import { getCIHistoryTable, getUsers } from '@/modules/cmdb/api/history'
 import { getCITypes } from '@/modules/cmdb/api/CIType'
