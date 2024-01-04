@@ -81,7 +81,7 @@
 <script>
 import _ from 'lodash'
 import debounce from 'lodash/debounce'
-import Pager from '../../module/pager.vue'
+import Pager from '@/components/Pager'
 import SearchForm from '../../module/searchForm.vue'
 import { searchApp } from '@/modules/acl/api/app'
 import { searchPermissonHistory } from '@/modules/acl/api/history'
