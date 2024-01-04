@@ -71,8 +71,6 @@ export default {
         title: this.$t('tip'),
         content: this.$t('topMenu.confirmLogout'),
         onOk() {
-          // localStorage.removeItem('ops_cityps_currentId')
-          localStorage.clear()
           return that.Logout()
         },
         onCancel() {},
