@@ -13,7 +13,7 @@ services:
     volumes:
       - db-data:/var/lib/mysql
       - ./docs/mysqld.cnf:/etc/mysql/conf.d/mysqld.cnf
-#      - ./docs/cmdb.sql:/docker-entrypoint-initdb.d/cmdb.sql
+      - ./docs/cmdb.sql:/docker-entrypoint-initdb.d/cmdb.sql
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     networks:
       new:
