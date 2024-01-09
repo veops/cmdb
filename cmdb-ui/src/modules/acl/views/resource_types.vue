@@ -57,17 +57,20 @@
           </template>
         </vxe-table-column>
       </ops-table>
-      <vxe-pager
+      <a-pagination
         size="small"
-        :layouts="['Total', 'PrevPage', 'JumpNumber', 'NextPage', 'Sizes']"
-        :current-page.sync="tablePage.currentPage"
-        :page-size.sync="tablePage.pageSize"
+        show-size-changer
+        show-quick-jumper
+        :current="tablePage.currentPage"
         :total="tablePage.total"
-        :page-sizes="pageSizeOptions"
-        @page-change="handlePageChange"
-        :style="{ marginTop: '10px' }"
-      >
-      </vxe-pager>
+        :show-total="(total, range) => `当前展示 ${range[0]}-${range[1]} 条数据, 共 ${total} 条`"
+        :page-size="tablePage.pageSize"
+        :default-current="1"
+        :page-size-options="pageSizeOptions"
+        @change="pageOrSizeChange"
+        @showSizeChange="pageOrSizeChange"
+        :style="{ marginTop: '10px', textAlign: 'right' }"
+      />
     </a-spin>
 
     <resourceTypeForm ref="resourceTypeForm" :handleOk="handleOk"> </resourceTypeForm>
@@ -89,7 +92,7 @@ export default {
       loading: false,
       groups: [],
       id2perms: {},
-      pageSizeOptions: [10, 25, 50, 100],
+      pageSizeOptions: ['20', '50', '100', '200'],
       tablePage: {
         total: 0,
         currentPage: 1,
@@ -176,7 +179,7 @@ export default {
         this.handleOk()
       })
     },
-    handlePageChange({ currentPage, pageSize }) {
+    pageOrSizeChange(currentPage, pageSize) {
       this.tablePage.currentPage = currentPage
       this.tablePage.pageSize = pageSize
       this.searchData()

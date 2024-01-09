@@ -372,7 +372,7 @@ export default {
         { label: this.$t('cs.companyStructure.mobile'), value: 'mobile' },
         { label: this.$t('cs.companyStructure.departmentName'), value: 'department_name' },
         { label: this.$t('cs.companyStructure.positionName'), value: 'position_name' },
-        { label: this.$t('cs.companyStructure.departmentDirector'), value: 'direct_supervisor_id' },
+        { label: this.$t('cs.companyStructure.supervisor'), value: 'direct_supervisor_id' },
       ]
     },
     sceneList () {

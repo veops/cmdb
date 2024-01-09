@@ -42,13 +42,13 @@
 
         <!-- 2 -->
         <vxe-table-column field="is_app_admin" :title="$t('admin')" :min-width="100" align="center">
-          <template #default="{row}">
+          <template #default="{ row }">
             <a-icon type="check" v-if="row.is_app_admin" />
           </template>
         </vxe-table-column>
 
         <vxe-table-column field="id" :title="$t('acl.inheritedFrom')" :min-width="150">
-          <template #default="{row}">
+          <template #default="{ row }">
             <a-tag color="cyan" v-for="role in id2parents[row.id]" :key="role.id">{{ role.name }}</a-tag>
           </template>
         </vxe-table-column>
@@ -69,13 +69,13 @@
             }
           "
         >
-          <template #default="{row}">
+          <template #default="{ row }">
             {{ row.uid ? $t('no') : $t('yes') }}
           </template>
         </vxe-table-column>
 
         <vxe-table-column field="action" :title="$t('operation')" :width="120" fixed="right">
-          <template #default="{row}">
+          <template #default="{ row }">
             <a-space>
               <a-tooltip :title="$t('acl.resourceList')">
                 <a
@@ -104,17 +104,20 @@
           </template>
         </vxe-table-column>
       </ops-table>
-      <vxe-pager
+      <a-pagination
         size="small"
-        :layouts="['Total', 'PrevPage', 'JumpNumber', 'NextPage', 'Sizes']"
-        :current-page.sync="tablePage.currentPage"
-        :page-size.sync="tablePage.pageSize"
+        show-size-changer
+        show-quick-jumper
+        :current="tablePage.currentPage"
         :total="tablePage.total"
-        :page-sizes="pageSizeOptions"
-        @page-change="handlePageChange"
-        :style="{ marginTop: '10px' }"
-      >
-      </vxe-pager>
+        :show-total="(total, range) => `当前展示 ${range[0]}-${range[1]} 条数据, 共 ${total} 条`"
+        :page-size="tablePage.pageSize"
+        :default-current="1"
+        :page-size-options="pageSizeOptions"
+        @change="pageOrSizeChange"
+        @showSizeChange="pageOrSizeChange"
+        :style="{ marginTop: '10px', textAlign: 'right' }"
+      />
     </a-spin>
 
     <roleForm ref="roleForm" :allRoles="allRoles" :id2parents="id2parents" :handleOk="handleOk"></roleForm>
@@ -149,7 +152,7 @@ export default {
       tableData: [],
       allRoles: [],
       id2parents: {},
-      pageSizeOptions: [10, 25, 50, 100],
+      pageSizeOptions: ['20', '50', '100', '200'],
       searchName: '',
       filterTableValue: { user_role: 1, user_only: 0 },
     }
@@ -254,7 +257,7 @@ export default {
     cancel(e) {
       return false
     },
-    handlePageChange({ currentPage, pageSize }) {
+    pageOrSizeChange(currentPage, pageSize) {
       this.tablePage.currentPage = currentPage
       this.tablePage.pageSize = pageSize
       this.loadData()
