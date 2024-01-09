@@ -115,6 +115,8 @@ def cmdb_init_acl():
     _app = AppCache.get('cmdb') or App.create(name='cmdb')
     app_id = _app.id
 
+    current_app.test_request_context().push()
+
     # 1. add resource type
     for resource_type in ResourceTypeEnum.all():
         try:
