@@ -1,7 +1,7 @@
 @border-radius-base: 2px; // 组件/浮层圆角
 @primary-color: #2f54eb; // 全局主色
+@scrollbar-color: rgba(47, 122, 235, 0.2);
 
-// @layout-header-background: #1a3652;
 @layout-header-background: #fff;
 @layout-header-height: 40px;
 @layout-header-icon-height: 34px;
@@ -15,13 +15,20 @@
 @layout-background-light-color: #fafafa;
 @layout-background-light-color-light: #f0f0f0;
 
+@layout-sidebar-color: #1d264c; //bg
+@layout-sidebar-sub-color: #000c37; //bg
+@layout-sidebar-selected-color: #3e4a71; //selected bg
+@layout-sidebar-arrow-color: rgba(255, 255, 255, 0.6);
+@layout-sidebar-font-color: #fff;
+@layout-sidebar-disabled-font-color: rgba(255, 255, 255, 0.6);
+
 #custom_colors() {
-  color_1: #2f54eb;
-  color_2: #f0f5ff;
-  color_3: #D2E2FF;
+  color_1: #2f54eb; //primary color
+  color_2: #f0f5ff; //light background color
+  color_3: #d2e2ff;
 }
 
-.ops_display_wrapper(@backgroundColor:#f0f5ff) {
+.ops_display_wrapper(@backgroundColor:#custom_colors()[color_2]) {
   cursor: pointer;
   padding: 5px 8px;
   background-color: @backgroundColor;

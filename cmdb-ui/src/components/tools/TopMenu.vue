@@ -119,7 +119,8 @@ export default {
     border-radius: 4px;
     color: @layout-header-font-color;
     height: @layout-header-height;
-    line-height: @layout-header-height;
+    display: inline-flex;
+    align-items: center;
     &:hover {
       background: linear-gradient(0deg, rgba(0, 80, 201, 0.2) 0%, rgba(174, 207, 255, 0.06) 86.76%);
       color: @layout-header-font-selected-color;
