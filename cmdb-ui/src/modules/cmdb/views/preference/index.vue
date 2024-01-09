@@ -43,7 +43,7 @@
             :class="{
               'cmdb-preference-avatar': true,
               'cmdb-preference-avatar-noicon': !ciType.icon,
-              'cmdb-preference-avatar-noicon-is_subscribed': !ciType.icon && ciType.is_subscribed,
+              'cmdb-preference-avatar-noicon-is_subscribed': !ciType.icon,
             }"
             :style="{ width: '30px', height: '30px', marginRight: '10px' }"
           >

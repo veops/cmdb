@@ -60,34 +60,6 @@
       <vxe-column field="mobile" :title="$t('cs.companyStructure.mobile')" min-width="80"></vxe-column>
       <vxe-column field="position_name" :title="$t('cs.companyStructure.positionName')" min-width="80"></vxe-column>
       <vxe-column field="department_name" :title="$t('cs.companyStructure.departmentName')" min-width="80"></vxe-column>
-      <vxe-column field="current_company" v-if="useDFC" :title="$t('cs.companyStructure.currentCompany')" min-width="120"></vxe-column>
-      <vxe-column field="dfc_entry_date" v-if="useDFC" :title="$t('cs.companyStructure.dfcEntryDate')" min-width="120"></vxe-column>
-      <vxe-column field="entry_date" :title="$t('cs.companyStructure.entryDate')" min-width="120"></vxe-column>
-      <vxe-column field="is_internship" :title="$t('cs.companyStructure.isInternship')" min-width="120"></vxe-column>
-      <vxe-column field="leave_date" :title="$t('cs.companyStructure.leaveDate')" min-width="120"></vxe-column>
-      <vxe-column field="id_card" :title="$t('cs.companyStructure.idCard')" min-width="120"></vxe-column>
-      <vxe-column field="nation" :title="$t('cs.companyStructure.nation')" min-width="80"></vxe-column>
-      <vxe-column field="id_place" :title="$t('cs.companyStructure.idPlace')" min-width="80"></vxe-column>
-      <vxe-column field="party" :title="$t('cs.companyStructure.party')" min-width="80"></vxe-column>
-      <vxe-column field="household_registration_type" :title="$t('cs.companyStructure.householdRegistrationType')" min-width="80"></vxe-column>
-      <vxe-column field="hometown" :title="$t('cs.companyStructure.homewtown')" min-width="80"></vxe-column>
-      <vxe-column field="marry" :title="$t('cs.companyStructure.marry')" min-width="80"></vxe-column>
-      <vxe-column field="max_degree" :title="$t('cs.companyStructure.maxDegree')" min-width="80"></vxe-column>
-      <vxe-column field="emergency_person" :title="$t('cs.companyStructure.emergencyPerson')" min-width="120"></vxe-column>
-      <vxe-column field="emergency_phone" :title="$t('cs.companyStructure.emergencyPhone')" min-width="120"></vxe-column>
-      <vxe-column field="bank_card_number" :title="$t('cs.companyStructure.bankCardNumber')" min-width="120"></vxe-column>
-      <vxe-column field="bank_card_name" :title="$t('cs.companyStructure.bankCardName')" min-width="80"></vxe-column>
-      <vxe-column field="opening_bank" :title="$t('cs.companyStructure.openingBank')" min-width="80"></vxe-column>
-      <vxe-column field="account_opening_location" :title="$t('cs.companyStructure.accountOpeningLocation')" min-width="120"></vxe-column>
-      <vxe-column field="school" :title="$t('cs.companyStructure.school')" min-width="80"></vxe-column>
-      <vxe-column field="major" :title="$t('cs.companyStructure.major')" min-width="80"></vxe-column>
-      <vxe-column field="education" :title="$t('cs.companyStructure.education')" min-width="80"></vxe-column>
-      <vxe-column field="graduation_year" :title="$t('cs.companyStructure.graduationYear')" min-width="120"></vxe-column>
-      <vxe-column field="birth_date" :title="$t('cs.companyStructure.birthDate')" min-width="120"></vxe-column>
-      <vxe-column field="birth_place" :title="$t('cs.companyStructure.birthPlace')" min-width="120"></vxe-column>
-      <vxe-column field="nationality_region" :title="$t('cs.companyStructure.nationalityRegion')" min-width="120"></vxe-column>
-      <vxe-column field="first_entry_date" :title="$t('cs.companyStructure.firstEntryDate')" min-width="120"></vxe-column>
-      <vxe-column field="estimated_departure_date" :title="$t('cs.companyStructure.estimatedDepartureDate')" min-width="120"></vxe-column>
       <vxe-column v-if="has_error" field="err" :title="$t('cs.companyStructure.importFailedReason')" min-width="120" fixed="right">
         <template #default="{ row }">
           <span :style="{ color: '#D81E06' }">{{ row.err }}</span>
@@ -301,98 +273,6 @@ export default {
           },
           {
             v: '部门',
-            t: 's',
-          },
-          {
-            v: '目前所属主体',
-            t: 's',
-          },
-          {
-            v: '初始入职日期',
-            t: 's',
-          },
-          {
-            v: '目前主体入职日期',
-            t: 's',
-          },
-          {
-            v: '正式/实习生',
-            t: 's',
-          },
-          {
-            v: '离职日期',
-            t: 's',
-          },
-          {
-            v: '身份证号码',
-            t: 's',
-          },
-          {
-            v: '民族',
-            t: 's',
-          },
-          {
-            v: '籍贯',
-            t: 's',
-          },
-          {
-            v: '组织关系',
-            t: 's',
-          },
-          {
-            v: '户籍类型',
-            t: 's',
-          },
-          {
-            v: '户口所在地',
-            t: 's',
-          },
-          {
-            v: '婚姻情况',
-            t: 's',
-          },
-          {
-            v: '最高学历',
-            t: 's',
-          },
-          {
-            v: '紧急联系人',
-            t: 's',
-          },
-          {
-            v: '紧急联系电话',
-            t: 's',
-          },
-          {
-            v: '卡号',
-            t: 's',
-          },
-          {
-            v: '银行',
-            t: 's',
-          },
-          {
-            v: '开户行',
-            t: 's',
-          },
-          {
-            v: '开户地',
-            t: 's',
-          },
-          {
-            v: '学校',
-            t: 's',
-          },
-          {
-            v: '专业',
-            t: 's',
-          },
-          {
-            v: '学历',
-            t: 's',
-          },
-          {
-            v: '毕业年份',
             t: 's',
           },
         ],

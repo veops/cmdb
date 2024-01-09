@@ -77,7 +77,7 @@
           <!-- 2 -->
 
           <vxe-table-column field="name" :title="$t('acl.resourceName')" :min-widh="150" fixed="left" show-overflow>
-            <template #title="{row}">
+            <template #title="{ row }">
               {{ row.isGroup ? $t('acl.groupName') : $t('acl.resourceName') }}
             </template>
           </vxe-table-column>
@@ -86,10 +86,12 @@
           <vxe-table-column field="user" :title="$t('acl.creator')" :min-widh="100"> </vxe-table-column>
 
           <!-- 4 -->
-          <vxe-table-column field="created_at" :title="$t('created_at')" :min-widh="220" align="center"> </vxe-table-column>
+          <vxe-table-column field="created_at" :title="$t('created_at')" :min-widh="220" align="center">
+          </vxe-table-column>
 
           <!-- 5 -->
-          <vxe-table-column field="updated_at" :title="$t('updated_at')" :min-widh="220" fixed="center"> </vxe-table-column>
+          <vxe-table-column field="updated_at" :title="$t('updated_at')" :min-widh="220" fixed="center">
+          </vxe-table-column>
 
           <!-- 6 -->
 
@@ -99,8 +101,9 @@
             :min-widh="200"
             fixed="right"
             align="center"
-            show-overflow>
-            <template #default="{row}">
+            show-overflow
+          >
+            <template #default="{ row }">
               <span v-show="isGroup">
                 <a @click="handleDisplayMember(row)">{{ $t('acl.member') }}</a>
                 <a-divider type="vertical" />
@@ -117,27 +120,36 @@
                 </a>
               </a-tooltip>
               <a-divider type="vertical" />
-              <a-popconfirm :title="$t('confirmDelete')" @confirm="handleDelete(row)" @cancel="cancel" :okText="$t('yes')" :cancelText="$t('no')">
+              <a-popconfirm
+                :title="$t('confirmDelete')"
+                @confirm="handleDelete(row)"
+                @cancel="cancel"
+                :okText="$t('yes')"
+                :cancelText="$t('no')"
+              >
                 <a style="color: red"><a-icon type="delete"/></a>
               </a-popconfirm>
             </template>
           </vxe-table-column>
         </ops-table>
-        <vxe-pager
+        <a-pagination
           size="small"
-          :layouts="['Total', 'PrevPage', 'JumpNumber', 'NextPage', 'Sizes']"
-          :current-page.sync="tablePage.currentPage"
-          :page-size.sync="tablePage.pageSize"
+          show-size-changer
+          show-quick-jumper
+          :current="tablePage.currentPage"
           :total="tablePage.total"
-          :page-sizes="pageSizeOptions"
-          @page-change="handlePageChange"
-          :style="{ marginTop: '10px' }"
-        >
-        </vxe-pager>
+          :show-total="(total, range) => `当前展示 ${range[0]}-${range[1]} 条数据, 共 ${total} 条`"
+          :page-size="tablePage.pageSize"
+          :default-current="1"
+          :page-size-options="pageSizeOptions"
+          @change="pageOrSizeChange"
+          @showSizeChange="pageOrSizeChange"
+          :style="{ marginTop: '10px', textAlign: 'right' }"
+        />
       </a-spin>
     </div>
-    <div v-else style="text-align: center;margin-top:20%">
-      <a-icon style="font-size:50px; margin-bottom: 20px; color: orange" type="info-circle" />
+    <div v-else style="text-align: center; margin-top: 20%">
+      <a-icon style="font-size: 50px; margin-bottom: 20px; color: orange" type="info-circle" />
       <h3>{{ $t('acl.addTypeTips') }}</h3>
     </div>
     <resourceForm ref="resourceForm" @fresh="handleOk"> </resourceForm>
@@ -191,7 +203,7 @@ export default {
       isGroup: false,
       allResourceTypes: [],
       currentType: { id: 0 },
-      pageSizeOptions: [10, 25, 50, 100],
+      pageSizeOptions: ['20', '50', '100', '200'],
       searchName: '',
       selectedRows: [],
     }
@@ -291,7 +303,7 @@ export default {
       }
     },
     cancel() {},
-    handlePageChange({ currentPage, pageSize }) {
+    pageOrSizeChange(currentPage, pageSize) {
       this.tablePage.currentPage = currentPage
       this.tablePage.pageSize = pageSize
       this.searchData()
@@ -302,7 +314,6 @@ export default {
         .getVxetableRef()
         .getCheckboxRecords()
         .concat(this.$refs.xTable.getVxetableRef().getCheckboxReserveRecords())
-        console.log(this.selectedRows)
     },
     onSelectRangeEnd({ records }) {
       this.selectedRows = records
