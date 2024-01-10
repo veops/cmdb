@@ -18,7 +18,7 @@ module.exports = {
       // TODO 需要增加根据环境不开启主题需求
       new ThemeColorReplacer({
         fileName: 'css/theme-colors-[contenthash:8].css',
-        matchColors: getAntdSerials('#1890ff'), // 主色系列
+        matchColors: getAntdSerials('#2f54eb'), // 主色系列
         // 改变样式选择器，解决样式覆盖问题
         changeSelector(selector) {
           switch (selector) {
@@ -83,11 +83,9 @@ module.exports = {
       less: {
         modifyVars: {
           /* less 变量覆盖，用于自定义 ant design 主题 */
-          /*
-          'primary-color': '#F5222D',
-          'link-color': '#F5222D',
-          'border-radius-base': '4px',
-          */
+          'primary-color': '#2f54eb',
+          // 'link-color': '#F5222D',
+          // 'border-radius-base': '4px',
         },
         javascriptEnabled: true,
       },
