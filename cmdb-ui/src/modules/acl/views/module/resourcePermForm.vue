@@ -57,7 +57,7 @@
           </a-tag>
         </template>
       </vxe-column>
-      <vxe-column field="operate" :title="$t('batchOperate')">
+      <vxe-column field="operate" :title="$t('acl.batchOperate')">
         <template #default="{row}">
           <a-button size="small" type="danger" @click="handleClearAll(row)">
             {{ $t('clear') }}

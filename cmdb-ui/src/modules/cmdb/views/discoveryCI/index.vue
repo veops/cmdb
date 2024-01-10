@@ -79,7 +79,7 @@
           <vxe-column
             align="center"
             field="is_accept"
-            :title="$t('cmdb.ad.isAccpet')"
+            :title="$t('cmdb.ad.isAccept')"
             v-bind="columns.length ? { width: '100px' } : { minWidth: '100px' }"
             :filters="[
               { label: $t('yes'), value: true },
@@ -92,7 +92,7 @@
           </vxe-column>
           <vxe-column
             field="accept_by"
-            :title="$t('cmdb.ad.accpetBy')"
+            :title="$t('cmdb.ad.acceptBy')"
             v-bind="columns.length ? { width: '80px' } : { minWidth: '80px' }"
             :filters="[]"
           ></vxe-column>
@@ -186,8 +186,8 @@ export default {
         this.clickSidebar(Number(_currentType))
         return
       }
-      if (res && res.length) {
-        this.clickSidebar(res[0].id)
+      if (res && res.length && res[0].ci_types && res[0].ci_types.length) {
+        this.clickSidebar(res[0].ci_types[0].id)
       }
     })
   },
@@ -246,7 +246,7 @@ export default {
         content: that.$t('cmdb.ad.confirmAccept'),
         onOk() {
           updateADCAccept(row.id).then(() => {
-            that.$message.success(that.$t('cmdb.ad.accpetSuccess'))
+            that.$message.success(that.$t('cmdb.ad.acceptSuccess'))
             that.getAdc(false)
           })
         },
