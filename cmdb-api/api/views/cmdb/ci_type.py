@@ -465,7 +465,7 @@ class CITypeGrantView(APIView):
 
         acl.grant_resource_to_role_by_rid(type_name, rid, ResourceTypeEnum.CI_TYPE, perms, rebuild=False)
 
-        if request.values.get('ci_filter') or request.values.get('attr_filter'):
+        if 'ci_filter' in request.values or 'attr_filter' in request.values:
             CIFilterPermsCRUD().add(type_id=type_id, rid=rid, **request.values)
         else:
             from api.tasks.acl import role_rebuild
