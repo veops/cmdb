@@ -50,7 +50,7 @@ def add_user():
 
     if is_admin:
         app = AppCache.get('acl') or App.create(name='acl')
-        acl_admin = RoleCache.get('acl_admin') or RoleCRUD.add_role('acl_admin', app.id, True)
+        acl_admin = RoleCache.get_by_name(app.id, 'acl_admin') or RoleCRUD.add_role('acl_admin', app.id, True)
         rid = RoleCache.get_by_name(None, username).id
 
         RoleRelationCRUD.add(acl_admin, acl_admin.id, [rid], app.id)
