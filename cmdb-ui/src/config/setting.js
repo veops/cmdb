@@ -14,7 +14,7 @@
  */
 
 export default {
-  primaryColor: '#1890ff', // primary color of ant design
+  primaryColor: '#2f54eb', // primary color of ant design
   navTheme: 'dark', // theme for nav menu
   layout: 'sidemenu', // nav menu position: sidemenu or topmenu
   contentWidth: 'Fixed', // layout of content: Fluid or Fixed, only works when layout is topmenu

@@ -76,7 +76,8 @@ const AppDeviceEnquire = {
 const mixinPermissions = {
   computed: {
     ...mapState({
-      detailPermissions: state => state.user.detailPermissions
+      detailPermissions: state => state.user.detailPermissions,
+      roles: state => state.user.roles
     })
   },
   methods: {
@@ -85,7 +86,7 @@ const mixinPermissions = {
     hasDetailPermission(appName, resourceName, perms = []) {
       const appNamePer = this.detailPermissions[`${appName}`]
       const _findResourcePermissions = appNamePer.find(item => item.name === resourceName)
-      return _findResourcePermissions.permissions.some(item => perms.includes(item))
+      return this.roles?.permissions.includes('acl_admin') || this.roles?.permissions.includes('backend_admin') || _findResourcePermissions?.permissions.some(item => perms.includes(item))
     }
   }
 }
