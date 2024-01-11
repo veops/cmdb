@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 
 import copy
-
 import toposort
 from flask import abort
 from flask import current_app
@@ -46,6 +45,7 @@ from api.models.cmdb import CITypeRelation
 from api.models.cmdb import CITypeTrigger
 from api.models.cmdb import CITypeUniqueConstraint
 from api.models.cmdb import CustomDashboard
+from api.models.cmdb import PreferenceCITypeOrder
 from api.models.cmdb import PreferenceRelationView
 from api.models.cmdb import PreferenceSearchOption
 from api.models.cmdb import PreferenceShowAttributes
@@ -75,12 +75,13 @@ class CITypeManager(object):
         return CIType.get_by_id(ci_type.id)
 
     @staticmethod
-    def get_ci_types(type_name=None):
+    def get_ci_types(type_name=None, like=True):
         resources = None
         if current_app.config.get('USE_ACL') and not is_app_admin('cmdb'):
             resources = set([i.get('name') for i in ACLManager().get_resources(ResourceTypeEnum.CI_TYPE)])
 
-        ci_types = CIType.get_by() if type_name is None else CIType.get_by_like(name=type_name)
+        ci_types = CIType.get_by() if type_name is None else (
+            CIType.get_by_like(name=type_name) if like else CIType.get_by(name=type_name))
         res = list()
         for type_dict in ci_types:
             attr = AttributeCache.get(type_dict["unique_id"])
@@ -222,7 +223,7 @@ class CITypeManager(object):
 
         for table in [PreferenceTreeView, PreferenceShowAttributes, PreferenceSearchOption, CustomDashboard,
                       CITypeGroupItem, CITypeAttributeGroup, CITypeAttribute, CITypeUniqueConstraint, CITypeTrigger,
-                      AutoDiscoveryCIType, CIFilterPerms]:
+                      AutoDiscoveryCIType, CIFilterPerms, PreferenceCITypeOrder]:
             for item in table.get_by(type_id=type_id, to_dict=False):
                 item.soft_delete(commit=False)
 
@@ -1274,7 +1275,7 @@ class CITypeTemplateManager(object):
         from api.lib.common_setting.upload_file import CommonFileCRUD
 
         tpt = dict(
-            ci_types=CITypeManager.get_ci_types(type_name=ci_type.name),
+            ci_types=CITypeManager.get_ci_types(type_name=ci_type.name, like=False),
             ci_type_auto_discovery_rules=list(),
             type2attributes=dict(),
             type2attribute_group=dict(),
