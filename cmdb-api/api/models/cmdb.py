@@ -2,7 +2,6 @@
 
 
 import datetime
-
 from sqlalchemy.dialects.mysql import DOUBLE
 
 from api.extensions import db
@@ -462,6 +461,15 @@ class PreferenceSearchOption(Model):
     uid = db.Column(db.Integer, index=True)
 
     option = db.Column(db.JSON)
+
+
+class PreferenceCITypeOrder(Model):
+    __tablename__ = "c_pcto"
+
+    uid = db.Column(db.Integer, index=True, nullable=False)
+    type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'))
+    order = db.Column(db.SmallInteger, default=0)
+    is_tree = db.Column(db.Boolean, default=False)  # True is tree view, False is resource view
 
 
 # custom

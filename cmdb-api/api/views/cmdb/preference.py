@@ -2,6 +2,7 @@
 
 
 from flask import abort
+from flask import current_app
 from flask import request
 
 from api.lib.cmdb.ci_type import CITypeManager
@@ -187,3 +188,15 @@ class PreferenceRelationRevokeView(APIView):
         acl.revoke_resource_from_role_by_rid(name, rid, ResourceTypeEnum.RELATION_VIEW, perms)
 
         return self.jsonify(code=200)
+
+
+class PreferenceCITypeOrderView(APIView):
+    url_prefix = ("/preference/ci_types/order",)
+
+    def post(self):
+        type_ids = request.values.get("type_ids")
+        is_tree = request.values.get("is_tree") in current_app.config.get('BOOL_TRUE')
+
+        PreferenceManager.upsert_ci_type_order(type_ids, is_tree)
+
+        return self.jsonify(type_ids=type_ids, is_tree=is_tree)

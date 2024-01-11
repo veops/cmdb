@@ -114,6 +114,8 @@ class CIFilterPermsCRUD(DBMixin):
 
                 obj.soft_delete()
 
+                return obj
+
         else:
             if not kwargs.get('ci_filter') and not kwargs.get('attr_filter'):
                 return
