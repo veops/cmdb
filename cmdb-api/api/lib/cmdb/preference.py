@@ -2,7 +2,6 @@
 
 
 import copy
-
 import six
 import toposort
 from flask import abort
@@ -14,6 +13,7 @@ from api.lib.cmdb.attribute import AttributeManager
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.cache import CITypeCache
+from api.lib.cmdb.cache import CMDBCounterCache
 from api.lib.cmdb.const import ConstraintEnum
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
@@ -24,6 +24,7 @@ from api.lib.exception import AbortException
 from api.lib.perm.acl.acl import ACLManager
 from api.models.cmdb import CITypeAttribute
 from api.models.cmdb import CITypeRelation
+from api.models.cmdb import PreferenceCITypeOrder
 from api.models.cmdb import PreferenceRelationView
 from api.models.cmdb import PreferenceSearchOption
 from api.models.cmdb import PreferenceShowAttributes
@@ -38,13 +39,22 @@ class PreferenceManager(object):
 
     @staticmethod
     def get_types(instance=False, tree=False):
+        ci_type_order = sorted(PreferenceCITypeOrder.get_by(uid=current_user.uid, to_dict=False), key=lambda x: x.order)
+
         types = db.session.query(PreferenceShowAttributes.type_id).filter(
             PreferenceShowAttributes.uid == current_user.uid).filter(
             PreferenceShowAttributes.deleted.is_(False)).group_by(
             PreferenceShowAttributes.type_id).all() if instance else []
+        types = sorted(types, key=lambda x: {i.type_id: idx for idx, i in enumerate(
+            ci_type_order) if not i.is_tree}.get(x.type_id, 1))
 
         tree_types = PreferenceTreeView.get_by(uid=current_user.uid, to_dict=False) if tree else []
-        type_ids = set([i.type_id for i in types + tree_types])
+        tree_types = sorted(tree_types, key=lambda x: {i.type_id: idx for idx, i in enumerate(
+            ci_type_order) if i.is_tree}.get(x.type_id, 1))
+
+        type_ids = [i.type_id for i in types + tree_types]
+        if types and tree_types:
+            type_ids = set(type_ids)
 
         return [CITypeCache.get(type_id).to_dict() for type_id in type_ids]
 
@@ -59,32 +69,36 @@ class PreferenceManager(object):
         :param tree:
         :return:
         """
-        result = dict(self=dict(instance=[], tree=[], type_id2subs_time=dict()),
-                      type_id2users=dict())
+        result = dict(self=dict(instance=[], tree=[], type_id2subs_time=dict()))
+
+        result.update(CMDBCounterCache.get_sub_counter())
+
+        ci_type_order = sorted(PreferenceCITypeOrder.get_by(uid=current_user.uid, to_dict=False), key=lambda x: x.order)
         if instance:
             types = db.session.query(PreferenceShowAttributes.type_id,
                                      PreferenceShowAttributes.uid, PreferenceShowAttributes.created_at).filter(
-                PreferenceShowAttributes.deleted.is_(False)).group_by(
+                PreferenceShowAttributes.deleted.is_(False)).filter(
+                PreferenceShowAttributes.uid == current_user.uid).group_by(
                 PreferenceShowAttributes.uid, PreferenceShowAttributes.type_id)
             for i in types:
-                if i.uid == current_user.uid:
-                    result['self']['instance'].append(i.type_id)
-                    if str(i.created_at) > str(result['self']['type_id2subs_time'].get(i.type_id, "")):
-                        result['self']['type_id2subs_time'][i.type_id] = i.created_at
+                result['self']['instance'].append(i.type_id)
+                if str(i.created_at) > str(result['self']['type_id2subs_time'].get(i.type_id, "")):
+                    result['self']['type_id2subs_time'][i.type_id] = i.created_at
 
-                result['type_id2users'].setdefault(i.type_id, []).append(i.uid)
+            instance_order = [i.type_id for i in ci_type_order if not i.is_tree]
+            if len(instance_order) == len(result['self']['instance']):
+                result['self']['instance'] = instance_order
 
         if tree:
-            types = PreferenceTreeView.get_by(to_dict=False)
+            types = PreferenceTreeView.get_by(uid=current_user.uid, to_dict=False)
             for i in types:
-                if i.uid == current_user.uid:
-                    result['self']['tree'].append(i.type_id)
-                    if str(i.created_at) > str(result['self']['type_id2subs_time'].get(i.type_id, "")):
-                        result['self']['type_id2subs_time'][i.type_id] = i.created_at
+                result['self']['tree'].append(i.type_id)
+                if str(i.created_at) > str(result['self']['type_id2subs_time'].get(i.type_id, "")):
+                    result['self']['type_id2subs_time'][i.type_id] = i.created_at
 
-                result['type_id2users'].setdefault(i.type_id, [])
-                if i.uid not in result['type_id2users'][i.type_id]:
-                    result['type_id2users'][i.type_id].append(i.uid)
+            tree_order = [i.type_id for i in ci_type_order if i.is_tree]
+            if len(tree_order) == len(result['self']['tree']):
+                result['self']['tree'] = tree_order
 
         return result
 
@@ -151,9 +165,22 @@ class PreferenceManager(object):
             if i.attr_id not in attr_dict:
                 i.soft_delete()
 
+        if not existed_all and attr_order:
+            cls.add_ci_type_order_item(type_id, is_tree=False)
+
+        elif not PreferenceShowAttributes.get_by(type_id=type_id, uid=current_user.uid, to_dict=False):
+            cls.delete_ci_type_order_item(type_id, is_tree=False)
+
     @staticmethod
     def get_tree_view():
+        ci_type_order = sorted(PreferenceCITypeOrder.get_by(uid=current_user.uid, is_tree=True, to_dict=False),
+                               key=lambda x: x.order)
+
         res = PreferenceTreeView.get_by(uid=current_user.uid, to_dict=True)
+        if ci_type_order:
+            res = sorted(res, key=lambda x: {ii.type_id: idx for idx, ii in enumerate(
+                ci_type_order)}.get(x['type_id'], 1))
+
         for item in res:
             if item["levels"]:
                 ci_type = CITypeCache.get(item['type_id']).to_dict()
@@ -172,8 +199,8 @@ class PreferenceManager(object):
 
         return res
 
-    @staticmethod
-    def create_or_update_tree_view(type_id, levels):
+    @classmethod
+    def create_or_update_tree_view(cls, type_id, levels):
         attrs = CITypeAttributesCache.get(type_id)
         for idx, i in enumerate(levels):
             for attr in attrs:
@@ -185,9 +212,12 @@ class PreferenceManager(object):
         if existed is not None:
             if not levels:
                 existed.soft_delete()
+                cls.delete_ci_type_order_item(type_id, is_tree=True)
                 return existed
             return existed.update(levels=levels)
         elif levels:
+            cls.add_ci_type_order_item(type_id, is_tree=True)
+
             return PreferenceTreeView.create(levels=levels, type_id=type_id, uid=current_user.uid)
 
     @staticmethod
@@ -356,6 +386,9 @@ class PreferenceManager(object):
         for i in PreferenceTreeView.get_by(type_id=type_id, uid=uid, to_dict=False):
             i.soft_delete()
 
+        for i in PreferenceCITypeOrder.get_by(type_id=type_id, uid=uid, to_dict=False):
+            i.soft_delete()
+
     @staticmethod
     def can_edit_relation(parent_id, child_id):
         views = PreferenceRelationView.get_by(to_dict=False)
@@ -381,3 +414,36 @@ class PreferenceManager(object):
                         return False
 
         return True
+
+    @staticmethod
+    def add_ci_type_order_item(type_id, is_tree=False):
+        max_order = PreferenceCITypeOrder.get_by(
+            uid=current_user.uid, is_tree=is_tree, only_query=True).order_by(PreferenceCITypeOrder.order.desc()).first()
+        order = (max_order and max_order.order + 1) or 1
+
+        PreferenceCITypeOrder.create(type_id=type_id, is_tree=is_tree, uid=current_user.uid, order=order)
+
+    @staticmethod
+    def delete_ci_type_order_item(type_id, is_tree=False):
+        existed = PreferenceCITypeOrder.get_by(uid=current_user.uid, type_id=type_id, is_tree=is_tree,
+                                               first=True, to_dict=False)
+
+        existed and existed.soft_delete()
+
+    @staticmethod
+    def upsert_ci_type_order(type_ids, is_tree=False):
+        for idx, type_id in enumerate(type_ids):
+            order = idx + 1
+            existed = PreferenceCITypeOrder.get_by(uid=current_user.uid, type_id=type_id, is_tree=is_tree,
+                                                   to_dict=False, first=True)
+            if existed is not None:
+                existed.update(order=order, flush=True)
+            else:
+                PreferenceCITypeOrder.create(uid=current_user.uid, type_id=type_id, is_tree=is_tree, order=order,
+                                             flush=True)
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error("upsert citype order failed: {}".format(e))
+            return abort(400, ErrFormat.unknown_error)
