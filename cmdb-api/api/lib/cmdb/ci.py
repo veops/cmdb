@@ -5,7 +5,6 @@ import copy
 import datetime
 import json
 import threading
-
 from flask import abort
 from flask import current_app
 from flask_login import current_user
@@ -16,6 +15,7 @@ from api.extensions import rd
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.cache import CITypeCache
+from api.lib.cmdb.cache import CMDBCounterCache
 from api.lib.cmdb.ci_type import CITypeAttributeManager
 from api.lib.cmdb.ci_type import CITypeManager
 from api.lib.cmdb.ci_type import CITypeRelationManager
@@ -218,15 +218,7 @@ class CIManager(object):
 
     @classmethod
     def get_ad_statistics(cls):
-        res = CI.get_by(to_dict=False)
-        result = dict()
-        for i in res:
-            result.setdefault(i.type_id, dict(total=0, auto_discovery=0))
-            result[i.type_id]['total'] += 1
-            if i.is_auto_discovery:
-                result[i.type_id]['auto_discovery'] += 1
-
-        return result
+        return CMDBCounterCache.get_adc_counter()
 
     @staticmethod
     def ci_is_exist(unique_key, unique_value, type_id):

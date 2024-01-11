@@ -5,8 +5,10 @@ from __future__ import unicode_literals
 from flask import current_app
 
 from api.extensions import cache
+from api.extensions import db
 from api.lib.cmdb.custom_dashboard import CustomDashboardManager
 from api.models.cmdb import Attribute
+from api.models.cmdb import CI
 from api.models.cmdb import CIType
 from api.models.cmdb import CITypeAttribute
 from api.models.cmdb import RelationType
@@ -227,6 +229,7 @@ class CITypeAttributeCache(object):
 
 class CMDBCounterCache(object):
     KEY = 'CMDB::Counter'
+    KEY2 = 'CMDB::Counter2'
 
     @classmethod
     def get(cls):
@@ -429,3 +432,21 @@ class CMDBCounterCache(object):
             return
 
         return numfound
+
+    @classmethod
+    def flush_adc_counter(cls):
+        res = db.session.query(CI.type_id, CI.is_auto_discovery)
+        result = dict()
+        for i in res:
+            result.setdefault(i.type_id, dict(total=0, auto_discovery=0))
+            result[i.type_id]['total'] += 1
+            if i.is_auto_discovery:
+                result[i.type_id]['auto_discovery'] += 1
+
+        cache.set(cls.KEY2, result, timeout=0)
+
+        return result
+
+    @classmethod
+    def get_adc_counter(cls):
+        return cache.get(cls.KEY2) or cls.flush_adc_counter()
