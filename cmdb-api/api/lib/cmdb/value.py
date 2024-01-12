@@ -118,7 +118,7 @@ class AttributeValueManager(object):
             return abort(400, ErrFormat.attribute_value_required.format(attr.alias))
 
     @staticmethod
-    def _check_re(expr, value):
+    def check_re(expr, value):
         if not re.compile(expr).match(str(value)):
             return abort(400, ErrFormat.attribute_value_invalid.format(value))
 
@@ -136,7 +136,7 @@ class AttributeValueManager(object):
             v = None
 
         if attr.re_check and value:
-            self._check_re(attr.re_check, value)
+            self.check_re(attr.re_check, value)
 
         return v
 
