@@ -21,7 +21,10 @@
                     message: $t('cmdb.ciType.attributeNameTips'),
                     pattern: RegExp('^(?!\\d)[a-zA-Z_0-9]+$'),
                   },
-                  { message: $t('cmdb.ciType.buildinAttribute'), pattern: RegExp('^(?!(id|_id|ci_id|type|_type|ci_type)$).*$') },
+                  {
+                    message: $t('cmdb.ciType.buildinAttribute'),
+                    pattern: RegExp('^(?!(id|_id|ci_id|type|_type|ci_type)$).*$'),
+                  },
                 ],
               },
             ]"
@@ -59,13 +62,12 @@
           :label="$t('cmdb.ciType.defaultValue')"
         >
           <template>
-            <a-select
+            <a-input
               v-if="form.getFieldValue('is_list')"
-              mode="tags"
               :style="{ width: '100%' }"
               v-decorator="['default_value', { rules: [{ required: false }] }]"
             >
-            </a-select>
+            </a-input>
             <a-input-number
               style="width: 100%"
               v-else-if="currentValueType === '1'"
@@ -162,7 +164,11 @@
       </a-form-item>
     </a-col>
     <a-col :span="6" v-if="currentValueType !== '6' && currentValueType !== '7'">
-      <a-form-item :label-col="{ span: 8 }" :wrapper-col="horizontalFormItemLayout.wrapperCol" :label="$t('cmdb.ciType.unique')">
+      <a-form-item
+        :label-col="{ span: 8 }"
+        :wrapper-col="horizontalFormItemLayout.wrapperCol"
+        :label="$t('cmdb.ciType.unique')"
+      >
         <a-switch
           :disabled="isShowComputedArea"
           @change="onChange"
@@ -280,6 +286,11 @@
     </a-col>
     <a-divider style="font-size:14px;margin-top:6px;">{{ $t('cmdb.ciType.advancedSettings') }}</a-divider>
     <a-row>
+      <a-col :span="24" v-if="!['6'].includes(currentValueType)">
+        <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 12 }" :label="$t('cmdb.ciType.reg')">
+          <RegSelect :isShowErrorMsg="false" v-model="re_check" :limitedFormat="getLimitedFormat()" />
+        </a-form-item>
+      </a-col>
       <a-col :span="24">
         <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" :label="$t('cmdb.ciType.font')">
           <FontArea ref="fontArea" />
@@ -296,11 +307,7 @@
             <span
               style="position:relative;white-space:pre;"
             >{{ $t('cmdb.ciType.computedAttribute') }}
-              <a-tooltip
-                :title="
-                  $t('cmdb.ciType.computedAttributeTips')
-                "
-              >
+              <a-tooltip :title="$t('cmdb.ciType.computedAttributeTips')">
                 <a-icon
                   style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
                   type="question-circle"
@@ -340,6 +347,7 @@ import { valueTypeMap } from '../../utils/const'
 import ComputedArea from './computedArea.vue'
 import PreValueArea from './preValueArea.vue'
 import FontArea from './fontArea.vue'
+import RegSelect from '@/components/RegexSelect'
 
 export default {
   name: 'CreateNewAttribute',
@@ -348,6 +356,7 @@ export default {
     PreValueArea,
     vueJsonEditor,
     FontArea,
+    RegSelect,
   },
   props: {
     hasFooter: {
@@ -374,6 +383,8 @@ export default {
       isShowComputedArea: false,
 
       defaultForDatetime: '',
+
+      re_check: {},
     }
   },
   computed: {
@@ -397,8 +408,12 @@ export default {
           const data = { is_required, default_show }
           delete values.is_required
           delete values.default_show
-          if (values.value_type === '0' && default_value && default_value.length) {
-            values.default = { default: default_value[0] }
+          if (values.value_type === '0' && default_value) {
+            if (values.is_list) {
+              values.default = { default: default_value || null }
+            } else {
+              values.default = { default: default_value[0] || null }
+            }
           } else if (values.value_type === '6') {
             if (this.default_value_json_right) {
               values.default = { default: this.default_value_json }
@@ -406,13 +421,13 @@ export default {
               values.default = { default: null }
             }
           } else if (default_value || default_value === 0) {
-            if (values.value_type === '3') {
+            if (values.value_type === '3' && !values.is_list) {
               if (default_value === '$created_at' || default_value === '$updated_at') {
                 values.default = { default: default_value }
               } else {
                 values.default = { default: moment(default_value).format('YYYY-MM-DD HH:mm:ss') }
               }
-            } else if (values.value_type === '4') {
+            } else if (values.value_type === '4' && !values.is_list) {
               values.default = { default: moment(default_value).format('YYYY-MM-DD') }
             } else {
               values.default = { default: default_value }
@@ -448,6 +463,9 @@ export default {
           if (values.value_type === '8') {
             values.value_type = '2'
             values.is_link = true
+          }
+          if (values.value_type !== '6') {
+            values.re_check = this.re_check?.value ?? null
           }
           const { attr_id } = await createAttribute({ ...values, option: { fontOptions } })
 
@@ -538,6 +556,21 @@ export default {
       this.form.setFieldsValue({
         default_value: key,
       })
+    },
+    getLimitedFormat() {
+      if (['0'].includes(this.currentValueType)) {
+        return ['number', 'phone', 'landline', 'zipCode', 'IDCard', 'monetaryAmount', 'custom']
+      }
+      if (['1'].includes(this.currentValueType)) {
+        return ['number', 'monetaryAmount', 'custom']
+      }
+      if (['3', '4', '5'].includes(this.currentValueType)) {
+        return ['custom']
+      }
+      if (this.currentValueType === '8') {
+        return ['link', 'custom']
+      }
+      return []
     },
   },
 }

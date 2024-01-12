@@ -13,7 +13,11 @@
     <a-form :form="form" :layout="formLayout">
       <a-divider style="font-size:14px;margin-top:6px;">{{ $t('cmdb.ciType.basicConfig') }}</a-divider>
       <a-col :span="12">
-        <a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" :label="$t('cmdb.ciType.AttributeName')">
+        <a-form-item
+          :label-col="formItemLayout.labelCol"
+          :wrapper-col="formItemLayout.wrapperCol"
+          :label="$t('cmdb.ciType.AttributeName')"
+        >
           <a-input
             :disabled="true"
             name="name"
@@ -35,12 +39,20 @@
       </a-col>
       <a-col
         :span="12"
-      ><a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" :label="$t('alias')">
+      ><a-form-item
+        :label-col="formItemLayout.labelCol"
+        :wrapper-col="formItemLayout.wrapperCol"
+        :label="$t('alias')"
+      >
         <a-input name="alias" v-decorator="['alias', { rules: [] }]" /> </a-form-item
       ></a-col>
       <a-col
         :span="12"
-      ><a-form-item :label-col="formItemLayout.labelCol" :wrapper-col="formItemLayout.wrapperCol" :label="$t('cmdb.ciType.DataType')">
+      ><a-form-item
+        :label-col="formItemLayout.labelCol"
+        :wrapper-col="formItemLayout.wrapperCol"
+        :label="$t('cmdb.ciType.DataType')"
+      >
         <a-select
           :disabled="true"
           name="value_type"
@@ -59,13 +71,12 @@
           :label="$t('cmdb.ciType.defaultValue')"
         >
           <template>
-            <a-select
+            <a-input
               v-if="form.getFieldValue('is_list')"
-              mode="tags"
               :style="{ width: '100%' }"
               v-decorator="['default_value', { rules: [{ required: false }] }]"
             >
-            </a-select>
+            </a-input>
             <a-select
               v-decorator="['default_value', { rules: [{ required: false }] }]"
               mode="tags"
@@ -160,7 +171,11 @@
         </a-form-item>
       </a-col>
       <a-col :span="6" v-if="currentValueType !== '6' && currentValueType !== '7'">
-        <a-form-item :label-col="{ span: 8 }" :wrapper-col="horizontalFormItemLayout.wrapperCol" :label="$t('cmdb.ciType.unique')">
+        <a-form-item
+          :label-col="{ span: 8 }"
+          :wrapper-col="horizontalFormItemLayout.wrapperCol"
+          :label="$t('cmdb.ciType.unique')"
+        >
           <a-switch
             :disabled="isShowComputedArea"
             @change="onChange"
@@ -282,6 +297,11 @@
       </a-col>
       <a-divider style="font-size:14px;margin-top:6px;">{{ $t('cmdb.ciType.advancedSettings') }}</a-divider>
       <a-row>
+        <a-col :span="24" v-if="!['6'].includes(currentValueType)">
+          <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 12 }" :label="$t('cmdb.ciType.reg')">
+            <RegSelect :isShowErrorMsg="false" v-model="re_check" :limitedFormat="getLimitedFormat()" />
+          </a-form-item>
+        </a-col>
         <a-col :span="24">
           <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" :label="$t('cmdb.ciType.font')">
             <FontArea ref="fontArea" />
@@ -303,11 +323,7 @@
               <span
                 style="position:relative;white-space:pre;"
               >{{ $t('cmdb.ciType.computedAttribute') }}
-                <a-tooltip
-                  :title="
-                    $t('cmdb.ciType.computedAttributeTips')
-                  "
-                >
+                <a-tooltip :title="$t('cmdb.ciType.computedAttributeTips')">
                   <a-icon
                     style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
                     type="question-circle"
@@ -355,6 +371,8 @@ import _ from 'lodash'
 import moment from 'moment'
 import vueJsonEditor from 'vue-json-editor'
 import {
+  // createAttribute,
+  // createCITypeAttributes,
   updateAttributeById,
   updateCITypeAttributesById,
   canDefineComputed,
@@ -364,10 +382,11 @@ import { valueTypeMap } from '../../utils/const'
 import ComputedArea from './computedArea.vue'
 import PreValueArea from './preValueArea.vue'
 import FontArea from './fontArea.vue'
+import RegSelect from '@/components/RegexSelect'
 
 export default {
   name: 'AttributeEditForm',
-  components: { ComputedArea, PreValueArea, vueJsonEditor, FontArea },
+  components: { ComputedArea, PreValueArea, vueJsonEditor, FontArea, RegSelect },
   props: {
     CITypeId: {
       type: Number,
@@ -395,6 +414,7 @@ export default {
       isShowComputedArea: false,
 
       defaultForDatetime: '',
+      re_check: {},
     }
   },
 
@@ -517,15 +537,30 @@ export default {
           })
         }
         console.log(_record)
+        if (!['6'].includes(_record.value_type) && _record.re_check) {
+          this.re_check = {
+            value: _record.re_check,
+          }
+        } else {
+          this.re_check = {}
+        }
         if (_record.default) {
           this.$nextTick(() => {
             if (_record.value_type === '0') {
-              this.form.setFieldsValue({
-                default_value: _record.default.default ? [_record.default.default] : [],
-              })
+              if (_record.is_list) {
+                this.$nextTick(() => {
+                  this.form.setFieldsValue({
+                    default_value: _record.default.default ? _record.default.default : '',
+                  })
+                })
+              } else {
+                this.form.setFieldsValue({
+                  default_value: _record.default.default ? [_record.default.default] : [],
+                })
+              }
             } else if (_record.value_type === '6') {
               this.default_value_json = _record?.default?.default || null
-            } else if (_record.value_type === '3' || _record.value_type === '4') {
+            } else if ((_record.value_type === '3' || _record.value_type === '4') && !_record.is_list) {
               if (_record?.default?.default === '$created_at' || _record?.default?.default === '$updated_at') {
                 this.defaultForDatetime = _record.default.default
                 this.form.setFieldsValue({
@@ -584,6 +619,9 @@ export default {
       await this.form.validateFields(async (err, values) => {
         if (!err) {
           console.log('Received values of form: ', values)
+          // if (values.choice_value) {
+          //   values.choice_value = values.choice_value.split('\n')
+          // }
 
           if (this.record.is_required !== values.is_required || this.record.default_show !== values.default_show) {
             console.log('changed is_required')
@@ -598,7 +636,11 @@ export default {
           delete values['is_required']
           const { default_value } = values
           if (values.value_type === '0' && default_value) {
-            values.default = { default: default_value[0] || null }
+            if (values.is_list) {
+              values.default = { default: default_value || null }
+            } else {
+              values.default = { default: default_value[0] || null }
+            }
           } else if (values.value_type === '6') {
             if (this.default_value_json_right) {
               values.default = { default: this.default_value_json }
@@ -606,13 +648,13 @@ export default {
               values.default = { default: null }
             }
           } else if (default_value || default_value === 0) {
-            if (values.value_type === '3') {
+            if (values.value_type === '3' && !values.is_list) {
               if (default_value === '$created_at' || default_value === '$updated_at') {
                 values.default = { default: default_value }
               } else {
                 values.default = { default: moment(default_value).format('YYYY-MM-DD HH:mm:ss') }
               }
-            } else if (values.value_type === '4') {
+            } else if (values.value_type === '4' && !values.is_list) {
               values.default = { default: moment(default_value).format('YYYY-MM-DD') }
             } else {
               values.default = { default: default_value }
@@ -640,6 +682,9 @@ export default {
           if (values.value_type === '8') {
             values.value_type = '2'
             values.is_link = true
+          }
+          if (values.value_type !== '6') {
+            values.re_check = this.re_check?.value ?? null
           }
           if (values.id) {
             await this.updateAttribute(values.id, { ...values, option: { fontOptions } }, isCalcComputed)
@@ -697,6 +742,21 @@ export default {
     },
     async handleCalcComputed() {
       await this.handleSubmit(true)
+    },
+    getLimitedFormat() {
+      if (['0'].includes(this.currentValueType)) {
+        return ['number', 'phone', 'landline', 'zipCode', 'IDCard', 'monetaryAmount', 'custom']
+      }
+      if (['1'].includes(this.currentValueType)) {
+        return ['number', 'monetaryAmount', 'custom']
+      }
+      if (['3', '4', '5'].includes(this.currentValueType)) {
+        return ['custom']
+      }
+      if (this.currentValueType === '8') {
+        return ['link', 'custom']
+      }
+      return []
     },
   },
   watch: {},

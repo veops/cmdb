@@ -24,7 +24,9 @@
         />
       </template>
       <template v-if="parentsType && parentsType.length">
-        <a-divider style="font-size:14px;margin:14px 0;font-weight:700;">{{ $t('cmdb.menu.citypeRelation') }}</a-divider>
+        <a-divider style="font-size:14px;margin:14px 0;font-weight:700;">{{
+          $t('cmdb.menu.citypeRelation')
+        }}</a-divider>
         <a-form>
           <a-row :gutter="24" align="top" type="flex">
             <a-col :span="12" v-for="item in parentsType" :key="item.id">
@@ -40,7 +42,11 @@
                       {{ attr.alias || attr.name }}
                     </a-select-option>
                   </a-select>
-                  <a-input :placeholder="$t('cmdb.ci.tips1')" v-model="parentsForm[item.name].value" style="width: 50%" />
+                  <a-input
+                    :placeholder="$t('cmdb.ci.tips1')"
+                    v-model="parentsForm[item.name].value"
+                    style="width: 50%"
+                  />
                 </a-input-group>
               </a-form-item>
             </a-col>

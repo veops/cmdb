@@ -22,7 +22,12 @@
               attr.name,
               {
                 rules: [{ required: attr.is_required, message: $t('placeholder2') + `${attr.alias || attr.name}` }],
-                initialValue: attr.default && attr.default.default ? attr.default.default : attr.is_list ? [] : null,
+                initialValue:
+                  attr.default && attr.default.default
+                    ? attr.is_list
+                      ? attr.default.default.split(',')
+                      : attr.default.default
+                    : null,
               },
             ]"
             :placeholder="$t('placeholder2')"
@@ -53,19 +58,18 @@
               </span>
             </a-select-option>
           </a-select>
-          <a-select
+          <a-input
             v-else-if="attr.is_list"
-            mode="tags"
             :style="{ width: '100%' }"
             v-decorator="[
               attr.name,
               {
                 rules: [{ required: attr.is_required, message: $t('placeholder2') + `${attr.alias || attr.name}` }],
-                initialValue: attr.default && attr.default.default ? attr.default.default : attr.is_list ? [] : null,
+                initialValue: attr.default && attr.default.default ? attr.default.default : '',
               },
             ]"
           >
-          </a-select>
+          </a-input>
           <a-input-number
             v-decorator="[
               attr.name,

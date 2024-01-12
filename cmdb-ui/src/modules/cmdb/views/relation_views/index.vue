@@ -58,13 +58,9 @@
             />
             <div class="relation-views-right-bar">
               <a-space>
-                <a-button
-                  v-if="isLeaf"
-                  type="primary"
-                  size="small"
-                  @click="$refs.create.handleOpen(true, 'create')"
-                >{{ $t('create') }}</a-button
-                >
+                <a-button v-if="isLeaf" type="primary" size="small" @click="$refs.create.handleOpen(true, 'create')">{{
+                  $t('create')
+                }}</a-button>
 
                 <div class="ops-list-batch-action" v-if="isLeaf && isShowBatchIcon">
                   <template v-if="selectedRowKeys.length">
@@ -135,7 +131,7 @@
                     {{ col.title }}</span
                   >
                 </template>
-                <template v-if="col.is_choice || col.is_password || col.is_list" #edit="{ row }">
+                <template v-if="col.is_choice || col.is_password" #edit="{ row }">
                   <vxe-input v-if="col.is_password" v-model="passwordValue[col.field]" />
                   <a-select
                     :getPopupContainer="(trigger) => trigger.parentElement"
@@ -171,18 +167,6 @@
                         {{ choice[0] }}
                       </span>
                     </a-select-option>
-                  </a-select>
-                  <a-select
-                    :getPopupContainer="(trigger) => trigger.parentElement"
-                    :style="{ width: '100%', height: '32px' }"
-                    v-model="row[col.field]"
-                    :placeholder="$t('placeholder2')"
-                    v-else-if="col.is_list"
-                    :showArrow="false"
-                    mode="tags"
-                    class="ci-table-edit-select"
-                    allowClear
-                  >
                   </a-select>
                 </template>
                 <template
@@ -364,7 +348,7 @@ import {
 } from '@/modules/cmdb/api/CIRelation'
 
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
-import { searchCI2, updateCI, deleteCI, searchCI } from '@/modules/cmdb/api/ci'
+import { searchCI2, updateCI, deleteCI } from '@/modules/cmdb/api/ci'
 import { getCITypes } from '../../api/CIType'
 import { roleHasPermissionToGrant } from '@/modules/acl/api/permission'
 import { searchResourceType } from '@/modules/acl/api/resource'
@@ -1018,11 +1002,7 @@ export default {
 
           this.$confirm({
             title: that.$t('warning'),
-            content: (h) => (
-              <div>
-                {that.$t('confirmDelete2', { name: Object.values(firstCIObj)[0] })}
-              </div>
-            ),
+            content: (h) => <div>{that.$t('confirmDelete2', { name: Object.values(firstCIObj)[0] })}</div>,
             onOk() {
               deleteCIRelationView(_tempTreeParent[0], _tempTree[0], { ancestor_ids }).then((res) => {
                 that.$message.success(that.$t('deleteSuccess'))
@@ -1048,7 +1028,7 @@ export default {
         title: that.$t('warning'),
         content: (h) => (
           <div>
-            {that.$t('cmdb.serviceTreedeleteRelationConfirm', { name: currentShowType.alias || currentShowType.name })}
+            {that.$t('cmdb.serviceTree.deleteRelationConfirm', { name: currentShowType.alias || currentShowType.name })}
           </div>
         ),
         onOk() {
