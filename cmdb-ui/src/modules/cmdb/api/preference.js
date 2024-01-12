@@ -114,3 +114,12 @@ export function revokeRelationView(rid, data) {
     data: data
   })
 }
+
+// preference citype order
+export function preferenceCitypeOrder(data) {
+  return axios({
+    url: `/v0.1/preference/ci_types/order`,
+    method: 'POST',
+    data: data
+  })
+}

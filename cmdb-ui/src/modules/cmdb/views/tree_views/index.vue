@@ -32,32 +32,24 @@
       >
         <template #one>
           <div class="tree-views-left" :style="{ height: `${windowHeight - 115}px` }">
-            <a-collapse
-              :activeKey="current"
-              accordion
-              @change="handleChangeCi"
-              :bordered="false"
-              :destroyInactivePanel="true"
+            <draggable
+              v-model="subscribeTreeViewCiTypes"
+              :animation="300"
+              @change="
+                (e) => {
+                  orderChange(e, subscribeTreeViewCiTypes)
+                }
+              "
             >
-              <a-collapse-panel
-                v-for="ciType in subscribeTreeViewCiTypes"
-                :key="String(ciType.type_id)"
-                :showArrow="false"
-                :style="{
-                  borderRadius: '4px',
-                  marginBottom: '5px',
-                  border: 0,
-                  overflow: 'hidden',
-                  width: '100%',
-                }"
-              >
+              <div v-for="ciType in subscribeTreeViewCiTypes" :key="ciType.type_id">
                 <div
-                  slot="header"
+                  @click="handleChangeCi(ciType.type_id)"
                   :class="{
                     'custom-header': true,
-                    'custom-header-selected': Number(ciType.type_id) === Number(typeId),
+                    'custom-header-selected': Number(ciType.type_id) === Number(typeId) && !treeKeys.length,
                   }"
                 >
+                  <OpsMoveIcon class="move-icon" />
                   <span class="tree-views-left-header-icon">
                     <template v-if="ciType.icon">
                       <img
@@ -95,6 +87,7 @@
                   :tree-data="treeData"
                   :load-data="onLoadData"
                   :expandedKeys="expandedKeys"
+                  v-if="Number(ciType.type_id) === Number(typeId)"
                 >
                   <a-icon slot="switcherIcon" type="down" />
                   <template #title="{ key: treeKey, title, isLeaf }">
@@ -107,8 +100,8 @@
                     />
                   </template>
                 </a-tree>
-              </a-collapse-panel>
-            </a-collapse>
+              </div>
+            </draggable>
           </div>
         </template>
         <template #two>
@@ -407,7 +400,13 @@
 /* eslint-disable no-useless-escape */
 import _ from 'lodash'
 import Sortable from 'sortablejs'
-import { getSubscribeTreeView, getSubscribeAttributes, subscribeTreeView } from '@/modules/cmdb/api/preference'
+import draggable from 'vuedraggable'
+import {
+  getSubscribeTreeView,
+  getSubscribeAttributes,
+  subscribeTreeView,
+  preferenceCitypeOrder,
+} from '@/modules/cmdb/api/preference'
 import { searchCI, updateCI, deleteCI } from '@/modules/cmdb/api/ci'
 import { getCITypes } from '@/modules/cmdb/api/CIType'
 import { getCITableColumns } from '../../utils/helper'
@@ -444,6 +443,7 @@ export default {
     PreferenceSearch,
     MetadataDrawer,
     OpsMoveIcon,
+    draggable,
   },
   data() {
     return {
@@ -463,7 +463,6 @@ export default {
       pageSize: 50,
       currentPage: 1,
       totalNumber: 0,
-      current: '', // 当前页面的type_id
       currentAttrList: [],
       trigger: false,
       newLoad: true,
@@ -571,7 +570,6 @@ export default {
       this.subscribeTreeViewCiTypes = res
       if (this.subscribeTreeViewCiTypes.length) {
         this.typeId = this.$route.params.typeId || this.subscribeTreeViewCiTypes[0].type_id
-        this.current = `${this.typeId}`
         this.selectedRowKeys = []
         this.$refs.xTable.getVxetableRef().clearCheckboxRow()
         this.$refs.xTable.getVxetableRef().clearCheckboxReserve()
@@ -600,7 +598,6 @@ export default {
     async loadCurrentView() {
       if (this.subscribeTreeViewCiTypes.length) {
         this.typeId = this.$route.params.typeId || this.subscribeTreeViewCiTypes[0].type_id
-        this.current = String(this.typeId)
         this.selectedRowKeys = []
         this.$refs.xTable.getVxetableRef().clearCheckboxRow()
         this.$refs.xTable.getVxetableRef().clearCheckboxReserve()
@@ -746,9 +743,14 @@ export default {
           name: 'cmdb_tree_views_item',
           params: { typeId: Number(value) },
         })
+        this.typeId = Number(value)
       } else {
-        this.newLoad = true
-        this.initPage()
+        this.typeId = null
+        this.$nextTick(() => {
+          this.typeId = Number(value)
+          this.newLoad = true
+          this.initPage()
+        })
       }
       this.isSetDataNodes = []
     },
@@ -1209,6 +1211,13 @@ export default {
           this.$message.error(this.$t('cmdb.ci.copyFailed'))
         })
     },
+    orderChange(e, subscribeTreeViewCiTypes) {
+      preferenceCitypeOrder({ type_ids: subscribeTreeViewCiTypes.map((type) => type.type_id), is_tree: true }).catch(
+        () => {
+          this.getTreeViews()
+        }
+      )
+    },
   },
 }
 </script>
@@ -1230,65 +1239,68 @@ export default {
     &:hover {
       overflow: auto;
     }
-    .ant-collapse-borderless {
-      background-color: #fff;
-    }
-    .ant-collapse-item:has(.custom-header-selected):not(:has(.ant-tree-treenode-selected)) > .ant-collapse-header,
-    .ant-collapse-item-active:not(:has(.ant-tree-treenode-selected)) > .ant-collapse-header {
-      background-color: #d6e4ff;
-    }
-    .ant-collapse-header {
-      padding: 8px 12px 4px;
+    .custom-header {
+      width: 100%;
+      display: inline-flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 8px 0 8px 12px;
+      cursor: move;
+      border-radius: 2px;
+      position: relative;
       &:hover {
         background-color: #f0f5ff;
+        > .actions,
+        > .move-icon {
+          display: inherit;
+        }
       }
-      &:hover > .custom-header > .actions {
-        display: inherit;
+      .move-icon {
+        width: 14px;
+        height: 20px;
+        cursor: move;
+        position: absolute;
+        display: none;
+        left: 0;
       }
-      .custom-header {
-        width: 100%;
+      .tree-views-left-header-icon {
         display: inline-flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        justify-content: flex-start;
         align-items: center;
-        .tree-views-left-header-icon {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 20px;
-          height: 20px;
-          border-radius: 2px;
-          box-shadow: 0px 1px 2px rgba(47, 84, 235, 0.2);
-          margin-right: 6px;
-          background-color: #fff;
-        }
-        .tree-views-left-header-name {
-          flex: 1;
-          font-weight: bold;
-          margin-left: 5px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-        .actions {
-          display: none;
-          margin-left: auto;
-        }
-        .action {
-          display: inline-block;
-          width: 22px;
-          text-align: center;
-          border-radius: 5px;
-          &:hover {
-            background-color: #cacaca;
-          }
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 2px;
+        box-shadow: 0px 1px 2px rgba(47, 84, 235, 0.2);
+        margin-right: 6px;
+        background-color: #fff;
+      }
+      .tree-views-left-header-name {
+        flex: 1;
+        font-weight: bold;
+        margin-left: 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .actions {
+        display: none;
+        margin-left: auto;
+        cursor: pointer;
+      }
+      .action {
+        display: inline-block;
+        width: 22px;
+        text-align: center;
+        border-radius: 5px;
+        &:hover {
+          background-color: #cacaca;
         }
       }
     }
-
-    .ant-collapse > .ant-collapse-item > .ant-collapse-header {
-      white-space: nowrap;
+    .custom-header-selected {
+      background-color: #d3e3fd !important;
     }
     .ant-tree li {
       padding: 2px 0;
