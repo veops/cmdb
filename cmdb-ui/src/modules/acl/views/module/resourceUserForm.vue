@@ -1,4 +1,4 @@
- <template>
+<template>
   <CustomDrawer
     width="800px"
     placement="left"
