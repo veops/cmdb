@@ -93,6 +93,8 @@ class Attribute(Model):
     _choice_web_hook = db.Column('choice_web_hook', db.JSON)
     choice_other = db.Column(db.JSON)
 
+    re_check = db.Column(db.Text)
+
     uid = db.Column(db.Integer, index=True)
 
     option = db.Column(db.JSON)
