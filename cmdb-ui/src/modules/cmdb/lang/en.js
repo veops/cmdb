@@ -174,7 +174,8 @@ const cmdb_en = {
         date: 'Date',
         time: 'Time',
         json: 'JSON',
-        event: 'Event'
+        event: 'Event',
+        reg: 'Regex'
     },
     components: {
         unselectAttributes: 'Unselected',

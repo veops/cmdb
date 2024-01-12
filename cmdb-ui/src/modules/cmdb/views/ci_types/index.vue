@@ -37,7 +37,7 @@
               >{{ $t('cmdb.ciType.attributeLibray') }}</a
               >
               <a-dropdown v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')">
-                <a><ops-icon type="ops-menu" /></a>
+                <a><ops-icon type="ops-menu"/></a>
                 <a-menu slot="overlay">
                   <a-menu-item key="0">
                     <a-upload
@@ -48,12 +48,15 @@
                       action="/api/v0.1/ci_types/template/import/file"
                       @change="changeUploadFile"
                     >
-                      <a><a-icon type="upload" /></a><a> {{ $t('upload') }}</a>
+                      <a><a-icon type="upload"/></a><a> {{ $t('upload') }}</a>
                     </a-upload>
                   </a-menu-item>
                   <a-menu-item key="1">
                     <a-space>
-                      <a href="/api/v0.1/ci_types/template/export/file"><a-icon type="download" /> {{ $t('download') }}</a>
+                      <a
+                        href="/api/v0.1/ci_types/template/export/file"
+                      ><a-icon type="download" /> {{ $t('download') }}</a
+                      >
                     </a-space>
                   </a-menu-item>
                 </a-menu>
@@ -63,9 +66,11 @@
           <draggable class="ci-types-left-content" :list="CITypeGroups" @end="handleChangeGroups" filter=".undraggable">
             <div v-for="g in CITypeGroups" :key="g.id || g.name">
               <div
-                :class="`${currentGId === g.id && !currentCId ? 'selected' : ''} ci-types-left-group ${
-                  g.id === -1 ? 'undraggable' : ''
-                }`"
+                :class="
+                  `${currentGId === g.id && !currentCId ? 'selected' : ''} ci-types-left-group ${
+                    g.id === -1 ? 'undraggable' : ''
+                  }`
+                "
                 @click="handleClickGroup(g.id)"
               >
                 <div>
@@ -78,16 +83,16 @@
                 <a-space>
                   <a-tooltip>
                     <template slot="title">{{ $t('cmdb.ciType.addCITypeInGroup') }}</template>
-                    <a><a-icon type="plus" @click="handleCreate(g)" /></a>
+                    <a><a-icon type="plus" @click="handleCreate(g)"/></a>
                   </a-tooltip>
                   <template v-if="g.id !== -1">
                     <a-tooltip>
                       <template slot="title">{{ $t('cmdb.ciType.editGroup') }}</template>
-                      <a><a-icon type="edit" @click="handleEditGroup(g)" /></a>
+                      <a><a-icon type="edit" @click="handleEditGroup(g)"/></a>
                     </a-tooltip>
                     <a-tooltip>
                       <template slot="title">{{ $t('cmdb.ciType.deleteGroup') }}</template>
-                      <a style="color: red"><a-icon type="delete" @click="handleDeleteGroup(g)" /></a>
+                      <a style="color: red"><a-icon type="delete" @click="handleDeleteGroup(g)"/></a>
                     </a-tooltip>
                   </template>
                 </a-space>
@@ -130,14 +135,15 @@
                   </div>
                   <span class="ci-types-left-detail-title">{{ ci.alias || ci.name }}</span>
                   <a-space class="ci-types-left-detail-action">
-                    <a><a-icon type="user-add" @click="(e) => handlePerm(e, ci)" /></a>
-                    <a><a-icon type="edit" @click="(e) => handleEdit(e, ci)" /></a>
+                    <a><a-icon type="user-add" @click="(e) => handlePerm(e, ci)"/></a>
+                    <a><a-icon type="edit" @click="(e) => handleEdit(e, ci)"/></a>
                     <a
                       v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')"
-                      @click="(e) => handleDownloadCiType(e, ci)">
-                      <a-icon type="download"/>
+                      @click="(e) => handleDownloadCiType(e, ci)"
+                    >
+                      <a-icon type="download" />
                     </a>
-                    <a style="color: red" @click="(e) => handleDelete(e, ci)"><a-icon type="delete" /></a>
+                    <a style="color: red" @click="(e) => handleDelete(e, ci)"><a-icon type="delete"/></a>
                   </a-space>
                 </div>
               </draggable>
@@ -242,6 +248,11 @@
             :filter-method="filterOption"
             v-decorator="['unique_key', { rules: [{ required: true, message: $t('cmdb.ciType.uniqueKeySelect') }] }]"
             :placeholder="$t('placeholder2')"
+            @visible-change="
+              () => {
+                filterInput = ''
+              }
+            "
           >
             <el-option
               :key="item.id"
@@ -549,6 +560,7 @@ export default {
       })
     },
     onClose() {
+      this.filterInput = ''
       this.form.resetFields()
       this.drawerVisible = false
     },
@@ -739,7 +751,7 @@ export default {
       const x = new XMLHttpRequest()
       x.open('GET', `/api/v0.1/ci_types/${ci.id}/template/export`, true)
       x.responseType = 'blob'
-      x.onload = function (e) {
+      x.onload = function(e) {
         const url = window.URL.createObjectURL(x.response)
         const a = document.createElement('a')
         a.href = url

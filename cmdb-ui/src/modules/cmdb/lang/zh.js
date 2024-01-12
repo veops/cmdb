@@ -174,7 +174,8 @@ const cmdb_zh = {
         date: '日期',
         time: '时间',
         json: 'JSON',
-        event: '事件'
+        event: '事件',
+        reg: '正则校验'
     },
     components: {
         unselectAttributes: '未选属性',
