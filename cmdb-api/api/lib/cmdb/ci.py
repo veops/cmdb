@@ -360,6 +360,8 @@ class CIManager(object):
                     if attr.default and attr.default.get('default') == AttributeDefaultValueEnum.UPDATED_AT:
                         ci_dict[attr.name] = now
 
+            value_manager = AttributeValueManager()
+
             computed_attrs = []
             for _, attr in attrs:
                 if attr.is_computed:
@@ -370,7 +372,8 @@ class CIManager(object):
                     elif attr.alias in ci_dict:
                         password_dict[attr.id] = ci_dict.pop(attr.alias)
 
-            value_manager = AttributeValueManager()
+                    if attr.re_check and password_dict.get(attr.id):
+                        value_manager.check_re(attr.re_check, password_dict[attr.id])
 
             if computed_attrs:
                 value_manager.handle_ci_compute_attributes(ci_dict, computed_attrs, ci)
@@ -429,6 +432,8 @@ class CIManager(object):
             if attr.default and attr.default.get('default') == AttributeDefaultValueEnum.UPDATED_AT:
                 ci_dict[attr.name] = now
 
+        value_manager = AttributeValueManager()
+
         password_dict = dict()
         computed_attrs = list()
         for _, attr in attrs:
@@ -440,7 +445,8 @@ class CIManager(object):
                 elif attr.alias in ci_dict:
                     password_dict[attr.id] = ci_dict.pop(attr.alias)
 
-        value_manager = AttributeValueManager()
+                if attr.re_check and password_dict.get(attr.id):
+                    value_manager.check_re(attr.re_check, password_dict[attr.id])
 
         if computed_attrs:
             value_manager.handle_ci_compute_attributes(ci_dict, computed_attrs, ci)
