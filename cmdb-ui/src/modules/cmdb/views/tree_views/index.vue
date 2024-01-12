@@ -182,7 +182,7 @@
                     {{ col.title }}</span
                   >
                 </template>
-                <template v-if="col.is_choice || col.is_password || col.is_list" #edit="{ row }">
+                <template v-if="col.is_choice || col.is_password" #edit="{ row }">
                   <vxe-input v-if="col.is_password" v-model="passwordValue[col.field]" />
                   <a-select
                     :getPopupContainer="(trigger) => trigger.parentElement"
@@ -218,18 +218,6 @@
                         {{ choice[0] }}
                       </span>
                     </a-select-option>
-                  </a-select>
-                  <a-select
-                    :getPopupContainer="(trigger) => trigger.parentElement"
-                    :style="{ width: '100%', height: '32px' }"
-                    v-model="row[col.field]"
-                    :placeholder="$t('placeholder2')"
-                    v-else-if="col.is_list"
-                    :showArrow="false"
-                    mode="tags"
-                    class="ci-table-edit-select"
-                    allowClear
-                  >
                   </a-select>
                 </template>
                 <template
@@ -1138,12 +1126,22 @@ export default {
         }
       })
       this.$refs.create.visible = false
+      const key = 'updatable'
+      let errorMsg = ''
       for (let i = 0; i < this.selectedRowKeys.length; i++) {
         await updateCI(this.selectedRowKeys[i], payload, false)
           .then(() => {
             successNum += 1
           })
-          .catch(() => {
+          .catch((error) => {
+            errorMsg = errorMsg + '\n' + `${this.selectedRowKeys[i]}:${error.response?.data?.message ?? ''}`
+            this.$notification.warning({
+              key,
+              message: this.$t('warning'),
+              description: errorMsg,
+              duration: 0,
+              style: { whiteSpace: 'break-spaces' },
+            })
             errorNum += 1
           })
           .finally(() => {

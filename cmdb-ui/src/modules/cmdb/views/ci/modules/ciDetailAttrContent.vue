@@ -60,7 +60,7 @@
         </span>
       </template>
       <template v-else-if="attr.is_list">
-        <span> {{ ci[attr.name].join(',') }}</span>
+        <span> {{ ci[attr.name] && Array.isArray(ci[attr.name]) ? ci[attr.name].join(',') : ci[attr.name] }}</span>
       </template>
       <template v-else>{{ getName(ci[attr.name]) }}</template>
     </span>
@@ -105,23 +105,6 @@
               </span>
             </a-select-option>
           </a-select>
-          <a-select
-            :style="{ width: '100%' }"
-            v-decorator="[
-              attr.name,
-              {
-                rules: [{ required: attr.is_required }],
-              },
-            ]"
-            :placeholder="$t('placeholder2')"
-            v-else-if="attr.is_list"
-            mode="tags"
-            showSearch
-            allowClear
-            size="small"
-            :getPopupContainer="(trigger) => trigger.parentElement"
-          >
-          </a-select>
           <a-input-number
             size="small"
             v-decorator="[
@@ -131,7 +114,7 @@
               },
             ]"
             style="width: 100%"
-            v-else-if="attr.value_type === '0' || attr.value_type === '1'"
+            v-else-if="(attr.value_type === '0' || attr.value_type === '1') && !attr.is_list"
           />
           <a-date-picker
             size="small"
@@ -144,22 +127,9 @@
             style="width: 100%"
             :format="attr.value_type === '4' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss'"
             :valueFormat="attr.value_type === '4' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss'"
-            v-else-if="attr.value_type === '4' || attr.value_type === '3'"
+            v-else-if="(attr.value_type === '4' || attr.value_type === '3') && !attr.is_list"
             :showTime="attr.value_type === '4' ? false : { format: 'HH:mm:ss' }"
           />
-          <!-- <a-input
-            size="small"
-            @focus="(e) => handleFocusInput(e, attr)"
-            v-decorator="[
-              attr.name,
-              {
-                validateTrigger: ['submit'],
-                rules: [{ required: attr.is_required }],
-              },
-            ]"
-            style="width: 100%"
-            v-else-if="attr.value_type === '6'"
-          /> -->
           <a-input
             size="small"
             v-decorator="[
@@ -241,7 +211,9 @@ export default {
       this.$nextTick(async () => {
         if (this.attr.is_list && !this.attr.is_choice) {
           this.form.setFieldsValue({
-            [`${this.attr.name}`]: this.ci[this.attr.name] || null,
+            [`${this.attr.name}`]: Array.isArray(this.ci[this.attr.name])
+              ? this.ci[this.attr.name].join(',')
+              : this.ci[this.attr.name],
           })
           return
         }

@@ -101,7 +101,6 @@
             :cell-type="col.value_type === '2' ? 'string' : 'auto'"
             :fixed="col.is_fixed ? 'left' : ''"
           >
-            <!-- <template #edit="{row}"><a-input v-model="row[col.field]"></a-input></template> -->
             <template #header>
               <span class="vxe-handle">
                 <OpsMoveIcon
@@ -110,7 +109,7 @@
                 <span>{{ col.title }}</span>
               </span>
             </template>
-            <template v-if="col.is_choice || col.is_password || col.is_list" #edit="{ row }">
+            <template v-if="col.is_choice || col.is_password" #edit="{ row }">
               <vxe-input v-if="col.is_password" v-model="passwordValue[col.field]" />
               <a-select
                 :getPopupContainer="(trigger) => trigger.parentElement"
@@ -146,18 +145,6 @@
                     {{ choice[0] }}
                   </span>
                 </a-select-option>
-              </a-select>
-              <a-select
-                :getPopupContainer="(trigger) => trigger.parentElement"
-                :style="{ width: '100%', height: '32px' }"
-                v-model="row[col.field]"
-                :placeholder="$t('placeholder2')"
-                v-else-if="col.is_list"
-                :showArrow="false"
-                mode="tags"
-                class="ci-table-edit-select"
-                allowClear
-              >
               </a-select>
             </template>
             <template
@@ -293,7 +280,6 @@
           </a-pagination>
         </div>
         <create-instance-form ref="create" @reload="reloadData" @submit="batchUpdate" />
-        <!-- <batch-update-relation :typeId="typeId" ref="batchUpdateRelation" @submit="batchUpdateRelation" /> -->
         <JsonEditor ref="jsonEditor" @jsonEditorOk="jsonEditorOk" />
         <BatchDownload ref="batchDownload" @batchDownload="batchDownload" />
         <MetadataDrawer ref="metadataDrawer" />
@@ -470,11 +456,6 @@ export default {
         const regSort = /(?<=sort=).+/g
 
         const exp = expression.match(regQ) ? expression.match(regQ)[0] : null
-        // if (exp) {
-        //   exp = exp.replace(/(\:)/g, '$1*')
-        //   exp = exp.replace(/(\,)/g, '*$1')
-        // }
-        // If the sorting is done by clicking on the table, the table will prevail.
         let sort
         if (sortByTable) {
           sort = sortByTable
@@ -483,7 +464,6 @@ export default {
         }
         const res = await searchCI({
           q: `_type:${this.typeId}${exp ? `,${exp}` : ''}${fuzzySearch ? `,*${fuzzySearch}*` : ''}`,
-          // q: `${this.mergeQ(queryParams)}${exp ? `,${exp}` : ''}${fuzzySearch ? `,*${fuzzySearch}*` : ''}`,
           count: this.pageSize,
           page: this.currentPage,
           sort,
@@ -532,55 +512,17 @@ export default {
         this.$refs['xTable'].getVxetableRef().setCheckboxRow(rows, true)
       }
     },
-    // mergeQ(params) {
-    //   let q = `_type:${this.typeId}`
-    //   Object.keys(params).forEach((key) => {
-    //     if (!['pageNo', 'pageSize', 'sortField', 'sortOrder'].includes(key) && params[key] + '' !== '') {
-    //       if (typeof params[key] === 'object' && params[key] && params[key].length > 1) {
-    //         q += `,${key}:(${params[key].join(';')})`
-    //       } else if (params[key]) {
-    //         q += `,${key}:*${params[key]}*`
-    //       }
-    //     }
-    //   })
-    //   return q
-    // },
-
     async loadPreferenceAttrList() {
       const subscribed = await getSubscribeAttributes(this.typeId)
       this.preferenceAttrList = subscribed.attributes // All columns that have been subscribed
     },
-
     onSelectChange() {
-      // const current = records.map((i) => i.ci_id || i._id)
-
-      // const cached = new Set(this.selectedRowKeys)
-      // if (checked) {
-      //   current.forEach((i) => {
-      //     cached.add(i)
-      //   })
-      // } else {
-      //   if (row) {
-      //     cached.delete(row.ci_id || row._id)
-      //   } else {
-      //     this.instanceList.map((row) => {
-      //       cached.delete(row.ci_id || row._id)
-      //     })
-      //   }
-      // }
       const xTable = this.$refs.xTable.getVxetableRef()
       const records = [...xTable.getCheckboxRecords(), ...xTable.getCheckboxReserveRecords()]
       this.selectedRowKeys = records.map((i) => i.ci_id || i._id)
     },
     onSelectRangeEnd({ records }) {
-      // const current = records.map((i) => i.ci_id || i._id)
-      // const cached = new Set(this.selectedRowKeys)
-      // current.forEach((i) => {
-      //   cached.add(i)
-      // })
       this.selectedRowKeys = records.map((i) => i.ci_id || i._id)
-
-      // this.setSelectRows()
     },
     reloadData() {
       this.loadTableData()
@@ -622,7 +564,7 @@ export default {
           })
           .catch((err) => {
             console.log(err)
-            $table.revertData(row)
+            this.loadTableData()
           })
       }
       this.columns.forEach((col) => {
@@ -693,12 +635,22 @@ export default {
         }
       })
       this.$refs.create.visible = false
+      const key = 'updatable'
+      let errorMsg = ''
       for (let i = 0; i < this.selectedRowKeys.length; i++) {
         await updateCI(this.selectedRowKeys[i], payload, false)
           .then(() => {
             successNum += 1
           })
-          .catch(() => {
+          .catch((error) => {
+            errorMsg = errorMsg + '\n' + `${this.selectedRowKeys[i]}:${error.response?.data?.message ?? ''}`
+            this.$notification.warning({
+              key,
+              message: this.$t('warning'),
+              description: errorMsg,
+              duration: 0,
+              style: { whiteSpace: 'break-spaces' },
+            })
             errorNum += 1
           })
           .finally(() => {
