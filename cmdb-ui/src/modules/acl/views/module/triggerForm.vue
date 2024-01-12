@@ -1,4 +1,4 @@
- <template>
+<template>
   <CustomDrawer
     @close="handleClose"
     width="500"

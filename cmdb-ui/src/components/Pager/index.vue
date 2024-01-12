@@ -1,45 +1,45 @@
 <template>
-    <div>
-      <a-row class="row" type="flex" justify="end">
-        <a-col>
-          <a-space align="end">
-            <a-button
-              class="left-button"
-              size="small"
-              :disabled="prevIsDisabled"
-              @click="prevPage"
-            ><a-icon
-              type="left"
-            /></a-button>
-            <a-button class="page-button" size="small">{{ currentPage }}</a-button>
-            <a-button
-              class="right-button"
-              size="small"
-              :disabled="nextIsDisabled"
-              @click="nextPage"
-            ><a-icon
-              type="right"
-            /></a-button>
-            <a-dropdown
-              class="dropdown"
-              size="small"
-              placement="topCenter"
-              :trigger="['click']"
-              :disabled="dropdownIsDisabled"
-            >
-              <a-menu slot="overlay">
-                <a-menu-item v-for="(size, index) in pageSizes" :key="index" @click="handleItemClick(size)">
-                  {{ `${size}${$t('itemsPerPage')}` }}
-                </a-menu-item>
-              </a-menu>
-              <a-button size="small">{{ `${pageSize}${$t('itemsPerPage')}` }}<a-icon type="down" /> </a-button>
-            </a-dropdown>
-          </a-space>
-        </a-col>
-      </a-row>
-    </div>
-  </template>
-  
+  <div>
+    <a-row class="row" type="flex" justify="end">
+      <a-col>
+        <a-space align="end">
+          <a-button
+            class="left-button"
+            size="small"
+            :disabled="prevIsDisabled"
+            @click="prevPage"
+          ><a-icon
+            type="left"
+          /></a-button>
+          <a-button class="page-button" size="small">{{ currentPage }}</a-button>
+          <a-button
+            class="right-button"
+            size="small"
+            :disabled="nextIsDisabled"
+            @click="nextPage"
+          ><a-icon
+            type="right"
+          /></a-button>
+          <a-dropdown
+            class="dropdown"
+            size="small"
+            placement="topCenter"
+            :trigger="['click']"
+            :disabled="dropdownIsDisabled"
+          >
+            <a-menu slot="overlay">
+              <a-menu-item v-for="(size, index) in pageSizes" :key="index" @click="handleItemClick(size)">
+                {{ `${size}${$t('itemsPerPage')}` }}
+              </a-menu-item>
+            </a-menu>
+            <a-button size="small">{{ `${pageSize}${$t('itemsPerPage')}` }}<a-icon type="down" /> </a-button>
+          </a-dropdown>
+        </a-space>
+      </a-col>
+    </a-row>
+  </div>
+</template>
+
   <script>
   export default {
     name: 'Pager',
@@ -117,7 +117,7 @@
     },
   }
   </script>
-  
+
   <style lang="less" scoped>
   .row {
     margin-top: 5px;
@@ -135,4 +135,3 @@
     }
   }
   </style>
-  
