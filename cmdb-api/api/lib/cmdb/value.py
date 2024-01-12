@@ -5,10 +5,10 @@ from __future__ import unicode_literals
 
 import copy
 import imp
-import os
-import tempfile
-
 import jinja2
+import os
+import re
+import tempfile
 from flask import abort
 from flask import current_app
 from jinja2schema import infer
@@ -117,6 +117,11 @@ class AttributeValueManager(object):
         if type_attr and type_attr.is_required and not value and value != 0:
             return abort(400, ErrFormat.attribute_value_required.format(attr.alias))
 
+    @staticmethod
+    def _check_re(expr, value):
+        if not re.compile(expr).match(str(value)):
+            return abort(400, ErrFormat.attribute_value_invalid.format(value))
+
     def _validate(self, attr, value, value_table, ci=None, type_id=None, ci_id=None, type_attr=None):
         ci = ci or {}
         v = self._deserialize_value(attr.value_type, value)
@@ -129,6 +134,9 @@ class AttributeValueManager(object):
 
         if v == "" and attr.value_type not in (ValueTypeEnum.TEXT,):
             v = None
+
+        if attr.re_check and value:
+            self._check_re(attr.re_check, value)
 
         return v
 
