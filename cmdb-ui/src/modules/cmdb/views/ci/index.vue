@@ -293,7 +293,6 @@
           </a-pagination>
         </div>
         <create-instance-form ref="create" @reload="reloadData" @submit="batchUpdate" />
-        <!-- <EditAttrsDrawer ref="editAttrsDrawer" @refresh="refreshAfterEditAttrs" /> -->
         <!-- <batch-update-relation :typeId="typeId" ref="batchUpdateRelation" @submit="batchUpdateRelation" /> -->
         <JsonEditor ref="jsonEditor" @jsonEditorOk="jsonEditorOk" />
         <BatchDownload ref="batchDownload" @batchDownload="batchDownload" />

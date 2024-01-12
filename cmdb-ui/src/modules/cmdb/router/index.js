@@ -138,7 +138,7 @@ const genCmdbRoutes = async () => {
   const [preference, relation] = await Promise.all([getPreference(), getRelationView()])
 
   preference.forEach(item => {
-    routes.children[2].children.unshift({
+    routes.children[2].children.push({
       path: `/cmdb/instances/types/${item.id}`,
       component: () => import(`../views/ci/index`),
       name: `cmdb_${item.id}`,
