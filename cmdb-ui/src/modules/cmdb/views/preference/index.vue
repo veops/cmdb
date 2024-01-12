@@ -5,7 +5,7 @@
         <span class="cmdb-preference-left-card-title">{{ $t('cmdb.preference.mySub') }}</span>
         <span
           class="cmdb-preference-left-card-content"
-        ><ops-icon type="cmdb-ci" :style="{ marginRight: '5px' }" />{{ $t('cmdb.menu.ciTable') }}:
+        ><ops-icon type="cmdb-ci" :style="{ marginRight: '5px' }"/>{{ $t('cmdb.menu.ciTable') }}:
           <a-badge
             showZero
             :count="self.instance.length"
@@ -16,11 +16,10 @@
               height: '23px',
               fontSize: '14px',
             }"
-          /></span
-        >
+          /></span>
         <span
           class="cmdb-preference-left-card-content"
-        ><ops-icon type="cmdb-tree" :style="{ marginRight: '5px' }" />{{ $t('cmdb.menu.ciTree') }}:
+        ><ops-icon type="cmdb-tree" :style="{ marginRight: '5px' }"/>{{ $t('cmdb.menu.ciTree') }}:
           <a-badge
             showZero
             :count="self.tree.length"
@@ -31,57 +30,67 @@
               height: '23px',
               fontSize: '14px',
             }"
-          /></span
-        >
+          /></span>
       </div>
       <div class="cmdb-preference-group" v-for="(group, index) in myPreferences" :key="group.name">
         <div class="cmdb-preference-group-title">
           <span> <ops-icon :style="{ marginRight: '10px' }" :type="group.icon" />{{ group.name }} </span>
         </div>
-        <div class="cmdb-preference-group-content" v-for="ciType in group.ci_types" :key="ciType.id">
-          <div
-            :class="{
-              'cmdb-preference-avatar': true,
-              'cmdb-preference-avatar-noicon': !ciType.icon,
-              'cmdb-preference-avatar-noicon-is_subscribed': !ciType.icon,
-            }"
-            :style="{ width: '30px', height: '30px', marginRight: '10px' }"
-          >
-            <template v-if="ciType.icon">
-              <img
-                v-if="ciType.icon.split('$$')[2]"
-                :src="`/api/common-setting/v1/file/${ciType.icon.split('$$')[3]}`"
-                :style="{ maxHeight: '30px', maxWidth: '30px' }"
-              />
-              <ops-icon
-                v-else
-                :style="{
-                  color: ciType.icon.split('$$')[1],
-                  fontSize: '14px',
-                }"
-                :type="ciType.icon.split('$$')[0]"
-              />
-            </template>
-            <span v-else :style="{ fontSize: '20px' }">{{ ciType.name[0].toUpperCase() }}</span>
+        <draggable
+          v-model="group.ci_types"
+          :animation="300"
+          @change="
+            (e) => {
+              orderChange(e, group)
+            }
+          "
+        >
+          <div class="cmdb-preference-group-content" v-for="ciType in group.ci_types" :key="ciType.id">
+            <OpsMoveIcon class="cmdb-preference-move-icon" />
+            <div
+              :class="{
+                'cmdb-preference-avatar': true,
+                'cmdb-preference-avatar-noicon': !ciType.icon,
+                'cmdb-preference-avatar-noicon-is_subscribed': !ciType.icon && ciType.is_subscribed,
+              }"
+              :style="{ width: '30px', height: '30px', marginRight: '10px' }"
+            >
+              <template v-if="ciType.icon">
+                <img
+                  v-if="ciType.icon.split('$$')[2]"
+                  :src="`/api/common-setting/v1/file/${ciType.icon.split('$$')[3]}`"
+                  :style="{ maxHeight: '30px', maxWidth: '30px' }"
+                />
+                <ops-icon
+                  v-else
+                  :style="{
+                    color: ciType.icon.split('$$')[1],
+                    fontSize: '14px',
+                  }"
+                  :type="ciType.icon.split('$$')[0]"
+                />
+              </template>
+              <span v-else :style="{ fontSize: '20px' }">{{ ciType.name[0].toUpperCase() }}</span>
+            </div>
+            <span class="cmdb-preference-group-content-title">{{ ciType.alias || ciType.name }}</span>
+            <span class="cmdb-preference-group-content-action">
+              <a-tooltip :title="$t('cmdb.preference.cancelSub')">
+                <span
+                  @click="unsubscribe(ciType, group.type)"
+                ><ops-icon type="cmdb-preference-cancel-subscribe" />
+                </span>
+              </a-tooltip>
+              <a-divider type="vertical" :style="{ margin: '0 3px' }" />
+              <a-tooltip :title="$t('cmdb.preference.editSub')">
+                <span
+                  @click="openSubscribeSetting(ciType, `${index + 1}`)"
+                ><ops-icon
+                  type="cmdb-preference-subscribe"
+                /></span>
+              </a-tooltip>
+            </span>
           </div>
-          <span class="cmdb-preference-group-content-title">{{ ciType.alias || ciType.name }}</span>
-          <span class="cmdb-preference-group-content-action">
-            <a-tooltip :title="$t('cmdb.preference.cancelSub')">
-              <span
-                @click="unsubscribe(ciType, group.type)"
-              ><ops-icon type="cmdb-preference-cancel-subscribe" />
-              </span>
-            </a-tooltip>
-            <a-divider type="vertical" :style="{ margin: '0 3px' }" />
-            <a-tooltip :title="$t('cmdb.preference.editSub')">
-              <span
-                @click="openSubscribeSetting(ciType, `${index + 1}`)"
-              ><ops-icon
-                type="cmdb-preference-subscribe"
-              /></span>
-            </a-tooltip>
-          </span>
-        </div>
+        </draggable>
       </div>
     </div>
     <div class="cmdb-preference-right">
@@ -124,19 +133,12 @@
                 >
               </div>
               <div class="cmdb-preference-colleague">
-                <template v-if="type_id2users[item.id] && type_id2users[item.id].length">
-                  <span
-                  >{{ type_id2users[item.id].length > 99 ? '99+' : type_id2users[item.id].length
-                  }}{{ $t('cmdb.preference.peopleSub') }}</span
-                  >
-                  <span class="cmdb-preference-colleague-name">
-                    <span v-for="uid in type_id2users[item.id].slice(0, 4)" :key="uid">
-                      {{ getNameByUid(uid) }}
-                    </span>
-                    <span class="cmdb-preference-colleague-ellipsis" v-if="type_id2users[item.id].length > 4">...</span>
-                  </span>
-                </template>
-                <span v-else :style="{ marginLeft: 'auto' }">{{ $t('cmdb.preference.noSub') }}</span>
+                <span
+                  v-if="type_id2users[item.id] && type_id2users[item.id].length"
+                >{{ type_id2users[item.id].length > 99 ? '99+' : type_id2users[item.id].length
+                }}{{ $t('cmdb.preference.peopleSub') }}</span
+                >
+                <span v-else>{{ $t('cmdb.preference.noSub') }}</span>
               </div>
               <div class="cmdb-preference-progress">
                 <div class="cmdb-preference-progress-info">
@@ -190,15 +192,23 @@ import router, { resetRouter } from '@/router'
 import store from '@/store'
 import { mapState } from 'vuex'
 import moment from 'moment'
+import draggable from 'vuedraggable'
 import { getCITypeGroups } from '../../api/ciTypeGroup'
-import { getPreference, getPreference2, subscribeCIType, subscribeTreeView } from '@/modules/cmdb/api/preference'
+import {
+  getPreference,
+  getPreference2,
+  subscribeCIType,
+  subscribeTreeView,
+  preferenceCitypeOrder,
+} from '@/modules/cmdb/api/preference'
 import CollapseTransition from '@/components/CollapseTransition'
 import SubscribeSetting from '../../components/subscribeSetting/subscribeSetting'
 import { getCIAdcStatistics } from '../../api/ci'
+import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
 
 export default {
   name: 'Preference',
-  components: { CollapseTransition, SubscribeSetting },
+  components: { CollapseTransition, SubscribeSetting, draggable, OpsMoveIcon },
   data() {
     return {
       citypeData: [],
@@ -214,7 +224,6 @@ export default {
   computed: {
     ...mapState({
       windowHeight: (state) => state.windowHeight,
-      allUsers: (state) => state.user.allUsers,
     }),
   },
   mounted() {
@@ -276,10 +285,6 @@ export default {
           this.expandKeys = ciTypeGroup.map((item) => item.id)
         }, 300)
       }
-    },
-    getNameByUid(uid) {
-      const _find = this.allUsers.find((item) => item.uid === uid)
-      return _find?.username[0].toUpperCase() || 'A'
     },
     getsubscribedDays(item) {
       const subscribedTime = this.self.type_id2subs_time[item.id]
@@ -350,6 +355,17 @@ export default {
       } else {
         this.expandKeys.push(group.id)
       }
+    },
+    orderChange(e, group) {
+      preferenceCitypeOrder({ type_ids: group.ci_types.map((type) => type.id), is_tree: group.type !== 'ci' })
+        .then(() => {
+          if (group.type === 'ci') {
+            this.resetRoute()
+          }
+        })
+        .catch(() => {
+          this.getCITypes(false)
+        })
     },
   },
 }
@@ -426,7 +442,7 @@ export default {
         align-items: center;
         height: 45px;
         padding: 0 8px;
-        cursor: default;
+        cursor: move;
         justify-content: flex-start;
         &:hover {
           background: #ffffff;
@@ -437,6 +453,15 @@ export default {
             white-space: nowrap;
             margin-left: auto;
           }
+          .cmdb-preference-move-icon {
+            visibility: visible;
+          }
+        }
+        .cmdb-preference-move-icon {
+          width: 14px;
+          height: 20px;
+          cursor: move;
+          visibility: hidden;
         }
         .cmdb-preference-group-content-title {
           flex: 1;
