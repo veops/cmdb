@@ -16,7 +16,7 @@ from wtforms import validators
 from api.extensions import db
 from api.lib.common_setting.acl import ACLManager
 from api.lib.common_setting.const import OperatorType
-from api.lib.cmdb.const import CMDB_QUEUE
+from api.lib.perm.acl.const import ACL_QUEUE
 from api.lib.common_setting.resp_format import ErrFormat
 from api.models.common_setting import Employee, Department
 
@@ -141,7 +141,7 @@ class EmployeeCRUD(object):
     def add(**kwargs):
         try:
             res = CreateEmployee().create_single(**kwargs)
-            refresh_employee_acl_info.apply_async(args=(), queue=CMDB_QUEUE)
+            refresh_employee_acl_info.apply_async(args=(), queue=ACL_QUEUE)
             return res
         except Exception as e:
             abort(400, str(e))
@@ -171,7 +171,7 @@ class EmployeeCRUD(object):
             if len(e_list) > 0:
                 edit_employee_department_in_acl.apply_async(
                     args=(e_list, new_department_id, current_user.uid),
-                    queue=CMDB_QUEUE
+                    queue=ACL_QUEUE
                 )
 
             return existed
@@ -577,7 +577,7 @@ class EmployeeCRUD(object):
     @staticmethod
     def import_employee(employee_list):
         res = CreateEmployee().batch_create(employee_list)
-        refresh_employee_acl_info.apply_async(args=(), queue=CMDB_QUEUE)
+        refresh_employee_acl_info.apply_async(args=(), queue=ACL_QUEUE)
         return res
 
     @staticmethod

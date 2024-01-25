@@ -3,14 +3,14 @@ from flask import current_app
 
 from api.extensions import celery
 from api.lib.common_setting.acl import ACLManager
-from api.lib.cmdb.const import CMDB_QUEUE
+from api.lib.perm.acl.const import ACL_QUEUE
 from api.lib.common_setting.resp_format import ErrFormat
 from api.models.common_setting import Department, Employee
 from api.lib.decorator import flush_db
 from api.lib.decorator import reconnect_db
 
 
-@celery.task(name="common_setting.edit_employee_department_in_acl", queue=CMDB_QUEUE)
+@celery.task(name="common_setting.edit_employee_department_in_acl", queue=ACL_QUEUE)
 @flush_db
 @reconnect_db
 def edit_employee_department_in_acl(e_list, new_d_id, op_uid):
@@ -77,7 +77,7 @@ def edit_employee_department_in_acl(e_list, new_d_id, op_uid):
     return result
 
 
-@celery.task(name="common_setting.refresh_employee_acl_info", queue=CMDB_QUEUE)
+@celery.task(name="common_setting.refresh_employee_acl_info", queue=ACL_QUEUE)
 @flush_db
 @reconnect_db
 def refresh_employee_acl_info():
