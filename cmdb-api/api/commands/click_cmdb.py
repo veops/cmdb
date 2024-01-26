@@ -1,13 +1,14 @@
 # -*- coding:utf-8 -*-
 
 
-import click
 import copy
 import datetime
 import json
-import requests
 import time
 import uuid
+
+import click
+import requests
 from flask import current_app
 from flask.cli import with_appcontext
 from flask_login import login_user
@@ -195,6 +196,8 @@ def cmdb_counter():
             if i % 5 == 0:
                 CMDBCounterCache.flush_adc_counter()
                 i = 0
+
+            CMDBCounterCache.flush_sub_counter()
 
             i += 1
         except:
