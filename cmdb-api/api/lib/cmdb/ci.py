@@ -5,6 +5,7 @@ import copy
 import datetime
 import json
 import threading
+
 from flask import abort
 from flask import current_app
 from flask_login import current_user
@@ -312,6 +313,9 @@ class CIManager(object):
 
         unique_key = AttributeCache.get(ci_type.unique_id) or abort(
             400, ErrFormat.unique_value_not_found.format("unique_id={}".format(ci_type.unique_id)))
+        if (unique_key.default and unique_key.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID and
+                not ci_dict.get(unique_key.name)):
+            ci_dict[unique_key.name] = cls._auto_inc_id(unique_key)
 
         unique_value = ci_dict.get(unique_key.name) or ci_dict.get(unique_key.alias) or ci_dict.get(unique_key.id)
         unique_value = unique_value or abort(400, ErrFormat.unique_key_required.format(unique_key.name))
@@ -346,7 +350,8 @@ class CIManager(object):
                         if attr.default.get('default') and attr.default.get('default') in (
                                 AttributeDefaultValueEnum.CREATED_AT, AttributeDefaultValueEnum.UPDATED_AT):
                             ci_dict[attr.name] = now
-                        elif attr.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID:
+                        elif (attr.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID and
+                              not ci_dict.get(attr.name)):
                             ci_dict[attr.name] = cls._auto_inc_id(attr)
                         elif ((attr.name not in ci_dict and attr.alias not in ci_dict) or (
                                 ci_dict.get(attr.name) is None and ci_dict.get(attr.alias) is None)):
