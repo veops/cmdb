@@ -139,7 +139,7 @@ export default {
           console.log('login form', values)
           const loginParams = { ...values }
           delete loginParams.username
-          loginParams[!state.loginType ? 'email' : 'username'] = values.username
+          loginParams.username = values.username
           loginParams.password = appConfig.useEncryption ? md5(values.password) : values.password
           localStorage.setItem('ops_auth_type', '')
           Login({ userInfo: loginParams })
