@@ -80,7 +80,7 @@ def edit_employee_department_in_acl(e_list, new_d_id, op_uid):
 @celery.task(name="common_setting.refresh_employee_acl_info", queue=ACL_QUEUE)
 @flush_db
 @reconnect_db
-def refresh_employee_acl_info():
+def refresh_employee_acl_info(current_employee_id=None):
     acl = ACLManager('acl')
     role_map = {role['name']: role for role in acl.get_all_roles()}
 
@@ -90,8 +90,12 @@ def refresh_employee_acl_info():
     query = Employee.query.filter(*criterion).order_by(
         Employee.created_at.desc()
     )
+    current_employee_rid = 0
 
     for em in query.all():
+        if current_employee_id and em.employee_id == current_employee_id:
+            current_employee_rid = em.acl_rid if em.acl_rid else 0
+
         if em.acl_uid and em.acl_rid:
             continue
         role = role_map.get(em.username, None)
@@ -105,6 +109,9 @@ def refresh_employee_acl_info():
         if not em.acl_rid:
             params['acl_rid'] = role.get('id', 0)
 
+        if current_employee_id and em.employee_id == current_employee_id:
+            current_employee_rid = params['acl_rid'] if params.get('acl_rid', 0) else 0
+
         try:
             em.update(**params)
             current_app.logger.info(
@@ -113,3 +120,12 @@ def refresh_employee_acl_info():
         except Exception as e:
             current_app.logger.error(str(e))
             continue
+
+    if current_employee_rid and current_employee_rid > 0:
+        try:
+            from api.lib.common_setting.employee import GrantEmployeeACLPerm
+
+            GrantEmployeeACLPerm().grant_by_rid(current_employee_rid, False)
+            current_app.logger.info(f"GrantEmployeeACLPerm success, current_employee_rid: {current_employee_rid}")
+        except Exception as e:
+            current_app.logger.error(str(e))

@@ -4,7 +4,7 @@ from flask.cli import with_appcontext
 from werkzeug.datastructures import MultiDict
 
 from api.lib.common_setting.acl import ACLManager
-from api.lib.common_setting.employee import EmployeeAddForm
+from api.lib.common_setting.employee import EmployeeAddForm, GrantEmployeeACLPerm
 from api.lib.common_setting.resp_format import ErrFormat
 from api.models.common_setting import Employee, Department
 
@@ -158,50 +158,11 @@ class InitDepartment(object):
 
     def init_backend_resource(self):
         acl = self.check_app('backend')
-        resources_types = acl.get_all_resources_types()
-
-        perms = ['read', 'grant', 'delete', 'update']
-
         acl_rid = self.get_admin_user_rid()
 
-        results = list(filter(lambda t: t['name'] == '操作权限', resources_types['groups']))
-        if len(results) == 0:
-            payload = dict(
-                app_id=acl.app_name,
-                name='操作权限',
-                description='',
-                perms=perms
-            )
-            resource_type = acl.create_resources_type(payload)
-        else:
-            resource_type = results[0]
-            resource_type_id = resource_type['id']
-            existed_perms = resources_types.get('id2perms', {}).get(resource_type_id, [])
-            existed_perms = [p['name'] for p in existed_perms]
-            new_perms = []
-            for perm in perms:
-                if perm not in existed_perms:
-                    new_perms.append(perm)
-            if len(new_perms) > 0:
-                resource_type['perms'] = existed_perms + new_perms
-                acl.update_resources_type(resource_type_id, resource_type)
-
-        resource_list = acl.get_resource_by_type(None, None, resource_type['id'])
-
-        for name in ['公司信息', '公司架构', '通知设置']:
-            target = list(filter(lambda r: r['name'] == name, resource_list))
-            if len(target) == 0:
-                payload = dict(
-                    type_id=resource_type['id'],
-                    app_id=acl.app_name,
-                    name=name,
-                )
-                resource = acl.create_resource(payload)
-            else:
-                resource = target[0]
-
-            if acl_rid > 0:
-                acl.grant_resource(acl_rid, resource['id'], perms)
+        if acl_rid == 0:
+            return
+        GrantEmployeeACLPerm(acl).grant_by_rid(acl_rid, True)
 
     @staticmethod
     def check_app(app_name):
