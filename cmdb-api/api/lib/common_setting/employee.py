@@ -141,7 +141,7 @@ class EmployeeCRUD(object):
     def add(**kwargs):
         try:
             res = CreateEmployee().create_single(**kwargs)
-            refresh_employee_acl_info.apply_async(args=(), queue=ACL_QUEUE)
+            refresh_employee_acl_info.apply_async(args=(res.employee_id,), queue=ACL_QUEUE)
             return res
         except Exception as e:
             abort(400, str(e))
@@ -577,7 +577,6 @@ class EmployeeCRUD(object):
     @staticmethod
     def import_employee(employee_list):
         res = CreateEmployee().batch_create(employee_list)
-        refresh_employee_acl_info.apply_async(args=(), queue=ACL_QUEUE)
         return res
 
     @staticmethod
@@ -788,9 +787,11 @@ class CreateEmployee(object):
         if existed:
             return existed
 
-        return Employee.create(
+        res = Employee.create(
             **kwargs
         )
+        refresh_employee_acl_info.apply_async(args=(res.employee_id,), queue=ACL_QUEUE)
+        return res
 
     @staticmethod
     def get_department_by_name(d_name):
@@ -897,3 +898,75 @@ class EmployeeUpdateByUidForm(Form):
     avatar = StringField(validators=[])
     sex = StringField(validators=[])
     mobile = StringField(validators=[])
+
+
+class GrantEmployeeACLPerm(object):
+    """
+    Grant ACL Permission After Create New Employee
+    """
+
+    def __init__(self, acl=None):
+        self.perms_by_create_resources_type = ['read', 'grant', 'delete', 'update']
+        self.perms_by_common_grant = ['read']
+        self.resource_name_list = ['公司信息', '公司架构', '通知设置']
+
+        self.acl = acl if acl else self.check_app('backend')
+        self.resources_types = self.acl.get_all_resources_types()
+        self.resources_type = self.get_resources_type()
+        self.resource_list = self.acl.get_resource_by_type(None, None, self.resources_type['id'])
+
+    @staticmethod
+    def check_app(app_name):
+        acl = ACLManager(app_name)
+        payload = dict(
+            name=app_name,
+            description=app_name
+        )
+        app = acl.validate_app()
+        if not app:
+            acl.create_app(payload)
+        return acl
+
+    def get_resources_type(self):
+        results = list(filter(lambda t: t['name'] == '操作权限', self.resources_types['groups']))
+        if len(results) == 0:
+            payload = dict(
+                app_id=self.acl.app_name,
+                name='操作权限',
+                description='',
+                perms=self.perms_by_create_resources_type
+            )
+            resource_type = self.acl.create_resources_type(payload)
+        else:
+            resource_type = results[0]
+            resource_type_id = resource_type['id']
+            existed_perms = self.resources_types.get('id2perms', {}).get(resource_type_id, [])
+            existed_perms = [p['name'] for p in existed_perms]
+            new_perms = []
+            for perm in self.perms_by_create_resources_type:
+                if perm not in existed_perms:
+                    new_perms.append(perm)
+            if len(new_perms) > 0:
+                resource_type['perms'] = existed_perms + new_perms
+                self.acl.update_resources_type(resource_type_id, resource_type)
+
+        return resource_type
+
+    def grant(self, rid_list):
+        [self.grant_by_rid(rid) for rid in rid_list if rid > 0]
+
+    def grant_by_rid(self, rid, is_admin=False):
+        for name in self.resource_name_list:
+            resource = list(filter(lambda r: r['name'] == name, self.resource_list))
+            if len(resource) == 0:
+                payload = dict(
+                    type_id=self.resources_type['id'],
+                    app_id=self.acl.app_name,
+                    name=name,
+                )
+                resource = self.acl.create_resource(payload)
+            else:
+                resource = resource[0]
+
+            perms = self.perms_by_create_resources_type if is_admin else self.perms_by_common_grant
+            self.acl.grant_resource(rid, resource['id'], perms)
