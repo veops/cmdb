@@ -25,7 +25,9 @@
                 initialValue:
                   attr.default && attr.default.default
                     ? attr.is_list
-                      ? attr.default.default.split(',')
+                      ? Array.isArray(attr.default.default)
+                        ? attr.default.default
+                        : attr.default.default.split(',')
                       : attr.default.default
                     : null,
               },
