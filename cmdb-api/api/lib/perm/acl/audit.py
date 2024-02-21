@@ -389,6 +389,7 @@ class AuditCRUD(object):
                        logout_at=logout_at,
                        ip=request.headers.get('X-Real-IP') or request.remote_addr,
                        browser=request.headers.get('User-Agent'),
+                       channel=request.values.get('channel', 'web'),
                        )
 
         if logout_at is None:

@@ -356,7 +356,7 @@ class AuditLoginLog(Model2):
     __tablename__ = "acl_audit_login_logs"
 
     username = db.Column(db.String(64), index=True)
-    channel = db.Column(db.Enum('web', 'api'), default="web")
+    channel = db.Column(db.Enum('web', 'api', 'ssh'), default="web")
     ip = db.Column(db.String(15))
     browser = db.Column(db.String(256))
     description = db.Column(db.String(128))
