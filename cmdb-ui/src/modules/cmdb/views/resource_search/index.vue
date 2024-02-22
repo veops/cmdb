@@ -206,7 +206,7 @@
 import _ from 'lodash'
 import SearchForm from '../../components/searchForm/SearchForm.vue'
 import { searchCI } from '../../api/ci'
-import { searchAttributes, getCITypeAttributesByTypeIds } from '../../api/CITypeAttr'
+import { searchAttributes, getCITypeAttributesByTypeIds, getCITypeAttributesById } from '../../api/CITypeAttr'
 import { getCITypes } from '../../api/CIType'
 import { getSubscribeAttributes } from '../../api/preference'
 import { getCITableColumns } from '../../utils/helper'
@@ -315,61 +315,59 @@ export default {
           this.instanceList = []
           this.totalNumber = res['numfound']
 
-          const oldData = res.result
-
-          function allKeys(data) {
-            const keys = {}
-            const ignoreAttr = ['_id', '_type', 'ci_type', 'ci_type_alias', 'unique', 'unique_alias']
-            data.forEach((item) => {
-              Object.keys(item).forEach((key) => {
-                if (!ignoreAttr.includes(key)) {
-                  keys[key] = ''
-                }
-              })
+          const { attributes: resAllAttributes } = await getCITypeAttributesByTypeIds({
+            type_ids: Object.keys(res.counter).join(','),
+          })
+          const _columnsGroup = Object.keys(res.counter).map((key) => {
+            const _find = this.ciTypes.find((item) => item.name === key)
+            return {
+              id: `parent-${_find.id}`,
+              value: key,
+              label: _find?.alias || _find?.name,
+              isCiType: true,
+            }
+          })
+          const ciTypeAttribute = {}
+          const promises = _columnsGroup.map((item) => {
+            return getCITypeAttributesById(item.id.split('-')[1]).then((res) => {
+              ciTypeAttribute[item.label] = res.attributes
             })
-            return keys
-          }
+          })
+          await Promise.all(promises)
 
-          function tidy(data) {
-            const outputKeys = allKeys(data)
-            const common = {}
-            data.forEach((item) => {
-              const tmp = {}
-              Object.keys(outputKeys).forEach((j) => {
-                if (j in item) {
-                  tmp[j] = item[j]
-                  // 提取common
-                  {
-                    const key = item['ci_type_alias']
-                    if (j in common) {
-                      common[j][[key]] = ''
-                    } else {
-                      common[j] = { [key]: '' }
-                    }
-                  }
+          const outputKeys = {}
+          resAllAttributes.forEach((attr) => {
+            outputKeys[attr.name] = ''
+          })
+
+          const common = {}
+          Object.keys(outputKeys).forEach((key) => {
+            Object.entries(ciTypeAttribute).forEach(([type, attrs]) => {
+              if (attrs.find((a) => a.name === key)) {
+                if (key in common) {
+                  common[key][type] = ''
                 } else {
-                  tmp[j] = null
-                }
-              })
-            })
-            const commonObject = {}
-            const commonKeys = []
-            // 整理common
-            Object.keys(common).forEach((key) => {
-              if (Object.keys(common[key]).length > 1) {
-                commonKeys.push(key)
-                const reverseKey = Object.keys(common[key]).join('&')
-                if (!commonObject[reverseKey]) {
-                  commonObject[reverseKey] = [key]
-                } else {
-                  commonObject[reverseKey].push(key)
+                  common[key] = { [type]: '' }
                 }
               }
             })
-            return { commonObject, commonKeys }
-          }
+          })
 
-          const { commonObject, commonKeys } = tidy(oldData)
+          const commonObject = {}
+          const commonKeys = []
+          // 整理common
+          Object.keys(common).forEach((key) => {
+            if (Object.keys(common[key]).length > 1) {
+              commonKeys.push(key)
+              const reverseKey = Object.keys(common[key]).join('&')
+              if (!commonObject[reverseKey]) {
+                commonObject[reverseKey] = [key]
+              } else {
+                commonObject[reverseKey].push(key)
+              }
+            }
+          })
+
           const _commonColumnsGroup = Object.keys(commonObject).map((key) => {
             return {
               id: `parent-${key}`,
@@ -385,24 +383,14 @@ export default {
             }
           })
 
-          const _columnsGroup = Object.keys(res.counter).map((key) => {
-            const _find = this.ciTypes.find((item) => item.name === key)
-            return {
-              id: `parent-${_find.id}`,
-              value: key,
-              label: _find?.alias || _find?.name,
-              isCiType: true,
-            }
-          })
-
-          const promises = _columnsGroup.map((item) => {
+          const promises1 = _columnsGroup.map((item) => {
             return getSubscribeAttributes(item.id.split('-')[1]).then((res1) => {
               item.children = this.getColumns(res.result, res1.attributes).filter(
                 (col) => !commonKeys.includes(col.field)
               )
             })
           })
-          await Promise.all(promises).then(() => {
+          await Promise.all(promises1).then(() => {
             this.columnsGroup = [..._commonColumnsGroup, ..._columnsGroup]
             this.instanceList = res['result']
           })
