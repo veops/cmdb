@@ -89,9 +89,12 @@ def db_setup():
     """
     db.create_all()
 
-    db.session.execute("set global sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,"
-                       "ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'")
-    db.session.commit()
+    try:
+        db.session.execute("set global sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,"
+                           "ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'")
+        db.session.commit()
+    except:
+        pass
 
     try:
         db.session.execute("set global tidb_enable_noop_functions='ON'")
