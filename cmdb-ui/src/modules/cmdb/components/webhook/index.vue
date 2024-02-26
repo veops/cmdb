@@ -88,7 +88,9 @@ export default {
       } catch {}
       const headers = {}
       this.$refs.Header.headers.forEach((item) => {
-        headers[item.key] = item.value
+        if (item.key) {
+          headers[item.key] = item.value
+        }
       })
       let authorization = {}
       const type = this.$refs.Authorization.authorizationType
