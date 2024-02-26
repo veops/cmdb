@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 
 import copy
+
 import toposort
 from flask import abort
 from flask import current_app
@@ -656,15 +657,15 @@ class CITypeRelationManager(object):
             current_app.logger.warning(str(e))
             return abort(400, ErrFormat.circular_dependency_error)
 
-        if constraint == ConstraintEnum.Many2Many:
-            other_c = CITypeRelation.get_by(parent_id=p.id, constraint=ConstraintEnum.Many2Many,
-                                            to_dict=False, first=True)
-            other_p = CITypeRelation.get_by(child_id=c.id, constraint=ConstraintEnum.Many2Many,
-                                            to_dict=False, first=True)
-            if other_c and other_c.child_id != c.id:
-                return abort(400, ErrFormat.m2m_relation_constraint.format(p.name, other_c.child.name))
-            if other_p and other_p.parent_id != p.id:
-                return abort(400, ErrFormat.m2m_relation_constraint.format(other_p.parent.name, c.name))
+        # if constraint == ConstraintEnum.Many2Many:
+        #     other_c = CITypeRelation.get_by(parent_id=p.id, constraint=ConstraintEnum.Many2Many,
+        #                                     to_dict=False, first=True)
+        #     other_p = CITypeRelation.get_by(child_id=c.id, constraint=ConstraintEnum.Many2Many,
+        #                                     to_dict=False, first=True)
+        #     if other_c and other_c.child_id != c.id:
+        #         return abort(400, ErrFormat.m2m_relation_constraint.format(p.name, other_c.child.name))
+        #     if other_p and other_p.parent_id != p.id:
+        #         return abort(400, ErrFormat.m2m_relation_constraint.format(other_p.parent.name, c.name))
 
         existed = cls._get(p.id, c.id)
         if existed is not None:
