@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :style="{ height: '100%' }">
     <vxe-table
       show-overflow
       show-header-overflow
@@ -7,7 +7,7 @@
       size="small"
       class="ops-stripe-table"
       :data="tableData"
-      v-bind="ci_id ? { maxHeight: `${windowHeight - 94}px` } : { height: `${windowHeight - 225}px` }"
+      v-bind="ci_id ? { height: 'auto' } : { height: `${windowHeight - 225}px` }"
     >
       <vxe-column field="trigger_name" :title="$t('cmdb.history.triggerName')"> </vxe-column>
       <vxe-column field="type" :title="$t('type')">

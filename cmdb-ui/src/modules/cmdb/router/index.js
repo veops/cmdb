@@ -57,6 +57,13 @@ const genCmdbRoutes = async () => {
         component: () => import('../views/discoveryCI/index.vue')
       },
       {
+        path: `/cmdb/cidetail/:typeId/:ciId`,
+        name: 'cmdb_ci_detail',
+        hidden: true,
+        meta: { title: 'cmdb.menu.cidetail', keepAlive: false },
+        component: () => import('../views/ci/ciDetailPage.vue')
+      },
+      {
         path: '/cmdb/disabled2',
         name: 'cmdb_disabled2',
         meta: { title: 'cmdb.menu.config', disabled: true, },
