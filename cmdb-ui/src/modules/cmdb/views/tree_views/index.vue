@@ -371,7 +371,7 @@
         }
       "
     />
-    <ci-detail ref="detail" :typeId="Number(typeId)" :treeViewsLevels="treeViewsLevels" />
+    <CiDetailDrawer ref="detail" :typeId="Number(typeId)" :treeViewsLevels="treeViewsLevels" />
     <create-instance-form
       ref="create"
       :typeIdFromRelation="Number(typeId)"
@@ -404,7 +404,7 @@ import PasswordField from '../../components/passwordField/index.vue'
 import SplitPane from '@/components/SplitPane'
 import TreeViewsNode from './modules/treeViewsNode.vue'
 import EditAttrsPopover from '../ci/modules/editAttrsPopover.vue'
-import CiDetail from '../ci/modules/CiDetail'
+import CiDetailDrawer from '../ci/modules/ciDetailDrawer.vue'
 import CreateInstanceForm from '../ci/modules/CreateInstanceForm'
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
 import JsonEditor from '../../components/JsonEditor/jsonEditor.vue'
@@ -424,7 +424,7 @@ export default {
     SplitPane,
     TreeViewsNode,
     EditAttrsPopover,
-    CiDetail,
+    CiDetailDrawer,
     CreateInstanceForm,
     JsonEditor,
     BatchDownload,

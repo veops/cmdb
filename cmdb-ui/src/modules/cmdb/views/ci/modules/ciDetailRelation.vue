@@ -39,7 +39,11 @@
             class="ops-stripe-table"
           >
             <template #operation_default="{ row }">
-              <a-popconfirm arrowPointAtCenter :title="$t('cmdb.ci.confirmDeleteRelation')" @confirm="deleteRelation(row._id, ciId)">
+              <a-popconfirm
+                arrowPointAtCenter
+                :title="$t('cmdb.ci.confirmDeleteRelation')"
+                @confirm="deleteRelation(row._id, ciId)"
+              >
                 <a
                   :disabled="!canEdit[parent.id]"
                   :style="{
@@ -82,7 +86,11 @@
             class="ops-stripe-table"
           >
             <template #operation_default="{ row }">
-              <a-popconfirm arrowPointAtCenter :title="$t('cmdb.ci.confirmDeleteRelation')" @confirm="deleteRelation(ciId, row._id)">
+              <a-popconfirm
+                arrowPointAtCenter
+                :title="$t('cmdb.ci.confirmDeleteRelation')"
+                @confirm="deleteRelation(ciId, row._id)"
+              >
                 <a
                   :disabled="!canEdit[child.id]"
                   :style="{
@@ -416,6 +424,7 @@ export default {
 
 <style lang="less" scoped>
 .ci-detail-relation {
+  height: 100%;
   .ci-detail-relation-table-title {
     font-size: 16px;
     font-weight: 700;
