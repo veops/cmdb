@@ -145,7 +145,7 @@ export default {
     selectedRowKeys: {
       type: Array,
       default: () => [],
-    }
+    },
   },
   data() {
     return {
@@ -179,7 +179,12 @@ export default {
       this.fuzzySearch = ''
     },
   },
-  inject: ['setPreferenceSearchCurrent'],
+  inject: {
+    setPreferenceSearchCurrent: {
+      from: 'setPreferenceSearchCurrent',
+      default: null,
+    },
+  },
   mounted() {
     if (this.type === 'resourceSearch') {
       this.getCITypeGroups()
@@ -234,7 +239,9 @@ export default {
       }
     },
     emitRefresh() {
-      this.setPreferenceSearchCurrent(null)
+      if (this.setPreferenceSearchCurrent) {
+        this.setPreferenceSearchCurrent(null)
+      }
       this.$nextTick(() => {
         this.$emit('refresh', true)
       })

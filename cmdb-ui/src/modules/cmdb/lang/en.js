@@ -19,6 +19,7 @@ const cmdb_en = {
         operationHistory: 'Operation Audit',
         relationType: 'Relation Type',
         ad: 'AutoDiscovery',
+        cidetail: 'CI Detail'
     },
     ciType: {
         ciType: 'CIType',
@@ -467,6 +468,8 @@ const cmdb_en = {
         tips10: 'Other attributes of the CIType are computed using expressions\n\nA code snippet computes the returned value.',
         newUpdateField: 'Add a Attribute',
         attributeSettings: 'Attribute Settings',
+        share: 'Share',
+        noPermission: 'No Permission'
     },
     serviceTree: {
         deleteNode: 'Delete Node',

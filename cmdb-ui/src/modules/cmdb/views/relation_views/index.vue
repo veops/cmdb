@@ -316,7 +316,7 @@
     <!-- <GrantDrawer ref="grantDrawer" resourceTypeName="RelationView" app_id="cmdb" /> -->
     <CMDBGrant ref="cmdbGrant" resourceType="RelationView" app_id="cmdb" />
 
-    <ci-detail ref="detail" :typeId="Number(currentTypeId[0])" />
+    <CiDetailDrawer ref="detail" :typeId="Number(currentTypeId[0])" />
     <create-instance-form
       ref="create"
       :typeIdFromRelation="Number(currentTypeId[0])"
@@ -354,7 +354,7 @@ import { roleHasPermissionToGrant } from '@/modules/acl/api/permission'
 import { searchResourceType } from '@/modules/acl/api/resource'
 import SplitPane from '@/components/SplitPane'
 import EditAttrsPopover from '../ci/modules/editAttrsPopover.vue'
-import CiDetail from '../ci/modules/CiDetail'
+import CiDetailDrawer from '../ci/modules/ciDetailDrawer.vue'
 import CreateInstanceForm from '../ci/modules/CreateInstanceForm'
 import JsonEditor from '../../components/JsonEditor/jsonEditor.vue'
 import BatchDownload from '../../components/batchDownload/batchDownload.vue'
@@ -375,7 +375,7 @@ export default {
     SplitPane,
     ElTree: Tree,
     EditAttrsPopover,
-    CiDetail,
+    CiDetailDrawer,
     CreateInstanceForm,
     JsonEditor,
     BatchDownload,

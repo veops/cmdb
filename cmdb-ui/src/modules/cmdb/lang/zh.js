@@ -19,6 +19,7 @@ const cmdb_zh = {
         operationHistory: '操作审计',
         relationType: '关系类型',
         ad: '自动发现',
+        cidetail: 'CI 详情'
     },
     ciType: {
         ciType: '模型',
@@ -466,6 +467,8 @@ const cmdb_zh = {
         tips10: '模型的其他属性通过表达式的方式计算出来\n\n一个代码片段计算返回的值',
         newUpdateField: '新增修改字段',
         attributeSettings: '字段设置',
+        share: '分享',
+        noPermission: '暂无权限'
     },
     serviceTree: {
         deleteNode: '删除节点',

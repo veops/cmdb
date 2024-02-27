@@ -57,7 +57,7 @@
             <span>{{ $t('cmdb.ci.selectRows', { rows: selectedRowKeys.length }) }}</span>
           </div>
         </SearchForm>
-        <CiDetail ref="detail" :typeId="typeId" />
+        <CiDetailDrawer ref="detail" :typeId="typeId" />
         <ops-table
           :id="`cmdb-ci-${typeId}`"
           border
@@ -297,7 +297,7 @@ import router, { resetRouter } from '@/router'
 
 import SearchForm from '../../components/searchForm/SearchForm.vue'
 import CreateInstanceForm from './modules/CreateInstanceForm'
-import CiDetail from './modules/CiDetail'
+import CiDetailDrawer from './modules/ciDetailDrawer.vue'
 import EditAttrsPopover from './modules/editAttrsPopover'
 import JsonEditor from '../../components/JsonEditor/jsonEditor.vue'
 import { searchCI, updateCI, deleteCI } from '@/modules/cmdb/api/ci'
@@ -320,7 +320,7 @@ export default {
   components: {
     SearchForm,
     CreateInstanceForm,
-    CiDetail,
+    CiDetailDrawer,
     JsonEditor,
     PasswordField,
     EditAttrsPopover,
