@@ -330,8 +330,8 @@ class AutoDiscoveryCICRUD(DBMixin):
 
     @staticmethod
     def get_attributes_by_type_id(type_id):
-        from api.lib.cmdb.cache import CITypeAttributesCache
-        attributes = [i[1] for i in CITypeAttributesCache.get2(type_id) or []]
+        from api.lib.cmdb.ci_type import CITypeAttributeManager
+        attributes = [i[1] for i in CITypeAttributeManager.get_all_attributes(type_id) or []]
 
         attr_names = set()
         adts = AutoDiscoveryCITypeCRUD.get_by_type_id(type_id)

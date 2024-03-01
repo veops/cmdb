@@ -2,6 +2,7 @@
 
 
 import copy
+
 import six
 import toposort
 from flask import abort
@@ -14,6 +15,7 @@ from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.cache import CMDBCounterCache
+from api.lib.cmdb.ci_type import CITypeAttributeManager
 from api.lib.cmdb.const import ConstraintEnum
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
@@ -112,8 +114,8 @@ class PreferenceManager(object):
             CITypeAttribute, CITypeAttribute.attr_id == PreferenceShowAttributes.attr_id).filter(
             PreferenceShowAttributes.uid == current_user.uid).filter(
             PreferenceShowAttributes.type_id == type_id).filter(
-            PreferenceShowAttributes.deleted.is_(False)).filter(CITypeAttribute.deleted.is_(False)).filter(
-            CITypeAttribute.type_id == type_id).all()
+            PreferenceShowAttributes.deleted.is_(False)).filter(CITypeAttribute.deleted.is_(False)).group_by(
+            CITypeAttribute.attr_id).all()
 
         result = []
         for i in sorted(attrs, key=lambda x: x.PreferenceShowAttributes.order):
@@ -123,17 +125,16 @@ class PreferenceManager(object):
 
         is_subscribed = True
         if not attrs:
-            attrs = db.session.query(CITypeAttribute).filter(
-                CITypeAttribute.type_id == type_id).filter(
-                CITypeAttribute.deleted.is_(False)).filter(
-                CITypeAttribute.default_show.is_(True)).order_by(CITypeAttribute.order)
-            result = [i.attr.to_dict() for i in attrs]
+            result = CITypeAttributeManager.get_attributes_by_type_id(type_id,
+                                                                      choice_web_hook_parse=False,
+                                                                      choice_other_parse=False)
+            result = [i for i in result if i['default_show']]
             is_subscribed = False
 
         for i in result:
             if i["is_choice"]:
                 i.update(dict(choice_value=AttributeManager.get_choice_values(
-                    i["id"], i["value_type"], i["choice_web_hook"], i.get("choice_other"))))
+                    i["id"], i["value_type"], i.get("choice_web_hook"), i.get("choice_other"))))
 
         return is_subscribed, result
 
