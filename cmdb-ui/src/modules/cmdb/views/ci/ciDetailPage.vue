@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="ci-detail-header">{{ this.type.name }}</div>
+    <div class="ci-detail-header">{{ this.type.alias }}</div>
     <div class="ci-detail-page">
       <CiDetailTab ref="ciDetailTab" :typeId="typeId" />
     </div>

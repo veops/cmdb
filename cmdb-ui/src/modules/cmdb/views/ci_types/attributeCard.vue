@@ -1,24 +1,30 @@
 <template>
-  <div class="attribute-card">
-    <div class="attribute-card-content">
-      <div class="attribute-card-value-type-icon handle" :style="{ ...getPropertyStyle(property) }">
-        <ValueTypeIcon :attr="property" />
-      </div>
-      <div :class="{ 'attribute-card-content-inner': true, 'attribute-card-name-required': property.is_required }">
-        <div :class="{ 'attribute-card-name': true, 'attribute-card-name-default-show': property.default_show }">
-          {{ property.alias || property.name }}
+  <div :class="{ 'attribute-card': true, 'attribute-card-inherited': inherited }">
+    <a-tooltip :title="inherited ? $t('cmdb.ciType.inheritFrom', { name: property.inherited_from }) : ''">
+      <div class="attribute-card-content">
+        <div
+          :class="{ 'attribute-card-value-type-icon': true, handle: !inherited }"
+          :style="{ ...getPropertyStyle(property) }"
+        >
+          <ValueTypeIcon :attr="property" />
         </div>
-        <div v-if="property.is_password" class="attribute-card_value-type">{{ $t('cmdb.ciType.password') }}</div>
-        <div v-else-if="property.is_link" class="attribute-card_value-type">{{ $t('cmdb.ciType.link') }}</div>
-        <div v-else class="attribute-card_value-type">{{ valueTypeMap[property.value_type] }}</div>
+        <div :class="{ 'attribute-card-content-inner': true, 'attribute-card-name-required': property.is_required }">
+          <div :class="{ 'attribute-card-name': true, 'attribute-card-name-default-show': property.default_show }">
+            {{ property.alias || property.name }}
+          </div>
+          <div v-if="property.is_password" class="attribute-card_value-type">{{ $t('cmdb.ciType.password') }}</div>
+          <div v-else-if="property.is_link" class="attribute-card_value-type">{{ $t('cmdb.ciType.link') }}</div>
+          <div v-else class="attribute-card_value-type">{{ valueTypeMap[property.value_type] }}</div>
+        </div>
+        <div
+          class="attribute-card-trigger"
+          v-if="(property.value_type === '3' || property.value_type === '4') && !isStore"
+        >
+          <a @click="openTrigger"><ops-icon type="ops-trigger"/></a>
+        </div>
       </div>
-      <div
-        class="attribute-card-trigger"
-        v-if="(property.value_type === '3' || property.value_type === '4') && !isStore"
-      >
-        <a @click="openTrigger"><ops-icon type="ops-trigger"/></a>
-      </div>
-    </div>
+    </a-tooltip>
+
     <div class="attribute-card-footer">
       <a-popover
         trigger="click"
@@ -51,7 +57,7 @@
         </a-space>
       </a-popover>
 
-      <a-space class="attribute-card-operation">
+      <a-space class="attribute-card-operation" v-if="!inherited">
         <a v-if="!isStore"><a-icon type="edit" @click="handleEdit"/></a>
         <a-tooltip :title="$t('cmdb.ciType.computeForAllCITips')">
           <a v-if="!isStore && property.is_computed"><a-icon type="redo" @click="handleCalcComputed"/></a>
@@ -140,6 +146,9 @@ export default {
         },
       ]
     },
+    inherited() {
+      return this.property.inherited || false
+    },
   },
   methods: {
     getPropertyStyle,
@@ -211,12 +220,14 @@ export default {
       width: 32px;
       height: 32px;
       font-size: 12px;
-      cursor: move;
       background: #ffffff !important;
       box-shadow: 0px 1px 2px rgba(47, 84, 235, 0.2);
       border-radius: 2px;
       text-align: center;
       line-height: 32px;
+    }
+    .handle {
+      cursor: move;
     }
     .attribute-card-content-inner {
       padding-left: 12px;
@@ -267,6 +278,12 @@ export default {
     .attribute-card-operation {
       visibility: hidden;
     }
+  }
+}
+.attribute-card-inherited {
+  background: #f3f4f7;
+  .attribute-card-footer {
+    background: #eaedf3;
   }
 }
 </style>

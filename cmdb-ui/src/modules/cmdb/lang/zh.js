@@ -176,7 +176,12 @@ const cmdb_zh = {
         time: '时间',
         json: 'JSON',
         event: '事件',
-        reg: '正则校验'
+        reg: '正则校验',
+        isInherit: '是否继承',
+        inheritType: '继承模型',
+        inheritTypePlaceholder: '请选择继承模型（多选）',
+        inheritFrom: '属性继承自{name}',
+        groupInheritFrom: '请至{name}进行修改'
     },
     components: {
         unselectAttributes: '未选属性',

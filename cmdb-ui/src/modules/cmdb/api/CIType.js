@@ -205,3 +205,21 @@ export function ciTypeFilterPermissions(type_id) {
     method: 'get',
   })
 }
+
+// parent_ids, child_id
+export function postCiTypeInheritance(data) {
+  return axios({
+    url: `/v0.1/ci_types/inheritance`,
+    method: 'post',
+    data
+  })
+}
+
+// parent_id, child_id
+export function deleteCiTypeInheritance(data) {
+  return axios({
+    url: `/v0.1/ci_types/inheritance`,
+    method: 'delete',
+    data
+  })
+}
