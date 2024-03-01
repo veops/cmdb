@@ -354,7 +354,7 @@ import CMDBGrant from '../../components/cmdbGrant'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
 import AttributeStore from './attributeStore.vue'
 import { getAllDepAndEmployee } from '@/api/company'
-import CMDBTypeSelect from '../../components/CMDBTypeSelect'
+import CMDBTypeSelect from '../../components/cmdbTypeSelect'
 
 export default {
   name: 'CITypes',
