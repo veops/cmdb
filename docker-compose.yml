@@ -33,7 +33,7 @@ services:
           - redis
 
   cmdb-api:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.3.11
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.3.12
 #    build:
 #      context: .
 #      target: cmdb-api
@@ -68,7 +68,7 @@ services:
           - cmdb-api
 
   cmdb-ui:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.3.11
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.3.12
 #    build:
 #      context: .
 #      target: cmdb-ui
