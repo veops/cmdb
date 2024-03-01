@@ -1,6 +1,11 @@
 <template>
   <div>
-    <a-modal v-model="addGroupModal" :title="$t('cmdb.ciType.addGroup')" @cancel="handleCancelCreateGroup" @ok="handleCreateGroup">
+    <a-modal
+      v-model="addGroupModal"
+      :title="$t('cmdb.ciType.addGroup')"
+      @cancel="handleCancelCreateGroup"
+      @ok="handleCreateGroup"
+    >
       <span>
         <a-form-item :label="$t('name')" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
           <a-input type="text" v-model.trim="newGroupName" />
@@ -9,21 +14,12 @@
     </a-modal>
     <div class="ci-types-attributes" :style="{ maxHeight: `${windowHeight - 104}px` }">
       <a-space style="margin-bottom: 10px">
-        <a-button
-          type="primary"
-          @click="handleAddGroup"
-          size="small"
-          class="ops-button-primary"
-          icon="plus"
-        >{{ $t('cmdb.ciType.group') }}</a-button
-        >
-        <a-button
-          type="primary"
-          @click="handleOpenUniqueConstraint"
-          size="small"
-          class="ops-button-primary"
-        >{{ $t('cmdb.ciType.uniqueConstraint') }}</a-button
-        >
+        <a-button type="primary" @click="handleAddGroup" size="small" class="ops-button-primary" icon="plus">{{
+          $t('cmdb.ciType.group')
+        }}</a-button>
+        <a-button type="primary" @click="handleOpenUniqueConstraint" size="small" class="ops-button-primary">{{
+          $t('cmdb.ciType.uniqueConstraint')
+        }}</a-button>
       </a-space>
       <div :key="CITypeGroup.id" v-for="(CITypeGroup, index) in CITypeGroups">
         <div>
@@ -33,7 +29,11 @@
           >
             <span style="font-weight:700">{{ CITypeGroup.name }}</span>
             <span style="color: #c3cdd7;margin:0 5px;">({{ CITypeGroup.attributes.length }})</span>
-            <a @click="handleEditGroupName(index, CITypeGroup)">
+
+            <a v-if="!CITypeGroup.inherited" @click="handleEditGroupName(index, CITypeGroup)">
+              <a-icon type="edit" />
+            </a>
+            <a v-else :style="{ cursor: 'not-allowed', color: 'gray' }">
               <a-icon type="edit" />
             </a>
           </div>
@@ -71,7 +71,13 @@
             </a-tooltip>
             <a-tooltip>
               <template slot="title">{{ $t('cmdb.ciType.deleteGroup') }}</template>
-              <a style="color:red;"><a-icon type="delete" @click="handleDeleteGroup(CITypeGroup)"/></a>
+              <a
+                :style="{ color: CITypeGroup.inherited ? 'gray' : 'red' }"
+                :disabled="CITypeGroup.inherited"
+              ><a-icon
+                type="delete"
+                @click="handleDeleteGroup(CITypeGroup)"
+              /></a>
             </a-tooltip>
           </a-space>
         </div>
@@ -82,7 +88,7 @@
             @start="drag = true"
             @change="
               (e) => {
-                handleChange(e, CITypeGroup.id)
+                handleChange(e, CITypeGroup.name)
               }
             "
             :filter="'.filter-empty'"
@@ -124,7 +130,7 @@
           @start="drag = true"
           @change="
             (e) => {
-              handleChange(e, -1)
+              handleChange(e, null)
             }
           "
           :animation="300"
@@ -144,18 +150,18 @@
         </draggable>
       </div>
     </div>
-    <attribute-edit-form
+    <AttributeEditForm
       ref="attributeEditForm"
       :CITypeId="CITypeId"
       :CITypeName="CITypeName"
       @ok="handleOk"
-    ></attribute-edit-form>
-    <new-ci-type-attr-modal
+    ></AttributeEditForm>
+    <NewCiTypeAttrModal
       ref="newCiTypeAttrModal"
       :CITypeId="CITypeId"
       :linked-ids="linkedIds"
       @ok="handleOk"
-    ></new-ci-type-attr-modal>
+    ></NewCiTypeAttrModal>
     <UniqueConstraint ref="uniqueConstraint" :CITypeId="CITypeId" />
   </div>
 </template>
@@ -347,8 +353,8 @@ export default {
     },
 
     handleMoveGroup(beforeIndex, afterIndex) {
-      const fromGroupId = this.CITypeGroups[beforeIndex].id
-      const toGroupId = this.CITypeGroups[afterIndex].id
+      const fromGroupId = this.CITypeGroups[beforeIndex].name
+      const toGroupId = this.CITypeGroups[afterIndex].name
       transferCITypeGroupIndex(this.CITypeId, { from: fromGroupId, to: toGroupId }).then((res) => {
         this.$message.success(this.$t('operateSuccess'))
         const beforeGroup = this.CITypeGroups[beforeIndex]
@@ -414,14 +420,14 @@ export default {
       })
     },
     handleChange(e, group) {
-      console.log('changess')
+      console.log('changess', group)
       if (e.hasOwnProperty('moved') && e.moved.oldIndex !== e.moved.newIndex) {
         if (group === -1) {
           this.$message.error(this.$t('cmdb.ciType.attributeSortedTips'))
         } else {
           transferCITypeAttrIndex(this.CITypeId, {
-            from: { attr_id: e.moved.element.id, group_id: group > -1 ? group : null },
-            to: { order: e.moved.newIndex, group_id: group > -1 ? group : null },
+            from: { attr_id: e.moved.element.id, group_name: group },
+            to: { order: e.moved.newIndex, group_name: group },
           })
             .then((res) => this.$message.success(this.$t('updateSuccess')))
             .catch(() => {
@@ -431,14 +437,14 @@ export default {
       }
 
       if (e.hasOwnProperty('added')) {
-        this.addRemoveGroupFlag = { to: { group_id: group > -1 ? group : null, order: e.added.newIndex }, inited: true }
+        this.addRemoveGroupFlag = { to: { group_name: group, order: e.added.newIndex }, inited: true }
       }
 
       if (e.hasOwnProperty('removed')) {
         this.$nextTick(() => {
           transferCITypeAttrIndex(this.CITypeId, {
-            from: { attr_id: e.removed.element.id, group_id: group > -1 ? group : null },
-            to: { group_id: this.addRemoveGroupFlag.to.group_id, order: this.addRemoveGroupFlag.to.order },
+            from: { attr_id: e.removed.element.id, group_name: group },
+            to: { group_name: this.addRemoveGroupFlag.to.group_name, order: this.addRemoveGroupFlag.to.order },
           })
             .then((res) => this.$message.success(this.$t('saveSuccess')))
             .catch(() => {

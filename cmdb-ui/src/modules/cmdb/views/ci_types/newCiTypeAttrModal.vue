@@ -20,7 +20,9 @@
         "
       >{{ $t('cancel') }}</a-button
       >
-      <a-button :loading="confirmLoading" @click="handleSubmit(false)" type="primary">{{ $t('cmdb.ciType.continueAdd') }}</a-button>
+      <a-button :loading="confirmLoading" @click="handleSubmit(false)" type="primary">{{
+        $t('cmdb.ciType.continueAdd')
+      }}</a-button>
       <a-button :loading="confirmLoading" type="primary" @click="handleSubmit">{{ $t('confirm') }}</a-button>
     </template>
     <a-tabs v-model="activeKey">
@@ -47,7 +49,7 @@
 <script>
 import _ from 'lodash'
 import { searchAttributes, createCITypeAttributes, updateCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
-import { updateCITypeGroupById, getCITypeGroupById } from '@/modules/cmdb/api/CIType'
+import { createCITypeGroupById, getCITypeGroupById } from '@/modules/cmdb/api/CIType'
 import CreateNewAttribute from './ceateNewAttribute.vue'
 import { valueTypeMap } from '../../utils/const'
 import AttributesTransfer from '../../components/attributesTransfer'
@@ -102,11 +104,11 @@ export default {
           if (this.currentGroup) {
             await this.updateCurrentGroup()
             const { id, name, order, attributes } = this.currentGroup
-            const attrIds = attributes.map((i) => i.id)
+            const attrIds = attributes.filter((i) => !i.inherited).map((i) => i.id)
             this.targetKeys.forEach((key) => {
               attrIds.push(Number(key))
             })
-            await updateCITypeGroupById(id, { name, order, attributes: [...new Set(attrIds)] })
+            await createCITypeGroupById(this.CITypeId, { name, order, attributes: [...new Set(attrIds)] })
           }
           this.confirmLoading = false
           this.handleClose(isCloseModal)
@@ -140,9 +142,9 @@ export default {
       if (this.currentGroup) {
         await this.updateCurrentGroup()
         const { id, name, order, attributes } = this.currentGroup
-        const attrIds = attributes.map((i) => i.id)
+        const attrIds = attributes.filter((i) => !i.inherited).map((i) => i.id)
         attrIds.push(newAttrId)
-        await updateCITypeGroupById(id, { name, order, attributes: attrIds })
+        await createCITypeGroupById(this.CITypeId, { name, order, attributes: attrIds })
       }
       this.confirmLoading = false
       this.loadTotalAttrs()

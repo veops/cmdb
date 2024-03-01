@@ -179,3 +179,13 @@ export const downloadExcel = (data, fileName = `${moment().format('YYYY-MM-DD HH
     // STEP 4: Write Excel file to browser  #导出
     XLSXS.writeFile(wb, fileName + '.xlsx')
 }
+
+export const getAllParentNodesLabel = (node, label) => {
+    if (node.parentNode) {
+        return getAllParentNodesLabel(node.parentNode, `${node.parentNode.label}-${label}`)
+    }
+    return label
+  }
+  export const getTreeSelectLabel = (node) => {
+    return `${getAllParentNodesLabel(node, node.label)}`
+  }

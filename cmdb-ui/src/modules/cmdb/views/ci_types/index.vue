@@ -139,6 +139,7 @@
                     <a><a-icon type="edit" @click="(e) => handleEdit(e, ci)"/></a>
                     <a
                       v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')"
+                      :disabled="ci.inherited"
                       @click="(e) => handleDownloadCiType(e, ci)"
                     >
                       <a-icon type="download" />
@@ -176,6 +177,7 @@
       placement="right"
       width="900px"
       :destroyOnClose="true"
+      :bodyStyle="{ height: 'calc(100vh - 108px)' }"
     >
       <a-form
         :form="form"
@@ -203,6 +205,35 @@
         </a-form-item>
         <a-form-item :label="$t('alias')">
           <a-input name="alias" v-decorator="['alias', { rules: [] }]" />
+        </a-form-item>
+        <a-form-item :label="$t('cmdb.ciType.isInherit')">
+          <a-radio-group v-model="isInherit">
+            <a-radio :value="true">
+              是
+            </a-radio>
+            <a-radio :value="false">
+              否
+            </a-radio>
+          </a-radio-group>
+        </a-form-item>
+        <a-form-item v-if="isInherit" :label="$t('cmdb.ciType.inheritType')">
+          <CMDBTypeSelect
+            multiple
+            :placeholder="$t('cmdb.ciType.inheritTypePlaceholder')"
+            v-decorator="[
+              'parent_ids',
+              { rules: [{ required: true, message: $t('cmdb.ciType.inheritTypePlaceholder') }] },
+            ]"
+            selectType="ci_type"
+            :class="{
+              'custom-treeselect': true,
+            }"
+            :style="{
+              '--custom-height': '32px',
+              lineHeight: '32px',
+              '--custom-multiple-lineHeight': '14px',
+            }"
+          />
         </a-form-item>
         <a-form-item :label="$t('icon')">
           <IconArea class="ci_types-icon-area" ref="iconArea" />
@@ -296,7 +327,14 @@ import router, { resetRouter } from '@/router'
 import store from '@/store'
 import draggable from 'vuedraggable'
 import { Select, Option } from 'element-ui'
-import { createCIType, updateCIType, deleteCIType } from '@/modules/cmdb/api/CIType'
+import {
+  createCIType,
+  updateCIType,
+  deleteCIType,
+  getCIType,
+  postCiTypeInheritance,
+  deleteCiTypeInheritance,
+} from '@/modules/cmdb/api/CIType'
 import {
   getCITypeGroupsConfig,
   postCITypeGroup,
@@ -316,6 +354,7 @@ import CMDBGrant from '../../components/cmdbGrant'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
 import AttributeStore from './attributeStore.vue'
 import { getAllDepAndEmployee } from '@/api/company'
+import CMDBTypeSelect from '../../components/CMDBTypeSelect'
 
 export default {
   name: 'CITypes',
@@ -330,6 +369,7 @@ export default {
     SplitPane,
     OpsMoveIcon,
     AttributeStore,
+    CMDBTypeSelect,
   },
   inject: ['reload'],
   data() {
@@ -368,6 +408,9 @@ export default {
       default_order_asc: '1',
 
       allTreeDepAndEmp: [],
+
+      editCiType: null,
+      isInherit: false,
     }
   },
   computed: {
@@ -563,6 +606,7 @@ export default {
       this.filterInput = ''
       this.form.resetFields()
       this.drawerVisible = false
+      this.isInherit = false
     },
     handleCreateNewAttrDone() {
       this.getAttributes()
@@ -583,6 +627,22 @@ export default {
           const icon =
             _icon && _icon.name ? `${_icon.name}$$${_icon.color || ''}$$${_icon.id || ''}$$${_icon.url || ''}` : ''
           if (values.id) {
+            const { parent_ids: oldP = [] } = this.editCiType
+            const { parent_ids: newP = [] } = values
+            const { remove, add } = this.compareArrays(newP, oldP)
+            if (add && add.length) {
+              await postCiTypeInheritance({ parent_ids: add, child_id: values.id }).catch(() => {
+                this.loading = false
+              })
+            }
+            if (remove && remove.length) {
+              for (let i = 0; i < remove.length; i++) {
+                await deleteCiTypeInheritance({ parent_id: remove[i], child_id: values.id }).catch(() => {
+                  this.loading = false
+                })
+              }
+            }
+            delete values.parent_ids
             await this.updateCIType(values.id, {
               ...values,
               icon,
@@ -592,6 +652,23 @@ export default {
           }
         }
       })
+    },
+    compareArrays(newArr, oldArr) {
+      const remove = []
+      const add = []
+      for (let i = 0; i < oldArr.length; i++) {
+        const item = oldArr[i]
+        if (newArr.indexOf(item) === -1) {
+          remove.push(item)
+        }
+      }
+      for (let i = 0; i < newArr.length; i++) {
+        const item = newArr[i]
+        if (oldArr.indexOf(item) === -1) {
+          add.push(item)
+        }
+      }
+      return { remove, add }
     },
     start(g) {
       console.log('start', g)
@@ -767,37 +844,50 @@ export default {
         router.addRoutes(store.getters.appRoutes)
       })
     },
-    handleEdit(e, record) {
+    async handleEdit(e, record) {
       e.preventDefault()
       e.stopPropagation()
       this.drawerTitle = this.$t('cmdb.ciType.editCIType')
       this.drawerVisible = true
-      getCITypeAttributesById(record.id).then((res) => {
+      await getCITypeAttributesById(record.id).then((res) => {
         this.orderSelectionOptions = res.attributes.filter((item) => item.is_required)
-        this.$nextTick(() => {
-          this.default_order_asc = record.default_order_attr && record.default_order_attr.startsWith('-') ? '2' : '1'
-
-          this.form.setFieldsValue({
-            id: record.id,
-            alias: record.alias,
-            name: record.name,
-            unique_key: record.unique_id,
-            default_order_attr:
-              record.default_order_attr && record.default_order_attr.startsWith('-')
-                ? record.default_order_attr.slice(1)
-                : record.default_order_attr,
+      })
+      await getCIType(record.id).then((res) => {
+        const ci_type = res.ci_types[0]
+        this.editCiType = ci_type ?? null
+        if (ci_type.parent_ids && ci_type.parent_ids.length) {
+          this.isInherit = true
+          this.$nextTick(() => {
+            this.form.setFieldsValue({
+              parent_ids: ci_type.parent_ids,
+            })
           })
-          this.$refs.iconArea.setIcon(
-            record.icon
-              ? {
-                  name: record.icon.split('$$')[0] || '',
-                  color: record.icon.split('$$')[1] || '',
-                  id: record.icon.split('$$')[2] ? Number(record.icon.split('$$')[2]) : null,
-                  url: record.icon.split('$$')[3] || '',
-                }
-              : {}
-          )
+        }
+      })
+      this.$nextTick(() => {
+        this.default_order_asc = record.default_order_attr && record.default_order_attr.startsWith('-') ? '2' : '1'
+
+        this.form.setFieldsValue({
+          id: record.id,
+          alias: record.alias,
+          name: record.name,
+          unique_key: record.unique_id,
+          default_order_attr:
+            record.default_order_attr && record.default_order_attr.startsWith('-')
+              ? record.default_order_attr.slice(1)
+              : record.default_order_attr,
         })
+
+        this.$refs.iconArea.setIcon(
+          record.icon
+            ? {
+                name: record.icon.split('$$')[0] || '',
+                color: record.icon.split('$$')[1] || '',
+                id: record.icon.split('$$')[2] ? Number(record.icon.split('$$')[2]) : null,
+                url: record.icon.split('$$')[3] || '',
+              }
+            : {}
+        )
       })
     },
     handleCreatNewAttr() {
