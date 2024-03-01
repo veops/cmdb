@@ -42,6 +42,7 @@ from api.models.cmdb import CITypeAttributeGroup
 from api.models.cmdb import CITypeAttributeGroupItem
 from api.models.cmdb import CITypeGroup
 from api.models.cmdb import CITypeGroupItem
+from api.models.cmdb import CITypeInheritance
 from api.models.cmdb import CITypeRelation
 from api.models.cmdb import CITypeTrigger
 from api.models.cmdb import CITypeUniqueConstraint
@@ -87,6 +88,7 @@ class CITypeManager(object):
         for type_dict in ci_types:
             attr = AttributeCache.get(type_dict["unique_id"])
             type_dict["unique_key"] = attr and attr.name
+            type_dict['parent_ids'] = CITypeInheritanceManager.get_parents(type_dict['id'])
             if resources is None or type_dict['name'] in resources:
                 res.append(type_dict)
 
@@ -133,7 +135,12 @@ class CITypeManager(object):
 
         kwargs["unique_id"] = unique_key.id
         kwargs['uid'] = current_user.uid
+
+        parent_ids = kwargs.pop('parent_ids', None)
+
         ci_type = CIType.create(**kwargs)
+
+        CITypeInheritanceManager.add(parent_ids, ci_type.id)
 
         CITypeAttributeManager.add(ci_type.id, [unique_key.id], is_required=True)
 
@@ -231,6 +238,12 @@ class CITypeManager(object):
         for item in AutoDiscoveryCI.get_by(type_id=type_id, to_dict=False):
             item.delete(commit=False)
 
+        for item in CITypeInheritance.get_by(parent_id=type_id, to_dict=False):
+            item.delete(commit=False)
+
+        for item in CITypeInheritance.get_by(child_id=type_id, to_dict=False):
+            item.delete(commit=False)
+
         db.session.commit()
 
         ci_type.soft_delete()
@@ -241,6 +254,100 @@ class CITypeManager(object):
 
         if current_app.config.get("USE_ACL"):
             ACLManager().del_resource(ci_type.name, ResourceTypeEnum.CI)
+
+
+class CITypeInheritanceManager(object):
+    cls = CITypeInheritance
+
+    @classmethod
+    def get_parents(cls, type_id):
+        return [i.parent_id for i in cls.cls.get_by(child_id=type_id, to_dict=False)]
+
+    @classmethod
+    def recursive_children(cls, type_id):
+        result = []
+
+        def _get_child(_id):
+            children = [i.child_id for i in cls.cls.get_by(parent_id=_id, to_dict=False)]
+            result.extend(children)
+            for child_id in children:
+                _get_child(child_id)
+
+        _get_child(type_id)
+
+        return result
+
+    @classmethod
+    def base(cls, type_id):
+        result = []
+        q = []
+
+        def _get_parents(_type_id):
+            parents = [i.parent_id for i in cls.cls.get_by(child_id=_type_id, to_dict=False)]
+            for i in parents[::-1]:
+                q.append(i)
+            try:
+                out = q.pop(0)
+            except IndexError:
+                return
+
+            result.append(out)
+
+            _get_parents(out)
+
+        _get_parents(type_id)
+
+        return result[::-1]
+
+    @classmethod
+    def add(cls, parent_ids, child_id):
+
+        rels = {}
+        for i in cls.cls.get_by(to_dict=False):
+            rels.setdefault(i.child_id, set()).add(i.parent_id)
+
+        try:
+            toposort_flatten(rels)
+        except toposort.CircularDependencyError as e:
+            current_app.logger.warning(str(e))
+            return abort(400, ErrFormat.circular_dependency_error)
+
+        for parent_id in parent_ids or []:
+            if parent_id == child_id:
+                return abort(400, ErrFormat.circular_dependency_error)
+
+            existed = cls.cls.get_by(parent_id=parent_id, child_id=child_id, first=True, to_dict=False)
+            if existed is None:
+                rels.setdefault(child_id, set()).add(parent_id)
+                try:
+                    toposort_flatten(rels)
+                except toposort.CircularDependencyError as e:
+                    current_app.logger.warning(str(e))
+                    return abort(400, ErrFormat.circular_dependency_error)
+
+                cls.cls.create(parent_id=parent_id, child_id=child_id, commit=False)
+
+        db.session.commit()
+
+    @classmethod
+    def delete(cls, parent_id, child_id):
+
+        existed = cls.cls.get_by(parent_id=parent_id, child_id=child_id, first=True, to_dict=False)
+
+        if existed is not None:
+            children = cls.recursive_children(child_id) + [child_id]
+            for _id in children:
+                if CI.get_by(type_id=_id, to_dict=False, first=True) is not None:
+                    return abort(400, ErrFormat.ci_exists_and_cannot_delete_inheritance)
+
+            attr_ids = set([i.id for _, i in CITypeAttributeManager.get_all_attributes(parent_id)])
+            for _id in children:
+                for attr_id in attr_ids:
+                    for i in PreferenceShowAttributes.get_by(type_id=_id, attr_id=attr_id, to_dict=False):
+                        i.soft_delete(commit=False)
+            db.session.commit()
+
+            existed.soft_delete()
 
 
 class CITypeGroupManager(object):
@@ -263,6 +370,7 @@ class CITypeGroupManager(object):
                 ci_type = CITypeCache.get(t['type_id']).to_dict()
                 if resources is None or (ci_type and ci_type['name'] in resources):
                     ci_type['permissions'] = resources[ci_type['name']] if resources is not None else None
+                    ci_type['inherited'] = True if CITypeInheritanceManager.get_parents(ci_type['id']) else False
                     group.setdefault("ci_types", []).append(ci_type)
                     group_types.add(t["type_id"])
 
@@ -272,6 +380,7 @@ class CITypeGroupManager(object):
             for ci_type in ci_types:
                 if ci_type["id"] not in group_types and (resources is None or ci_type['name'] in resources):
                     ci_type['permissions'] = resources.get(ci_type['name']) if resources is not None else None
+                    ci_type['inherited'] = True if CITypeInheritanceManager.get_parents(ci_type['id']) else False
                     other_types['ci_types'].append(ci_type)
 
             groups.append(other_types)
@@ -363,40 +472,62 @@ class CITypeAttributeManager(object):
                 return attr.name
 
     @staticmethod
-    def get_attr_names_by_type_id(type_id):
-        return [AttributeCache.get(attr.attr_id).name for attr in CITypeAttributesCache.get(type_id)]
+    def get_all_attributes(type_id):
+        parent_ids = CITypeInheritanceManager.base(type_id)
+
+        result = []
+        for _type_id in parent_ids + [type_id]:
+            result.extend(CITypeAttributesCache.get2(_type_id))
+
+        return result
+
+    @classmethod
+    def get_attr_names_by_type_id(cls, type_id):
+        return [attr.name for _, attr in cls.get_all_attributes(type_id)]
 
     @staticmethod
     def get_attributes_by_type_id(type_id, choice_web_hook_parse=True, choice_other_parse=True):
         has_config_perm = ACLManager('cmdb').has_permission(
             CITypeManager.get_name_by_id(type_id), ResourceTypeEnum.CI, PermEnum.CONFIG)
 
-        attrs = CITypeAttributesCache.get(type_id)
-        result = list()
-        for attr in sorted(attrs, key=lambda x: (x.order, x.id)):
-            attr_dict = AttributeManager().get_attribute(attr.attr_id, choice_web_hook_parse, choice_other_parse)
-            attr_dict["is_required"] = attr.is_required
-            attr_dict["order"] = attr.order
-            attr_dict["default_show"] = attr.default_show
-            if not has_config_perm:
-                attr_dict.pop('choice_web_hook', None)
-                attr_dict.pop('choice_other', None)
+        parent_ids = CITypeInheritanceManager.base(type_id)
 
-            result.append(attr_dict)
+        result = list()
+        id2pos = dict()
+        type2name = {i: CITypeCache.get(i) for i in parent_ids}
+        for _type_id in parent_ids + [type_id]:
+            attrs = CITypeAttributesCache.get(_type_id)
+            for attr in sorted(attrs, key=lambda x: (x.order, x.id)):
+                attr_dict = AttributeManager().get_attribute(attr.attr_id, choice_web_hook_parse, choice_other_parse)
+                attr_dict["is_required"] = attr.is_required
+                attr_dict["order"] = attr.order
+                attr_dict["default_show"] = attr.default_show
+                attr_dict["inherited"] = False if _type_id == type_id else True
+                attr_dict["inherited_from"] = type2name.get(_type_id) and type2name[_type_id].alias
+                if not has_config_perm:
+                    attr_dict.pop('choice_web_hook', None)
+                    attr_dict.pop('choice_other', None)
+
+                if attr_dict['id'] not in id2pos:
+                    id2pos[attr_dict['id']] = len(result)
+                    result.append(attr_dict)
+                else:
+                    result[id2pos[attr_dict['id']]] = attr_dict
 
         return result
 
-    @staticmethod
-    def get_common_attributes(type_ids):
+    @classmethod
+    def get_common_attributes(cls, type_ids):
         has_config_perm = False
         for type_id in type_ids:
             has_config_perm |= ACLManager('cmdb').has_permission(
                 CITypeManager.get_name_by_id(type_id), ResourceTypeEnum.CI, PermEnum.CONFIG)
 
-        result = CITypeAttribute.get_by(__func_in___key_type_id=list(map(int, type_ids)), to_dict=False)
+        result = {type_id: [i for _, i in cls.get_all_attributes(type_id)] for type_id in type_ids}
         attr2types = {}
-        for i in result:
-            attr2types.setdefault(i.attr_id, []).append(i.type_id)
+        for type_id in result:
+            for i in result[type_id]:
+                attr2types.setdefault(i.id, []).append(type_id)
 
         attrs = []
         for attr_id in attr2types:
@@ -530,7 +661,17 @@ class CITypeAttributeManager(object):
         attr_id = _from.get('attr_id')
         from_group_id = _from.get('group_id')
         to_group_id = _to.get('group_id')
+        from_group_name = _from.get('group_name')
+        to_group_name = _to.get('group_name')
         order = _to.get('order')
+
+        if from_group_name:
+            from_group = CITypeAttributeGroup.get_by(type_id=type_id, name=from_group_name, first=True, to_dict=False)
+            from_group_id = from_group and from_group.id
+
+        if to_group_name:
+            to_group = CITypeAttributeGroup.get_by(type_id=type_id, name=to_group_name, first=True, to_dict=False)
+            to_group_id = to_group and to_group.id
 
         if from_group_id != to_group_id:
             if from_group_id is not None:
@@ -740,25 +881,66 @@ class CITypeAttributeGroupManager(object):
 
     @staticmethod
     def get_by_type_id(type_id, need_other=False):
-        groups = CITypeAttributeGroup.get_by(type_id=type_id)
-        groups = sorted(groups, key=lambda x: x["order"] or 0)
-        grouped = list()
+        parent_ids = CITypeInheritanceManager.base(type_id)
+
+        groups = []
+        id2type = {i: CITypeCache.get(i).alias for i in parent_ids}
+        for _type_id in parent_ids + [type_id]:
+            _groups = CITypeAttributeGroup.get_by(type_id=_type_id)
+            _groups = sorted(_groups, key=lambda x: x["order"] or 0)
+            for i in _groups:
+                if type_id != _type_id:
+                    i['inherited'] = True
+                    i['inherited_from'] = id2type[_type_id]
+                else:
+                    i['inherited'] = False
+
+            groups.extend(_groups)
+
+        grouped = set()
 
         attributes = CITypeAttributeManager.get_attributes_by_type_id(type_id)
         id2attr = {i.get('id'): i for i in attributes}
 
+        group2pos = dict()
+        attr2pos = dict()
+        result = []
         for group in groups:
             items = CITypeAttributeGroupItem.get_by(group_id=group["id"], to_dict=False)
             items = sorted(items, key=lambda x: x.order or 0)
-            group["attributes"] = [id2attr.get(i.attr_id) for i in items if i.attr_id in id2attr]
-            grouped.extend([i.attr_id for i in items])
+
+            if group['name'] not in group2pos:
+                group_pos = len(result)
+                group['attributes'] = []
+                result.append(group)
+
+                group2pos[group['name']] = group_pos
+            else:
+                group_pos = group2pos[group['name']]
+
+            attr = None
+            for i in items:
+                if i.attr_id in id2attr:
+                    attr = id2attr[i.attr_id]
+                    attr['inherited'] = group['inherited']
+                    attr['inherited_from'] = group.get('inherited_from')
+                    result[group_pos]['attributes'].append(attr)
+
+                if i.attr_id in attr2pos:
+                    result[attr2pos[i.attr_id][0]]['attributes'].remove(attr2pos[i.attr_id][1])
+
+                attr2pos[i.attr_id] = [group_pos, attr]
+
+            group.pop('inherited_from', None)
+
+            grouped |= set([i.attr_id for i in items])
 
         if need_other:
             grouped = set(grouped)
             other_attributes = [attr for attr in attributes if attr["id"] not in grouped]
-            groups.append(dict(attributes=other_attributes))
+            result.append(dict(attributes=other_attributes))
 
-        return groups
+        return result
 
     @staticmethod
     def create_or_update(type_id, name, attr_order, group_order=0, is_update=False):
@@ -892,10 +1074,16 @@ class CITypeAttributeGroupManager(object):
     @classmethod
     def transfer(cls, type_id, _from, _to):
         current_app.logger.info("CIType[{0}] {1} -> {2}".format(type_id, _from, _to))
-        from_group = CITypeAttributeGroup.get_by_id(_from)
+        if isinstance(_from, int):
+            from_group = CITypeAttributeGroup.get_by_id(_from)
+        else:
+            from_group = CITypeAttributeGroup.get_by(name=_from, first=True, to_dict=False)
         from_group or abort(404, ErrFormat.ci_type_attribute_group_not_found.format("id={}".format(_from)))
 
-        to_group = CITypeAttributeGroup.get_by_id(_to)
+        if isinstance(_to, int):
+            to_group = CITypeAttributeGroup.get_by_id(_to)
+        else:
+            to_group = CITypeAttributeGroup.get_by(name=_to, first=True, to_dict=False)
         to_group or abort(404, ErrFormat.ci_type_attribute_group_not_found.format("id={}".format(_to)))
 
         from_order, to_order = from_group.order, to_group.order

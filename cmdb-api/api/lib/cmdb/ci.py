@@ -14,7 +14,6 @@ from werkzeug.exceptions import BadRequest
 from api.extensions import db
 from api.extensions import rd
 from api.lib.cmdb.cache import AttributeCache
-from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.cache import CMDBCounterCache
 from api.lib.cmdb.ci_type import CITypeAttributeManager
@@ -53,7 +52,6 @@ from api.models.cmdb import AttributeHistory
 from api.models.cmdb import AutoDiscoveryCI
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
-from api.models.cmdb import CITypeAttribute
 from api.models.cmdb import CITypeRelation
 from api.models.cmdb import CITypeTrigger
 from api.tasks.cmdb import ci_cache
@@ -310,6 +308,7 @@ class CIManager(object):
         """
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ci_type = CITypeManager.check_is_existed(ci_type_name)
+        raw_dict = copy.deepcopy(ci_dict)
 
         unique_key = AttributeCache.get(ci_type.unique_id) or abort(
             400, ErrFormat.unique_value_not_found.format("unique_id={}".format(ci_type.unique_id)))
@@ -320,7 +319,7 @@ class CIManager(object):
         unique_value = ci_dict.get(unique_key.name) or ci_dict.get(unique_key.alias) or ci_dict.get(unique_key.id)
         unique_value = unique_value or abort(400, ErrFormat.unique_key_required.format(unique_key.name))
 
-        attrs = CITypeAttributesCache.get2(ci_type_name)
+        attrs = CITypeAttributeManager.get_all_attributes(ci_type.id)
         ci_type_attrs_name = {attr.name: attr for _, attr in attrs}
         ci_type_attrs_alias = {attr.alias: attr for _, attr in attrs}
         ci_attr2type_attr = {type_attr.attr_id: type_attr for type_attr, _ in attrs}
@@ -386,7 +385,7 @@ class CIManager(object):
             cls._valid_unique_constraint(ci_type.id, ci_dict, ci and ci.id)
 
             ref_ci_dict = dict()
-            for k in ci_dict:
+            for k in copy.deepcopy(ci_dict):
                 if k.startswith("$") and "." in k:
                     ref_ci_dict[k] = ci_dict[k]
                     continue
@@ -398,7 +397,10 @@ class CIManager(object):
                 _attr_name = ((ci_type_attrs_name.get(k) and ci_type_attrs_name[k].name) or
                               (ci_type_attrs_alias.get(k) and ci_type_attrs_alias[k].name))
                 if limit_attrs and _attr_name not in limit_attrs:
-                    return abort(403, ErrFormat.ci_filter_perm_attr_no_permission.format(k))
+                    if k in raw_dict:
+                        return abort(403, ErrFormat.ci_filter_perm_attr_no_permission.format(k))
+                    else:
+                        ci_dict.pop(k)
 
             ci_dict = {k: v for k, v in ci_dict.items() if k in ci_type_attrs_name or k in ci_type_attrs_alias}
 
@@ -430,7 +432,9 @@ class CIManager(object):
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ci = self.confirm_ci_existed(ci_id)
 
-        attrs = CITypeAttributesCache.get2(ci.type_id)
+        raw_dict = copy.deepcopy(ci_dict)
+
+        attrs = CITypeAttributeManager.get_all_attributes(ci.type_id)
         ci_type_attrs_name = {attr.name: attr for _, attr in attrs}
         ci_attr2type_attr = {type_attr.attr_id: type_attr for type_attr, _ in attrs}
         for _, attr in attrs:
@@ -467,9 +471,12 @@ class CIManager(object):
             key2attr = value_manager.valid_attr_value(ci_dict, ci.type_id, ci.id, ci_type_attrs_name,
                                                       ci_attr2type_attr=ci_attr2type_attr)
             if limit_attrs:
-                for k in ci_dict:
+                for k in copy.deepcopy(ci_dict):
                     if k not in limit_attrs:
-                        return abort(403, ErrFormat.ci_filter_perm_attr_no_permission.format(k))
+                        if k in raw_dict:
+                            return abort(403, ErrFormat.ci_filter_perm_attr_no_permission.format(k))
+                        else:
+                            ci_dict.pop(k)
 
             try:
                 record_id = value_manager.create_or_update_attr_value(ci, ci_dict, key2attr)
@@ -517,8 +524,7 @@ class CIManager(object):
 
                 ci_delete_trigger.apply_async(args=(trigger, OperateType.DELETE, ci_dict), queue=CMDB_QUEUE)
 
-        attrs = CITypeAttribute.get_by(type_id=ci.type_id, to_dict=False)
-        attrs = [AttributeCache.get(attr.attr_id) for attr in attrs]
+        attrs = [i for _, i in CITypeAttributeManager.get_all_attributes(type_id=ci.type_id)]
         for attr in attrs:
             value_table = TableMap(attr=attr).table
             for item in value_table.get_by(ci_id=ci_id, to_dict=False):
