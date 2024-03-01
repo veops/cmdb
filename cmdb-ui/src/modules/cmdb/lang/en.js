@@ -176,7 +176,12 @@ const cmdb_en = {
         time: 'Time',
         json: 'JSON',
         event: 'Event',
-        reg: 'Regex'
+        reg: 'Regex',
+        isInherit: 'Inherit',
+        inheritType: 'Inherit Type',
+        inheritTypePlaceholder: 'Please select inherit types',
+        inheritFrom: 'inherit from {name}',
+        groupInheritFrom: 'Please go to the {name} for modification'
     },
     components: {
         unselectAttributes: 'Unselected',
