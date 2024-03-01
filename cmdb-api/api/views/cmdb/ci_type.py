@@ -14,6 +14,7 @@ from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci_type import CITypeAttributeGroupManager
 from api.lib.cmdb.ci_type import CITypeAttributeManager
 from api.lib.cmdb.ci_type import CITypeGroupManager
+from api.lib.cmdb.ci_type import CITypeInheritanceManager
 from api.lib.cmdb.ci_type import CITypeManager
 from api.lib.cmdb.ci_type import CITypeTemplateManager
 from api.lib.cmdb.ci_type import CITypeTriggerManager
@@ -43,9 +44,13 @@ class CITypeView(APIView):
         q = request.args.get("type_name")
 
         if type_id is not None:
-            ci_types = [CITypeCache.get(type_id).to_dict()]
+            ci_type = CITypeCache.get(type_id).to_dict()
+            ci_type['parent_ids'] = CITypeInheritanceManager.get_parents(type_id)
+            ci_types = [ci_type]
         elif type_name is not None:
-            ci_types = [CITypeCache.get(type_name).to_dict()]
+            ci_type = CITypeCache.get(type_name).to_dict()
+            ci_type['parent_ids'] = CITypeInheritanceManager.get_parents(ci_type['id'])
+            ci_types = [ci_type]
         else:
             ci_types = CITypeManager().get_ci_types(q)
         count = len(ci_types)
@@ -53,7 +58,7 @@ class CITypeView(APIView):
         return self.jsonify(numfound=count, ci_types=ci_types)
 
     @args_required("name")
-    @args_validate(CITypeManager.cls)
+    @args_validate(CITypeManager.cls, exclude_args=['parent_ids'])
     def post(self):
         params = request.values
 
@@ -82,6 +87,26 @@ class CITypeView(APIView):
         CITypeManager.delete(type_id)
 
         return self.jsonify(type_id=type_id)
+
+
+class CITypeInheritanceView(APIView):
+    url_prefix = ("/ci_types/inheritance",)
+
+    @args_required("parent_ids")
+    @args_required("child_id")
+    @has_perm_from_args("child_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
+    def post(self):
+        CITypeInheritanceManager.add(request.values['parent_ids'], request.values['child_id'])
+
+        return self.jsonify(**request.values)
+
+    @args_required("parent_id")
+    @args_required("child_id")
+    @has_perm_from_args("child_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
+    def delete(self):
+        CITypeInheritanceManager.delete(request.values['parent_id'], request.values['child_id'])
+
+        return self.jsonify(**request.values)
 
 
 class CITypeGroupView(APIView):
@@ -248,8 +273,8 @@ class CITypeAttributeTransferView(APIView):
     @args_required('from')
     @args_required('to')
     def post(self, type_id):
-        _from = request.values.get('from')  # {'attr_id': xx, 'group_id': xx}
-        _to = request.values.get('to')  # {'group_id': xx, 'order': xxx}
+        _from = request.values.get('from')  # {'attr_id': xx, 'group_id': xx, 'group_name': xx}
+        _to = request.values.get('to')  # {'group_id': xx, 'group_name': xx, 'order': xxx}
 
         CITypeAttributeManager.transfer(type_id, _from, _to)
 
@@ -262,8 +287,8 @@ class CITypeAttributeGroupTransferView(APIView):
     @args_required('from')
     @args_required('to')
     def post(self, type_id):
-        _from = request.values.get('from')  # group_id
-        _to = request.values.get('to')  # group_id
+        _from = request.values.get('from')  # group_id or group_name
+        _to = request.values.get('to')  # group_id or group_name
 
         CITypeAttributeGroupManager.transfer(type_id, _from, _to)
 
@@ -296,7 +321,7 @@ class CITypeAttributeGroupView(APIView):
 
         attr_order = list(zip(attrs, orders))
         group = CITypeAttributeGroupManager.create_or_update(type_id, name, attr_order, order)
-        current_app.logger.warning(group.id)
+
         return self.jsonify(group_id=group.id)
 
     @has_perm_from_args("type_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
@@ -310,11 +335,13 @@ class CITypeAttributeGroupView(APIView):
 
         attr_order = list(zip(attrs, orders))
         CITypeAttributeGroupManager.update(group_id, name, attr_order, order)
+
         return self.jsonify(group_id=group_id)
 
     @has_perm_from_args("type_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
     def delete(self, group_id):
         CITypeAttributeGroupManager.delete(group_id)
+
         return self.jsonify(group_id=group_id)
 
 

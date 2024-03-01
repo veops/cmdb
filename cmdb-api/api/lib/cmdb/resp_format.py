@@ -60,6 +60,8 @@ class ErrFormat(CommonErrFormat):
     only_owner_can_delete = _l("Only the creator can delete it!")  # 只有创建人才能删除它!
     ci_exists_and_cannot_delete_type = _l(
         "The model cannot be deleted because the CI already exists")  # 因为CI已经存在，不能删除模型
+    ci_exists_and_cannot_delete_inheritance = _l(
+        "The inheritance cannot be deleted because the CI already exists")  # 因为CI已经存在，不能删除继承关系
 
     # 因为关系视图 {} 引用了该模型，不能删除模型
     ci_relation_view_exists_and_cannot_delete_type = _l(

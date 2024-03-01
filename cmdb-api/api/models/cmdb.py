@@ -2,6 +2,7 @@
 
 
 import datetime
+
 from sqlalchemy.dialects.mysql import DOUBLE
 
 from api.extensions import db
@@ -54,6 +55,16 @@ class CIType(Model):
     unique_key = db.relationship("Attribute", backref="c_ci_types.unique_id")
 
     uid = db.Column(db.Integer, index=True)
+
+
+class CITypeInheritance(Model):
+    __tablename__ = "c_ci_type_inheritance"
+
+    parent_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)
+    child_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)
+
+    parent = db.relationship("CIType", primaryjoin="CIType.id==CITypeInheritance.parent_id")
+    child = db.relationship("CIType", primaryjoin="CIType.id==CITypeInheritance.child_id")
 
 
 class CITypeRelation(Model):
