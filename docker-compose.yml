@@ -57,6 +57,8 @@ services:
         nohup flask cmdb-trigger > trigger.log 2>&1 &
         flask cmdb-init-cache
         flask cmdb-init-acl
+        flask init-import-user-from-acl
+        flask init-department
         flask cmdb-counter > counter.log 2>&1
 
     depends_on:
