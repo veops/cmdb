@@ -138,7 +138,10 @@ class Search(object):
 
     @staticmethod
     def _id_query_handler(v):
-        return QUERY_CI_BY_ID.format(v)
+        if ";" in v:
+            return QUERY_CI_BY_ID.format("in {}".format(v.replace(';', ',')))
+        else:
+            return QUERY_CI_BY_ID.format("= {}".format(v))
 
     @staticmethod
     def _in_query_handler(attr, v, is_not):
