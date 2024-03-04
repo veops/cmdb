@@ -62,7 +62,7 @@ QUERY_CI_BY_ATTR_NAME = """
 QUERY_CI_BY_ID = """
     SELECT c_cis.id as ci_id
     FROM c_cis
-    WHERE c_cis.id={}
+    WHERE c_cis.id {}
 """
 
 QUERY_CI_BY_TYPE = """
