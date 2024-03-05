@@ -15,6 +15,7 @@ Flask-SQLAlchemy = "==2.5.0"
 SQLAlchemy = "==1.4.49"
 PyMySQL = "==1.1.0"
 redis = "==4.6.0"
+python-redis-lock = "==4.0.0"
 # Migrations
 Flask-Migrate = "==2.5.2"
 # Deployment

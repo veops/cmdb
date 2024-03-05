@@ -4,6 +4,7 @@
 import json
 import time
 
+import redis_lock
 from flask import current_app
 from flask_login import login_user
 
@@ -20,7 +21,6 @@ from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION2
 from api.lib.decorator import flush_db
 from api.lib.decorator import reconnect_db
 from api.lib.perm.acl.cache import UserCache
-from api.lib.utils import Lock
 from api.lib.utils import handle_arg_list
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
@@ -99,7 +99,7 @@ def ci_delete_trigger(trigger, operate_type, ci_dict):
 @flush_db
 @reconnect_db
 def ci_relation_cache(parent_id, child_id, ancestor_ids):
-    with Lock("CIRelation_{}".format(parent_id)):
+    with redis_lock.Lock(rd.r, "CIRelation_{}".format(parent_id)):
         if ancestor_ids is None:
             children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
             children = json.loads(children) if children is not None else {}
@@ -177,7 +177,7 @@ def ci_relation_add(parent_dict, child_id, uid):
 @celery.task(name="cmdb.ci_relation_delete", queue=CMDB_QUEUE)
 @reconnect_db
 def ci_relation_delete(parent_id, child_id, ancestor_ids):
-    with Lock("CIRelation_{}".format(parent_id)):
+    with redis_lock.Lock(rd.r, "CIRelation_{}".format(parent_id)):
         if ancestor_ids is None:
             children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
             children = json.loads(children) if children is not None else {}

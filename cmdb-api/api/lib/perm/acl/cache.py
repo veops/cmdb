@@ -2,10 +2,11 @@
 
 
 import msgpack
+import redis_lock
 
 from api.extensions import cache
+from api.extensions import rd
 from api.lib.decorator import flush_db
-from api.lib.utils import Lock
 from api.models.acl import App
 from api.models.acl import Permission
 from api.models.acl import Resource
@@ -136,14 +137,14 @@ class HasResourceRoleCache(object):
 
     @classmethod
     def add(cls, rid, app_id):
-        with Lock('HasResourceRoleCache'):
+        with redis_lock.Lock(rd.r, 'HasResourceRoleCache'):
             c = cls.get(app_id)
             c[rid] = 1
             cache.set(cls.PREFIX_KEY.format(app_id), c, timeout=0)
 
     @classmethod
     def remove(cls, rid, app_id):
-        with Lock('HasResourceRoleCache'):
+        with redis_lock.Lock(rd.r, 'HasResourceRoleCache'):
             c = cls.get(app_id)
             c.pop(rid, None)
             cache.set(cls.PREFIX_KEY.format(app_id), c, timeout=0)

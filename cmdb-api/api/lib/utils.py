@@ -1,8 +1,6 @@
 # -*- coding:utf-8 -*- 
 
 import base64
-import sys
-import time
 from typing import Set
 
 import elasticsearch
@@ -211,52 +209,6 @@ class ESHandler(object):
                     res.get("aggregations", {}))
         else:
             return 0, [], {}
-
-
-class Lock(object):
-    def __init__(self, name, timeout=10, app=None, need_lock=True):
-        self.lock_key = name
-        self.need_lock = need_lock
-        self.timeout = timeout
-        if not app:
-            app = current_app
-        self.app = app
-        try:
-            self.redis = redis.Redis(host=self.app.config.get('CACHE_REDIS_HOST'),
-                                     port=self.app.config.get('CACHE_REDIS_PORT'),
-                                     password=self.app.config.get('CACHE_REDIS_PASSWORD'))
-        except:
-            self.app.logger.error("cannot connect redis")
-            raise Exception("cannot connect redis")
-
-    def lock(self, timeout=None):
-        if not timeout:
-            timeout = self.timeout
-        retry = 0
-        while retry < 100:
-            timestamp = time.time() + timeout + 1
-            _lock = self.redis.setnx(self.lock_key, timestamp)
-            if _lock == 1 or (
-                    time.time() > float(self.redis.get(self.lock_key) or sys.maxsize) and
-                    time.time() > float(self.redis.getset(self.lock_key, timestamp) or sys.maxsize)):
-                break
-            else:
-                retry += 1
-                time.sleep(0.6)
-        if retry >= 100:
-            raise Exception("get lock failed...")
-
-    def release(self):
-        if time.time() < float(self.redis.get(self.lock_key)):
-            self.redis.delete(self.lock_key)
-
-    def __enter__(self):
-        if self.need_lock:
-            self.lock()
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.need_lock:
-            self.release()
 
 
 class AESCrypto(object):
