@@ -644,9 +644,14 @@ class CITypeAttributeManager(object):
                 existed.soft_delete()
 
                 for ci in CI.get_by(type_id=type_id, to_dict=False):
-                    AttributeValueManager.delete_attr_value(attr_id, ci.id)
+                    AttributeValueManager.delete_attr_value(attr_id, ci.id, commit=False)
 
                     ci_cache.apply_async(args=(ci.id, None, None), queue=CMDB_QUEUE)
+
+                for item in PreferenceShowAttributes.get_by(type_id=type_id, attr_id=attr_id, to_dict=False):
+                    item.soft_delete(commit=False)
+
+                db.session.commit()
 
                 CITypeAttributeCache.clean(type_id, attr_id)
 

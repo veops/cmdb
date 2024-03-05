@@ -302,9 +302,9 @@ class AttributeValueManager(object):
         return self.write_change2(changed)
 
     @staticmethod
-    def delete_attr_value(attr_id, ci_id):
+    def delete_attr_value(attr_id, ci_id, commit=True):
         attr = AttributeCache.get(attr_id)
         if attr is not None:
             value_table = TableMap(attr=attr).table
             for item in value_table.get_by(attr_id=attr.id, ci_id=ci_id, to_dict=False):
-                item.delete()
+                item.delete(commit=commit)

@@ -6,6 +6,7 @@ import datetime
 import json
 import threading
 
+import redis_lock
 from flask import abort
 from flask import current_app
 from flask_login import current_user
@@ -45,7 +46,6 @@ from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import validate_permission
 from api.lib.secrets.inner import InnerCrypt
 from api.lib.secrets.vault import VaultClient
-from api.lib.utils import Lock
 from api.lib.utils import handle_arg_list
 from api.lib.webhook import webhook_request
 from api.models.cmdb import AttributeHistory
@@ -61,7 +61,6 @@ from api.tasks.cmdb import ci_relation_add
 from api.tasks.cmdb import ci_relation_cache
 from api.tasks.cmdb import ci_relation_delete
 
-PRIVILEGED_USERS = {"worker", "cmdb_agent", "agent"}
 PASSWORD_DEFAULT_SHOW = "******"
 
 
@@ -278,16 +277,16 @@ class CIManager(object):
 
     @staticmethod
     def _auto_inc_id(attr):
-        db.session.remove()
+        db.session.commit()
 
         value_table = TableMap(attr_name=attr.name).table
-        with Lock("auto_inc_id_{}".format(attr.name), need_lock=True):
+        with redis_lock.Lock(rd.r, "auto_inc_id_{}".format(attr.name)):
             max_v = value_table.get_by(attr_id=attr.id, only_query=True).order_by(
                 getattr(value_table, 'value').desc()).first()
             if max_v is not None:
                 return int(max_v.value) + 1
 
-            return 1
+        return 1
 
     @classmethod
     def add(cls, ci_type_name,
@@ -312,12 +311,12 @@ class CIManager(object):
 
         unique_key = AttributeCache.get(ci_type.unique_id) or abort(
             400, ErrFormat.unique_value_not_found.format("unique_id={}".format(ci_type.unique_id)))
-        if (unique_key.default and unique_key.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID and
-                not ci_dict.get(unique_key.name)):
-            ci_dict[unique_key.name] = cls._auto_inc_id(unique_key)
 
-        unique_value = ci_dict.get(unique_key.name) or ci_dict.get(unique_key.alias) or ci_dict.get(unique_key.id)
-        unique_value = unique_value or abort(400, ErrFormat.unique_key_required.format(unique_key.name))
+        unique_value = None
+        if not (unique_key.default and unique_key.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID and
+                not ci_dict.get(unique_key.name)):  # primary key is not auto inc id
+            unique_value = ci_dict.get(unique_key.name) or ci_dict.get(unique_key.alias) or ci_dict.get(unique_key.id)
+            unique_value = unique_value or abort(400, ErrFormat.unique_key_required.format(unique_key.name))
 
         attrs = CITypeAttributeManager.get_all_attributes(ci_type.id)
         ci_type_attrs_name = {attr.name: attr for _, attr in attrs}
@@ -327,8 +326,15 @@ class CIManager(object):
         ci = None
         record_id = None
         password_dict = {}
-        need_lock = current_user.username not in current_app.config.get('PRIVILEGED_USERS', PRIVILEGED_USERS)
-        with Lock(ci_type_name, need_lock=need_lock):
+        with redis_lock.Lock(rd.r, ci_type.name):
+            db.session.commit()
+
+            if (unique_key.default and unique_key.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID and
+                    not ci_dict.get(unique_key.name)):
+                ci_dict[unique_key.name] = cls._auto_inc_id(unique_key)
+                current_app.logger.info(ci_dict[unique_key.name])
+                unique_value = ci_dict[unique_key.name]
+
             existed = cls.ci_is_exist(unique_key, unique_value, ci_type.id)
             if existed is not None:
                 if exist_policy == ExistPolicy.REJECT:
@@ -463,8 +469,9 @@ class CIManager(object):
         limit_attrs = self._valid_ci_for_no_read(ci) if not _is_admin else {}
 
         record_id = None
-        need_lock = current_user.username not in current_app.config.get('PRIVILEGED_USERS', PRIVILEGED_USERS)
-        with Lock(ci.ci_type.name, need_lock=need_lock):
+        with redis_lock.Lock(rd.r, ci.ci_type.name):
+            db.session.commit()
+
             self._valid_unique_constraint(ci.type_id, ci_dict, ci_id)
 
             ci_dict = {k: v for k, v in ci_dict.items() if k in ci_type_attrs_name}
@@ -912,7 +919,7 @@ class CIRelationManager(object):
 
     @staticmethod
     def _check_constraint(first_ci_id, first_type_id, second_ci_id, second_type_id, type_relation):
-        db.session.remove()
+        db.session.commit()
         if type_relation.constraint == ConstraintEnum.Many2Many:
             return
 
@@ -972,7 +979,7 @@ class CIRelationManager(object):
             else:
                 type_relation = CITypeRelation.get_by_id(relation_type_id)
 
-            with Lock("ci_relation_add_{}_{}".format(first_ci.type_id, second_ci.type_id), need_lock=True):
+            with redis_lock.Lock(rd.r, "ci_relation_add_{}_{}".format(first_ci.type_id, second_ci.type_id)):
 
                 cls._check_constraint(first_ci_id, first_ci.type_id, second_ci_id, second_ci.type_id, type_relation)
 
@@ -1062,7 +1069,7 @@ class CIRelationManager(object):
 class CITriggerManager(object):
     @staticmethod
     def get(type_id):
-        db.session.remove()
+        db.session.commit()
         return CITypeTrigger.get_by(type_id=type_id, to_dict=True)
 
     @staticmethod
