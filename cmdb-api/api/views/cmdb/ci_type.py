@@ -493,7 +493,7 @@ class CITypeGrantView(APIView):
         acl.grant_resource_to_role_by_rid(type_name, rid, ResourceTypeEnum.CI_TYPE, perms, rebuild=False)
 
         resource = None
-        if 'ci_filter' in request.values or 'attr_filter' in request.values:
+        if 'ci_filter' in request.values or 'attr_filter' in request.values or 'id_filter' in request.values:
             resource = CIFilterPermsCRUD().add(type_id=type_id, rid=rid, **request.values)
 
         if not resource:
@@ -522,10 +522,26 @@ class CITypeRevokeView(APIView):
         if not acl.has_permission(type_name, ResourceTypeEnum.CI_TYPE, PermEnum.GRANT) and not is_app_admin('cmdb'):
             return abort(403, ErrFormat.no_permission.format(type_name, PermEnum.GRANT))
 
-        acl.revoke_resource_from_role_by_rid(type_name, rid, ResourceTypeEnum.CI_TYPE, perms, rebuild=False)
-
         app_id = AppCache.get('cmdb').id
         resource = None
+
+        if request.values.get('id_filter'):
+            resource, revoke_read = CIFilterPermsCRUD().delete2(
+                type_id=type_id, rid=rid, id_filter=request.values['id_filter'])
+
+            acl.revoke_resource_from_role_by_rid(
+                type_name, rid, ResourceTypeEnum.CI_TYPE, [PermEnum.READ], rebuild=False)
+
+            if not resource:
+                from api.tasks.acl import role_rebuild
+                from api.lib.perm.acl.const import ACL_QUEUE
+
+                role_rebuild.apply_async(args=(rid, app_id), queue=ACL_QUEUE)
+
+            return self.jsonify(type_id=type_id, rid=rid)
+
+        acl.revoke_resource_from_role_by_rid(type_name, rid, ResourceTypeEnum.CI_TYPE, perms, rebuild=False)
+
         if PermEnum.READ in perms or not perms:
             resource = CIFilterPermsCRUD().delete(type_id=type_id, rid=rid)
 

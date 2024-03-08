@@ -1,9 +1,11 @@
 # -*- coding:utf-8 -*-
 import json
+import sys
 from collections import Counter
 
 from flask import abort
 from flask import current_app
+from flask_login import current_user
 
 from api.extensions import rd
 from api.lib.cmdb.ci import CIRelationManager
@@ -11,9 +13,13 @@ from api.lib.cmdb.ci_type import CITypeRelationManager
 from api.lib.cmdb.const import ConstraintEnum
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION2
+from api.lib.cmdb.const import ResourceTypeEnum
+from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.search.ci.db.search import Search as SearchFromDB
 from api.lib.cmdb.search.ci.es.search import Search as SearchFromES
+from api.lib.perm.acl.acl import ACLManager
+from api.lib.perm.acl.acl import is_app_admin
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
 
@@ -29,6 +35,7 @@ class Search(object):
                  sort=None,
                  reverse=False,
                  ancestor_ids=None,
+                 descendant_ids=None,
                  has_m2m=None):
         self.orig_query = query
         self.fl = fl
@@ -44,8 +51,10 @@ class Search(object):
         self.level2constraint = CITypeRelationManager.get_level2constraint(
             root_id[0] if root_id and isinstance(root_id, list) else root_id,
             level[0] if isinstance(level, list) and level else level)
+        current_app.logger.info('level2constraint: {}'.format(self.level2constraint))
 
         self.ancestor_ids = ancestor_ids
+        self.descendant_ids = descendant_ids
         self.has_m2m = has_m2m or False
         if not self.has_m2m:
             if self.ancestor_ids:
@@ -163,14 +172,47 @@ class Search(object):
                                 sort=self.sort,
                                 ci_ids=merge_ids).search()
 
+    @staticmethod
+    def _get_ci_filter(filter_perms):
+        ci_filter, id_filter = {}, {}
+        if filter_perms.get('ci_filter'):
+            if current_app.config.get("USE_ES"):
+                ci_filter = {}  # TODO
+            else:
+                ci_filter = SearchFromDB(filter_perms['ci_filter'],
+                                         count=sys.maxsize).get_ci_ids()
+
+        if filter_perms.get('id_filter'):
+            id_filter = map(int, filter_perms['id_filter'].keys())
+
+        if filter_perms.get('ci_filter') and filter_perms.get('id_filter'):
+            return set(ci_filter) & set(id_filter)
+
+        return id_filter if filter_perms.get('id_filter') else ci_filter
+
     def statistics(self, type_ids):
         self.level = int(self.level)
+
+        acl = ACLManager('cmdb')
+        _is_app_admin = is_app_admin('cmdb') or current_user.username == "worker"
+
+        type2filter_perms = dict()
+        if not _is_app_admin:
+            res2 = acl.get_resources(ResourceTypeEnum.CI_FILTER)
+            if res2:
+                type2filter_perms = CIFilterPermsCRUD().get_by_ids(list(map(int, [i['name'] for i in res2])))
+            current_app.logger.info(type2filter_perms)
 
         ids = [self.root_id] if not isinstance(self.root_id, list) else self.root_id
         _tmp = []
         level2ids = {}
         for lv in range(1, self.level + 1):
             level2ids[lv] = []
+
+            if len(self.descendant_ids) >= lv and type2filter_perms.get(self.descendant_ids[lv - 1]):
+                limit_ci_ids = set(self._get_ci_filter(type2filter_perms[self.descendant_ids[lv - 1]]))
+            else:
+                limit_ci_ids = {}
 
             if lv == 1:
                 if not self.has_m2m:
@@ -189,12 +231,16 @@ class Search(object):
                     continue
 
                 if type_ids and lv == self.level:
-                    _tmp = list(map(lambda x: [i for i in x if i[1] in type_ids],
-                                    (map(lambda x: list(json.loads(x).items()),
-                                         [i or '{}' for i in rd.get(key, prefix) or []]))))
+                    _tmp = list(
+                        map(lambda x: [i for i in x if i[1] in type_ids and (
+                                not limit_ci_ids or int(i[0]) in limit_ci_ids)],
+                            (map(lambda x: list(json.loads(x).items()),
+                                 [i or '{}' for i in rd.get(key, prefix) or []]))))
                 else:
-                    _tmp = list(map(lambda x: list(json.loads(x).items()),
-                                    [i or '{}' for i in rd.get(key, prefix) or []]))
+                    _tmp = list(
+                        map(lambda x: [i for i in x if (not limit_ci_ids or int(i[0]) in limit_ci_ids)],
+                            (map(lambda x: list(json.loads(x).items()),
+                                 [i or '{}' for i in rd.get(key, prefix) or []]))))
 
             else:
                 for idx, item in enumerate(_tmp):
@@ -210,13 +256,13 @@ class Search(object):
                         if key:
                             if type_ids and lv == self.level:
                                 __tmp = map(lambda x: [(_id, type_id) for _id, type_id in json.loads(x).items()
-                                                       if type_id in type_ids],
-                                            filter(lambda x: x is not None,
-                                                   rd.get(key, prefix) or []))
+                                                       if type_id in type_ids and (
+                                                               not limit_ci_ids or int(_id) in limit_ci_ids)],
+                                            filter(lambda x: x is not None, rd.get(key, prefix) or []))
                             else:
-                                __tmp = map(lambda x: list(json.loads(x).items()),
-                                            filter(lambda x: x is not None,
-                                                   rd.get(key, prefix) or []))
+                                __tmp = map(lambda x: [(_id, type_id) for _id, type_id in json.loads(x).items()
+                                                       if not limit_ci_ids or int(_id) in limit_ci_ids],
+                                            filter(lambda x: x is not None, rd.get(key, prefix) or []))
                         else:
                             __tmp = []
 

@@ -54,6 +54,7 @@ class Search(object):
         self.count = count
         self.sort = sort
         self.ci_ids = ci_ids or []
+        self.raw_ci_ids = copy.deepcopy(self.ci_ids)
         self.query_sql = ""
         self.type_id_list = []
         self.only_type_query = False
@@ -122,6 +123,14 @@ class Search(object):
                                 self.fl = set(self.type2filter_perms[ci_type.id]['attr_filter'])
                             else:
                                 self.fl = set(self.fl) & set(self.type2filter_perms[ci_type.id]['attr_filter'])
+
+                        if self.type2filter_perms[ci_type.id].get('id_filter'):
+                            if self.raw_ci_ids:
+                                self.ci_ids = (set(map(str, self.ci_ids)) &
+                                               set(list(self.type2filter_perms[ci_type.id]['id_filter'].keys())))
+                            else:
+                                self.ci_ids = list(self.type2filter_perms[ci_type.id]['id_filter'].keys())
+
                 else:
                     raise SearchError(ErrFormat.no_permission.format(ci_type.alias, PermEnum.READ))
             else:
@@ -389,8 +398,6 @@ class Search(object):
         else:
             self.__get_types_has_read()
 
-        current_app.logger.warning(result)
-
         return result
 
     def __query_by_attr(self, q, queries, alias):
@@ -482,7 +489,7 @@ class Search(object):
     def _filter_ids(self, query_sql):
         if self.ci_ids:
             return "SELECT * FROM ({0}) AS IN_QUERY WHERE IN_QUERY.ci_id IN ({1})".format(
-                query_sql, ",".join(list(map(str, self.ci_ids))))
+                query_sql, ",".join(list(set(map(str, self.ci_ids)))))
 
         return query_sql
 
@@ -514,6 +521,9 @@ class Search(object):
         s = time.time()
         if query_sql:
             query_sql = self._filter_ids(query_sql)
+            if self.raw_ci_ids and not self.ci_ids:
+                return 0, []
+
             self.query_sql = query_sql
             # current_app.logger.debug(query_sql)
             numfound, res = self._execute_sql(query_sql)
@@ -572,3 +582,9 @@ class Search(object):
         total = len(response)
 
         return response, counter, total, self.page, numfound, facet
+
+    def get_ci_ids(self):
+        _, ci_ids = self._query_build_raw()
+
+        return ci_ids
+

@@ -7,6 +7,7 @@ from flask import current_app
 from flask import request
 from flask_login import current_user
 
+from api.extensions import db
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.mixin import DBMixin
@@ -40,6 +41,11 @@ class CIFilterPermsCRUD(DBMixin):
                         result[i['rid']]['ci_filter'] = ""
                     result[i['rid']]['ci_filter'] += (i['ci_filter'] or "")
 
+                if i['id_filter']:
+                    if not result[i['rid']]['id_filter']:
+                        result[i['rid']]['id_filter'] = {}
+                    result[i['rid']]['id_filter'].update(i['id_filter'] or {})
+
         return result
 
     def get_by_ids(self, _ids, type_id=None):
@@ -69,6 +75,11 @@ class CIFilterPermsCRUD(DBMixin):
                     if not result[i['type_id']]['ci_filter']:
                         result[i['type_id']]['ci_filter'] = ""
                     result[i['type_id']]['ci_filter'] += (i['ci_filter'] or "")
+
+                if i['id_filter']:
+                    if not result[i['type_id']]['id_filter']:
+                        result[i['type_id']]['id_filter'] = {}
+                    result[i['type_id']]['id_filter'].update(i['id_filter'] or {})
 
         return result
 
@@ -103,12 +114,23 @@ class CIFilterPermsCRUD(DBMixin):
     def add(self, **kwargs):
         kwargs = self._can_add(**kwargs) or kwargs
 
-        obj = self.cls.get_by(type_id=kwargs.get('type_id'),
-                              rid=kwargs.get('rid'),
-                              first=True, to_dict=False)
+        if kwargs.get('id_filter'):
+            obj = self.cls.get_by(type_id=kwargs.get('type_id'),
+                                  rid=kwargs.get('rid'),
+                                  ci_filter=None,
+                                  attr_filter=None,
+                                  first=True, to_dict=False)
+        else:
+            obj = self.cls.get_by(type_id=kwargs.get('type_id'),
+                                  rid=kwargs.get('rid'),
+                                  first=True, to_dict=False)
         if obj is not None:
+            if obj.id_filter and isinstance(kwargs.get('id_filter'), dict):
+                kwargs['id_filter'].update(obj.id_filter)
+
             obj = obj.update(filter_none=False, **kwargs)
-            if not obj.attr_filter and not obj.ci_filter:
+
+            if not obj.attr_filter and not obj.ci_filter and not obj.id_filter:
                 if current_app.config.get('USE_ACL'):
                     ACLManager().del_resource(str(obj.id), ResourceTypeEnum.CI_FILTER)
 
@@ -117,7 +139,7 @@ class CIFilterPermsCRUD(DBMixin):
                 return obj
 
         else:
-            if not kwargs.get('ci_filter') and not kwargs.get('attr_filter'):
+            if not kwargs.get('ci_filter') and not kwargs.get('attr_filter') and not kwargs.get('id_filter'):
                 return
 
             obj = self.cls.create(**kwargs)
@@ -152,6 +174,30 @@ class CIFilterPermsCRUD(DBMixin):
             obj.soft_delete()
 
             return resource
+
+    def delete2(self, **kwargs):
+        obj = self.cls.get_by(type_id=kwargs.get('type_id'),
+                              rid=kwargs.get('rid'),
+                              ci_filter=None,
+                              attr_filter=None,
+                              first=True, to_dict=False)
+
+        if obj is not None:
+            resource, revoke_read = None, False
+            id_filter = {k: v for k, v in (obj.id_filter or {}).items() if k not in kwargs['id_filter']}
+            if not id_filter and not obj.ci_filter and current_app.config.get('USE_ACL'):
+                resource = ACLManager().del_resource(str(obj.id), ResourceTypeEnum.CI_FILTER)
+
+                obj.soft_delete()
+                db.session.commit()
+
+                if not self.cls.get_by(type_id=kwargs.get('type_id'), rid=kwargs.get('rid'), to_dict=False):
+                    revoke_read = True
+
+            else:
+                obj.update(id_filter=id_filter)
+
+            return resource, revoke_read
 
 
 def has_perm_for_ci(arg_name, resource_type, perm, callback=None, app=None):

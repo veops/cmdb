@@ -13,7 +13,6 @@ from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.search import SearchError
 from api.lib.cmdb.search.ci_relation.search import Search
 from api.lib.decorator import args_required
-from api.lib.perm.auth import auth_abandoned
 from api.lib.utils import get_page
 from api.lib.utils import get_page_size
 from api.lib.utils import handle_arg_list
@@ -65,16 +64,17 @@ class CIRelationSearchView(APIView):
 class CIRelationStatisticsView(APIView):
     url_prefix = "/ci_relations/statistics"
 
-    @auth_abandoned
+    # @auth_abandoned
     def get(self):
         root_ids = list(map(int, handle_arg_list(request.values.get('root_ids'))))
         level = request.values.get('level', 1)
         type_ids = set(map(int, handle_arg_list(request.values.get('type_ids', []))))
         ancestor_ids = request.values.get('ancestor_ids') or None  # only for many to many
+        descendant_ids = list(map(int, handle_arg_list(request.values.get('descendant_ids', []))))
         has_m2m = request.values.get("has_m2m") in current_app.config.get('BOOL_TRUE')
 
         start = time.time()
-        s = Search(root_ids, level, ancestor_ids=ancestor_ids, has_m2m=has_m2m)
+        s = Search(root_ids, level, ancestor_ids=ancestor_ids, descendant_ids=descendant_ids, has_m2m=has_m2m)
         try:
             result = s.statistics(type_ids)
         except SearchError as e:
