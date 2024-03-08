@@ -223,10 +223,12 @@ class CITypeManager(object):
                 if item.get('parent_id') == type_id or item.get('child_id') == type_id:
                     return abort(400, ErrFormat.ci_relation_view_exists_and_cannot_delete_type.format(rv.name))
 
-        for item in CITypeRelation.get_by(parent_id=type_id, to_dict=False):
-            item.soft_delete(commit=False)
+        for item in (CITypeRelation.get_by(parent_id=type_id, to_dict=False) +
+                     CITypeRelation.get_by(child_id=type_id, to_dict=False)):
+            if current_app.config.get('USE_ACL'):
+                resource_name = CITypeRelationManager.acl_resource_name(item.parent.name, item.child.name)
+                ACLManager().del_resource(resource_name, ResourceTypeEnum.CI_TYPE_RELATION)
 
-        for item in CITypeRelation.get_by(child_id=type_id, to_dict=False):
             item.soft_delete(commit=False)
 
         for table in [PreferenceTreeView, PreferenceShowAttributes, PreferenceSearchOption, CustomDashboard,
