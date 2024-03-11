@@ -13,7 +13,7 @@
   **set database in config file cmdb-api/settings.py**
 
 - In cmdb directory,start in order as follows:
-  - enviroment: `make env`
+  - environment: `make env`
   - start API: `make api`
   - start UI: `make ui`
   - start worker: `make worker`

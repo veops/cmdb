@@ -194,7 +194,7 @@ def validate(ticket):
 
 def _parse_tag(string, tag):
     """
-    Used for parsing xml.  Search string for the first occurence of
+    Used for parsing xml.  Search string for the first occurrence of
     <tag>.....</tag> and return text (stripped of leading and tailing
     whitespace) between tags.  Return "" if tag not found.
     """
