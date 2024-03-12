@@ -49,21 +49,20 @@ def edit_employee_department_in_acl(e_list, new_d_id, op_uid):
             continue
 
         old_d_rid_in_acl = role_map.get(old_department.department_name, 0)
-        if old_d_rid_in_acl == 0:
-            return
-        if old_d_rid_in_acl != old_department.acl_rid:
-            old_department.update(
-                acl_rid=old_d_rid_in_acl
-            )
-        d_acl_rid = old_department.acl_rid if old_d_rid_in_acl == old_department.acl_rid else old_d_rid_in_acl
-        payload = {
-            'app_id': 'acl',
-            'parent_id': d_acl_rid,
-        }
-        try:
-            acl.remove_user_from_role(employee_acl_rid, payload)
-        except Exception as e:
-            result.append(ErrFormat.acl_remove_user_from_role_failed.format(str(e)))
+        if old_d_rid_in_acl > 0:
+            if old_d_rid_in_acl != old_department.acl_rid:
+                old_department.update(
+                    acl_rid=old_d_rid_in_acl
+                )
+            d_acl_rid = old_department.acl_rid if old_d_rid_in_acl == old_department.acl_rid else old_d_rid_in_acl
+            payload = {
+                'app_id': 'acl',
+                'parent_id': d_acl_rid,
+            }
+            try:
+                acl.remove_user_from_role(employee_acl_rid, payload)
+            except Exception as e:
+                result.append(ErrFormat.acl_remove_user_from_role_failed.format(str(e)))
 
         payload = {
             'app_id': 'acl',
