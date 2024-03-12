@@ -331,8 +331,8 @@ def cmdb_inner_secrets_unseal(address):
     """
     unseal the secrets feature
     """
-    if not valid_address(address):
-        return
+    # if not valid_address(address):
+    #     return
     address = "{}/api/v0.1/secrets/unseal".format(address.strip("/"))
     for i in range(global_key_threshold):
         token = click.prompt(f'Enter unseal token {i + 1}', hide_input=True, confirmation_prompt=False)
@@ -368,8 +368,8 @@ def cmdb_inner_secrets_seal(address, token):
     """
     assert address is not None
     assert token is not None
-    if not valid_address(address):
-        return
+    # if not valid_address(address):
+    #     return
     address = "{}/api/v0.1/secrets/seal".format(address.strip("/"))
     resp = requests.post(address, headers={
         "Inner-Token": token,

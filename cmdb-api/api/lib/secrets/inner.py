@@ -32,6 +32,8 @@ seal_status = True
 
 
 def string_to_bytes(value):
+    if not value:
+        return ""
     if isinstance(value, bytes):
         return value
     if sys.version_info.major == 2:
@@ -307,13 +309,13 @@ class KeyManage:
 
     def is_seal(self):
         """
-        If there is no initialization or the root key is inconsistent, it is considered to be in a sealed state.
+        If there is no initialization or the root key is inconsistent, it is considered to be in a sealed state..
         :return:
         """
         secrets_root_key = current_app.config.get("secrets_root_key")
         msg, ok = self.is_valid_root_key(secrets_root_key)
         if not ok:
-            return true
+            return True
         status = self.backend.get(backend_seal_key)
         return status == "block"
 
