@@ -653,6 +653,16 @@ class CITypeAttributeManager(object):
                 for item in PreferenceShowAttributes.get_by(type_id=type_id, attr_id=attr_id, to_dict=False):
                     item.soft_delete(commit=False)
 
+                for item in CITypeUniqueConstraint.get_by(type_id=type_id, to_dict=False):
+                    if attr_id in item.attr_ids:
+                        attr_ids = copy.deepcopy(item.attr_ids)
+                        attr_ids.remove(attr_id)
+
+                        if attr_ids:
+                            item.update(attr_ids=attr_ids, commit=False)
+                        else:
+                            item.soft_delete()
+
                 db.session.commit()
 
                 CITypeAttributeCache.clean(type_id, attr_id)
