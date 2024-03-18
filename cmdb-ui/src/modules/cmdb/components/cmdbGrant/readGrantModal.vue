@@ -6,7 +6,8 @@
         { value: 2, label: $t('cmdb.components.customize'), layout: 'vertical' },
         { value: 3, label: $t('cmdb.components.none') },
       ]"
-      v-model="radioValue"
+      :value="radioValue"
+      @change="changeRadioValue"
     >
       <template slot="extra_2" v-if="radioValue === 2">
         <treeselect
@@ -128,6 +129,9 @@ export default {
       this.visible = true
       this.colType = colType
       this.row = row
+      this.form = {
+        name: '',
+      }
       if (this.colType === 'read_ci') {
         await getCITypeAttributesByTypeIds({ type_ids: this.CITypeId }).then((res) => {
           this.canSearchPreferenceAttrList = res.attributes.filter((item) => item.value_type !== '6')
@@ -148,10 +152,6 @@ export default {
               this.$refs.filterComp.visibleChange(true)
             })
           }
-        }
-      } else {
-        this.form = {
-          name: '',
         }
       }
     },
@@ -197,6 +197,13 @@ export default {
         expression = `q=${filterExp}`
       }
       this.expression = expression
+    },
+    changeRadioValue(value) {
+      if (this.id_filter) {
+        this.$message.warning(this.$t('cmdb.serviceTree.grantedByServiceTreeTips'))
+      } else {
+        this.radioValue = value
+      }
     },
   },
 }

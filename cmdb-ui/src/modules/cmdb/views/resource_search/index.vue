@@ -284,6 +284,10 @@ export default {
       const regSort = /(?<=sort=).+/g
 
       const exp = expression.match(regQ) ? expression.match(regQ)[0] : null
+      // if (exp) {
+      //   exp = exp.replace(/(\:)/g, '$1*')
+      //   exp = exp.replace(/(\,)/g, '*$1')
+      // }
       // 如果是表格点击的排序 以表格为准
       let sort
       if (sortByTable) {
@@ -314,7 +318,9 @@ export default {
           this.columnsGroup = []
           this.instanceList = []
           this.totalNumber = res['numfound']
-
+          if (!res['numfound']) {
+            return
+          }
           const { attributes: resAllAttributes } = await getCITypeAttributesByTypeIds({
             type_ids: Object.keys(res.counter).join(','),
           })

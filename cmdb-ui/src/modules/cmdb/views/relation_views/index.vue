@@ -2,14 +2,55 @@
   <div :style="{ marginBottom: '-24px', overflow: 'hidden' }">
     <div v-if="relationViews.name2id && relationViews.name2id.length" class="relation-views-wrapper">
       <div class="cmdb-views-header">
-        <span class="cmdb-views-header-title">{{ $route.meta.name }}</span>
+        <span
+          class="cmdb-views-header-title"
+        >{{ $route.meta.name }}
+          <div
+            class="ops-list-batch-action"
+            :style="{ backgroundColor: '#c0ceeb' }"
+            v-if="showBatchLevel !== null && batchTreeKey && batchTreeKey.length"
+          >
+            <span
+              @click="
+                () => {
+                  $refs.grantModal.open('depart')
+                }
+              "
+            >{{ $t('grant') }}</span
+            >
+            <a-divider type="vertical" />
+            <span
+              @click="
+                () => {
+                  $refs.revokeModal.open()
+                }
+              "
+            >{{ $t('revoke') }}</span
+            >
+            <template v-if="showBatchLevel > 0">
+              <a-divider type="vertical" />
+              <span @click="batchDeleteCIRelationFromTree">{{ $t('delete') }}</span>
+            </template>
+            <a-divider type="vertical" />
+            <span
+              @click="
+                () => {
+                  showBatchLevel = null
+                  batchTreeKey = []
+                }
+              "
+            >{{ $t('cancel') }}</span
+            >
+            <span>{{ $t('selectRows', { rows: batchTreeKey.length }) }}</span>
+          </div>
+        </span>
         <a-button size="small" icon="user-add" type="primary" ghost @click="handlePerm">{{ $t('grant') }}</a-button>
       </div>
       <SplitPane
         :min="200"
         :max="500"
         :paneLengthPixel.sync="paneLengthPixel"
-        appName="cmdb-relation-views"
+        :appName="`cmdb-relation-views-${viewId}`"
         triggerColor="#F0F5FF"
         :triggerLength="18"
       >
@@ -24,7 +65,6 @@
               @drop="onDrop"
               :expandedKeys="expandedKeys"
             >
-              <a-icon slot="switcherIcon" type="down" />
               <template #title="{ key: treeKey, title, isLeaf }">
                 <ContextMenu
                   :title="title"
@@ -35,7 +75,10 @@
                   :id2type="relationViews.id2type"
                   @onContextMenuClick="onContextMenuClick"
                   @onNodeClick="onNodeClick"
-                  :ciTypes="ciTypes"
+                  :ciTypeIcons="ciTypeIcons"
+                  :showBatchLevel="showBatchLevel"
+                  :batchTreeKey="batchTreeKey"
+                  @clickCheckbox="clickCheckbox"
                 />
               </template>
             </a-tree>
@@ -313,9 +356,8 @@
       v-else-if="relationViews.name2id && !relationViews.name2id.length"
     ></a-alert>
     <AddTableModal ref="addTableModal" @reload="reload" />
-    <!-- <GrantDrawer ref="grantDrawer" resourceTypeName="RelationView" app_id="cmdb" /> -->
     <CMDBGrant ref="cmdbGrant" resourceType="RelationView" app_id="cmdb" />
-
+    <GrantModal ref="grantModal" @handleOk="onRelationViewGrant" :customTitle="$t('cmdb.serviceTree.grantTitle')" />
     <CiDetailDrawer ref="detail" :typeId="Number(currentTypeId[0])" />
     <create-instance-form
       ref="create"
@@ -325,11 +367,12 @@
     />
     <JsonEditor ref="jsonEditor" @jsonEditorOk="jsonEditorOk" />
     <BatchDownload ref="batchDownload" @batchDownload="batchDownload" />
+    <ReadPermissionsModal ref="readPermissionsModal" />
+    <RevokeModal ref="revokeModal" @handleRevoke="handleRevoke" />
   </div>
 </template>
 
 <script>
-/* eslint-disable no-useless-escape */
 import _ from 'lodash'
 import { Tree } from 'element-ui'
 import Sortable from 'sortablejs'
@@ -349,7 +392,7 @@ import {
 
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
 import { searchCI2, updateCI, deleteCI } from '@/modules/cmdb/api/ci'
-import { getCITypes } from '../../api/CIType'
+import { getCITypeIcons, grantCiType, revokeCiType } from '../../api/CIType'
 import { roleHasPermissionToGrant } from '@/modules/acl/api/permission'
 import { searchResourceType } from '@/modules/acl/api/resource'
 import SplitPane from '@/components/SplitPane'
@@ -361,8 +404,11 @@ import BatchDownload from '../../components/batchDownload/batchDownload.vue'
 import PasswordField from '../../components/passwordField/index.vue'
 import PreferenceSearch from '../../components/preferenceSearch/preferenceSearch.vue'
 import CMDBGrant from '../../components/cmdbGrant'
+import GrantModal from '../../components/cmdbGrant/grantModal.vue'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
 import { getAttrPassword } from '../../api/CITypeAttr'
+import ReadPermissionsModal from './modules/ReadPermissionsModal.vue'
+import RevokeModal from '../../components/cmdbGrant/revokeModal.vue'
 
 export default {
   name: 'RelationViews',
@@ -370,8 +416,8 @@ export default {
     SearchForm,
     AddTableModal,
     ContextMenu,
-    // GrantDrawer,
     CMDBGrant,
+    GrantModal,
     SplitPane,
     ElTree: Tree,
     EditAttrsPopover,
@@ -382,13 +428,15 @@ export default {
     PasswordField,
     PreferenceSearch,
     OpsMoveIcon,
+    ReadPermissionsModal,
+    RevokeModal,
   },
   data() {
     return {
       treeData: [],
       triggerSelect: false,
       treeNode: null,
-      ciTypes: [],
+      ciTypeIcons: {},
       relationViews: {},
       levels: [],
       showTypeIds: [],
@@ -430,6 +478,10 @@ export default {
       passwordValue: {},
       lastEditCiId: null,
       isContinueCloseEdit: true,
+
+      contextMenuKey: null,
+      showBatchLevel: null,
+      batchTreeKey: [],
     }
   },
 
@@ -451,6 +503,21 @@ export default {
     },
     isShowBatchIcon() {
       return !!this.selectedRowKeys.length
+    },
+    topo_flatten() {
+      return this.relationViews?.views[this.$route.meta.name]?.topo_flatten ?? []
+    },
+    descendant_ids() {
+      return this.topo_flatten.slice(this.treeKeys.length).join(',')
+    },
+    descendant_ids_for_statistics() {
+      return this.topo_flatten.slice(this.treeKeys.length + 1).join(',')
+    },
+    root_parent_path() {
+      return this.treeKeys
+        .slice(0, this.treeKeys.length)
+        .map((item) => item.split('%')[0])
+        .join(',')
     },
   },
   provide() {
@@ -505,8 +572,8 @@ export default {
       })
     },
     getCITypesList() {
-      getCITypes().then((res) => {
-        this.ciTypes = res.ci_types
+      getCITypeIcons().then((res) => {
+        this.ciTypeIcons = res
       })
     },
     refreshTable() {
@@ -572,33 +639,38 @@ export default {
         q = q.slice(1)
       }
       if (this.treeKeys.length === 0) {
-        await this.judgeCITypes(q)
+        // await this.judgeCITypes(q)
         if (!refreshType) {
-          this.loadRoot()
+          await this.loadRoot()
         }
 
-        const fuzzySearch = (this.$refs['search'] || {}).fuzzySearch || ''
-        if (fuzzySearch) {
-          q = `q=_type:${this.currentTypeId[0]},*${fuzzySearch}*,` + q
-        } else {
-          q = `q=_type:${this.currentTypeId[0]},` + q
-        }
-        if (this.currentTypeId[0]) {
-          const res = await searchCI2(q)
-          this.pageNo = res.page
-          this.numfound = res.numfound
-          res.result.forEach((item, index) => (item.key = item._id))
-          const jsonAttrList = this.preferenceAttrList.filter((attr) => attr.value_type === '6')
-          console.log(jsonAttrList)
-          this.instanceList = res['result'].map((item) => {
-            jsonAttrList.forEach(
-              (jsonAttr) => (item[jsonAttr.name] = item[jsonAttr.name] ? JSON.stringify(item[jsonAttr.name]) : '')
-            )
-            return { ..._.cloneDeep(item) }
-          })
-          this.initialInstanceList = _.cloneDeep(this.instanceList)
-          this.calcColumns()
-        }
+        // const fuzzySearch = (this.$refs['search'] || {}).fuzzySearch || ''
+        // if (fuzzySearch) {
+        //   q = `q=_type:${this.currentTypeId[0]},*${fuzzySearch}*,` + q
+        // } else {
+        //   q = `q=_type:${this.currentTypeId[0]},` + q
+        // }
+        // if (this.currentTypeId[0] && this.treeData && this.treeData.length) {
+        //   // default select first node
+        //   this.onNodeClick(this.treeData[0].key)
+        //   const res = await searchCI2(q)
+        //   const root_id = this.treeData.map((item) => item.id).join(',')
+        //   q += `&root_id=${root_id}`
+
+        //   this.pageNo = res.page
+        //   this.numfound = res.numfound
+        //   res.result.forEach((item, index) => (item.key = item._id))
+        //   const jsonAttrList = this.preferenceAttrList.filter((attr) => attr.value_type === '6')
+        //   console.log(jsonAttrList)
+        //   this.instanceList = res['result'].map((item) => {
+        //     jsonAttrList.forEach(
+        //       (jsonAttr) => (item[jsonAttr.name] = item[jsonAttr.name] ? JSON.stringify(item[jsonAttr.name]) : '')
+        //     )
+        //     return { ..._.cloneDeep(item) }
+        //   })
+        //   this.initialInstanceList = _.cloneDeep(this.instanceList)
+        //   this.calcColumns()
+        // }
       } else {
         q += `&root_id=${this.treeKeys[this.treeKeys.length - 1].split('%')[0]}`
 
@@ -634,10 +706,10 @@ export default {
           level = [1]
         }
         q += `&level=${level.join(',')}`
+        await this.judgeCITypes(q)
         if (!refreshType) {
           this.loadNoRoot(this.treeKeys[this.treeKeys.length - 1], level)
         }
-        await this.judgeCITypes(q)
         const fuzzySearch = (this.$refs['search'] || {}).fuzzySearch || ''
         if (fuzzySearch) {
           q = `q=_type:${this.currentTypeId[0]},*${fuzzySearch}*,` + q
@@ -645,8 +717,12 @@ export default {
           q = `q=_type:${this.currentTypeId[0]},` + q
         }
         if (Object.values(this.level2constraint).includes('2')) {
-          q = q + `&&has_m2m=1`
+          q = q + `&has_m2m=1`
         }
+        if (this.root_parent_path) {
+          q = q + `&root_parent_path=${this.root_parent_path}`
+        }
+        q = q + `&descendant_ids=${this.descendant_ids}`
         if (this.currentTypeId[0]) {
           const res = await searchCIRelation(q)
 
@@ -666,7 +742,6 @@ export default {
 
           this.calcColumns()
         }
-
         if (refreshType === 'refreshNumber') {
           const promises = this.treeKeys.map((key, index) => {
             let ancestor_ids
@@ -684,8 +759,9 @@ export default {
               ancestor_ids,
               root_ids: key.split('%')[0],
               level: this.treeKeys.length - index,
-              type_ids: this.showTypes.map((type) => type.id).join(','),
+              type_ids: this.leaf2showTypes[this.leaf[0]].join(','),
               has_m2m: Number(Object.values(this.level2constraint).includes('2')),
+              descendant_ids: this.descendant_ids_for_statistics,
             }).then((res) => {
               let result
               const getTreeItem = (data, id) => {
@@ -741,22 +817,25 @@ export default {
       const promises = _showTypeIds.map((typeId) => {
         let _q = (`q=_type:${typeId},` + q).replace(/count=\d*/, 'count=1')
         if (Object.values(this.level2constraint).includes('2')) {
-          _q = _q + `&&has_m2m=1`
+          _q = _q + `&has_m2m=1`
         }
-        console.log(_q)
-        if (this.treeKeys.length === 0) {
-          return searchCI2(_q).then((res) => {
-            if (res.numfound !== 0) {
-              showTypeIds.push(typeId)
-            }
-          })
-        } else {
-          return searchCIRelation(_q).then((res) => {
-            if (res.numfound !== 0) {
-              showTypeIds.push(typeId)
-            }
-          })
+        if (this.root_parent_path) {
+          _q = _q + `&root_parent_path=${this.root_parent_path}`
         }
+        // if (this.treeKeys.length === 0) {
+        //   return searchCI2(_q).then((res) => {
+        //     if (res.numfound !== 0) {
+        //       showTypeIds.push(typeId)
+        //     }
+        //   })
+        // } else {
+        _q = _q + `&descendant_ids=${this.descendant_ids}`
+        return searchCIRelation(_q).then((res) => {
+          if (res.numfound !== 0) {
+            showTypeIds.push(typeId)
+          }
+        })
+        // }
       })
       await Promise.all(promises).then(async () => {
         if (showTypeIds.length && showTypeIds.sort().join(',') !== this.showTypeIds.sort().join(',')) {
@@ -780,7 +859,7 @@ export default {
     },
 
     async loadRoot() {
-      searchCI2(`q=_type:(${this.levels[0].join(';')})&count=10000`).then(async (res) => {
+      await searchCI2(`q=_type:(${this.levels[0].join(';')})&count=10000&use_id_filter=1`).then(async (res) => {
         const facet = []
         const ciIds = []
         res.result.forEach((item) => {
@@ -797,8 +876,9 @@ export default {
           return statisticsCIRelation({
             root_ids: ciIds.join(','),
             level: level,
-            type_ids: this.showTypes.map((type) => type.id).join(','),
+            type_ids: this.leaf2showTypes[this.leaf[0]].join(','),
             has_m2m: Number(Object.values(this.level2constraint).includes('2')),
+            descendant_ids: this.descendant_ids_for_statistics,
           }).then((num) => {
             facet.forEach((item, idx) => {
               item[1] += num[ciIds[idx] + '']
@@ -806,16 +886,17 @@ export default {
           })
         })
         await Promise.all(promises)
-        this.wrapTreeData(facet, 'loadRoot')
+        this.wrapTreeData(facet)
+        // default select first node
+        this.onNodeClick(this.treeData[0].key)
       })
     },
 
     async loadNoRoot(rootIdAndTypeId, level) {
       const rootId = rootIdAndTypeId.split('%')[0]
       const typeId = Number(rootIdAndTypeId.split('%')[1])
-      const topo_flatten = this.relationViews?.views[this.$route.meta.name]?.topo_flatten ?? []
-      const index = topo_flatten.findIndex((id) => id === typeId)
-      const _type = topo_flatten[index + 1]
+      const index = this.topo_flatten.findIndex((id) => id === typeId)
+      const _type = this.topo_flatten[index + 1]
       if (_type) {
         let q = `q=_type:${_type}&root_id=${rootId}&level=1&count=10000`
         if (
@@ -829,8 +910,12 @@ export default {
             .join(',')}`
         }
         if (Object.values(this.level2constraint).includes('2')) {
-          q = q + `&&has_m2m=1`
+          q = q + `&has_m2m=1`
         }
+        if (this.root_parent_path) {
+          q = q + `&root_parent_path=${this.root_parent_path}`
+        }
+        q = q + `&descendant_ids=${this.descendant_ids}`
         searchCIRelation(q).then(async (res) => {
           const facet = []
           const ciIds = []
@@ -852,8 +937,9 @@ export default {
                 ancestor_ids,
                 root_ids: ciIds.join(','),
                 level: _level - 1,
-                type_ids: this.showTypes.map((type) => type.id).join(','),
+                type_ids: this.leaf2showTypes[this.leaf[0]].join(','),
                 has_m2m: Number(Object.values(this.level2constraint).includes('2')),
+                descendant_ids: this.descendant_ids_for_statistics,
               }).then((num) => {
                 facet.forEach((item, idx) => {
                   item[1] += num[ciIds[idx] + '']
@@ -862,7 +948,7 @@ export default {
             }
           })
           await Promise.all(promises)
-          this.wrapTreeData(facet, 'loadNoRoot')
+          this.wrapTreeData(facet)
         })
       }
     },
@@ -917,6 +1003,7 @@ export default {
         }
         this.treeKeys = treeNode.eventKey.split('@^@').filter((item) => item !== '')
         this.treeNode = treeNode
+        // this.refreshTable()
         resolve()
       })
     },
@@ -979,27 +1066,37 @@ export default {
         this.$refs.xTable.refreshColumn()
       })
     },
+    calculateParamsFromTreeKey(treeKey, menuKey) {
+      const splitTreeKey = treeKey.split('@^@')
+      const _tempTree = splitTreeKey[splitTreeKey.length - 1].split('%')
+      const firstCIObj = JSON.parse(_tempTree[2])
+      const firstCIId = _tempTree[0]
+      let ancestor_ids
+      if (
+        Object.keys(this.level2constraint).some(
+          (le) => le < Object.keys(this.level2constraint).length && this.level2constraint[le] === '2'
+        )
+      ) {
+        const ancestor = treeKey
+          .split('@^@')
+          .slice(0, menuKey === 'delete' ? treeKey.split('@^@').length - 2 : treeKey.split('@^@').length - 1)
+        ancestor_ids = ancestor.map((item) => item.split('%')[0]).join(',')
+      }
+      return { splitTreeKey, firstCIObj, firstCIId, _tempTree, ancestor_ids }
+    },
     onContextMenuClick(treeKey, menuKey) {
       if (treeKey) {
-        const splitTreeKey = treeKey.split('@^@')
-        const _tempTree = splitTreeKey[splitTreeKey.length - 1].split('%')
-        const firstCIObj = JSON.parse(_tempTree[2])
-        const firstCIId = _tempTree[0]
-        let ancestor_ids
-        if (
-          Object.keys(this.level2constraint).some(
-            (le) => le < Object.keys(this.level2constraint).length && this.level2constraint[le] === '2'
-          )
-        ) {
-          const ancestor = treeKey
-            .split('@^@')
-            .slice(0, menuKey === 'delete' ? treeKey.split('@^@').length - 2 : treeKey.split('@^@').length - 1)
-          ancestor_ids = ancestor.map((item) => item.split('%')[0]).join(',')
+        if (!['batchGrant', 'batchRevoke', 'batchDelete', 'batchCancel'].includes(menuKey)) {
+          this.contextMenuKey = treeKey
         }
+
+        const { splitTreeKey, firstCIObj, firstCIId, _tempTree, ancestor_ids } = this.calculateParamsFromTreeKey(
+          treeKey,
+          menuKey
+        )
         if (menuKey === 'delete') {
           const _tempTreeParent = splitTreeKey[splitTreeKey.length - 2].split('%')
           const that = this
-
           this.$confirm({
             title: that.$t('warning'),
             content: (h) => <div>{that.$t('confirmDelete2', { name: Object.values(firstCIObj)[0] })}</div>,
@@ -1012,6 +1109,24 @@ export default {
               })
             },
           })
+        } else if (menuKey === 'grant') {
+          this.$refs.grantModal.open('depart')
+        } else if (menuKey === 'revoke') {
+          this.$refs.revokeModal.open()
+        } else if (menuKey === 'view') {
+          this.$refs.readPermissionsModal.open(treeKey)
+        } else if (menuKey === 'batch') {
+          this.showBatchLevel = splitTreeKey.filter((item) => !!item).length - 1
+          this.batchTreeKey = []
+        } else if (menuKey === 'batchGrant') {
+          this.$refs.grantModal.open('depart')
+        } else if (menuKey === 'batchRevoke') {
+          this.$refs.revokeModal.open()
+        } else if (menuKey === 'batchDelete') {
+          this.batchDeleteCIRelationFromTree()
+        } else if (menuKey === 'batchCancel') {
+          this.showBatchLevel = null
+          this.batchTreeKey = []
         } else {
           const childTypeId = menuKey
           this.$refs.addTableModal.openModal(firstCIObj, firstCIId, childTypeId, 'children', ancestor_ids)
@@ -1066,8 +1181,10 @@ export default {
       const _splitTargetKey = targetKey.split('@^@').filter((item) => item !== '')
       if (_splitDragKey.length - 1 === _splitTargetKey.length) {
         const dragId = _splitDragKey[_splitDragKey.length - 1].split('%')[0]
+        // const targetObj = JSON.parse(_splitTargetKey[_splitTargetKey.length - 1].split('%')[2])
         const targetId = _splitTargetKey[_splitTargetKey.length - 1].split('%')[0]
         console.log(_splitDragKey)
+        // TODO 拖拽这里不造咋弄 等等再说吧
         batchUpdateCIRelationChildren([dragId], [targetId]).then((res) => {
           this.reload()
         })
@@ -1437,6 +1554,138 @@ export default {
         .catch(() => {
           this.$message.error(this.$t('cmdb.serviceTreecopyFailed'))
         })
+    },
+    async onRelationViewGrant({ department, user }, type) {
+      const result = []
+      if (this.showBatchLevel !== null && this.batchTreeKey && this.batchTreeKey.length) {
+        for (let i = 0; i < this.batchTreeKey.length; i++) {
+          await this.relationViewGrant({ department, user }, this.batchTreeKey[i], (_result) => {
+            result.push(..._result)
+          })
+        }
+        this.showBatchLevel = null
+        this.batchTreeKey = []
+      } else {
+        await this.relationViewGrant({ department, user }, this.contextMenuKey, (_result) => {
+          result.push(..._result)
+        })
+      }
+      if (result.every((r) => r.status === 'fulfilled')) {
+        this.$message.success(this.$t('operateSuccess'))
+      }
+    },
+    async relationViewGrant({ department, user }, nodeKey, callback) {
+      const needGrantNodes = nodeKey
+        .split('@^@')
+        .filter((item) => !!item)
+        .reverse()
+      console.log(needGrantNodes)
+
+      const needGrantRids = [...department, ...user]
+      const floor = Math.ceil(needGrantRids.length / 6)
+      const result = []
+      for (let i = 0; i < needGrantNodes.length; i++) {
+        const grantNode = needGrantNodes[i]
+        const _grantNode = grantNode.split('%')
+        const ciId = _grantNode[0]
+        const typeId = _grantNode[1]
+        const uniqueValue = Object.entries(JSON.parse(_grantNode[2]))[0][1]
+        const parent_path = needGrantNodes
+          .slice(i + 1)
+          .map((item) => {
+            return Number(item.split('%')[0])
+          })
+          .reverse()
+          .join(',')
+        for (let j = 0; j < floor; j++) {
+          const itemList = needGrantRids.slice(6 * j, 6 * j + 6)
+          const promises = itemList.map((rid) =>
+            grantCiType(typeId, rid, {
+              id_filter: { [ciId]: { name: uniqueValue, parent_path } },
+              is_recursive: Number(i > 0),
+            })
+          )
+          const _result = await Promise.allSettled(promises)
+          result.push(..._result)
+        }
+      }
+      callback(result)
+    },
+    clickCheckbox(treeKey) {
+      const _idx = this.batchTreeKey.findIndex((item) => item === treeKey)
+      if (_idx > -1) {
+        this.batchTreeKey.splice(_idx, 1)
+      } else {
+        this.batchTreeKey.push(treeKey)
+      }
+    },
+    batchDeleteCIRelationFromTree() {
+      const that = this
+      this.$confirm({
+        title: that.$t('warning'),
+        content: (h) => <div>{that.$t('confirmDelete')}</div>,
+        async onOk() {
+          for (let i = 0; i < that.batchTreeKey.length; i++) {
+            const { splitTreeKey, firstCIObj, firstCIId, _tempTree, ancestor_ids } = that.calculateParamsFromTreeKey(
+              that.batchTreeKey[i],
+              'delete'
+            )
+            const _tempTreeParent = splitTreeKey[splitTreeKey.length - 2].split('%')
+            await deleteCIRelationView(_tempTreeParent[0], _tempTree[0], { ancestor_ids }).then((res) => {})
+          }
+          that.$message.success(that.$t('deleteSuccess'))
+          that.showBatchLevel = null
+          that.batchTreeKey = []
+          setTimeout(() => {
+            that.reload()
+          }, 500)
+        },
+      })
+    },
+    async handleSingleRevoke({ users = [], roles = [] }, treeKey, callback) {
+      const rids = [...users.map((item) => Number(item.split('-')[1])), ...roles]
+      const treeKeyPath = treeKey.split('@^@').filter((item) => !!item)
+      const _treeKey = treeKeyPath.pop(-1).split('%')
+      const id_filter = {}
+      const typeId = _treeKey[1]
+      const ciId = _treeKey[0]
+      const uniqueValue = Object.entries(JSON.parse(_treeKey[2]))[0][1]
+
+      const parent_path = treeKeyPath
+        .map((item) => {
+          return Number(item.split('%')[0])
+        })
+        .join(',')
+      id_filter[ciId] = { name: uniqueValue, parent_path }
+      const floor = Math.ceil(rids.length / 6)
+      const result = []
+      for (let j = 0; j < floor; j++) {
+        const itemList = rids.slice(6 * j, 6 * j + 6)
+        const promises = itemList.map((rid) => revokeCiType(typeId, rid, { id_filter, perms: ['read'], parent_path }))
+        const _result = await Promise.allSettled(promises)
+        result.push(..._result)
+      }
+      callback(result)
+    },
+    async handleRevoke({ users = [], roles = [] }) {
+      const result = []
+      if (this.showBatchLevel !== null && this.batchTreeKey && this.batchTreeKey.length) {
+        for (let i = 0; i < this.batchTreeKey.length; i++) {
+          const treeKey = this.batchTreeKey[i]
+          await this.handleSingleRevoke({ users, roles }, treeKey, (_result) => {
+            result.push(..._result)
+          })
+        }
+      } else {
+        await this.handleSingleRevoke({ users, roles }, this.contextMenuKey, (_result) => {
+          result.push(..._result)
+        })
+      }
+      if (result.every((r) => r.status === 'fulfilled')) {
+        this.$message.success(this.$t('operateSuccess'))
+      }
+      this.showBatchLevel = null
+      this.batchTreeKey = []
     },
   },
 }

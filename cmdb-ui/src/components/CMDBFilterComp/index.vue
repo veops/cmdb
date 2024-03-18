@@ -16,6 +16,7 @@
           :needAddHere="needAddHere"
           v-model="ruleList"
           :canSearchPreferenceAttrList="canSearchPreferenceAttrList.filter((attr) => !attr.is_password)"
+          :disabled="disabled"
         />
         <a-divider :style="{ margin: '10px 0' }" />
         <div style="width:554px">
@@ -31,6 +32,7 @@
       v-else
       v-model="ruleList"
       :canSearchPreferenceAttrList="canSearchPreferenceAttrList.filter((attr) => !attr.is_password)"
+      :disabled="disabled"
     />
   </div>
 </template>
@@ -66,6 +68,10 @@ export default {
       default: true,
     },
     needAddHere: {
+      type: Boolean,
+      default: false,
+    },
+    disabled: {
       type: Boolean,
       default: false,
     },
