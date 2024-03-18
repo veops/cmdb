@@ -11,8 +11,7 @@ from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci import CIManager
 from api.lib.cmdb.ci import CIRelationManager
 from api.lib.cmdb.const import ExistPolicy
-from api.lib.cmdb.const import PermEnum
-from api.lib.cmdb.const import ResourceTypeEnum
+from api.lib.cmdb.const import ResourceTypeEnum, PermEnum
 from api.lib.cmdb.const import RetKey
 from api.lib.cmdb.perms import has_perm_for_ci
 from api.lib.cmdb.search import SearchError
@@ -152,9 +151,10 @@ class CISearchView(APIView):
             ret_key = RetKey.NAME
         facet = handle_arg_list(request.values.get("facet", ""))
         sort = request.values.get("sort")
+        use_id_filter = request.values.get("use_id_filter", False) in current_app.config.get('BOOL_TRUE')
 
         start = time.time()
-        s = search(query, fl, facet, page, ret_key, count, sort, excludes)
+        s = search(query, fl, facet, page, ret_key, count, sort, excludes, use_id_filter=use_id_filter)
         try:
             response, counter, total, page, numfound, facet = s.search()
         except SearchError as e:

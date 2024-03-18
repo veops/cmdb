@@ -18,6 +18,7 @@ from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import REDIS_PREFIX_CI
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION2
+from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.decorator import flush_db
 from api.lib.decorator import reconnect_db
 from api.lib.perm.acl.cache import UserCache
@@ -81,6 +82,13 @@ def ci_delete(ci_id):
         rd.delete(ci_id, REDIS_PREFIX_CI)
 
     current_app.logger.info("{0} delete..........".format(ci_id))
+
+
+@celery.task(name="cmdb.delete_id_filter", queue=CMDB_QUEUE)
+@reconnect_db
+def delete_id_filter(ci_id):
+
+    CIFilterPermsCRUD().delete_id_filter_by_ci_id(ci_id)
 
 
 @celery.task(name="cmdb.ci_delete_trigger", queue=CMDB_QUEUE)

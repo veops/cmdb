@@ -16,10 +16,11 @@ def search(query=None,
            ret_key=RetKey.NAME,
            count=1,
            sort=None,
-           excludes=None):
+           excludes=None,
+           use_id_filter=True):
     if current_app.config.get("USE_ES"):
         s = SearchFromES(query, fl, facet, page, ret_key, count, sort)
     else:
-        s = SearchFromDB(query, fl, facet, page, ret_key, count, sort, excludes=excludes)
+        s = SearchFromDB(query, fl, facet, page, ret_key, count, sort, excludes=excludes, use_id_filter=use_id_filter)
 
     return s

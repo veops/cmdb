@@ -38,9 +38,13 @@ from api.resource import APIView
 
 
 class CITypeView(APIView):
-    url_prefix = ("/ci_types", "/ci_types/<int:type_id>", "/ci_types/<string:type_name>")
+    url_prefix = ("/ci_types", "/ci_types/<int:type_id>", "/ci_types/<string:type_name>",
+                  "/ci_types/icons")
 
     def get(self, type_id=None, type_name=None):
+        if request.url.endswith("icons"):
+            return self.jsonify(CITypeManager().get_icons())
+
         q = request.args.get("type_name")
 
         if type_id is not None:
@@ -490,13 +494,14 @@ class CITypeGrantView(APIView):
         if not acl.has_permission(type_name, ResourceTypeEnum.CI_TYPE, PermEnum.GRANT) and not is_app_admin('cmdb'):
             return abort(403, ErrFormat.no_permission.format(type_name, PermEnum.GRANT))
 
-        acl.grant_resource_to_role_by_rid(type_name, rid, ResourceTypeEnum.CI_TYPE, perms, rebuild=False)
+        if perms and not request.values.get('id_filter'):
+            acl.grant_resource_to_role_by_rid(type_name, rid, ResourceTypeEnum.CI_TYPE, perms, rebuild=False)
 
-        resource = None
+        new_resource = None
         if 'ci_filter' in request.values or 'attr_filter' in request.values or 'id_filter' in request.values:
-            resource = CIFilterPermsCRUD().add(type_id=type_id, rid=rid, **request.values)
+            new_resource = CIFilterPermsCRUD().add(type_id=type_id, rid=rid, **request.values)
 
-        if not resource:
+        if not new_resource:
             from api.tasks.acl import role_rebuild
             from api.lib.perm.acl.const import ACL_QUEUE
 
@@ -526,17 +531,9 @@ class CITypeRevokeView(APIView):
         resource = None
 
         if request.values.get('id_filter'):
-            resource, revoke_read = CIFilterPermsCRUD().delete2(
-                type_id=type_id, rid=rid, id_filter=request.values['id_filter'])
-
-            acl.revoke_resource_from_role_by_rid(
-                type_name, rid, ResourceTypeEnum.CI_TYPE, [PermEnum.READ], rebuild=False)
-
-            if not resource:
-                from api.tasks.acl import role_rebuild
-                from api.lib.perm.acl.const import ACL_QUEUE
-
-                role_rebuild.apply_async(args=(rid, app_id), queue=ACL_QUEUE)
+            CIFilterPermsCRUD().delete2(
+                type_id=type_id, rid=rid, id_filter=request.values['id_filter'],
+                parent_path=request.values.get('parent_path'))
 
             return self.jsonify(type_id=type_id, rid=rid)
 

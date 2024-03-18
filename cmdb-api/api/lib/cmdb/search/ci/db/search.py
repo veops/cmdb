@@ -44,7 +44,10 @@ class Search(object):
                  count=1,
                  sort=None,
                  ci_ids=None,
-                 excludes=None):
+                 excludes=None,
+                 parent_node_perm_passed=False,
+                 use_id_filter=False,
+                 use_ci_filter=True):
         self.orig_query = query
         self.fl = fl or []
         self.excludes = excludes or []
@@ -58,6 +61,9 @@ class Search(object):
         self.query_sql = ""
         self.type_id_list = []
         self.only_type_query = False
+        self.parent_node_perm_passed = parent_node_perm_passed
+        self.use_id_filter = use_id_filter
+        self.use_ci_filter = use_ci_filter
 
         self.valid_type_names = []
         self.type2filter_perms = dict()
@@ -107,7 +113,7 @@ class Search(object):
                     self.type_id_list.append(str(ci_type.id))
                     if ci_type.id in self.type2filter_perms:
                         ci_filter = self.type2filter_perms[ci_type.id].get('ci_filter')
-                        if ci_filter:
+                        if ci_filter and self.use_ci_filter and not self.use_id_filter:
                             sub = []
                             ci_filter = Template(ci_filter).render(user=current_user)
                             for i in ci_filter.split(','):
@@ -124,13 +130,13 @@ class Search(object):
                             else:
                                 self.fl = set(self.fl) & set(self.type2filter_perms[ci_type.id]['attr_filter'])
 
-                        if self.type2filter_perms[ci_type.id].get('id_filter'):
-                            if self.raw_ci_ids:
-                                self.ci_ids = (set(map(str, self.ci_ids)) &
-                                               set(list(self.type2filter_perms[ci_type.id]['id_filter'].keys())))
-                            else:
+                        if self.type2filter_perms[ci_type.id].get('id_filter') and self.use_id_filter:
+
+                            if not self.raw_ci_ids:
                                 self.ci_ids = list(self.type2filter_perms[ci_type.id]['id_filter'].keys())
 
+                    if self.use_id_filter and not self.ci_ids and not is_app_admin('cmdb'):
+                        self.raw_ci_ids = [0]
                 else:
                     raise SearchError(ErrFormat.no_permission.format(ci_type.alias, PermEnum.READ))
             else:
@@ -164,6 +170,7 @@ class Search(object):
             "NOT LIKE" if is_not else "LIKE",
             _v.replace("*", "%")) for _v in new_v])
         _query_sql = QUERY_CI_BY_ATTR_NAME.format(table_name, attr.id, in_query)
+
         return _query_sql
 
     @staticmethod
@@ -179,6 +186,7 @@ class Search(object):
             "NOT BETWEEN" if is_not else "BETWEEN",
             start.replace("*", "%"), end.replace("*", "%"))
         _query_sql = QUERY_CI_BY_ATTR_NAME.format(table_name, attr.id, range_query)
+
         return _query_sql
 
     @staticmethod
@@ -195,6 +203,7 @@ class Search(object):
 
             comparison_query = "{0} '{1}'".format(v[0], v[1:].replace("*", "%"))
         _query_sql = QUERY_CI_BY_ATTR_NAME.format(table_name, attr.id, comparison_query)
+
         return _query_sql
 
     @staticmethod
@@ -206,6 +215,7 @@ class Search(object):
         elif field.startswith("-"):
             field = field[1:]
             sort_type = "DESC"
+
         return field, sort_type
 
     def __sort_by_id(self, sort_type, query_sql):
@@ -334,6 +344,11 @@ class Search(object):
 
         return numfound, res
 
+    def __get_type2filter_perms(self):
+        res2 = ACLManager('cmdb').get_resources(ResourceTypeEnum.CI_FILTER)
+        if res2:
+            self.type2filter_perms = CIFilterPermsCRUD().get_by_ids(list(map(int, [i['name'] for i in res2])))
+
     def __get_types_has_read(self):
         """
         :return: _type:(type1;type2)
@@ -343,14 +358,23 @@ class Search(object):
 
         self.valid_type_names = {i['name'] for i in res if PermEnum.READ in i['permissions']}
 
-        res2 = acl.get_resources(ResourceTypeEnum.CI_FILTER)
-        if res2:
-            self.type2filter_perms = CIFilterPermsCRUD().get_by_ids(list(map(int, [i['name'] for i in res2])))
+        self.__get_type2filter_perms()
+
+        for type_id in self.type2filter_perms:
+            ci_type = CITypeCache.get(type_id)
+            if ci_type:
+                if self.type2filter_perms[type_id].get('id_filter'):
+                    if self.use_id_filter:
+                        self.valid_type_names.add(ci_type.name)
+                elif self.type2filter_perms[type_id].get('ci_filter'):
+                    if self.use_ci_filter:
+                        self.valid_type_names.add(ci_type.name)
+                else:
+                    self.valid_type_names.add(ci_type.name)
 
         return "_type:({})".format(";".join(self.valid_type_names))
 
     def __confirm_type_first(self, queries):
-
         has_type = False
 
         result = []
@@ -384,7 +408,10 @@ class Search(object):
                 result.append(q)
 
         _is_app_admin = is_app_admin('cmdb') or current_user.username == "worker"
-        if result and not has_type and not _is_app_admin:
+        if self.parent_node_perm_passed:
+            self.__get_type2filter_perms()
+            self.valid_type_names = "ALL"
+        elif result and not has_type and not _is_app_admin:
             type_q = self.__get_types_has_read()
             if id_query:
                 ci = CIManager.get_by_id(id_query)
@@ -587,4 +614,3 @@ class Search(object):
         _, ci_ids = self._query_build_raw()
 
         return ci_ids
-

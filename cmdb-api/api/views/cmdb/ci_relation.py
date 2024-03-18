@@ -35,6 +35,8 @@ class CIRelationSearchView(APIView):
 
         root_id = request.values.get('root_id')
         ancestor_ids = request.values.get('ancestor_ids') or None  # only for many to many
+        root_parent_path = handle_arg_list(request.values.get('root_parent_path') or '')
+        descendant_ids = list(map(int, handle_arg_list(request.values.get('descendant_ids', []))))
         level = list(map(int, handle_arg_list(request.values.get('level', '1'))))
 
         query = request.values.get('q', "")
@@ -46,7 +48,8 @@ class CIRelationSearchView(APIView):
 
         start = time.time()
         s = Search(root_id, level, query, fl, facet, page, count, sort, reverse,
-                   ancestor_ids=ancestor_ids, has_m2m=has_m2m)
+                   ancestor_ids=ancestor_ids, has_m2m=has_m2m, root_parent_path=root_parent_path,
+                   descendant_ids=descendant_ids)
         try:
             response, counter, total, page, numfound, facet = s.search()
         except SearchError as e:
@@ -64,7 +67,6 @@ class CIRelationSearchView(APIView):
 class CIRelationStatisticsView(APIView):
     url_prefix = "/ci_relations/statistics"
 
-    # @auth_abandoned
     def get(self):
         root_ids = list(map(int, handle_arg_list(request.values.get('root_ids'))))
         level = request.values.get('level', 1)
