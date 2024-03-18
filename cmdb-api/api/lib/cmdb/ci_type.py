@@ -76,6 +76,10 @@ class CITypeManager(object):
 
         return CIType.get_by_id(ci_type.id)
 
+    def get_icons(self):
+        return {i.id: i.icon or i.name for i in db.session.query(
+            self.cls.id, self.cls.icon, self.cls.name).filter(self.cls.deleted.is_(False))}
+
     @staticmethod
     def get_ci_types(type_name=None, like=True):
         resources = None
@@ -652,6 +656,21 @@ class CITypeAttributeManager(object):
 
                 for item in PreferenceShowAttributes.get_by(type_id=type_id, attr_id=attr_id, to_dict=False):
                     item.soft_delete(commit=False)
+
+                child_ids = CITypeInheritanceManager.recursive_children(type_id)
+                for _type_id in [type_id] + child_ids:
+                    for item in CITypeUniqueConstraint.get_by(type_id=_type_id, to_dict=False):
+                        if attr_id in item.attr_ids:
+                            attr_ids = copy.deepcopy(item.attr_ids)
+                            attr_ids.remove(attr_id)
+
+                            if attr_ids:
+                                item.update(attr_ids=attr_ids, commit=False)
+                            else:
+                                item.soft_delete(commit=False)
+
+                    item = CITypeTrigger.get_by(type_id=_type_id, attr_id=attr_id, to_dict=False, first=True)
+                    item and item.soft_delete(commit=False)
 
                 db.session.commit()
 

@@ -60,6 +60,7 @@ from api.tasks.cmdb import ci_delete_trigger
 from api.tasks.cmdb import ci_relation_add
 from api.tasks.cmdb import ci_relation_cache
 from api.tasks.cmdb import ci_relation_delete
+from api.tasks.cmdb import delete_id_filter
 
 PASSWORD_DEFAULT_SHOW = "******"
 
@@ -558,6 +559,7 @@ class CIManager(object):
             AttributeHistoryManger.add(None, ci_id, [(None, OperateType.DELETE, ci_dict, None)], ci.type_id)
 
         ci_delete.apply_async(args=(ci_id,), queue=CMDB_QUEUE)
+        delete_id_filter.apply_async(args=(ci_id,), queue=CMDB_QUEUE)
 
         return ci_id
 
@@ -865,6 +867,20 @@ class CIRelationManager(object):
         return numfound, len(ci_ids), result
 
     @staticmethod
+    def recursive_children(ci_id):
+        result = []
+
+        def _get_children(_id):
+            children = CIRelation.get_by(first_ci_id=_id, to_dict=False)
+            result.extend([i.second_ci_id for i in children])
+            for child in children:
+                _get_children(child.second_ci_id)
+
+        _get_children(ci_id)
+
+        return result
+
+    @staticmethod
     def _sort_handler(sort_by, query_sql):
 
         if sort_by.startswith("+"):
@@ -1015,6 +1031,7 @@ class CIRelationManager(object):
         his_manager.add(cr, operate_type=OperateType.DELETE)
 
         ci_relation_delete.apply_async(args=(cr.first_ci_id, cr.second_ci_id, cr.ancestor_ids), queue=CMDB_QUEUE)
+        delete_id_filter.apply_async(args=(cr.second_ci_id,), queue=CMDB_QUEUE)
 
         return cr_id
 
@@ -1026,9 +1043,13 @@ class CIRelationManager(object):
                                to_dict=False,
                                first=True)
 
-        ci_relation_delete.apply_async(args=(first_ci_id, second_ci_id, ancestor_ids), queue=CMDB_QUEUE)
+        if cr is not None:
+            cls.delete(cr.id)
 
-        return cr and cls.delete(cr.id)
+        ci_relation_delete.apply_async(args=(first_ci_id, second_ci_id, ancestor_ids), queue=CMDB_QUEUE)
+        delete_id_filter.apply_async(args=(second_ci_id,), queue=CMDB_QUEUE)
+
+        return cr
 
     @classmethod
     def batch_update(cls, ci_ids, parents, children, ancestor_ids=None):

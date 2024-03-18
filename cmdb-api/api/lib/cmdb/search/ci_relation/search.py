@@ -1,9 +1,11 @@
 # -*- coding:utf-8 -*-
 import json
+import sys
 from collections import Counter
 
 from flask import abort
 from flask import current_app
+from flask_login import current_user
 
 from api.extensions import rd
 from api.lib.cmdb.ci import CIRelationManager
@@ -11,11 +13,14 @@ from api.lib.cmdb.ci_type import CITypeRelationManager
 from api.lib.cmdb.const import ConstraintEnum
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION2
+from api.lib.cmdb.const import ResourceTypeEnum
+from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.search.ci.db.search import Search as SearchFromDB
 from api.lib.cmdb.search.ci.es.search import Search as SearchFromES
+from api.lib.perm.acl.acl import ACLManager
+from api.lib.perm.acl.acl import is_app_admin
 from api.models.cmdb import CI
-from api.models.cmdb import CIRelation
 
 
 class Search(object):
@@ -29,7 +34,9 @@ class Search(object):
                  sort=None,
                  reverse=False,
                  ancestor_ids=None,
-                 has_m2m=None):
+                 descendant_ids=None,
+                 has_m2m=None,
+                 root_parent_path=None):
         self.orig_query = query
         self.fl = fl
         self.facet_field = facet_field
@@ -46,6 +53,8 @@ class Search(object):
             level[0] if isinstance(level, list) and level else level)
 
         self.ancestor_ids = ancestor_ids
+        self.descendant_ids = descendant_ids
+        self.root_parent_path = root_parent_path
         self.has_m2m = has_m2m or False
         if not self.has_m2m:
             if self.ancestor_ids:
@@ -56,27 +65,21 @@ class Search(object):
                     if _l < int(level) and c == ConstraintEnum.Many2Many:
                         self.has_m2m = True
 
+        self.type2filter_perms = None
+
     def _get_ids(self, ids):
-        if self.level[-1] == 1 and len(ids) == 1:
-            if self.ancestor_ids is None:
-                return [i.second_ci_id for i in CIRelation.get_by(first_ci_id=ids[0], to_dict=False)]
-
-            else:
-                seconds = {i.second_ci_id for i in CIRelation.get_by(first_ci_id=ids[0],
-                                                                     ancestor_ids=self.ancestor_ids,
-                                                                     to_dict=False)}
-
-                return list(seconds)
 
         merge_ids = []
         key = []
         _tmp = []
         for level in range(1, sorted(self.level)[-1] + 1):
+            if len(self.descendant_ids) >= level and self.type2filter_perms.get(self.descendant_ids[level - 1]):
+                id_filter_limit, _ = self._get_ci_filter(self.type2filter_perms[self.descendant_ids[level - 1]])
+            else:
+                id_filter_limit = {}
+
             if not self.has_m2m:
-                _tmp = map(lambda x: json.loads(x).keys(),
-                           filter(lambda x: x is not None, rd.get(ids, REDIS_PREFIX_CI_RELATION) or []))
-                ids = [j for i in _tmp for j in i]
-                key, prefix = ids, REDIS_PREFIX_CI_RELATION
+                key, prefix = list(map(str, ids)), REDIS_PREFIX_CI_RELATION
 
             else:
                 if not self.ancestor_ids:
@@ -92,11 +95,15 @@ class Search(object):
                         key = list(set(["{},{}".format(i, j) for idx, i in enumerate(key) for j in _tmp[idx]]))
                         prefix = REDIS_PREFIX_CI_RELATION2
 
-                _tmp = list(map(lambda x: json.loads(x).keys() if x else [], rd.get(key, prefix) or []))
-                ids = [j for i in _tmp for j in i]
-
-            if not key:
+            if not key or id_filter_limit is None:
                 return []
+
+            res = [json.loads(x).items() for x in [i or '{}' for i in rd.get(key, prefix) or []]]
+            _tmp = [[i[0] for i in x if (not id_filter_limit or (
+                    key[idx] not in id_filter_limit or int(i[0]) in id_filter_limit[key[idx]]) or
+                                         int(i[0]) in id_filter_limit)] for idx, x in enumerate(res)]
+
+            ids = [j for i in _tmp for j in i]
 
             if level in self.level:
                 merge_ids.extend(ids)
@@ -120,7 +127,28 @@ class Search(object):
 
         return merge_ids
 
+    def _has_read_perm_from_parent_nodes(self):
+        self.root_parent_path = list(map(str, self.root_parent_path))
+        if str(self.root_id).isdigit() and str(self.root_id) not in self.root_parent_path:
+            self.root_parent_path.append(str(self.root_id))
+        self.root_parent_path = set(self.root_parent_path)
+
+        if is_app_admin('cmdb'):
+            self.type2filter_perms = {}
+            return True
+
+        res = ACLManager().get_resources(ResourceTypeEnum.CI_FILTER) or {}
+        self.type2filter_perms = CIFilterPermsCRUD().get_by_ids(list(map(int, [i['name'] for i in res]))) or {}
+        for _, filters in self.type2filter_perms.items():
+            if set((filters.get('id_filter') or {}).keys()) & self.root_parent_path:
+                return True
+
+        return True
+
     def search(self):
+        use_ci_filter = len(self.descendant_ids) == self.level[0] - 1
+        parent_node_perm_passed = self._has_read_perm_from_parent_nodes()
+
         ids = [self.root_id] if not isinstance(self.root_id, list) else self.root_id
         cis = [CI.get_by_id(_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(_id))) for _id in ids]
 
@@ -161,10 +189,50 @@ class Search(object):
                                 page=self.page,
                                 count=self.count,
                                 sort=self.sort,
-                                ci_ids=merge_ids).search()
+                                ci_ids=merge_ids,
+                                parent_node_perm_passed=parent_node_perm_passed,
+                                use_ci_filter=use_ci_filter).search()
+
+    def _get_ci_filter(self, filter_perms, ci_filters=None):
+        ci_filters = ci_filters or []
+        if ci_filters:
+            result = {}
+            for item in ci_filters:
+                res = SearchFromDB('_type:{},{}'.format(item['type_id'], item['ci_filter']),
+                                   count=sys.maxsize, parent_node_perm_passed=True).get_ci_ids()
+                if res:
+                    result[item['type_id']] = set(res)
+
+            return {}, result if result else None
+
+        result = dict()
+        if filter_perms.get('id_filter'):
+            for k in filter_perms['id_filter']:
+                node_path = k.split(',')
+                if len(node_path) == 1:
+                    result[int(node_path[0])] = 1
+                elif not self.has_m2m:
+                    result.setdefault(node_path[-2], set()).add(int(node_path[-1]))
+                else:
+                    result.setdefault(','.join(node_path[:-1]), set()).add(int(node_path[-1]))
+            if result:
+                return result, None
+            else:
+                return None, None
+
+        return {}, None
 
     def statistics(self, type_ids):
         self.level = int(self.level)
+
+        acl = ACLManager('cmdb')
+        _is_app_admin = is_app_admin('cmdb') or current_user.username == "worker"
+
+        type2filter_perms = dict()
+        if not _is_app_admin:
+            res2 = acl.get_resources(ResourceTypeEnum.CI_FILTER)
+            if res2:
+                type2filter_perms = CIFilterPermsCRUD().get_by_ids(list(map(int, [i['name'] for i in res2])))
 
         ids = [self.root_id] if not isinstance(self.root_id, list) else self.root_id
         _tmp = []
@@ -172,31 +240,52 @@ class Search(object):
         for lv in range(1, self.level + 1):
             level2ids[lv] = []
 
+            id_filter_limit, ci_filter_limit = None, None
+            if len(self.descendant_ids) >= lv and type2filter_perms.get(self.descendant_ids[lv - 1]):
+                id_filter_limit, _ = self._get_ci_filter(type2filter_perms[self.descendant_ids[lv - 1]])
+            elif type_ids and self.level == lv:
+                ci_filters = [type2filter_perms[type_id] for type_id in type_ids if type_id in type2filter_perms]
+                if ci_filters:
+                    id_filter_limit, ci_filter_limit = self._get_ci_filter({}, ci_filters=ci_filters)
+                else:
+                    id_filter_limit = {}
+            else:
+                id_filter_limit = {}
+
             if lv == 1:
                 if not self.has_m2m:
-                    key, prefix = ids, REDIS_PREFIX_CI_RELATION
+                    key, prefix = [str(i) for i in ids], REDIS_PREFIX_CI_RELATION
                 else:
+                    key = ["{},{}".format(self.ancestor_ids, _id) for _id in ids]
                     if not self.ancestor_ids:
-                        key, prefix = ids, REDIS_PREFIX_CI_RELATION
+                        key, prefix = [str(i) for i in ids], REDIS_PREFIX_CI_RELATION
                     else:
-                        key = ["{},{}".format(self.ancestor_ids, _id) for _id in ids]
                         prefix = REDIS_PREFIX_CI_RELATION2
 
                     level2ids[lv] = [[i] for i in key]
 
-                if not key:
-                    _tmp = []
+                if not key or id_filter_limit is None:
+                    _tmp = [[]] * len(ids)
                     continue
 
+                res = [json.loads(x).items() for x in [i or '{}' for i in rd.get(key, prefix) or []]]
+                _tmp = []
                 if type_ids and lv == self.level:
-                    _tmp = list(map(lambda x: [i for i in x if i[1] in type_ids],
-                                    (map(lambda x: list(json.loads(x).items()),
-                                         [i or '{}' for i in rd.get(key, prefix) or []]))))
+                    _tmp = [[i for i in x if i[1] in type_ids and
+                             (not id_filter_limit or (key[idx] not in id_filter_limit or
+                                                      int(i[0]) in id_filter_limit[key[idx]]) or
+                              int(i[0]) in id_filter_limit)] for idx, x in enumerate(res)]
                 else:
-                    _tmp = list(map(lambda x: list(json.loads(x).items()),
-                                    [i or '{}' for i in rd.get(key, prefix) or []]))
+                    _tmp = [[i for i in x if (not id_filter_limit or (key[idx] not in id_filter_limit or
+                                                                      int(i[0]) in id_filter_limit[key[idx]]) or
+                                              int(i[0]) in id_filter_limit)] for idx, x in enumerate(res)]
+
+                if ci_filter_limit:
+                    _tmp = [[j for j in i if j[1] not in ci_filter_limit or int(j[0]) in ci_filter_limit[j[1]]]
+                            for i in _tmp]
 
             else:
+
                 for idx, item in enumerate(_tmp):
                     if item:
                         if not self.has_m2m:
@@ -208,15 +297,22 @@ class Search(object):
                             level2ids[lv].append(key)
 
                         if key:
+                            res = [json.loads(x).items() for x in [i or '{}' for i in rd.get(key, prefix) or []]]
                             if type_ids and lv == self.level:
-                                __tmp = map(lambda x: [(_id, type_id) for _id, type_id in json.loads(x).items()
-                                                       if type_id in type_ids],
-                                            filter(lambda x: x is not None,
-                                                   rd.get(key, prefix) or []))
+                                __tmp = [[i for i in x if i[1] in type_ids and
+                                          (not id_filter_limit or (
+                                                  key[idx] not in id_filter_limit or
+                                                  int(i[0]) in id_filter_limit[key[idx]]) or
+                                           int(i[0]) in id_filter_limit)] for idx, x in enumerate(res)]
                             else:
-                                __tmp = map(lambda x: list(json.loads(x).items()),
-                                            filter(lambda x: x is not None,
-                                                   rd.get(key, prefix) or []))
+                                __tmp = [[i for i in x if (not id_filter_limit or (
+                                        key[idx] not in id_filter_limit or
+                                        int(i[0]) in id_filter_limit[key[idx]]) or
+                                                           int(i[0]) in id_filter_limit)] for idx, x in enumerate(res)]
+
+                            if ci_filter_limit:
+                                __tmp = [[j for j in i if j[1] not in ci_filter_limit or
+                                          int(j[0]) in ci_filter_limit[j[1]]] for i in __tmp]
                         else:
                             __tmp = []
 

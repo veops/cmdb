@@ -569,6 +569,7 @@ class CIFilterPerms(Model):
     type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'))
     ci_filter = db.Column(db.Text)
     attr_filter = db.Column(db.Text)
+    id_filter = db.Column(db.JSON)  # {node_path: unique_value}
 
     rid = db.Column(db.Integer, index=True)
 
