@@ -25,6 +25,7 @@ export default {
     deleting: '正在删除',
     deletingTip: '正在删除，共{total}个，成功{successNum}个，失败{errorNum}个',
     grant: '授权',
+    revoke: '回收',
     login_at: '登录时间',
     logout_at: '登出时间',
     createSuccess: '创建成功',

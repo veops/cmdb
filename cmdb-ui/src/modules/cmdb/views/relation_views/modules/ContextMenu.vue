@@ -1,63 +1,81 @@
 <template>
-  <a-dropdown :trigger="['contextmenu']">
-    <a-menu slot="overlay" @click="({ key: menuKey }) => this.onContextMenuClick(this.treeKey, menuKey)">
-      <a-menu-item v-for="item in menuList" :key="item.id">{{ $t('new') }} {{ item.alias }}</a-menu-item>
-      <a-menu-item v-if="showDelete" key="delete">{{ $t('cmdb.serviceTree.deleteNode') }}</a-menu-item>
-    </a-menu>
-    <div
-      :style="{
-        width: '100%',
-        display: 'inline-flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      }"
-      @click="clickNode"
-    >
-      <span
-        :style="{
-          display: 'flex',
-          overflow: 'hidden',
-          width: '100%',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          alignItems: 'center',
-        }"
-      >
-        <template v-if="icon">
-          <img
-            v-if="icon.split('$$')[2]"
-            :src="`/api/common-setting/v1/file/${icon.split('$$')[3]}`"
-            :style="{ maxHeight: '14px', maxWidth: '14px' }"
-          />
-          <ops-icon
-            v-else
-            :style="{
-              color: icon.split('$$')[1],
-              fontSize: '14px',
-            }"
-            :type="icon.split('$$')[0]"
-          />
-        </template>
-        <span
+  <div
+    :class="{
+      'relation-views-node': true,
+      'relation-views-node-checkbox': showCheckbox,
+    }"
+    @click="clickNode"
+  >
+    <span>
+      <a-checkbox @click.stop="clickCheckbox" class="relation-views-node-checkbox" v-if="showCheckbox" />
+      <template v-if="icon">
+        <img
+          v-if="icon.includes('$$') && icon.split('$$')[2]"
+          :src="`/api/common-setting/v1/file/${icon.split('$$')[3]}`"
+          :style="{ maxHeight: '14px', maxWidth: '14px' }"
+        />
+        <ops-icon
+          v-else-if="icon.includes('$$') && icon.split('$$')[0]"
           :style="{
-            display: 'inline-block',
-            width: '16px',
-            height: '16px',
-            borderRadius: '50%',
-            backgroundColor: '#d3d3d3',
-            color: '#fff',
-            textAlign: 'center',
-            lineHeight: '16px',
-            fontSize: '12px',
+            color: icon.split('$$')[1],
+            fontSize: '14px',
           }"
-          v-else
-        >{{ ciTypeName ? ciTypeName[0].toUpperCase() : 'i' }}</span
-        >
-        <span :style="{ marginLeft: '5px' }">{{ this.title }}</span>
-      </span>
-      <a-icon :style="{ fontSize: '10px' }" v-if="childLength && !isLeaf" :type="switchIcon"></a-icon>
-    </div>
-  </a-dropdown>
+          :type="icon.split('$$')[0]"
+        />
+        <span class="relation-views-node-icon" v-else>{{ icon ? icon[0].toUpperCase() : 'i' }}</span>
+      </template>
+      <span class="relation-views-node-title">{{ this.title }}</span>
+    </span>
+    <a-dropdown>
+      <a-menu slot="overlay" @click="({ key: menuKey }) => this.onContextMenuClick(this.treeKey, menuKey)">
+        <template v-if="showBatchLevel === null">
+          <a-menu-item
+            v-for="item in menuList"
+            :key="item.id"
+          ><a-icon type="plus-circle" />{{ $t('new') }} {{ item.alias }}</a-menu-item
+          >
+          <a-menu-item
+            v-if="showDelete"
+            key="delete"
+          ><ops-icon type="icon-xianxing-delete" />{{ $t('cmdb.serviceTree.deleteNode') }}</a-menu-item
+          >
+          <a-menu-divider />
+          <a-menu-item key="grant"><a-icon type="user-add" />{{ $t('grant') }}</a-menu-item>
+          <a-menu-item key="revoke"><a-icon type="user-delete" />{{ $t('revoke') }}</a-menu-item>
+          <a-menu-item key="view"><a-icon type="eye" />{{ $t('cmdb.serviceTree.view') }}</a-menu-item>
+          <a-menu-divider />
+          <a-menu-item
+            key="batch"
+          ><ops-icon type="icon-xianxing-copy" />{{ $t('cmdb.serviceTree.batch') }}</a-menu-item
+          >
+        </template>
+        <template v-else>
+          <a-menu-item
+            :disabled="!batchTreeKey || !batchTreeKey.length"
+            key="batchGrant"
+          ><a-icon type="user-add" />{{ $t('grant') }}</a-menu-item
+          >
+          <a-menu-item
+            :disabled="!batchTreeKey || !batchTreeKey.length"
+            key="batchRevoke"
+          ><a-icon type="user-delete" />{{ $t('revoke') }}</a-menu-item
+          >
+          <a-menu-divider />
+          <template v-if="showBatchLevel > 0">
+            <a-menu-item
+              :disabled="!batchTreeKey || !batchTreeKey.length"
+              key="batchDelete"
+            ><ops-icon type="icon-xianxing-delete" />{{ $t('delete') }}</a-menu-item
+            >
+            <a-menu-divider />
+          </template>
+          <a-menu-item key="batchCancel"><a-icon type="close-circle" />{{ $t('cancel') }}</a-menu-item>
+        </template>
+      </a-menu>
+      <a-icon class="relation-views-node-operation" type="ellipsis" />
+    </a-dropdown>
+    <a-icon :style="{ fontSize: '10px' }" v-if="childLength && !isLeaf" :type="switchIcon"></a-icon>
+  </div>
 </template>
 
 <script>
@@ -88,7 +106,15 @@ export default {
       type: Boolean,
       default: () => false,
     },
-    ciTypes: {
+    ciTypeIcons: {
+      type: Object,
+      default: () => {},
+    },
+    showBatchLevel: {
+      type: Number,
+      default: null,
+    },
+    batchTreeKey: {
       type: Array,
       default: () => [],
     },
@@ -141,14 +167,10 @@ export default {
     icon() {
       const _split = this.treeKey.split('@^@')
       const currentNodeTypeId = _split[_split.length - 1].split('%')[1]
-      const _find = this.ciTypes.find((type) => type.id === Number(currentNodeTypeId))
-      return _find?.icon || null
+      return this.ciTypeIcons[Number(currentNodeTypeId)] ?? null
     },
-    ciTypeName() {
-      const _split = this.treeKey.split('@^@')
-      const currentNodeTypeId = _split[_split.length - 1].split('%')[1]
-      const _find = this.ciTypes.find((type) => type.id === Number(currentNodeTypeId))
-      return _find?.name || ''
+    showCheckbox() {
+      return this.showBatchLevel === this.treeKey.split('@^@').filter((item) => !!item).length - 1
     },
   },
   methods: {
@@ -159,8 +181,73 @@ export default {
       this.$emit('onNodeClick', this.treeKey)
       this.switchIcon = this.switchIcon === 'down' ? 'up' : 'down'
     },
+    clickCheckbox() {
+      this.$emit('clickCheckbox', this.treeKey)
+    },
   },
 }
 </script>
 
-<style></style>
+<style lang="less" scoped>
+.relation-views-node {
+  width: 100%;
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+  > span {
+    display: flex;
+    overflow: hidden;
+    align-items: center;
+    width: 100%;
+    .relation-views-node-icon {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: #d3d3d3;
+      color: #fff;
+      text-align: center;
+      line-height: 16px;
+      font-size: 12px;
+    }
+    .relation-views-node-title {
+      padding-left: 5px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      width: calc(100% - 16px);
+    }
+  }
+  .relation-views-node-operation {
+    display: none;
+    margin-right: 5px;
+  }
+}
+.relation-views-node-checkbox,
+.relation-views-node-moveright {
+  > span {
+    .relation-views-node-checkbox {
+      margin-right: 10px;
+    }
+    .relation-views-node-title {
+      width: calc(100% - 42px);
+    }
+  }
+}
+</style>
+
+<style lang="less">
+.relation-views-left .ant-tree-node-content-wrapper:hover {
+  .relation-views-node-operation {
+    display: inline-block;
+  }
+}
+.relation-views-left {
+  ul:has(.relation-views-node-checkbox) > li > ul {
+    margin-left: 26px;
+  }
+  ul:has(.relation-views-node-checkbox) {
+    margin-left: 0 !important;
+  }
+}
+</style>

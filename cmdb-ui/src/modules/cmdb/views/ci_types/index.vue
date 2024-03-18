@@ -270,7 +270,17 @@
             </div>
           </el-select>
         </a-form-item>
-        <a-form-item :label="$t('cmdb.ciType.uniqueKey')">
+        <a-form-item>
+          <template slot="label">
+            <a-tooltip :title="$t('cmdb.ciType.uniqueKeyTips')">
+              <a-icon
+                style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
+                type="question-circle"
+                theme="filled"
+              />
+            </a-tooltip>
+            <span>{{ $t('cmdb.ciType.uniqueKey') }}</span>
+          </template>
           <el-select
             size="small"
             filterable

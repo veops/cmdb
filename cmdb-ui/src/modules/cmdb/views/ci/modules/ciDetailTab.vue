@@ -27,7 +27,7 @@
       </a-tab-pane>
       <a-tab-pane key="tab_2">
         <span slot="tab"><a-icon type="branches" />{{ $t('cmdb.relation') }}</span>
-        <div :style="{ height: '100%', padding: '24px' }">
+        <div :style="{ height: '100%', padding: '24px', overflow: 'auto' }">
           <CiDetailRelation ref="ciDetailRelation" :ciId="ciId" :typeId="typeId" :ci="ci" />
         </div>
       </a-tab-pane>

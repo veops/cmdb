@@ -223,3 +223,10 @@ export function deleteCiTypeInheritance(data) {
     data
   })
 }
+
+export function getCITypeIcons() {
+  return axios({
+    url: '/v0.1/ci_types/icons',
+    method: 'GET',
+  })
+}

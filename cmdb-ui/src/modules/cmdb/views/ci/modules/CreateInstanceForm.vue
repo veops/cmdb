@@ -220,6 +220,7 @@ export default {
         if (otherGroupAttr.length) {
           _attributesByGroup.push({ id: -1, name: this.$t('other'), attributes: otherGroupAttr })
         }
+        console.log(otherGroupAttr, _attributesByGroup)
         this.attributesByGroup = _attributesByGroup
       })
     },
@@ -296,6 +297,38 @@ export default {
           _this.$emit('reload', { ci_id: res.ci_id })
         })
       }
+
+      // this.form.validateFields((err, values) => {
+      //   if (err) {
+      //     _this.$message.error('字段填写不符合要求！')
+      //     return
+      //   }
+      //   Object.keys(values).forEach((k) => {
+      //     if (Object.prototype.toString.call(values[k]) === '[object Object]' && values[k]) {
+      //       values[k] = values[k].format('YYYY-MM-DD HH:mm:ss')
+      //     }
+      //     const _tempFind = this.attributeList.find((item) => item.name === k)
+      //     if (_tempFind.value_type === '6') {
+      //       values[k] = values[k] ? JSON.parse(values[k]) : undefined
+      //     }
+      //   })
+
+      //   if (_this.action === 'update') {
+      //     _this.$emit('submit', values)
+      //     return
+      //   }
+      //   values.ci_type = _this.typeId
+      //   console.log(values)
+      //   this.attributesByGroup.forEach((group) => {
+      //     this.$refs[`createInstanceFormByGroup_${group.id}`][0].getData()
+      //   })
+      //   console.log(1111)
+      //   // addCI(values).then((res) => {
+      //   //   _this.$message.success('新增成功!')
+      //   //   _this.visible = false
+      //   //   _this.$emit('reload')
+      //   // })
+      // })
     },
     handleClose() {
       this.visible = false
@@ -363,6 +396,9 @@ export default {
         this.batchUpdateLists.splice(_idx, 1)
       }
     },
+    // filterOption(input, option) {
+    //   return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
+    // },
     handleFocusInput(e, attr) {
       console.log(attr)
       const _tempFind = this.attributeList.find((item) => item.name === attr.name)

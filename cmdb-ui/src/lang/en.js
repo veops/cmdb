@@ -25,6 +25,7 @@ export default {
     deleting: 'Deleting',
     deletingTip: 'Deleting, total of {total}, {successNum} succeeded, {errorNum} failed',
     grant: 'Grant',
+    revoke: 'Revoke',
     login_at: 'Login At',
     logout_at: 'Logout At',
     createSuccess: 'Create Success',

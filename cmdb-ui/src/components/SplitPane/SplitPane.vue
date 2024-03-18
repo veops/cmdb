@@ -113,6 +113,10 @@ export default {
   },
 
   mounted() {
+    const paneLengthPixel = localStorage.getItem(`${this.appName}-paneLengthPixel`)
+    if (paneLengthPixel) {
+      this.$emit('update:paneLengthPixel', Number(paneLengthPixel))
+    }
     this.parentContainer = document.querySelector(`.${this.appName}`)
     if (this.isExpanded) {
       document.querySelector(`.${this.appName} .pane-two`).style.display = 'none'
