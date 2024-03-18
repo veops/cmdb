@@ -52,7 +52,7 @@
               :style="{ color: fuzzySearch ? '#2f54eb' : '', cursor: 'pointer' }"
               @click="emitRefresh"
             />
-            <a-tooltip slot="prefix" placement="bottom" :overlayStyle="{ maxWidth: '550px' }">
+            <a-tooltip slot="prefix" placement="bottom" :overlayStyle="{ maxWidth: '550px', whiteSpace: 'pre-line' }">
               <template slot="title">
                 {{ $t('cmdb.components.ciSearchTips') }}
               </template>
@@ -97,6 +97,7 @@
         </a-space>
       </div>
       <a-space>
+        <slot name="extraContent"></slot>
         <a-button @click="reset" size="small">{{ $t('reset') }}</a-button>
         <a-tooltip :title="$t('cmdb.components.attributeDesc')" v-if="type === 'relationView'">
           <a
@@ -191,6 +192,9 @@ export default {
     }
   },
   methods: {
+    // toggleAdvanced() {
+    //   this.advanced = !this.advanced
+    // },
     getCITypeGroups() {
       getCITypeGroups({ need_other: true }).then((res) => {
         this.ciTypeGroup = res

@@ -11,24 +11,24 @@
   >
     <div :style="{ width: '100%' }" id="add-table-modal">
       <a-spin :spinning="loading">
-        <!-- <a-input
-          v-model="expression"
-          class="ci-searchform-expression"
-          :style="{ width, marginBottom: '10px' }"
-          :placeholder="placeholder"
-          @focus="
-            () => {
-              isFocusExpression = true
-            }
-          "
-        /> -->
         <SearchForm
           ref="searchForm"
           :typeId="addTypeId"
           :preferenceAttrList="preferenceAttrList"
           @refresh="handleSearch"
-        />
-        <!-- <a @click="handleSearch"><a-icon type="search"/></a> -->
+        >
+          <a-button
+            @click="
+              () => {
+                $refs.createInstanceForm.handleOpen(true, 'create')
+              }
+            "
+            slot="extraContent"
+            type="primary"
+            size="small"
+          >新增</a-button
+          >
+        </SearchForm>
         <vxe-table
           ref="xTable"
           row-id="_id"
@@ -77,19 +77,31 @@
         />
       </a-spin>
     </div>
+    <CreateInstanceForm
+      ref="createInstanceForm"
+      :typeIdFromRelation="addTypeId"
+      @reload="
+        () => {
+          currentPage = 1
+          getTableData(true)
+        }
+      "
+    />
   </a-modal>
 </template>
 
 <script>
-/* eslint-disable no-useless-escape */
 import { searchCI } from '@/modules/cmdb/api/ci'
 import { getSubscribeAttributes } from '@/modules/cmdb/api/preference'
 import { batchUpdateCIRelationChildren, batchUpdateCIRelationParents } from '@/modules/cmdb/api/CIRelation'
 import { getCITableColumns } from '../../../utils/helper'
 import SearchForm from '../../../components/searchForm/SearchForm.vue'
+import CreateInstanceForm from '../../ci/modules/CreateInstanceForm.vue'
+import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
+
 export default {
   name: 'AddTableModal',
-  components: { SearchForm },
+  components: { SearchForm, CreateInstanceForm },
   data() {
     return {
       visible: false,
@@ -106,6 +118,7 @@ export default {
       type: 'children',
       preferenceAttrList: [],
       ancestor_ids: undefined,
+      attrList1: [],
     }
   },
   computed: {
@@ -119,6 +132,13 @@ export default {
       return this.isFocusExpression ? '500px' : '100px'
     },
   },
+  provide() {
+    return {
+      attrList: () => {
+        return this.attrList
+      },
+    }
+  },
   watch: {},
   methods: {
     async openModal(ciObj, ciId, addTypeId, type, ancestor_ids = undefined) {
@@ -131,6 +151,9 @@ export default {
       this.ancestor_ids = ancestor_ids
       await getSubscribeAttributes(addTypeId).then((res) => {
         this.preferenceAttrList = res.attributes // 已经订阅的全部列
+      })
+      getCITypeAttributesById(addTypeId).then((res) => {
+        this.attrList = res.attributes
       })
       this.getTableData(true)
     },
@@ -207,6 +230,9 @@ export default {
           this.handleClose()
           this.$emit('reload')
         }, 500)
+      } else {
+        this.handleClose()
+        this.$emit('reload')
       }
     },
     handleSearch() {

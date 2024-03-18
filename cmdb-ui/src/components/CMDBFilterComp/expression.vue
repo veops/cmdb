@@ -20,6 +20,7 @@
               }
             }
           "
+          :disabled="disabled"
         >
         </treeselect>
       </div>
@@ -42,6 +43,7 @@
         "
         appendToBody
         :zIndex="1050"
+        :disabled="disabled"
       >
         <div
           :title="node.label"
@@ -80,6 +82,7 @@
         @select="(value) => handleChangeExp(value, item, index)"
         appendToBody
         :zIndex="1050"
+        :disabled="disabled"
       >
       </treeselect>
       <treeselect
@@ -103,6 +106,7 @@
         "
         appendToBody
         :zIndex="1050"
+        :disabled="disabled"
       >
         <div
           :title="node.label"
@@ -125,6 +129,7 @@
           v-model="item.min"
           :style="{ width: '78px' }"
           :placeholder="$t('min')"
+          :disabled="disabled"
         />
         ~
         <a-input
@@ -133,6 +138,7 @@
           v-model="item.max"
           :style="{ width: '78px' }"
           :placeholder="$t('max')"
+          :disabled="disabled"
         />
       </a-input-group>
       <a-input-group size="small" compact v-else-if="item.exp === 'compare'" :style="{ width: '175px' }">
@@ -155,6 +161,7 @@
           "
           appendToBody
           :zIndex="1050"
+          :disabled="disabled"
         >
         </treeselect>
         <a-input class="ops-input" v-model="item.value" size="small" style="width: 113px" />
@@ -166,19 +173,22 @@
         :placeholder="item.exp === 'in' || item.exp === '~in' ? $t('cmdbFilterComp.split', { separator: ';' }) : ''"
         class="ops-input"
         :style="{ width: '175px' }"
+        :disabled="disabled"
       ></a-input>
       <div v-else :style="{ width: '175px' }"></div>
-      <a-tooltip :title="$t('copy')">
-        <a class="operation" @click="handleCopyRule(item)"><ops-icon type="icon-xianxing-copy"/></a>
-      </a-tooltip>
-      <a-tooltip :title="$t('delete')">
-        <a class="operation" @click="handleDeleteRule(item)"><ops-icon type="icon-xianxing-delete"/></a>
-      </a-tooltip>
-      <a-tooltip :title="$t('cmdbFilterComp.addHere')" v-if="needAddHere">
-        <a class="operation" @click="handleAddRuleAt(item)"><a-icon type="plus-circle"/></a>
-      </a-tooltip>
+      <template v-if="!disabled">
+        <a-tooltip :title="$t('copy')">
+          <a class="operation" @click="handleCopyRule(item)"><ops-icon type="icon-xianxing-copy"/></a>
+        </a-tooltip>
+        <a-tooltip :title="$t('delete')">
+          <a class="operation" @click="handleDeleteRule(item)"><ops-icon type="icon-xianxing-delete"/></a>
+        </a-tooltip>
+        <a-tooltip :title="$t('cmdbFilterComp.addHere')" v-if="needAddHere">
+          <a class="operation" @click="handleAddRuleAt(item)"><a-icon type="plus-circle"/></a>
+        </a-tooltip>
+      </template>
     </a-space>
-    <div class="table-filter-add">
+    <div class="table-filter-add" v-if="!disabled">
       <a @click="handleAddRule">+ {{ $t('new') }}</a>
     </div>
   </div>
@@ -208,6 +218,10 @@ export default {
       default: () => [],
     },
     needAddHere: {
+      type: Boolean,
+      default: false,
+    },
+    disabled: {
       type: Boolean,
       default: false,
     },
