@@ -309,7 +309,7 @@ class CMDBCounterCache(object):
 
         s = RelSearch([i[0] for i in type_id_names], level, other_filer or '')
         try:
-            stats = s.statistics(type_ids)
+            stats = s.statistics(type_ids, need_filter=False)
         except SearchError as e:
             current_app.logger.error(e)
             return

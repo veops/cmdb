@@ -67,6 +67,7 @@ class Search(object):
 
         self.valid_type_names = []
         self.type2filter_perms = dict()
+        self.is_app_admin = is_app_admin('cmdb') or current_user.username == "worker"
 
     @staticmethod
     def _operator_proc(key):
@@ -135,7 +136,7 @@ class Search(object):
                             if not self.raw_ci_ids:
                                 self.ci_ids = list(self.type2filter_perms[ci_type.id]['id_filter'].keys())
 
-                    if self.use_id_filter and not self.ci_ids and not is_app_admin('cmdb'):
+                    if self.use_id_filter and not self.ci_ids and not self.is_app_admin:
                         self.raw_ci_ids = [0]
                 else:
                     raise SearchError(ErrFormat.no_permission.format(ci_type.alias, PermEnum.READ))
@@ -407,11 +408,10 @@ class Search(object):
             else:
                 result.append(q)
 
-        _is_app_admin = is_app_admin('cmdb') or current_user.username == "worker"
         if self.parent_node_perm_passed:
             self.__get_type2filter_perms()
             self.valid_type_names = "ALL"
-        elif result and not has_type and not _is_app_admin:
+        elif result and not has_type and not self.is_app_admin:
             type_q = self.__get_types_has_read()
             if id_query:
                 ci = CIManager.get_by_id(id_query)
@@ -420,7 +420,7 @@ class Search(object):
                 result.insert(0, "_type:{}".format(ci.type_id))
             else:
                 result.insert(0, type_q)
-        elif _is_app_admin:
+        elif self.is_app_admin:
             self.valid_type_names = "ALL"
         else:
             self.__get_types_has_read()
