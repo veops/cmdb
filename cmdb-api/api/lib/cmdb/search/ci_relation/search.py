@@ -66,6 +66,8 @@ class Search(object):
                         self.has_m2m = True
 
         self.type2filter_perms = None
+        
+        self.is_app_admin = is_app_admin('cmdb') or current_user.username == "worker"
 
     def _get_ids(self, ids):
 
@@ -133,7 +135,7 @@ class Search(object):
             self.root_parent_path.append(str(self.root_id))
         self.root_parent_path = set(self.root_parent_path)
 
-        if is_app_admin('cmdb'):
+        if self.is_app_admin:
             self.type2filter_perms = {}
             return True
 
@@ -222,14 +224,13 @@ class Search(object):
 
         return {}, None
 
-    def statistics(self, type_ids):
+    def statistics(self, type_ids, need_filter=True):
         self.level = int(self.level)
 
         acl = ACLManager('cmdb')
-        _is_app_admin = is_app_admin('cmdb') or current_user.username == "worker"
 
         type2filter_perms = dict()
-        if not _is_app_admin:
+        if not self.is_app_admin:
             res2 = acl.get_resources(ResourceTypeEnum.CI_FILTER)
             if res2:
                 type2filter_perms = CIFilterPermsCRUD().get_by_ids(list(map(int, [i['name'] for i in res2])))
@@ -240,17 +241,20 @@ class Search(object):
         for lv in range(1, self.level + 1):
             level2ids[lv] = []
 
-            id_filter_limit, ci_filter_limit = None, None
-            if len(self.descendant_ids) >= lv and type2filter_perms.get(self.descendant_ids[lv - 1]):
-                id_filter_limit, _ = self._get_ci_filter(type2filter_perms[self.descendant_ids[lv - 1]])
-            elif type_ids and self.level == lv:
-                ci_filters = [type2filter_perms[type_id] for type_id in type_ids if type_id in type2filter_perms]
-                if ci_filters:
-                    id_filter_limit, ci_filter_limit = self._get_ci_filter({}, ci_filters=ci_filters)
+            if need_filter:
+                id_filter_limit, ci_filter_limit = None, None
+                if len(self.descendant_ids or []) >= lv and type2filter_perms.get(self.descendant_ids[lv - 1]):
+                    id_filter_limit, _ = self._get_ci_filter(type2filter_perms[self.descendant_ids[lv - 1]])
+                elif type_ids and self.level == lv:
+                    ci_filters = [type2filter_perms[type_id] for type_id in type_ids if type_id in type2filter_perms]
+                    if ci_filters:
+                        id_filter_limit, ci_filter_limit = self._get_ci_filter({}, ci_filters=ci_filters)
+                    else:
+                        id_filter_limit = {}
                 else:
                     id_filter_limit = {}
             else:
-                id_filter_limit = {}
+                id_filter_limit, ci_filter_limit = {}, {}
 
             if lv == 1:
                 if not self.has_m2m:
