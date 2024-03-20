@@ -1,5 +1,20 @@
 @border-radius-base: 2px; // 组件/浮层圆角
-@primary-color: #2f54eb; // 全局主色
+@border-radius-box: 4px; // big box radius
+
+@primary-color: #2f54eb; // 全局主色 六大品牌色
+@primary-color_2: #7f97fa;
+@primary-color_3: #d3e3fd;
+@primary-color_4: #e1efff;
+@primary-color_5: #f0f5ff;
+@primary-color_6: #f9fbff;
+
+@text-color_1: #1d2119;
+@text-color_2: #4e5969;
+@text-color_3: #86909c;
+@text-color_4: #a5a9bc;
+
+@border-color: #e4e7ed;
+
 @scrollbar-color: rgba(47, 122, 235, 0.2);
 
 @layout-header-background: #fff;
@@ -28,7 +43,7 @@
   color_3: #d2e2ff;
 }
 
-.ops_display_wrapper(@backgroundColor:#custom_colors()[color_2]) {
+.ops_display_wrapper(@backgroundColor:@primary-color_5) {
   cursor: pointer;
   padding: 5px 8px;
   background-color: @backgroundColor;
@@ -42,10 +57,10 @@
   cursor: pointer;
   padding: 5px 10px;
   &:hover {
-    background-color: #custom_colors[color_2];
+    background-color: @primary-color_5;
   }
 }
 .ops_popover_item_selected() {
-  background-color: #custom_colors[color_2];
-  color: #custom_colors[color_1];
+  background-color: @primary-color_5;
+  color: @primary-color;
 }
