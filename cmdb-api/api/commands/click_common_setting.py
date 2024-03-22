@@ -224,7 +224,7 @@ def common_check_new_columns():
         column_type = new_column.type.compile(engine.dialect)
         default_value = new_column.default.arg if new_column.default else None
 
-        sql = "ALTER TABLE " + target_table_name + " ADD COLUMN " + new_column.name + " " + column_type
+        sql = "ALTER TABLE " + target_table_name + " ADD COLUMN " + f"`{new_column.name}`" + " " + column_type
         if new_column.comment:
             sql += f" comment '{new_column.comment}'"
 
