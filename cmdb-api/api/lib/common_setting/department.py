@@ -470,8 +470,58 @@ class EditDepartmentInACL(object):
 
         return f"edit_department_name_in_acl, rid: {d_rid}, success"
 
+    @classmethod
+    def remove_from_old_department_role(cls, e_list, acl):
+        result = []
+        for employee in e_list:
+            employee_acl_rid = employee.get('e_acl_rid')
+            if employee_acl_rid == 0:
+                result.append(f"employee_acl_rid == 0")
+                continue
+            cls.remove_single_employee_from_old_department(acl, employee, result)
+
     @staticmethod
-    def edit_employee_department_in_acl(e_list: list, new_d_id: int, op_uid: int):
+    def remove_single_employee_from_old_department(acl, employee, result):
+        from api.models.acl import Role
+        old_department = DepartmentCRUD.get_department_by_id(employee.get('department_id'), False)
+        if not old_department:
+            return False
+
+        old_role = Role.get_by(first=True, name=old_department.department_name, app_id=None)
+        old_d_rid_in_acl = old_role.get('id') if old_role else 0
+        if old_d_rid_in_acl == 0:
+            return False
+
+        d_acl_rid = old_department.acl_rid if old_d_rid_in_acl == old_department.acl_rid else old_d_rid_in_acl
+        payload = {
+            'app_id': 'acl',
+            'parent_id': d_acl_rid,
+        }
+        try:
+            acl.remove_user_from_role(employee.get('e_acl_rid'), payload)
+            current_app.logger.info(f"remove {employee.get('e_acl_rid')} from {d_acl_rid}")
+        except Exception as e:
+            result.append(
+                f"remove_user_from_role employee_acl_rid: {employee.get('e_acl_rid')}, parent_id: {d_acl_rid}, err: {e}")
+
+        return True
+
+    @staticmethod
+    def add_employee_to_new_department(acl, employee_acl_rid, new_department_acl_rid, result):
+        payload = {
+            'app_id': 'acl',
+            'child_ids': [employee_acl_rid],
+        }
+        try:
+            acl.add_user_to_role(new_department_acl_rid, payload)
+            current_app.logger.info(f"add {employee_acl_rid} to {new_department_acl_rid}")
+        except Exception as e:
+            result.append(
+                f"add_user_to_role employee_acl_rid: {employee_acl_rid}, parent_id: {new_department_acl_rid}, \
+                             err: {e}")
+
+    @classmethod
+    def edit_employee_department_in_acl(cls, e_list: list, new_d_id: int, op_uid: int):
         result = []
         new_department = DepartmentCRUD.get_department_by_id(new_d_id, False)
         if not new_department:
@@ -481,7 +531,11 @@ class EditDepartmentInACL(object):
         from api.models.acl import Role
         new_role = Role.get_by(first=True, name=new_department.department_name, app_id=None)
         new_d_rid_in_acl = new_role.get('id') if new_role else 0
+        acl = ACLManager('acl', str(op_uid))
+
         if new_d_rid_in_acl == 0:
+            # only remove from old department role
+            cls.remove_from_old_department_role(e_list, acl)
             return
 
         if new_d_rid_in_acl != new_department.acl_rid:
@@ -491,43 +545,15 @@ class EditDepartmentInACL(object):
         new_department_acl_rid = new_department.acl_rid if new_d_rid_in_acl == new_department.acl_rid else \
             new_d_rid_in_acl
 
-        acl = ACLManager('acl', str(op_uid))
         for employee in e_list:
-            old_department = DepartmentCRUD.get_department_by_id(employee.get('department_id'), False)
-            if not old_department:
-                continue
             employee_acl_rid = employee.get('e_acl_rid')
             if employee_acl_rid == 0:
                 result.append(f"employee_acl_rid == 0")
                 continue
 
-            old_role = Role.get_by(first=True, name=old_department.department_name, app_id=None)
-            old_d_rid_in_acl = old_role.get('id') if old_role else 0
-            if old_d_rid_in_acl == 0:
-                return
-            if old_d_rid_in_acl != old_department.acl_rid:
-                old_department.update(
-                    acl_rid=old_d_rid_in_acl
-                )
-            d_acl_rid = old_department.acl_rid if old_d_rid_in_acl == old_department.acl_rid else old_d_rid_in_acl
-            payload = {
-                'app_id': 'acl',
-                'parent_id': d_acl_rid,
-            }
-            try:
-                acl.remove_user_from_role(employee_acl_rid, payload)
-            except Exception as e:
-                result.append(
-                    f"remove_user_from_role employee_acl_rid: {employee_acl_rid}, parent_id: {d_acl_rid}, err: {e}")
+            cls.remove_single_employee_from_old_department(acl, employee, result)
 
-            payload = {
-                'app_id': 'acl',
-                'child_ids': [employee_acl_rid],
-            }
-            try:
-                acl.add_user_to_role(new_department_acl_rid, payload)
-            except Exception as e:
-                result.append(
-                    f"add_user_to_role employee_acl_rid: {employee_acl_rid}, parent_id: {d_acl_rid}, err: {e}")
+            # 在新部门中添加员工
+            cls.add_employee_to_new_department(acl, employee_acl_rid, new_department_acl_rid, result)
 
         return result
