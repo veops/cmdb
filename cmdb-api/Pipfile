@@ -66,6 +66,7 @@ hvac = "==2.0.0"
 colorama = ">=0.4.6"
 pycryptodomex = ">=3.19.0"
 lz4 = ">=4.3.2"
+python-magic = "==0.4.27"
 
 [dev-packages]
 # Testing
