@@ -17,7 +17,7 @@ def search(query=None,
            count=1,
            sort=None,
            excludes=None,
-           use_id_filter=True):
+           use_id_filter=False):
     if current_app.config.get("USE_ES"):
         s = SearchFromES(query, fl, facet, page, ret_key, count, sort)
     else:
