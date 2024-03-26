@@ -238,11 +238,13 @@ class PreferenceManager(object):
             views = _views
 
         view2cr_ids = dict()
+        name2view = dict()
         result = dict()
         name2id = list()
         for view in views:
             view2cr_ids.setdefault(view['name'], []).extend(view['cr_ids'])
             name2id.append([view['name'], view['id']])
+            name2view[view['name']] = view
 
         id2type = dict()
         for view_name in view2cr_ids:
@@ -286,6 +288,8 @@ class PreferenceManager(object):
                                      topo_flatten=topo_flatten,
                                      level2constraint=level2constraint,
                                      leaf=leaf,
+                                     option=name2view[view_name]['option'],
+                                     is_public=name2view[view_name]['is_public'],
                                      leaf2show_types=leaf2show_types,
                                      node2show_types=node2show_types,
                                      show_types=[CITypeCache.get(j).to_dict()
@@ -297,14 +301,18 @@ class PreferenceManager(object):
         return result, id2type, sorted(name2id, key=lambda x: x[1])
 
     @classmethod
-    def create_or_update_relation_view(cls, name, cr_ids, is_public=False):
+    def create_or_update_relation_view(cls, name=None, cr_ids=None, _id=None, is_public=False, option=None):
         if not cr_ids:
             return abort(400, ErrFormat.preference_relation_view_node_required)
 
-        existed = PreferenceRelationView.get_by(name=name, to_dict=False, first=True)
+        if _id is None:
+            existed = PreferenceRelationView.get_by(name=name, to_dict=False, first=True)
+        else:
+            existed = PreferenceRelationView.get_by_id(_id)
         current_app.logger.debug(existed)
         if existed is None:
-            PreferenceRelationView.create(name=name, cr_ids=cr_ids, uid=current_user.uid, is_public=is_public)
+            PreferenceRelationView.create(name=name, cr_ids=cr_ids, uid=current_user.uid,
+                                          is_public=is_public, option=option)
 
             if current_app.config.get("USE_ACL"):
                 ACLManager().add_resource(name, ResourceTypeEnum.RELATION_VIEW)
@@ -312,6 +320,11 @@ class PreferenceManager(object):
                                                     RoleEnum.CMDB_READ_ALL,
                                                     ResourceTypeEnum.RELATION_VIEW,
                                                     permissions=[PermEnum.READ])
+        else:
+            if existed.name != name and current_app.config.get("USE_ACL"):
+                ACLManager().update_resource(existed.name, name, ResourceTypeEnum.RELATION_VIEW)
+
+            existed.update(name=name, cr_ids=cr_ids, is_public=is_public, option=option)
 
         return cls.get_relation_view()
 

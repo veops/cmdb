@@ -460,6 +460,7 @@ class PreferenceRelationView(Model):
     name = db.Column(db.String(64), index=True, nullable=False)
     cr_ids = db.Column(db.JSON)  # [{parent_id: x, child_id: y}]
     is_public = db.Column(db.Boolean, default=False)
+    option = db.Column(db.JSON)
 
 
 class PreferenceSearchOption(Model):
