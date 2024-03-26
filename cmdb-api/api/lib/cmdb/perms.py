@@ -258,7 +258,7 @@ class CIFilterPermsCRUD(DBMixin):
 
             request_id_filter = {}
             for _id, v in (kwargs.get('id_filter') or {}).items():
-                key = ",".join([v['parent_path']] if v.get('parent_path') else [] + [str(_id)])
+                key = ",".join(([v['parent_path']] if v.get('parent_path') else []) + [str(_id)])
                 request_id_filter[key] = v['name']
 
             resource = None
