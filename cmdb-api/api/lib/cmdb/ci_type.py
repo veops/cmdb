@@ -1188,6 +1188,8 @@ class CITypeTemplateManager(object):
             i.pop('choice_web_hook', None)
             i.pop('choice_other', None)
             i.pop('order', None)
+            i.pop('inherited', None)
+            i.pop('inherited_from', None)
             choice_value = i.pop('choice_value', None)
             if not choice_value:
                 i['is_choice'] = False
