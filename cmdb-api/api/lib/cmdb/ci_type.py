@@ -699,6 +699,10 @@ class CITypeAttributeManager(object):
             to_group = CITypeAttributeGroup.get_by(type_id=type_id, name=to_group_name, first=True, to_dict=False)
             to_group_id = to_group and to_group.id
 
+            if not to_group_id and CITypeInheritance.get_by(child_id=type_id, to_dict=False):
+                to_group = CITypeAttributeGroup.create(type_id=type_id, name=to_group_name)
+                to_group_id = to_group and to_group.id
+
         if from_group_id != to_group_id:
             if from_group_id is not None:
                 CITypeAttributeGroupManager.delete_item(from_group_id, attr_id)
