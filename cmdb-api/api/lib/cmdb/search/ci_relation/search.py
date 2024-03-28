@@ -66,7 +66,7 @@ class Search(object):
                         self.has_m2m = True
 
         self.type2filter_perms = None
-        
+
         self.is_app_admin = is_app_admin('cmdb') or current_user.username == "worker"
 
     def _get_ids(self, ids):
@@ -320,7 +320,8 @@ class Search(object):
                         else:
                             __tmp = []
 
-                        _tmp[idx] = [j for i in __tmp for j in i]
+                        if __tmp:
+                            _tmp[idx] = [j for i in __tmp for j in i]
                     else:
                         _tmp[idx] = []
                         level2ids[lv].append([])
