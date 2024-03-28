@@ -88,10 +88,12 @@ export default {
 </script>
 
 <style lang="less">
+@import '~@/style/static.less';
+
 .acl-secret-key {
   background-color: #fff;
   padding: 24px;
-  border-radius: 15px;
+  border-radius: @border-radius-box;
   height: calc(100% + 24px);
   .ant-input[disabled] {
     color: rgba(0, 0, 0, 0.5);

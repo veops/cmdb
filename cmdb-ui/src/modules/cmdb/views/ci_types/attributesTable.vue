@@ -12,14 +12,28 @@
         </a-form-item>
       </span>
     </a-modal>
-    <div class="ci-types-attributes" :style="{ maxHeight: `${windowHeight - 104}px` }">
+    <div class="ci-types-attributes" :style="{ height: `${windowHeight - 130}px` }">
       <a-space style="margin-bottom: 10px">
-        <a-button type="primary" @click="handleAddGroup" size="small" class="ops-button-primary" icon="plus">{{
-          $t('cmdb.ciType.group')
-        }}</a-button>
-        <a-button type="primary" @click="handleOpenUniqueConstraint" size="small" class="ops-button-primary">{{
-          $t('cmdb.ciType.uniqueConstraint')
-        }}</a-button>
+        <a-button @click="handleAddGroup" size="small" icon="plus">{{ $t('cmdb.ciType.group') }}</a-button>
+        <a-button @click="handleOpenUniqueConstraint" size="small">{{ $t('cmdb.ciType.uniqueConstraint') }}</a-button>
+        <div>
+          <a-tooltip
+            v-for="type in Object.keys(valueTypeMap)"
+            :key="type"
+            :title="$t('cmdb.ciType.filterTips', { name: valueTypeMap[type] })"
+          >
+            <span
+              @click="handleFilterType(type)"
+              :class="{
+                'ci-types-attributes-filter': true,
+                'ci-types-attributes-filter-selected': attrTypeFilter.includes(type),
+              }"
+            >
+              <ops-icon :type="getPropertyIcon({ value_type: type })" />
+              {{ valueTypeMap[type] }}
+            </span>
+          </a-tooltip>
+        </div>
       </a-space>
       <div :key="CITypeGroup.id" v-for="(CITypeGroup, index) in CITypeGroups">
         <div>
@@ -29,13 +43,6 @@
           >
             <span style="font-weight:700">{{ CITypeGroup.name }}</span>
             <span style="color: #c3cdd7;margin:0 5px;">({{ CITypeGroup.attributes.length }})</span>
-
-            <a v-if="!CITypeGroup.inherited" @click="handleEditGroupName(index, CITypeGroup)">
-              <a-icon type="edit" />
-            </a>
-            <a v-else :style="{ cursor: 'not-allowed', color: 'gray' }">
-              <a-icon type="edit" />
-            </a>
           </div>
           <template v-else>
             <span>
@@ -64,21 +71,24 @@
                 @click="handleMoveGroup(index, index + 1)"
               /></a>
             </a-tooltip>
-
-            <a-tooltip>
-              <template slot="title">{{ $t('cmdb.ciType.selectAttribute') }}</template>
-              <a><a-icon type="plus" @click="handleAddGroupAttr(index)"/></a>
-            </a-tooltip>
-            <a-tooltip>
-              <template slot="title">{{ $t('cmdb.ciType.deleteGroup') }}</template>
-              <a
-                :style="{ color: CITypeGroup.inherited ? 'gray' : 'red' }"
-                :disabled="CITypeGroup.inherited"
-              ><a-icon
-                type="delete"
-                @click="handleDeleteGroup(CITypeGroup)"
-              /></a>
-            </a-tooltip>
+            <a-dropdown>
+              <a><ops-icon type="veops-more"/></a>
+              <a-menu slot="overlay">
+                <a-menu-item @click="handleAddGroupAttr(index)">
+                  <template slot="title"></template>
+                  <a-icon type="plus" />
+                  {{ $t('cmdb.ciType.addAttribute') }}
+                </a-menu-item>
+                <a-menu-item @click="handleEditGroupName(index, CITypeGroup)" :disabled="CITypeGroup.inherited">
+                  <a-icon type="edit" />
+                  {{ $t('cmdb.ciType.editGroupName') }}
+                </a-menu-item>
+                <a-menu-item @click="handleDeleteGroup(CITypeGroup)" :disabled="CITypeGroup.inherited">
+                  <a-icon type="delete" />
+                  {{ $t('cmdb.ciType.deleteGroup') }}
+                </a-menu-item>
+              </a-menu>
+            </a-dropdown>
           </a-space>
         </div>
         <div class="ci-types-attributes-wrapper">
@@ -98,7 +108,9 @@
             handle=".handle"
           >
             <AttributeCard
-              v-for="item in CITypeGroup.attributes"
+              v-for="item in CITypeGroup.attributes.filter(
+                (attr) => !attrTypeFilter.length || (attrTypeFilter.length && attrTypeFilter.includes(attr.value_type))
+              )"
               :key="item.id"
               @edit="handleEditProperty(item)"
               :property="item"
@@ -106,6 +118,7 @@
               :CITypeId="CITypeId"
               :attributes="attributes"
             />
+            <AttributeCard isAdd @add="handleAddGroupAttr(index)" />
             <i></i> <i></i> <i></i> <i></i> <i></i>
           </draggable>
         </div>
@@ -114,10 +127,11 @@
         <div :style="{ height: '32px', lineHeight: '32px', display: 'inline-block', fontSize: '14px' }">
           <span style="font-weight:700">{{ $t('other') }}</span>
           <span style="color: #c3cdd7;margin-left:5px;">({{ otherGroupAttributes.length }})</span>
+          <span style="color: #c3cdd7;margin-left:5px;font-size:10px;">{{ $t('cmdb.ciType.otherGroupTips') }}</span>
         </div>
         <div style="float: right">
           <a-tooltip>
-            <template slot="title">{{ $t('cmdb.ciType.selectAttribute') }}</template>
+            <template slot="title">{{ $t('cmdb.ciType.addAttribute') }}</template>
             <a @click="handleAddGroupAttr(undefined)"><a-icon type="plus"/></a>
           </a-tooltip>
         </div>
@@ -138,7 +152,9 @@
           handle=".handle"
         >
           <AttributeCard
-            v-for="item in otherGroupAttributes"
+            v-for="item in otherGroupAttributes.filter(
+              (attr) => !attrTypeFilter.length || (attrTypeFilter.length && attrTypeFilter.includes(attr.value_type))
+            )"
             :key="item.id"
             @edit="handleEditProperty(item)"
             :property="item"
@@ -146,6 +162,7 @@
             :CITypeId="CITypeId"
             :attributes="attributes"
           />
+          <AttributeCard isAdd @add="handleAddGroupAttr(undefined)" />
           <i></i> <i></i> <i></i> <i></i> <i></i>
         </draggable>
       </div>
@@ -185,6 +202,8 @@ import AttributeCard from './attributeCard.vue'
 import AttributeEditForm from './attributeEditForm.vue'
 import NewCiTypeAttrModal from './newCiTypeAttrModal.vue'
 import UniqueConstraint from './uniqueConstraint.vue'
+import { valueTypeMap } from '../../utils/const'
+import { getPropertyIcon } from '../../utils/helper'
 
 export default {
   name: 'AttributesTable',
@@ -214,6 +233,8 @@ export default {
       otherGroupAttributes: [],
       addGroupModal: false,
       newGroupName: '',
+      attrTypeFilter: [],
+      unique: '',
     }
   },
   computed: {
@@ -223,9 +244,17 @@ export default {
     windowHeight() {
       return this.$store.state.windowHeight
     },
+    valueTypeMap() {
+      return valueTypeMap()
+    },
   },
   provide() {
-    return { refresh: this.getCITypeGroupData }
+    return {
+      refresh: this.getCITypeGroupData,
+      unique: () => {
+        return this.unique
+      },
+    }
   },
   beforeCreate() {},
   created() {},
@@ -233,6 +262,7 @@ export default {
     this.getCITypeGroupData()
   },
   methods: {
+    getPropertyIcon,
     handleEditProperty(property) {
       this.$refs.attributeEditForm.handleEdit(property, this.attributes)
     },
@@ -260,6 +290,7 @@ export default {
         group.editable = false
         group.originOrder = group.order
         group.originName = group.name
+        // group.attributes = group.attributes.sort((a, b) => a.order - b.order)
       })
 
       this.otherGroupAttributes = this.attributes
@@ -282,6 +313,7 @@ export default {
       Promise.all(promises).then((values) => {
         console.log(values)
         this.attributes = values[0].attributes
+        this.unique = values[0].unique
         const temp = {}
         this.attributes.forEach((attr) => {
           temp[attr.id] = attr
@@ -387,6 +419,7 @@ export default {
               group.attributes = group.attributes.filter((x) => !values.checkedAttributes.includes(x.id))
             }
           })
+          // this.CITypeGroups = this.CITypeGroups
 
           this.otherGroupAttributes.forEach((attributes) => {
             if (values.groupId === null) {
@@ -523,20 +556,40 @@ export default {
     handleOpenUniqueConstraint() {
       this.$refs.uniqueConstraint.open(this.attributes)
     },
+    handleFilterType(type) {
+      const _idx = this.attrTypeFilter.findIndex((item) => item === type)
+      if (_idx > -1) {
+        this.attrTypeFilter.splice(_idx, 1)
+      } else {
+        this.attrTypeFilter.push(type)
+      }
+    },
   },
-  watch: {},
 }
 </script>
 
 <style lang="less" scoped>
+@import '~@/style/static.less';
+
 .fold {
   width: calc(100% - 216px);
   display: inline-block;
 }
 
 .ci-types-attributes {
-  padding: 16px 24px 24px;
+  padding: 0 20px;
   overflow-y: auto;
+  .ci-types-attributes-filter {
+    color: @text-color_4;
+    cursor: pointer;
+    padding: 3px 8px;
+    white-space: nowrap;
+    margin-right: 5px;
+  }
+  .ci-types-attributes-filter:hover,
+  .ci-types-attributes-filter-selected {
+    background-color: @primary-color_5;
+  }
   .property-item-empty {
     color: #40a9ff;
     width: calc(100% - 20px);

@@ -15,21 +15,35 @@
         </span>
       </span>
       <a-space>
-        <a-button size="small" icon="plus" type="primary" @click="$refs.create.handleOpen(true, 'create')">
+        <a-button
+          type="primary"
+          class="ops-button-ghost"
+          ghost
+          @click="$refs.create.handleOpen(true, 'create')"
+        ><ops-icon type="veops-increase" />
           {{ $t('create') }}
         </a-button>
-        <a-button size="small" icon="user-add" type="primary" ghost @click="handlePerm">{{ $t('grant') }}</a-button>
-        <a-popconfirm
-          :title="
-            $t('cmdb.preference.confirmcancelSub2', { name: `${this.$route.meta.title || this.$route.meta.name}` })
-          "
-          :ok-text="$t('confirm')"
-          :cancel-text="$t('cancel')"
-          @confirm="unsubscribe"
-          placement="bottomRight"
-        >
-          <a-button size="small" icon="star" type="primary" ghost>{{ $t('cmdb.preference.cancelSub') }}</a-button>
-        </a-popconfirm>
+        <EditAttrsPopover :typeId="typeId" class="operation-icon" @refresh="refreshAfterEditAttrs">
+          <a-button
+            type="primary"
+            ghost
+            class="ops-button-ghost"
+          ><ops-icon type="veops-configuration_table" />{{ $t('cmdb.configTable') }}</a-button
+          >
+        </EditAttrsPopover>
+        <a-dropdown v-model="visible">
+          <a-button type="primary" ghost class="ops-button-ghost">···</a-button>
+          <a-menu slot="overlay" @click="handleMenuClick">
+            <a-menu-item @click="handlePerm" key="grant">
+              <a-icon type="user-add" />
+              {{ $t('grant') }}
+            </a-menu-item>
+            <a-menu-item key="cancelSub" @click="unsubscribe">
+              <a-icon type="star" />
+              {{ $t('cmdb.preference.cancelSub') }}
+            </a-menu-item>
+          </a-menu>
+        </a-dropdown>
       </a-space>
     </div>
     <div class="cmdb-ci-main">
@@ -86,7 +100,6 @@
           :scroll-y="{ enabled: true, gt: 20 }"
           :scroll-x="{ enabled: true, gt: 0 }"
           class="ops-unstripe-table"
-          :style="{ margin: '0 -12px' }"
           :custom-config="{ storage: true }"
         >
           <vxe-column align="center" type="checkbox" width="60" :fixed="isCheckboxFixed ? 'left' : ''"></vxe-column>
@@ -219,11 +232,9 @@
               </template>
             </template>
           </vxe-table-column>
-          <vxe-column align="left" field="operate" fixed="right" width="120">
+          <vxe-column align="left" field="operate" fixed="right" width="80">
             <template #header>
               <span>{{ $t('operation') }}</span>
-              <EditAttrsPopover :typeId="typeId" class="operation-icon" @refresh="refreshAfterEditAttrs" />
-              <!-- <a-icon class="operation-icon" type="control" /> -->
             </template>
             <template #default="{ row }">
               <a-space>
@@ -342,7 +353,7 @@ export default {
       // if (this.selectedRowKeys && this.selectedRowKeys.length) {
       //   return this.windowHeight - 246
       // }
-      return this.windowHeight - 210
+      return this.windowHeight - 240
     },
   },
   data() {
@@ -377,6 +388,7 @@ export default {
       passwordValue: {},
       lastEditCiId: null,
       isContinueCloseEdit: true,
+      visible: false,
     }
   },
   watch: {
@@ -916,15 +928,24 @@ export default {
         })
     },
     unsubscribe(ciType, type = 'all') {
-      const promises = [subscribeCIType(this.typeId, ''), subscribeTreeView(this.typeId, '')]
-      Promise.all(promises).then(() => {
-        const lastTypeId = window.localStorage.getItem('ops_ci_typeid') || undefined
-        if (Number(ciType) === Number(lastTypeId)) {
-          localStorage.setItem('ops_ci_typeid', '')
-        }
-        this.$message.success(this.$t('cmdb.preference.cancelSubSuccess'))
-        this.resetRoute()
-        this.$router.push('/cmdb/preference')
+      const that = this
+      this.$confirm({
+        title: that.$t('warning'),
+        content: that.$t('cmdb.preference.confirmcancelSub2', {
+          name: `${that.$route.meta.title || that.$route.meta.name}`,
+        }),
+        onOk() {
+          const promises = [subscribeCIType(that.typeId, ''), subscribeTreeView(that.typeId, '')]
+          Promise.all(promises).then(() => {
+            const lastTypeId = window.localStorage.getItem('ops_ci_typeid') || undefined
+            if (Number(ciType) === Number(lastTypeId)) {
+              localStorage.setItem('ops_ci_typeid', '')
+            }
+            that.$message.success(that.$t('cmdb.preference.cancelSubSuccess'))
+            that.resetRoute()
+            that.$router.push('/cmdb/preference')
+          })
+        },
       })
     },
     resetRoute() {
@@ -957,6 +978,11 @@ export default {
         }
       })
     },
+    handleMenuClick(e) {
+      if (e.key === 'grant') {
+        this.visible = false
+      }
+    },
   },
 }
 </script>
@@ -968,11 +994,11 @@ export default {
 <style lang="less" scoped>
 @import '~@/style/static.less';
 .cmdb-ci {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: @border-radius-box;
+  height: calc(100vh - 64px);
+  overflow: auto;
   margin-bottom: -24px;
-  .cmdb-ci-main {
-    background-color: #fff;
-    border-radius: 15px;
-    padding: 12px;
-  }
 }
 </style>

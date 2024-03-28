@@ -4,34 +4,15 @@
       <a-alert :message="$t('cmdb.tree.tips1')" banner></a-alert>
     </div>
     <div class="tree-views" v-else>
-      <div class="cmdb-views-header">
-        <span>
-          <span class="cmdb-views-header-title">{{ currentCiTypeName }}</span>
-          <span
-            @click="
-              () => {
-                $refs.metadataDrawer.open(typeId)
-              }
-            "
-            class="cmdb-views-header-metadata"
-          ><a-icon type="info-circle" />
-            {{ $t('cmdb.components.attributeDesc') }}
-          </span>
-        </span>
-        <a-button size="small" icon="plus" type="primary" @click="$refs.create.handleOpen(true, 'create')">{{
-          $t('create')
-        }}</a-button>
-      </div>
       <SplitPane
         :min="200"
         :max="500"
         :paneLengthPixel.sync="paneLengthPixel"
         appName="cmdb-tree-views"
-        triggerColor="#F0F5FF"
         :triggerLength="18"
       >
         <template #one>
-          <div class="tree-views-left" :style="{ height: `${windowHeight - 115}px` }">
+          <div class="tree-views-left" :style="{ height: `${windowHeight - 64}px` }">
             <draggable
               v-model="subscribeTreeViewCiTypes"
               :animation="300"
@@ -89,12 +70,12 @@
                   :expandedKeys="expandedKeys"
                   v-if="Number(ciType.type_id) === Number(typeId)"
                 >
-                  <a-icon slot="switcherIcon" type="down" />
-                  <template #title="{ key: treeKey, title, isLeaf }">
+                  <template #title="{ key: treeKey, title, isLeaf, childLength}">
                     <TreeViewsNode
                       :title="title"
                       :treeKey="treeKey"
                       :levels="levels"
+                      :childLength="childLength"
                       :isLeaf="isLeaf"
                       @onNodeClick="onNodeClick"
                     />
@@ -105,16 +86,49 @@
           </div>
         </template>
         <template #two>
-          <div class="tree-views-right" id="tree-views-right" :style="{ height: `${windowHeight - 115}px` }">
+          <div class="tree-views-right" id="tree-views-right" :style="{ height: `${windowHeight - 64}px` }">
+            <div class="cmdb-views-header">
+              <span>
+                <span class="cmdb-views-header-title">{{ currentCiTypeName }}</span>
+                <span
+                  @click="
+                    () => {
+                      $refs.metadataDrawer.open(typeId)
+                    }
+                  "
+                  class="cmdb-views-header-metadata"
+                ><a-icon type="info-circle" />
+                  {{ $t('cmdb.ci.attributeDesc') }}
+                </span>
+              </span>
+              <a-space>
+                <a-button
+                  type="primary"
+                  class="ops-button-ghost"
+                  ghost
+                  @click="$refs.create.handleOpen(true, 'create')"
+                ><ops-icon type="veops-increase" />
+                  {{ $t('create') }}
+                </a-button>
+                <EditAttrsPopover :typeId="Number(typeId)" class="operation-icon" @refresh="refreshAfterEditAttrs">
+                  <a-button
+                    type="primary"
+                    ghost
+                    class="ops-button-ghost"
+                  ><ops-icon type="veops-configuration_table" />{{ $t('cmdb.configTable') }}</a-button
+                  >
+                </EditAttrsPopover>
+              </a-space>
+            </div>
             <SearchForm
               ref="search"
               @refresh="reloadData"
               :preferenceAttrList="currentAttrList"
               :typeId="Number(typeId)"
               @copyExpression="copyExpression"
-            />
-            <div class="tree-views-right-bar">
+            >
               <PreferenceSearch
+                v-show="!selectedRowKeys.length"
                 ref="preferenceSearch"
                 @getQAndSort="getQAndSort"
                 @setParamsFromPreferenceSearch="setParamsFromPreferenceSearch"
@@ -129,7 +143,7 @@
                   <span>{{ $t('cmdb.ci.selectRows', { rows: selectedRowKeys.length }) }}</span>
                 </template>
               </div>
-            </div>
+            </SearchForm>
             <ops-table
               :id="`cmdb-tree-${typeId}`"
               border
@@ -150,7 +164,7 @@
               :cell-style="getCellStyle"
               :scroll-y="{ enabled: true, gt: 20 }"
               :scroll-x="{ enabled: true, gt: 0 }"
-              :height="`${windowHeight - 252}px`"
+              :height="`${windowHeight - 240}px`"
               @checkbox-change="onSelectChange"
               @checkbox-all="onSelectChange"
               @checkbox-range-end="onSelectRangeEnd"
@@ -159,7 +173,6 @@
               @edit-actived="handleEditActived"
               :edit-config="{ trigger: 'dblclick', mode: 'row', showIcon: false }"
               class="ops-unstripe-table"
-              :style="{ margin: '0 -12px' }"
               :custom-config="{ storage: true }"
             >
               <vxe-column align="center" type="checkbox" width="60" :fixed="isCheckboxFixed ? 'left' : ''"></vxe-column>
@@ -294,7 +307,6 @@
               <vxe-table-column align="left" field="operate" fixed="right" width="120">
                 <template #header>
                   <span>{{ $t('operation') }}</span>
-                  <EditAttrsPopover :typeId="Number(typeId)" class="operation-icon" @refresh="refreshAfterEditAttrs" />
                 </template>
                 <template #default="{ row }">
                   <a-space>
@@ -693,7 +705,8 @@ export default {
       console.log('facet', facet)
       const _treeData = Object.values(facet)[0].map((item) => {
         return {
-          title: `${item[0]} (${item[1]})`,
+          title: item[0],
+          childLength: item[1],
           key: this.treeKeys.join(this.keySplit) + this.keySplit + item[0],
           isLeaf: this.levels.length - 1 === this.treeKeys.length,
         }
@@ -1228,12 +1241,8 @@ export default {
   .tree-views-left {
     float: left;
     position: relative;
-    background-color: #fff;
     overflow: hidden;
     width: 100%;
-    padding: 12px;
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
     &:hover {
       overflow: auto;
     }
@@ -1249,7 +1258,7 @@ export default {
       border-radius: 2px;
       position: relative;
       &:hover {
-        background-color: #f0f5ff;
+        background-color: @primary-color_3;
         > .actions,
         > .move-icon {
           display: inherit;
@@ -1270,9 +1279,7 @@ export default {
         width: 20px;
         height: 20px;
         border-radius: 2px;
-        box-shadow: 0px 1px 2px rgba(47, 84, 235, 0.2);
         margin-right: 6px;
-        background-color: #fff;
       }
       .tree-views-left-header-name {
         flex: 1;
@@ -1281,6 +1288,7 @@ export default {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        color: @text-color_1;
       }
       .actions {
         display: none;
@@ -1298,7 +1306,7 @@ export default {
       }
     }
     .custom-header-selected {
-      background-color: #d3e3fd !important;
+      background-color: @primary-color_3 !important;
     }
     .ant-tree li {
       padding: 2px 0;
@@ -1317,23 +1325,18 @@ export default {
         padding: 0 6px;
       }
     }
+    .ant-tree li .ant-tree-node-content-wrapper.ant-tree-node-selected {
+      background-color: @primary-color_3;
+    }
   }
   .tree-views-right {
     background-color: #fff;
     display: flex;
     flex-direction: column;
-    padding: 12px;
+    padding: 20px;
     overflow: auto;
     width: 100%;
-    border-radius: 15px;
-    .tree-views-right-bar {
-      display: inline-flex;
-      flex-direction: row;
-      justify-content: flex-start;
-      align-items: center;
-      margin-bottom: 10px;
-      height: 36px;
-    }
+    border-radius: @border-radius-box;
   }
 }
 </style>

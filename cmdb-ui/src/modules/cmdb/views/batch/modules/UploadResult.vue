@@ -1,10 +1,11 @@
 <template>
   <div class="cmdb-batch-upload-result" v-if="visible">
-    <h3 class="cmdb-batch-upload-result-title">{{ $t('cmdb.batch.uploadResult') }}</h3>
+    <p class="cmdb-batch-upload-label">5. {{ $t('cmdb.batch.uploadResult') }}</p>
     <div class="cmdb-batch-upload-result-content">
       <h4>
-        {{ $t('cmdb.batch.total') }}&nbsp;<span style="color: blue">{{ total }}</span> {{ $t('cmdb.batch.successItems') }}
-        <span style="color: lightgreen">{{ success }}</span> {{ $t('cmdb.batch.failedItems') }} <span style="color: red">{{ errorNum }} </span>{{ $t('cmdb.batch.items') }}
+        {{ $t('cmdb.batch.total') }}&nbsp;<span style="color: blue">{{ total }}</span>
+        {{ $t('cmdb.batch.successItems') }} <span style="color: lightgreen">{{ success }}</span>
+        {{ $t('cmdb.batch.failedItems') }} <span style="color: red">{{ errorNum }} </span>{{ $t('cmdb.batch.items') }}
       </h4>
       <div>
         <span>{{ $t('cmdb.batch.errorTips') }}: </span>
@@ -39,7 +40,7 @@ export default {
       default: false,
     },
   },
-  data: function() {
+  data() {
     return {
       visible: false,
       complete: 0,
@@ -52,6 +53,13 @@ export default {
   computed: {
     total() {
       return this.upLoadData.length || 0
+    },
+  },
+  watch: {
+    ciType: {
+      handler() {
+        this.visible = false
+      },
     },
   },
   methods: {
@@ -96,10 +104,6 @@ export default {
 @import '~@/style/static.less';
 
 .cmdb-batch-upload-result {
-  .cmdb-batch-upload-result-title {
-    border-left: 4px solid #custom_colors[color_1];
-    padding-left: 10px;
-  }
   .cmdb-batch-upload-result-content {
     background-color: rgba(240, 245, 255, 0.35);
     border-radius: 5px;

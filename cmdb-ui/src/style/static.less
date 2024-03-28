@@ -1,41 +1,48 @@
 @border-radius-base: 2px; // 组件/浮层圆角
 @border-radius-box: 4px; // big box radius
 
-@primary-color: #2f54eb; // 全局主色 六大品牌色
+// primary color
+@primary-color: #2f54eb;
 @primary-color_2: #7f97fa;
-@primary-color_3: #d3e3fd;
+@primary-color_3: #ebeff8;
 @primary-color_4: #e1efff;
 @primary-color_5: #f0f5ff;
 @primary-color_6: #f9fbff;
+@primary-color_7: #f7f8fa;
+@primary-color_8: #b1c9ff;
 
-@text-color_1: #1d2119;
+// Neutral color
+@text-color_1: #1d2129;
 @text-color_2: #4e5969;
 @text-color_3: #86909c;
 @text-color_4: #a5a9bc;
+@text-color_5: #cacdd9;
+@text-color_6: #e4e7ed;
+@text-color_7: #f0f1f5;
 
-@border-color: #e4e7ed;
+@func-color_1: #fd4c6a;
+@func-color_2: #ff7d00;
+@func-color_3: #00b42a;
+@func-color_4: #fad337;
+
+@border-color-base: @text-color_6; // 边框色
 
 @scrollbar-color: rgba(47, 122, 235, 0.2);
 
+@layout-content-background: @primary-color_7;
 @layout-header-background: #fff;
 @layout-header-height: 40px;
 @layout-header-icon-height: 34px;
 @layout-header-font-color: #020000;
-@layout-header-font-selected-color: #2857bc;
+@layout-header-font-selected-color: @primary-color;
 
-//dark
-@layout-background-color: #182132;
-@layout-background-color-light: #262f40;
-//light
-@layout-background-light-color: #fafafa;
-@layout-background-light-color-light: #f0f0f0;
-
-@layout-sidebar-color: #1d264c; //bg
-@layout-sidebar-sub-color: #000c37; //bg
-@layout-sidebar-selected-color: #3e4a71; //selected bg
-@layout-sidebar-arrow-color: rgba(255, 255, 255, 0.6);
-@layout-sidebar-font-color: #fff;
-@layout-sidebar-disabled-font-color: rgba(255, 255, 255, 0.6);
+@layout-sidebar-color: #ffffff; //bg
+@layout-sidebar-sub-color: @primary-color_7; //bg
+@layout-sidebar-selected-color: @primary-color_5; //selected bg
+@layout-sidebar-arrow-color: @text-color_4;
+@layout-sidebar-font-color: @text-color_2;
+@layout-sidebar-selected-font-color: @primary-color;
+@layout-sidebar-disabled-font-color: @text-color_4;
 
 #custom_colors() {
   color_1: #2f54eb; //primary color
@@ -47,7 +54,7 @@
   cursor: pointer;
   padding: 5px 8px;
   background-color: @backgroundColor;
-  border-radius: 5px;
+  border-radius: @border-radius-box;
   height: 30px;
   color: rgba(0, 0, 0, 0.6);
   white-space: nowrap;
@@ -57,10 +64,10 @@
   cursor: pointer;
   padding: 5px 10px;
   &:hover {
-    background-color: @primary-color_5;
+    background-color: @primary-color_3;
   }
 }
 .ops_popover_item_selected() {
-  background-color: @primary-color_5;
+  background-color: @primary-color_3;
   color: @primary-color;
 }

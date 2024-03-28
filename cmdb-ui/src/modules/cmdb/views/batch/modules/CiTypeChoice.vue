@@ -1,11 +1,11 @@
 <template>
-  <a-space>
-    <span>{{ $t('cmdb.ciType.ciType') }}: </span>
+  <div>
+    <p class="cmdb-batch-upload-label"><span>*</span>1. {{ $t('cmdb.batch.selectCIType') }}</p>
     <a-select
       showSearch
       :placeholder="$t('cmdb.batch.selectCITypeTips')"
       @change="selectCiType"
-      :style="{ width: '300px' }"
+      :style="{ width: '50%', marginBottom: '1em' }"
       class="ops-select"
       :filter-option="filterOption"
       v-model="selectNum"
@@ -14,13 +14,16 @@
         ciType.alias
       }}</a-select-option>
     </a-select>
+    <p class="cmdb-batch-upload-label">&nbsp;&nbsp;2. {{ $t('cmdb.batch.downloadTemplate') }}</p>
     <a-button
+      :style="{ marginBottom: '1em' }"
       @click="openModal"
       :disabled="!selectNum"
       type="primary"
-      class="ops-button-primary"
+      ghost
+      class="ops-button-ghost"
       icon="download"
-    >{{ $t('cmdb.batch.downloadTemplate') }}</a-button
+    >{{ $t('cmdb.batch.clickDownload') }}</a-button
     >
     <a-modal
       :bodyStyle="{ paddingTop: 0 }"
@@ -88,7 +91,7 @@
         </a-row>
       </template>
     </a-modal>
-  </a-space>
+  </div>
 </template>
 
 <script>
@@ -107,7 +110,7 @@ export default {
     return {
       ciTypeList: [],
       ciTypeName: '',
-      selectNum: null,
+      selectNum: undefined,
       selectCiTypeAttrList: [],
       visible: false,
       checkedAttrs: [],
@@ -238,6 +241,7 @@ export default {
       for (let row = 2; row < 5000; row++) {
         Object.keys(choice_value_obj).forEach((key) => {
           const formulae = `"${choice_value_obj[key].choice_value.map((value) => value[0]).join(',')}"`
+          console.log(formulae)
           if (formulae.length <= 255) {
             ws.getCell(row, choice_value_obj[key].columnIdx).dataValidation = {
               type: 'list',

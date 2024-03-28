@@ -1,6 +1,7 @@
 const cmdb_zh = {
     relation: '关系',
     attribute: '属性',
+    configTable: '配置表格',
     menu: {
         views: '视图',
         config: '配置',
@@ -35,7 +36,7 @@ const cmdb_zh = {
         attributeLibray: '属性库',
         addCITypeInGroup: '在该组中新增CI模型',
         addCIType: '新增CI模型',
-        editGroupName: '编辑组名称',
+        editGroupName: '重命名分组',
         deleteGroup: '删除该组',
         CITypeName: '模型名(英文)',
         English: '英文',
@@ -182,7 +183,11 @@ const cmdb_zh = {
         inheritType: '继承模型',
         inheritTypePlaceholder: '请选择继承模型（多选）',
         inheritFrom: '属性继承自{name}',
-        groupInheritFrom: '请至{name}进行修改'
+        groupInheritFrom: '请至{name}进行修改',
+        downloadType: '下载模型',
+        deleteCIType: '删除模型',
+        otherGroupTips: '其他分组属性不可排序',
+        filterTips: '点击可仅查看{name}属性'
     },
     components: {
         unselectAttributes: '未选属性',
@@ -220,7 +225,7 @@ const cmdb_zh = {
         beforeChange: '变更前',
         afterChange: '变更后',
         noticeContentTips: '请输入通知内容',
-        saveQuery: '保存筛选条件',
+        saveQuery: '保存条件',
         pleaseSearch: '请查找',
         conditionFilter: '条件过滤',
         attributeDesc: '属性说明',
@@ -245,9 +250,10 @@ const cmdb_zh = {
         unselectCIType: '尚未选择模板类型',
         pleaseUploadFile: '请上传文件',
         batchUploadCanceled: '批量上传已取消',
-        selectCITypeTips: '请选择模板类型',
+        selectCIType: '选择模型',
+        selectCITypeTips: '请选择模型后下载模板',
         downloadTemplate: '下载模板',
-        drawTips: '点击或拖拽文件至此上传！',
+        clickDownload: '点击下载',
         supportFileTypes: '支持文件类型：xls，xlsx',
         uploadResult: '上传结果',
         total: '共',
@@ -257,6 +263,16 @@ const cmdb_zh = {
         errorTips: '错误信息',
         requestFailedTips: '请求出现错误，请稍后再试',
         requestSuccessTips: '批量上传已完成',
+        uploadFile: '文件上传',
+        drawTips1: '请先<span class="cmdb-batch-upload-tips">选择模型</span>，<span class="cmdb-batch-upload-tips">下载模板</span>后',
+        drawTips2: '<span class="cmdb-batch-upload-tips">点击或拖拽文件</span>至此上传',
+        dataPreview: '数据预览并导入',
+        tips1: '温馨提示：',
+        tips2: '1. 点击下载模板，用户可以自定义模板文件的表头，包括模型属性、模型关联',
+        // eslint-disable-next-line no-template-curly-in-string
+        tips3: '2. 模板文件中红色为模型关系，如$产品.产品名(${模型名}.{属性名})这一列就可建立物理机和产品之间的关系',
+        tips4: '3. 下载模板excel文件中会将属性的预定义值置为下拉选项，请注意，受excel本身的限制，单个下拉框限制了最多255个字符，如果超过255个字符，我们不会设置该属性的下拉选项',
+        tips5: '4. 在使用excel模板时，请确保单个文件不超过5000行',
     },
     preference: {
         mySub: '我的订阅',
@@ -274,6 +290,7 @@ const cmdb_zh = {
         monthsAgo: '月前',
         yearsAgo: '年前',
         just: '刚刚',
+        searchPlaceholder: '请搜索模型',
     },
     custom_dashboard: {
         charts: '图表',
@@ -314,13 +331,23 @@ const cmdb_zh = {
     },
     preference_relation: {
         newServiceTree: '新增服务树',
+        editServiceTree: '编辑服务树',
         serviceTreeName: '服务树名',
+        serviceTreeNamePlaceholder: '请输入服务树名',
         public: '公开',
         saveLayout: '保存布局',
         childNodesNotFound: '不存在子节点，不能形成业务关系，请重新选择！',
         tips1: '不能与当前选中节点形成视图，请重新选择！',
         tips2: '请输入新增服务树名！',
         tips3: '请选择至少两个节点！',
+        tips4: '叶子节点/树节点信息至少展示一个',
+        tips5: '选中树目录节点，服务树子节点展示成Table',
+        showLeafNode: '树的子节点展示成Table',
+        showTreeNode: '展示树节点信息',
+        sort: '顺序',
+        sort1: '树子节点信息在前',
+        sort2: '树节点信息在前'
+
     },
     history: {
         ciChange: 'CI变更',
@@ -443,7 +470,7 @@ const cmdb_zh = {
         disk: '硬盘',
     },
     ci: {
-        attributeDesc: '属性说明',
+        attributeDesc: '查看属性配置',
         selectRows: '选取：{rows} 项',
         addRelation: '添加关系',
         all: '全部',
@@ -477,13 +504,15 @@ const cmdb_zh = {
         noPermission: '暂无权限'
     },
     serviceTree: {
-        deleteNode: '删除节点',
+        deleteNode: '移除 {name}',
         tips1: '例：q=os_version:centos&sort=os_version',
         tips2: '表达式搜索',
         alert1: '管理员 还未配置业务关系, 或者你无权限访问!',
         copyFailed: '复制失败',
         deleteRelationConfirm: '确认将选中的 {name} 从当前关系中删除？',
         batch: '批量操作',
+        editNode: '编辑节点',
+        editNodeName: '修改节点名',
         grantTitle: '授权（查看权限）',
         userPlaceholder: '请选择用户',
         rolePlaceholder: '请选择角色',

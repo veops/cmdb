@@ -241,7 +241,6 @@ export default {
                 const str = ` 【 ${key} : -> ${newVal} 】 `
                 item.changeDescription += str
               } else {
-                const str = ` 【 ${key} : ${oldVal} -> ${newVal} 】 `
                 item.changeDescription += ` 【 ${key} : ${oldVal} -> ${newVal} 】 `
               }
             }

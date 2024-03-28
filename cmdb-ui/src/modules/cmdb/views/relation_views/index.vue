@@ -1,61 +1,51 @@
 <template>
   <div :style="{ marginBottom: '-24px', overflow: 'hidden' }">
     <div v-if="relationViews.name2id && relationViews.name2id.length" class="relation-views-wrapper">
-      <div class="cmdb-views-header">
-        <span
-          class="cmdb-views-header-title"
-        >{{ $route.meta.name }}
-          <div
-            class="ops-list-batch-action"
-            :style="{ backgroundColor: '#c0ceeb' }"
-            v-if="showBatchLevel !== null && batchTreeKey && batchTreeKey.length"
-          >
-            <span
-              @click="
-                () => {
-                  $refs.grantModal.open('depart')
-                }
-              "
-            >{{ $t('grant') }}</span
-            >
-            <a-divider type="vertical" />
-            <span
-              @click="
-                () => {
-                  $refs.revokeModal.open()
-                }
-              "
-            >{{ $t('revoke') }}</span
-            >
-            <template v-if="showBatchLevel > 0">
-              <a-divider type="vertical" />
-              <span @click="batchDeleteCIRelationFromTree">{{ $t('delete') }}</span>
-            </template>
-            <a-divider type="vertical" />
-            <span
-              @click="
-                () => {
-                  showBatchLevel = null
-                  batchTreeKey = []
-                }
-              "
-            >{{ $t('cancel') }}</span
-            >
-            <span>{{ $t('selectRows', { rows: batchTreeKey.length }) }}</span>
-          </div>
-        </span>
-        <a-button size="small" icon="user-add" type="primary" ghost @click="handlePerm">{{ $t('grant') }}</a-button>
-      </div>
       <SplitPane
         :min="200"
         :max="500"
         :paneLengthPixel.sync="paneLengthPixel"
         :appName="`cmdb-relation-views-${viewId}`"
-        triggerColor="#F0F5FF"
         :triggerLength="18"
       >
         <template #one>
           <div class="relation-views-left" :style="{ height: `${windowHeight - 115}px` }">
+            <div class="relation-views-left-header" :title="$route.meta.name">{{ $route.meta.name }}</div>
+            <div
+              class="ops-list-batch-action"
+              :style="{ marginBottom: '10px' }"
+              v-if="showBatchLevel !== null && batchTreeKey && batchTreeKey.length"
+            >
+              <span
+                @click="
+                  () => {
+                    $refs.grantModal.open('depart')
+                  }
+                "
+              >{{ $t('grant') }}</span
+              >
+              <span
+                @click="
+                  () => {
+                    $refs.revokeModal.open()
+                  }
+                "
+              >{{ $t('revoke') }}</span
+              >
+              <template v-if="showBatchLevel > 0">
+                <span @click="batchDeleteCIRelationFromTree">{{ $t('delete') }}</span>
+              </template>
+              <span
+                @click="
+                  () => {
+                    showBatchLevel = null
+                    batchTreeKey = []
+                  }
+                "
+              >{{ $t('cancel') }}</span
+              >
+              <span>{{ $t('selectRows', { rows: batchTreeKey.length }) }}</span>
+            </div>
             <a-tree
               :selectedKeys="selectedKeys"
               :loadData="onLoadData"
@@ -65,9 +55,10 @@
               @drop="onDrop"
               :expandedKeys="expandedKeys"
             >
-              <template #title="{ key: treeKey, title, isLeaf }">
+              <template #title="{ key: treeKey, title,number, isLeaf }">
                 <ContextMenu
                   :title="title"
+                  :number="number"
                   :treeKey="treeKey"
                   :levels="levels"
                   :isLeaf="isLeaf"
@@ -79,51 +70,69 @@
                   :showBatchLevel="showBatchLevel"
                   :batchTreeKey="batchTreeKey"
                   @clickCheckbox="clickCheckbox"
+                  @updateTreeData="updateTreeData"
                 />
               </template>
             </a-tree>
           </div>
         </template>
         <template #two>
-          <div id="relation-views-right" class="relation-views-right" :style="{ height: `${windowHeight - 115}px` }">
-            <a-tabs :activeKey="String(currentTypeId[0])" type="card" @change="changeCIType" class="ops-tab">
-              <a-tab-pane v-for="item in showTypes" :key="`${item.id}`" :tab="item.alias || item.name"> </a-tab-pane>
+          <div id="relation-views-right" class="relation-views-right" :style="{ height: `${windowHeight - 64}px` }">
+            <a-tabs :activeKey="currentTypeId[0]" class="ops-tab" @change="changeCIType" size="small">
+              <a-tab-pane v-for="item in showTypes" :key="item.id" :tab="item.alias || item.name"> </a-tab-pane>
+              <a-space slot="tabBarExtraContent">
+                <a-button
+                  v-if="isLeaf"
+                  type="primary"
+                  class="ops-button-ghost"
+                  ghost
+                  @click="$refs.create.handleOpen(true, 'create')"
+                ><ops-icon type="veops-increase" />{{ $t('create') }}</a-button
+                >
+                <a-button icon="user-add" type="primary" ghost @click="handlePerm" class="ops-button-ghost">{{
+                  $t('grant')
+                }}</a-button>
+                <EditAttrsPopover
+                  :typeId="Number(currentTypeId[0])"
+                  class="operation-icon"
+                  @refresh="refreshAfterEditAttrs"
+                >
+                  <a-button
+                    type="primary"
+                    ghost
+                    class="ops-button-ghost"
+                  ><ops-icon type="veops-configuration_table" />{{ $t('cmdb.configTable') }}</a-button
+                  >
+                </EditAttrsPopover>
+              </a-space>
             </a-tabs>
             <SearchForm
               ref="search"
               @refresh="refreshTable"
               :preferenceAttrList="preferenceAttrList"
-              :isShowExpression="true"
+              :isShowExpression="!(isLeaf && isShowBatchIcon)"
               :typeId="Number(currentTypeId[0])"
               @copyExpression="copyExpression"
               type="relationView"
-              :style="{ padding: '0 12px', marginTop: '16px' }"
-            />
-            <div class="relation-views-right-bar">
-              <a-space>
-                <a-button v-if="isLeaf" type="primary" size="small" @click="$refs.create.handleOpen(true, 'create')">{{
-                  $t('create')
-                }}</a-button>
-
+            >
+              <PreferenceSearch
+                v-if="!(isLeaf && isShowBatchIcon)"
+                ref="preferenceSearch"
+                @getQAndSort="getQAndSort"
+                @setParamsFromPreferenceSearch="setParamsFromPreferenceSearch"
+              />
+              <a-space slot="extraContent">
                 <div class="ops-list-batch-action" v-if="isLeaf && isShowBatchIcon">
                   <template v-if="selectedRowKeys.length">
                     <span @click="$refs.create.handleOpen(true, 'update')">{{ $t('update') }}</span>
-                    <a-divider type="vertical" />
                     <span @click="openBatchDownload">{{ $t('download') }}</span>
-                    <a-divider type="vertical" />
                     <span @click="batchDelete">{{ $t('cmdb.ciType.deleteInstance') }}</span>
-                    <a-divider type="vertical" />
                     <span @click="batchDeleteCIRelation">{{ $t('cmdb.history.deleteRelation') }}</span>
                     <span>{{ $t('cmdb.ci.selectRows', { rows: selectedRowKeys.length }) }}</span>
                   </template>
                 </div>
-                <PreferenceSearch
-                  ref="preferenceSearch"
-                  @getQAndSort="getQAndSort"
-                  @setParamsFromPreferenceSearch="setParamsFromPreferenceSearch"
-                />
               </a-space>
-            </div>
+            </SearchForm>
             <vxe-table
               :id="`cmdb-relation-${viewId}-${currentTypeId}`"
               border
@@ -283,14 +292,9 @@
                   </template>
                 </template>
               </vxe-table-column>
-              <vxe-column align="left" field="operate" fixed="right" width="120">
+              <vxe-column align="left" field="operate" fixed="right" width="80">
                 <template #header>
                   <span>{{ $t('operation') }}</span>
-                  <EditAttrsPopover
-                    :typeId="Number(currentTypeId[0])"
-                    class="operation-icon"
-                    @refresh="refreshAfterEditAttrs"
-                  />
                 </template>
                 <template #default="{ row }">
                   <a-space>
@@ -482,6 +486,9 @@ export default {
       contextMenuKey: null,
       showBatchLevel: null,
       batchTreeKey: [],
+
+      statisticsObj: {},
+      viewOption: {},
     }
   },
 
@@ -490,7 +497,7 @@ export default {
       return this.$store.state.windowHeight
     },
     tableHeight() {
-      return this.windowHeight - 295
+      return this.windowHeight - 244
     },
     selectedKeys() {
       if (this.treeKeys.length <= 1) {
@@ -518,6 +525,15 @@ export default {
         .slice(0, this.treeKeys.length)
         .map((item) => item.split('%')[0])
         .join(',')
+    },
+    is_show_leaf_node() {
+      return this.viewOption?.is_show_leaf_node ?? true
+    },
+    is_show_tree_node() {
+      return this.viewOption?.is_show_tree_node ?? false
+    },
+    leaf_tree_sort() {
+      return this.viewOption?.sort ?? 1
     },
   },
   provide() {
@@ -638,6 +654,7 @@ export default {
       if (q && q[0] === ',') {
         q = q.slice(1)
       }
+
       if (this.treeKeys.length === 0) {
         // await this.judgeCITypes(q)
         if (!refreshType) {
@@ -684,8 +701,10 @@ export default {
             .map((item) => item.split('%')[0])
             .join(',')}`
         }
-        const typeId = parseInt(this.treeKeys[this.treeKeys.length - 1].split('%')[1])
 
+        await this.judgeCITypes()
+
+        const typeId = parseInt(this.treeKeys[this.treeKeys.length - 1].split('%')[1])
         let level = []
         if (!this.leaf.includes(typeId)) {
           let startIdx = 0
@@ -705,8 +724,8 @@ export default {
         } else {
           level = [1]
         }
-        q += `&level=${level.join(',')}`
-        await this.judgeCITypes(q)
+
+        q += `&level=${this.topo_flatten.includes(this.currentTypeId[0]) ? 1 : level.join(',')}`
         if (!refreshType) {
           this.loadNoRoot(this.treeKeys[this.treeKeys.length - 1], level)
         }
@@ -793,69 +812,106 @@ export default {
       this.selectedRowKeys = []
       this.currentTypeId = [typeId]
       this.loadColumns()
-      this.$nextTick(() => {
-        this.refreshTable()
-      })
+      // this.$nextTick(() => {
+      //   this.refreshTable()
+      // })
     },
 
-    async judgeCITypes(q) {
-      const showTypeIds = []
-      let _showTypes = []
+    async judgeCITypes() {
       let _showTypeIds = []
-
+      let _showTypes = []
       if (this.treeKeys.length) {
-        const typeId = parseInt(this.treeKeys[this.treeKeys.length - 1].split('%')[1])
-
-        _showTypes = this.node2ShowTypes[typeId + '']
-        _showTypes.forEach((item) => {
-          _showTypeIds.push(item.id)
-        })
-      } else {
-        _showTypeIds = JSON.parse(JSON.stringify(this.origShowTypeIds))
-        _showTypes = JSON.parse(JSON.stringify(this.origShowTypes))
-      }
-      const promises = _showTypeIds.map((typeId) => {
-        let _q = (`q=_type:${typeId},` + q).replace(/count=\d*/, 'count=1')
-        if (Object.values(this.level2constraint).includes('2')) {
-          _q = _q + `&has_m2m=1`
+        if (this.is_show_leaf_node) {
+          const typeId = parseInt(this.treeKeys[this.treeKeys.length - 1].split('%')[1])
+          _showTypeIds = _.cloneDeep(this.origShowTypeIds)
+          _showTypes = _.cloneDeep(this.node2ShowTypes[typeId])
         }
-        if (this.root_parent_path) {
-          _q = _q + `&root_parent_path=${this.root_parent_path}`
-        }
-        // if (this.treeKeys.length === 0) {
-        //   return searchCI2(_q).then((res) => {
-        //     if (res.numfound !== 0) {
-        //       showTypeIds.push(typeId)
-        //     }
-        //   })
-        // } else {
-        _q = _q + `&descendant_ids=${this.descendant_ids}`
-        return searchCIRelation(_q).then((res) => {
-          if (res.numfound !== 0) {
-            showTypeIds.push(typeId)
-          }
-        })
-        // }
-      })
-      await Promise.all(promises).then(async () => {
-        if (showTypeIds.length && showTypeIds.sort().join(',') !== this.showTypeIds.sort().join(',')) {
-          const showTypes = []
-          _showTypes.forEach((item) => {
-            if (showTypeIds.includes(item.id)) {
-              showTypes.push(item)
+        if (this.is_show_tree_node) {
+          const treeKeyTypeId = Number(this.treeKeys.slice(-1)[0].split('%')[1])
+          const _idx = this.topo_flatten.findIndex((item) => item === treeKeyTypeId)
+          if (_idx > -1 && _idx < this.topo_flatten.length - 1) {
+            const _showTreeTypeId = this.topo_flatten[_idx + 1]
+            const _showTreeTypes = this.relationViews.id2type[_showTreeTypeId]
+            if (this.leaf_tree_sort === 1) {
+              _showTypeIds.push(_showTreeTypeId)
+              _showTypes.push(_showTreeTypes)
+            } else {
+              _showTypeIds.unshift(_showTreeTypeId)
+              _showTypes.unshift(_showTreeTypes)
             }
-          })
-          this.showTypes = showTypes
-          this.showTypeIds = showTypeIds
-          if (
-            !this.currentTypeId.length ||
-            (this.currentTypeId.length && !this.showTypeIds.includes(this.currentTypeId[0]))
-          ) {
-            this.currentTypeId = [this.showTypeIds[0]]
-            await this.loadColumns()
           }
         }
-      })
+        this.showTypeIds = _showTypeIds
+        this.showTypes = _showTypes
+      } else {
+        this.showTypeIds = _.cloneDeep(this.origShowTypeIds)
+        this.showTypes = JSON.parse(JSON.stringify(this.origShowTypes))
+      }
+      if (
+        !this.currentTypeId.length ||
+        (this.currentTypeId.length && !this.showTypeIds.includes(this.currentTypeId[0]))
+      ) {
+        this.currentTypeId = [this.showTypeIds[0]]
+        await this.loadColumns()
+      }
+      // const showTypeIds = []
+      // let _showTypes = []
+      // let _showTypeIds = []
+
+      // if (this.treeKeys.length) {
+      //   const typeId = parseInt(this.treeKeys[this.treeKeys.length - 1].split('%')[1])
+
+      //   _showTypes = this.node2ShowTypes[typeId + '']
+      //   _showTypes.forEach((item) => {
+      //     _showTypeIds.push(item.id)
+      //   })
+      // } else {
+      //   _showTypeIds = JSON.parse(JSON.stringify(this.origShowTypeIds))
+      //   _showTypes = JSON.parse(JSON.stringify(this.origShowTypes))
+      // }
+      // const promises = _showTypeIds.map((typeId) => {
+      //   let _q = (`q=_type:${typeId},` + q).replace(/count=\d*/, 'count=1')
+      //   if (Object.values(this.level2constraint).includes('2')) {
+      //     _q = _q + `&has_m2m=1`
+      //   }
+      //   if (this.root_parent_path) {
+      //     _q = _q + `&root_parent_path=${this.root_parent_path}`
+      //   }
+      //   // if (this.treeKeys.length === 0) {
+      //   //   return searchCI2(_q).then((res) => {
+      //   //     if (res.numfound !== 0) {
+      //   //       showTypeIds.push(typeId)
+      //   //     }
+      //   //   })
+      //   // } else {
+      //   _q = _q + `&descendant_ids=${this.descendant_ids}`
+      //   return searchCIRelation(_q).then((res) => {
+      //     if (res.numfound !== 0) {
+      //       showTypeIds.push(typeId)
+      //     }
+      //   })
+      //   // }
+      // })
+      // await Promise.all(promises).then(async () => {
+      //   if (showTypeIds.length && showTypeIds.sort().join(',') !== this.showTypeIds.sort().join(',')) {
+      //     const showTypes = []
+      //     _showTypes.forEach((item) => {
+      //       if (showTypeIds.includes(item.id)) {
+      //         showTypes.push(item)
+      //       }
+      //     })
+      //     console.log(showTypes)
+      //     this.showTypes = showTypes
+      //     this.showTypeIds = showTypeIds
+      //     if (
+      //       !this.currentTypeId.length ||
+      //       (this.currentTypeId.length && !this.showTypeIds.includes(this.currentTypeId[0]))
+      //     ) {
+      //       this.currentTypeId = [this.showTypeIds[0]]
+      //       await this.loadColumns()
+      //     }
+      //   }
+      // })
     },
 
     async loadRoot() {
@@ -980,7 +1036,8 @@ export default {
       const treeData = []
       facet.forEach((item) => {
         treeData.push({
-          title: `${item[0]} (${item[1]})`,
+          title: item[0],
+          number: item[1],
           key: this.treeKeys.join('@^@') + '@^@' + item[2] + '%' + item[3] + '%' + `{"${item[4]}":"${item[0]}"}`,
           isLeaf: this.leaf.includes(item[3]),
           id: item[2],
@@ -1041,16 +1098,19 @@ export default {
           this.leaf = this.relationViews.views[this.viewName].leaf
           this.currentView = `${this.viewId}`
           this.typeId = this.levels[0][0]
+          this.viewOption = this.relationViews.views[this.viewName].option ?? {}
           this.refreshTable()
         }
       })
     },
 
     async loadColumns() {
-      this.getAttributeList()
-      const res = await getSubscribeAttributes(this.currentTypeId[0])
-      this.preferenceAttrList = res.attributes
-      this.calcColumns()
+      if (this.currentTypeId[0]) {
+        this.getAttributeList()
+        const res = await getSubscribeAttributes(this.currentTypeId[0])
+        this.preferenceAttrList = res.attributes
+        this.calcColumns()
+      }
     },
 
     calcColumns() {
@@ -1183,7 +1243,6 @@ export default {
         const dragId = _splitDragKey[_splitDragKey.length - 1].split('%')[0]
         // const targetObj = JSON.parse(_splitTargetKey[_splitTargetKey.length - 1].split('%')[2])
         const targetId = _splitTargetKey[_splitTargetKey.length - 1].split('%')[0]
-        console.log(_splitDragKey)
         // TODO 拖拽这里不造咋弄 等等再说吧
         batchUpdateCIRelationChildren([dragId], [targetId]).then((res) => {
           this.reload()
@@ -1354,6 +1413,9 @@ export default {
               ...data,
             }
             this.initialInstanceList = _initialInstanceList
+            this.$nextTick(() => {
+              this.refreshTable()
+            })
           })
           .catch((err) => {
             console.log(err)
@@ -1579,7 +1641,6 @@ export default {
         .split('@^@')
         .filter((item) => !!item)
         .reverse()
-      console.log(needGrantNodes)
 
       const needGrantRids = [...department, ...user]
       const floor = Math.ceil(needGrantRids.length / 6)
@@ -1687,6 +1748,29 @@ export default {
       this.showBatchLevel = null
       this.batchTreeKey = []
     },
+    findNode(node, target) {
+      for (let i = 0; i < node.length; i++) {
+        if (node[i].id === target) {
+          return node[i]
+        }
+        if (node[i].children && node[i].children.length) {
+          for (let i = 0; i < node[i].children.length; i++) {
+            const found = this.findNode(node[i].children, target)
+            if (found) {
+              return found
+            }
+          }
+        }
+      }
+      return null
+    },
+    updateTreeData(ciId, value) {
+      const _find = this.findNode(this.treeData, ciId)
+      if (_find) {
+        this.$set(_find, 'title', value)
+      }
+      this.refreshTable()
+    },
   },
 }
 </script>
@@ -1701,14 +1785,23 @@ export default {
     width: 100%;
     float: left;
     position: relative;
-    // transition: all 0.3s;
-    background-color: #fff;
     overflow: hidden;
-    padding: 12px;
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
+    padding: 0;
     &:hover {
       overflow: auto;
+    }
+    .relation-views-left-header {
+      border-left: 4px solid @primary-color;
+      height: 32px;
+      line-height: 32px;
+      padding-left: 12px;
+      margin-bottom: 12px;
+      color: @text-color_1;
+      font-weight: bold;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: default;
     }
     .ant-tree li {
       padding: 2px 0;
@@ -1732,15 +1825,8 @@ export default {
     width: 100%;
     overflow: auto;
     background-color: #fff;
-    .relation-views-right-bar {
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-start;
-      align-items: center;
-      margin-bottom: 5px;
-      height: 32px;
-      padding: 0 12px;
-    }
+    padding: 20px;
+    border-radius: @border-radius-box;
   }
 }
 </style>

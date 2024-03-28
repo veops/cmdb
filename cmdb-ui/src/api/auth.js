@@ -30,9 +30,9 @@ export function getAuthDataEnable() {
     })
 }
 
-export function testLDAP(test_type, data) {
+export function testLDAP(data) {
     return axios({
-        url: `/common-setting/v1/auth_config/LDAP/test?test_type=${test_type}`,
+        url: `/common-setting/v1/auth_config/LDAP/test`,
         method: 'post',
         data,
     })

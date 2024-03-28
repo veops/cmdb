@@ -1,11 +1,11 @@
 <template>
   <TwoColumnLayout appName="cmdb-adc">
     <template #one>
-      <div v-for="group in ci_types_list" :key="group.id">
-        <div>
+      <div class="cmdb-adc-group" v-for="group in ci_types_list" :key="group.id">
+        <p>
           <strong>{{ group.name || $t('other') }}</strong
           ><span :style="{ color: 'rgb(195, 205, 215)' }">({{ group.ci_types.length }})</span>
-        </div>
+        </p>
         <div
           :class="{ 'cmdb-adc-side-item': true, 'cmdb-adc-side-item-selected': currentType === type.id }"
           v-for="type in group.ci_types"
@@ -34,7 +34,6 @@
       <div id="discovery-ci">
         <a-input-search
           :placeholder="$t('cmdb.components.pleaseSearch')"
-          class="ops-input ops-input-radius"
           :style="{ width: '200px', marginRight: '20px', marginBottom: '10px' }"
           @search="handleSearch"
           allowClear
@@ -102,7 +101,11 @@
             sortable
             v-bind="columns.length ? { width: '130px' } : { minWidth: '130px' }"
           ></vxe-column>
-          <vxe-column :title="$t('operation')" v-bind="columns.length ? { width: '60px' } : { minWidth: '60px' }" align="center">
+          <vxe-column
+            :title="$t('operation')"
+            v-bind="columns.length ? { width: '60px' } : { minWidth: '60px' }"
+            align="center"
+          >
             <template #default="{row}">
               <a-space>
                 <a-tooltip :title="$t('cmdb.ad.accept')">
@@ -312,6 +315,9 @@ export default {
 <style lang="less" scoped>
 @import '~@/style/static.less';
 .cmdb-adc {
+  .cmdb-adc-group {
+    margin-bottom: 20px;
+  }
   .cmdb-adc-side-item {
     .ops_popover_item();
     height: 32px;
@@ -343,7 +349,7 @@ export default {
   }
   .cmdb-adc-side-item-selected {
     .ops_popover_item_selected();
-    background-color: #custom_colors[color_2];
+    background-color: @primary-color_3;
   }
 }
 </style>

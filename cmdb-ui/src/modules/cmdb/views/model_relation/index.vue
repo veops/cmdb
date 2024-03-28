@@ -242,9 +242,11 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import '~@/style/static.less';
+
 .model-relation {
   background-color: #fff;
-  border-radius: 15px;
+  border-radius: @border-radius-box;
   padding: 24px;
   height: calc(100vh - 64px);
   margin-bottom: -24px;

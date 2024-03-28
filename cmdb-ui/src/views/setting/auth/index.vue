@@ -17,8 +17,12 @@
             <a-space>
               <a-button :loading="loading" type="primary" @click="handleSave">{{ $t('save') }}</a-button>
               <template v-if="item.value === 'LDAP'">
-                <a-button :loading="loading" ghost type="primary" @click="handleTest('connect')">{{ $t('cs.auth.testConnect') }}</a-button>
-                <a-button :loading="loading" ghost type="primary" @click="handleTest('login')">{{ $t('cs.auth.testLogin') }}</a-button>
+                <a-button :loading="loading" ghost type="primary" @click="handleTest('connect')">{{
+                  $t('cs.auth.testConnect')
+                }}</a-button>
+                <a-button :loading="loading" ghost type="primary" @click="handleTest('login')">{{
+                  $t('cs.auth.testLogin')
+                }}</a-button>
               </template>
               <a-button :loading="loading" @click="handleReset">{{ $t('reset') }}</a-button>
             </a-space>
@@ -56,28 +60,28 @@ export default {
   computed: {
     authList() {
       return [
-      {
-        value: 'LDAP',
-        label: 'LDAP',
-      },
-      {
-        value: 'CAS',
-        label: 'CAS',
-      },
-      {
-        value: 'OAUTH2',
-        label: 'OAUTH2',
-      },
-      {
-        value: 'OIDC',
-        label: 'OIDC',
-      },
-      {
-        value: 'AuthCommonConfig',
-        label: this.$t('cs.auth.common'),
-      },
-    ]
-    }
+        {
+          value: 'LDAP',
+          label: 'LDAP',
+        },
+        {
+          value: 'CAS',
+          label: 'CAS',
+        },
+        {
+          value: 'OAUTH2',
+          label: 'OAUTH2',
+        },
+        {
+          value: 'OIDC',
+          label: 'OIDC',
+        },
+        {
+          value: 'AuthCommonConfig',
+          label: this.$t('cs.auth.common'),
+        },
+      ]
+    },
   },
   methods: {
     getAuthDataEnable() {
@@ -129,7 +133,7 @@ export default {
               ...values,
             }
           }
-          testLDAP(type, { data: _data })
+          testLDAP({ data: _data, test_type: type })
             .then((res) => {
               this.$message.success(this.$t('cs.auth.testSuccess'))
             })

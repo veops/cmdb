@@ -189,8 +189,10 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import '~@/style/static.less';
+
 .acl-resource-types {
-  border-radius: 15px;
+  border-radius: @border-radius-box;
   background-color: #fff;
   height: calc(100vh - 64px);
   margin-bottom: -24px;

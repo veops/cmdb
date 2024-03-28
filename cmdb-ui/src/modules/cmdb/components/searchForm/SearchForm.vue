@@ -5,8 +5,15 @@
         <a-space>
           <treeselect
             v-if="type === 'resourceSearch'"
-            class="custom-treeselect"
-            :style="{ width: '250px', marginRight: '10px', '--custom-height': '32px' }"
+            class="custom-treeselect custom-treeselect-bgcAndBorder"
+            :style="{
+              width: '200px',
+              marginRight: '10px',
+              '--custom-height': '32px',
+              '--custom-bg-color': '#fff',
+              '--custom-border': '1px solid #d9d9d9',
+              '--custom-multiple-lineHeight': '16px',
+            }"
             v-model="currenCiType"
             :multiple="true"
             :clearable="true"
@@ -41,15 +48,14 @@
           </treeselect>
           <a-input
             v-model="fuzzySearch"
-            :style="{ display: 'inline-block', width: '244px' }"
+            :style="{ display: 'inline-block', width: '200px' }"
             :placeholder="$t('cmdb.components.pleaseSearch')"
             @pressEnter="emitRefresh"
-            class="ops-input ops-input-radius"
           >
             <a-icon
               type="search"
               slot="suffix"
-              :style="{ color: fuzzySearch ? '#2f54eb' : '', cursor: 'pointer' }"
+              :style="{ color: fuzzySearch ? '#2f54eb' : '#d9d9d9', cursor: 'pointer' }"
               @click="emitRefresh"
             />
             <a-tooltip slot="prefix" placement="bottom" :overlayStyle="{ maxWidth: '550px', whiteSpace: 'pre-line' }">
@@ -59,6 +65,9 @@
               <a><a-icon type="question-circle"/></a>
             </a-tooltip>
           </a-input>
+          <a-tooltip :title="$t('reset')">
+            <a-button @click="reset">重置</a-button>
+          </a-tooltip>
           <FilterComp
             ref="filterComp"
             :canSearchPreferenceAttrList="canSearchPreferenceAttrList"
@@ -69,7 +78,7 @@
             <div slot="popover_item" class="search-form-bar-filter">
               <a-icon class="search-form-bar-filter-icon" type="filter" />
               {{ $t('cmdb.components.conditionFilter') }}
-              <a-icon class="search-form-bar-filter-icon" type="down" />
+              <a-icon class="search-form-bar-filter-icon" type="down" :style="{ color: '#d9d9d9' }" />
             </div>
           </FilterComp>
           <a-input
@@ -91,14 +100,13 @@
             :placeholder="placeholder"
             @keyup.enter="emitRefresh"
           >
-            <a-icon slot="suffix" type="copy" @click="handleCopyExpression" />
+            <ops-icon slot="suffix" type="veops-copy" @click="handleCopyExpression" />
           </a-input>
           <slot></slot>
         </a-space>
       </div>
       <a-space>
         <slot name="extraContent"></slot>
-        <a-button @click="reset" size="small">{{ $t('reset') }}</a-button>
         <a-tooltip :title="$t('cmdb.components.attributeDesc')" v-if="type === 'relationView'">
           <a
             @click="
@@ -237,7 +245,6 @@ export default {
       }
     },
     inputCiTypeGroup(value) {
-      console.log(value)
       if (!value || !value.length) {
         this.$emit('updateAllAttributesList', value)
       }
@@ -257,6 +264,7 @@ export default {
 }
 </script>
 <style lang="less">
+@import '~@/style/static.less';
 @import '../../views/index.less';
 .ci-searchform-expression {
   > input {
@@ -266,14 +274,14 @@ export default {
     border-right: none;
     &:hover,
     &:focus {
-      border-bottom: 2px solid #2f54eb;
+      border-bottom: 2px solid @primary-color;
     }
     &:focus {
       box-shadow: 0 2px 2px -2px #1f78d133;
     }
   }
   .ant-input-suffix {
-    color: #2f54eb;
+    color: #d9d9d9;
     cursor: pointer;
   }
 }
@@ -290,14 +298,15 @@ export default {
 @import '~@/style/static.less';
 
 .search-form-bar {
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 32px;
   .search-form-bar-filter {
-    .ops_display_wrapper();
+    .ops_display_wrapper(transparent);
     .search-form-bar-filter-icon {
-      color: #custom_colors[color_1];
+      color: @primary-color;
       font-size: 12px;
     }
   }

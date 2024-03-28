@@ -1,39 +1,41 @@
 <template>
   <div class="cmdb-batch-upload" :style="{ height: `${windowHeight - 64}px` }">
-    <div id="title">
-      <ci-type-choice ref="ciTypeChoice" @getCiTypeAttr="showCiType" />
+    <div class="cmdb-views-header">
+      <span>
+        <span class="cmdb-views-header-title">{{ $t('cmdb.menu.batchUpload') }}</span>
+      </span>
     </div>
-    <a-row>
-      <a-col :span="12">
-        <upload-file-form
-          :isUploading="isUploading"
-          :ciType="ciType"
-          ref="uploadFileForm"
-          @uploadDone="uploadDone"
-        ></upload-file-form>
-      </a-col>
-      <a-col :span="24" v-if="ciType && uploadData.length">
-        <CiUploadTable :ciTypeAttrs="ciTypeAttrs" ref="ciUploadTable" :uploadData="uploadData"></CiUploadTable>
-        <div class="cmdb-batch-upload-action">
-          <a-space size="large">
-            <a-button type="primary" ghost @click="handleCancel">{{ $t('cancel') }}</a-button>
-            <a-button @click="handleUpload" type="primary">{{ $t('upload') }}</a-button>
-            <a-button v-if="hasError && !isUploading" @click="downloadError" type="primary">{{ $t('cmdb.batch.downloadFailed') }}</a-button>
-          </a-space>
-        </div>
-      </a-col>
-      <a-col :span="24" v-if="ciType">
-        <upload-result
-          ref="uploadResult"
-          :upLoadData="uploadData"
-          :ciType="ciType"
-          :unique-field="uniqueField"
-          :isUploading="isUploading"
-          @uploadResultDone="uploadResultDone"
-          @uploadResultError="uploadResultError"
-        ></upload-result>
-      </a-col>
-    </a-row>
+    <CiTypeChoice ref="ciTypeChoice" @getCiTypeAttr="showCiType" />
+    <p class="cmdb-batch-upload-label"><span>*</span>3. {{ $t('cmdb.batch.uploadFile') }}</p>
+    <UploadFileForm
+      :isUploading="isUploading"
+      :ciType="ciType"
+      ref="uploadFileForm"
+      @uploadDone="uploadDone"
+    ></UploadFileForm>
+    <p class="cmdb-batch-upload-label">4. {{ $t('cmdb.batch.dataPreview') }}</p>
+    <CiUploadTable :ciTypeAttrs="ciTypeAttrs" ref="ciUploadTable" :uploadData="uploadData"></CiUploadTable>
+    <div class="cmdb-batch-upload-action">
+      <a-space size="large">
+        <a-button :disabled="!(ciType && uploadData.length)" @click="handleUpload" type="primary">{{
+          $t('upload')
+        }}</a-button>
+        <a-button @click="handleCancel">{{ $t('cancel') }}</a-button>
+        <a-button v-if="hasError && !isUploading" @click="downloadError" type="primary">{{
+          $t('cmdb.batch.downloadFailed')
+        }}</a-button>
+      </a-space>
+    </div>
+    <UploadResult
+      v-if="ciType"
+      ref="uploadResult"
+      :upLoadData="uploadData"
+      :ciType="ciType"
+      :unique-field="uniqueField"
+      :isUploading="isUploading"
+      @uploadResultDone="uploadResultDone"
+      @uploadResultError="uploadResultError"
+    ></UploadResult>
   </div>
 </template>
 
@@ -124,7 +126,7 @@ export default {
     handleCancel() {
       if (!this.isUploading) {
         this.showCiType(null)
-        this.$refs.ciTypeChoice.selectNum = null
+        this.$refs.ciTypeChoice.selectNum = undefined
         this.hasError = false
       } else {
         this.$message.warning(this.$t('cmdb.batch.batchUploadCanceled'))
@@ -144,16 +146,29 @@ export default {
   },
 }
 </script>
+<style lang="less">
+@import '~@/style/static.less';
+@import '../index.less';
+.cmdb-batch-upload-label {
+  color: @text-color_1;
+  font-weight: bold;
+  white-space: pre;
+  > span {
+    color: red;
+  }
+}
+</style>
 <style lang="less" scoped>
+@import '~@/style/static.less';
+
 .cmdb-batch-upload {
   margin-bottom: -24px;
-  padding: 24px;
+  padding: 20px;
   background-color: #fff;
-  border-radius: 20px;
+  border-radius: @border-radius-box;
   overflow: auto;
   .cmdb-batch-upload-action {
     width: 50%;
-    text-align: center;
     margin: 12px 0;
   }
 }

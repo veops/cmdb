@@ -172,8 +172,6 @@ export default {
   margin-right: 60px;
   .ant-input-group.ant-input-group-compact > *:first-child,
   .ant-input-group.ant-input-group-compact > .ant-select:first-child > .ant-select-selection {
-    border-top-left-radius: 20px !important;
-    border-bottom-left-radius: 20px !important;
     background-color: #custom_colors[color_1];
     color: #fff;
     border: none;
@@ -202,7 +200,6 @@ export default {
     .ant-input {
       background-color: #f0f5ff;
       border: none;
-      border-radius: 20px;
       &:focus {
         box-shadow: none;
       }

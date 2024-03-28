@@ -1,6 +1,7 @@
 <template>
-  <div :style="{ padding: '16px 24px 24px' }">
+  <div :style="{ padding: '0 20px 20px' }">
     <a-button
+      v-if="!isInGrantComp"
       style="margin-bottom: 10px"
       @click="handleCreate"
       type="primary"
@@ -43,7 +44,7 @@
         <template #default="{row}">
           <a-space v-if="!row.isParent && row.source_ci_type_id">
             <a @click="handleOpenGrant(row)"><a-icon type="user-add"/></a>
-            <a-popconfirm :title="$t('cmdb.ciType.confirmDelete2')" @confirm="handleDelete(row)">
+            <a-popconfirm v-if="!isInGrantComp" :title="$t('cmdb.ciType.confirmDelete2')" @confirm="handleDelete(row)">
               <a style="color: red;"><a-icon type="delete"/></a>
             </a-popconfirm>
           </a-space>
@@ -148,6 +149,10 @@ export default {
       type: String,
       default: '',
     },
+    isInGrantComp: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -178,7 +183,9 @@ export default {
   async mounted() {
     this.getCITypes()
     this.getRelationTypes()
-    await this.getCITypeParent()
+    if (!this.isInGrantComp) {
+      await this.getCITypeParent()
+    }
     this.getData()
   },
   methods: {
