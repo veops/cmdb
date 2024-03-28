@@ -144,6 +144,9 @@ export default {
 <style lang="less" scoped>
 @import '~@/style/static.less';
 .setting-discovery {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: @border-radius-box;
   .type-header {
     width: 100%;
     display: inline-flex;

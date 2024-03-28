@@ -8,11 +8,10 @@
     </div>
     <SplitPane
       v-else
-      :min="280"
+      :min="220"
       :max="500"
       :paneLengthPixel.sync="paneLengthPixel"
       appName="cmdb-ci-types"
-      triggerColor="#F0F5FF"
       :triggerLength="18"
     >
       <template #one>
@@ -22,22 +21,23 @@
               :disabled="!permissions.includes('admin') && !permissions.includes('cmdb_admin')"
               type="primary"
               size="small"
-              icon="plus"
+              ghost
               @click="handleClickAddGroup"
-              class="ops-button-primary"
-            >{{ $t('cmdb.ciType.group') }}</a-button
+              class="ops-button-ghost"
+            ><ops-icon type="veops-increase" />{{ $t('cmdb.ciType.group') }}</a-button
             >
             <a-space>
-              <a
+              <span
+                :style="{ cursor: 'pointer' }"
                 @click="
                   () => {
                     $refs.attributeStore.open()
                   }
                 "
-              >{{ $t('cmdb.ciType.attributeLibray') }}</a
-              >
+              >{{ $t('cmdb.ciType.attributeLibray') }}
+              </span>
               <a-dropdown v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')">
-                <a><ops-icon type="ops-menu"/></a>
+                <ops-icon type="ops-menu" :style="{ cursor: 'pointer' }" />
                 <a-menu slot="overlay">
                   <a-menu-item key="0">
                     <a-upload
@@ -83,7 +83,7 @@
                 <a-space>
                   <a-tooltip>
                     <template slot="title">{{ $t('cmdb.ciType.addCITypeInGroup') }}</template>
-                    <a><a-icon type="plus" @click="handleCreate(g)"/></a>
+                    <a><ops-icon type="veops-increase" @click="handleCreate(g)"/></a>
                   </a-tooltip>
                   <template v-if="g.id !== -1">
                     <a-tooltip>
@@ -113,7 +113,7 @@
                 >
                   <div>
                     <OpsMoveIcon
-                      style="width: 17px; height: 17px; display: none; position: absolute; left: 15px; top: 5px"
+                      style="width: 17px; height: 17px; display: none; position: absolute; left: -1px; top: 8px"
                     />
                     <span class="ci-types-left-detail-icon">
                       <template v-if="ci.icon">
@@ -134,18 +134,33 @@
                     </span>
                   </div>
                   <span class="ci-types-left-detail-title">{{ ci.alias || ci.name }}</span>
-                  <a-space class="ci-types-left-detail-action">
-                    <a><a-icon type="user-add" @click="(e) => handlePerm(e, ci)"/></a>
-                    <a><a-icon type="edit" @click="(e) => handleEdit(e, ci)"/></a>
-                    <a
-                      v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')"
-                      :disabled="ci.inherited"
-                      @click="(e) => handleDownloadCiType(e, ci)"
-                    >
-                      <a-icon type="download" />
+                  <a-dropdown :getPopupContainer="(trigger) => trigger">
+                    <a class="ci-types-left-detail-action">
+                      <ops-icon type="veops-more" />
                     </a>
-                    <a style="color: red" @click="(e) => handleDelete(e, ci)"><a-icon type="delete"/></a>
-                  </a-space>
+                    <a-menu slot="overlay">
+                      <a-menu-item @click="(e) => handlePerm(e, ci)">
+                        <a-icon type="user-add" />
+                        {{ $t('grant') }}
+                      </a-menu-item>
+                      <a-menu-item @click="(e) => handleEdit(e, ci)">
+                        <a-icon type="edit" />
+                        {{ $t('cmdb.ciType.editCIType') }}
+                      </a-menu-item>
+                      <a-menu-item
+                        v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')"
+                        :disabled="ci.inherited"
+                        @click="(e) => handleDownloadCiType(e, ci)"
+                      >
+                        <a-icon type="download" />
+                        {{ $t('cmdb.ciType.downloadType') }}
+                      </a-menu-item>
+                      <a-menu-item @click="(e) => handleDelete(e, ci)">
+                        <a-icon type="delete" />
+                        {{ $t('cmdb.ciType.deleteCIType') }}
+                      </a-menu-item>
+                    </a-menu>
+                  </a-dropdown>
                 </div>
               </draggable>
             </div>
@@ -270,17 +285,7 @@
             </div>
           </el-select>
         </a-form-item>
-        <a-form-item>
-          <template slot="label">
-            <a-tooltip :title="$t('cmdb.ciType.uniqueKeyTips')">
-              <a-icon
-                style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
-                type="question-circle"
-                theme="filled"
-              />
-            </a-tooltip>
-            <span>{{ $t('cmdb.ciType.uniqueKey') }}</span>
-          </template>
+        <a-form-item :help="$t('cmdb.ciType.uniqueKeyTips')" :label="$t('cmdb.ciType.uniqueKey')">
           <el-select
             size="small"
             filterable
@@ -456,7 +461,6 @@ export default {
     },
     currentCName() {
       if (this.currentId) {
-        console.log(this.currentId)
         if (this.currentId.split('%')[2] !== 'null') {
           return this.currentId.split('%')[2]
         }
@@ -817,8 +821,8 @@ export default {
         })
     },
     handleDelete(e, record) {
-      e.preventDefault()
-      e.stopPropagation()
+      e.domEvent.preventDefault()
+      e.domEvent.stopPropagation()
       const that = this
       this.$confirm({
         title: that.$t('warning'),
@@ -833,8 +837,8 @@ export default {
       })
     },
     handleDownloadCiType(e, ci) {
-      e.preventDefault()
-      e.stopPropagation()
+      e.domEvent.preventDefault()
+      e.domEvent.stopPropagation()
       const x = new XMLHttpRequest()
       x.open('GET', `/api/v0.1/ci_types/${ci.id}/template/export`, true)
       x.responseType = 'blob'
@@ -855,8 +859,8 @@ export default {
       })
     },
     async handleEdit(e, record) {
-      e.preventDefault()
-      e.stopPropagation()
+      e.domEvent.preventDefault()
+      e.domEvent.stopPropagation()
       this.drawerTitle = this.$t('cmdb.ciType.editCIType')
       this.drawerVisible = true
       await getCITypeAttributesById(record.id).then((res) => {
@@ -909,8 +913,8 @@ export default {
       }
     },
     handlePerm(e, ci) {
-      e.preventDefault()
-      e.stopPropagation()
+      e.domEvent.preventDefault()
+      e.domEvent.stopPropagation()
       roleHasPermissionToGrant({
         app_id: 'cmdb',
         resource_type_name: 'CIType',
@@ -942,6 +946,8 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import '~@/style/static.less';
+
 .ci-types-wrap {
   margin: 0 0 -24px 0;
   .ci-types-empty {
@@ -955,21 +961,24 @@ export default {
     width: 100%;
     overflow: auto;
     float: left;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
+
     .ci-types-left-content {
       max-height: calc(100% - 45px);
-      overflow: auto;
+      overflow: hidden;
+      &:hover {
+        overflow: auto;
+      }
     }
     .ci-types-left-title {
-      padding: 10px 15px;
+      padding: 10px 0;
       display: flex;
       flex-direction: row;
       justify-content: space-between;
+      color: @text-color_3;
     }
     .ci-types-left-group {
       position: relative;
-      padding: 8px 15px;
+      padding: 8px 0 8px 14px;
       color: rgb(99, 99, 99);
       cursor: pointer;
       font-size: 14px;
@@ -982,7 +991,7 @@ export default {
         display: none;
       }
       &:hover {
-        background-color: #e1efff;
+        background-color: @primary-color_3;
         > div:nth-child(2) {
           display: inline-flex;
         }
@@ -992,16 +1001,24 @@ export default {
       }
     }
     .ci-types-left-detail {
-      padding: 3px 14px 3px 36px;
+      padding: 3px 14px;
       cursor: pointer;
       position: relative;
       display: flex;
       flex-direction: row;
       justify-content: flex-start;
+      align-items: center;
       margin-bottom: 4px;
+      height: 32px;
+      line-height: 32px;
       .ci-types-left-detail-action {
         display: none;
         margin-left: auto;
+      }
+      .ci-types-left-detail-title {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
       }
       .ci-types-left-detail-icon {
         display: flex;
@@ -1019,7 +1036,7 @@ export default {
         }
       }
       &:hover {
-        background-color: #e1efff;
+        background-color: @primary-color_3;
         svg {
           display: inline !important;
         }
@@ -1029,7 +1046,7 @@ export default {
       }
     }
     .selected {
-      background-color: #e1efff;
+      background-color: @primary-color_3;
       .ci-types-left-detail-title {
         font-weight: 700;
       }
@@ -1038,6 +1055,7 @@ export default {
   .ci-types-right {
     width: 100%;
     position: relative;
+    background-color: #fff;
     .ci-types-right-empty {
       position: absolute;
       text-align: center;
@@ -1049,7 +1067,6 @@ export default {
   .ci-types-left,
   .ci-types-right {
     height: 100%;
-    background-color: #fff;
   }
 }
 </style>

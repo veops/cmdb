@@ -134,6 +134,6 @@ export default {
 
 <style lang="less" scoped>
 .ci-types-triggers {
-  padding: 16px 24px 24px;
+  padding: 0 20px 20px;
 }
 </style>

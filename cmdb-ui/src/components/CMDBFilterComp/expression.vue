@@ -178,7 +178,7 @@
       <div v-else :style="{ width: '175px' }"></div>
       <template v-if="!disabled">
         <a-tooltip :title="$t('copy')">
-          <a class="operation" @click="handleCopyRule(item)"><ops-icon type="icon-xianxing-copy"/></a>
+          <a class="operation" @click="handleCopyRule(item)"><ops-icon type="veops-copy"/></a>
         </a-tooltip>
         <a-tooltip :title="$t('delete')">
           <a class="operation" @click="handleDeleteRule(item)"><ops-icon type="icon-xianxing-delete"/></a>

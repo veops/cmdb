@@ -760,6 +760,52 @@ export const multicolorIconList = [
       label: 'redis'
     }]
   }, {
+    value: 'cloud',
+    label: '云',
+    list: [{
+      value: 'AWS',
+      label: 'AWS'
+    }, {
+      value: 'Azure',
+      label: 'Azure'
+    }, {
+      value: 'Google_Cloud_Platform',
+      label: 'Google Cloud Platform'
+    }, {
+      value: 'Alibaba_Cloud',
+      label: '阿里云'
+    }, {
+      value: 'Huawei_Cloud',
+      label: '华为云'
+    }, {
+      value: 'Tencent_Cloud',
+      label: '腾讯云'
+    }, {
+      value: 'UCloud',
+      label: 'UCloud'
+    }, {
+      value: 'Ctyun',
+      label: '天翼云'
+    }, {
+      value: 'ECloud',
+      label: '移动云'
+    }, {
+      value: 'JDCloud',
+      label: '京东云'
+    }, {
+      value: 'Bytecloud',
+      label: '字节云'
+    }, {
+      value: 'OpenStack',
+      label: 'OpenStack'
+    }, {
+      value: 'ZStack',
+      label: 'ZStack'
+    }, {
+      value: 'Nutanix',
+      label: 'Nutanix'
+    }]
+  }, {
     value: 'system',
     label: '操作系统',
     list: [{

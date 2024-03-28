@@ -35,7 +35,7 @@ export default {
     },
     triggerColor: {
       type: String,
-      default: '#F0F5FF',
+      default: '#f7f8fa',
     },
   },
   data() {
@@ -52,22 +52,22 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import '~@/style/static.less';
+
 .two-column-layout {
   margin-bottom: -24px;
   width: 100%;
   .two-column-layout-sidebar {
     height: 100%;
-    padding: 15px 7px;
     border-radius: 15px;
     overflow-y: auto;
-    background-color: #fff;
   }
   .two-column-layout-main {
     height: 100%;
     padding: 12px;
     background-color: #fff;
     overflow-y: auto;
-    border-radius: 15px;
+    border-radius: @border-radius-box;
   }
 }
 </style>

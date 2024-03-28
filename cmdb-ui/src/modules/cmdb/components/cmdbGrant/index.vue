@@ -1,5 +1,11 @@
 <template>
-  <a-modal width="800px" :visible="visible" @ok="handleOk" @cancel="handleCancel" :bodyStyle="{ padding: 0 }">
+  <a-modal
+    width="800px"
+    :visible="visible"
+    @ok="handleOk"
+    @cancel="handleCancel"
+    :bodyStyle="{ padding: 0, paddingTop: '20px' }"
+  >
     <GrantComp
       :resourceType="resourceType"
       :app_id="app_id"

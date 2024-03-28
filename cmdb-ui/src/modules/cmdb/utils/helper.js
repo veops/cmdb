@@ -49,7 +49,6 @@ export function getCITableColumns(data, attrList, width = 1600, height) {
     const _attrList = _.orderBy(attrList, ['is_fixed'], ['desc'])
     const columns = []
     for (let attr of _attrList) {
-
         const editRender = { name: 'input' }
         switch (attr.value_type) {
             case '0':
@@ -85,7 +84,7 @@ export function getCITableColumns(data, attrList, width = 1600, height) {
 
         }
         columns.push({
-            attr_id:attr.id,
+            attr_id: attr.id,
             editRender,
             title: attr.alias || attr.name,
             field: attr.name,
@@ -132,6 +131,35 @@ export const getPropertyStyle = (attr) => {
             return { color: '#0390CC', backgroundColor: '#e6fffb' }
         case '8':
             return { color: '#144BD9', backgroundColor: '#fff0f6' }
+    }
+}
+
+export const getPropertyIcon = (attr) => {
+    switch (attr.value_type) {
+        case '0':
+            return 'duose-shishu'
+        case '1':
+            return 'duose-fudianshu'
+        case '2':
+            if (attr.is_password) {
+                return 'duose-password'
+            }
+            if (attr.is_link) {
+                return 'duose-link'
+            }
+            return 'duose-wenben'
+        case '3':
+            return 'duose-datetime'
+        case '4':
+            return 'duose-date'
+        case '5':
+            return 'duose-time'
+        case '6':
+            return 'duose-json'
+        case '7':
+            return 'duose-password'
+        case '8':
+            return 'duose-link'
     }
 }
 
@@ -185,7 +213,7 @@ export const getAllParentNodesLabel = (node, label) => {
         return getAllParentNodesLabel(node.parentNode, `${node.parentNode.label}-${label}`)
     }
     return label
-  }
-  export const getTreeSelectLabel = (node) => {
+}
+export const getTreeSelectLabel = (node) => {
     return `${getAllParentNodesLabel(node, node.label)}`
-  }
+}

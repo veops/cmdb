@@ -165,7 +165,7 @@
                       : '#fafafa',
                 }"
               >
-                <div :style="{ color: fontColor }">{{ form.name }}</div>
+                <div v-if="chartType === 'count'" :style="{ color: fontColor }">{{ form.name }}</div>
                 <Chart
                   :ref="`chart_${item.id}`"
                   :chartId="item.id"
@@ -613,6 +613,7 @@ export default {
       } else {
         this.form.category = 1
       }
+      console.log(this.chartType)
     },
     showPreview() {
       this.$refs.chartForm.validate(async (valid) => {

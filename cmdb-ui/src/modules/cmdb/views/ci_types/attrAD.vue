@@ -1,5 +1,5 @@
 <template>
-  <div class="attr-ad" :style="{ height: `${windowHeight - 104}px` }">
+  <div class="attr-ad" :style="{ height: `${windowHeight - 130}px` }">
     <div v-if="adCITypeList && adCITypeList.length">
       <a-tabs size="small" v-model="currentTab">
         <a-tab-pane v-for="item in adCITypeList" :key="item.id">
@@ -207,7 +207,7 @@ export default {
 @import '~@/style/static.less';
 .attr-ad {
   position: relative;
-  padding: 0 12px;
+  padding: 0 20px;
   .attr-ad-header {
     width: 100%;
     display: inline-flex;
