@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1702544951995') format('woff2'),
-       url('iconfont.woff?t=1702544951995') format('woff'),
-       url('iconfont.ttf?t=1702544951995') format('truetype');
+  src: url('iconfont.woff2?t=1711618200417') format('woff2'),
+       url('iconfont.woff?t=1711618200417') format('woff'),
+       url('iconfont.ttf?t=1711618200417') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,222 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.Google_Cloud_Platform:before {
+  content: "\e90b";
+}
+
+.Ctyun:before {
+  content: "\e90c";
+}
+
+.Alibaba_Cloud:before {
+  content: "\e90d";
+}
+
+.Azure:before {
+  content: "\e90e";
+}
+
+.ZStack:before {
+  content: "\e904";
+}
+
+.Tencent_Cloud:before {
+  content: "\e905";
+}
+
+.Nutanix:before {
+  content: "\e906";
+}
+
+.OpenStack:before {
+  content: "\e907";
+}
+
+.Huawei_Cloud:before {
+  content: "\e908";
+}
+
+.Bytecloud:before {
+  content: "\e909";
+}
+
+.UCloud:before {
+  content: "\e90a";
+}
+
+.AWS:before {
+  content: "\e901";
+}
+
+.ECloud:before {
+  content: "\e902";
+}
+
+.JDCloud:before {
+  content: "\e903";
+}
+
+.veops-more:before {
+  content: "\e900";
+}
+
+.duose-date:before {
+  content: "\e8ff";
+}
+
+.duose-shishu:before {
+  content: "\e8fd";
+}
+
+.duose-wenben:before {
+  content: "\e8fe";
+}
+
+.duose-json:before {
+  content: "\e8f7";
+}
+
+.duose-fudianshu:before {
+  content: "\e8f8";
+}
+
+.duose-time:before {
+  content: "\e8f9";
+}
+
+.duose-password:before {
+  content: "\e8fa";
+}
+
+.duose-link:before {
+  content: "\e8fb";
+}
+
+.duose-datetime:before {
+  content: "\e8fc";
+}
+
+.veops-setting2:before {
+  content: "\e8f6";
+}
+
+.veops-search:before {
+  content: "\e8f5";
+}
+
+.veops-delete:before {
+  content: "\e8f4";
+}
+
+.veops-refresh:before {
+  content: "\e8f3";
+}
+
+.veops-filter:before {
+  content: "\e8f2";
+}
+
+.veops-reduce:before {
+  content: "\e8ed";
+}
+
+.veops-increase:before {
+  content: "\e8ee";
+}
+
+.veops-configuration_table:before {
+  content: "\e8ef";
+}
+
+.veops-copy:before {
+  content: "\e8f0";
+}
+
+.veops-save:before {
+  content: "\e8f1";
+}
+
+.veops-setting:before {
+  content: "\e8ec";
+}
+
+.veops-default_avatar:before {
+  content: "\e8ea";
+}
+
+.veops-notice:before {
+  content: "\e8eb";
+}
+
+.itsm-quickStart:before {
+  content: "\e8e9";
+}
+
+.itsm-associatedWith:before {
+  content: "\e8e8";
+}
+
+.itsm-folder:before {
+  content: "\e8e7";
+}
+
+.report:before {
+  content: "\e8e5";
+}
+
+.folder:before {
+  content: "\e8e6";
+}
+
+.itsm-refresh:before {
+  content: "\e8e4";
+}
+
+.itsm-add_table:before {
+  content: "\e8e2";
+}
+
+.itsm-delete_page:before {
+  content: "\e8e3";
+}
+
+.oneterm-secret_key:before {
+  content: "\e8e0";
+}
+
+.oneterm-password:before {
+  content: "\e8e1";
+}
+
+.itsm-sla_timeout_not_handled:before {
+  content: "\e8dd";
+}
+
+.itsm-sla_not_timeout:before {
+  content: "\e8de";
+}
+
+.itsm-SLA:before {
+  content: "\e8df";
+}
+
+.itsm-sla_timeout_handled:before {
+  content: "\e8dc";
+}
+
+.itsm-sla_all:before {
+  content: "\e8da";
+}
+
+.itsm-generate_by_node_id:before {
+  content: "\e8db";
+}
+
+.cmdb-MySQL:before {
+  content: "\e8d9";
 }
 
 .OAUTH2:before {
@@ -33,7 +249,7 @@
   content: "\e8d4";
 }
 
-.a-itsm-knowledge2:before {
+.itsm-knowledge2:before {
   content: "\e8d2";
 }
 
