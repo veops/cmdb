@@ -1,5 +1,5 @@
 <template>
-  <div :style="{ height: `${windowHeight - 156}px`, overflow: 'auto', position: 'relative' }">
+  <div :style="{ height: `${windowHeight - 187}px`, overflow: 'auto', position: 'relative' }">
     <a
       v-if="!adrIsInner"
       :style="{ position: 'absolute', right: 0, top: 0 }"

@@ -32,8 +32,10 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import '~@/style/static.less';
+
 .acl-operation-history {
-  border-radius: 15px;
+  border-radius: @border-radius-box;
   height: calc(100vh - 64px);
   margin-bottom: -24px;
   padding: 24px;

@@ -1,6 +1,7 @@
 const cmdb_en = {
     relation: 'Relation',
     attribute: 'Attributes',
+    configTable: 'Config Table',
     menu: {
         views: 'Views',
         config: 'Configuration',
@@ -182,7 +183,11 @@ const cmdb_en = {
         inheritType: 'Inherit Type',
         inheritTypePlaceholder: 'Please select inherit types',
         inheritFrom: 'inherit from {name}',
-        groupInheritFrom: 'Please go to the {name} for modification'
+        groupInheritFrom: 'Please go to the {name} for modification',
+        downloadType: 'Download CIType',
+        deleteCIType: 'Delete CIType',
+        otherGroupTips: 'Non sortable within the other group',
+        filterTips: 'click to show {name}'
     },
     components: {
         unselectAttributes: 'Unselected',
@@ -245,8 +250,10 @@ const cmdb_en = {
         unselectCIType: 'No CIType selected yet',
         pleaseUploadFile: 'Please upload files',
         batchUploadCanceled: 'Batch upload canceled',
-        selectCITypeTips: 'Please select CIType',
+        selectCIType: 'Select CIType',
+        selectCITypeTips: 'Please select a CIType and then download',
         downloadTemplate: 'Download Template',
+        clickDownload: 'Click to Download',
         drawTips: 'Click or drag files here to upload!',
         supportFileTypes: 'Supported file types: xls, xlsx',
         uploadResult: 'Upload results',
@@ -257,6 +264,16 @@ const cmdb_en = {
         errorTips: 'Error message',
         requestFailedTips: 'An error occurred with the request, please try again later',
         requestSuccessTips: 'Upload completed',
+        uploadFile: 'Upload File',
+        drawTips1: 'Please <span class="cmdb-batch-upload-tips">select a CIType</span>, and then <span class="cmdb-batch-upload-tips">download</span> ,',
+        drawTips2: '<span class="cmdb-batch-upload-tips">click or drag file</span> to upload',
+        dataPreview: 'Preview data and upload',
+        tips1: 'Kind Reminder :',
+        tips2: '1. Click to download the template, and users can customize the header of the template file, including model properties and model associations',
+        // eslint-disable-next-line no-template-curly-in-string
+        tips3: '2. The red color in the template file represents the model relationship, such as the $Product. Product Name (${Model Name}. {Attribute Name}) column, which establishes the relationship between the physical machine and the product.',
+        tips4: '3. In the download template Excel file, the predefined values of attributes will be set as dropdown options. Please note that due to the limitations of Excel itself, a single dropdown box is limited to a maximum of 255 characters. If it exceeds 255 characters, we will not set the dropdown options for this attribute',
+        tips5: '4. When using Excel templates, please ensure that a single file does not exceed 5000 lines.',
     },
     preference: {
         mySub: 'My Subscription',
@@ -274,6 +291,7 @@ const cmdb_en = {
         monthsAgo: 'month ago',
         yearsAgo: 'years ago',
         just: 'just now',
+        searchPlaceholder: 'Please search CIType',
     },
     custom_dashboard: {
         charts: 'Chart',
@@ -313,14 +331,23 @@ const cmdb_en = {
         noCustomDashboard: 'The administrator has not customized the dashboard yet',
     },
     preference_relation: {
-        newServiceTree: 'Add ServiceTree',
+        newServiceTree: 'Add Service Tree',
+        editServiceTree: 'Edit Service Tree',
         serviceTreeName: 'Name',
+        serviceTreeNamePlaceholder: 'Please enter the service tree name',
         public: 'Public',
         saveLayout: 'Save Layout',
         childNodesNotFound: 'There are no child nodes and no business relationship can be formed. Please select again!',
         tips1: 'Cannot form a view with the currently selected node, please select again!',
         tips2: 'Please enter the new serviceTree name!',
         tips3: 'Please select at least two nodes!',
+        tips4: 'Select at least one in leaf node or tree node',
+        tips5: 'Select the tree directory node and display the service tree sub nodes as a Table',
+        showLeafNode: 'Show Leaf Node',
+        showTreeNode: 'Show Tree Node',
+        sort: 'Sort',
+        sort1: 'Leaf node information comes first',
+        sort2: 'Tree node information comes first'
     },
     history: {
         ciChange: 'CI',
@@ -478,13 +505,15 @@ const cmdb_en = {
         noPermission: 'No Permission'
     },
     serviceTree: {
-        deleteNode: 'Delete Node',
+        deleteNode: 'Delete {name}',
         tips1: 'For example: q=os_version:centos&sort=os_version',
         tips2: 'Expression search',
         alert1: 'The administrator has not configured the ServiceTree(relation view), or you do not have permission to access it!',
         copyFailed: 'Copy failed',
         deleteRelationConfirm: 'Confirm to remove selected {name} from current relationship?',
         batch: 'Batch',
+        editNode: 'Edit Node',
+        editNodeName: 'Edit Node Name',
         grantTitle: 'Grant(read)',
         userPlaceholder: 'Please select users',
         rolePlaceholder: 'Please select roles',

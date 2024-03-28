@@ -50,7 +50,7 @@ body {
 }
 
 .ant-layout {
-  background-color: #f7f8fa;
+  background-color: @layout-content-background;
 }
 
 .layout.ant-layout {
@@ -161,7 +161,7 @@ body {
       transition: width 0.2s;
 
       &.ant-header-side-opened {
-        width: calc(100% - 200px);
+        width: calc(100% - 220px);
       }
 
       &.ant-header-side-closed {
@@ -411,7 +411,6 @@ body {
 
 // 菜单样式
 .sider {
-  box-shadow: 2px 0 6px rgba(0, 21, 41, 0.35);
   position: relative;
   z-index: 10;
   min-height: 100vh;
@@ -431,17 +430,7 @@ body {
   &.ant-fixed-sidemenu {
     position: fixed;
     height: 100%;
-    background: @layout-background-color;
     z-index: 99;
-  }
-
-  .ant-menu-dark {
-    background: @layout-background-color;
-
-    .ant-menu-inline.ant-menu-sub {
-      background: @layout-background-color-light;
-      box-shadow: none;
-    }
   }
 
   .logo {
@@ -478,21 +467,11 @@ body {
 
   &.light {
     background-color: #fff;
-    box-shadow: 2px 0px 8px 0px rgba(29, 35, 41, 0.05);
 
     .logo {
       background: @layout-header-background;
-      box-shadow: 1px 1px 0px 0px #e8e8e8;
+      box-shadow: 0 1px 3px 0px #9eabbe25;
     }
-
-    // .ant-menu-light {
-    //   .ant-menu-item {
-    //     margin: 0;
-    //   }
-    //   .ant-menu-item-selected {
-    //     background: #0000000a;
-    //   }
-    // }
   }
 }
 
@@ -506,6 +485,9 @@ body {
 // 从此处开始
 .ops-side-bar.ant-menu {
   transition: none;
+  .ant-menu-item {
+    text-overflow: initial !important;
+  }
 }
 .ops-side-bar.ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected {
   background: @layout-sidebar-selected-color;
@@ -525,7 +507,7 @@ body {
 }
 
 .ops-side-bar.ant-menu-light {
-  border-right-color: transparent;
+  border-right-color: #e8e8e8;
   background: @layout-sidebar-color;
   background-repeat: no-repeat !important;
   background-size: cover;
@@ -538,6 +520,9 @@ body {
       display: inline-flex;
       align-items: center;
       color: @layout-sidebar-font-color;
+      i {
+        color: @text-color_5;
+      }
     }
     &:hover {
       .scroll {
@@ -590,8 +575,11 @@ body {
   .ant-menu-item-selected {
     a,
     a:hover {
-      color: @layout-sidebar-font-color;
+      color: @layout-sidebar-selected-font-color;
       font-weight: 600;
+      i {
+        color: @layout-sidebar-selected-font-color;
+      }
     }
   }
   .ant-menu-item::after,
@@ -601,6 +589,9 @@ body {
 
   .ant-menu-submenu {
     color: @layout-sidebar-font-color;
+    i {
+      color: @text-color_5;
+    }
   }
   .ant-menu-submenu-title:hover {
     color: @layout-sidebar-font-color;
@@ -613,8 +604,11 @@ body {
   }
   .ant-menu-submenu-selected {
     > .ant-menu-submenu-title {
-      color: @layout-sidebar-font-color;
+      color: @layout-sidebar-selected-font-color;
       font-weight: 800;
+      i {
+        color: @layout-sidebar-selected-font-color;
+      }
     }
   }
   .ant-menu-submenu-content .ant-menu-submenu-active .ant-menu-submenu-title {
@@ -852,7 +846,7 @@ body {
   .ant-layout-sider {
     box-shadow: none;
     .ant-layout-sider-children {
-      background: @primary-color_5;
+      background: @primary-color_7;
       .ant-menu {
         display: none;
       }
@@ -883,7 +877,7 @@ body {
   }
 }
 
-.custom-vue-treeselect__control(@bgColor:@primary-color_5,@border:none) {
+.custom-vue-treeselect__control(@bgColor:@primary-color_7,@border:none) {
   background-color: @bgColor;
   border: @border;
 }
@@ -956,13 +950,13 @@ body {
 //非斑马纹
 .ops-unstripe-table {
   .vxe-table--border-line {
-    border: none !important;
+    // border: none !important;
   }
   .vxe-table--header-wrapper {
-    background-color: @primary-color_5 !important;
+    background-color: @primary-color_6 !important;
   }
   .vxe-header--row .vxe-header--column:hover {
-    background: #2f54eb1f !important;
+    background: @primary-color_3;
   }
 }
 .ops-unstripe-table.vxe-table--render-default.border--full {
@@ -983,7 +977,7 @@ body {
     border: none !important;
   }
   .vxe-table--header-wrapper {
-    background-color: @primary-color_5 !important;
+    background-color: @primary-color_6 !important;
   }
   // .vxe-table--header-wrapper.body--wrapper {
   //   border-radius: 8px !important;
@@ -1010,33 +1004,25 @@ body {
     }
   }
   .vxe-header--row .vxe-header--column:hover {
-    background: #2f54eb1f !important;
+    background: @primary-color_3;
   }
 }
 
 .ops-input {
   .ant-input,
   .ant-time-picker-input {
-    background-color: @primary-color_5;
+    background-color: @primary-color_7;
     border: none;
   }
 }
 .ops-input.ant-input {
-  background-color: @primary-color_5;
+  background-color: @primary-color_7;
   border: none;
 }
 .ops-input.ant-input[disabled] {
   background-color: #f9f9f9;
   color: #333;
   cursor: default;
-}
-.ops-input-radius {
-  .ant-input {
-    border-radius: 20px;
-  }
-}
-.ops-input-radius.ant-input {
-  border-radius: 20px;
 }
 
 // vxe-table checkbox 选中 highlight
@@ -1110,12 +1096,12 @@ body {
 //批量操作
 .ops-list-batch-action {
   display: inline-block;
-  background-color: @primary-color_5;
+  background-color: @primary-color_6;
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.55);
+  color: @text-color_3;
   > span {
     display: inline-block;
-    padding: 4px 8px;
+    padding: 7px 8px;
     cursor: pointer;
     &:hover {
       color: @primary-color;
@@ -1127,7 +1113,7 @@ body {
   }
 }
 
-//tab
+// card tab
 .ops-tab.ant-tabs.ant-tabs-card {
   .ant-tabs-card-bar {
     margin: 0;
@@ -1147,15 +1133,53 @@ body {
   }
 }
 
-//button
+// line tab
+.ops-tab.ant-tabs {
+  .ant-tabs-bar {
+    margin-bottom: 20px;
+    border-bottom: none;
+    .ant-tabs-nav.ant-tabs-nav-animated,
+    .ant-tabs-nav.ant-tabs-nav-animated > div:first-child {
+      border-bottom: 1px solid @border-color-base;
+    }
+    .ant-tabs-tab {
+      color: @text-color_4;
+    }
+    .ant-tabs-tab-active {
+      color: @primary-color;
+    }
+  }
+}
+
+// button
 .ops-button-primary {
   background-color: @primary-color_4;
   border-color: @primary-color_4;
   color: @primary-color;
   box-shadow: none;
 }
+// button
+.ops-button-ghost.ant-btn-background-ghost.ant-btn-primary {
+  background-color: @primary-color_5!important;
+  border-color: @primary-color_8;
+}
+.ops-button-ghost.ant-btn-background-ghost.ant-btn-primary[disabled] {
+  border-color: #d9d9d9;
+  background-color: @primary-color_7!important;
+}
 
-//select
+// button
+.ant-btn.ant-btn-icon-only {
+  &:hover > i {
+    color: @primary-color;
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  }
+  > i {
+    color: #d9d9d9;
+  }
+}
+
+// select
 .ops-select {
   &.white {
     .ant-select-selection {
@@ -1173,10 +1197,6 @@ body {
       }
     }
   }
-  .ant-select-selection {
-    background-color: @primary-color_5;
-    border-color: @primary-color_5;
-  }
 }
 
 //dropdown
@@ -1190,9 +1210,7 @@ body {
 
 //modal
 .ant-modal-content {
-  border-radius: 15px;
   .ant-modal-header {
-    border-radius: 15px;
     border-bottom: none;
     .ant-modal-title {
       padding-left: 10px;
@@ -1328,12 +1346,8 @@ body {
     border-bottom-color: @primary-color;
   }
 }
-// .ant-menu.ant-menu-light {
-//   &.ops-menu {
-//     background-color: white;
-//     background: none;
-//     .ant-menu-submenu {
-//       color: rgba(0, 0, 0, 0.65);
-//     }
-//   }
-// }
+
+.ant-tree li .ant-tree-node-content-wrapper.ant-tree-node-selected,
+.ant-tree li .ant-tree-node-content-wrapper:hover {
+  background-color: @primary-color_3;
+}

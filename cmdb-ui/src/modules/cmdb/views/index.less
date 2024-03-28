@@ -77,7 +77,7 @@
 }
 
 .cmdb-views-header {
-  border-left: 4px solid #custom_colors[color_1];
+  border-left: 4px solid @primary-color;
   height: 32px;
   display: flex;
   align-items: center;
@@ -85,17 +85,17 @@
   margin-bottom: 18px;
   .cmdb-views-header-title {
     font-size: 16px;
-    font-weight: 400;
-    color: rgba(0, 0, 0, 0.75);
+    font-weight: bold;
+    color: @text-color_1;
     margin-left: 10px;
   }
   .cmdb-views-header-metadata {
     cursor: pointer;
     font-size: 12px;
-    color: rgba(0, 0, 0, 0.55);
+    color: @text-color_3;
     margin-left: 20px;
     &:hover {
-      color: #custom_colors[color_1];
+      color: @primary-color;
     }
   }
 }

@@ -11,9 +11,9 @@
       :key="route.name"
       @click="() => handleClick(route)"
     >
-      {{ route.meta.title }}
+      {{ $t(route.meta.title) }}
     </span>
-    <!-- <a-popover v-model="visible" placement="bottom" trigger="click" overlayClassName="top-menu-dropdown">
+    <a-popover v-model="visible" placement="bottom" trigger="click" overlayClassName="top-menu-dropdown">
       <template slot="content">
         <div class="title">
           更多应用
@@ -36,20 +36,31 @@
         </div>
       </template>
       <span class="top-menu-icon"><gridSvg /></span>
-    </a-popover> -->
+    </a-popover>
   </div>
 </template>
 
 <script>
 import store from '@/store'
 import { gridSvg, top_agent, top_acl } from '@/core/icons'
+import { getPreference } from '@/modules/cmdb/api/preference'
 export default {
   name: 'TopMenu',
   components: { gridSvg, top_agent, top_acl },
   data() {
     return {
-      defaultShowRouteName: ['cmdb', 'acl'],
-      defaultUnShowRouteName: [],
+      defaultShowRouteName: [
+        'dag',
+        'cmdb',
+        'itsm',
+        'ticket',
+        'monitor',
+        'calendar',
+        'datainsight',
+        'fullscreen',
+        'oneterm',
+      ],
+      defaultUnShowRouteName: ['acl', 'agent'],
       routes: store.getters.appRoutes.filter((i) => !(i.meta || {}).hiddenInTopMenu),
       current: store.getters.appRoutes[0].name,
       visible: false,
@@ -78,10 +89,20 @@ export default {
     this.current = this.$route.matched[0].name
   },
   methods: {
-    handleClick(route) {
+    async handleClick(route) {
       this.visible = false
       if (route.name !== this.current) {
-        this.$router.push(route.redirect)
+        if (route.name === 'cmdb') {
+          const preference = await getPreference()
+          const lastTypeId = window.localStorage.getItem('ops_ci_typeid') || undefined
+          if (lastTypeId && preference.some((item) => item.id === Number(lastTypeId))) {
+            this.$router.push(`/cmdb/instances/types/${lastTypeId}`)
+          } else {
+            this.$router.push('/cmdb/dashboard')
+          }
+        } else {
+          this.$router.push(route.redirect)
+        }
         // this.current = route.name
       }
     },
@@ -110,33 +131,21 @@ export default {
     line-height: @layout-header-icon-height;
     border-radius: 4px !important;
     display: inline-flex;
-    align-items: flex-end;
+    align-items: center;
   }
   > span {
     cursor: pointer;
     padding: 4px 10px;
     margin: 0 5px;
-    border-radius: 4px;
     color: @layout-header-font-color;
     height: @layout-header-height;
     display: inline-flex;
     align-items: center;
-    &:hover {
-      background: linear-gradient(0deg, rgba(0, 80, 201, 0.2) 0%, rgba(174, 207, 255, 0.06) 86.76%);
-      color: @layout-header-font-selected-color;
-      border-radius: 3px 3px 0px 0px;
-    }
   }
+  > span:hover,
   .top-menu-selected {
-    background: linear-gradient(0deg, rgba(0, 80, 201, 0.2) 0%, rgba(174, 207, 255, 0.06) 86.76%);
+    font-weight: bold;
     color: @layout-header-font-selected-color;
-    border-radius: 3px 3px 0px 0px;
-    border-bottom: 3px solid @layout-header-font-selected-color;
-    &:hover {
-      background: linear-gradient(0deg, rgba(0, 80, 201, 0.2) 0%, rgba(174, 207, 255, 0.06) 86.76%);
-      color: @layout-header-font-selected-color;
-      border-radius: 3px 3px 0px 0px;
-    }
   }
 }
 

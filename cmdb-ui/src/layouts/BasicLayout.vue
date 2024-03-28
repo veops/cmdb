@@ -87,21 +87,21 @@ export default {
   computed: {
     ...mapState({
       // 动态主路由
-      mainMenu: state => state.routes.appRoutes,
+      mainMenu: (state) => state.routes.appRoutes,
     }),
     contentPaddingLeft() {
       if (!this.fixSidebar || this.isMobile()) {
         return '0'
       }
       if (this.sidebarOpened) {
-        return '200px'
+        return '220px'
       }
       return '80px'
     },
     sideBarMenu() {
-      const sideMenus = this.mainMenu.filter(item => this.$route.path.startsWith(item.path))
+      const sideMenus = this.mainMenu.filter((item) => this.$route.path.startsWith(item.path))
       if (sideMenus.length > 1) {
-        return sideMenus.find(item => item.path !== '/').children
+        return sideMenus.find((item) => item.path !== '/').children
       } else {
         return sideMenus[0].children
       }
@@ -110,6 +110,9 @@ export default {
   provide() {
     return {
       reloadBoard: this.reload,
+      collapsed: () => {
+        return this.collapsed
+      },
     }
   },
   watch: {
@@ -145,15 +148,6 @@ export default {
       this.$nextTick(() => {
         this.alive = true
       })
-    },
-    paddingCalc() {
-      let left = ''
-      if (this.sidebarOpened) {
-        left = this.isDesktop() ? '200px' : '80px'
-      } else {
-        left = (this.isMobile() && '0') || (this.fixSidebar && '80px') || '0'
-      }
-      return left
     },
     menuSelect() {
       if (!this.isDesktop()) {

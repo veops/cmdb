@@ -51,7 +51,6 @@
               :class="{
                 'cmdb-preference-avatar': true,
                 'cmdb-preference-avatar-noicon': !ciType.icon,
-                'cmdb-preference-avatar-noicon-is_subscribed': !ciType.icon && ciType.is_subscribed,
               }"
               :style="{ width: '30px', height: '30px', marginRight: '10px' }"
             >
@@ -94,7 +93,12 @@
       </div>
     </div>
     <div class="cmdb-preference-right">
-      <div v-for="group in citypeData" :key="group.id">
+      <a-input-search
+        v-model="searchValue"
+        :style="{ width: '300px', marginBottom: '20px' }"
+        :placeholder="$t('cmdb.preference.searchPlaceholder')"
+      />
+      <div v-for="group in filterCiTypeData" :key="group.id">
         <p @click="changeGroupExpand(group)" :style="{ display: 'inline-block', cursor: 'pointer' }">
           <a-icon :type="expandKeys.includes(group.id) ? 'caret-down' : 'caret-right'" />{{ group.name }}({{
             group.ci_types ? group.ci_types.length : 0
@@ -108,7 +112,6 @@
                   :class="{
                     'cmdb-preference-avatar': true,
                     'cmdb-preference-avatar-noicon': !item.icon,
-                    'cmdb-preference-avatar-noicon-is_subscribed': !item.icon && item.is_subscribed,
                   }"
                 >
                   <template v-if="item.icon">
@@ -188,6 +191,7 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import router, { resetRouter } from '@/router'
 import store from '@/store'
 import { mapState } from 'vuex'
@@ -219,12 +223,29 @@ export default {
       },
       type_id2users: {},
       myPreferences: [],
+      searchValue: '',
     }
   },
   computed: {
     ...mapState({
       windowHeight: (state) => state.windowHeight,
     }),
+    filterCiTypeData() {
+      if (this.searchValue) {
+        const _citypeData = _.cloneDeep(this.citypeData)
+        _citypeData.forEach((group) => {
+          if (group.ci_types) {
+            group.ci_types = group.ci_types.filter(
+              (item) =>
+                item.name.toLowerCase().includes(this.searchValue.toLowerCase()) ||
+                item.alias.toLowerCase().includes(this.searchValue.toLowerCase())
+            )
+          }
+        })
+        return _citypeData
+      }
+      return this.citypeData
+    },
   },
   mounted() {
     this.getCITypes(true)
@@ -376,7 +397,6 @@ export default {
 .cmdb-preference {
   margin: -24px;
   overflow: auto;
-  background: url('../../assets/preference_background.png');
   position: relative;
   display: flex;
   flex-direction: row;
@@ -392,7 +412,7 @@ export default {
   .cmdb-preference-left {
     width: 300px;
     height: 100%;
-    padding: 12px 18px;
+    padding: 24px 18px;
     .cmdb-preference-left-card {
       background: url('../../assets/preference_card.png');
       background-repeat: no-repeat;
@@ -426,17 +446,19 @@ export default {
       .cmdb-preference-group-title {
         text-align: center;
         margin-bottom: 5px;
+        i {
+          color: @primary-color;
+        }
         > span {
           display: inline-block;
-          color: #fff;
-          background: linear-gradient(90deg, #305bec, #78cfff);
+          color: @text-color_2;
           border-radius: 16px;
           font-weight: 600;
           padding: 6px 12px;
         }
       }
       .cmdb-preference-group-content {
-        color: rgba(0, 0, 0, 0.75);
+        color: @text-color_1;
         font-weight: 400;
         display: flex;
         align-items: center;
@@ -447,7 +469,11 @@ export default {
         &:hover {
           background: #ffffff;
           box-shadow: 0px 2px 8px rgba(149, 160, 208, 0.25);
-          border-radius: 8px;
+          border-radius: @border-radius-box;
+          .cmdb-preference-avatar {
+            box-shadow: none;
+            background-color: @primary-color_5;
+          }
           .cmdb-preference-group-content-action {
             display: inline;
             white-space: nowrap;
@@ -479,7 +505,7 @@ export default {
   .cmdb-preference-right {
     flex: 1;
     height: 100%;
-    padding-top: 18px;
+    padding-top: 24px;
     .cmdb-preference-content {
       display: flex;
       flex-direction: row;
@@ -494,11 +520,11 @@ export default {
         display: inline-block;
         width: 195px;
         height: 155px;
-        border-radius: 8px;
+        border-radius: @border-radius-box;
         background-color: #fff;
         box-shadow: 0px 2px 8px rgba(149, 160, 208, 0.25);
         margin: 0 20px 20px 0;
-        padding: 8px;
+        padding: 12px;
         &:hover {
           box-shadow: 4px 25px 30px rgba(50, 89, 134, 0.25);
           transform: scale(1.1);
@@ -550,7 +576,7 @@ export default {
           .cmdb-preference-progress-gray {
             height: 5px;
             border-radius: 5px;
-            background-color: #d9d9d9;
+            background-color: @text-color_6;
             margin-top: 5px;
             width: 100%;
             position: relative;
@@ -560,7 +586,7 @@ export default {
               top: 0;
               left: 0;
               border-radius: 5px;
-              background: linear-gradient(90deg, #305bec, #78cfff);
+              background: @primary-color_8;
             }
           }
         }
@@ -592,20 +618,17 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 34px;
+    height: 34px;
     box-shadow: 0px 4px 4px rgba(129, 140, 186, 0.25);
-    border-radius: 5px;
+    border-radius: 1px;
+    background-color: #fff;
   }
   .cmdb-preference-avatar-noicon {
-    background-color: #7f97fa;
     > span {
-      font-size: 24px;
-      color: #fff;
+      font-size: 18px;
+      color: @text-color_4;
     }
-  }
-  .cmdb-preference-avatar-noicon-is_subscribed {
-    background-color: #47a964;
   }
 }
 </style>

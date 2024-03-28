@@ -11,7 +11,7 @@
         @blur="handleInputConfirm"
         @keyup.enter="handleInputConfirm"
       />
-      <a-button v-else type="primary" size="small" ghost @click="showInput">{{ $t('cmdb.components.saveQuery') }}</a-button>
+      <a v-else @click="showInput"> {{ $t('cmdb.components.saveQuery') }}</a>
     </span>
     <template v-for="(item, index) in preferenceSearchList.slice(0, 3)">
       <span
@@ -178,10 +178,10 @@ export default {
 <style lang="less" scoped>
 .preference-search-tag {
   cursor: pointer;
-  border-radius: 5px;
-  border: none;
+  border-radius: 2px;
+  border: 1px solid #d9d9d9;
   display: inline-block;
-  padding: 0 7px;
+  padding: 2px 7px;
   margin-right: 8px;
   > span {
     margin-right: 4px;

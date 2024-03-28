@@ -11,9 +11,11 @@
         @setFixedList="setFixedList"
       />
     </template>
-    <div :style="{ height: '100%', width: '30px', float: 'right', borderLeft: '1px solid #e8eaec' }">
-      <a-icon :style="{ margin: '13px 0 0 10px ' }" type="control" />
-    </div>
+    <slot>
+      <div :style="{ height: '100%', width: '30px', float: 'right', borderLeft: '1px solid #e8eaec' }">
+        <a-icon :style="{ margin: '13px 0 0 10px ' }" type="control" />
+      </div>
+    </slot>
   </a-popover>
 </template>
 

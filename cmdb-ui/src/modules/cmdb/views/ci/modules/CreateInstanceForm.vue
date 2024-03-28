@@ -106,9 +106,9 @@
               <a-date-picker
                 v-decorator="[list.name, { rules: [{ required: false }] }]"
                 style="width: 100%"
-                :format="getFieldType(list.name) == 'date' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss'"
-                v-if="getFieldType(list.name) === 'date' || getFieldType(list.name) === 'datetime'"
-                :showTime="getFieldType(list.name) === 'date' ? false : { format: 'HH:mm:ss' }"
+                :format="getFieldType(list.name) == '4' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss'"
+                v-if="getFieldType(list.name) === '4' || getFieldType(list.name) === '3'"
+                :showTime="getFieldType(list.name) === '4' ? false : { format: 'HH:mm:ss' }"
               />
               <a-input
                 v-if="getFieldType(list.name) === 'input'"
@@ -373,7 +373,7 @@ export default {
         } else if (_find.value_type === '0' || _find.value_type === '1') {
           return 'input_number'
         } else if (_find.value_type === '4' || _find.value_type === '3') {
-          return this.valueTypeMap[_find.value_type]
+          return _find.value_type
         } else {
           return 'input'
         }

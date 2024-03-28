@@ -64,7 +64,7 @@ export default {
     },
     triggerColor: {
       type: String,
-      default: '#f0f2f5',
+      default: '#f7f8fa',
     },
   },
   data() {

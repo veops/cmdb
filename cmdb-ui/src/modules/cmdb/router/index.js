@@ -156,8 +156,8 @@ const genCmdbRoutes = async () => {
   const lastTypeId = window.localStorage.getItem('ops_ci_typeid') || undefined
   if (lastTypeId && preference.some(item => item.id === Number(lastTypeId))) {
     routes.redirect = `/cmdb/instances/types/${lastTypeId}`
-  } else if (routes.children[2].children.length > 0) {
-    routes.redirect = routes.children[2].children.find(item => !item.hidden).path
+  } else if (routes.children[3]?.children?.length > 0) {
+    routes.redirect = routes.children[3]?.children.find(item => !item.hidden)?.path
   } else {
     routes.redirect = '/cmdb/dashboard'
   }

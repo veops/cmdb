@@ -9,13 +9,21 @@
       :fileList="fileList"
       :disabled="!ciType || isUploading"
     >
-      <img :style="{ width: '80px', height: '80px' }" src="@/assets/file_upload.png" />
-      <p class="ant-upload-text">{{ $t('cmdb.batch.drawTips') }}</p>
+      <ops-icon type="itsm-folder" />
       <p class="ant-upload-hint">{{ $t('cmdb.batch.supportFileTypes') }}</p>
+      <p v-html="$t('cmdb.batch.drawTips1')"></p>
+      <p v-html="$t('cmdb.batch.drawTips2')"></p>
+      <div v-for="item in fileList" :key="item.name" class="cmdb-batch-upload-dragger-file">
+        <span><a-icon type="file" :style="{ color: '#2F54EB', marginRight: '5px' }" />{{ item.name }}</span>
+        <a-progress :status="progressStatus" :percent="percent" />
+      </div>
     </a-upload-dragger>
-    <div v-for="item in fileList" :key="item.name" class="cmdb-batch-upload-dragger-file">
-      <span><a-icon type="file" :style="{ color: '#2F54EB', marginRight: '5px' }" />{{ item.name }}</span>
-      <a-progress :status="progressStatus" :percent="percent" />
+    <div class="cmdb-batch-upload-tips">
+      <p>{{ $t('cmdb.batch.tips1') }}</p>
+      <div>{{ $t('cmdb.batch.tips2') }}</div>
+      <div>{{ $t('cmdb.batch.tips3') }}</div>
+      <div>{{ $t('cmdb.batch.tips4') }}</div>
+      <div>{{ $t('cmdb.batch.tips5') }}</div>
     </div>
   </div>
 </template>
@@ -46,15 +54,13 @@ export default {
   },
   watch: {
     ciType: {
-      handler(newValue) {
-        if (!newValue) {
-          this.ciItemNum = 0
-          this.fileList = []
-          this.dataList = []
-          this.progressStatus = 'active'
-          this.percent = 0
-          this.$emit('uploadDone', this.dataList)
-        }
+      handler() {
+        this.ciItemNum = 0
+        this.fileList = []
+        this.dataList = []
+        this.progressStatus = 'active'
+        this.percent = 0
+        this.$emit('uploadDone', this.dataList)
       },
     },
   },
@@ -77,12 +83,28 @@ export default {
 </script>
 
 <style lang="less">
+@import '~@/style/static.less';
+
 .cmdb-batch-upload-dragger {
-  height: 220px;
+  height: auto;
   margin: 16px 0;
+  .ant-upload p {
+    margin-bottom: 5px;
+  }
   .ant-upload.ant-upload-drag {
-    background: rgba(240, 245, 255, 0.35);
     border: none;
+    background: linear-gradient(90deg, @text-color_5 50%, transparent 0) repeat-x,
+      linear-gradient(90deg, @text-color_5 50%, transparent 0) repeat-x,
+      linear-gradient(0deg, @text-color_5 50%, transparent 0) repeat-y,
+      linear-gradient(0deg, @text-color_5 50%, transparent 0) repeat-y;
+    background-size: 15px 1px, 15px 1px, 1px 15px, 1px 15px;
+    background-position: 0 0, 0 100%, 0 0, 100% 0;
+    .ant-upload-drag-container > i {
+      font-size: 60px;
+    }
+    .cmdb-batch-upload-tips {
+      color: @primary-color;
+    }
   }
   .ant-upload.ant-upload-drag .ant-upload-drag-container {
     vertical-align: baseline;
@@ -90,22 +112,36 @@ export default {
 }
 </style>
 <style lang="less" scoped>
+@import '~@/style/static.less';
+
 .cmdb-batch-upload-dragger {
   position: relative;
+  display: flex;
+  > span {
+    display: inline-block;
+    width: 50%;
+  }
   .cmdb-batch-upload-dragger-file {
-    background-color: #fff;
-    box-shadow: 0px 2px 5px rgba(78, 94, 160, 0.2);
-    border-radius: 4px;
-    position: absolute;
+    background-color: @primary-color_7;
+    border-radius: 2px;
     width: 80%;
-    left: 50%;
-    bottom: 24px;
     padding: 2px 8px;
-    transform: translate(-50%);
     display: inline-flex;
     > span {
       white-space: nowrap;
       margin-right: 10px;
+    }
+  }
+  .cmdb-batch-upload-tips {
+    width: 50%;
+    padding-left: 20px;
+    color: @text-color_3;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    p:first-child {
+      color: @text-color_1;
     }
   }
 }

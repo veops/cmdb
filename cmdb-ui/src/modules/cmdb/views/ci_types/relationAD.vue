@@ -1,5 +1,5 @@
 <template>
-  <div class="relation-ad" :style="{ height: `${windowHeight - 104}px` }">
+  <div class="relation-ad" :style="{ height: `${windowHeight - 130}px` }">
     <div class="relation-ad-item" v-for="item in relationList" :key="item.id">
       <treeselect
         class="custom-treeselect"
@@ -253,7 +253,7 @@ export default {
 <style lang="less" scoped>
 .relation-ad {
   overflow: auto;
-  padding: 24px;
+  padding: 0 20px;
   .relation-ad-item {
     display: inline-flex;
     justify-content: flex-start;

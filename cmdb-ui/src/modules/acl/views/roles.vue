@@ -285,8 +285,10 @@ export default {
 </script>
 
 <style lang="less">
+@import '~@/style/static.less';
+
 .acl-roles {
-  border-radius: 15px;
+  border-radius: @border-radius-box;
   background-color: #fff;
   height: calc(100vh - 64px);
   margin-bottom: -24px;
