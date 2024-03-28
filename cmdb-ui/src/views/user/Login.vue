@@ -1,12 +1,10 @@
 <template>
   <div class="ops-login">
     <div class="ops-login-left">
-      <span>OneOps统一运维平台</span>
-      <img src="../../assets/login_img.png" />
+      <span>维易科技<br />让运维更简单</span>
     </div>
     <div class="ops-login-right">
-      <img src="../../assets/OneOps.png" />
-      <div class="ops-login-right-welcome"><span>欢迎登录</span></div>
+      <img src="../../assets/logo_VECMDB.png" />
       <a-form
         id="formLogin"
         ref="formLogin"
