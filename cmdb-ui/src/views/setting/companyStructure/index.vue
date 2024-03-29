@@ -136,14 +136,12 @@
               </div>
               <div>
                 <a-space v-if="isEditable">
-                  <a-button
+                  <a
                     @click="openEmployeeModal({}, 'add')"
-                    size="small"
-                    type="primary"
-                    shape="circle"
-                    icon="plus"
-                    ghost
-                  />
+                  ><ops-icon
+                    :style="{ fontSize: '18px' }"
+                    type="veops-increase"
+                  /></a>
                   <a-button type="primary" size="small" ghost @click="batchUpload">
                     {{ $t('cs.companyStructure.batchImport') }}
                   </a-button>

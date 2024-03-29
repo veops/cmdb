@@ -6,6 +6,7 @@
     :visible="visible"
     @close="handleCancel"
     @ok="handleOk"
+    destroyOnClose
   >
     <div class="custom-drawer-bottom-action">
       <a-button type="primary" ghost @click="handleCancel">{{ $t('cancel') }}</a-button>

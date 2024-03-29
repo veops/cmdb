@@ -88,7 +88,7 @@
               <a-menu-item
                 :disabled="!batchTreeKey || !batchTreeKey.length"
                 key="batchDelete"
-              ><ops-icon type="icon-xianxing-delete" />{{ $t('delete') }}</a-menu-item
+              ><ops-icon type="icon-xianxing-delete" />{{ $t('cmdb.serviceTree.remove') }}</a-menu-item
               >
               <a-menu-divider />
             </template>
