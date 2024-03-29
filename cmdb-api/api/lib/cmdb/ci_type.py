@@ -1362,8 +1362,12 @@ class CITypeTemplateManager(object):
             rule.pop("id", None)
             rule.pop("created_at", None)
             rule.pop("updated_at", None)
+            rule.pop("relation", None)
 
             rule['uid'] = current_user.uid
+
+            if not rule.get('attributes'):
+                continue
 
             existed = False
             for i in AutoDiscoveryCIType.get_by(type_id=ci_type.id, adr_id=rule['adr_id'], to_dict=False):
