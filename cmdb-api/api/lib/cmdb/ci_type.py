@@ -1305,6 +1305,8 @@ class CITypeTemplateManager(object):
                 _group = copy.deepcopy(group)
                 _group.pop('attributes', None)
                 _group.pop('id', None)
+                _group.pop('inherited', None)
+                _group.pop('inherited_from', None)
                 existed = CITypeAttributeGroup.get_by(name=_group['name'],
                                                       type_id=type_id_map.get(_group['type_id'], _group['type_id']),
                                                       first=True, to_dict=False)
