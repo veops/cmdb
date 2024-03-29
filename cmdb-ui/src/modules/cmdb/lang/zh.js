@@ -340,7 +340,7 @@ const cmdb_zh = {
         tips1: '不能与当前选中节点形成视图，请重新选择！',
         tips2: '请输入新增服务树名！',
         tips3: '请选择至少两个节点！',
-        tips4: '叶子节点/树节点信息至少展示一个',
+        tips4: '树子节点为必选',
         tips5: '选中树目录节点，服务树子节点展示成Table',
         showLeafNode: '树的子节点展示成Table',
         showTreeNode: '展示树节点信息',
