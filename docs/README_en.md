@@ -69,17 +69,17 @@
 ### One-Click Docker Quick Build
 
 > Method 1
-- step 1: **Prepare: install docker and docker-compose**
+- step 1: **Prepare: install Docker and Docker Compose (v2)**
 - step 2:  copy the repository
 ```shell 
 git clone https://github.com/veops/cmdb.git
 ```
 - step 3: In directory cmdb:
 ```
-docker-compose up -d
+docker compose up -d
 ```
 > Method 2  Usefull for linux os.
-- step 1: **Prepare: install docker and docker-compose**
+- step 1: **Prepare: install Docker and Docker Compose (v2)**
 - step 2: directly use the install.sh file in the project's root directory to `install`, `start`, `pause`, `status`, `delete`, and `uninstall` the application. 
 ```shell
 curl -so install.sh https://raw.githubusercontent.com/veops/cmdb/master/install.sh 
