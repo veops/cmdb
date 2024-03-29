@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-03-01 13:49+0800\n"
+"POT-Creation-Date: 2024-03-29 10:42+0800\n"
 "PO-Revision-Date: 2023-12-25 20:21+0800\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -322,7 +322,7 @@ msgstr "无效的属性值: {}"
 
 #: api/lib/cmdb/resp_format.py:94
 msgid "{} Invalid value: {}"
-msgstr "无效的值: {}"
+msgstr "{} 无效的值: {}"
 
 #: api/lib/cmdb/resp_format.py:95
 msgid "{} is not in the predefined values"
@@ -335,6 +335,10 @@ msgstr "属性 {} 的值必须是唯一的, 当前值 {} 已存在"
 #: api/lib/cmdb/resp_format.py:98
 msgid "Attribute {} value must exist"
 msgstr "属性 {} 值必须存在"
+
+#: api/lib/cmdb/resp_format.py:99
+msgid "Out of range value, the maximum value is 2147483647"
+msgstr "超过最大值限制, 最大值是2147483647"
 
 #: api/lib/cmdb/resp_format.py:101
 msgid "Unknown error when adding or modifying attribute value: {}"

@@ -96,7 +96,7 @@ class ErrFormat(CommonErrFormat):
     # 属性 {} 的值必须是唯一的, 当前值 {} 已存在
     attribute_value_unique_required = _l("The value of attribute {} must be unique, {} already exists")
     attribute_value_required = _l("Attribute {} value must exist")  # 属性 {} 值必须存在
-
+    attribute_value_out_of_range = _l("Out of range value, the maximum value is 2147483647")
     # 新增或者修改属性值未知错误: {}
     attribute_value_unknown_error = _l("Unknown error when adding or modifying attribute value: {}")
 

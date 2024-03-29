@@ -5,14 +5,16 @@ from __future__ import unicode_literals
 
 import copy
 import imp
-import jinja2
 import os
 import re
 import tempfile
+
+import jinja2
 from flask import abort
 from flask import current_app
 from jinja2schema import infer
 from jinja2schema import to_json_schema
+from werkzeug.exceptions import BadRequest
 
 from api.extensions import db
 from api.lib.cmdb.attribute import AttributeManager
@@ -23,6 +25,7 @@ from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.cmdb.history import AttributeHistoryManger
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.utils import TableMap
+from api.lib.cmdb.utils import ValueDeserializeError
 from api.lib.cmdb.utils import ValueTypeMap
 from api.lib.utils import handle_arg_list
 from api.models.cmdb import CI
@@ -80,7 +83,7 @@ class AttributeValueManager(object):
         return res
 
     @staticmethod
-    def _deserialize_value(value_type, value):
+    def _deserialize_value(alias, value_type, value):
         if not value:
             return value
 
@@ -88,6 +91,8 @@ class AttributeValueManager(object):
         try:
             v = deserialize(value)
             return v
+        except ValueDeserializeError as e:
+            return abort(400, ErrFormat.attribute_value_invalid2.format(alias, e))
         except ValueError:
             return abort(400, ErrFormat.attribute_value_invalid.format(value))
 
@@ -124,7 +129,7 @@ class AttributeValueManager(object):
 
     def _validate(self, attr, value, value_table, ci=None, type_id=None, ci_id=None, type_attr=None):
         ci = ci or {}
-        v = self._deserialize_value(attr.value_type, value)
+        v = self._deserialize_value(attr.alias, attr.value_type, value)
 
         attr.is_choice and value and self._check_is_choice(attr, attr.value_type, v)
         attr.is_unique and self._check_is_unique(
@@ -240,6 +245,8 @@ class AttributeValueManager(object):
                     value = self._validate(attr, value, value_table, ci=None, type_id=type_id, ci_id=ci_id,
                                            type_attr=ci_attr2type_attr.get(attr.id))
                     ci_dict[key] = value
+            except BadRequest as e:
+                raise
             except Exception as e:
                 current_app.logger.warning(str(e))
 
