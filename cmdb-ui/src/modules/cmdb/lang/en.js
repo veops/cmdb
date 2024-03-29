@@ -505,6 +505,7 @@ const cmdb_en = {
         noPermission: 'No Permission'
     },
     serviceTree: {
+        remove: 'Remove',
         deleteNode: 'Delete {name}',
         tips1: 'For example: q=os_version:centos&sort=os_version',
         tips2: 'Expression search',

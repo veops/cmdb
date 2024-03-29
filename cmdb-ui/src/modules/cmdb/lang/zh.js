@@ -504,6 +504,7 @@ const cmdb_zh = {
         noPermission: '暂无权限'
     },
     serviceTree: {
+        remove: '移除',
         deleteNode: '移除 {name}',
         tips1: '例：q=os_version:centos&sort=os_version',
         tips2: '表达式搜索',

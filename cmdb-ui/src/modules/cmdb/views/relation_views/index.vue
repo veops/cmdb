@@ -33,7 +33,7 @@
               >{{ $t('revoke') }}</span
               >
               <template v-if="showBatchLevel > 0">
-                <span @click="batchDeleteCIRelationFromTree">{{ $t('delete') }}</span>
+                <span @click="batchDeleteCIRelationFromTree">{{ $t('cmdb.serviceTree.remove') }}</span>
               </template>
               <span
                 @click="
