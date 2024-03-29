@@ -148,10 +148,10 @@ class ACLManager(object):
             if group:
                 PermissionCRUD.revoke(rid, permissions, group_id=group.id, rebuild=rebuild)
 
-    def del_resource(self, name, resource_type_name=None):
+    def del_resource(self, name, resource_type_name=None, rebuild=True):
         resource = self._get_resource(name, resource_type_name)
         if resource:
-            return ResourceCRUD.delete(resource.id)
+            return ResourceCRUD.delete(resource.id, rebuild=rebuild)
 
     def has_permission(self, resource_name, resource_type, perm, resource_id=None):
         if is_app_admin(self.app_id):
