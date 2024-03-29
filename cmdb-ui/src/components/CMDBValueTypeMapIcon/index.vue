@@ -17,25 +17,29 @@ export default {
     getPropertyIcon(attr) {
       switch (attr.value_type) {
         case '0':
-          return 'icon-xianxing-shishu'
+          return 'duose-shishu'
         case '1':
-          return 'icon-xianxing-fudianshu'
+          return 'duose-fudianshu'
         case '2':
           if (attr.is_password) {
-            return 'icon-xianxing-password'
+            return 'duose-password'
           }
           if (attr.is_link) {
-            return 'icon-xianxing-link'
+            return 'duose-link'
           }
-          return 'icon-xianxing-wenben'
+          return 'duose-wenben'
         case '3':
-          return 'icon-xianxing-datetime'
+          return 'duose-datetime'
         case '4':
-          return 'icon-xianxing-date'
+          return 'duose-date'
         case '5':
-          return 'icon-xianxing-time'
+          return 'duose-time'
         case '6':
-          return 'icon-xianxing-json'
+          return 'duose-json'
+        case '7':
+          return 'duose-password'
+        case '8':
+          return 'duose-link'
       }
     },
   },

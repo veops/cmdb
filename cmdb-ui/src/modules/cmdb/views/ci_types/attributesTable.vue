@@ -108,9 +108,7 @@
             handle=".handle"
           >
             <AttributeCard
-              v-for="item in CITypeGroup.attributes.filter(
-                (attr) => !attrTypeFilter.length || (attrTypeFilter.length && attrTypeFilter.includes(attr.value_type))
-              )"
+              v-for="item in filterValueType(CITypeGroup.attributes)"
               :key="item.id"
               @edit="handleEditProperty(item)"
               :property="item"
@@ -152,9 +150,7 @@
           handle=".handle"
         >
           <AttributeCard
-            v-for="item in otherGroupAttributes.filter(
-              (attr) => !attrTypeFilter.length || (attrTypeFilter.length && attrTypeFilter.includes(attr.value_type))
-            )"
+            v-for="item in filterValueType(otherGroupAttributes)"
             :key="item.id"
             @edit="handleEditProperty(item)"
             :property="item"
@@ -563,6 +559,32 @@ export default {
       } else {
         this.attrTypeFilter.push(type)
       }
+    },
+    filterValueType(array) {
+      const { attrTypeFilter } = this
+      return array.filter((attr) => {
+        if (!attrTypeFilter.length) {
+          return true
+        } else {
+          if (attrTypeFilter.includes('7') && attr.is_password) {
+            return true
+          }
+          if (attrTypeFilter.includes('8') && attr.is_link) {
+            return true
+          }
+          if (
+            attrTypeFilter.includes(attr.value_type) &&
+            attr.value_type === '2' &&
+            (attr.is_password || attr.is_link)
+          ) {
+            return false
+          }
+          if (attrTypeFilter.includes(attr.value_type)) {
+            return true
+          }
+          return false
+        }
+      })
     },
   },
 }
