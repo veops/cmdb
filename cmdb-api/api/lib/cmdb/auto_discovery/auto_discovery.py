@@ -331,14 +331,14 @@ class AutoDiscoveryCICRUD(DBMixin):
     @staticmethod
     def get_attributes_by_type_id(type_id):
         from api.lib.cmdb.ci_type import CITypeAttributeManager
-        attributes = [i[1] for i in CITypeAttributeManager.get_all_attributes(type_id) or []]
+        attributes = [i for i in CITypeAttributeManager.get_attributes_by_type_id(type_id) or []]
 
         attr_names = set()
         adts = AutoDiscoveryCITypeCRUD.get_by_type_id(type_id)
         for adt in adts:
             attr_names |= set((adt.attributes or {}).values())
 
-        return [attr.to_dict() for attr in attributes if attr.name in attr_names]
+        return [attr for attr in attributes if attr['name'] in attr_names]
 
     @classmethod
     def search(cls, page, page_size, fl=None, **kwargs):

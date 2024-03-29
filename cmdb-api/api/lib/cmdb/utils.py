@@ -11,12 +11,21 @@ import six
 import api.models.cmdb as model
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.const import ValueTypeEnum
+from api.lib.cmdb.resp_format import ErrFormat
 
 TIME_RE = re.compile(r'(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d')
 
 
+class ValueDeserializeError(Exception):
+    pass
+
+
 def string2int(x):
-    return int(float(x))
+    v = int(float(x))
+    if v > 2147483647:
+        raise ValueDeserializeError(ErrFormat.attribute_value_out_of_range)
+
+    return v
 
 
 def str2datetime(x):
