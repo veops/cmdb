@@ -16,9 +16,9 @@
       <a-tab-pane key="5" :tab="$t('cmdb.ciType.relationAD')">
         <RelationAD :CITypeId="CITypeId"></RelationAD>
       </a-tab-pane>
-      <a-tab-pane key="6" :tab="$t('cmdb.components.relationGrant')">
+      <a-tab-pane key="6" :tab="$t('cmdb.ciType.grant')">
         <GrantComp :CITypeId="CITypeId" resourceType="CIType" :resourceTypeName="CITypeName"></GrantComp>
-        <div class="citype-detail-title">{{ $t('cmdb.ciType.relation') }}</div>
+        <div class="citype-detail-title">{{ $t('cmdb.components.relationGrant') }}</div>
         <RelationTable isInGrantComp :CITypeId="CITypeId" :CITypeName="CITypeName"></RelationTable>
       </a-tab-pane>
     </a-tabs>
