@@ -11,7 +11,7 @@
         <a-checkbox :checked="form.is_show_leaf_node" @change="changeLeaf"> </a-checkbox>
       </a-form-model-item>
       <a-form-model-item :label="$t('cmdb.preference_relation.showTreeNode')" prop="is_show_tree_node">
-        <a-checkbox :checked="form.is_show_tree_node" @change="changeNode"> </a-checkbox>
+        <a-checkbox v-model="form.is_show_tree_node"> </a-checkbox>
       </a-form-model-item>
       <a-form-model-item
         v-if="form.is_show_leaf_node && form.is_show_tree_node"
@@ -49,7 +49,7 @@ export default {
       rules: {
         name: [{ required: true, message: this.$t('cmdb.preference_relation.serviceTreeNamePlaceholder') }],
         is_public: [{ required: false }],
-        is_show_leaf_node: [{ required: false }],
+        is_show_leaf_node: [{ required: true }],
         is_show_tree_node: [{ required: false }],
       },
     }
@@ -83,24 +83,13 @@ export default {
     },
     changeLeaf(e) {
       const checked = e.target.checked
-      if (!checked && !this.form.is_show_tree_node) {
+      if (!checked) {
         this.$message.warning(this.$t('cmdb.preference_relation.tips4'))
         return
       }
       this.form = {
         ...this.form,
         is_show_leaf_node: checked,
-      }
-    },
-    changeNode(e) {
-      const checked = e.target.checked
-      if (!checked && !this.form.is_show_leaf_node) {
-        this.$message.warning(this.$t('cmdb.preference_relation.tips4'))
-        return
-      }
-      this.form = {
-        ...this.form,
-        is_show_tree_node: checked,
       }
     },
   },

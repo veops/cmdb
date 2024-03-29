@@ -341,7 +341,7 @@ const cmdb_en = {
         tips1: 'Cannot form a view with the currently selected node, please select again!',
         tips2: 'Please enter the new serviceTree name!',
         tips3: 'Please select at least two nodes!',
-        tips4: 'Select at least one in leaf node or tree node',
+        tips4: 'Leaf node must be selected',
         tips5: 'Select the tree directory node and display the service tree sub nodes as a Table',
         showLeafNode: 'Show Leaf Node',
         showTreeNode: 'Show Tree Node',
