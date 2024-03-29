@@ -11,9 +11,9 @@
       :key="route.name"
       @click="() => handleClick(route)"
     >
-      {{ $t(route.meta.title) }}
+      {{ route.meta.title }}
     </span>
-    <a-popover v-model="visible" placement="bottom" trigger="click" overlayClassName="top-menu-dropdown">
+    <!-- <a-popover v-model="visible" placement="bottom" trigger="click" overlayClassName="top-menu-dropdown">
       <template slot="content">
         <div class="title">
           更多应用
@@ -36,7 +36,7 @@
         </div>
       </template>
       <span class="top-menu-icon"><gridSvg /></span>
-    </a-popover>
+    </a-popover> -->
   </div>
 </template>
 
@@ -49,18 +49,8 @@ export default {
   components: { gridSvg, top_agent, top_acl },
   data() {
     return {
-      defaultShowRouteName: [
-        'dag',
-        'cmdb',
-        'itsm',
-        'ticket',
-        'monitor',
-        'calendar',
-        'datainsight',
-        'fullscreen',
-        'oneterm',
-      ],
-      defaultUnShowRouteName: ['acl', 'agent'],
+      defaultShowRouteName: ['cmdb', 'acl'],
+      defaultUnShowRouteName: [],
       routes: store.getters.appRoutes.filter((i) => !(i.meta || {}).hiddenInTopMenu),
       current: store.getters.appRoutes[0].name,
       visible: false,

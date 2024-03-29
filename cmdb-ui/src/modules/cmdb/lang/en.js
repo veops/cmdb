@@ -271,7 +271,7 @@ const cmdb_en = {
         tips1: 'Kind Reminder :',
         tips2: '1. Click to download the template, and users can customize the header of the template file, including model properties and model associations',
         // eslint-disable-next-line no-template-curly-in-string
-        tips3: '2. The red color in the template file represents the model relationship, such as the $Product. Product Name (${Model Name}. {Attribute Name}) column, which establishes the relationship between the physical machine and the product.',
+        tips3: '2. The red color in the template file represents the model relationship, such as the $Product. Product Name (${Model Name}. {Attribute Name}) column, which establishes the relationship with the product.',
         tips4: '3. In the download template Excel file, the predefined values of attributes will be set as dropdown options. Please note that due to the limitations of Excel itself, a single dropdown box is limited to a maximum of 255 characters. If it exceeds 255 characters, we will not set the dropdown options for this attribute',
         tips5: '4. When using Excel templates, please ensure that a single file does not exceed 5000 lines.',
     },
