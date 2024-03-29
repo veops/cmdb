@@ -66,7 +66,7 @@
             </a-tooltip>
           </a-input>
           <a-tooltip :title="$t('reset')">
-            <a-button @click="reset">重置</a-button>
+            <a-button @click="reset">{{ $t('reset') }}</a-button>
           </a-tooltip>
           <FilterComp
             ref="filterComp"
