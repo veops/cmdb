@@ -419,51 +419,51 @@ const cmdb_en = {
         updateFields: 'Update Field',
         pluginScript: `# -*- coding:utf-8 -*-
 
-        import json
+import json
         
         
-        class AutoDiscovery(object):
+class AutoDiscovery(object):
         
-            @property
-            def unique_key(self):
-                """
+    @property
+    def unique_key(self):
+        """
         
-                :return: Returns the name of a unique attribute
-                """
-                return
+        :return: Returns the name of a unique attribute
+        """
+        return
         
-            @staticmethod
-            def attributes():
-                """
-                Define attribute fields
-                :return: Returns a list of attribute fields. The list items are (name, type, description). The name must be in English.
-                type: String Integer Float Date DateTime Time JSON
-                For example:
-                return [
-                    ("ci_type", "String", "CIType name"),
-                    ("private_ip", "String", "Internal IP, multiple values separated by commas")
-                ]
-                """
-                return []
+    @staticmethod
+    def attributes():
+        """
+        Define attribute fields
+        :return: Returns a list of attribute fields. The list items are (name, type, description). The name must be in English.
+        type: String Integer Float Date DateTime Time JSON
+        For example:
+        return [
+            ("ci_type", "String", "CIType name"),
+            ("private_ip", "String", "Internal IP, multiple values separated by commas")
+        ]
+        """
+        return []
         
-            @staticmethod
-            def run():
-                """
-                Execution entry, returns collected attribute values
-                :return: 
-                Returns a list, the list item is a dictionary, the dictionary key is the attribute name, and the value is the attribute value
-                For example:
-                return [dict(ci_type="server", private_ip="192.168.1.1")]
-                """
-                return []
+    @staticmethod
+    def run():
+        """
+        Execution entry, returns collected attribute values
+        :return: 
+        Returns a list, the list item is a dictionary, the dictionary key is the attribute name, and the value is the attribute value
+        For example:
+        return [dict(ci_type="server", private_ip="192.168.1.1")]
+        """
+        return []
         
         
-        if __name__ == "__main__":
-            result = AutoDiscovery().run()
-            if isinstance(result, list):
-                print("AutoDiscovery::Result::{}".format(json.dumps(result)))
-            else:
-                print("ERROR: The collection return must be a list")
+if __name__ == "__main__":
+    result = AutoDiscovery().run()
+    if isinstance(result, list):
+        print("AutoDiscovery::Result::{}".format(json.dumps(result)))
+    else:
+        print("ERROR: The collection return must be a list")
         `,
         server: 'Server',
         vserver: 'VServer',
