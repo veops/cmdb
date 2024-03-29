@@ -309,7 +309,7 @@ class ResourceCRUD(object):
         return resource
 
     @staticmethod
-    def delete(_id):
+    def delete(_id, rebuild=True):
         resource = Resource.get_by_id(_id) or abort(404, ErrFormat.resource_not_found.format("id={}".format(_id)))
 
         origin = resource.to_dict()
@@ -322,8 +322,9 @@ class ResourceCRUD(object):
             i.soft_delete()
             rebuilds.append((i.rid, i.app_id))
 
-        for rid, app_id in set(rebuilds):
-            role_rebuild.apply_async(args=(rid, app_id), queue=ACL_QUEUE)
+        if rebuild:
+            for rid, app_id in set(rebuilds):
+                role_rebuild.apply_async(args=(rid, app_id), queue=ACL_QUEUE)
 
         AuditCRUD.add_resource_log(resource.app_id, AuditOperateType.delete,
                                    AuditScope.resource, resource.id, origin, {}, {})
