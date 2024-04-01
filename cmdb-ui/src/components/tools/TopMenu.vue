@@ -1,15 +1,11 @@
 <template>
   <div class="top-menu" v-if="routes.length > 2">
-    <!-- <a-menu v-model="current" mode="horizontal">
-      <a-menu-item :key="route.name" v-for="route in routes.slice(0, routes.length - 1)">
-        <router-link :to="{ name: route.name }">{{ route.meta.title }}</router-link>
-      </a-menu-item>
-    </a-menu>-->
     <span
       :class="current === route.name ? 'top-menu-selected' : ''"
       v-for="route in defaultShowRoutes"
       :key="route.name"
       @click="() => handleClick(route)"
+      :title="$t(route.meta.title)"
     >
       {{ route.meta.title }}
     </span>
@@ -102,15 +98,6 @@ export default {
 
 <style lang="less">
 @import '../../style/static.less';
-// .top-menu {
-//   display: inline-block;
-// }
-// .ant-menu-horizontal {
-//   border-bottom: 0 !important;
-// }
-// .ant-menu-horizontal > .ant-menu-item {
-//   border-bottom: 0;
-// }
 
 .top-menu {
   display: inline-flex;
@@ -129,13 +116,21 @@ export default {
     margin: 0 5px;
     color: @layout-header-font-color;
     height: @layout-header-height;
-    display: inline-flex;
-    align-items: center;
+    line-height: @layout-header-line-height;
+    display: inline-block;
   }
   > span:hover,
   .top-menu-selected {
     font-weight: bold;
     color: @layout-header-font-selected-color;
+  }
+  > span::before {
+    display: block;
+    content: attr(title);
+    font-weight: bold;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
   }
 }
 
