@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1711618200417') format('woff2'),
-       url('iconfont.woff?t=1711618200417') format('woff'),
-       url('iconfont.ttf?t=1711618200417') format('truetype');
+  src: url('iconfont.woff2?t=1711963254221') format('woff2'),
+       url('iconfont.woff?t=1711963254221') format('woff'),
+       url('iconfont.ttf?t=1711963254221') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,18 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.caise-VPC:before {
+  content: "\e910";
+}
+
+.caise-CDN:before {
+  content: "\e911";
+}
+
+.caise-OOS:before {
+  content: "\e90f";
 }
 
 .Google_Cloud_Platform:before {

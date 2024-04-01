@@ -6,6 +6,27 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "39782649",
+      "name": "VPC",
+      "font_class": "caise-VPC",
+      "unicode": "e910",
+      "unicode_decimal": 59664
+    },
+    {
+      "icon_id": "39782643",
+      "name": "CDN",
+      "font_class": "caise-CDN",
+      "unicode": "e911",
+      "unicode_decimal": 59665
+    },
+    {
+      "icon_id": "39782632",
+      "name": "OOS",
+      "font_class": "caise-OOS",
+      "unicode": "e90f",
+      "unicode_decimal": 59663
+    },
+    {
       "icon_id": "39729980",
       "name": "Google Cloud Platform",
       "font_class": "Google_Cloud_Platform",
