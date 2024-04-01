@@ -1022,17 +1022,14 @@ export const multicolorIconList = [
       value: 'caise-tomcat',
       label: 'Tomcat'
     }, {
-      value: 'caise-aliyun',
-      label: '阿里云'
+      value: 'caise-VPC',
+      label: 'VPC'
     }, {
-      value: 'caise-tengxunyun',
-      label: '腾讯云'
+      value: 'caise-CDN',
+      label: 'CDN'
     }, {
-      value: 'caise-huaweiyun',
-      label: '华为云'
-    }, {
-      value: 'caise-aws',
-      label: 'AWS'
+      value: 'caise-OOS',
+      label: '对象存储'
     }]
   }, {
     value: 'data',
