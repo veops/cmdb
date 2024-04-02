@@ -2,7 +2,6 @@
 
 
 import json
-import time
 
 import redis_lock
 from flask import current_app
@@ -33,8 +32,7 @@ from api.models.cmdb import CITypeAttribute
 @reconnect_db
 def ci_cache(ci_id, operate_type, record_id):
     from api.lib.cmdb.ci import CITriggerManager
-
-    time.sleep(0.01)
+    from api.lib.cmdb.ci import CIRelationManager
 
     m = api.lib.cmdb.ci.CIManager()
     ci_dict = m.get_ci_by_id_from_db(ci_id, need_children=False, use_master=False)
@@ -52,13 +50,13 @@ def ci_cache(ci_id, operate_type, record_id):
 
         CITriggerManager.fire(operate_type, ci_dict, record_id)
 
+    ci_dict and CIRelationManager.build_by_attribute(ci_dict)
+
 
 @celery.task(name="cmdb.batch_ci_cache", queue=CMDB_QUEUE)
 @flush_db
 @reconnect_db
 def batch_ci_cache(ci_ids, ):  # only for attribute change index
-    time.sleep(1)
-
     for ci_id in ci_ids:
         m = api.lib.cmdb.ci.CIManager()
         ci_dict = m.get_ci_by_id_from_db(ci_id, need_children=False, use_master=False)
@@ -87,7 +85,6 @@ def ci_delete(ci_id):
 @celery.task(name="cmdb.delete_id_filter", queue=CMDB_QUEUE)
 @reconnect_db
 def delete_id_filter(ci_id):
-
     CIFilterPermsCRUD().delete_id_filter_by_ci_id(ci_id)
 
 

@@ -1086,6 +1086,31 @@ class CIRelationManager(object):
                 for ci_id in ci_ids:
                     cls.delete_2(parent_id, ci_id, ancestor_ids=ancestor_ids)
 
+    @classmethod
+    def build_by_attribute(cls, ci_dict):
+        type_id = ci_dict['_type']
+        child_items = CITypeRelation.get_by(parent_id=type_id, only_query=True).filter(
+            CITypeRelation.parent_attr_id.isnot(None))
+        for item in child_items:
+            parent_attr = AttributeCache.get(item.parent_attr_id)
+            child_attr = AttributeCache.get(item.child_attr_id)
+            attr_value = ci_dict.get(parent_attr.name)
+            value_table = TableMap(attr=child_attr).table
+            for child in value_table.get_by(attr_id=child_attr.id, value=attr_value, only_query=True).join(
+                    CI, CI.id == value_table.ci_id).filter(CI.type_id == item.child_id):
+                CIRelationManager.add(ci_dict['_id'], child.ci_id)
+
+        parent_items = CITypeRelation.get_by(child_id=type_id, only_query=True).filter(
+            CITypeRelation.child_attr_id.isnot(None))
+        for item in parent_items:
+            parent_attr = AttributeCache.get(item.parent_attr_id)
+            child_attr = AttributeCache.get(item.child_attr_id)
+            attr_value = ci_dict.get(child_attr.name)
+            value_table = TableMap(attr=parent_attr).table
+            for parent in value_table.get_by(attr_id=parent_attr.id, value=attr_value, only_query=True).join(
+                    CI, CI.id == value_table.ci_id).filter(CI.type_id == item.parent_id):
+                CIRelationManager.add(parent.ci_id, ci_dict['_id'])
+
 
 class CITriggerManager(object):
     @staticmethod

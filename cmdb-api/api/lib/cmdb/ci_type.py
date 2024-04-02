@@ -672,6 +672,10 @@ class CITypeAttributeManager(object):
                     item = CITypeTrigger.get_by(type_id=_type_id, attr_id=attr_id, to_dict=False, first=True)
                     item and item.soft_delete(commit=False)
 
+                for item in (CITypeRelation.get_by(parent_id=type_id, parent_attr_id=attr_id, to_dict=False) +
+                             CITypeRelation.get_by(child_id=type_id, child_attr_id=attr_id, to_dict=False)):
+                    item.soft_delete(commit=False)
+
                 db.session.commit()
 
                 CITypeAttributeCache.clean(type_id, attr_id)
@@ -813,7 +817,8 @@ class CITypeRelationManager(object):
         return "{} -> {}".format(first_name, second_name)
 
     @classmethod
-    def add(cls, parent, child, relation_type_id, constraint=ConstraintEnum.One2Many):
+    def add(cls, parent, child, relation_type_id, constraint=ConstraintEnum.One2Many,
+            parent_attr_id=None, child_attr_id=None):
         p = CITypeManager.check_is_existed(parent)
         c = CITypeManager.check_is_existed(child)
 
@@ -828,24 +833,18 @@ class CITypeRelationManager(object):
             current_app.logger.warning(str(e))
             return abort(400, ErrFormat.circular_dependency_error)
 
-        # if constraint == ConstraintEnum.Many2Many:
-        #     other_c = CITypeRelation.get_by(parent_id=p.id, constraint=ConstraintEnum.Many2Many,
-        #                                     to_dict=False, first=True)
-        #     other_p = CITypeRelation.get_by(child_id=c.id, constraint=ConstraintEnum.Many2Many,
-        #                                     to_dict=False, first=True)
-        #     if other_c and other_c.child_id != c.id:
-        #         return abort(400, ErrFormat.m2m_relation_constraint.format(p.name, other_c.child.name))
-        #     if other_p and other_p.parent_id != p.id:
-        #         return abort(400, ErrFormat.m2m_relation_constraint.format(other_p.parent.name, c.name))
-
         existed = cls._get(p.id, c.id)
         if existed is not None:
             existed.update(relation_type_id=relation_type_id,
-                           constraint=constraint)
+                           constraint=constraint,
+                           parent_attr_id=parent_attr_id,
+                           child_attr_id=child_attr_id)
         else:
             existed = CITypeRelation.create(parent_id=p.id,
                                             child_id=c.id,
                                             relation_type_id=relation_type_id,
+                                            parent_attr_id=parent_attr_id,
+                                            child_attr_id=child_attr_id,
                                             constraint=constraint)
 
             if current_app.config.get("USE_ACL"):

@@ -75,6 +75,9 @@ class CITypeRelation(Model):
     relation_type_id = db.Column(db.Integer, db.ForeignKey("c_relation_types.id"), nullable=False)
     constraint = db.Column(db.Enum(*ConstraintEnum.all()), default=ConstraintEnum.One2Many)
 
+    parent_attr_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"))
+    child_attr_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"))
+
     parent = db.relationship("CIType", primaryjoin="CIType.id==CITypeRelation.parent_id")
     child = db.relationship("CIType", primaryjoin="CIType.id==CITypeRelation.child_id")
     relation_type = db.relationship("RelationType", backref="c_ci_type_relations.relation_type_id")
