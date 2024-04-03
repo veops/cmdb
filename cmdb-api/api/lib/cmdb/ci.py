@@ -295,6 +295,7 @@ class CIManager(object):
             _no_attribute_policy=ExistPolicy.IGNORE,
             is_auto_discovery=False,
             _is_admin=False,
+            ticket_id=None,
             **ci_dict):
         """
         add ci
@@ -303,6 +304,7 @@ class CIManager(object):
         :param _no_attribute_policy: ignore or reject
         :param is_auto_discovery: default is False
         :param _is_admin: default is False
+        :param ticket_id:
         :param ci_dict:
         :return:
         """
@@ -417,7 +419,7 @@ class CIManager(object):
             operate_type = OperateType.UPDATE if ci is not None else OperateType.ADD
             try:
                 ci = ci or CI.create(type_id=ci_type.id, is_auto_discovery=is_auto_discovery)
-                record_id = value_manager.create_or_update_attr_value(ci, ci_dict, key2attr)
+                record_id = value_manager.create_or_update_attr_value(ci, ci_dict, key2attr, ticket_id=ticket_id)
             except BadRequest as e:
                 if existed is None:
                     cls.delete(ci.id)
@@ -435,7 +437,7 @@ class CIManager(object):
 
         return ci.id
 
-    def update(self, ci_id, _is_admin=False, **ci_dict):
+    def update(self, ci_id, _is_admin=False, ticket_id=None, **ci_dict):
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ci = self.confirm_ci_existed(ci_id)
 
@@ -487,7 +489,7 @@ class CIManager(object):
                             ci_dict.pop(k)
 
             try:
-                record_id = value_manager.create_or_update_attr_value(ci, ci_dict, key2attr)
+                record_id = value_manager.create_or_update_attr_value(ci, ci_dict, key2attr, ticket_id=ticket_id)
             except BadRequest as e:
                 raise e
 
@@ -958,7 +960,7 @@ class CIRelationManager(object):
                     return abort(400, ErrFormat.relation_constraint.format("1-N"))
 
     @classmethod
-    def add(cls, first_ci_id, second_ci_id, more=None, relation_type_id=None, ancestor_ids=None):
+    def add(cls, first_ci_id, second_ci_id, more=None, relation_type_id=None, ancestor_ids=None, valid=True):
 
         first_ci = CIManager.confirm_ci_existed(first_ci_id)
         second_ci = CIManager.confirm_ci_existed(second_ci_id)
@@ -983,7 +985,7 @@ class CIRelationManager(object):
                 relation_type_id or abort(404, ErrFormat.relation_not_found.format("{} -> {}".format(
                     first_ci.ci_type.name, second_ci.ci_type.name)))
 
-                if current_app.config.get('USE_ACL'):
+                if current_app.config.get('USE_ACL') and valid:
                     resource_name = CITypeRelationManager.acl_resource_name(first_ci.ci_type.name,
                                                                             second_ci.ci_type.name)
                     if not ACLManager().has_permission(
@@ -1098,7 +1100,7 @@ class CIRelationManager(object):
             value_table = TableMap(attr=child_attr).table
             for child in value_table.get_by(attr_id=child_attr.id, value=attr_value, only_query=True).join(
                     CI, CI.id == value_table.ci_id).filter(CI.type_id == item.child_id):
-                CIRelationManager.add(ci_dict['_id'], child.ci_id)
+                CIRelationManager.add(ci_dict['_id'], child.ci_id, valid=False)
 
         parent_items = CITypeRelation.get_by(child_id=type_id, only_query=True).filter(
             CITypeRelation.child_attr_id.isnot(None))
@@ -1109,7 +1111,33 @@ class CIRelationManager(object):
             value_table = TableMap(attr=parent_attr).table
             for parent in value_table.get_by(attr_id=parent_attr.id, value=attr_value, only_query=True).join(
                     CI, CI.id == value_table.ci_id).filter(CI.type_id == item.parent_id):
-                CIRelationManager.add(parent.ci_id, ci_dict['_id'])
+                CIRelationManager.add(parent.ci_id, ci_dict['_id'], valid=False)
+
+    @classmethod
+    def rebuild_all_by_attribute(cls, ci_type_relation):
+        parent_attr = AttributeCache.get(ci_type_relation['parent_attr_id'])
+        child_attr = AttributeCache.get(ci_type_relation['child_attr_id'])
+        if not parent_attr or not child_attr:
+            return
+
+        parent_value_table = TableMap(attr=parent_attr).table
+        child_value_table = TableMap(attr=child_attr).table
+
+        parent_values = parent_value_table.get_by(attr_id=parent_attr.id, only_query=True).join(
+            CI, CI.id == parent_value_table.ci_id).filter(CI.type_id == ci_type_relation['parent_id'])
+        child_values = child_value_table.get_by(attr_id=child_attr.id, only_query=True).join(
+            CI, CI.id == child_value_table.ci_id).filter(CI.type_id == ci_type_relation['child_id'])
+
+        child_value2ci_ids = {}
+        for child in child_values:
+            child_value2ci_ids.setdefault(child.value, []).append(child.ci_id)
+
+        for parent in parent_values:
+            for child_ci_id in child_value2ci_ids.get(parent.value, []):
+                try:
+                    cls.add(parent.ci_id, child_ci_id, valid=False)
+                except:
+                    pass
 
 
 class CITriggerManager(object):

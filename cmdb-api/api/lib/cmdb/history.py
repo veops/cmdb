@@ -167,6 +167,7 @@ class AttributeHistoryManger(object):
                         new=hist.new,
                         created_at=record.created_at.strftime('%Y-%m-%d %H:%M:%S'),
                         record_id=record.id,
+                        ticket_id=record.ticket_id,
                         hid=hist.id
                         )
             result.append(item)
@@ -200,9 +201,9 @@ class AttributeHistoryManger(object):
         return username, timestamp, attr_dict, rel_dict
 
     @staticmethod
-    def add(record_id, ci_id, history_list, type_id=None, flush=False, commit=True):
+    def add(record_id, ci_id, history_list, type_id=None, ticket_id=None, flush=False, commit=True):
         if record_id is None:
-            record = OperationRecord.create(uid=current_user.uid, type_id=type_id)
+            record = OperationRecord.create(uid=current_user.uid, type_id=type_id, ticket_id=ticket_id)
             record_id = record.id
 
         for attr_id, operate_type, old, new in history_list or []:
