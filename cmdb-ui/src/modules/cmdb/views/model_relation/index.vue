@@ -10,7 +10,7 @@
       :visible="visible"
       @cancel="onClose"
       @ok="handleSubmit"
-      width="500px"
+      width="700px"
     >
       <a-form :form="form" @submit="handleSubmit" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item :label="$t('cmdb.ciType.sourceCIType')">
@@ -69,6 +69,39 @@
             <a-select-option value="2">{{ $t('cmdb.ciType.many2Many') }}</a-select-option>
           </a-select>
         </a-form-item>
+        <a-form-item :label="$t('cmdb.ciType.attributeAssociation')">
+          <a-row>
+            <a-col :span="11">
+              <a-form-item>
+                <a-select
+                  :placeholder="$t('cmdb.ciType.attributeAssociationTip4')"
+                  allowClear
+                  v-decorator="['parent_attr_id', { rules: [{ required: false }] }]"
+                >
+                  <a-select-option v-for="attr in filterAttributes(modalParentAttributes)" :key="attr.id">
+                    {{ attr.alias || attr.name }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="2" :style="{ textAlign: 'center' }">
+              =>
+            </a-col>
+            <a-col :span="11">
+              <a-form-item>
+                <a-select
+                  :placeholder="$t('cmdb.ciType.attributeAssociationTip5')"
+                  allowClear
+                  v-decorator="['child_attr_id', { rules: [{ required: false }] }]"
+                >
+                  <a-select-option v-for="attr in filterAttributes(modalChildAttributes)" :key="attr.id">
+                    {{ attr.alias || attr.name }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+          </a-row>
+        </a-form-item>
       </a-form>
     </a-modal>
   </div>
@@ -80,6 +113,8 @@ import { searchResourceType } from '@/modules/acl/api/resource'
 import { getCITypeGroupsConfig } from '@/modules/cmdb/api/ciTypeGroup'
 import { getCITypes } from '@/modules/cmdb/api/CIType'
 import { createRelation, deleteRelation, getCITypeChildren, getRelationTypes } from '@/modules/cmdb/api/CITypeRelation'
+import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
+
 export default {
   name: 'Index',
   components: {
@@ -101,6 +136,9 @@ export default {
 
       sourceCITypeId: undefined,
       targetCITypeId: undefined,
+
+      modalParentAttributes: [],
+      modalChildAttributes: [],
     }
   },
   computed: {
@@ -206,13 +244,29 @@ export default {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          createRelation(values.source_ci_type_id, values.ci_type_id, values.relation_type_id, values.constraint).then(
-            (res) => {
-              this.$message.success(this.$t('addSuccess'))
-              this.onClose()
-              this.handleOk()
-            }
-          )
+          const {
+            source_ci_type_id,
+            ci_type_id,
+            relation_type_id,
+            constraint,
+            parent_attr_id = undefined,
+            child_attr_id = undefined,
+          } = values
+
+          if ((!parent_attr_id && child_attr_id) || (parent_attr_id && !child_attr_id)) {
+            this.$message.warning(this.$t('cmdb.ciType.attributeAssociationTip3'))
+            return
+          }
+          createRelation(source_ci_type_id, ci_type_id, {
+            relation_type_id,
+            constraint,
+            parent_attr_id,
+            child_attr_id,
+          }).then((res) => {
+            this.$message.success(this.$t('addSuccess'))
+            this.onClose()
+            this.handleOk()
+          })
         }
       })
       this.sourceCITypeId = undefined
@@ -230,12 +284,24 @@ export default {
     },
     handleSourceTypeChange(value) {
       this.sourceCITypeId = value
+      this.form.setFieldsValue({ parent_attr_id: undefined })
+      getCITypeAttributesById(value).then((res) => {
+        this.modalParentAttributes = res?.attributes ?? []
+      })
     },
     handleTargetTypeChange(value) {
       this.targetCITypeId = value
+      this.form.setFieldsValue({ child_attr_id: undefined })
+      getCITypeAttributesById(value).then((res) => {
+        this.modalChildAttributes = res?.attributes ?? []
+      })
     },
     filterOption(input, option) {
       return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
+    },
+    filterAttributes(attributes) {
+      // filter password/json/is_list
+      return attributes.filter((attr) => !attr.is_password && !attr.is_list && attr.value_type !== '6')
     },
   },
 }

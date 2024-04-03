@@ -154,7 +154,7 @@ export default {
       this.getViewsData()
     },
     async getMainData() {
-      const ciTypeRelations = await getCITypeRelations()
+      const { relations: ciTypeRelations } = await getCITypeRelations()
       const nodes = []
       const links = []
       ciTypeRelations.forEach((item) => {

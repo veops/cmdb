@@ -7,7 +7,7 @@
     @click="clickNode"
   >
     <span class="relation-views-node-switch">
-      <a-icon v-if="childLength && !isLeaf" :type="switchIcon"></a-icon>
+      <a-icon v-if="!isLeaf" :type="switchIcon"></a-icon>
     </span>
     <span class="relation-views-node-content">
       <a-checkbox @click.stop="clickCheckbox" class="relation-views-node-checkbox" v-if="showCheckbox" />

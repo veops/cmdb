@@ -129,7 +129,7 @@ const cmdb_zh = {
         addRelation: '新增关系',
         sourceCIType: '源模型',
         sourceCITypeTips: '请选择源模型',
-        dstCIType: '目标模型名',
+        dstCIType: '目标模型',
         dstCITypeTips: '请选择目标模型',
         relationType: '关联类型',
         relationTypeTips: '请选择关联类型',
@@ -187,7 +187,13 @@ const cmdb_zh = {
         downloadType: '下载模型',
         deleteCIType: '删除模型',
         otherGroupTips: '其他分组属性不可排序',
-        filterTips: '点击可仅查看{name}属性'
+        filterTips: '点击可仅查看{name}属性',
+        attributeAssociation: '属性关联',
+        attributeAssociationTip1: '通过2个模型的属性值(除密码、json、多值)来自动建立关系',
+        attributeAssociationTip2: '双击可编辑',
+        attributeAssociationTip3: '属性关联必须选择两个属性',
+        attributeAssociationTip4: '请选择原模型属性',
+        attributeAssociationTip5: '请选择目标模型属性',
     },
     components: {
         unselectAttributes: '未选属性',

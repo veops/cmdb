@@ -4,7 +4,7 @@
       <a-tab-pane key="1" :tab="$t('cmdb.ciType.attributes')">
         <AttributesTable ref="attributesTable" :CITypeId="CITypeId" :CITypeName="CITypeName"></AttributesTable>
       </a-tab-pane>
-      <a-tab-pane forceRender key="2" :tab="$t('cmdb.ciType.relation')">
+      <a-tab-pane key="2" :tab="$t('cmdb.ciType.relation')">
         <RelationTable :CITypeId="CITypeId" :CITypeName="CITypeName"></RelationTable>
       </a-tab-pane>
       <a-tab-pane key="3" :tab="$t('cmdb.ciType.trigger')">
