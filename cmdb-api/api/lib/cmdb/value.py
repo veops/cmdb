@@ -150,9 +150,10 @@ class AttributeValueManager(object):
         return AttributeHistoryManger.add(record_id, ci_id, [(attr_id, operate_type, old, new)], type_id)
 
     @staticmethod
-    def write_change2(changed, record_id=None):
+    def write_change2(changed, record_id=None, ticket_id=None):
         for ci_id, attr_id, operate_type, old, new, type_id in changed:
             record_id = AttributeHistoryManger.add(record_id, ci_id, [(attr_id, operate_type, old, new)], type_id,
+                                                   ticket_id=ticket_id,
                                                    commit=False, flush=False)
         try:
             db.session.commit()
@@ -255,12 +256,13 @@ class AttributeValueManager(object):
 
         return key2attr
 
-    def create_or_update_attr_value(self, ci, ci_dict, key2attr):
+    def create_or_update_attr_value(self, ci, ci_dict, key2attr, ticket_id=None):
         """
         add or update attribute value, then write history
         :param ci: instance object
         :param ci_dict: attribute dict
         :param key2attr: attr key to attr
+        :param ticket_id:
         :return:
         """
         changed = []
@@ -306,7 +308,7 @@ class AttributeValueManager(object):
             current_app.logger.warning(str(e))
             return abort(400, ErrFormat.attribute_value_unknown_error.format(e.args[0]))
 
-        return self.write_change2(changed)
+        return self.write_change2(changed, ticket_id=ticket_id)
 
     @staticmethod
     def delete_attr_value(attr_id, ci_id, commit=True):

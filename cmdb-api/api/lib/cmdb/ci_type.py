@@ -734,14 +734,19 @@ class CITypeRelationManager(object):
     @staticmethod
     def get():
         res = CITypeRelation.get_by(to_dict=False)
+        type2attributes = dict()
         for idx, item in enumerate(res):
             _item = item.to_dict()
             res[idx] = _item
             res[idx]['parent'] = item.parent.to_dict()
+            if item.parent_id not in type2attributes:
+                type2attributes[item.parent_id] = [i[1].to_dict() for i in CITypeAttributesCache.get2(item.parent_id)]
             res[idx]['child'] = item.child.to_dict()
+            if item.child_id not in type2attributes:
+                type2attributes[item.child_id] = [i[1].to_dict() for i in CITypeAttributesCache.get2(item.child_id)]
             res[idx]['relation_type'] = item.relation_type.to_dict()
 
-        return res
+        return res, type2attributes
 
     @staticmethod
     def get_child_type_ids(type_id, level):
@@ -773,6 +778,8 @@ class CITypeRelationManager(object):
 
         ci_type_dict["relation_type"] = relation_inst.relation_type.name
         ci_type_dict["constraint"] = relation_inst.constraint
+        ci_type_dict["parent_attr_id"] = relation_inst.parent_attr_id
+        ci_type_dict["child_attr_id"] = relation_inst.child_attr_id
 
         return ci_type_dict
 
@@ -833,12 +840,15 @@ class CITypeRelationManager(object):
             current_app.logger.warning(str(e))
             return abort(400, ErrFormat.circular_dependency_error)
 
+        old_parent_attr_id = None
         existed = cls._get(p.id, c.id)
         if existed is not None:
-            existed.update(relation_type_id=relation_type_id,
-                           constraint=constraint,
-                           parent_attr_id=parent_attr_id,
-                           child_attr_id=child_attr_id)
+            old_parent_attr_id = existed.parent_attr_id
+            existed = existed.update(relation_type_id=relation_type_id,
+                                     constraint=constraint,
+                                     parent_attr_id=parent_attr_id,
+                                     child_attr_id=child_attr_id,
+                                     filter_none=False)
         else:
             existed = CITypeRelation.create(parent_id=p.id,
                                             child_id=c.id,
@@ -857,6 +867,11 @@ class CITypeRelationManager(object):
                 ACLManager().grant_resource_to_role(resource_name,
                                                     current_user.username,
                                                     ResourceTypeEnum.CI_TYPE_RELATION)
+
+        if parent_attr_id and parent_attr_id != old_parent_attr_id:
+            if parent_attr_id and parent_attr_id != existed.parent_attr_id:
+                from api.tasks.cmdb import rebuild_relation_for_attribute_changed
+                rebuild_relation_for_attribute_changed.apply_async(args=(existed.to_dict()))
 
         CITypeHistoryManager.add(CITypeOperateType.ADD_RELATION, p.id,
                                  change=dict(parent=p.to_dict(), child=c.to_dict(), relation_type_id=relation_type_id))
@@ -1150,6 +1165,8 @@ class CITypeTemplateManager(object):
                                                  id2obj_dicts[added_id].get('child_id'),
                                                  id2obj_dicts[added_id].get('relation_type_id'),
                                                  id2obj_dicts[added_id].get('constraint'),
+                                                 id2obj_dicts[added_id].get('parent_attr_id'),
+                                                 id2obj_dicts[added_id].get('child_attr_id'),
                                                  )
             else:
                 obj = cls.create(flush=True, **id2obj_dicts[added_id])
@@ -1440,7 +1457,7 @@ class CITypeTemplateManager(object):
             ci_types=CITypeManager.get_ci_types(),
             ci_type_groups=CITypeGroupManager.get(),
             relation_types=[i.to_dict() for i in RelationTypeManager.get_all()],
-            ci_type_relations=CITypeRelationManager.get(),
+            ci_type_relations=CITypeRelationManager.get()[0],
             ci_type_auto_discovery_rules=list(),
             type2attributes=dict(),
             type2attribute_group=dict(),
