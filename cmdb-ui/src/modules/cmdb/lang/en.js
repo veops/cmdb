@@ -187,7 +187,14 @@ const cmdb_en = {
         downloadType: 'Download CIType',
         deleteCIType: 'Delete CIType',
         otherGroupTips: 'Non sortable within the other group',
-        filterTips: 'click to show {name}'
+        filterTips: 'click to show {name}',
+        attributeAssociation: 'Attribute Association',
+        attributeAssociationTip1: 'Automatically establish relationships through the attributes except password, json and multiple of two models',
+        attributeAssociationTip2: 'Double click to edit',
+        attributeAssociationTip3: 'Two Attributes must be selected',
+        attributeAssociationTip4: 'Please select a attribute from Source CIType',
+        attributeAssociationTip5: 'Please select a attribute from Target CIType',
+
     },
     components: {
         unselectAttributes: 'Unselected',

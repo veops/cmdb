@@ -59,7 +59,6 @@ export default {
   width: 100%;
   .two-column-layout-sidebar {
     height: 100%;
-    border-radius: 15px;
     overflow-y: auto;
   }
   .two-column-layout-main {

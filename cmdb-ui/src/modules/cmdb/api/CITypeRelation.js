@@ -30,11 +30,11 @@ export function getRelationTypes(CITypeID, parameter) {
   })
 }
 
-export function createRelation(parentId, childrenId, relationTypeId, constraint) {
+export function createRelation(parentId, childrenId, data) {
   return axios({
     url: `/v0.1/ci_type_relations/${parentId}/${childrenId}`,
     method: 'post',
-    data: { relation_type_id: relationTypeId, constraint }
+    data
   })
 }
 
@@ -42,7 +42,6 @@ export function deleteRelation(parentId, childrenId) {
   return axios({
     url: `/v0.1/ci_type_relations/${parentId}/${childrenId}`,
     method: 'delete'
-
   })
 }
 
