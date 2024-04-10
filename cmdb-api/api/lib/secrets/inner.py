@@ -16,6 +16,7 @@ from cryptography.hazmat.primitives.ciphers import algorithms
 from cryptography.hazmat.primitives.ciphers import modes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
 from flask import current_app
 
 global_iv_length = 16
@@ -56,12 +57,19 @@ class Backend:
     def update(self, key, value):
         return self.backend.update(key, value)
 
+    def get_shares(self, key):
+        return self.backend.get_shares(key)
+
+    def set_shares(self, key, value):
+        return self.backend.set_shares(key, value)
+
 
 class KeyManage:
 
     def __init__(self, trigger=None, backend=None):
         self.trigger = trigger
         self.backend = backend
+        self.share_key = "cmdb::secret::secrets_share"
         if backend:
             self.backend = Backend(backend)
 
@@ -126,6 +134,8 @@ class KeyManage:
         return new_shares
 
     def is_valid_root_key(self, root_key):
+        if not root_key:
+            return False
         root_key_hash, ok = self.hash_root_key(root_key)
         if not ok:
             return root_key_hash, ok
@@ -158,7 +168,8 @@ class KeyManage:
             if ok:
                 current_app.config["secrets_encrypt_key"] = secrets_encrypt_key
                 current_app.config["secrets_root_key"] = root_key
-                current_app.config["secrets_shares"] = []
+                # current_app.config["secrets_shares"] = []
+                self.backend.set_shares(self.share_key, [])
                 return {"message": success, "status": success}
             return {"message": msg, "status": "failed"}
         else:
@@ -177,10 +188,12 @@ class KeyManage:
         try:
             t = [i for i in b64decode(key)]
             v = (int("".join([chr(i) for i in t[-2:]])), bytes(t[:-2]))
-            shares = current_app.config.get("secrets_shares", [])
+            # shares = current_app.config.get("secrets_shares", [])
+            shares = self.backend.get_shares(self.share_key)
             if v not in shares:
                 shares.append(v)
-                current_app.config["secrets_shares"] = shares
+                # current_app.config["secrets_shares"] = shares
+                self.backend.set_shares(self.share_key, shares)
 
             if len(shares) >= global_key_threshold:
                 recovered_secret = Shamir.combine(shares[:global_key_threshold], False)
@@ -313,6 +326,8 @@ class KeyManage:
         :return:
         """
         secrets_root_key = current_app.config.get("secrets_root_key")
+        if not secrets_root_key:
+            return True
         msg, ok = self.is_valid_root_key(secrets_root_key)
         if not ok:
             return True
