@@ -79,9 +79,6 @@ services:
         flask init-department
         flask cmdb-counter > counter.log 2>&1
 
-    depends_on:
-      - cmdb-db
-      - cmdb-cache
     networks:
       new:
         aliases:
