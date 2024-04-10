@@ -1,25 +1,15 @@
 <template>
-  <CustomDrawer
-    width="80%"
-    placement="left"
-    @close="
-      () => {
-        visible = false
-      }
-    "
-    :visible="visible"
-    :hasTitle="false"
-    :hasFooter="false"
-    :bodyStyle="{ padding: 0, height: '100vh' }"
-    wrapClassName="ci-detail"
-    destroyOnClose
-  >
-    <a-tabs v-model="activeTabKey" @change="changeTab">
+  <div :style="{ height: '100%' }">
+    <a-tabs v-if="hasPermission" class="ci-detail-tab" v-model="activeTabKey" @change="changeTab">
+      <a @click="shareCi" slot="tabBarExtraContent" :style="{ marginRight: '24px' }">
+        <a-icon type="share-alt" />
+        {{ $t('cmdb.ci.share') }}
+      </a>
       <a-tab-pane key="tab_1">
-        <span slot="tab"><a-icon type="book" />属性</span>
-        <div :style="{ maxHeight: `${windowHeight - 44}px`, overflow: 'auto', padding: '24px' }" class="ci-detail-attr">
+        <span slot="tab"><a-icon type="book" />{{ $t('cmdb.attribute') }}</span>
+        <div class="ci-detail-attr">
           <el-descriptions
-            :title="group.name || '其他'"
+            :title="group.name || $t('other')"
             :key="group.name"
             v-for="group in attributeGroups"
             border
@@ -36,40 +26,40 @@
         </div>
       </a-tab-pane>
       <a-tab-pane key="tab_2">
-        <span slot="tab"><a-icon type="branches" />关系</span>
-        <div :style="{ padding: '24px' }">
+        <span slot="tab"><a-icon type="branches" />{{ $t('cmdb.relation') }}</span>
+        <div :style="{ height: '100%', padding: '24px', overflow: 'auto' }">
           <CiDetailRelation ref="ciDetailRelation" :ciId="ciId" :typeId="typeId" :ci="ci" />
         </div>
       </a-tab-pane>
       <a-tab-pane key="tab_3">
-        <span slot="tab"><a-icon type="clock-circle" />操作历史</span>
-        <div :style="{ padding: '24px', height: 'calc(100vh - 44px)' }">
+        <span slot="tab"><a-icon type="clock-circle" />{{ $t('cmdb.ci.history') }}</span>
+        <div :style="{ padding: '24px', height: '100%' }">
           <vxe-table
             ref="xTable"
             :data="ciHistory"
             size="small"
-            :max-height="`${windowHeight - 94}px`"
+            height="auto"
             :span-method="mergeRowMethod"
             border
             :scroll-y="{ enabled: false }"
             class="ops-stripe-table"
           >
-            <vxe-table-column sortable field="created_at" title="时间"></vxe-table-column>
+            <vxe-table-column sortable field="created_at" :title="$t('created_at')"></vxe-table-column>
             <vxe-table-column
               field="username"
-              title="用户"
+              :title="$t('user')"
               :filters="[]"
               :filter-method="filterUsernameMethod"
             ></vxe-table-column>
             <vxe-table-column
               field="operate_type"
               :filters="[
-                { value: 0, label: '新增' },
-                { value: 1, label: '删除' },
-                { value: 3, label: '修改' },
+                { value: 0, label: $t('new') },
+                { value: 1, label: $t('delete') },
+                { value: 3, label: $t('update') },
               ]"
               :filter-method="filterOperateMethod"
-              title="操作"
+              :title="$t('operation')"
             >
               <template #default="{ row }">
                 {{ operateTypeMap[row.operate_type] }}
@@ -77,23 +67,33 @@
             </vxe-table-column>
             <vxe-table-column
               field="attr_alias"
-              title="属性"
+              :title="$t('cmdb.attribute')"
               :filters="[]"
               :filter-method="filterAttrMethod"
             ></vxe-table-column>
-            <vxe-table-column field="old" title="旧"></vxe-table-column>
-            <vxe-table-column field="new" title="新"></vxe-table-column>
+            <vxe-table-column field="old" :title="$t('cmdb.history.old')"></vxe-table-column>
+            <vxe-table-column field="new" :title="$t('cmdb.history.new')"></vxe-table-column>
           </vxe-table>
         </div>
       </a-tab-pane>
       <a-tab-pane key="tab_4">
-        <span slot="tab"><ops-icon type="itsm_auto_trigger" />触发历史</span>
-        <div :style="{ padding: '24px', height: 'calc(100vh - 44px)' }">
+        <span slot="tab"><ops-icon type="itsm_auto_trigger" />{{ $t('cmdb.history.triggerHistory') }}</span>
+        <div :style="{ padding: '24px', height: '100%' }">
           <TriggerTable :ci_id="ci._id" />
         </div>
       </a-tab-pane>
     </a-tabs>
-  </CustomDrawer>
+    <a-empty
+      v-else
+      :image-style="{
+        height: '100px',
+      }"
+      :style="{ paddingTop: '20%' }"
+    >
+      <img slot="image" :src="require('@/assets/data_empty.png')" />
+      <span slot="description"> {{ $t('cmdb.ci.noPermission') }} </span>
+    </a-empty>
+  </div>
 </template>
 
 <script>
@@ -105,8 +105,8 @@ import { getCIById } from '@/modules/cmdb/api/ci'
 import CiDetailAttrContent from './ciDetailAttrContent.vue'
 import CiDetailRelation from './ciDetailRelation.vue'
 import TriggerTable from '../../operation_history/modules/triggerTable.vue'
-
 export default {
+  name: 'CiDetailTab',
   components: {
     ElDescriptions: Descriptions,
     ElDescriptionsItem: DescriptionsItem,
@@ -125,14 +125,7 @@ export default {
     },
   },
   data() {
-    const operateTypeMap = {
-      0: '新增',
-      1: '删除',
-      2: '修改',
-    }
     return {
-      operateTypeMap,
-      visible: false,
       ci: {},
       attributeGroups: [],
       activeTabKey: 'tab_1',
@@ -140,11 +133,19 @@ export default {
       ciHistory: [],
       ciId: null,
       ci_types: [],
+      hasPermission: true,
     }
   },
   computed: {
     windowHeight() {
       return this.$store.state.windowHeight
+    },
+    operateTypeMap() {
+      return {
+        0: this.$t('new'),
+        1: this.$t('delete'),
+        2: this.$t('update'),
+      }
     },
   },
   provide() {
@@ -154,10 +155,22 @@ export default {
       },
     }
   },
-  inject: ['reload', 'handleSearch', 'attrList'],
+  inject: {
+    reload: {
+      from: 'reload',
+      default: null,
+    },
+    handleSearch: {
+      from: 'handleSearch',
+      default: null,
+    },
+    attrList: {
+      from: 'attrList',
+      default: () => [],
+    },
+  },
   methods: {
-    create(ciId, activeTabKey = 'tab_1', ciDetailRelationKey = '1') {
-      this.visible = true
+    async create(ciId, activeTabKey = 'tab_1', ciDetailRelationKey = '1') {
       this.activeTabKey = activeTabKey
       if (activeTabKey === 'tab_2') {
         this.$nextTick(() => {
@@ -165,12 +178,14 @@ export default {
         })
       }
       this.ciId = ciId
-      this.getAttributes()
-      this.getCI()
-      this.getCIHistory()
-      getCITypes().then((res) => {
-        this.ci_types = res.ci_types
-      })
+      await this.getCI()
+      if (this.hasPermission) {
+        this.getAttributes()
+        this.getCIHistory()
+        getCITypes().then((res) => {
+          this.ci_types = res.ci_types
+        })
+      }
     },
     getAttributes() {
       getCITypeGroupById(this.typeId, { need_other: 1 })
@@ -179,11 +194,14 @@ export default {
         })
         .catch((e) => {})
     },
-    getCI() {
-      getCIById(this.ciId)
+    async getCI() {
+      await getCIById(this.ciId)
         .then((res) => {
-          // this.ci = res.ci
-          this.ci = res.result[0]
+          if (res.result.length) {
+            this.ci = res.result[0]
+          } else {
+            this.hasPermission = false
+          }
         })
         .catch((e) => {})
     },
@@ -268,23 +286,28 @@ export default {
       // 修改的字段为树形视图订阅的字段 则全部reload
       setTimeout(() => {
         if (_find) {
-          this.reload()
+          if (this.reload) {
+            this.reload()
+          }
         } else {
-          this.handleSearch()
+          if (this.handleSearch) {
+            this.handleSearch()
+          }
         }
       }, 500)
     },
     mergeRowMethod({ row, _rowIndex, column, visibleData }) {
       const fields = ['created_at', 'username']
-      const cellValue = row[column.property]
-      if (cellValue && fields.includes(column.property)) {
+      const cellValue1 = row['created_at']
+      const cellValue2 = row['username']
+      if (cellValue1 && cellValue2 && fields.includes(column.property)) {
         const prevRow = visibleData[_rowIndex - 1]
         let nextRow = visibleData[_rowIndex + 1]
-        if (prevRow && prevRow[column.property] === cellValue) {
+        if (prevRow && prevRow['created_at'] === cellValue1 && prevRow['username'] === cellValue2) {
           return { rowspan: 0, colspan: 0 }
         } else {
           let countRowspan = 1
-          while (nextRow && nextRow[column.property] === cellValue) {
+          while (nextRow && nextRow['created_at'] === cellValue1 && nextRow['username'] === cellValue2) {
             nextRow = visibleData[++countRowspan + _rowIndex]
           }
           if (countRowspan > 1) {
@@ -300,23 +323,49 @@ export default {
       // 修改的字段为树形视图订阅的字段 则全部reload
       setTimeout(() => {
         if (_find) {
-          this.reload()
+          if (this.reload) {
+            this.reload()
+          }
         } else {
-          this.handleSearch()
+          if (this.handleSearch) {
+            this.handleSearch()
+          }
         }
       }, 500)
+    },
+    shareCi() {
+      const text = `${document.location.host}/cmdb/cidetail/${this.typeId}/${this.ciId}`
+      this.$copyText(text)
+        .then(() => {
+          this.$message.success(this.$t('copySuccess'))
+        })
+        .catch(() => {
+          this.$message.error(this.$t('cmdb.ci.copyFailed'))
+        })
     },
   },
 }
 </script>
 
-<style lang="less" scoped></style>
 <style lang="less">
-.ci-detail {
+.ci-detail-tab {
+  height: 100%;
+  .ant-tabs-content {
+    height: calc(100% - 45px);
+    .ant-tabs-tabpane {
+      height: 100%;
+    }
+  }
   .ant-tabs-bar {
     margin: 0;
   }
+  .ant-tabs-extra-content {
+    line-height: 44px;
+  }
   .ci-detail-attr {
+    height: 100%;
+    overflow: auto;
+    padding: 24px;
     .el-descriptions-item__content {
       cursor: default;
       &:hover a {

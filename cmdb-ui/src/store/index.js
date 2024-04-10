@@ -9,7 +9,6 @@ import logo from './global/logo'
 import notice from './global/notice'
 import getters from './global/getters'
 import appConfig from '@/config/app'
-console.log(appConfig)
 
 Vue.use(Vuex)
 
@@ -25,6 +24,7 @@ const store = new Vuex.Store({
     windowWidth: 800,
     windowHeight: 600,
     currentTime: 0,
+    locale: 'zh'
   },
   mutations: {
     SET_WINDOW_SIZE(state, { width, height }) {
@@ -34,6 +34,10 @@ const store = new Vuex.Store({
     SET_TIME: (state, time) => {
       state.currentTime = time
     },
+    SET_LOCALE: (state, locale) => {
+      state.locale = locale
+      localStorage.setItem('ops_locale', locale)
+    }
   },
   actions: {
     setWindowSize({ commit }) {

@@ -15,8 +15,9 @@
           @click="openChartForm('add', { options: { w: 3 } })"
           type="primary"
           icon="plus-circle"
-          class="ops-button-primary"
-        >新增图表</a-button
+          ghost
+          class="ops-button-ghost"
+        >{{ $t('cmdb.custom_dashboard.newChart') }}</a-button
         >
       </div>
       <GridLayout
@@ -44,7 +45,7 @@
                 ? Array.isArray(item.options.bgColor)
                   ? `linear-gradient(to bottom, ${item.options.bgColor[0]} 0%, ${item.options.bgColor[1]} 100%)`
                   : item.options.bgColor
-                : '#fafafa',
+                : '#fff',
           }"
         >
           <div class="cmdb-dashboard-grid-item-title">
@@ -78,10 +79,13 @@
             ></a>
             <a-menu slot="overlay">
               <a-menu-item>
-                <a @click="() => openChartForm('edit', item)"><a-icon style="margin-right:5px" type="edit" />编辑</a>
+                <a
+                  @click="() => openChartForm('edit', item)"
+                ><a-icon style="margin-right:5px" type="edit" />{{ $t('edit') }}</a
+                >
               </a-menu-item>
               <a-menu-item>
-                <a @click="deleteChart(item)"><a-icon style="margin-right:5px" type="delete" />删除</a>
+                <a @click="deleteChart(item)"><a-icon style="margin-right:5px" type="delete" />{{ $t('delete') }}</a>
               </a-menu-item>
             </a-menu>
           </a-dropdown>
@@ -114,9 +118,9 @@
         type="primary"
         icon="plus"
       >
-        定制仪表盘
+        {{ $t('cmdb.menu.customDashboard') }}
       </a-button>
-      <span v-else>管理员暂未定制仪表盘</span>
+      <span v-else>{{ $t('cmdb.custom_dashboard.noCustomDashboard') }}</span>
     </div>
     <ChartForm ref="chartForm" @refresh="refresh" :ci_types="ci_types" :totalData="totalData" />
   </div>
@@ -261,7 +265,7 @@ export default {
   text-align: center;
 }
 .cmdb-dashboard-grid-item {
-  border-radius: 8px;
+  border-radius: 2px;
   padding: 6px 12px;
   .cmdb-dashboard-grid-item-title {
     overflow: hidden;
@@ -299,6 +303,7 @@ export default {
     display: inline-block;
     width: 16px;
     height: 16px;
+    line-height: 16px;
     font-size: 16px;
     text-align: center;
     margin-right: 5px;

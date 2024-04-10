@@ -1,5 +1,5 @@
 <template>
-  <div :style="{ height: `${windowHeight - 156}px`, overflow: 'auto', position: 'relative' }">
+  <div :style="{ height: `${windowHeight - 187}px`, overflow: 'auto', position: 'relative' }">
     <a
       v-if="!adrIsInner"
       :style="{ position: 'absolute', right: 0, top: 0 }"
@@ -11,10 +11,11 @@
     >
       <a-space>
         <ops-icon type="icon-xianxing-edit" />
-        <span>编辑</span>
+        <span>{{ $t('edit') }}</span>
       </a-space>
     </a>
-    <div class="attr-ad-header">字段映射</div>
+    <div>{{ $t('alias') }}：<a-input v-model="alias" style="width:200px;" /></div>
+    <div class="attr-ad-header">{{ $t('cmdb.ciType.attributeMap') }}</div>
     <vxe-table
       v-if="adrType === 'agent'"
       ref="xTable"
@@ -25,13 +26,13 @@
       :data="tableData"
       :style="{ width: '700px', marginBottom: '20px' }"
     >
-      <vxe-colgroup title="自动发现">
-        <vxe-column field="name" title="名称"> </vxe-column>
-        <vxe-column field="type" title="类型"> </vxe-column>
-        <vxe-column field="desc" title="描述"> </vxe-column>
+      <vxe-colgroup :title="$t('cmdb.ciType.autoDiscovery')">
+        <vxe-column field="name" :title="$t('name')"> </vxe-column>
+        <vxe-column field="type" :title="$t('type')"> </vxe-column>
+        <vxe-column field="desc" :title="$t('desc')"> </vxe-column>
       </vxe-colgroup>
-      <vxe-colgroup title="模型属性">
-        <vxe-column field="attr" title="名称" :edit-render="{}">
+      <vxe-colgroup :title="$t('cmdb.ciType.attributes')">
+        <vxe-column field="attr" :title="$t('name')" :edit-render="{}">
           <template #default="{row}">
             {{ row.attr }}
           </template>
@@ -56,7 +57,7 @@
       :ruleName="adrName"
       :ciTypeAttributes="ciTypeAttributes"
       :adCITypeList="adCITypeList"
-      :currentTab="currentTab"
+      :currentTab="adr_id"
       :style="{ marginBottom: '20px' }"
     />
     <a-form-model
@@ -75,18 +76,18 @@
     </a-form-model>
     <a-form :form="form3" v-if="adrType === 'snmp'" class="attr-ad-snmp-form">
       <a-col :span="24">
-        <a-form-item label="节点" :labelCol="{ span: 2 }" :wrapperCol="{ span: 20 }">
+        <a-form-item :label="$t('cmdb.ciType.node')" :labelCol="{ span: 2 }" :wrapperCol="{ span: 20 }">
           <MonitorNodeSetting ref="monitorNodeSetting" :initNodes="nodes" :form="form3" />
         </a-form-item>
       </a-col>
     </a-form>
-    <div class="attr-ad-header">执行配置</div>
+    <div class="attr-ad-header">{{ $t('cmdb.ciType.adExecConfig') }}</div>
     <a-form-model :model="form" :labelCol="{ span: 2 }" :wrapperCol="{ span: 20 }">
-      <a-form-model-item label="执行机器">
+      <a-form-model-item :label="$t('cmdb.ciType.adExecTarget')">
         <CustomRadio v-model="agent_type" :radioList="agentTypeRadioList">
           <a-input
             :style="{ width: '300px' }"
-            placeholder="请输入以0x开头的16进制OneAgent ID"
+            :placeholder="$t('cmdb.ciType.oneagentIdTips')"
             v-show="agent_type === 'agent_id'"
             slot="extra_agent_id"
             v-model="form.agent_id"
@@ -95,26 +96,26 @@
             :style="{ width: '300px' }"
             v-show="agent_type === 'query_expr'"
             slot="extra_query_expr"
-            placeholder="从CMDB选择"
+            :placeholder="$t('cmdb.ciType.selectFromCMDBTips')"
             v-model="form.query_expr"
           >
             <a @click="handleOpenCmdb" slot="suffix"><a-icon type="menu"/></a>
           </a-input>
         </CustomRadio>
       </a-form-model-item>
-      <a-form-model-item label="自动入库">
+      <a-form-model-item :label="$t('cmdb.ciType.adAutoInLib')">
         <a-switch v-model="form.auto_accept" />
       </a-form-model-item>
     </a-form-model>
-    <div class="attr-ad-header">采集频率</div>
+    <div class="attr-ad-header">{{ $t('cmdb.ciType.adInterval') }}</div>
     <CustomRadio :radioList="radioList" v-model="interval">
       <span v-show="interval === 'interval'" slot="extra_interval">
-        <a-input-number v-model="intervalValue" :min="1" /> 秒
+        <a-input-number v-model="intervalValue" :min="1" /> {{ $t('seconds') }}
       </span>
     </CustomRadio>
 
     <div class="attr-ad-footer">
-      <a-button type="primary" @click="handleSave">保存</a-button>
+      <a-button type="primary" @click="handleSave">{{ $t('save') }}</a-button>
     </div>
     <CMDBExprDrawer ref="cmdbDrawer" @copySuccess="copySuccess" />
   </div>
@@ -133,7 +134,7 @@ export default {
   name: 'AttrADTabpane',
   components: { Vcrontab, HttpSnmpAD, CMDBExprDrawer, MonitorNodeSetting },
   props: {
-    currentTab: {
+    adr_id: {
       type: Number,
       default: 0,
     },
@@ -159,11 +160,7 @@ export default {
     },
   },
   data() {
-    const radioList = [
-      { value: 'interval', label: '按间隔' },
-    ]
     return {
-      radioList,
       tableData: [],
       form: {
         agent_id: '',
@@ -187,6 +184,7 @@ export default {
         },
       ],
       form3: this.$form.createForm(this, { name: 'snmp_form' }),
+      alias: '',
     }
   },
   computed: {
@@ -205,24 +203,31 @@ export default {
     },
     agentTypeRadioList() {
       const { permissions = [] } = this.userRoles
-      if (permissions.includes('cmdb_admin') || permissions.includes('admin')) {
+      if ((permissions.includes('cmdb_admin') || permissions.includes('admin')) && this.adrType !== 'http') {
         return [
-          { value: 'all', label: '所有节点' },
-          { value: 'agent_id', label: '指定节点' },
-          { value: 'query_expr', label: '从CMDB中选择 ' },
+          { value: 'all', label: this.$t('cmdb.ciType.allNodes') },
+          { value: 'agent_id', label: this.$t('cmdb.ciType.specifyNodes') },
+          { value: 'query_expr', label: this.$t('cmdb.ciType.selectFromCMDBTips') },
         ]
       }
       return [
-        { value: 'agent_id', label: '指定节点' },
-        { value: 'query_expr', label: '从CMDB中选择 ' },
+        { value: 'agent_id', label: this.$t('cmdb.ciType.specifyNodes') },
+        { value: 'query_expr', label: this.$t('cmdb.ciType.selectFromCMDBTips') },
+      ]
+    },
+    radioList() {
+      return [
+        { value: 'interval', label: this.$t('cmdb.ciType.byInterval') },
+        // { value: 'cron', label: '按cron', layout: 'vertical' },
       ]
     },
   },
   mounted() {},
   methods: {
     init() {
-      const _find = this.adrList.find((item) => Number(item.id) === Number(this.currentTab))
-      const _findADT = this.adCITypeList.find((item) => Number(item.adr_id) === Number(this.currentTab))
+      const _find = this.adrList.find((item) => Number(item.id) === Number(this.adr_id))
+      const _findADT = this.adCITypeList.find((item) => Number(item.id) === Number(this.currentAdt.id))
+      this.alias = _findADT?.extra_option?.alias ?? ''
       if (this.adrType === 'http') {
         const { category = undefined, key = '', secret = '' } = _findADT?.extra_option ?? {}
         this.form2 = {
@@ -294,7 +299,7 @@ export default {
       this.cron = cron
     },
     handleSave() {
-      const { currentAdt } = this
+      const { currentAdt, alias } = this
       let params
       if (this.adrType === 'http') {
         params = {
@@ -349,20 +354,26 @@ export default {
       if (this.agent_type === 'agent_id' || this.agent_type === 'all') {
         params.query_expr = ''
         if (this.agent_type === 'agent_id' && !params.agent_id) {
-          this.$message.error('请填写指定节点！')
+          this.$message.error(this.$t('cmdb.ciType.specifyNodesTips'))
           return
         }
       }
       if (this.agent_type === 'query_expr' || this.agent_type === 'all') {
         params.agent_id = ''
         if (this.agent_type === 'query_expr' && !params.query_expr) {
-          this.$message.error('请从cmdb中选择！')
+          this.$message.error(this.$t('cmdb.ciType.selectFromCMDBTips'))
           return
         }
       }
-
+      if (params.extra_option) {
+        params.extra_option.alias = alias
+      } else {
+        params.extra_option = {}
+        params.extra_option.alias = alias
+      }
       putCITypeDiscovery(currentAdt.id, params).then((res) => {
-        this.$message.success('保存成功')
+        this.$message.success(this.$t('saveSuccess'))
+        this.$emit('handleSave')
       })
     },
     handleOpenCmdb() {

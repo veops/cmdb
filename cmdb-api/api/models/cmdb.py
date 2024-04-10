@@ -57,6 +57,16 @@ class CIType(Model):
     uid = db.Column(db.Integer, index=True)
 
 
+class CITypeInheritance(Model):
+    __tablename__ = "c_ci_type_inheritance"
+
+    parent_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)
+    child_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)
+
+    parent = db.relationship("CIType", primaryjoin="CIType.id==CITypeInheritance.parent_id")
+    child = db.relationship("CIType", primaryjoin="CIType.id==CITypeInheritance.child_id")
+
+
 class CITypeRelation(Model):
     __tablename__ = "c_ci_type_relations"
 
@@ -64,6 +74,9 @@ class CITypeRelation(Model):
     child_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)  # dst
     relation_type_id = db.Column(db.Integer, db.ForeignKey("c_relation_types.id"), nullable=False)
     constraint = db.Column(db.Enum(*ConstraintEnum.all()), default=ConstraintEnum.One2Many)
+
+    parent_attr_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"))
+    child_attr_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"))
 
     parent = db.relationship("CIType", primaryjoin="CIType.id==CITypeRelation.parent_id")
     child = db.relationship("CIType", primaryjoin="CIType.id==CITypeRelation.child_id")
@@ -93,6 +106,8 @@ class Attribute(Model):
 
     _choice_web_hook = db.Column('choice_web_hook', db.JSON)
     choice_other = db.Column(db.JSON)
+
+    re_check = db.Column(db.Text)
 
     uid = db.Column(db.Integer, index=True)
 
@@ -448,6 +463,7 @@ class PreferenceRelationView(Model):
     name = db.Column(db.String(64), index=True, nullable=False)
     cr_ids = db.Column(db.JSON)  # [{parent_id: x, child_id: y}]
     is_public = db.Column(db.Boolean, default=False)
+    option = db.Column(db.JSON)
 
 
 class PreferenceSearchOption(Model):
@@ -462,6 +478,15 @@ class PreferenceSearchOption(Model):
     uid = db.Column(db.Integer, index=True)
 
     option = db.Column(db.JSON)
+
+
+class PreferenceCITypeOrder(Model):
+    __tablename__ = "c_pcto"
+
+    uid = db.Column(db.Integer, index=True, nullable=False)
+    type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'))
+    order = db.Column(db.SmallInteger, default=0)
+    is_tree = db.Column(db.Boolean, default=False)  # True is tree view, False is resource view
 
 
 # custom
@@ -548,6 +573,7 @@ class CIFilterPerms(Model):
     type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'))
     ci_filter = db.Column(db.Text)
     attr_filter = db.Column(db.Text)
+    id_filter = db.Column(db.JSON)  # {node_path: unique_value}
 
     rid = db.Column(db.Integer, index=True)
 

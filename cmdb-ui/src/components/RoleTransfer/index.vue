@@ -3,12 +3,12 @@
     <a-switch
       class="role-transfer-switch"
       v-model="isUserRole"
-      checked-children="用户"
-      un-checked-children="虚拟"
+      :checked-children="$t('user')"
+      :un-checked-children="$t('visual')"
       @change="loadRoles"
     />
     <div class="role-transfer-left">
-      <a-input placeholder="请输入搜索内容" v-model="searchValue" />
+      <a-input :placeholder="$t('placeholderSearch')" v-model="searchValue" />
       <div v-for="item in filterAllRoles" :key="item.id" @click="handleSelectedLeft(item.id)">
         <a-checkbox :checked="selectedLeft.includes(item.id)" />
         <div :title="item.name" class="role-transfer-left-role">{{ item.name }}</div>

@@ -5,23 +5,26 @@
     :label-col="formItemLayout.labelCol"
     :wrapper-col="formItemLayout.wrapperCol"
   >
-    <a-divider style="font-size:14px;margin-top:6px;">基础设置</a-divider>
+    <a-divider style="font-size:14px;margin-top:6px;">{{ $t('cmdb.ciType.basicConfig') }}</a-divider>
     <a-row>
       <a-col :span="12">
-        <a-form-item label="属性名(英文)">
+        <a-form-item :label="$t('cmdb.ciType.AttributeName')">
           <a-input
             name="name"
-            placeholder="英文"
+            :placeholder="$t('cmdb.ciType.English')"
             v-decorator="[
               'name',
               {
                 rules: [
-                  { required: true, message: '请输入属性名' },
+                  { required: true, message: $t('cmdb.ciType.inputAttributeName') },
                   {
-                    message: '不能以数字开头，可以是英文 数字以及下划线 (_)',
+                    message: $t('cmdb.ciType.attributeNameTips'),
                     pattern: RegExp('^(?!\\d)[a-zA-Z_0-9]+$'),
                   },
-                  { message: '内置字段', pattern: RegExp('^(?!(id|_id|ci_id|type|_type|ci_type)$).*$') },
+                  {
+                    message: $t('cmdb.ciType.buildinAttribute'),
+                    pattern: RegExp('^(?!(id|_id|ci_id|type|_type|ci_type)$).*$'),
+                  },
                 ],
               },
             ]"
@@ -29,14 +32,14 @@
         </a-form-item>
       </a-col>
       <a-col :span="12">
-        <a-form-item label="别名">
+        <a-form-item :label="$t('alias')">
           <a-input name="alias" v-decorator="['alias', { rules: [] }]" />
         </a-form-item>
       </a-col>
     </a-row>
     <a-row>
       <a-col :span="12">
-        <a-form-item label="数据类型">
+        <a-form-item :label="$t('cmdb.ciType.DataType')">
           <a-select
             name="value_type"
             style="width: 100%"
@@ -56,16 +59,15 @@
         <a-form-item
           :label-col="{ span: currentValueType === '6' ? 4 : 8 }"
           :wrapper-col="{ span: currentValueType === '6' ? 18 : 15 }"
-          label="默认值"
+          :label="$t('cmdb.ciType.defaultValue')"
         >
           <template>
-            <a-select
+            <a-input
               v-if="form.getFieldValue('is_list')"
-              mode="tags"
               :style="{ width: '100%' }"
               v-decorator="['default_value', { rules: [{ required: false }] }]"
             >
-            </a-select>
+            </a-input>
             <a-input-number
               style="width: 100%"
               v-else-if="currentValueType === '1'"
@@ -79,7 +81,7 @@
               @select="selectIntDefaultValue"
             >
               <a-select-option key="$auto_inc_id">
-                自增ID
+                {{ $t('cmdb.ciType.autoIncID') }}
               </a-select-option>
             </a-select>
             <a-input
@@ -100,13 +102,13 @@
               @select="changeDefaultForDatetime"
             >
               <a-select-option key="$created_at">
-                创建时间
+                {{ $t('createdAt') }}
               </a-select-option>
               <a-select-option key="$updated_at">
-                更新时间
+                {{ $t('updatedAt') }}
               </a-select-option>
               <a-select-option key="$custom_time">
-                自定义时间
+                {{ $t('cmdb.ciType.customTime') }}
               </a-select-option>
             </a-select>
             <template v-else-if="currentValueType === '4' || currentValueType === '3'">
@@ -124,10 +126,10 @@
                 <a><a-icon type="down" /> </a>
                 <a-menu slot="overlay" @click="onClick">
                   <a-menu-item key="$created_at">
-                    <a>创建时间</a>
+                    <a>{{ $t('createdAt') }}</a>
                   </a-menu-item>
                   <a-menu-item key="$updated_at">
-                    <a>更新时间</a>
+                    <a>{{ $t('updatedAt') }}</a>
                   </a-menu-item>
                 </a-menu>
               </a-dropdown>
@@ -152,7 +154,7 @@
       <a-form-item
         :label-col="horizontalFormItemLayout.labelCol"
         :wrapper-col="horizontalFormItemLayout.wrapperCol"
-        label="必须"
+        :label="$t('required')"
       >
         <a-switch
           @change="(checked) => onChange(checked, 'is_required')"
@@ -162,7 +164,11 @@
       </a-form-item>
     </a-col>
     <a-col :span="6" v-if="currentValueType !== '6' && currentValueType !== '7'">
-      <a-form-item :label-col="{ span: 8 }" :wrapper-col="horizontalFormItemLayout.wrapperCol" label="唯一">
+      <a-form-item
+        :label-col="{ span: 8 }"
+        :wrapper-col="horizontalFormItemLayout.wrapperCol"
+        :label="$t('cmdb.ciType.unique')"
+      >
         <a-switch
           :disabled="isShowComputedArea"
           @change="onChange"
@@ -176,8 +182,8 @@
         <template slot="label">
           <span
             style="position:relative;white-space:pre;"
-          >{{ `索引` }}
-            <a-tooltip title="字段可被用于检索，加速查询">
+          >{{ $t('cmdb.ciType.index') }}
+            <a-tooltip :title="$t('cmdb.ciType.indexTips')">
               <a-icon
                 style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
                 type="question-circle"
@@ -208,8 +214,8 @@
         <template slot="label">
           <span
             style="position:relative;white-space:pre;"
-          >{{ `显示` }}
-            <a-tooltip title="CI实例表格默认展示该字段">
+          >{{ $t('cmdb.ciType.defaultShow') }}
+            <a-tooltip :title="$t('cmdb.ciType.defaultShowTips')">
               <a-icon
                 style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
                 type="question-circle"
@@ -235,7 +241,7 @@
       <a-form-item
         :label-col="currentValueType === '2' ? horizontalFormItemLayout.labelCol : { span: 8 }"
         :wrapper-col="horizontalFormItemLayout.wrapperCol"
-        label="排序"
+        :label="$t('cmdb.ciType.isSortable')"
       >
         <a-switch
           :disabled="isShowComputedArea"
@@ -254,8 +260,8 @@
         <template slot="label">
           <span
             style="position:relative;white-space:pre;"
-          >{{ `多值` }}
-            <a-tooltip title="字段的值是1个或者多个，接口返回的值的类型是list">
+          >{{ $t('cmdb.ciType.list') }}
+            <a-tooltip :title="$t('cmdb.ciType.listTips')">
               <a-icon
                 style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
                 type="question-circle"
@@ -278,15 +284,20 @@
         />
       </a-form-item>
     </a-col>
-    <a-divider style="font-size:14px;margin-top:6px;">高级设置</a-divider>
+    <a-divider style="font-size:14px;margin-top:6px;">{{ $t('cmdb.ciType.advancedSettings') }}</a-divider>
     <a-row>
+      <a-col :span="24" v-if="!['6'].includes(currentValueType)">
+        <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 12 }" :label="$t('cmdb.ciType.reg')">
+          <RegSelect :isShowErrorMsg="false" v-model="re_check" :limitedFormat="getLimitedFormat()" />
+        </a-form-item>
+      </a-col>
       <a-col :span="24">
-        <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" label="字体">
+        <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" :label="$t('cmdb.ciType.font')">
           <FontArea ref="fontArea" />
         </a-form-item>
       </a-col>
       <a-col :span="24" v-if="!['6', '7'].includes(currentValueType)">
-        <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" label="预定义值">
+        <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" :label="$t('cmdb.ciType.choiceValue')">
           <PreValueArea ref="preValueArea" :canDefineScript="canDefineScript" :disabled="isShowComputedArea" />
         </a-form-item>
       </a-col>
@@ -295,12 +306,8 @@
           <template slot="label">
             <span
               style="position:relative;white-space:pre;"
-            >{{ `计算属性` }}
-              <a-tooltip
-                :title="
-                  `该属性的值是通过模型的其它属性构建的表达式或者执行一段代码的方式计算而来，属性的引用方法为: {{ 属性名 }}`
-                "
-              >
+            >{{ $t('cmdb.ciType.computedAttribute') }}
+              <a-tooltip :title="$t('cmdb.ciType.computedAttributeTips')">
                 <a-icon
                   style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
                   type="question-circle"
@@ -326,9 +333,9 @@
       </a-col>
     </a-row>
     <a-form-item v-if="hasFooter" :wrapper-col="{ offset: 18 }">
-      <a-button type="primary" @click="handleSubmit">新增</a-button>
+      <a-button type="primary" @click="handleSubmit">{{ $t('new') }}</a-button>
       <a-divider type="vertical" />
-      <a-button @click="handleClose">取消</a-button>
+      <a-button @click="handleClose">{{ $t('cancel') }}</a-button>
     </a-form-item>
   </a-form>
 </template>
@@ -340,6 +347,7 @@ import { valueTypeMap } from '../../utils/const'
 import ComputedArea from './computedArea.vue'
 import PreValueArea from './preValueArea.vue'
 import FontArea from './fontArea.vue'
+import RegSelect from '@/components/RegexSelect'
 
 export default {
   name: 'CreateNewAttribute',
@@ -348,6 +356,7 @@ export default {
     PreValueArea,
     vueJsonEditor,
     FontArea,
+    RegSelect,
   },
   props: {
     hasFooter: {
@@ -357,7 +366,6 @@ export default {
   },
   data() {
     return {
-      valueTypeMap,
       formItemLayout: {
         labelCol: { span: 8 },
         wrapperCol: { span: 15 },
@@ -369,15 +377,20 @@ export default {
       form: this.$form.createForm(this),
       currentValueType: '2',
       default_value_json: {},
-      default_value_json_right: true, // 当前json是否正确
+      default_value_json_right: true, // Is the current json correct?
 
       canDefineComputed: false,
       isShowComputedArea: false,
 
       defaultForDatetime: '',
+
+      re_check: {},
     }
   },
   computed: {
+    valueTypeMap() {
+      return valueTypeMap()
+    },
     canDefineScript() {
       return this.canDefineComputed
     },
@@ -395,8 +408,12 @@ export default {
           const data = { is_required, default_show }
           delete values.is_required
           delete values.default_show
-          if (values.value_type === '0' && default_value && default_value.length) {
-            values.default = { default: default_value[0] }
+          if (values.value_type === '0' && default_value) {
+            if (values.is_list) {
+              values.default = { default: default_value || null }
+            } else {
+              values.default = { default: default_value[0] || null }
+            }
           } else if (values.value_type === '6') {
             if (this.default_value_json_right) {
               values.default = { default: this.default_value_json }
@@ -404,13 +421,13 @@ export default {
               values.default = { default: null }
             }
           } else if (default_value || default_value === 0) {
-            if (values.value_type === '3') {
+            if (values.value_type === '3' && !values.is_list) {
               if (default_value === '$created_at' || default_value === '$updated_at') {
                 values.default = { default: default_value }
               } else {
                 values.default = { default: moment(default_value).format('YYYY-MM-DD HH:mm:ss') }
               }
-            } else if (values.value_type === '4') {
+            } else if (values.value_type === '4' && !values.is_list) {
               values.default = { default: moment(default_value).format('YYYY-MM-DD') }
             } else {
               values.default = { default: default_value }
@@ -423,7 +440,7 @@ export default {
             const computedAreaData = this.$refs.computedArea.getData()
             values = { ...values, ...computedAreaData }
           } else {
-            // 如果是非计算属性，就看看有没有预定义值
+            // If it is a non-computed attribute, check to see if there is a predefined value
             if (!['6', '7'].includes(values.value_type)) {
               const preValueAreaData = this.$refs.preValueArea.getData()
               values = { ...values, ...preValueAreaData }
@@ -431,9 +448,9 @@ export default {
           }
           const fontOptions = this.$refs.fontArea.getData()
 
-          // is_index进行操作，除了文本   索引隐藏掉  文本  索引默认是true
-          // 框里的5种类型  is_index=true
-          // json类型、密码、链接  is_index=false
+          // is_index: except for text, the index is hidden, text index default is true
+          // 5 types in the box,  is_index=true
+          // json, password, link  is_index=false
           if (['6', '7', '8'].includes(values.value_type)) {
             values.is_index = false
           } else if (values.value_type !== '2') {
@@ -446,6 +463,9 @@ export default {
           if (values.value_type === '8') {
             values.value_type = '2'
             values.is_link = true
+          }
+          if (values.value_type !== '6') {
+            values.re_check = this.re_check?.value ?? null
           }
           const { attr_id } = await createAttribute({ ...values, option: { fontOptions } })
 
@@ -497,13 +517,13 @@ export default {
         })
       }
       if (checked && property === 'is_sortable') {
-        this.$message.warning('选中排序，则必须也要选中！')
+        this.$message.warning(this.$t('cmdb.ciType.addAttributeTips1'))
         this.form.setFieldsValue({
           is_required: true,
         })
       }
       if (!checked && property === 'is_required' && this.form.getFieldValue('is_sortable')) {
-        this.$message.warning('选中排序，则必须也要选中！')
+        this.$message.warning(this.$t('cmdb.ciType.addAttributeTips1'))
         this.$nextTick(() => {
           this.form.setFieldsValue({
             is_required: true,
@@ -536,6 +556,21 @@ export default {
       this.form.setFieldsValue({
         default_value: key,
       })
+    },
+    getLimitedFormat() {
+      if (['0'].includes(this.currentValueType)) {
+        return ['number', 'phone', 'landline', 'zipCode', 'IDCard', 'monetaryAmount', 'custom']
+      }
+      if (['1'].includes(this.currentValueType)) {
+        return ['number', 'monetaryAmount', 'custom']
+      }
+      if (['3', '4', '5'].includes(this.currentValueType)) {
+        return ['custom']
+      }
+      if (this.currentValueType === '8') {
+        return ['link', 'custom']
+      }
+      return []
     },
   },
 }

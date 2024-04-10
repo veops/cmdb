@@ -11,23 +11,39 @@
           "
           class="cmdb-views-header-metadata"
         >
-          <a-icon type="info-circle" />属性说明
+          <a-icon type="info-circle" />{{ $t('cmdb.ci.attributeDesc') }}
         </span>
       </span>
       <a-space>
-        <a-button size="small" icon="plus" type="primary" @click="$refs.create.handleOpen(true, 'create')">
-          新建
+        <a-button
+          type="primary"
+          class="ops-button-ghost"
+          ghost
+          @click="$refs.create.handleOpen(true, 'create')"
+        ><ops-icon type="veops-increase" />
+          {{ $t('create') }}
         </a-button>
-        <a-button size="small" icon="user-add" type="primary" ghost @click="handlePerm">授权</a-button>
-        <a-popconfirm
-          :title="`确认取消订阅 ${this.$route.meta.title || this.$route.meta.name} 吗？`"
-          ok-text="确认"
-          cancel-text="取消"
-          @confirm="unsubscribe"
-          placement="bottomRight"
-        >
-          <a-button size="small" icon="star" type="primary" ghost>取消订阅</a-button>
-        </a-popconfirm>
+        <EditAttrsPopover :typeId="typeId" class="operation-icon" @refresh="refreshAfterEditAttrs">
+          <a-button
+            type="primary"
+            ghost
+            class="ops-button-ghost"
+          ><ops-icon type="veops-configuration_table" />{{ $t('cmdb.configTable') }}</a-button
+          >
+        </EditAttrsPopover>
+        <a-dropdown v-model="visible">
+          <a-button type="primary" ghost class="ops-button-ghost">···</a-button>
+          <a-menu slot="overlay" @click="handleMenuClick">
+            <a-menu-item @click="handlePerm" key="grant">
+              <a-icon type="user-add" />
+              {{ $t('grant') }}
+            </a-menu-item>
+            <a-menu-item key="cancelSub" @click="unsubscribe">
+              <a-icon type="star" />
+              {{ $t('cmdb.preference.cancelSub') }}
+            </a-menu-item>
+          </a-menu>
+        </a-dropdown>
       </a-space>
     </div>
     <div class="cmdb-ci-main">
@@ -47,15 +63,15 @@
             @setParamsFromPreferenceSearch="setParamsFromPreferenceSearch"
           />
           <div class="ops-list-batch-action" v-show="!!selectedRowKeys.length">
-            <span @click="$refs.create.handleOpen(true, 'update')">修改</span>
+            <span @click="$refs.create.handleOpen(true, 'update')">{{ $t('update') }}</span>
             <a-divider type="vertical" />
-            <span @click="openBatchDownload">下载</span>
+            <span @click="openBatchDownload">{{ $t('download') }}</span>
             <a-divider type="vertical" />
-            <span @click="batchDelete">删除</span>
-            <span>选取：{{ selectedRowKeys.length }} 项</span>
+            <span @click="batchDelete">{{ $t('delete') }}</span>
+            <span>{{ $t('cmdb.ci.selectRows', { rows: selectedRowKeys.length }) }}</span>
           </div>
         </SearchForm>
-        <CiDetail ref="detail" :typeId="typeId" />
+        <CiDetailDrawer ref="detail" :typeId="typeId" />
         <ops-table
           :id="`cmdb-ci-${typeId}`"
           border
@@ -84,7 +100,6 @@
           :scroll-y="{ enabled: true, gt: 20 }"
           :scroll-x="{ enabled: true, gt: 0 }"
           class="ops-unstripe-table"
-          :style="{ margin: '0 -12px' }"
           :custom-config="{ storage: true }"
         >
           <vxe-column align="center" type="checkbox" width="60" :fixed="isCheckboxFixed ? 'left' : ''"></vxe-column>
@@ -99,7 +114,6 @@
             :cell-type="col.value_type === '2' ? 'string' : 'auto'"
             :fixed="col.is_fixed ? 'left' : ''"
           >
-            <!-- <template #edit="{row}"><a-input v-model="row[col.field]"></a-input></template> -->
             <template #header>
               <span class="vxe-handle">
                 <OpsMoveIcon
@@ -114,7 +128,7 @@
                 :getPopupContainer="(trigger) => trigger.parentElement"
                 :style="{ width: '100%', height: '32px' }"
                 v-model="row[col.field]"
-                placeholder="请选择"
+                :v-bind="$t('placeholder2')"
                 v-if="col.is_choice"
                 :showArrow="false"
                 :mode="col.is_list ? 'multiple' : 'default'"
@@ -220,16 +234,14 @@
           </vxe-table-column>
           <vxe-column align="left" field="operate" fixed="right" width="80">
             <template #header>
-              <span>操作</span>
-              <EditAttrsPopover :typeId="typeId" class="operation-icon" @refresh="refreshAfterEditAttrs" />
-              <!-- <a-icon class="operation-icon" type="control" /> -->
+              <span>{{ $t('operation') }}</span>
             </template>
             <template #default="{ row }">
               <a-space>
                 <a @click="$refs.detail.create(row.ci_id || row._id)">
                   <a-icon type="unordered-list" />
                 </a>
-                <a-tooltip title="添加关系">
+                <a-tooltip :title="$t('cmdb.ci.addRelation')">
                   <a @click="$refs.detail.create(row.ci_id || row._id, 'tab_2', '2')">
                     <a-icon type="retweet" />
                   </a>
@@ -241,10 +253,10 @@
             </template>
           </vxe-column>
           <template #empty>
-            <div v-if="loading" style="height: 200px; line-height: 200px">加载中...</div>
+            <div v-if="loading" style="height: 200px; line-height: 200px">{{ $t('loading') }}</div>
             <div v-else>
               <img :style="{ width: '200px' }" :src="require('@/assets/data_empty.png')" />
-              <div>暂无数据</div>
+              <div>{{ $t('noData') }}</div>
             </div>
           </template>
         </ops-table>
@@ -258,7 +270,14 @@
             :page-size="pageSize"
             :page-size-options="pageSizeOptions"
             @showSizeChange="onShowSizeChange"
-            :show-total="(total, range) => `当前${range[0]}-${range[1]} 共 ${total}条记录`"
+            :show-total="
+              (total, range) =>
+                $t('pagination.total', {
+                  range0: range[0],
+                  range1: range[1],
+                  total,
+                })
+            "
             @change="
               (page) => {
                 currentPage = page
@@ -266,8 +285,8 @@
             "
           >
             <template slot="buildOptionText" slot-scope="props">
-              <span v-if="props.value !== '100000'">{{ props.value }}条/页</span>
-              <span v-if="props.value === '100000'">全部</span>
+              <span v-if="props.value !== '100000'">{{ props.value }}{{ $t('itemsPerPage') }}</span>
+              <span v-if="props.value === '100000'">{{ $t('cmdb.ci.all') }}</span>
             </template>
           </a-pagination>
         </div>
@@ -289,7 +308,7 @@ import router, { resetRouter } from '@/router'
 
 import SearchForm from '../../components/searchForm/SearchForm.vue'
 import CreateInstanceForm from './modules/CreateInstanceForm'
-import CiDetail from './modules/CiDetail'
+import CiDetailDrawer from './modules/ciDetailDrawer.vue'
 import EditAttrsPopover from './modules/editAttrsPopover'
 import JsonEditor from '../../components/JsonEditor/jsonEditor.vue'
 import { searchCI, updateCI, deleteCI } from '@/modules/cmdb/api/ci'
@@ -312,7 +331,7 @@ export default {
   components: {
     SearchForm,
     CreateInstanceForm,
-    CiDetail,
+    CiDetailDrawer,
     JsonEditor,
     PasswordField,
     EditAttrsPopover,
@@ -334,7 +353,7 @@ export default {
       // if (this.selectedRowKeys && this.selectedRowKeys.length) {
       //   return this.windowHeight - 246
       // }
-      return this.windowHeight - 210
+      return this.windowHeight - 240
     },
   },
   data() {
@@ -351,17 +370,16 @@ export default {
       preferenceAttrList: [],
 
       instanceList: [],
-      // 表头
       columns: [],
       // custom table alert & rowSelection
       selectedRowKeys: [],
-      // 对照是否编辑
+      // Check whether to edit
       initialInstanceList: [],
       sortByTable: undefined,
       isEditActive: false,
       attrList: [],
       attributes: {},
-      // 表格拖拽的参数
+      // Table drag parameters
       tableDragClassName: [],
 
       resource_type: {},
@@ -370,6 +388,7 @@ export default {
       passwordValue: {},
       lastEditCiId: null,
       isContinueCloseEdit: true,
+      visible: false,
     }
   },
   watch: {
@@ -407,11 +426,15 @@ export default {
   },
   inject: ['reloadBoard'],
   mounted() {
+    // window.onkeypress = (e) => {
+    //   this.handleKeyPress(e)
+    // }
     setTimeout(() => {
       this.columnDrop()
     }, 1000)
   },
   beforeDestroy() {
+    // window.onkeypress = null
     if (this.sortable) {
       this.sortable.destroy()
     }
@@ -437,14 +460,14 @@ export default {
     async loadTableData(sortByTable = undefined) {
       try {
         this.loading = true
-        // 若模糊搜索可以 queryParam相关后期可删除
+        // If fuzzy search is possible, queryParam can be deleted later.
+        // const queryParams = this.$refs['search'].queryParam || {}
         const fuzzySearch = this.$refs['search'].fuzzySearch
         const expression = this.$refs['search'].expression || ''
         const regQ = /(?<=q=).+(?=&)|(?<=q=).+$/g
         const regSort = /(?<=sort=).+/g
 
         const exp = expression.match(regQ) ? expression.match(regQ)[0] : null
-        // 如果是表格点击的排序 以表格为准
         let sort
         if (sortByTable) {
           sort = sortByTable
@@ -453,7 +476,6 @@ export default {
         }
         const res = await searchCI({
           q: `_type:${this.typeId}${exp ? `,${exp}` : ''}${fuzzySearch ? `,*${fuzzySearch}*` : ''}`,
-          // q: `${this.mergeQ(queryParams)}${exp ? `,${exp}` : ''}${fuzzySearch ? `,*${fuzzySearch}*` : ''}`,
           count: this.pageSize,
           page: this.currentPage,
           sort,
@@ -504,9 +526,8 @@ export default {
     },
     async loadPreferenceAttrList() {
       const subscribed = await getSubscribeAttributes(this.typeId)
-      this.preferenceAttrList = subscribed.attributes // 已经订阅的全部列
+      this.preferenceAttrList = subscribed.attributes // All columns that have been subscribed
     },
-
     onSelectChange() {
       const xTable = this.$refs.xTable.getVxetableRef()
       const records = [...xTable.getCheckboxRecords(), ...xTable.getCheckboxReserveRecords()]
@@ -526,7 +547,10 @@ export default {
       const $table = this.$refs['xTable'].getVxetableRef()
       const data = {}
       this.columns.forEach((item) => {
-        if (!(item.field in this.initialPasswordValue) && !_.isEqual(row[item.field], this.initialInstanceList[rowIndex][item.field])) {
+        if (
+          !(item.field in this.initialPasswordValue) &&
+          !_.isEqual(row[item.field], this.initialInstanceList[rowIndex][item.field])
+        ) {
           data[item.field] = row[item.field] ?? null
         }
       })
@@ -541,7 +565,7 @@ export default {
       if (JSON.stringify(data) !== '{}') {
         updateCI(row.ci_id || row._id, data)
           .then(() => {
-            this.$message.success('保存成功！')
+            this.$message.success(this.$t('saveSuccess'))
             $table.reloadRow(row, null)
             const _initialInstanceList = _.cloneDeep(this.initialInstanceList)
             _initialInstanceList[rowIndex] = {
@@ -552,7 +576,7 @@ export default {
           })
           .catch((err) => {
             console.log(err)
-            $table.revertData(row)
+            this.loadTableData()
           })
       }
       this.columns.forEach((col) => {
@@ -564,7 +588,10 @@ export default {
     },
 
     async openBatchDownload() {
-      this.$refs.batchDownload.open({ preferenceAttrList: this.preferenceAttrList })
+      this.$refs.batchDownload.open({
+        preferenceAttrList: this.preferenceAttrList,
+        ciTypeName: this.$route.meta.title || this.$route.meta.name,
+      })
     },
     batchDownload({ filename, type, checkedKeys }) {
       const jsonAttrList = []
@@ -596,8 +623,8 @@ export default {
     batchUpdate(values) {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: '确认要批量修改吗？',
+        title: that.$t('warning'),
+        content: that.$t('cmdb.ci.batchUpdateConfirm'),
         async onOk() {
           that.batchUpdateAsync(values)
         },
@@ -607,29 +634,43 @@ export default {
       let successNum = 0
       let errorNum = 0
       this.loading = true
-      this.loadTip = `正在批量修改...`
+      this.loadTip = this.$t('cmdb.ci.batchUpdateInProgress') + '...'
       const payload = {}
       Object.keys(values).forEach((key) => {
         if (values[key] || values[key] === 0) {
           payload[key] = values[key]
         }
-        // 字段值支持置空
-        // 目前存在字段值不支持置空，由后端返回
+        // Field values support blanking
+        // There are currently field values that do not support blanking and will be returned by the backend.
         if (values[key] === undefined || values[key] === null) {
           payload[key] = null
         }
       })
       this.$refs.create.visible = false
+      const key = 'updatable'
+      let errorMsg = ''
       for (let i = 0; i < this.selectedRowKeys.length; i++) {
         await updateCI(this.selectedRowKeys[i], payload, false)
           .then(() => {
             successNum += 1
           })
-          .catch(() => {
+          .catch((error) => {
+            errorMsg = errorMsg + '\n' + `${this.selectedRowKeys[i]}:${error.response?.data?.message ?? ''}`
+            this.$notification.warning({
+              key,
+              message: this.$t('warning'),
+              description: errorMsg,
+              duration: 0,
+              style: { whiteSpace: 'break-spaces' },
+            })
             errorNum += 1
           })
           .finally(() => {
-            this.loadTip = `正在批量修改，共${this.selectedRowKeys.length}个，成功${successNum}个，失败${errorNum}个`
+            this.loadTip = this.$t('cmdb.ci.batchUpdateInProgress2', {
+              total: this.selectedRowKeys.length,
+              successNum: successNum,
+              errorNum: errorNum,
+            })
           })
       }
       this.loading = false
@@ -642,8 +683,8 @@ export default {
     batchDelete() {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: '确认删除？',
+        title: that.$t('warning'),
+        content: that.$t('confirmDelete'),
         onOk() {
           that.batchDeleteAsync()
         },
@@ -653,17 +694,27 @@ export default {
       let successNum = 0
       let errorNum = 0
       this.loading = true
-      this.loadTip = `正在删除...`
-      for (let i = 0; i < this.selectedRowKeys.length; i++) {
-        await deleteCI(this.selectedRowKeys[i], false)
-          .then(() => {
-            successNum += 1
-          })
-          .catch(() => {
-            errorNum += 1
+      this.loadTip = this.$t('cmdb.ci.batchDeleting')
+      const floor = Math.ceil(this.selectedRowKeys.length / 6)
+      for (let i = 0; i < floor; i++) {
+        const itemList = this.selectedRowKeys.slice(6 * i, 6 * i + 6)
+        const promises = itemList.map((x) => deleteCI(x, false))
+        await Promise.allSettled(promises)
+          .then((res) => {
+            res.forEach((r) => {
+              if (r.status === 'fulfilled') {
+                successNum += 1
+              } else {
+                errorNum += 1
+              }
+            })
           })
           .finally(() => {
-            this.loadTip = `正在删除，共${this.selectedRowKeys.length}个，成功${successNum}个，失败${errorNum}个`
+            this.loadTip = this.$t('cmdb.ci.batchDeleting2', {
+              total: this.selectedRowKeys.length,
+              successNum: successNum,
+              errorNum: errorNum,
+            })
           })
       }
       this.loading = false
@@ -682,12 +733,12 @@ export default {
     deleteCI(record) {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: '确认删除？',
+        title: that.$t('warning'),
+        content: that.$t('confirmDelete'),
         onOk() {
           deleteCI(record.ci_id || record._id).then((res) => {
             // that.$refs.table.refresh(true)
-            that.$message.success('删除成功！')
+            that.$message.success(that.$t('deleteSuccess'))
             that.reloadData()
           })
         },
@@ -710,7 +761,7 @@ export default {
       this.$refs.jsonEditor.open(column, row)
     },
     jsonEditorOk(row, column, jsonData) {
-      // 后端写数据有快慢，不拉接口直接修改table的数据
+      // The backend writes data at different speeds. You can modify the table data directly without pulling the interface.
       // this.reloadData()
       this.instanceList.forEach((item) => {
         if (item._id === row._id) {
@@ -726,6 +777,9 @@ export default {
       } else {
         this.currentPage = 1
       }
+      setTimeout(() => {
+        // this.setSelectRows()
+      }, 500)
     },
     handleSortCol({ column, property, order, sortBy, sortList, $event }) {
       let sortByTable
@@ -760,7 +814,7 @@ export default {
             },
             onEnd: (params) => {
               // 由于开启了虚拟滚动，newIndex和oldIndex是虚拟的
-              const { newIndex, oldIndex, from, to } = params
+              const { newIndex, oldIndex } = params
               // 从tableDragClassName拿到colid
               const fromColid = this.tableDragClassName[oldIndex]
               const toColid = this.tableDragClassName[newIndex]
@@ -777,6 +831,9 @@ export default {
         )
       })
     },
+    // tableFilterChangeEvent({ column, property, values, datas, filterList, $event }) {
+    //   console.log(111)
+    // },
     getChoiceValueStyle(col, colValue) {
       const _find = col.filters.find((item) => String(item[0]) === String(colValue))
       if (_find) {
@@ -864,18 +921,31 @@ export default {
       const text = `q=_type:${this.typeId}${exp ? `,${exp}` : ''}${fuzzySearch ? `,*${fuzzySearch}*` : ''}`
       this.$copyText(text)
         .then(() => {
-          this.$message.success('复制成功！')
+          this.$message.success(this.$t('copySuccess'))
         })
         .catch(() => {
-          this.$message.error('复制失败！')
+          this.$message.error(this.$t('cmdb.ci.copyFailed'))
         })
     },
     unsubscribe(ciType, type = 'all') {
-      const promises = [subscribeCIType(this.typeId, ''), subscribeTreeView(this.typeId, '')]
-      Promise.all(promises).then(() => {
-        this.$message.success('取消订阅成功')
-        this.resetRoute()
-        this.$router.push('/cmdb/preference')
+      const that = this
+      this.$confirm({
+        title: that.$t('warning'),
+        content: that.$t('cmdb.preference.confirmcancelSub2', {
+          name: `${that.$route.meta.title || that.$route.meta.name}`,
+        }),
+        onOk() {
+          const promises = [subscribeCIType(that.typeId, ''), subscribeTreeView(that.typeId, '')]
+          Promise.all(promises).then(() => {
+            const lastTypeId = window.localStorage.getItem('ops_ci_typeid') || undefined
+            if (Number(ciType) === Number(lastTypeId)) {
+              localStorage.setItem('ops_ci_typeid', '')
+            }
+            that.$message.success(that.$t('cmdb.preference.cancelSubSuccess'))
+            that.resetRoute()
+            that.$router.push('/cmdb/preference')
+          })
+        },
       })
     },
     resetRoute() {
@@ -904,9 +974,14 @@ export default {
             })
           })
         } else {
-          this.$message.error('权限不足！')
+          this.$message.error(this.$t('noPermission'))
         }
       })
+    },
+    handleMenuClick(e) {
+      if (e.key === 'grant') {
+        this.visible = false
+      }
     },
   },
 }
@@ -919,11 +994,11 @@ export default {
 <style lang="less" scoped>
 @import '~@/style/static.less';
 .cmdb-ci {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: @border-radius-box;
+  height: calc(100vh - 64px);
+  overflow: auto;
   margin-bottom: -24px;
-  .cmdb-ci-main {
-    background-color: #fff;
-    border-radius: 15px;
-    padding: 12px;
-  }
 }
 </style>

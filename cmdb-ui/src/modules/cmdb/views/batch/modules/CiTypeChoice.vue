@@ -1,25 +1,29 @@
 <template>
-  <a-space>
-    <span>模板类型：</span>
+  <div>
+    <p class="cmdb-batch-upload-label"><span>*</span>1. {{ $t('cmdb.batch.selectCIType') }}</p>
     <a-select
       showSearch
-      placeholder="请选择模板类型"
+      :placeholder="$t('cmdb.batch.selectCITypeTips')"
       @change="selectCiType"
-      :style="{ width: '300px' }"
+      :style="{ width: '50%', marginBottom: '1em' }"
       class="ops-select"
       :filter-option="filterOption"
+      v-model="selectNum"
     >
       <a-select-option v-for="ciType in ciTypeList" :key="ciType.name" :value="ciType.id">{{
         ciType.alias
       }}</a-select-option>
     </a-select>
+    <p class="cmdb-batch-upload-label">&nbsp;&nbsp;2. {{ $t('cmdb.batch.downloadTemplate') }}</p>
     <a-button
+      :style="{ marginBottom: '1em' }"
       @click="openModal"
       :disabled="!selectNum"
       type="primary"
-      class="ops-button-primary"
+      ghost
+      class="ops-button-ghost"
       icon="download"
-    >下载模板</a-button
+    >{{ $t('cmdb.batch.clickDownload') }}</a-button
     >
     <a-modal
       :bodyStyle="{ paddingTop: 0 }"
@@ -30,14 +34,14 @@
       @ok="handleOk"
       wrapClassName="ci-type-choice-modal"
     >
-      <a-divider orientation="left">模型属性</a-divider>
+      <a-divider orientation="left">{{ $t('cmdb.ciType.attributes') }}</a-divider>
       <a-checkbox
         @change="changeCheckAll"
         :style="{ marginBottom: '20px' }"
         :indeterminate="indeterminate"
         :checked="checkAll"
       >
-        全选
+        {{ $t('checkAll') }}
       </a-checkbox>
       <br />
       <a-checkbox-group style="width:100%" v-model="checkedAttrs">
@@ -51,7 +55,7 @@
         </a-row>
       </a-checkbox-group>
       <template v-if="parentsType && parentsType.length">
-        <a-divider orientation="left">模型关联</a-divider>
+        <a-divider orientation="left">{{ $t('cmdb.ciType.relation') }}</a-divider>
         <a-row :gutter="[24, 24]" align="top" type="flex">
           <a-col :style="{ display: 'inline-flex' }" :span="12" v-for="item in parentsType" :key="item.id">
             <a-checkbox @click="clickParent(item)" :checked="checkedParents.includes(item.alias || item.name)">
@@ -69,7 +73,11 @@
               :title="item.alias || item.name"
             >{{ item.alias || item.name }}</span
             >
-            <a-select :style="{ flex: 1 }" size="small" v-model="parentsForm[item.alias || item.name].attr">
+            <a-select
+              :style="{ flex: 1 }"
+              size="small"
+              v-model="parentsForm[item.alias || item.name].selectedParentAttr"
+            >
               <a-select-option
                 :title="attr.alias || attr.name"
                 v-for="attr in item.attributes"
@@ -83,15 +91,18 @@
         </a-row>
       </template>
     </a-modal>
-  </a-space>
+  </div>
 </template>
 
 <script>
 import _ from 'lodash'
-import { downloadExcel } from '../../../utils/helper'
+import { mapState } from 'vuex'
+import ExcelJS from 'exceljs'
+import FileSaver from 'file-saver'
 import { getCITypes } from '@/modules/cmdb/api/CIType'
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
 import { getCITypeParent, getCanEditByParentIdChildId } from '@/modules/cmdb/api/CITypeRelation'
+import { searchPermResourceByRoleId } from '@/modules/acl/api/permission'
 
 export default {
   name: 'CiTypeChoice',
@@ -99,7 +110,7 @@ export default {
     return {
       ciTypeList: [],
       ciTypeName: '',
-      selectNum: 0,
+      selectNum: undefined,
       selectCiTypeAttrList: [],
       visible: false,
       checkedAttrs: [],
@@ -111,9 +122,21 @@ export default {
       canEdit: {},
     }
   },
-  created: function() {
+  computed: {
+    ...mapState({
+      rid: (state) => state.user.rid,
+    }),
+  },
+  async created() {
+    const { resources } = await searchPermResourceByRoleId(this.rid, {
+      resource_type_id: 'CIType',
+      app_id: 'cmdb',
+    })
     getCITypes().then((res) => {
-      this.ciTypeList = res.ci_types
+      this.ciTypeList = res.ci_types.filter((type) => {
+        const _findRe = resources.find((re) => re.name === type.name)
+        return _findRe?.permissions.includes('create') ?? false
+      })
     })
   },
   watch: {
@@ -130,8 +153,7 @@ export default {
   },
   methods: {
     selectCiType(el) {
-      // 当选择好模板类型时的回调函数
-      this.selectNum = el
+      // Callback function when a template type is selected
       getCITypeAttributesById(el).then((res) => {
         this.$emit('getCiTypeAttr', res)
         this.selectCiTypeAttrList = res
@@ -155,11 +177,10 @@ export default {
           })
         }
         this.parentsType = res.parents.filter((parent) => this.canEdit[parent.id])
-
         const _parentsForm = {}
         res.parents.forEach((item) => {
           const _find = item.attributes.find((attr) => attr.id === item.unique_id)
-          _parentsForm[item.alias || item.name] = { attr: _find?.alias || _find?.name, value: '' }
+          _parentsForm[item.alias || item.name] = { ...item, selectedParentAttr: _find?.alias || _find?.name }
         })
         this.parentsForm = _parentsForm
         this.checkedParents = []
@@ -174,30 +195,69 @@ export default {
       this.visible = false
     },
     handleOk() {
-      const columns1 = this.checkedAttrs.map((item) => {
+      const excel_name = `${this.ciTypeName}.xlsx`
+      const wb = new ExcelJS.Workbook()
+      const ws = wb.addWorksheet(this.ciTypeName)
+      const choice_value_obj = {}
+      const columns1 = this.checkedAttrs.map((item, index) => {
+        const _find = this.selectCiTypeAttrList.attributes.find((attr) => item === attr.alias || item === attr.name)
+        if (_find?.choice_value && _find?.choice_value.length) {
+          choice_value_obj[item] = {
+            choice_value: _find?.choice_value,
+            columnIdx: index + 1,
+          }
+        }
         return {
-          v: item,
-          t: 's',
-          s: {
-            numFmt: 'string',
-          },
+          header: item,
+          key: item,
+          width: 20,
         }
       })
-      const columns2 = this.checkedParents.map((p) => {
+
+      const columns2 = this.checkedParents.map((p, idx) => {
+        const _selectedParentAttr = this.parentsForm[p].selectedParentAttr
+        const _find = this.parentsForm[p].attributes.find(
+          (attr) => _selectedParentAttr === attr.alias || _selectedParentAttr === attr.name
+        )
+        if (_find?.choice_value && _find?.choice_value.length) {
+          choice_value_obj[p] = {
+            choice_value: _find?.choice_value,
+            columnIdx: columns1.length + idx + 1,
+          }
+        }
         return {
-          v: `$${p}.${this.parentsForm[p].attr}`,
-          t: 's',
-          s: {
+          header: `$${p}.${this.parentsForm[p].selectedParentAttr}`,
+          key: `$${p}.${this.parentsForm[p].selectedParentAttr}`,
+          width: 40,
+          style: {
             font: {
-              color: {
-                rgb: 'FF0000',
-              },
+              color: { argb: 'ff0000' },
             },
           },
         }
       })
-      downloadExcel([[...columns1, ...columns2]], this.ciTypeName)
-      this.handleCancel()
+      ws.columns = [...columns1, ...columns2]
+
+      for (let row = 2; row < 5000; row++) {
+        Object.keys(choice_value_obj).forEach((key) => {
+          const formulae = `"${choice_value_obj[key].choice_value.map((value) => value[0]).join(',')}"`
+          console.log(formulae)
+          if (formulae.length <= 255) {
+            ws.getCell(row, choice_value_obj[key].columnIdx).dataValidation = {
+              type: 'list',
+              formulae: [formulae],
+            }
+          }
+        })
+      }
+
+      wb.xlsx.writeBuffer().then((buffer) => {
+        const file = new Blob([buffer], {
+          type: 'application/octet-stream',
+        })
+        FileSaver.saveAs(file, excel_name)
+        this.handleCancel()
+      })
     },
     changeCheckAll(e) {
       if (e.target.checked) {

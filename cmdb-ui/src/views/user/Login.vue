@@ -43,7 +43,7 @@
           <a-checkbox v-decorator="['rememberMe', { valuePropName: 'checked' }]">自动登录</a-checkbox>
         </a-form-item>
 
-        <a-form-item style="margin-top: 24px">
+        <a-form-item style="margin-top:24px">
           <a-button
             size="large"
             type="primary"
@@ -51,21 +51,37 @@
             class="login-button"
             :loading="state.loginBtn"
             :disabled="state.loginBtn"
-          >确定</a-button
+          >登录</a-button
+          >
+          <a-checkbox
+            v-if="enable_list && enable_list.length === 1 && enable_list[0].auth_type === 'LDAP'"
+            v-model="auth_with_ldap"
+          >LDAP</a-checkbox
           >
         </a-form-item>
       </a-form>
+      <template v-if="_enable_list && _enable_list.length >= 1">
+        <a-divider style="font-size:14px">其他登录方式</a-divider>
+        <div style="text-align:center">
+          <span v-for="(item, index) in _enable_list" :key="item.auth_type">
+            <ops-icon :type="item.auth_type" />
+            <a @click="otherLogin(item.auth_type)">{{ item.auth_type }}</a>
+            <a-divider v-if="index < _enable_list.length - 1" type="vertical" />
+          </span>
+        </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script>
 import md5 from 'md5'
-import { mapActions } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import { timeFix } from '@/utils/util'
 import appConfig from '@/config/app.js'
 
 export default {
+  name: 'Login',
   data() {
     return {
       customActiveKey: 'tab1',
@@ -82,11 +98,36 @@ export default {
         loginType: 0,
         smsSendBtn: false,
       },
+      auth_with_ldap: false,
     }
   },
+  computed: {
+    ...mapState({ auth_enable: (state) => state?.user?.auth_enable ?? {} }),
+    enable_list() {
+      return this.auth_enable.enable_list ?? []
+    },
+    _enable_list() {
+      return this.enable_list.filter((en) => en.auth_type !== 'LDAP')
+    },
+  },
+  watch: {
+    enable_list: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal && newVal.length === 1 && newVal[0].auth_type === 'LDAP') {
+          this.auth_with_ldap = true
+        } else {
+          this.auth_with_ldap = false
+        }
+      },
+    },
+  },
   created() {},
+  async mounted() {
+    await this.GetAuthDataEnable()
+  },
   methods: {
-    ...mapActions(['Login', 'Logout']),
+    ...mapActions(['Login', 'GetAuthDataEnable']),
     // handler
     handleUsernameOrEmail(rule, value, callback) {
       const { state } = this
@@ -101,10 +142,12 @@ export default {
     handleSubmit(e) {
       e.preventDefault()
       const {
+        enable_list,
         form: { validateFields },
         state,
         customActiveKey,
         Login,
+        auth_with_ldap,
       } = this
 
       state.loginBtn = true
@@ -113,12 +156,17 @@ export default {
 
       validateFields(validateFieldsKey, { force: true }, (err, values) => {
         if (!err) {
-          console.log('login form', values)
           const loginParams = { ...values }
           delete loginParams.username
-          loginParams[!state.loginType ? 'email' : 'username'] = values.username
+          loginParams.username = values.username
           loginParams.password = appConfig.useEncryption ? md5(values.password) : values.password
-          Login(loginParams)
+          loginParams.auth_with_ldap =
+            enable_list && enable_list.length === 1 && enable_list[0].auth_type === 'LDAP'
+              ? Number(auth_with_ldap)
+              : undefined
+
+          localStorage.setItem('ops_auth_type', '')
+          Login({ userInfo: loginParams })
             .then((res) => this.loginSuccess(res))
             .finally(() => {
               state.loginBtn = false
@@ -130,10 +178,11 @@ export default {
         }
       })
     },
-
+    otherLogin(auth_type) {
+      this.Login({ userInfo: {}, auth_type })
+    },
     loginSuccess(res) {
-      console.log(res)
-      this.$router.push({ path: this.$route.query.redirect })
+      this.$router.push({ path: this.$route.query?.redirect ?? '/' })
       // 延迟 1 秒显示欢迎信息
       setTimeout(() => {
         this.$notification.success({
@@ -159,6 +208,13 @@ export default {
     background: url('../../assets/login_bg.png') no-repeat;
     background-position: center;
     background-size: cover;
+    > img {
+      width: 80%;
+      position: absolute;
+      top: 60%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
     > span {
       color: white;
       position: absolute;
@@ -166,7 +222,6 @@ export default {
       left: 50%;
       transform: translateX(-50%);
       font-size: 1.75vw;
-      text-align: center;
     }
   }
   .ops-login-right {
@@ -176,6 +231,14 @@ export default {
     > img {
       width: 70%;
       margin-left: 15%;
+    }
+    .ops-login-right-welcome {
+      text-align: center;
+      color: rgba(29, 57, 196, 1);
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 600;
+      font-size: 1.25vw;
     }
     .login-button {
       width: 100%;

@@ -1,11 +1,11 @@
 <template>
   <div>
     <a-space :style="{ display: 'flex', marginBottom: '10px' }" v-for="(item, index) in ruleList" :key="item.id">
-      <div :style="{ width: '50px', height: '24px', position: 'relative' }">
+      <div :style="{ width: '70px', height: '24px', position: 'relative' }">
         <treeselect
           v-if="index"
           class="custom-treeselect"
-          :style="{ width: '50px', '--custom-height': '24px', position: 'absolute', top: '-17px', left: 0 }"
+          :style="{ width: '70px', '--custom-height': '24px', position: 'absolute', top: '-17px', left: 0 }"
           v-model="item.type"
           :multiple="false"
           :clearable="false"
@@ -20,6 +20,7 @@
               }
             }
           "
+          :disabled="disabled"
         >
         </treeselect>
       </div>
@@ -42,6 +43,7 @@
         "
         appendToBody
         :zIndex="1050"
+        :disabled="disabled"
       >
         <div
           :title="node.label"
@@ -80,6 +82,7 @@
         @select="(value) => handleChangeExp(value, item, index)"
         appendToBody
         :zIndex="1050"
+        :disabled="disabled"
       >
       </treeselect>
       <treeselect
@@ -91,7 +94,7 @@
         searchable
         v-if="isChoiceByProperty(item.property) && (item.exp === 'is' || item.exp === '~is')"
         :options="getChoiceValueByProperty(item.property)"
-        placeholder="请选择"
+        :placeholder="$t('placeholder2')"
         :normalizer="
           (node) => {
             return {
@@ -103,6 +106,7 @@
         "
         appendToBody
         :zIndex="1050"
+        :disabled="disabled"
       >
         <div
           :title="node.label"
@@ -119,9 +123,23 @@
         v-else-if="item.exp === 'range' || item.exp === '~range'"
         :style="{ width: '175px' }"
       >
-        <a-input class="ops-input" size="small" v-model="item.min" :style="{ width: '78px' }" placeholder="最小值" />
+        <a-input
+          class="ops-input"
+          size="small"
+          v-model="item.min"
+          :style="{ width: '78px' }"
+          :placeholder="$t('min')"
+          :disabled="disabled"
+        />
         ~
-        <a-input class="ops-input" size="small" v-model="item.max" :style="{ width: '78px' }" placeholder="最大值" />
+        <a-input
+          class="ops-input"
+          size="small"
+          v-model="item.max"
+          :style="{ width: '78px' }"
+          :placeholder="$t('max')"
+          :disabled="disabled"
+        />
       </a-input-group>
       <a-input-group size="small" compact v-else-if="item.exp === 'compare'" :style="{ width: '175px' }">
         <treeselect
@@ -143,6 +161,7 @@
           "
           appendToBody
           :zIndex="1050"
+          :disabled="disabled"
         >
         </treeselect>
         <a-input class="ops-input" v-model="item.value" size="small" style="width: 113px" />
@@ -151,19 +170,26 @@
         v-else-if="item.exp !== 'value' && item.exp !== '~value'"
         size="small"
         v-model="item.value"
-        :placeholder="item.exp === 'in' || item.exp === '~in' ? '以 ; 分隔' : ''"
+        :placeholder="item.exp === 'in' || item.exp === '~in' ? $t('cmdbFilterComp.split', { separator: ';' }) : ''"
         class="ops-input"
+        :style="{ width: '175px' }"
+        :disabled="disabled"
       ></a-input>
       <div v-else :style="{ width: '175px' }"></div>
-      <a-tooltip title="复制">
-        <a class="operation" @click="handleCopyRule(item)"><ops-icon type="icon-xianxing-copy"/></a>
-      </a-tooltip>
-      <a-tooltip title="删除">
-        <a class="operation" @click="handleDeleteRule(item)"><ops-icon type="icon-xianxing-delete"/></a>
-      </a-tooltip>
+      <template v-if="!disabled">
+        <a-tooltip :title="$t('copy')">
+          <a class="operation" @click="handleCopyRule(item)"><ops-icon type="veops-copy"/></a>
+        </a-tooltip>
+        <a-tooltip :title="$t('delete')">
+          <a class="operation" @click="handleDeleteRule(item)"><ops-icon type="icon-xianxing-delete"/></a>
+        </a-tooltip>
+        <a-tooltip :title="$t('cmdbFilterComp.addHere')" v-if="needAddHere">
+          <a class="operation" @click="handleAddRuleAt(item)"><a-icon type="plus-circle"/></a>
+        </a-tooltip>
+      </template>
     </a-space>
-    <div class="table-filter-add">
-      <a @click="handleAddRule">+ 新增</a>
+    <div class="table-filter-add" v-if="!disabled">
+      <a @click="handleAddRule">+ {{ $t('new') }}</a>
     </div>
   </div>
 </template>
@@ -191,12 +217,17 @@ export default {
       required: true,
       default: () => [],
     },
+    needAddHere: {
+      type: Boolean,
+      default: false,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
-      ruleTypeList,
-      expList,
-      advancedExpList,
       compareTypeList,
     }
   },
@@ -210,6 +241,15 @@ export default {
         return val
       },
     },
+    ruleTypeList() {
+      return ruleTypeList()
+    },
+    expList() {
+      return expList()
+    },
+    advancedExpList() {
+      return advancedExpList()
+    },
   },
   methods: {
     getExpListByProperty(property) {
@@ -217,10 +257,10 @@ export default {
         const _find = this.canSearchPreferenceAttrList.find((item) => item.name === property)
         if (_find && ['0', '1', '3', '4', '5'].includes(_find.value_type)) {
           return [
-            { value: 'is', label: '等于' },
-            { value: '~is', label: '不等于' },
-            { value: '~value', label: '为空' }, // 为空的定义有点绕
-            { value: 'value', label: '不为空' },
+            { value: 'is', label: this.$t('cmdbFilterComp.is') },
+            { value: '~is', label: this.$t('cmdbFilterComp.~is') },
+            { value: '~value', label: this.$t('cmdbFilterComp.~value') }, // 为空的定义有点绕
+            { value: 'value', label: this.$t('cmdbFilterComp.value') },
           ]
         }
         return this.expList
@@ -252,6 +292,19 @@ export default {
       const idx = this.ruleList.findIndex((r) => r.id === item.id)
       if (idx > -1) {
         this.ruleList.splice(idx, 1)
+      }
+      this.$emit('change', this.ruleList)
+    },
+    handleAddRuleAt(item) {
+      const idx = this.ruleList.findIndex((r) => r.id === item.id)
+      if (idx > -1) {
+        this.ruleList.splice(idx, 0, {
+          id: uuidv4(),
+          type: 'and',
+          property: this.canSearchPreferenceAttrList[0]?.name,
+          exp: 'is',
+          value: null,
+        })
       }
       this.$emit('change', this.ruleList)
     },

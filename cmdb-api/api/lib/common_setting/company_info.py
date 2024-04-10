@@ -1,4 +1,6 @@
 # -*- coding:utf-8 -*-
+from urllib.parse import urlparse
+
 from api.extensions import cache
 from api.models.common_setting import CompanyInfo
 
@@ -11,6 +13,7 @@ class CompanyInfoCRUD(object):
 
     @staticmethod
     def create(**kwargs):
+        CompanyInfoCRUD.check_data(**kwargs)
         res = CompanyInfo.create(**kwargs)
         CompanyInfoCache.refresh(res.info)
         return res
@@ -22,9 +25,25 @@ class CompanyInfoCRUD(object):
         if not existed:
             existed = CompanyInfoCRUD.create(**kwargs)
         else:
+            CompanyInfoCRUD.check_data(**kwargs)
             existed = existed.update(**kwargs)
         CompanyInfoCache.refresh(existed.info)
         return existed
+
+    @staticmethod
+    def check_data(**kwargs):
+        info = kwargs.get('info', {})
+        info['messenger'] = CompanyInfoCRUD.check_messenger(info.get('messenger', None))
+
+        kwargs['info'] = info
+
+    @staticmethod
+    def check_messenger(messenger):
+        if not messenger:
+            return messenger
+
+        parsed_url = urlparse(messenger)
+        return f"{parsed_url.scheme}://{parsed_url.netloc}"
 
 
 class CompanyInfoCache(object):

@@ -7,10 +7,10 @@
         size="small"
         class="ops-button-primary"
         icon="plus"
-      >新增触发器</a-button
+      >{{ $t('cmdb.ciType.newTrigger') }}</a-button
       >
     </div>
-    <vxe-table
+    <ops-table
       stripe
       :data="tableData"
       size="small"
@@ -20,40 +20,20 @@
       :max-height="windowHeight - 180"
       class="ops-stripe-table"
     >
-      <vxe-column field="option.name" title="名称"></vxe-column>
-      <vxe-column field="option.description" title="备注"></vxe-column>
-      <vxe-column field="type" title="类型">
+      <vxe-column field="option.name" :title="$t('name')"></vxe-column>
+      <vxe-column field="option.description" :title="$t('desc')"></vxe-column>
+      <vxe-column field="type" :title="$t('type')">
         <template #default="{ row }">
-          <span v-if="row.attr_id">日期属性</span>
-          <span v-else>数据变更</span>
+          <span v-if="row.attr_id">{{ $t('cmdb.ciType.triggerDate') }}</span>
+          <span v-else>{{ $t('cmdb.ciType.triggerDataChange') }}</span>
         </template>
       </vxe-column>
-      <vxe-column field="option.enable" title="开启">
+      <vxe-column field="option.enable" :title="$t('cmdb.ciType.triggerEnable')">
         <template #default="{ row }">
           <a-switch :checked="row.option.enable" @click="changeEnable(row)"></a-switch>
         </template>
       </vxe-column>
-
-      <!-- <vxe-column field="attr_name" title="属性名"></vxe-column>
-      <vxe-column field="option.subject" title="主题"></vxe-column>
-      <vxe-column field="option.body" title="内容"></vxe-column>
-      <vxe-column field="option.wx_to" title="微信通知">
-        <template #default="{ row }">
-          <span v-for="(person, index) in row.option.wx_to" :key="person + index">[{{ person }}]</span>
-        </template>
-      </vxe-column>
-      <vxe-column field="option.mail_to" title="邮件通知">
-        <template #default="{ row }">
-          <span v-for="(email, index) in row.option.mail_to" :key="email + index">[{{ email }}]</span>
-        </template>
-      </vxe-column>
-      <vxe-column field="option.before_days" title="提前">
-        <template #default="{ row }">
-          <span v-if="row.option.before_days">{{ row.option.before_days }}天</span>
-        </template>
-      </vxe-column>
-      <vxe-column field="option.notify_at" title="发送时间"></vxe-column> -->
-      <vxe-column field="operation" title="操作" width="80px" align="center">
+      <vxe-column field="operation" :title="$t('operation')" width="100px" align="center">
         <template #default="{ row }">
           <a-space>
             <a @click="handleEdit(row)"><a-icon type="edit"/></a>
@@ -61,7 +41,7 @@
           </a-space>
         </template>
       </vxe-column>
-    </vxe-table>
+    </ops-table>
     <TriggerForm ref="triggerForm" :CITypeId="CITypeId" />
   </div>
 </template>
@@ -71,7 +51,6 @@ import _ from 'lodash'
 import { getTriggerList, deleteTrigger, updateTrigger } from '../../api/CIType'
 import { getCITypeAttributesById } from '../../api/CITypeAttr'
 import TriggerForm from './triggerForm.vue'
-import { getAllDepAndEmployee } from '@/api/company'
 
 export default {
   name: 'TriggerTable',
@@ -86,7 +65,6 @@ export default {
     return {
       tableData: [],
       attrList: [],
-      allTreeDepAndEmp: [],
     }
   },
   computed: {
@@ -97,20 +75,9 @@ export default {
   provide() {
     return {
       refresh: this.getTableData,
-      provide_allTreeDepAndEmp: () => {
-        return this.allTreeDepAndEmp
-      },
     }
   },
-  mounted() {
-    this.getAllDepAndEmployee()
-  },
   methods: {
-    getAllDepAndEmployee() {
-      getAllDepAndEmployee({ block: 0 }).then((res) => {
-        this.allTreeDepAndEmp = res
-      })
-    },
     async getTableData() {
       const [triggerList, attrList] = await Promise.all([
         getTriggerList(this.CITypeId),
@@ -131,11 +98,11 @@ export default {
     handleDetele(id) {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: '确认删除该触发器吗?',
+        title: that.$t('warning'),
+        content: that.$t('cmdb.ciType.confirmDeleteTrigger'),
         onOk() {
           deleteTrigger(that.CITypeId, id).then(() => {
-            that.$message.success('删除成功！')
+            that.$message.success(that.$t('deleteSuccess'))
             that.getTableData()
           })
         },
@@ -167,6 +134,6 @@ export default {
 
 <style lang="less" scoped>
 .ci-types-triggers {
-  padding: 16px 24px 24px;
+  padding: 0 20px 20px;
 }
 </style>

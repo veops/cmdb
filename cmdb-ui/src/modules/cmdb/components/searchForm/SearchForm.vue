@@ -5,8 +5,15 @@
         <a-space>
           <treeselect
             v-if="type === 'resourceSearch'"
-            class="custom-treeselect"
-            :style="{ width: '250px', marginRight: '10px', '--custom-height': '32px' }"
+            class="custom-treeselect custom-treeselect-bgcAndBorder"
+            :style="{
+              width: '200px',
+              marginRight: '10px',
+              '--custom-height': '32px',
+              '--custom-bg-color': '#fff',
+              '--custom-border': '1px solid #d9d9d9',
+              '--custom-multiple-lineHeight': '16px',
+            }"
             v-model="currenCiType"
             :multiple="true"
             :clearable="true"
@@ -15,7 +22,7 @@
             :limit="1"
             :limitText="(count) => `+ ${count}`"
             value-consists-of="LEAF_PRIORITY"
-            placeholder="模型"
+            :placeholder="$t('cmdb.ciType.ciType')"
             @close="closeCiTypeGroup"
             @open="openCiTypeGroup"
             @input="inputCiTypeGroup"
@@ -23,8 +30,8 @@
               (node) => {
                 return {
                   id: node.id || -1,
-                  label: node.alias || node.name || '其他',
-                  title: node.alias || node.name || '其他',
+                  label: node.alias || node.name || $t('other'),
+                  title: node.alias || node.name || $t('other'),
                   children: node.ci_types,
                 }
               }
@@ -41,24 +48,26 @@
           </treeselect>
           <a-input
             v-model="fuzzySearch"
-            :style="{ display: 'inline-block', width: '244px' }"
-            placeholder="请查找"
+            :style="{ display: 'inline-block', width: '200px' }"
+            :placeholder="$t('cmdb.components.pleaseSearch')"
             @pressEnter="emitRefresh"
-            class="ops-input ops-input-radius"
           >
             <a-icon
               type="search"
               slot="suffix"
-              :style="{ color: fuzzySearch ? '#2f54eb' : '', cursor: 'pointer' }"
+              :style="{ color: fuzzySearch ? '#2f54eb' : '#d9d9d9', cursor: 'pointer' }"
               @click="emitRefresh"
             />
-            <a-tooltip slot="prefix" placement="bottom" :overlayStyle="{ maxWidth: '550px' }">
+            <a-tooltip slot="prefix" placement="bottom" :overlayStyle="{ maxWidth: '550px', whiteSpace: 'pre-line' }">
               <template slot="title">
-                1、json属性不能搜索<br />2、搜索内容包括逗号，则需转义 \,<br />3、只搜索索引属性，非索引属性使用条件过滤
+                {{ $t('cmdb.components.ciSearchTips') }}
               </template>
               <a><a-icon type="question-circle"/></a>
             </a-tooltip>
           </a-input>
+          <a-tooltip :title="$t('reset')">
+            <a-button @click="reset">{{ $t('reset') }}</a-button>
+          </a-tooltip>
           <FilterComp
             ref="filterComp"
             :canSearchPreferenceAttrList="canSearchPreferenceAttrList"
@@ -68,8 +77,8 @@
           >
             <div slot="popover_item" class="search-form-bar-filter">
               <a-icon class="search-form-bar-filter-icon" type="filter" />
-              条件过滤
-              <a-icon class="search-form-bar-filter-icon" type="down" />
+              {{ $t('cmdb.components.conditionFilter') }}
+              <a-icon class="search-form-bar-filter-icon" type="down" :style="{ color: '#d9d9d9' }" />
             </div>
           </FilterComp>
           <a-input
@@ -91,14 +100,14 @@
             :placeholder="placeholder"
             @keyup.enter="emitRefresh"
           >
-            <a-icon slot="suffix" type="copy" @click="handleCopyExpression" />
+            <ops-icon slot="suffix" type="veops-copy" @click="handleCopyExpression" />
           </a-input>
           <slot></slot>
         </a-space>
       </div>
       <a-space>
-        <a-button @click="reset" size="small">重置</a-button>
-        <a-tooltip title="属性说明" v-if="type === 'relationView'">
+        <slot name="extraContent"></slot>
+        <a-tooltip :title="$t('cmdb.components.attributeDesc')" v-if="type === 'relationView'">
           <a
             @click="
               () => {
@@ -145,11 +154,11 @@ export default {
     selectedRowKeys: {
       type: Array,
       default: () => [],
-    }
+    },
   },
   data() {
     return {
-      // 高级搜索 展开/关闭
+      // Advanced Search Expand/Close
       advanced: false,
       queryParam: {},
       isFocusExpression: false,
@@ -163,7 +172,7 @@ export default {
 
   computed: {
     placeholder() {
-      return this.isFocusExpression ? '例：q=hostname:*0.0.0.0*' : '表达式'
+      return this.isFocusExpression ? this.$t('cmdb.components.ciSearchTips2') : this.$t('cmdb.ciType.expr')
     },
     width() {
       return '200px'
@@ -179,13 +188,21 @@ export default {
       this.fuzzySearch = ''
     },
   },
-  inject: ['setPreferenceSearchCurrent'],
+  inject: {
+    setPreferenceSearchCurrent: {
+      from: 'setPreferenceSearchCurrent',
+      default: null,
+    },
+  },
   mounted() {
     if (this.type === 'resourceSearch') {
       this.getCITypeGroups()
     }
   },
   methods: {
+    // toggleAdvanced() {
+    //   this.advanced = !this.advanced
+    // },
     getCITypeGroups() {
       getCITypeGroups({ need_other: true }).then((res) => {
         this.ciTypeGroup = res
@@ -228,13 +245,14 @@ export default {
       }
     },
     inputCiTypeGroup(value) {
-      console.log(value)
       if (!value || !value.length) {
         this.$emit('updateAllAttributesList', value)
       }
     },
     emitRefresh() {
-      this.setPreferenceSearchCurrent(null)
+      if (this.setPreferenceSearchCurrent) {
+        this.setPreferenceSearchCurrent(null)
+      }
       this.$nextTick(() => {
         this.$emit('refresh', true)
       })
@@ -246,6 +264,7 @@ export default {
 }
 </script>
 <style lang="less">
+@import '~@/style/static.less';
 @import '../../views/index.less';
 .ci-searchform-expression {
   > input {
@@ -255,14 +274,14 @@ export default {
     border-right: none;
     &:hover,
     &:focus {
-      border-bottom: 2px solid #2f54eb;
+      border-bottom: 2px solid @primary-color;
     }
     &:focus {
       box-shadow: 0 2px 2px -2px #1f78d133;
     }
   }
   .ant-input-suffix {
-    color: #2f54eb;
+    color: #d9d9d9;
     cursor: pointer;
   }
 }
@@ -279,14 +298,15 @@ export default {
 @import '~@/style/static.less';
 
 .search-form-bar {
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 32px;
   .search-form-bar-filter {
-    .ops_display_wrapper();
+    .ops_display_wrapper(transparent);
     .search-form-bar-filter-icon {
-      color: #custom_colors[color_1];
+      color: @primary-color;
       font-size: 12px;
     }
   }

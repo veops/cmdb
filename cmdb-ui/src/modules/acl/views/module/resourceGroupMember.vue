@@ -1,5 +1,5 @@
 <template>
-  <a-modal v-model="visible" :title="`组成员：${editRecord.name}`" :width="800" :footer="null">
+  <a-modal v-model="visible" :title="`${$t('acl.groupMember')}${editRecord.name}`" :width="800" :footer="null">
     <div :style="{ maxHeight: '500px', overflow: 'auto' }">
       <a-tag :style="{ marginBottom: '5px' }" v-for="mem in members" :key="mem.name">
         {{ mem.name }}

@@ -32,7 +32,7 @@
             /></a>
           </a-space>
           <a v-else @click="handleEdit"><a-icon type="eye"/></a>
-          <span>{{ rule.is_plugin ? 'Plugin' : '默认' }}</span>
+          <span>{{ rule.is_plugin ? 'Plugin' : $t('cmdb.custom_dashboard.default') }}</span>
         </div>
       </template>
     </div>
@@ -57,7 +57,7 @@ export default {
       return this.rule?.option?.icon ?? { color: '', name: 'caise-wuliji' }
     },
     isDeletable() {
-      return !['物理机', '虚拟机', '网卡', '硬盘', 'server', 'vserver', 'NIC', 'harddisk'].includes(this.rule.name)
+      return ![this.$t('cmdb.ad.server'), this.$t('cmdb.ad.vserver'), this.$t('cmdb.ad.nic'), this.$t('cmdb.ad.disk'), 'server', 'vserver', 'NIC', 'harddisk'].includes(this.rule.name)
     },
   },
   inject: {

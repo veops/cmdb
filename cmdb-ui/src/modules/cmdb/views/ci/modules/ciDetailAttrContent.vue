@@ -59,6 +59,9 @@
           {{ ci[attr.name] }}
         </span>
       </template>
+      <template v-else-if="attr.is_list">
+        <span> {{ ci[attr.name] && Array.isArray(ci[attr.name]) ? ci[attr.name].join(',') : ci[attr.name] }}</span>
+      </template>
       <template v-else>{{ getName(ci[attr.name]) }}</template>
     </span>
     <template v-else>
@@ -72,10 +75,9 @@
                 rules: [{ required: attr.is_required }],
               },
             ]"
-            placeholder="请选择"
+            :placeholder="$t('placeholder2')"
             v-if="attr.is_choice"
             :mode="attr.is_list ? 'multiple' : 'default'"
-            :multiple="attr.is_list"
             showSearch
             allowClear
             size="small"
@@ -112,7 +114,7 @@
               },
             ]"
             style="width: 100%"
-            v-else-if="attr.value_type === '0' || attr.value_type === '1'"
+            v-else-if="(attr.value_type === '0' || attr.value_type === '1') && !attr.is_list"
           />
           <a-date-picker
             size="small"
@@ -125,22 +127,9 @@
             style="width: 100%"
             :format="attr.value_type === '4' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss'"
             :valueFormat="attr.value_type === '4' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss'"
-            v-else-if="attr.value_type === '4' || attr.value_type === '3'"
+            v-else-if="(attr.value_type === '4' || attr.value_type === '3') && !attr.is_list"
             :showTime="attr.value_type === '4' ? false : { format: 'HH:mm:ss' }"
           />
-          <!-- <a-input
-            size="small"
-            @focus="(e) => handleFocusInput(e, attr)"
-            v-decorator="[
-              attr.name,
-              {
-                validateTrigger: ['submit'],
-                rules: [{ required: attr.is_required }],
-              },
-            ]"
-            style="width: 100%"
-            v-else-if="attr.value_type === '6'"
-          /> -->
           <a-input
             size="small"
             v-decorator="[
@@ -222,7 +211,9 @@ export default {
       this.$nextTick(async () => {
         if (this.attr.is_list && !this.attr.is_choice) {
           this.form.setFieldsValue({
-            [`${this.attr.name}`]: this.ci[this.attr.name].join(',') || null,
+            [`${this.attr.name}`]: Array.isArray(this.ci[this.attr.name])
+              ? this.ci[this.attr.name].join(',')
+              : this.ci[this.attr.name],
           })
           return
         }
@@ -244,7 +235,7 @@ export default {
       if (!_.isEqual(this.ci[this.attr.name], newData)) {
         await updateCI(this.ci._id, { [`${this.attr.name}`]: newData })
           .then(() => {
-            this.$message.success('更新成功！')
+            this.$message.success(this.$t('updateSuccess'))
             this.$emit('updateCIByself', { [`${this.attr.name}`]: newData }, this.attr.name)
           })
           .catch(() => {
@@ -267,7 +258,7 @@ export default {
       if (!_.isEqual(this.ci[this.attr.name], jsonData)) {
         updateCI(this.ci._id, { [`${this.attr.name}`]: jsonData })
           .then(() => {
-            this.$message.success('更新成功！')
+            this.$message.success(this.$t('updateSuccess'))
             this.$emit('updateCIByself', { [`${this.attr.name}`]: jsonData }, this.attr.name)
           })
           .catch(() => {

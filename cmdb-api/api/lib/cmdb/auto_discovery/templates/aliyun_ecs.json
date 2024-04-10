@@ -1,647 +1,386 @@
 [
-  {
-    "name": "CreationTime",
-    "type": "文本",
-    "example": "2017-12-10T04:04Z",
-    "desc": "\u5b9e\u4f8b\u521b\u5efa\u65f6\u95f4\u3002\u4ee5ISO 8601\u4e3a\u6807\u51c6\uff0c\u5e76\u4f7f\u7528UTC+0\u65f6\u95f4\uff0c\u683c\u5f0f\u4e3ayyyy-MM-ddTHH:mmZ\u3002\u66f4\u591a\u4fe1\u606f\uff0c\u8bf7\u53c2\u89c1[ISO 8601](~~25696~~)\u3002"
-  },
-  {
-    "name": "SerialNumber",
-    "type": "文本",
-    "example": "51d1353b-22bf-4567-a176-8b3e12e4****",
-    "desc": "\u5b9e\u4f8b\u5e8f\u5217\u53f7\u3002"
-  },
-  {
-    "name": "Status",
-    "type": "文本",
-    "example": "Running",
-    "desc": "\u5b9e\u4f8b\u72b6\u6001\u3002"
-  },
-  {
-    "name": "DeploymentSetId",
-    "type": "文本",
-    "example": "ds-bp67acfmxazb4p****",
-    "desc": "\u90e8\u7f72\u96c6ID\u3002"
-  },
-  {
-    "name": "KeyPairName",
-    "type": "文本",
-    "example": "testKeyPairName",
-    "desc": "\u5bc6\u94a5\u5bf9\u540d\u79f0\u3002"
-  },
-  {
-    "name": "SaleCycle",
-    "type": "文本",
-    "example": "month",
-    "desc": "> \u8be5\u53c2\u6570\u5df2\u5f03\u7528\uff0c\u4e0d\u518d\u8fd4\u56de\u6709\u610f\u4e49\u7684\u6570\u636e\u3002"
-  },
-  {
-    "name": "SpotStrategy",
-    "type": "文本",
-    "example": "NoSpot",
-    "desc": "\u6309\u91cf\u5b9e\u4f8b\u7684\u7ade\u4ef7\u7b56\u7565\u3002\u53ef\u80fd\u503c\uff1a\n\n- NoSpot\uff1a\u6b63\u5e38\u6309\u91cf\u4ed8\u8d39\u5b9e\u4f8b\u3002\n- SpotWithPriceLimit\uff1a\u8bbe\u7f6e\u4e0a\u9650\u4ef7\u683c\u7684\u62a2\u5360\u5f0f\u5b9e\u4f8b\u3002\n- SpotAsPriceGo\uff1a\u7cfb\u7edf\u81ea\u52a8\u51fa\u4ef7\uff0c\u6700\u9ad8\u6309\u91cf\u4ed8\u8d39\u4ef7\u683c\u7684\u62a2\u5360\u5f0f\u5b9e\u4f8b\u3002"
-  },
-  {
-    "name": "DeviceAvailable",
-    "type": "boolean",
-    "example": "true",
-    "desc": "\u5b9e\u4f8b\u662f\u5426\u53ef\u4ee5\u6302\u8f7d\u6570\u636e\u76d8\u3002"
-  },
-  {
-    "name": "LocalStorageCapacity",
-    "type": "整数",
-    "example": "1000",
-    "desc": "\u5b9e\u4f8b\u6302\u8f7d\u7684\u672c\u5730\u5b58\u50a8\u5bb9\u91cf\u3002"
-  },
-  {
-    "name": "Description",
-    "type": "文本",
-    "example": "testDescription",
-    "desc": "\u5b9e\u4f8b\u63cf\u8ff0\u3002"
-  },
-  {
-    "name": "SpotDuration",
-    "type": "整数",
-    "example": "1",
-    "desc": "\u62a2\u5360\u5f0f\u5b9e\u4f8b\u7684\u4fdd\u7559\u65f6\u957f\uff0c\u5355\u4f4d\u4e3a\u5c0f\u65f6\u3002\u53ef\u80fd\u503c\u4e3a0~6\u3002\n\n- \u4fdd\u7559\u65f6\u957f2~6\u6b63\u5728\u9080\u6d4b\u4e2d\uff0c\u5982\u9700\u5f00\u901a\u8bf7\u63d0\u4ea4\u5de5\u5355\u3002\n- \u503c\u4e3a0\uff0c\u5219\u4e3a\u65e0\u4fdd\u62a4\u671f\u6a21\u5f0f\u3002\n\n>\u5f53SpotStrategy\u503c\u4e3aSpotWithPriceLimit\u6216SpotAsPriceGo\u65f6\u8fd4\u56de\u8be5\u53c2\u6570\u3002"
-  },
-  {
-    "name": "InstanceNetworkType",
-    "type": "文本",
-    "example": "vpc",
-    "desc": "\u5b9e\u4f8b\u7f51\u7edc\u7c7b\u578b\u3002\u53ef\u80fd\u503c\uff1a\n\n- classic\uff1a\u7ecf\u5178\u7f51\u7edc\u3002\n- vpc\uff1a\u4e13\u6709\u7f51\u7edcVPC\u3002"
-  },
-  {
-    "name": "InstanceName",
-    "type": "文本",
-    "example": "InstanceNameTest",
-    "desc": "\u5b9e\u4f8b\u540d\u79f0\u3002"
-  },
-  {
-    "name": "OSNameEn",
-    "type": "文本",
-    "example": "CentOS  7.4 64 bit",
-    "desc": "\u5b9e\u4f8b\u64cd\u4f5c\u7cfb\u7edf\u7684\u82f1\u6587\u540d\u79f0\u3002"
-  },
-  {
-    "name": "HpcClusterId",
-    "type": "文本",
-    "example": "hpc-bp67acfmxazb4p****",
-    "desc": "\u5b9e\u4f8b\u6240\u5c5e\u7684HPC\u96c6\u7fa4ID\u3002"
-  },
-  {
-    "name": "SpotPriceLimit",
-    "type": "float",
-    "example": "0.98",
-    "desc": "\u5b9e\u4f8b\u7684\u6bcf\u5c0f\u65f6\u6700\u9ad8\u4ef7\u683c\u3002\u652f\u6301\u6700\u59273\u4f4d\u5c0f\u6570\uff0c\u53c2\u6570SpotStrategy=SpotWithPriceLimit\u65f6\uff0c\u8be5\u53c2\u6570\u751f\u6548\u3002"
-  },
-  {
-    "name": "Memory",
-    "type": "整数",
-    "example": "16384",
-    "desc": "\u5185\u5b58\u5927\u5c0f\uff0c\u5355\u4f4d\u4e3aMiB\u3002"
-  },
-  {
-    "name": "OSName",
-    "type": "文本",
-    "example": "CentOS  7.4 64 \u4f4d",
-    "desc": "\u5b9e\u4f8b\u7684\u64cd\u4f5c\u7cfb\u7edf\u540d\u79f0\u3002"
-  },
-  {
-    "name": "DeploymentSetGroupNo",
-    "type": "整数",
-    "example": "1",
-    "desc": "ECS\u5b9e\u4f8b\u7ed1\u5b9a\u90e8\u7f72\u96c6\u5206\u6563\u90e8\u7f72\u65f6\uff0c\u5b9e\u4f8b\u5728\u90e8\u7f72\u96c6\u4e2d\u7684\u5206\u7ec4\u4f4d\u7f6e\u3002"
-  },
-  {
-    "name": "ImageId",
-    "type": "文本",
-    "example": "m-bp67acfmxazb4p****",
-    "desc": "\u5b9e\u4f8b\u8fd0\u884c\u7684\u955c\u50cfID\u3002"
-  },
-  {
-    "name": "VlanId",
-    "type": "文本",
-    "example": "10",
-    "desc": "\u5b9e\u4f8b\u7684VLAN ID\u3002\n\n>\u8be5\u53c2\u6570\u5373\u5c06\u88ab\u5f03\u7528\uff0c\u4e3a\u63d0\u9ad8\u517c\u5bb9\u6027\uff0c\u8bf7\u5c3d\u91cf\u4f7f\u7528\u5176\u4ed6\u53c2\u6570\u3002"
-  },
-  {
-    "name": "ClusterId",
-    "type": "文本",
-    "example": "c-bp67acfmxazb4p****",
-    "desc": "\u5b9e\u4f8b\u6240\u5728\u7684\u96c6\u7fa4ID\u3002\n\n>\u8be5\u53c2\u6570\u5373\u5c06\u88ab\u5f03\u7528\uff0c\u4e3a\u63d0\u9ad8\u517c\u5bb9\u6027\uff0c\u8bf7\u5c3d\u91cf\u4f7f\u7528\u5176\u4ed6\u53c2\u6570\u3002"
-  },
-  {
-    "name": "GPUSpec",
-    "type": "文本",
-    "example": "NVIDIA V100",
-    "desc": "\u5b9e\u4f8b\u89c4\u683c\u9644\u5e26\u7684GPU\u7c7b\u578b\u3002"
-  },
-  {
-    "name": "AutoReleaseTime",
-    "type": "文本",
-    "example": "2017-12-10T04:04Z",
-    "desc": "\u6309\u91cf\u4ed8\u8d39\u5b9e\u4f8b\u7684\u81ea\u52a8\u91ca\u653e\u65f6\u95f4\u3002"
-  },
-  {
-    "name": "DeletionProtection",
-    "type": "boolean",
-    "example": "false",
-    "desc": "\u5b9e\u4f8b\u91ca\u653e\u4fdd\u62a4\u5c5e\u6027\uff0c\u6307\u5b9a\u662f\u5426\u652f\u6301\u901a\u8fc7\u63a7\u5236\u53f0\u6216API\uff08DeleteInstance\uff09\u91ca\u653e\u5b9e\u4f8b\u3002\n\n- true\uff1a\u5df2\u5f00\u542f\u5b9e\u4f8b\u91ca\u653e\u4fdd\u62a4\u3002\n- false\uff1a\u672a\u5f00\u542f\u5b9e\u4f8b\u91ca\u653e\u4fdd\u62a4\u3002\n\n> \u8be5\u5c5e\u6027\u4ec5\u9002\u7528\u4e8e\u6309\u91cf\u4ed8\u8d39\u5b9e\u4f8b\uff0c\u4e14\u53ea\u80fd\u9650\u5236\u624b\u52a8\u91ca\u653e\u64cd\u4f5c\uff0c\u5bf9\u7cfb\u7edf\u91ca\u653e\u64cd\u4f5c\u4e0d\u751f\u6548\u3002"
-  },
-  {
-    "name": "StoppedMode",
-    "type": "文本",
-    "example": "KeepCharging",
-    "desc": "\u5b9e\u4f8b\u505c\u673a\u540e\u662f\u5426\u7ee7\u7eed\u6536\u8d39\u3002\u53ef\u80fd\u503c\uff1a\n\n- KeepCharging\uff1a\u505c\u673a\u540e\u7ee7\u7eed\u6536\u8d39\uff0c\u4e3a\u60a8\u7ee7\u7eed\u4fdd\u7559\u5e93\u5b58\u8d44\u6e90\u3002\n- StopCharging\uff1a\u505c\u673a\u540e\u4e0d\u6536\u8d39\u3002\u505c\u673a\u540e\uff0c\u6211\u4eec\u91ca\u653e\u5b9e\u4f8b\u5bf9\u5e94\u7684\u8d44\u6e90\uff0c\u4f8b\u5982vCPU\u3001\u5185\u5b58\u548c\u516c\u7f51IP\u7b49\u8d44\u6e90\u3002\u91cd\u542f\u662f\u5426\u6210\u529f\u4f9d\u8d56\u4e8e\u5f53\u524d\u5730\u57df\u4e2d\u662f\u5426\u4ecd\u6709\u8d44\u6e90\u5e93\u5b58\u3002\n- Not-applicable\uff1a\u672c\u5b9e\u4f8b\u4e0d\u652f\u6301\u505c\u673a\u4e0d\u6536\u8d39\u529f\u80fd\u3002"
-  },
-  {
-    "name": "GPUAmount",
-    "type": "整数",
-    "example": "4",
-    "desc": "\u5b9e\u4f8b\u89c4\u683c\u9644\u5e26\u7684GPU\u6570\u91cf\u3002"
-  },
-  {
-    "name": "HostName",
-    "type": "文本",
-    "example": "testHostName",
-    "desc": "\u5b9e\u4f8b\u4e3b\u673a\u540d\u3002"
-  },
-  {
-    "name": "InstanceId",
-    "type": "文本",
-    "example": "i-bp67acfmxazb4p****",
-    "desc": "\u5b9e\u4f8bID\u3002"
-  },
-  {
-    "name": "InternetMaxBandwidthOut",
-    "type": "整数",
-    "example": "5",
-    "desc": "\u516c\u7f51\u51fa\u5e26\u5bbd\u6700\u5927\u503c\uff0c\u5355\u4f4d\u4e3aMbit/s\u3002"
-  },
-  {
-    "name": "InternetMaxBandwidthIn",
-    "type": "整数",
-    "example": "50",
-    "desc": "\u516c\u7f51\u5165\u5e26\u5bbd\u6700\u5927\u503c\uff0c\u5355\u4f4d\u4e3aMbit/s\u3002"
-  },
-  {
-    "name": "InstanceType",
-    "type": "文本",
-    "example": "ecs.g5.large",
-    "desc": "\u5b9e\u4f8b\u89c4\u683c\u3002"
-  },
-  {
-    "name": "InstanceChargeType",
-    "type": "文本",
-    "example": "PostPaid",
-    "desc": "\u5b9e\u4f8b\u7684\u8ba1\u8d39\u65b9\u5f0f\u3002\u53ef\u80fd\u503c\uff1a\n\n- PrePaid\uff1a\u5305\u5e74\u5305\u6708\u3002\n- PostPaid\uff1a\u6309\u91cf\u4ed8\u8d39\u3002"
-  },
-  {
-    "name": "RegionId",
-    "type": "文本",
-    "example": "cn-hangzhou",
-    "desc": "\u5b9e\u4f8b\u6240\u5c5e\u5730\u57dfID\u3002"
-  },
-  {
-    "name": "IoOptimized",
-    "type": "boolean",
-    "example": "true",
-    "desc": "\u662f\u5426\u4e3aI/O\u4f18\u5316\u578b\u5b9e\u4f8b\u3002"
-  },
-  {
-    "name": "StartTime",
-    "type": "文本",
-    "example": "2017-12-10T04:04Z",
-    "desc": "\u5b9e\u4f8b\u6700\u8fd1\u4e00\u6b21\u7684\u542f\u52a8\u65f6\u95f4\u3002\u4ee5ISO8601\u4e3a\u6807\u51c6\uff0c\u5e76\u4f7f\u7528UTC+0\u65f6\u95f4\uff0c\u683c\u5f0f\u4e3ayyyy-MM-ddTHH:mmZ\u3002\u66f4\u591a\u4fe1\u606f\uff0c\u8bf7\u53c2\u89c1[ISO8601](~~25696~~)\u3002"
-  },
-  {
-    "name": "Cpu",
-    "type": "整数",
-    "example": "8",
-    "desc": "vCPU\u6570\u3002"
-  },
-  {
-    "name": "LocalStorageAmount",
-    "type": "整数",
-    "example": "2",
-    "desc": "\u5b9e\u4f8b\u6302\u8f7d\u7684\u672c\u5730\u5b58\u50a8\u6570\u91cf\u3002"
-  },
-  {
-    "name": "ExpiredTime",
-    "type": "文本",
-    "example": "2017-12-10T04:04Z",
-    "desc": "\u8fc7\u671f\u65f6\u95f4\u3002\u4ee5ISO8601\u4e3a\u6807\u51c6\uff0c\u5e76\u4f7f\u7528UTC+0\u65f6\u95f4\uff0c\u683c\u5f0f\u4e3ayyyy-MM-ddTHH:mmZ\u3002\u66f4\u591a\u4fe1\u606f\uff0c\u8bf7\u53c2\u89c1[ISO8601](~~25696~~)\u3002"
-  },
-  {
-    "name": "ResourceGroupId",
-    "type": "文本",
-    "example": "rg-bp67acfmxazb4p****",
-    "desc": "\u5b9e\u4f8b\u6240\u5c5e\u7684\u4f01\u4e1a\u8d44\u6e90\u7ec4ID\u3002"
-  },
-  {
-    "name": "InternetChargeType",
-    "type": "文本",
-    "example": "PayByTraffic",
-    "desc": "\u7f51\u7edc\u8ba1\u8d39\u7c7b\u578b\u3002\u53ef\u80fd\u503c\uff1a\n\n- PayByBandwidth\uff1a\u6309\u56fa\u5b9a\u5e26\u5bbd\u8ba1\u8d39\u3002\n- PayByTraffic\uff1a\u6309\u4f7f\u7528\u6d41\u91cf\u8ba1\u8d39\u3002"
-  },
-  {
-    "name": "ZoneId",
-    "type": "文本",
-    "example": "cn-hangzhou-g",
-    "desc": "\u5b9e\u4f8b\u6240\u5c5e\u53ef\u7528\u533a\u3002"
-  },
-  {
-    "name": "Recyclable",
-    "type": "boolean",
-    "example": "false",
-    "desc": "\u5b9e\u4f8b\u662f\u5426\u53ef\u4ee5\u56de\u6536\u3002"
-  },
-  {
-    "name": "ISP",
-    "type": "文本",
-    "example": "null",
-    "desc": "> \u8be5\u53c2\u6570\u6b63\u5728\u9080\u6d4b\u4e2d\uff0c\u6682\u672a\u5f00\u653e\u4f7f\u7528\u3002"
-  },
-  {
-    "name": "CreditSpecification",
-    "type": "文本",
-    "example": "Standard",
-    "desc": "\u4fee\u6539\u7a81\u53d1\u6027\u80fd\u5b9e\u4f8b\u7684\u8fd0\u884c\u6a21\u5f0f\u3002\u53ef\u80fd\u503c\uff1a\n\n- Standard\uff1a\u6807\u51c6\u6a21\u5f0f\u3002\u6709\u5173\u5b9e\u4f8b\u6027\u80fd\u7684\u66f4\u591a\u4fe1\u606f\uff0c\u8bf7\u53c2\u89c1[\u4ec0\u4e48\u662f\u7a81\u53d1\u6027\u80fd\u5b9e\u4f8b](~~59977~~)\u4e2d\u7684\u6027\u80fd\u7ea6\u675f\u6a21\u5f0f\u7ae0\u8282\u3002\n- Unlimited\uff1a\u65e0\u6027\u80fd\u7ea6\u675f\u6a21\u5f0f\uff0c\u6709\u5173\u5b9e\u4f8b\u6027\u80fd\u7684\u66f4\u591a\u4fe1\u606f\uff0c\u8bf7\u53c2\u89c1[\u4ec0\u4e48\u662f\u7a81\u53d1\u6027\u80fd\u5b9e\u4f8b](~~59977~~)\u4e2d\u7684\u65e0\u6027\u80fd\u7ea6\u675f\u6a21\u5f0f\u7ae0\u8282\u3002"
-  },
-  {
-    "name": "InstanceTypeFamily",
-    "type": "文本",
-    "example": "ecs.g5",
-    "desc": "\u5b9e\u4f8b\u89c4\u683c\u65cf\u3002"
-  },
-  {
-    "name": "OSType",
-    "type": "文本",
-    "example": "linux",
-    "desc": "\u5b9e\u4f8b\u7684\u64cd\u4f5c\u7cfb\u7edf\u7c7b\u578b\uff0c\u5206\u4e3aWindows Server\u548cLinux\u4e24\u79cd\u3002\u53ef\u80fd\u503c\uff1a\n\n- windows\u3002\n- linux\u3002"
-  },
-  {
-    "name": "NetworkInterfaces",
-    "type": "json",
-    "example": {
-      "type": "json",
-      "properties": {
-        "Type": {
-          "description": "\u5f39\u6027\u7f51\u5361\u7c7b\u578b\u3002\u53ef\u80fd\u503c\uff1a\n- Primary\uff1a\u4e3b\u7f51\u5361\u3002\n- Secondary\uff1a\u8f85\u52a9\u5f39\u6027\u7f51\u5361\u3002",
-          "type": "文本",
-          "example": "Primary"
-        },
-        "MacAddress": {
-          "description": "\u5f39\u6027\u7f51\u5361\u7684MAC\u5730\u5740\u3002",
-          "type": "文本",
-          "example": "00:16:3e:32:b4:**"
-        },
-        "PrimaryIpAddress": {
-          "description": "\u5f39\u6027\u7f51\u5361\u4e3b\u79c1\u6709IP\u5730\u5740\u3002",
-          "type": "文本",
-          "example": "172.17.**.***"
-        },
-        "NetworkInterfaceId": {
-          "description": "\u5f39\u6027\u7f51\u5361\u7684ID\u3002",
-          "type": "文本",
-          "example": "eni-2zeh9atclduxvf1z****"
-        },
-        "PrivateIpSets": {
-          "type": "array",
-          "items": {
-            "type": "json",
-            "properties": {
-              "PrivateIpAddress": {
-                "description": "\u5b9e\u4f8b\u7684\u79c1\u7f51IP\u5730\u5740\u3002",
-                "type": "文本",
-                "example": "172.17.**.**"
-              },
-              "Primary": {
-                "description": "\u662f\u5426\u662f\u4e3b\u79c1\u7f51IP\u5730\u5740\u3002",
-                "type": "boolean",
-                "example": "true"
-              }
-            }
-          },
-          "description": "PrivateIpSet\u7ec4\u6210\u7684\u96c6\u5408\u3002"
-        },
-        "Ipv6Sets": {
-          "type": "array",
-          "items": {
-            "type": "json",
-            "properties": {
-              "Ipv6Address": {
-                "description": "\u4e3a\u5f39\u6027\u7f51\u5361\u6307\u5b9a\u7684IPv6\u5730\u5740\u3002",
-                "type": "文本",
-                "example": "2408:4321:180:1701:94c7:bc38:3bfa:***"
-              }
-            }
-          },
-          "description": "\u4e3a\u5f39\u6027\u7f51\u5361\u5206\u914d\u7684IPv6\u5730\u5740\u96c6\u5408\u3002\u4ec5\u5f53\u8bf7\u6c42\u53c2\u6570`AdditionalAttributes.N`\u53d6\u503c\u4e3a`NETWORK_PRIMARY_ENI_IP`\u65f6\uff0c\u624d\u4f1a\u8fd4\u56de\u8be5\u53c2\u6570\u503c\u3002"
-        },
-        "Ipv4PrefixSets": {
-          "type": "array",
-          "items": {
-            "type": "json",
-            "properties": {
-              "Ipv4Prefix": {
-                "description": "IPv4\u524d\u7f00\u3002",
-                "type": "文本",
-                "example": "47.122.*.*/19"
-              }
-            }
-          },
-          "description": "IPv4\u524d\u7f00\u96c6\u5408\u3002"
-        },
-        "Ipv6PrefixSets": {
-          "type": "array",
-          "items": {
-            "type": "json",
-            "properties": {
-              "Ipv6Prefix": {
-                "description": "IPv6\u524d\u7f00\u3002",
-                "type": "文本",
-                "example": "2001:1111:*:*::/64"
-              }
-            }
-          },
-          "description": "IPv6\u524d\u7f00\u96c6\u5408\u3002"
-        }
-      },
-      "description": "\u5b9e\u4f8b\u5305\u542b\u7684\u5f39\u6027\u7f51\u5361\u96c6\u5408\u3002"
+    {
+        "name": "CreationTime",
+        "type": "string",
+        "desc": "实例创建时间。以ISO 8601为标准，并使用UTC+0时间，格式为yyyy-MM-ddTHH:mmZ。更多信息，请参见[ISO 8601](~~25696~~)。",
+        "example": "2017-12-10T04:04Z"
     },
-    "desc": "\u5b9e\u4f8b\u5305\u542b\u7684\u5f39\u6027\u7f51\u5361\u96c6\u5408\u3002"
-  },
-  {
-    "name": "OperationLocks",
-    "type": "文本、多值",
-    "example": {
-      "type": "json",
-      "properties": {
-        "LockMsg": {
-          "description": "\u5b9e\u4f8b\u88ab\u9501\u5b9a\u7684\u63cf\u8ff0\u4fe1\u606f\u3002",
-          "type": "文本",
-          "example": "The specified instance is locked due to financial reason."
-        },
-        "LockReason": {
-          "description": "\u9501\u5b9a\u7c7b\u578b\u3002\u53ef\u80fd\u503c\uff1a\n\n- financial\uff1a\u56e0\u6b20\u8d39\u88ab\u9501\u5b9a\u3002\n- security\uff1a\u56e0\u5b89\u5168\u539f\u56e0\u88ab\u9501\u5b9a\u3002\n- Recycling\uff1a\u62a2\u5360\u5f0f\u5b9e\u4f8b\u7684\u5f85\u91ca\u653e\u9501\u5b9a\u72b6\u6001\u3002\n- dedicatedhostfinancial\uff1a\u56e0\u4e3a\u4e13\u6709\u5bbf\u4e3b\u673a\u6b20\u8d39\u5bfc\u81f4ECS\u5b9e\u4f8b\u88ab\u9501\u5b9a\u3002\n- refunded\uff1a\u56e0\u9000\u6b3e\u88ab\u9501\u5b9a\u3002",
-          "type": "文本",
-          "example": "Recycling"
-        }
-      }
+    {
+        "name": "SerialNumber",
+        "type": "string",
+        "desc": "实例序列号。",
+        "example": "51d1353b-22bf-4567-a176-8b3e12e4****"
     },
-    "desc": "\u5b9e\u4f8b\u7684\u9501\u5b9a\u539f\u56e0\u3002"
-  },
-  {
-    "name": "Tags",
-    "type": "json",
-    "example": {
-      "type": "json",
-      "properties": {
-        "TagValue": {
-          "description": "\u5b9e\u4f8b\u7684\u6807\u7b7e\u503c\u3002",
-          "type": "文本",
-          "example": "TestValue"
-        },
-        "TagKey": {
-          "description": "\u5b9e\u4f8b\u7684\u6807\u7b7e\u952e\u3002",
-          "type": "文本",
-          "example": "TestKey"
-        }
-      }
+    {
+        "name": "Status",
+        "type": "string",
+        "desc": "实例状态。",
+        "example": "Running"
     },
-    "desc": "\u5b9e\u4f8b\u7684\u6807\u7b7e\u96c6\u5408\u3002"
-  },
-  {
-    "name": "RdmaIpAddress",
-    "type": "文本、多值",
-    "example": {
-      "description": "HPC\u5b9e\u4f8b\u7684Rdma\u7f51\u7edcIP\u3002",
-      "type": "文本",
-      "example": "10.10.10.102"
+    {
+        "name": "DeploymentSetId",
+        "type": "string",
+        "desc": "部署集ID。",
+        "example": "ds-bp67acfmxazb4p****"
     },
-    "desc": "HPC\u5b9e\u4f8b\u7684Rdma\u7f51\u7edcIP\u5217\u8868\u3002"
-  },
-  {
-    "name": "SecurityGroupIds",
-    "type": "文本、多值",
-    "example": {
-      "description": "\u5b89\u5168\u7ec4ID\u3002",
-      "type": "文本",
-      "example": "sg-bp67acfmxazb4p****"
+    {
+        "name": "KeyPairName",
+        "type": "string",
+        "desc": "密钥对名称。",
+        "example": "testKeyPairName"
     },
-    "desc": "\u5b9e\u4f8b\u6240\u5c5e\u5b89\u5168\u7ec4ID\u5217\u8868\u3002"
-  },
-  {
-    "name": "PublicIpAddress",
-    "type": "文本、多值",
-    "example": {
-      "description": "\u5b9e\u4f8b\u516c\u7f51IP\u5730\u5740\u3002",
-      "type": "文本",
-      "example": "121.40.**.**"
+    {
+        "name": "SaleCycle",
+        "type": "string",
+        "desc": "> 该参数已弃用，不再返回有意义的数据。",
+        "example": "month"
     },
-    "desc": "\u5b9e\u4f8b\u516c\u7f51IP\u5730\u5740\u5217\u8868\u3002"
-  },
-  {
-    "name": "InnerIpAddress",
-    "type": "文本、多值",
-    "example": {
-      "description": "\u7ecf\u5178\u7f51\u7edc\u7c7b\u578b\u5b9e\u4f8b\u7684\u5185\u7f51IP\u5730\u5740\u3002",
-      "type": "文本",
-      "example": "10.170.**.**"
+    {
+        "name": "SpotStrategy",
+        "type": "string",
+        "desc": "按量实例的竞价策略。可能值：\n\n- NoSpot：正常按量付费实例。\n- SpotWithPriceLimit：设置上限价格的抢占式实例。\n- SpotAsPriceGo：系统自动出价，最高按量付费价格的抢占式实例。",
+        "example": "NoSpot"
     },
-    "desc": "\u7ecf\u5178\u7f51\u7edc\u7c7b\u578b\u5b9e\u4f8b\u7684\u5185\u7f51IP\u5730\u5740\u5217\u8868\u3002"
-  },
-  {
-    "name": "VpcAttributes",
-    "type": "json",
-    "example": {
-      "VpcId": {
-        "description": "\u4e13\u6709\u7f51\u7edcVPC ID\u3002",
-        "type": "文本",
-        "example": "vpc-2zeuphj08tt7q3brd****"
-      },
-      "NatIpAddress": {
-        "description": "\u4e91\u4ea7\u54c1\u7684IP\uff0c\u7528\u4e8eVPC\u4e91\u4ea7\u54c1\u4e4b\u95f4\u7684\u7f51\u7edc\u4e92\u901a\u3002",
-        "type": "文本",
-        "example": "172.17.**.**"
-      },
-      "VSwitchId": {
-        "description": "\u865a\u62df\u4ea4\u6362\u673aID\u3002",
-        "type": "文本",
-        "example": "vsw-2zeh0r1pabwtg6wcs****"
-      },
-      "PrivateIpAddress": {
-        "type": "array",
-        "items": {
-          "description": "\u79c1\u6709IP\u5730\u5740\u3002",
-          "type": "文本",
-          "example": "172.17.**.**"
-        },
-        "description": "\u79c1\u6709IP\u5730\u5740\u5217\u8868\u3002"
-      }
-    },
-    "desc": "\u4e13\u6709\u7f51\u7edcVPC\u5c5e\u6027\u3002"
-  },
-  {
-    "name": "EipAddress",
-    "type": "json",
-    "example": {
-      "IsSupportUnassociate": {
-        "description": "\u662f\u5426\u53ef\u4ee5\u89e3\u7ed1\u5f39\u6027\u516c\u7f51IP\u3002",
+    {
+        "name": "DeviceAvailable",
         "type": "boolean",
+        "desc": "实例是否可以挂载数据盘。\n\n- true：可以挂载数据盘。\n- false：不可以挂载数据盘。",
         "example": "true"
-      },
-      "InternetChargeType": {
-        "description": "\u5f39\u6027\u516c\u7f51IP\u7684\u8ba1\u8d39\u65b9\u5f0f\u3002\n\n- PayByBandwidth\uff1a\u6309\u5e26\u5bbd\u8ba1\u8d39\u3002\n\n- PayByTraffic\uff1a\u6309\u6d41\u91cf\u8ba1\u8d39\u3002",
-        "type": "文本",
-        "example": "PayByTraffic"
-      },
-      "IpAddress": {
-        "description": "\u5f39\u6027\u516c\u7f51IP\u3002",
-        "type": "文本",
-        "example": "42.112.**.**"
-      },
-      "Bandwidth": {
-        "description": "\u5f39\u6027\u516c\u7f51IP\u7684\u516c\u7f51\u5e26\u5bbd\u9650\u901f\uff0c\u5355\u4f4d\u4e3aMbit/s\u3002",
-        "type": "整数",
-        "format": "int32",
-        "example": "5"
-      },
-      "AllocationId": {
-        "description": "\u5f39\u6027\u516c\u7f51IP\u7684ID\u3002",
-        "type": "文本",
-        "example": "eip-2ze88m67qx5z****"
-      }
     },
-    "desc": "\u5f39\u6027\u516c\u7f51IP\u7ed1\u5b9a\u4fe1\u606f\u3002"
-  },
-  {
-    "name": "HibernationOptions",
-    "type": "json",
-    "example": {
-      "Configured": {
-        "description": "> \u8be5\u53c2\u6570\u6b63\u5728\u9080\u6d4b\u4e2d\uff0c\u6682\u672a\u5f00\u653e\u4f7f\u7528\u3002",
+    {
+        "name": "LocalStorageCapacity",
+        "type": "integer",
+        "desc": "实例挂载的本地存储容量。单位：GiB。",
+        "example": "1000"
+    },
+    {
+        "name": "Description",
+        "type": "string",
+        "desc": "实例描述。",
+        "example": "testDescription"
+    },
+    {
+        "name": "SpotDuration",
+        "type": "integer",
+        "desc": "抢占式实例的保留时长，单位为小时。可能值：\n\n- 1：创建后阿里云会保证实例运行1小时不会被自动释放；超过1小时后，系统会自动比较出价与市场价格、检查资源库存，来决定实例的持有和回收。\n- 0：创建后，阿里云不保证实例运行1小时，系统会自动比较出价与市场价格、检查资源库存，来决定实例的持有和回收。\n\n实例回收前5分钟阿里云会通过ECS系统事件向您发送通知。抢占式实例按秒计费，建议您结合具体任务执行耗时来选择合适的保留时长。\n\n>当SpotStrategy值为SpotWithPriceLimit或SpotAsPriceGo时返回该参数。",
+        "example": "1"
+    },
+    {
+        "name": "InstanceNetworkType",
+        "type": "string",
+        "desc": "实例网络类型。可能值：\n\n- classic：经典网络。\n- vpc：专有网络VPC。",
+        "example": "vpc"
+    },
+    {
+        "name": "InstanceName",
+        "type": "string",
+        "desc": "实例名称。",
+        "example": "InstanceNameTest"
+    },
+    {
+        "name": "OSNameEn",
+        "type": "string",
+        "desc": "实例操作系统的英文名称。",
+        "example": "CentOS  7.4 64 bit"
+    },
+    {
+        "name": "HpcClusterId",
+        "type": "string",
+        "desc": "实例所属的HPC集群ID。",
+        "example": "hpc-bp67acfmxazb4p****"
+    },
+    {
+        "name": "SpotPriceLimit",
+        "type": "number",
+        "desc": "实例的每小时最高价格。支持最大3位小数，参数SpotStrategy=SpotWithPriceLimit时，该参数生效。",
+        "example": "0.98"
+    },
+    {
+        "name": "Memory",
+        "type": "integer",
+        "desc": "内存大小，单位为MiB。",
+        "example": "16384"
+    },
+    {
+        "name": "OSName",
+        "type": "string",
+        "desc": "实例的操作系统名称。",
+        "example": "CentOS  7.4 64 位"
+    },
+    {
+        "name": "DeploymentSetGroupNo",
+        "type": "integer",
+        "desc": "ECS实例绑定部署集分散部署时，实例在部署集中的分组位置。",
+        "example": "1"
+    },
+    {
+        "name": "ImageId",
+        "type": "string",
+        "desc": "实例运行的镜像ID。",
+        "example": "m-bp67acfmxazb4p****"
+    },
+    {
+        "name": "VlanId",
+        "type": "string",
+        "desc": "实例的VLAN ID。\n\n>该参数即将被弃用，为提高兼容性，请尽量使用其他参数。",
+        "example": "10"
+    },
+    {
+        "name": "ClusterId",
+        "type": "string",
+        "desc": "实例所在的集群ID。\n\n>该参数即将被弃用，为提高兼容性，请尽量使用其他参数。",
+        "example": "c-bp67acfmxazb4p****"
+    },
+    {
+        "name": "GPUSpec",
+        "type": "string",
+        "desc": "实例规格附带的GPU类型。",
+        "example": "NVIDIA V100"
+    },
+    {
+        "name": "AutoReleaseTime",
+        "type": "string",
+        "desc": "按量付费实例的自动释放时间。",
+        "example": "2017-12-10T04:04Z"
+    },
+    {
+        "name": "DeletionProtection",
         "type": "boolean",
+        "desc": "实例释放保护属性，指定是否支持通过控制台或API（DeleteInstance）释放实例。\n\n- true：已开启实例释放保护。\n- false：未开启实例释放保护。\n\n> 该属性仅适用于按量付费实例，且只能限制手动释放操作，对系统释放操作不生效。",
         "example": "false"
-      }
     },
-    "desc": "> \u8be5\u53c2\u6570\u6b63\u5728\u9080\u6d4b\u4e2d\uff0c\u6682\u672a\u5f00\u653e\u4f7f\u7528\u3002"
-  },
-  {
-    "name": "DedicatedHostAttribute",
-    "type": "json",
-    "example": {
-      "DedicatedHostId": {
-        "description": "\u4e13\u6709\u5bbf\u4e3b\u673aID\u3002",
-        "type": "文本",
-        "example": "dh-bp67acfmxazb4p****"
-      },
-      "DedicatedHostName": {
-        "description": "\u4e13\u6709\u5bbf\u4e3b\u673a\u540d\u79f0\u3002",
-        "type": "文本",
-        "example": "testDedicatedHostName"
-      },
-      "DedicatedHostClusterId": {
-        "description": "\u4e13\u6709\u5bbf\u4e3b\u673a\u96c6\u7fa4ID\u3002",
-        "type": "文本",
-        "example": "dc-bp67acfmxazb4h****"
-      }
+    {
+        "name": "StoppedMode",
+        "type": "string",
+        "desc": "实例停机后是否继续收费。可能值：\n\n- KeepCharging：停机后继续收费，为您继续保留库存资源。\n- StopCharging：停机后不收费。停机后，我们释放实例对应的资源，例如vCPU、内存和公网IP等资源。重启是否成功依赖于当前地域中是否仍有资源库存。\n- Not-applicable：本实例不支持停机不收费功能。",
+        "example": "KeepCharging"
     },
-    "desc": "\u7531\u4e13\u6709\u5bbf\u4e3b\u673a\u96c6\u7fa4ID\uff08DedicatedHostClusterId\uff09\u3001\u4e13\u6709\u5bbf\u4e3b\u673aID\uff08DedicatedHostId\uff09\u548c\u540d\u79f0\uff08DedicatedHostName\uff09\u7ec4\u6210\u7684\u5bbf\u4e3b\u673a\u5c5e\u6027\u6570\u7ec4\u3002"
-  },
-  {
-    "name": "EcsCapacityReservationAttr",
-    "type": "json",
-    "example": {
-      "CapacityReservationPreference": {
-        "description": "\u5bb9\u91cf\u9884\u7559\u504f\u597d\u3002",
-        "type": "文本",
-        "example": "cr-bp67acfmxazb4p****"
-      },
-      "CapacityReservationId": {
-        "description": "\u5bb9\u91cf\u9884\u7559ID\u3002",
-        "type": "文本",
-        "example": "cr-bp67acfmxazb4p****"
-      }
-    },
-    "desc": "\u4e91\u670d\u52a1\u5668ECS\u7684\u5bb9\u91cf\u9884\u7559\u76f8\u5173\u53c2\u6570\u3002"
-  },
-  {
-    "name": "DedicatedInstanceAttribute",
-    "type": "json",
-    "example": {
-      "Affinity": {
-        "description": "\u4e13\u6709\u5bbf\u4e3b\u673a\u5b9e\u4f8b\u662f\u5426\u4e0e\u4e13\u6709\u5bbf\u4e3b\u673a\u5173\u8054\u3002\u53ef\u80fd\u503c\uff1a\n\n- default\uff1a\u4e13\u6709\u5bbf\u4e3b\u673a\u5b9e\u4f8b\u4e0d\u4e0e\u4e13\u6709\u5bbf\u4e3b\u673a\u5173\u8054\u3002\u505c\u673a\u4e0d\u6536\u8d39\u5b9e\u4f8b\u91cd\u542f\u540e\uff0c\u53ef\u80fd\u4f1a\u653e\u7f6e\u5728\u81ea\u52a8\u8d44\u6e90\u90e8\u7f72\u6c60\u4e2d\u7684\u5176\u5b83\u4e13\u6709\u5bbf\u4e3b\u673a\u4e0a\u3002\n\n- host\uff1a\u4e13\u6709\u5bbf\u4e3b\u673a\u5b9e\u4f8b\u4e0e\u4e13\u6709\u5bbf\u4e3b\u673a\u5173\u8054\u3002\u505c\u673a\u4e0d\u6536\u8d39\u5b9e\u4f8b\u91cd\u542f\u540e\uff0c\u4ecd\u653e\u7f6e\u5728\u539f\u4e13\u6709\u5bbf\u4e3b\u673a\u4e0a\u3002",
-        "type": "文本",
-        "example": "default"
-      },
-      "Tenancy": {
-        "description": "\u5b9e\u4f8b\u7684\u5bbf\u4e3b\u673a\u7c7b\u578b\u662f\u5426\u4e3a\u4e13\u6709\u5bbf\u4e3b\u673a\u3002\u53ef\u80fd\u503c\uff1a\n\n- default\uff1a\u5b9e\u4f8b\u7684\u5bbf\u4e3b\u673a\u7c7b\u578b\u4e0d\u662f\u4e13\u6709\u5bbf\u4e3b\u673a\u3002\n\n- host\uff1a\u5b9e\u4f8b\u7684\u5bbf\u4e3b\u673a\u7c7b\u578b\u4e3a\u4e13\u6709\u5bbf\u4e3b\u673a\u3002",
-        "type": "文本",
-        "example": "default"
-      }
-    },
-    "desc": "\u4e13\u6709\u5bbf\u4e3b\u673a\u5b9e\u4f8b\u7684\u5c5e\u6027\u3002"
-  },
-  {
-    "name": "CpuOptions",
-    "type": "json",
-    "example": {
-      "Numa": {
-        "description": "\u5206\u914d\u7684\u7ebf\u7a0b\u6570\u3002\u53ef\u80fd\u503c\u4e3a2\u3002",
-        "type": "文本",
-        "example": "2"
-      },
-      "CoreCount": {
-        "description": "\u7269\u7406CPU\u6838\u5fc3\u6570\u3002",
-        "type": "整数",
-        "format": "int32",
-        "example": "2"
-      },
-      "ThreadsPerCore": {
-        "description": "CPU\u7ebf\u7a0b\u6570\u3002",
-        "type": "整数",
-        "format": "int32",
+    {
+        "name": "GPUAmount",
+        "type": "integer",
+        "desc": "实例规格附带的GPU数量。",
         "example": "4"
-      }
     },
-    "desc": "CPU\u914d\u7f6e\u8be6\u60c5\u3002"
-  },
-  {
-    "name": "MetadataOptions",
-    "type": "json",
-    "example": {
-      "HttpEndpoint": {
-        "description": "\u662f\u5426\u542f\u7528\u5b9e\u4f8b\u5143\u6570\u636e\u7684\u8bbf\u95ee\u901a\u9053\u3002\u53ef\u80fd\u503c\uff1a\n- enabled\uff1a\u542f\u7528\u3002\n- disabled\uff1a\u7981\u7528\u3002",
-        "type": "文本",
-        "example": "enabled"
-      },
-      "HttpPutResponseHopLimit": {
-        "description": "> \u8be5\u53c2\u6570\u6682\u672a\u5f00\u653e\u4f7f\u7528\u3002",
-        "type": "整数",
-        "format": "int32",
-        "example": "0"
-      },
-      "HttpTokens": {
-        "description": "\u8bbf\u95ee\u5b9e\u4f8b\u5143\u6570\u636e\u65f6\u662f\u5426\u5f3a\u5236\u4f7f\u7528\u52a0\u56fa\u6a21\u5f0f\uff08IMDSv2\uff09\u3002\u53ef\u80fd\u503c\uff1a\n- optional\uff1a\u4e0d\u5f3a\u5236\u4f7f\u7528\u3002\n- required\uff1a\u5f3a\u5236\u4f7f\u7528\u3002",
-        "type": "文本",
-        "example": "optional"
-      }
+    {
+        "name": "HostName",
+        "type": "string",
+        "desc": "实例主机名。",
+        "example": "testHostName"
     },
-    "desc": "\u5143\u6570\u636e\u9009\u9879\u96c6\u5408\u3002"
-  },
-  {
-    "name": "ImageOptions",
-    "type": "json",
-    "example": {
-      "LoginAsNonRoot": {
-        "description": "\u4f7f\u7528\u8be5\u955c\u50cf\u7684\u5b9e\u4f8b\u662f\u5426\u652f\u6301\u4f7f\u7528ecs-user\u7528\u6237\u767b\u5f55\u3002\u53ef\u80fd\u503c\uff1a\n\n- true\uff1a\u662f\n\n- false\uff1a\u5426",
+    {
+        "name": "InstanceId",
+        "type": "string",
+        "desc": "实例ID。",
+        "example": "i-bp67acfmxazb4p****"
+    },
+    {
+        "name": "InternetMaxBandwidthOut",
+        "type": "integer",
+        "desc": "公网出带宽最大值，单位：Mbit/s。",
+        "example": "5"
+    },
+    {
+        "name": "InternetMaxBandwidthIn",
+        "type": "integer",
+        "desc": "公网入带宽最大值，单位：Mbit/s。",
+        "example": "50"
+    },
+    {
+        "name": "InstanceType",
+        "type": "string",
+        "desc": "实例规格。",
+        "example": "ecs.g5.large"
+    },
+    {
+        "name": "InstanceChargeType",
+        "type": "string",
+        "desc": "实例的计费方式。可能值：\n\n- PrePaid：包年包月。\n- PostPaid：按量付费。",
+        "example": "PostPaid"
+    },
+    {
+        "name": "RegionId",
+        "type": "string",
+        "desc": "实例所属地域ID。",
+        "example": "cn-hangzhou"
+    },
+    {
+        "name": "IoOptimized",
         "type": "boolean",
-        "example": "false"
-      }
+        "desc": "是否为I/O优化型实例。\n\n- true：是。\n- false：否。",
+        "example": "true"
     },
-    "desc": "\u955c\u50cf\u76f8\u5173\u5c5e\u6027\u4fe1\u606f\u3002"
-  }
+    {
+        "name": "StartTime",
+        "type": "string",
+        "desc": "实例最近一次的启动时间。以ISO 8601为标准，并使用UTC+0时间，格式为yyyy-MM-ddTHH:mmZ。更多信息，请参见[ISO 8601](~~25696~~)。",
+        "example": "2017-12-10T04:04Z"
+    },
+    {
+        "name": "Cpu",
+        "type": "integer",
+        "desc": "vCPU数。",
+        "example": "8"
+    },
+    {
+        "name": "LocalStorageAmount",
+        "type": "integer",
+        "desc": "实例挂载的本地存储数量。",
+        "example": "2"
+    },
+    {
+        "name": "ExpiredTime",
+        "type": "string",
+        "desc": "过期时间。以ISO 8601为标准，并使用UTC+0时间，格式为yyyy-MM-ddTHH:mmZ。更多信息，请参见[ISO 8601](~~25696~~)。",
+        "example": "2017-12-10T04:04Z"
+    },
+    {
+        "name": "ResourceGroupId",
+        "type": "string",
+        "desc": "实例所属的企业资源组ID。",
+        "example": "rg-bp67acfmxazb4p****"
+    },
+    {
+        "name": "InternetChargeType",
+        "type": "string",
+        "desc": "网络计费类型。可能值：\n\n- PayByBandwidth：按固定带宽计费。\n- PayByTraffic：按使用流量计费。",
+        "example": "PayByTraffic"
+    },
+    {
+        "name": "ZoneId",
+        "type": "string",
+        "desc": "实例所属可用区。",
+        "example": "cn-hangzhou-g"
+    },
+    {
+        "name": "Recyclable",
+        "type": "boolean",
+        "desc": "实例是否可以回收。",
+        "example": "false"
+    },
+    {
+        "name": "ISP",
+        "type": "string",
+        "desc": "> 该参数正在邀测中，暂未开放使用。",
+        "example": "null"
+    },
+    {
+        "name": "CreditSpecification",
+        "type": "string",
+        "desc": "突发性能实例的运行模式。可能值：\n\n- Standard：标准模式。有关实例性能的更多信息，请参见[什么是突发性能实例](~~59977~~)中的性能约束模式章节。\n- Unlimited：无性能约束模式，有关实例性能的更多信息，请参见[什么是突发性能实例](~~59977~~)中的无性能约束模式章节。",
+        "example": "Standard"
+    },
+    {
+        "name": "InstanceTypeFamily",
+        "type": "string",
+        "desc": "实例规格族。",
+        "example": "ecs.g5"
+    },
+    {
+        "name": "OSType",
+        "type": "string",
+        "desc": "实例的操作系统类型，分为Windows Server和Linux两种。可能值：\n\n- windows。\n- linux。",
+        "example": "linux"
+    },
+    {
+        "name": "NetworkInterfaces",
+        "type": "array",
+        "desc": "实例包含的弹性网卡集合。",
+        "example": ""
+    },
+    {
+        "name": "OperationLocks",
+        "type": "array",
+        "desc": "实例的锁定原因。",
+        "example": ""
+    },
+    {
+        "name": "Tags",
+        "type": "array",
+        "desc": "实例的标签集合。",
+        "example": ""
+    },
+    {
+        "name": "RdmaIpAddress",
+        "type": "array",
+        "desc": "HPC实例的RDMA网络IP列表。",
+        "example": ""
+    },
+    {
+        "name": "SecurityGroupIds",
+        "type": "array",
+        "desc": "实例所属安全组ID列表。",
+        "example": ""
+    },
+    {
+        "name": "PublicIpAddress",
+        "type": "array",
+        "desc": "实例公网IP地址列表。",
+        "example": ""
+    },
+    {
+        "name": "InnerIpAddress",
+        "type": "array",
+        "desc": "经典网络类型实例的内网IP地址列表。",
+        "example": ""
+    },
+    {
+        "name": "VpcAttributes",
+        "type": "object",
+        "desc": "专有网络VPC属性。",
+        "example": ""
+    },
+    {
+        "name": "EipAddress",
+        "type": "object",
+        "desc": "弹性公网IP绑定信息。",
+        "example": ""
+    },
+    {
+        "name": "HibernationOptions",
+        "type": "object",
+        "desc": "> 该参数正在邀测中，暂未开放使用。",
+        "example": ""
+    },
+    {
+        "name": "DedicatedHostAttribute",
+        "type": "object",
+        "desc": "由专有宿主机集群ID（DedicatedHostClusterId）、专有宿主机ID（DedicatedHostId）和名称（DedicatedHostName）组成的宿主机属性数组。",
+        "example": ""
+    },
+    {
+        "name": "EcsCapacityReservationAttr",
+        "type": "object",
+        "desc": "云服务器ECS的容量预留相关参数。",
+        "example": ""
+    },
+    {
+        "name": "DedicatedInstanceAttribute",
+        "type": "object",
+        "desc": "专有宿主机实例的属性。",
+        "example": ""
+    },
+    {
+        "name": "CpuOptions",
+        "type": "object",
+        "desc": "CPU配置详情。",
+        "example": ""
+    },
+    {
+        "name": "MetadataOptions",
+        "type": "object",
+        "desc": "元数据选项集合。",
+        "example": ""
+    },
+    {
+        "name": "ImageOptions",
+        "type": "object",
+        "desc": "镜像相关属性信息。",
+        "example": ""
+    },
+    {
+        "name": "SpotInterruptionBehavior",
+        "type": "string",
+        "desc": "平台发起抢占式实例中断时，抢占式实例的中断模式。可能值：\n\n- Terminate：释放。\n\n- Stop：节省停机。",
+        "example": "Terminate"
+    }
 ]

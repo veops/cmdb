@@ -11,9 +11,9 @@
       >
       </a-input>
       <div ref="preValueEdit" slot="content">
-        <a-divider orientation="left" style="margin:8px 0;color:gray;font-size:10px;">图标</a-divider>
+        <a-divider orientation="left" style="margin:8px 0;color:gray;font-size:10px;">{{ $t('icon') }}</a-divider>
         <IconArea ref="iconArea" />
-        <a-divider orientation="left" style="margin:8px 0;color:gray;font-size:10px;">字体</a-divider>
+        <a-divider orientation="left" style="margin:8px 0;color:gray;font-size:10px;">{{ $t('cmdb.ciType.font') }}</a-divider>
         <div :style="{ display: 'flex', justifyContent: 'space-around' }">
           <div
             @click="changeFontStyle('fontWeight', 'bold')"
@@ -37,7 +37,7 @@
           </div>
         </div>
 
-        <a-divider orientation="left" style="margin:8px 0;color:gray;font-size:10px;">颜色</a-divider>
+        <a-divider orientation="left" style="margin:8px 0;color:gray;font-size:10px;">{{ $t('cmdb.ciType.color') }}</a-divider>
         <div :style="{ display: 'flex', justifyContent: 'space-around' }">
           <div class="attributes-font-color">
             <a-icon type="font-colors" /><el-color-picker
@@ -56,11 +56,11 @@
             </el-color-picker>
           </div>
         </div>
-        <a-divider orientation="left" style="margin:8px 0;color:gray;font-size:10px;">操作</a-divider>
+        <a-divider orientation="left" style="margin:8px 0;color:gray;font-size:10px;">{{ $t('operation') }}</a-divider>
         <div style="text-align:right;">
           <a-tooltip
             v-if="type !== 'add'"
-            title="删除"
+            :title="$t('delete')"
           ><a
           ><a-icon
             @click="handleDelete"
@@ -69,11 +69,11 @@
             type="delete"/></a
             ></a-tooltip>
           <a-tooltip
-            title="确定"
+            :title="$t('confirm')"
           ><a><a-icon @click="handleEditOk" style="margin-right:10px;color:green;" type="check"/></a
           ></a-tooltip>
           <a-tooltip
-            title="取消"
+            :title="$t('cancel')"
           ><a
           ><a-icon
             @click="
@@ -137,6 +137,9 @@ import _ from 'lodash'
 import { ColorPicker } from 'element-ui'
 import { defautValueColor, defaultBGColors } from '../../utils/const'
 import IconArea from './iconArea.vue'
+import lang from 'element-ui/lib/locale/lang/en'
+import locale from 'element-ui/lib/locale'
+locale.use(lang)
 export default {
   name: 'PreValueTag',
   components: { ElColorPicker: ColorPicker, IconArea },

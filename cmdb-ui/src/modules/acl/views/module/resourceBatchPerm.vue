@@ -1,6 +1,6 @@
 <template>
   <CustomDrawer
-    title="便捷授权"
+    :title="$t('acl.convenient')"
     width="500px"
     :maskClosable="false"
     :closable="true"
@@ -10,12 +10,12 @@
     <a-form :form="form">
       <a-form-item>
         <div slot="label" style="display: inline-block">
-          <span>角色列表</span>
+          <span>{{ $t('acl.roleList') }}</span>
           <a-divider type="vertical" />
           <a-switch
             style="display: inline-block"
-            checked-children="用户"
-            un-checked-children="虚拟"
+            :checked-children="$t('user')"
+            :un-checked-children="$t('acl.virtual')"
             @change="handleRoleTypeChange"
             v-model="roleType"
           />
@@ -23,37 +23,37 @@
         <el-select
           :style="{ width: '100%' }"
           size="small"
-          v-decorator="['roleIdList', { rules: [{ required: true, message: '请选择角色名称' }] }]"
+          v-decorator="['roleIdList', { rules: [{ required: true, message: $t('acl.role_placeholder2') }] }]"
           multiple
           filterable
-          placeholder="请选择角色名称，可多选！"
+          :placeholder="$t('acl.role_placeholder3')"
         >
           <el-option v-for="role in allRoles" :key="role.id" :value="role.id" :label="role.name"></el-option>
         </el-select>
       </a-form-item>
 
-      <a-form-item label="权限列表">
+      <a-form-item :label="$t('acl.permissionList')">
         <el-select
           :style="{ width: '100%' }"
           size="small"
           name="permName"
-          v-decorator="['permName', { rules: [{ required: true, message: '请选择权限' }] }]"
+          v-decorator="['permName', { rules: [{ required: true, message: this.$t('acl.permission_placeholder') }] }]"
           multiple
-          placeholder="请选择权限，可多选！"
+          :placeholder="this.$t('acl.permission_placeholder')"
         >
           <el-option v-for="perm in allPerms" :key="perm.name" :value="perm.name" :label="perm.name"></el-option>
         </el-select>
       </a-form-item>
-      <a-form-item label="资源名">
+      <a-form-item :label="$t('acl.resourceName')">
         <a-textarea
-          v-decorator="['resource_names', { rules: [{ required: true, message: '请输入资源名，换行分隔' }] }]"
+          v-decorator="['resource_names', { rules: [{ required: true, message: $t('acl.resourceBatchTips') }] }]"
           :autoSize="{ minRows: 4 }"
-          placeholder="请输入资源名，换行分隔"
+          :placeholder="$t('acl.resourceBatchTips')"
         />
       </a-form-item>
       <div class="custom-drawer-bottom-action">
-        <a-button @click="handleRevoke" type="danger" ghost>权限回收</a-button>
-        <a-button @click="handleSubmit" type="primary">授权</a-button>
+        <a-button @click="handleRevoke" type="danger" ghost>{{ $t('acl.revoke') }}</a-button>
+        <a-button @click="handleSubmit" type="primary">{{ $t('grant') }}</a-button>
       </div>
     </a-form>
   </CustomDrawer>
@@ -98,12 +98,12 @@ export default {
       this.loadRoles(Number(target))
     },
     loadRoles(isUserRole) {
-      searchRole({ page_size: 9999, app_id: this.$route.name.split('_')[0], user_role: isUserRole }).then(res => {
+      searchRole({ page_size: 9999, app_id: this.$route.name.split('_')[0], user_role: isUserRole }).then((res) => {
         this.allRoles = res.roles
       })
     },
     loadPerm(resourceTypeId) {
-      getResourceTypePerms(resourceTypeId).then(res => {
+      getResourceTypePerms(resourceTypeId).then((res) => {
         this.allPerms = res
       })
     },
@@ -111,13 +111,13 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           console.log(values)
-          values.roleIdList.forEach(roleId => {
+          values.roleIdList.forEach((roleId) => {
             setBatchRoleResourceByResourceName(roleId, {
               resource_names: values.resource_names.split('\n'),
               perms: values.permName,
               resource_type_id: this.resource_type_id,
-            }).then(res => {
-              this.$message.success('授权成功')
+            }).then((res) => {
+              this.$message.success(this.$t('operateSuccess'))
               this.form.resetFields()
             })
           })
@@ -128,13 +128,13 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           console.log(values)
-          values.roleIdList.forEach(roleId => {
+          values.roleIdList.forEach((roleId) => {
             setBatchRoleResourceRevokeByResourceName(roleId, {
               resource_names: values.resource_names.split('\n'),
               perms: values.permName,
               resource_type_id: this.resource_type_id,
-            }).then(res => {
-              this.$message.success('权限回收成功')
+            }).then((res) => {
+              this.$message.success(this.$t('operateSuccess'))
               this.form.resetFields()
             })
           })

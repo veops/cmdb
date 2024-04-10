@@ -89,19 +89,22 @@ export default {
     },
   },
   data() {
-    const keyMapList = [
-      { value: 'default', label: '默认' },
-      { value: 'vim', label: 'vim' },
-      { value: 'emacs', label: 'emacs' },
-      { value: 'sublime', label: 'sublime' },
-    ]
     return {
-      keyMapList,
       coder: null,
       fontSize: 14,
       keyMap: 'default',
       fullscreenExitVisible: false,
     }
+  },
+  computed: {
+    keyMapList() {
+      return [
+        { value: 'default', label: this.$t('default') },
+        { value: 'vim', label: 'vim' },
+        { value: 'emacs', label: 'emacs' },
+        { value: 'sublime', label: 'sublime' },
+      ]
+    },
   },
   mounted() {},
   methods: {

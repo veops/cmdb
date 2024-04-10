@@ -1,6 +1,6 @@
 <template>
   <a-form :form="form">
-    <a-divider style="font-size: 14px; margin: 14px 0; font-weight: 700">{{ group.name || '其他' }}</a-divider>
+    <a-divider style="font-size:14px;margin:14px 0;font-weight:700;">{{ group.name || $t('other') }}</a-divider>
     <a-row :gutter="24" align="top" type="flex">
       <a-col
         :span="12"
@@ -21,14 +21,20 @@
             v-decorator="[
               attr.name,
               {
-                rules: [{ required: attr.is_required, message: `请选择${attr.alias || attr.name}` }],
-                initialValue: attr.default && attr.default.default ? attr.default.default : attr.is_list ? [] : null,
+                rules: [{ required: attr.is_required, message: $t('placeholder2') + `${attr.alias || attr.name}` }],
+                initialValue:
+                  attr.default && attr.default.default
+                    ? attr.is_list
+                      ? Array.isArray(attr.default.default)
+                        ? attr.default.default
+                        : attr.default.default.split(',')
+                      : attr.default.default
+                    : null,
               },
             ]"
-            placeholder="请选择"
+            :placeholder="$t('placeholder2')"
             v-if="attr.is_choice"
             :mode="attr.is_list ? 'multiple' : 'default'"
-            :multiple="attr.is_list"
             showSearch
             allowClear
           >
@@ -54,24 +60,23 @@
               </span>
             </a-select-option>
           </a-select>
-          <a-select
+          <a-input
             v-else-if="attr.is_list"
-            mode="tags"
             :style="{ width: '100%' }"
             v-decorator="[
               attr.name,
               {
-                rules: [{ required: attr.is_required, message: `请选择${attr.alias || attr.name}` }],
-                initialValue: attr.default && attr.default.default ? attr.default.default : attr.is_list ? [] : null,
+                rules: [{ required: attr.is_required, message: $t('placeholder2') + `${attr.alias || attr.name}` }],
+                initialValue: attr.default && attr.default.default ? attr.default.default : '',
               },
             ]"
           >
-          </a-select>
+          </a-input>
           <a-input-number
             v-decorator="[
               attr.name,
               {
-                rules: [{ required: attr.is_required, message: `请输入${attr.alias || attr.name}` }],
+                rules: [{ required: attr.is_required, message: $t('placeholder1') + `${attr.alias || attr.name}` }],
                 initialValue: attr.default && attr.default.default ? attr.default.default : null,
               },
             ]"
@@ -82,7 +87,7 @@
             v-decorator="[
               attr.name,
               {
-                rules: [{ required: attr.is_required, message: `请选择${attr.alias || attr.name}` }],
+                rules: [{ required: attr.is_required, message: $t('placeholder2') + `${attr.alias || attr.name}` }],
                 initialValue: attr.default && attr.default.default ? moment(attr.default.default) : null,
               },
             ]"
@@ -97,7 +102,7 @@
               attr.name,
               {
                 validateTrigger: ['submit'],
-                rules: [{ required: attr.is_required, message: `请输入${attr.alias || attr.name}` }],
+                rules: [{ required: attr.is_required, message: $t('placeholder1') + `${attr.alias || attr.name}` }],
                 initialValue: attr.default && attr.default.default ? JSON.stringify(attr.default.default) : '',
               },
             ]"
@@ -110,7 +115,7 @@
               attr.name,
               {
                 validateTrigger: ['submit'],
-                rules: [{ required: attr.is_required, message: `请输入${attr.alias || attr.name}` }],
+                rules: [{ required: attr.is_required, message: $t('placeholder1') + `${attr.alias || attr.name}` }],
                 initialValue: attr.default && attr.default.default ? attr.default.default : null,
               },
             ]"

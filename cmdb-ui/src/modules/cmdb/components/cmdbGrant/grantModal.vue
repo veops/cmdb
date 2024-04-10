@@ -14,9 +14,16 @@
 <script>
 import EmployeeTransfer from '@/components/EmployeeTransfer'
 import RoleTransfer from '@/components/RoleTransfer'
+
 export default {
   name: 'GrantModal',
   components: { EmployeeTransfer, RoleTransfer },
+  props: {
+    customTitle: {
+      type: String,
+      default: '',
+    },
+  },
   data() {
     return {
       visible: false,
@@ -25,10 +32,13 @@ export default {
   },
   computed: {
     title() {
-      if (this.type === 'depart') {
-        return '授权用户/部门'
+      if (this.customTitle) {
+        return this.customTitle
       }
-      return '授权角色'
+      if (this.type === 'depart') {
+        return this.$t('cmdb.components.grantUser')
+      }
+      return this.$t('cmdb.components.grantRole')
     },
   },
   methods: {

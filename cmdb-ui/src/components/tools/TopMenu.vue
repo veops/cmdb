@@ -1,15 +1,11 @@
 <template>
   <div class="top-menu" v-if="routes.length > 2">
-    <!-- <a-menu v-model="current" mode="horizontal">
-      <a-menu-item :key="route.name" v-for="route in routes.slice(0, routes.length - 1)">
-        <router-link :to="{ name: route.name }">{{ route.meta.title }}</router-link>
-      </a-menu-item>
-    </a-menu>-->
     <span
       :class="current === route.name ? 'top-menu-selected' : ''"
       v-for="route in defaultShowRoutes"
       :key="route.name"
       @click="() => handleClick(route)"
+      :title="$t(route.meta.title)"
     >
       {{ route.meta.title }}
     </span>
@@ -43,6 +39,7 @@
 <script>
 import store from '@/store'
 import { gridSvg, top_agent, top_acl } from '@/core/icons'
+import { getPreference } from '@/modules/cmdb/api/preference'
 export default {
   name: 'TopMenu',
   components: { gridSvg, top_agent, top_acl },
@@ -78,10 +75,20 @@ export default {
     this.current = this.$route.matched[0].name
   },
   methods: {
-    handleClick(route) {
+    async handleClick(route) {
       this.visible = false
       if (route.name !== this.current) {
-        this.$router.push(route.redirect)
+        if (route.name === 'cmdb') {
+          const preference = await getPreference()
+          const lastTypeId = window.localStorage.getItem('ops_ci_typeid') || undefined
+          if (lastTypeId && preference.some((item) => item.id === Number(lastTypeId))) {
+            this.$router.push(`/cmdb/instances/types/${lastTypeId}`)
+          } else {
+            this.$router.push('/cmdb/dashboard')
+          }
+        } else {
+          this.$router.push(route.redirect)
+        }
         // this.current = route.name
       }
     },
@@ -91,15 +98,6 @@ export default {
 
 <style lang="less">
 @import '../../style/static.less';
-// .top-menu {
-//   display: inline-block;
-// }
-// .ant-menu-horizontal {
-//   border-bottom: 0 !important;
-// }
-// .ant-menu-horizontal > .ant-menu-item {
-//   border-bottom: 0;
-// }
 
 .top-menu {
   display: inline-flex;
@@ -110,32 +108,29 @@ export default {
     line-height: @layout-header-icon-height;
     border-radius: 4px !important;
     display: inline-flex;
-    align-items: flex-end;
+    align-items: center;
   }
   > span {
     cursor: pointer;
     padding: 4px 10px;
     margin: 0 5px;
-    border-radius: 4px;
     color: @layout-header-font-color;
     height: @layout-header-height;
-    line-height: @layout-header-height;
-    &:hover {
-      background: linear-gradient(0deg, rgba(0, 80, 201, 0.2) 0%, rgba(174, 207, 255, 0.06) 86.76%);
-      color: @layout-header-font-selected-color;
-      border-radius: 3px 3px 0px 0px;
-    }
+    line-height: @layout-header-line-height;
+    display: inline-block;
   }
+  > span:hover,
   .top-menu-selected {
-    background: linear-gradient(0deg, rgba(0, 80, 201, 0.2) 0%, rgba(174, 207, 255, 0.06) 86.76%);
+    font-weight: bold;
     color: @layout-header-font-selected-color;
-    border-radius: 3px 3px 0px 0px;
-    border-bottom: 3px solid @layout-header-font-selected-color;
-    &:hover {
-      background: linear-gradient(0deg, rgba(0, 80, 201, 0.2) 0%, rgba(174, 207, 255, 0.06) 86.76%);
-      color: @layout-header-font-selected-color;
-      border-radius: 3px 3px 0px 0px;
-    }
+  }
+  > span::before {
+    display: block;
+    content: attr(title);
+    font-weight: bold;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
   }
 }
 

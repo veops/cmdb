@@ -2,6 +2,7 @@
 
 
 from flask import abort
+from flask import current_app
 from flask import request
 
 from api.lib.cmdb.ci_type import CITypeManager
@@ -96,7 +97,7 @@ class PreferenceTreeApiView(APIView):
 
 
 class PreferenceRelationApiView(APIView):
-    url_prefix = "/preference/relation/view"
+    url_prefix = ("/preference/relation/view", "/preference/relation/view/<int:_id>")
 
     def get(self):
         views, id2type, name2id = PreferenceManager.get_relation_view()
@@ -109,14 +110,20 @@ class PreferenceRelationApiView(APIView):
     @args_validate(PreferenceManager.pref_rel_cls)
     def post(self):
         name = request.values.get("name")
+        is_public = request.values.get("is_public") in current_app.config.get('BOOL_TRUE')
         cr_ids = request.values.get("cr_ids")
-        views, id2type, name2id = PreferenceManager.create_or_update_relation_view(name, cr_ids)
+        option = request.values.get("option") or None
+        views, id2type, name2id = PreferenceManager.create_or_update_relation_view(name, cr_ids, is_public=is_public,
+                                                                                   option=option)
 
         return self.jsonify(views=views, id2type=id2type, name2id=name2id)
 
     @role_required(RoleEnum.CONFIG)
-    def put(self):
-        return self.post()
+    @args_required("name")
+    def put(self, _id):
+        views, id2type, name2id = PreferenceManager.create_or_update_relation_view(_id=_id, **request.values)
+
+        return self.jsonify(views=views, id2type=id2type, name2id=name2id)
 
     @role_required(RoleEnum.CONFIG)
     @args_required("name")
@@ -187,3 +194,15 @@ class PreferenceRelationRevokeView(APIView):
         acl.revoke_resource_from_role_by_rid(name, rid, ResourceTypeEnum.RELATION_VIEW, perms)
 
         return self.jsonify(code=200)
+
+
+class PreferenceCITypeOrderView(APIView):
+    url_prefix = ("/preference/ci_types/order",)
+
+    def post(self):
+        type_ids = request.values.get("type_ids")
+        is_tree = request.values.get("is_tree") in current_app.config.get('BOOL_TRUE')
+
+        PreferenceManager.upsert_ci_type_order(type_ids, is_tree)
+
+        return self.jsonify(type_ids=type_ids, is_tree=is_tree)

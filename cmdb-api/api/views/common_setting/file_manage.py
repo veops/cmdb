@@ -1,11 +1,12 @@
 # -*- coding:utf-8 -*-
-import os
-
-from flask import request, abort, current_app, send_from_directory
+from flask import request, abort, current_app
 from werkzeug.utils import secure_filename
+import lz4.frame
+import magic
 
+from api.lib.common_setting.const import MIMEExtMap
 from api.lib.common_setting.resp_format import ErrFormat
-from api.lib.common_setting.upload_file import allowed_file, generate_new_file_name
+from api.lib.common_setting.upload_file import allowed_file, generate_new_file_name, CommonFileCRUD
 from api.resource import APIView
 
 prefix = '/file'
@@ -28,7 +29,8 @@ class GetFileView(APIView):
     url_prefix = (f'{prefix}/<string:_filename>',)
 
     def get(self, _filename):
-        return send_from_directory(current_app.config['UPLOAD_DIRECTORY_FULL'], _filename, as_attachment=True)
+        file_stream = CommonFileCRUD.get_file(_filename)
+        return self.send_file(file_stream, as_attachment=True, download_name=_filename)
 
 
 class PostFileView(APIView):
@@ -43,21 +45,35 @@ class PostFileView(APIView):
 
         if not file:
             abort(400, ErrFormat.file_is_required)
-        extension = file.mimetype.split('/')[-1]
-        if file.filename == '':
-            filename = f'.{extension}'
-        else:
-            if extension not in file.filename:
-                filename = file.filename + f".{extension}"
-            else:
-                filename = file.filename
 
-        if allowed_file(filename, current_app.config.get('ALLOWED_EXTENSIONS', ALLOWED_EXTENSIONS)):
-            filename = generate_new_file_name(filename)
-            filename = secure_filename(filename)
-            file.save(os.path.join(
-                current_app.config['UPLOAD_DIRECTORY_FULL'], filename))
+        m_type = magic.from_buffer(file.read(2048), mime=True)
+        file.seek(0)
 
-            return self.jsonify(file_name=filename)
+        if m_type == 'application/octet-stream':
+            m_type = file.mimetype
+        elif m_type == 'text/plain':
+            # https://github.com/ahupp/python-magic/issues/193
+            m_type = m_type if file.mimetype == m_type else file.mimetype
 
-        abort(400, 'Extension not allow')
+        extension = MIMEExtMap.get(m_type, None)
+
+        if extension is None:
+            abort(400, f"不支持的文件类型: {m_type}")
+
+        filename = file.filename if file.filename and file.filename.endswith(extension) else file.filename + extension
+
+        new_filename = generate_new_file_name(filename)
+        new_filename = secure_filename(new_filename)
+        file_content = file.read()
+        compressed_data = lz4.frame.compress(file_content)
+        try:
+            CommonFileCRUD.add_file(
+                origin_name=filename,
+                file_name=new_filename,
+                binary=compressed_data,
+            )
+
+            return self.jsonify(file_name=new_filename)
+        except Exception as e:
+            current_app.logger.error(e)
+            abort(400, ErrFormat.upload_failed.format(e))

@@ -1,8 +1,6 @@
-import config from '@/config/setting'
-
 const api = {
-  Login: config.useSSO ? '/api/sso/login' : '/v1/acl/login',
-  Logout: config.useSSO ? '/api/sso/logout' : '/v1/acl/logout',
+  Login: '/v1/acl/login',
+  Logout: '/v1/acl/logout',
   ForgePassword: '/auth/forge-password',
   Register: '/auth/register',
   twoStepCode: '/auth/2step-code',

@@ -4,7 +4,7 @@ from flask.cli import with_appcontext
 from werkzeug.datastructures import MultiDict
 
 from api.lib.common_setting.acl import ACLManager
-from api.lib.common_setting.employee import EmployeeAddForm
+from api.lib.common_setting.employee import EmployeeAddForm, GrantEmployeeACLPerm
 from api.lib.common_setting.resp_format import ErrFormat
 from api.models.common_setting import Employee, Department
 
@@ -158,50 +158,11 @@ class InitDepartment(object):
 
     def init_backend_resource(self):
         acl = self.check_app('backend')
-        resources_types = acl.get_all_resources_types()
-
-        perms = ['read', 'grant', 'delete', 'update']
-
         acl_rid = self.get_admin_user_rid()
 
-        results = list(filter(lambda t: t['name'] == '操作权限', resources_types['groups']))
-        if len(results) == 0:
-            payload = dict(
-                app_id=acl.app_name,
-                name='操作权限',
-                description='',
-                perms=perms
-            )
-            resource_type = acl.create_resources_type(payload)
-        else:
-            resource_type = results[0]
-            resource_type_id = resource_type['id']
-            existed_perms = resources_types.get('id2perms', {}).get(resource_type_id, [])
-            existed_perms = [p['name'] for p in existed_perms]
-            new_perms = []
-            for perm in perms:
-                if perm not in existed_perms:
-                    new_perms.append(perm)
-            if len(new_perms) > 0:
-                resource_type['perms'] = existed_perms + new_perms
-                acl.update_resources_type(resource_type_id, resource_type)
-
-        resource_list = acl.get_resource_by_type(None, None, resource_type['id'])
-
-        for name in ['公司信息', '公司架构', '通知设置']:
-            target = list(filter(lambda r: r['name'] == name, resource_list))
-            if len(target) == 0:
-                payload = dict(
-                    type_id=resource_type['id'],
-                    app_id=acl.app_name,
-                    name=name,
-                )
-                resource = acl.create_resource(payload)
-            else:
-                resource = target[0]
-
-            if acl_rid > 0:
-                acl.grant_resource(acl_rid, resource['id'], perms)
+        if acl_rid == 0:
+            return
+        GrantEmployeeACLPerm(acl).grant_by_rid(acl_rid, True)
 
     @staticmethod
     def check_app(app_name):
@@ -263,7 +224,7 @@ def common_check_new_columns():
         column_type = new_column.type.compile(engine.dialect)
         default_value = new_column.default.arg if new_column.default else None
 
-        sql = "ALTER TABLE " + target_table_name + " ADD COLUMN " + new_column.name + " " + column_type
+        sql = "ALTER TABLE " + target_table_name + " ADD COLUMN " + f"`{new_column.name}`" + " " + column_type
         if new_column.comment:
             sql += f" comment '{new_column.comment}'"
 
@@ -299,3 +260,20 @@ def common_check_new_columns():
                 except Exception as e:
                     current_app.logger.error(f"add new column [{column.name}] in table [{table_name}] err:")
                     current_app.logger.error(e)
+
+
+@click.command()
+@with_appcontext
+def common_sync_file_to_db():
+    from api.lib.common_setting.upload_file import CommonFileCRUD
+    CommonFileCRUD.sync_file_to_db()
+
+
+@click.command()
+@with_appcontext
+@click.option('--value', type=click.INT, default=-1)
+def set_auth_auto_redirect_enable(value):
+    if value < 0:
+        return
+    from api.lib.common_setting.common_data import CommonDataCRUD
+    CommonDataCRUD.set_auth_auto_redirect_enable(value)

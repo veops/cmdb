@@ -15,9 +15,12 @@ from wtforms import validators
 
 from api.extensions import db
 from api.lib.common_setting.acl import ACLManager
-from api.lib.common_setting.const import COMMON_SETTING_QUEUE, OperatorType
+from api.lib.common_setting.const import OperatorType
+from api.lib.perm.acl.const import ACL_QUEUE
 from api.lib.common_setting.resp_format import ErrFormat
 from api.models.common_setting import Employee, Department
+
+from api.tasks.common_setting import refresh_employee_acl_info, edit_employee_department_in_acl
 
 acl_user_columns = [
     'email',
@@ -137,7 +140,9 @@ class EmployeeCRUD(object):
     @staticmethod
     def add(**kwargs):
         try:
-            return CreateEmployee().create_single(**kwargs)
+            res = CreateEmployee().create_single(**kwargs)
+            refresh_employee_acl_info.apply_async(args=(res.employee_id,), queue=ACL_QUEUE)
+            return res
         except Exception as e:
             abort(400, str(e))
 
@@ -164,10 +169,9 @@ class EmployeeCRUD(object):
             existed.update(**kwargs)
 
             if len(e_list) > 0:
-                from api.tasks.common_setting import edit_employee_department_in_acl
                 edit_employee_department_in_acl.apply_async(
                     args=(e_list, new_department_id, current_user.uid),
-                    queue=COMMON_SETTING_QUEUE
+                    queue=ACL_QUEUE
                 )
 
             return existed
@@ -291,7 +295,9 @@ class EmployeeCRUD(object):
         employees = []
         for r in pagination.items:
             d = r.Employee.to_dict()
-            d['department_name'] = r.Department.department_name
+            d['department_name'] = r.Department.department_name if r.Department else ''
+            if r.Employee.department_id == 0:
+                d['department_name'] = ErrFormat.company_wide
             employees.append(d)
 
         return {
@@ -437,7 +443,7 @@ class EmployeeCRUD(object):
         employees = []
         for r in pagination.items:
             d = r.Employee.to_dict()
-            d['department_name'] = r.Department.department_name
+            d['department_name'] = r.Department.department_name if r.Department else ''
             employees.append(d)
 
         return {
@@ -563,6 +569,7 @@ class EmployeeCRUD(object):
             for column in direct_columns:
                 tmp[column] = d.get(column, '')
             notice_info = d.get('notice_info', {})
+            notice_info = copy.deepcopy(notice_info) if notice_info else {}
             tmp.update(**notice_info)
             results.append(tmp)
         return results
@@ -686,6 +693,27 @@ class EmployeeCRUD(object):
         else:
             abort(400, ErrFormat.column_name_not_support)
 
+    @staticmethod
+    def update_last_login_by_uid(uid, last_login=None):
+        employee = Employee.get_by(acl_uid=uid, first=True, to_dict=False)
+        if not employee:
+            return
+        if last_login:
+            try:
+                last_login = datetime.strptime(last_login, '%Y-%m-%d %H:%M:%S')
+            except Exception as e:
+                last_login = datetime.now()
+        else:
+            last_login = datetime.now()
+
+        try:
+            employee.update(
+                last_login=last_login
+            )
+            return last_login
+        except Exception as e:
+            return
+
 
 def get_user_map(key='uid', acl=None):
     """
@@ -726,6 +754,7 @@ class CreateEmployee(object):
         try:
             existed = self.check_acl_user(user_data)
             if not existed:
+                user_data['add_from'] = 'common'
                 return self.acl.create_user(user_data)
             return existed
         except Exception as e:
@@ -758,9 +787,11 @@ class CreateEmployee(object):
         if existed:
             return existed
 
-        return Employee.create(
+        res = Employee.create(
             **kwargs
         )
+        refresh_employee_acl_info.apply_async(args=(res.employee_id,), queue=ACL_QUEUE)
+        return res
 
     @staticmethod
     def get_department_by_name(d_name):
@@ -867,3 +898,75 @@ class EmployeeUpdateByUidForm(Form):
     avatar = StringField(validators=[])
     sex = StringField(validators=[])
     mobile = StringField(validators=[])
+
+
+class GrantEmployeeACLPerm(object):
+    """
+    Grant ACL Permission After Create New Employee
+    """
+
+    def __init__(self, acl=None):
+        self.perms_by_create_resources_type = ['read', 'grant', 'delete', 'update']
+        self.perms_by_common_grant = ['read']
+        self.resource_name_list = ['公司信息', '公司架构', '通知设置']
+
+        self.acl = acl if acl else self.check_app('backend')
+        self.resources_types = self.acl.get_all_resources_types()
+        self.resources_type = self.get_resources_type()
+        self.resource_list = self.acl.get_resource_by_type(None, None, self.resources_type['id'])
+
+    @staticmethod
+    def check_app(app_name):
+        acl = ACLManager(app_name)
+        payload = dict(
+            name=app_name,
+            description=app_name
+        )
+        app = acl.validate_app()
+        if not app:
+            acl.create_app(payload)
+        return acl
+
+    def get_resources_type(self):
+        results = list(filter(lambda t: t['name'] == '操作权限', self.resources_types['groups']))
+        if len(results) == 0:
+            payload = dict(
+                app_id=self.acl.app_name,
+                name='操作权限',
+                description='',
+                perms=self.perms_by_create_resources_type
+            )
+            resource_type = self.acl.create_resources_type(payload)
+        else:
+            resource_type = results[0]
+            resource_type_id = resource_type['id']
+            existed_perms = self.resources_types.get('id2perms', {}).get(resource_type_id, [])
+            existed_perms = [p['name'] for p in existed_perms]
+            new_perms = []
+            for perm in self.perms_by_create_resources_type:
+                if perm not in existed_perms:
+                    new_perms.append(perm)
+            if len(new_perms) > 0:
+                resource_type['perms'] = existed_perms + new_perms
+                self.acl.update_resources_type(resource_type_id, resource_type)
+
+        return resource_type
+
+    def grant(self, rid_list):
+        [self.grant_by_rid(rid) for rid in rid_list if rid > 0]
+
+    def grant_by_rid(self, rid, is_admin=False):
+        for name in self.resource_name_list:
+            resource = list(filter(lambda r: r['name'] == name, self.resource_list))
+            if len(resource) == 0:
+                payload = dict(
+                    type_id=self.resources_type['id'],
+                    app_id=self.acl.app_name,
+                    name=name,
+                )
+                resource = self.acl.create_resource(payload)
+            else:
+                resource = resource[0]
+
+            perms = self.perms_by_create_resources_type if is_admin else self.perms_by_common_grant
+            self.acl.grant_resource(rid, resource['id'], perms)

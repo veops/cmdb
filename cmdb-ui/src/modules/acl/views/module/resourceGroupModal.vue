@@ -1,5 +1,5 @@
 <template>
-  <a-modal v-model="visible" :title="`成员管理：${editRecord.name}`" @ok="handleSubmit" :width="690">
+  <a-modal v-model="visible" :title="`${$t('acl.memberManage')}${editRecord.name}`" @ok="handleSubmit" :width="690">
     <!-- <CustomTransfer
       ref="customTransfer"
       :show-search="true"
@@ -26,7 +26,7 @@
       @selectChange="selectChange"
       :selectedKeys="selectedKeys"
     >
-      <span slot="notFoundContent">暂无数据</span>
+      <span slot="notFoundContent">{{ $t('noData') }}</span>
       <template slot="children" slot-scope="{ props: { direction, filteredItems } }">
         <div class="ant-transfer-list-content" v-if="direction === 'right'">
           <div
@@ -104,7 +104,7 @@ export default {
       })
       updateResourceGroup(this.editRecord['id'], { items: items.join(',') }).then(() => {
         this.visible = false
-        this.$message.success('更新成功！')
+        this.$message.success(this.$t('updateSuccess'))
       })
       // .catch(err => this.$httpError(err))
     },

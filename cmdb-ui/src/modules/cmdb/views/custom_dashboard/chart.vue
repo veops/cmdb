@@ -53,7 +53,7 @@
             <span>{{ row[`key${index}`] }}</span>
           </template>
         </vxe-column>
-        <vxe-column field="value" title="数量"></vxe-column>
+        <vxe-column field="value" :title="$t('cmdb.custom_dashboard.quantity')"></vxe-column>
       </template>
     </vxe-table>
     <div

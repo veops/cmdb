@@ -1,9 +1,9 @@
 <template>
   <div>
     <div class="parameters-header">
-      <span>请求参数</span>
+      <span>{{ $t('cmdb.components.requestParam') }}</span>
       <a-space>
-        <a-tooltip title="清空">
+        <a-tooltip :title="$t('cmdb.components.clear')">
           <ops-icon
             type="icon-xianxing-delete"
             @click="
@@ -13,7 +13,7 @@
             "
           />
         </a-tooltip>
-        <a-tooltip title="新增">
+        <a-tooltip :title="$t('new')">
           <a-icon type="plus" @click="add" />
         </a-tooltip>
       </a-space>
@@ -21,8 +21,8 @@
     <div class="parameters-box" v-if="parameters && parameters.length">
       <table>
         <tr v-for="(item, index) in parameters" :key="item.id">
-          <td><a-input class="parameters-input" v-model="item.key" :placeholder="`参数${index + 1}`" /></td>
-          <td><a-input class="parameters-input" v-model="item.value" :placeholder="`值${index + 1}`" /></td>
+          <td><a-input class="parameters-input" v-model="item.key" :placeholder="$t('cmdb.components.param', { param: `${index + 1}` })" /></td>
+          <td><a-input class="parameters-input" v-model="item.value" :placeholder="$t('cmdb.components.value', { value: `${index + 1}` })" /></td>
           <td>
             <a style="color:red">
               <ops-icon type="icon-xianxing-delete" @click="deleteParam(index)" />
@@ -38,9 +38,9 @@
       }"
     >
       <img slot="image" :src="require('@/assets/data_empty.png')" />
-      <span slot="description"> 暂无请求参数 </span>
+      <span slot="description"> {{ $t('cmdb.components.noParamRequest') }} </span>
       <a-button @click="add" type="primary" size="small" icon="plus" class="ops-button-primary">
-        添加
+        {{ $t('add') }}
       </a-button>
     </a-empty>
   </div>

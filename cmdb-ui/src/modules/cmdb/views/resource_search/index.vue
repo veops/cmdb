@@ -1,185 +1,194 @@
 <template>
-  <div id="resource_search" :style="{ height: fromCronJob ? `${windowHeight - 48}px` : `${windowHeight - 90}px` }">
+  <div
+    class="resource-search"
+    id="resource_search"
+    :style="{ height: fromCronJob ? `${windowHeight - 48}px` : `${windowHeight - 64}px` }"
+  >
     <div class="cmdb-views-header">
       <span>
-        <span class="cmdb-views-header-title">资源搜索</span>
+        <span class="cmdb-views-header-title">{{ $t('cmdb.menu.ciSearch') }}</span>
       </span>
-    </div>
-    <div :style="{ backgroundColor: '#fff', padding: '12px', borderRadius: '15px' }">
-      <SearchForm
-        ref="search"
-        type="resourceSearch"
-        @refresh="handleSearch"
-        :preferenceAttrList="allAttributesList"
-        @updateAllAttributesList="updateAllAttributesList"
-        @copyExpression="copyExpression"
-      />
-      <div
+      <a-button
         v-if="!fromCronJob"
-        :style="{
-          display: 'flex',
-          justifyContent: 'space-between',
-          height: '32px',
-          marginBottom: '5px',
-          alignItems: 'center',
-        }"
+        icon="download"
+        type="primary"
+        class="ops-button-ghost"
+        ghost
+        @click="handleExport"
+      >{{ $t('download') }}</a-button
       >
-        <a-button icon="download" type="primary" ghost size="small" @click="handleExport">导出</a-button>
-        <PreferenceSearch
-          ref="preferenceSearch"
-          @getQAndSort="getQAndSort"
-          @setParamsFromPreferenceSearch="setParamsFromPreferenceSearch"
-        />
-      </div>
-      <vxe-table
-        :id="`cmdb-resource`"
-        border
-        keep-source
-        show-overflow
-        resizable
-        ref="xTable"
-        size="small"
-        row-id="_id"
-        :loading="loading"
-        :height="fromCronJob ? windowHeight - 180 : windowHeight - 250"
-        show-header-overflow
-        highlight-hover-row
-        :data="instanceList"
-        :sort-config="{ remote: true, trigger: 'cell' }"
-        @sort-change="handleSortCol"
-        :row-key="true"
-        :column-key="true"
-        :cell-style="getCellStyle"
-        :scroll-y="{ enabled: true, gt: 20 }"
-        :scroll-x="{ enabled: true, gt: 0 }"
-        :export-config="{
-          isColgroup: true,
-          type: 'xlsx',
-          types: ['xlsx', 'csv', 'html', 'xml', 'txt'],
-          mode: 'current',
-          modes: ['current'],
-          isFooter: false,
-          isHeader: true,
-          isColgroup: true,
-        }"
-        class="ops-unstripe-table"
-        :style="{ margin: '0 -12px' }"
-        :custom-config="{ storage: true }"
-      >
+    </div>
+    <SearchForm
+      ref="search"
+      type="resourceSearch"
+      @refresh="handleSearch"
+      :preferenceAttrList="allAttributesList"
+      @updateAllAttributesList="updateAllAttributesList"
+      @copyExpression="copyExpression"
+    >
+      <PreferenceSearch
+        v-if="!fromCronJob"
+        ref="preferenceSearch"
+        @getQAndSort="getQAndSort"
+        @setParamsFromPreferenceSearch="setParamsFromPreferenceSearch"
+      />
+    </SearchForm>
+    <vxe-table
+      :id="`cmdb-resource`"
+      border
+      keep-source
+      show-overflow
+      resizable
+      ref="xTable"
+      size="small"
+      row-id="_id"
+      :loading="loading"
+      :height="fromCronJob ? windowHeight - 180 : windowHeight - 240"
+      show-header-overflow
+      highlight-hover-row
+      :data="instanceList"
+      :sort-config="{ remote: true, trigger: 'cell' }"
+      @sort-change="handleSortCol"
+      :row-key="true"
+      :column-key="true"
+      :cell-style="getCellStyle"
+      :scroll-y="{ enabled: true, gt: 20 }"
+      :scroll-x="{ enabled: true, gt: 0 }"
+      :export-config="{
+        isColgroup: true,
+        type: 'xlsx',
+        types: ['xlsx', 'csv', 'html', 'xml', 'txt'],
+        mode: 'current',
+        modes: ['current'],
+        isFooter: false,
+        isHeader: true,
+        isColgroup: true,
+      }"
+      class="ops-unstripe-table"
+      :custom-config="{ storage: true }"
+    >
+      <vxe-column
+        v-if="instanceList.length"
+        :title="$t('cmdb.ciType.ciType')"
+        field="ci_type_alias"
+        :width="100"
+        fixed="left"
+      ></vxe-column>
+      <vxe-colgroup v-for="colGroup in columnsGroup" :key="colGroup.value" :title="colGroup.label">
+        <template #header>
+          <span :style="{ display: 'inline-flex', alignItems: 'center' }">
+            {{ colGroup.label }}
+            <EditAttrsPopover
+              :style="{ borderLeft: 'none', width: '30px', height: '38px', cursor: 'pointer' }"
+              v-if="colGroup.isCiType"
+              :typeId="Number(colGroup.id.split('-')[1])"
+              @refresh="loadInstance"
+            />
+          </span>
+        </template>
         <vxe-column
-          v-if="instanceList.length"
-          title="模型"
-          field="ci_type_alias"
-          :width="100"
-          fixed="left"
-        ></vxe-column>
-        <vxe-colgroup v-for="colGroup in columnsGroup" :key="colGroup.value" :title="colGroup.label">
-          <template #header>
-            <span :style="{ display: 'inline-flex', alignItems: 'center' }">
-              {{ colGroup.label }}
-              <EditAttrsPopover
-                :style="{ borderLeft: 'none', width: '30px', height: '38px', cursor: 'pointer' }"
-                v-if="colGroup.isCiType"
-                :typeId="Number(colGroup.id.split('-')[1])"
-                @refresh="loadInstance"
-              />
-            </span>
-          </template>
-          <vxe-column
-            v-for="(col, index) in colGroup.children"
-            :key="`${col.field}_${index}`"
-            :title="col.title"
-            :field="col.field"
-            :width="col.width"
-            :minWidth="100"
-            :cell-type="col.value_type === '2' ? 'string' : 'auto'"
-          >
-            <template v-if="col.value_type === '6' || col.is_link || col.is_password || col.is_choice" #default="{row}">
-              <span v-if="col.value_type === '6' && row[col.field]">{{ JSON.stringify(row[col.field]) }}</span>
-              <a
-                v-else-if="col.is_link && row[col.field]"
-                :href="
-                  row[col.field].startsWith('http') || row[col.field].startsWith('https')
-                    ? `${row[col.field]}`
-                    : `http://${row[col.field]}`
-                "
-                target="_blank"
-              >{{ row[col.field] }}</a
-              >
-              <PasswordField
-                v-else-if="col.is_password && row[col.field]"
-                :ci_id="row._id"
-                :attr_id="col.attr_id"
-              ></PasswordField>
-              <template v-else-if="col.is_choice">
-                <template v-if="col.is_list">
-                  <span
-                    v-for="value in row[col.field]"
-                    :key="value"
-                    :style="{
-                      borderRadius: '4px',
-                      padding: '1px 5px',
-                      margin: '2px',
-                      ...getChoiceValueStyle(col, value),
-                    }"
-                  ><ops-icon
-                    :style="{ color: getChoiceValueIcon(col, value).color }"
-                    :type="getChoiceValueIcon(col, value).name"
-                  />{{ value }}</span
-                  >
-                </template>
+          v-for="(col, index) in colGroup.children"
+          :key="`${col.field}_${index}`"
+          :title="col.title"
+          :field="col.field"
+          :width="col.width"
+          :minWidth="100"
+          :cell-type="col.value_type === '2' ? 'string' : 'auto'"
+        >
+          <template v-if="col.value_type === '6' || col.is_link || col.is_password || col.is_choice" #default="{row}">
+            <span v-if="col.value_type === '6' && row[col.field]">{{ JSON.stringify(row[col.field]) }}</span>
+            <a
+              v-else-if="col.is_link && row[col.field]"
+              :href="
+                row[col.field].startsWith('http') || row[col.field].startsWith('https')
+                  ? `${row[col.field]}`
+                  : `http://${row[col.field]}`
+              "
+              target="_blank"
+            >{{ row[col.field] }}</a
+            >
+            <PasswordField
+              v-else-if="col.is_password && row[col.field]"
+              :ci_id="row._id"
+              :attr_id="col.attr_id"
+            ></PasswordField>
+            <template v-else-if="col.is_choice">
+              <template v-if="col.is_list">
                 <span
-                  v-else
+                  v-for="value in row[col.field]"
+                  :key="value"
                   :style="{
                     borderRadius: '4px',
                     padding: '1px 5px',
-                    margin: '2px 0',
-                    ...getChoiceValueStyle(col, row[col.field]),
+                    margin: '2px',
+                    ...getChoiceValueStyle(col, value),
                   }"
-                >
-                  <ops-icon
-                    :style="{ color: getChoiceValueIcon(col, row[col.field]).color }"
-                    :type="getChoiceValueIcon(col, row[col.field]).name"
-                  />
-                  {{ row[col.field] }}</span
+                ><ops-icon
+                  :style="{ color: getChoiceValueIcon(col, value).color }"
+                  :type="getChoiceValueIcon(col, value).name"
+                />{{ value }}</span
                 >
               </template>
+              <span
+                v-else
+                :style="{
+                  borderRadius: '4px',
+                  padding: '1px 5px',
+                  margin: '2px 0',
+                  ...getChoiceValueStyle(col, row[col.field]),
+                }"
+              >
+                <ops-icon
+                  :style="{ color: getChoiceValueIcon(col, row[col.field]).color }"
+                  :type="getChoiceValueIcon(col, row[col.field]).name"
+                />
+                {{ row[col.field] }}</span
+              >
             </template>
-          </vxe-column>
-        </vxe-colgroup>
-
-        <template #empty>
-          <div v-if="loading" style="height: 200px; line-height: 200px">加载中...</div>
-          <div v-else>
-            <img :style="{ width: '200px' }" :src="require('@/assets/data_empty.png')" />
-            <div>暂无数据</div>
-          </div>
-        </template>
-      </vxe-table>
-      <div :style="{ textAlign: 'right', marginTop: '4px' }">
-        <a-pagination
-          :showSizeChanger="true"
-          :current="currentPage"
-          size="small"
-          :total="totalNumber"
-          show-quick-jumper
-          :page-size="pageSize"
-          :page-size-options="pageSizeOptions"
-          @showSizeChange="onShowSizeChange"
-          :show-total="(total, range) => `当前${range[0]}-${range[1]} 共 ${total}条记录`"
-          @change="
-            (page) => {
-              currentPage = page
-              loadInstance(sortByTable)
-            }
-          "
-        >
-          <template slot="buildOptionText" slot-scope="props">
-            <span v-if="props.value !== '100000'">{{ props.value }}条/页</span>
-            <span v-if="props.value === '100000'">全部</span>
           </template>
-        </a-pagination>
-      </div>
+        </vxe-column>
+      </vxe-colgroup>
+
+      <template #empty>
+        <div>
+          <img :style="{ width: '140px' }" :src="require('@/assets/data_empty.png')" />
+          <div>{{ $t('noData') }}</div>
+        </div>
+      </template>
+      <template #loading>
+        <div style="height: 200px; line-height: 200px">{{ $t('loading') }}</div>
+      </template>
+    </vxe-table>
+    <div :style="{ textAlign: 'right', marginTop: '4px' }">
+      <a-pagination
+        :showSizeChanger="true"
+        :current="currentPage"
+        size="small"
+        :total="totalNumber"
+        show-quick-jumper
+        :page-size="pageSize"
+        :page-size-options="pageSizeOptions"
+        @showSizeChange="onShowSizeChange"
+        :show-total="
+          (total, range) =>
+            $t('pagination.total', {
+              range0: range[0],
+              range1: range[1],
+              total,
+            })
+        "
+        @change="
+          (page) => {
+            currentPage = page
+            loadInstance(sortByTable)
+          }
+        "
+      >
+        <template slot="buildOptionText" slot-scope="props">
+          <span v-if="props.value !== '100000'">{{ props.value }}{{ $t('itemsPerPage') }}</span>
+          <span v-if="props.value === '100000'">{{ $t('all') }}</span>
+        </template>
+      </a-pagination>
     </div>
 
     <BatchDownload
@@ -195,7 +204,7 @@
 import _ from 'lodash'
 import SearchForm from '../../components/searchForm/SearchForm.vue'
 import { searchCI } from '../../api/ci'
-import { searchAttributes, getCITypeAttributesByTypeIds } from '../../api/CITypeAttr'
+import { searchAttributes, getCITypeAttributesByTypeIds, getCITypeAttributesById } from '../../api/CITypeAttr'
 import { getCITypes } from '../../api/CIType'
 import { getSubscribeAttributes } from '../../api/preference'
 import { getCITableColumns } from '../../utils/helper'
@@ -216,6 +225,7 @@ export default {
   data() {
     return {
       ciTypes: [],
+      originAllAttributesList: [],
       allAttributesList: [], // 当前选择的模型的全部attributes  默认全部
       currentPage: 1,
       pageSizeOptions: ['50', '100', '200', '100000'],
@@ -249,18 +259,19 @@ export default {
         this.ciTypes = res.ci_types
       })
     },
-    getAllAttr() {
-      searchAttributes({ page_size: 9999 }).then((res) => {
+    async getAllAttr() {
+      await searchAttributes({ page_size: 9999 }).then((res) => {
         this.allAttributesList = res.attributes
+        this.originAllAttributesList = res.attributes
       })
     },
-    updateAllAttributesList(value) {
+    async updateAllAttributesList(value) {
       if (value && value.length) {
-        getCITypeAttributesByTypeIds({ type_ids: value.join(',') }).then((res) => {
+        await getCITypeAttributesByTypeIds({ type_ids: value.join(',') }).then((res) => {
           this.allAttributesList = res.attributes
         })
       } else {
-        this.getAllAttr()
+        this.allAttributesList = this.originAllAttributesList
       }
     },
     async loadInstance(sortByTable = undefined) {
@@ -273,6 +284,10 @@ export default {
       const regSort = /(?<=sort=).+/g
 
       const exp = expression.match(regQ) ? expression.match(regQ)[0] : null
+      // if (exp) {
+      //   exp = exp.replace(/(\:)/g, '$1*')
+      //   exp = exp.replace(/(\,)/g, '*$1')
+      // }
       // 如果是表格点击的排序 以表格为准
       let sort
       if (sortByTable) {
@@ -303,62 +318,61 @@ export default {
           this.columnsGroup = []
           this.instanceList = []
           this.totalNumber = res['numfound']
-
-          const oldData = res.result
-
-          function allKeys(data) {
-            const keys = {}
-            const ignoreAttr = ['_id', '_type', 'ci_type', 'ci_type_alias', 'unique', 'unique_alias']
-            data.forEach((item) => {
-              Object.keys(item).forEach((key) => {
-                if (!ignoreAttr.includes(key)) {
-                  keys[key] = ''
-                }
-              })
-            })
-            return keys
+          if (!res['numfound']) {
+            return
           }
-
-          function tidy(data) {
-            const outputKeys = allKeys(data)
-            const common = {}
-            data.forEach((item) => {
-              const tmp = {}
-              Object.keys(outputKeys).forEach((j) => {
-                if (j in item) {
-                  tmp[j] = item[j]
-                  // 提取common
-                  {
-                    const key = item['ci_type_alias']
-                    if (j in common) {
-                      common[j][[key]] = ''
-                    } else {
-                      common[j] = { [key]: '' }
-                    }
-                  }
-                } else {
-                  tmp[j] = null
-                }
-              })
+          const { attributes: resAllAttributes } = await getCITypeAttributesByTypeIds({
+            type_ids: Object.keys(res.counter).join(','),
+          })
+          const _columnsGroup = Object.keys(res.counter).map((key) => {
+            const _find = this.ciTypes.find((item) => item.name === key)
+            return {
+              id: `parent-${_find.id}`,
+              value: key,
+              label: _find?.alias || _find?.name,
+              isCiType: true,
+            }
+          })
+          const ciTypeAttribute = {}
+          const promises = _columnsGroup.map((item) => {
+            return getCITypeAttributesById(item.id.split('-')[1]).then((res) => {
+              ciTypeAttribute[item.label] = res.attributes
             })
-            const commonObject = {}
-            const commonKeys = []
-            // 整理common
-            Object.keys(common).forEach((key) => {
-              if (Object.keys(common[key]).length > 1) {
-                commonKeys.push(key)
-                const reverseKey = Object.keys(common[key]).join('&')
-                if (!commonObject[reverseKey]) {
-                  commonObject[reverseKey] = [key]
+          })
+          await Promise.all(promises)
+
+          const outputKeys = {}
+          resAllAttributes.forEach((attr) => {
+            outputKeys[attr.name] = ''
+          })
+
+          const common = {}
+          Object.keys(outputKeys).forEach((key) => {
+            Object.entries(ciTypeAttribute).forEach(([type, attrs]) => {
+              if (attrs.find((a) => a.name === key)) {
+                if (key in common) {
+                  common[key][type] = ''
                 } else {
-                  commonObject[reverseKey].push(key)
+                  common[key] = { [type]: '' }
                 }
               }
             })
-            return { commonObject, commonKeys }
-          }
+          })
 
-          const { commonObject, commonKeys } = tidy(oldData)
+          const commonObject = {}
+          const commonKeys = []
+          // 整理common
+          Object.keys(common).forEach((key) => {
+            if (Object.keys(common[key]).length > 1) {
+              commonKeys.push(key)
+              const reverseKey = Object.keys(common[key]).join('&')
+              if (!commonObject[reverseKey]) {
+                commonObject[reverseKey] = [key]
+              } else {
+                commonObject[reverseKey].push(key)
+              }
+            }
+          })
           const _commonColumnsGroup = Object.keys(commonObject).map((key) => {
             return {
               id: `parent-${key}`,
@@ -374,24 +388,14 @@ export default {
             }
           })
 
-          const _columnsGroup = Object.keys(res.counter).map((key) => {
-            const _find = this.ciTypes.find((item) => item.name === key)
-            return {
-              id: `parent-${_find.id}`,
-              value: key,
-              label: _find?.alias || _find?.name,
-              isCiType: true,
-            }
-          })
-
-          const promises = _columnsGroup.map((item) => {
+          const promises1 = _columnsGroup.map((item) => {
             return getSubscribeAttributes(item.id.split('-')[1]).then((res1) => {
               item.children = this.getColumns(res.result, res1.attributes).filter(
                 (col) => !commonKeys.includes(col.field)
               )
             })
           })
-          await Promise.all(promises).then(() => {
+          await Promise.all(promises1).then(() => {
             this.columnsGroup = [..._commonColumnsGroup, ..._columnsGroup]
             this.instanceList = res['result']
           })
@@ -406,7 +410,7 @@ export default {
         return { ...item, id: item.field, label: item.title }
       })
     },
-    handleSearch() {
+    async handleSearch() {
       this.currentPage = 1
       this.loadInstance()
     },
@@ -444,9 +448,11 @@ export default {
       return {}
     },
     handleExport() {
-      // this.$refs.xTable.openExport()
       this.$refs.batchDownload.open({
-        preferenceAttrList: [{ id: `ci_type_alias`, value: 'ci_type_alias', label: '模型' }, ...this.columnsGroup],
+        preferenceAttrList: [
+          { id: `ci_type_alias`, value: 'ci_type_alias', label: this.$t('cmdb.ciType.ciType') },
+          ...this.columnsGroup,
+        ],
       })
     },
     batchDownload({ filename, type, checkedKeys }) {
@@ -517,13 +523,24 @@ export default {
       }${fuzzySearch ? `,*${fuzzySearch}*` : ''}`
       this.$copyText(text)
         .then(() => {
-          this.$message.success('复制成功！')
+          this.$message.success(this.$t('copySuccess'))
           this.$emit('copySuccess', text)
         })
         .catch(() => {
-          this.$message.error('复制失败！')
+          this.$message.error(this.$t('cmdb.ci.copyFailed'))
         })
     },
   },
 }
 </script>
+
+<style lang="less" scoped>
+@import '~@/style/static.less';
+
+.resource-search {
+  margin-bottom: -24px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: @border-radius-box;
+}
+</style>

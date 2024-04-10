@@ -5,6 +5,7 @@ import copy
 import datetime
 import json
 import time
+import uuid
 
 import click
 import requests
@@ -114,10 +115,20 @@ def cmdb_init_acl():
     _app = AppCache.get('cmdb') or App.create(name='cmdb')
     app_id = _app.id
 
+    current_app.test_request_context().push()
+
     # 1. add resource type
     for resource_type in ResourceTypeEnum.all():
         try:
-            ResourceTypeCRUD.add(app_id, resource_type, '', PermEnum.all())
+            perms = PermEnum.all()
+            if resource_type in (ResourceTypeEnum.CI_FILTER, ResourceTypeEnum.PAGE):
+                perms = [PermEnum.READ]
+            elif resource_type == ResourceTypeEnum.CI_TYPE_RELATION:
+                perms = [PermEnum.ADD, PermEnum.DELETE, PermEnum.GRANT]
+            elif resource_type == ResourceTypeEnum.RELATION_VIEW:
+                perms = [PermEnum.READ, PermEnum.UPDATE, PermEnum.DELETE, PermEnum.GRANT]
+
+            ResourceTypeCRUD.add(app_id, resource_type, '', perms)
         except AbortException:
             pass
 
@@ -168,12 +179,27 @@ def cmdb_counter():
     from api.lib.cmdb.cache import CMDBCounterCache
 
     current_app.test_request_context().push()
+    if not UserCache.get('worker'):
+        from api.lib.perm.acl.user import UserCRUD
+
+        UserCRUD.add(username='worker', password=uuid.uuid4().hex, email='worker@xxx.com')
+
     login_user(UserCache.get('worker'))
+
+    i = 0
     while True:
         try:
             db.session.remove()
 
             CMDBCounterCache.reset()
+
+            if i % 5 == 0:
+                CMDBCounterCache.flush_adc_counter()
+                i = 0
+
+            CMDBCounterCache.flush_sub_counter()
+
+            i += 1
         except:
             import traceback
             print(traceback.format_exc())

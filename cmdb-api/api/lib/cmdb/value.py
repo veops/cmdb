@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import copy
 import imp
 import os
+import re
 import tempfile
 
 import jinja2
@@ -13,6 +14,7 @@ from flask import abort
 from flask import current_app
 from jinja2schema import infer
 from jinja2schema import to_json_schema
+from werkzeug.exceptions import BadRequest
 
 from api.extensions import db
 from api.lib.cmdb.attribute import AttributeManager
@@ -23,6 +25,7 @@ from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.cmdb.history import AttributeHistoryManger
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.utils import TableMap
+from api.lib.cmdb.utils import ValueDeserializeError
 from api.lib.cmdb.utils import ValueTypeMap
 from api.lib.utils import handle_arg_list
 from api.models.cmdb import CI
@@ -80,7 +83,7 @@ class AttributeValueManager(object):
         return res
 
     @staticmethod
-    def _deserialize_value(value_type, value):
+    def _deserialize_value(alias, value_type, value):
         if not value:
             return value
 
@@ -88,14 +91,21 @@ class AttributeValueManager(object):
         try:
             v = deserialize(value)
             return v
+        except ValueDeserializeError as e:
+            return abort(400, ErrFormat.attribute_value_invalid2.format(alias, e))
         except ValueError:
             return abort(400, ErrFormat.attribute_value_invalid.format(value))
 
     @staticmethod
     def _check_is_choice(attr, value_type, value):
         choice_values = AttributeManager.get_choice_values(attr.id, value_type, attr.choice_web_hook, attr.choice_other)
-        if str(value) not in list(map(str, [i[0] for i in choice_values])):
-            return abort(400, ErrFormat.not_in_choice_values.format(value))
+        if value_type == ValueTypeEnum.FLOAT:
+            if float(value) not in list(map(float, [i[0] for i in choice_values])):
+                return abort(400, ErrFormat.not_in_choice_values.format(value))
+
+        else:
+            if str(value) not in list(map(str, [i[0] for i in choice_values])):
+                return abort(400, ErrFormat.not_in_choice_values.format(value))
 
     @staticmethod
     def _check_is_unique(value_table, attr, ci_id, type_id, value):
@@ -112,9 +122,14 @@ class AttributeValueManager(object):
         if type_attr and type_attr.is_required and not value and value != 0:
             return abort(400, ErrFormat.attribute_value_required.format(attr.alias))
 
+    @staticmethod
+    def check_re(expr, value):
+        if not re.compile(expr).match(str(value)):
+            return abort(400, ErrFormat.attribute_value_invalid.format(value))
+
     def _validate(self, attr, value, value_table, ci=None, type_id=None, ci_id=None, type_attr=None):
         ci = ci or {}
-        v = self._deserialize_value(attr.value_type, value)
+        v = self._deserialize_value(attr.alias, attr.value_type, value)
 
         attr.is_choice and value and self._check_is_choice(attr, attr.value_type, v)
         attr.is_unique and self._check_is_unique(
@@ -125,6 +140,9 @@ class AttributeValueManager(object):
         if v == "" and attr.value_type not in (ValueTypeEnum.TEXT,):
             v = None
 
+        if attr.re_check and value:
+            self.check_re(attr.re_check, value)
+
         return v
 
     @staticmethod
@@ -132,9 +150,10 @@ class AttributeValueManager(object):
         return AttributeHistoryManger.add(record_id, ci_id, [(attr_id, operate_type, old, new)], type_id)
 
     @staticmethod
-    def write_change2(changed, record_id=None):
+    def write_change2(changed, record_id=None, ticket_id=None):
         for ci_id, attr_id, operate_type, old, new, type_id in changed:
             record_id = AttributeHistoryManger.add(record_id, ci_id, [(attr_id, operate_type, old, new)], type_id,
+                                                   ticket_id=ticket_id,
                                                    commit=False, flush=False)
         try:
             db.session.commit()
@@ -227,6 +246,8 @@ class AttributeValueManager(object):
                     value = self._validate(attr, value, value_table, ci=None, type_id=type_id, ci_id=ci_id,
                                            type_attr=ci_attr2type_attr.get(attr.id))
                     ci_dict[key] = value
+            except BadRequest as e:
+                raise
             except Exception as e:
                 current_app.logger.warning(str(e))
 
@@ -235,12 +256,13 @@ class AttributeValueManager(object):
 
         return key2attr
 
-    def create_or_update_attr_value(self, ci, ci_dict, key2attr):
+    def create_or_update_attr_value(self, ci, ci_dict, key2attr, ticket_id=None):
         """
         add or update attribute value, then write history
         :param ci: instance object
         :param ci_dict: attribute dict
         :param key2attr: attr key to attr
+        :param ticket_id:
         :return:
         """
         changed = []
@@ -286,12 +308,12 @@ class AttributeValueManager(object):
             current_app.logger.warning(str(e))
             return abort(400, ErrFormat.attribute_value_unknown_error.format(e.args[0]))
 
-        return self.write_change2(changed)
+        return self.write_change2(changed, ticket_id=ticket_id)
 
     @staticmethod
-    def delete_attr_value(attr_id, ci_id):
+    def delete_attr_value(attr_id, ci_id, commit=True):
         attr = AttributeCache.get(attr_id)
         if attr is not None:
             value_table = TableMap(attr=attr).table
             for item in value_table.get_by(attr_id=attr.id, ci_id=ci_id, to_dict=False):
-                item.delete()
+                item.delete(commit=commit)

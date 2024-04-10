@@ -1,11 +1,13 @@
 <template>
   <div class="acl-resource-types">
     <div class="acl-resource-types-header">
-      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem">{{ btnName }}</a-button>
+      <a-button @click="handleCreate" type="primary" style="margin-right: 0.3rem">{{
+        $t('acl.addResourceType')
+      }}</a-button>
       <a-input-search
         class="ops-input"
         :style="{ display: 'inline', marginLeft: '10px', width: '200px' }"
-        placeholder="搜索 | 资源类型名"
+        :placeholder="`${$t('search')} | ${$t('acl.resourceType')}`"
         v-model="searchName"
         allowClear
         @search="
@@ -28,44 +30,47 @@
         <!-- 1 -->
         <vxe-table-column
           field="name"
-          title="资源类型名"
+          :title="$t('acl.resourceType')"
           :min-width="175"
           fixed="left"
           show-overflow
         ></vxe-table-column>
 
         <!-- 2 -->
-        <vxe-table-column field="description" title="描述" :min-width="175"></vxe-table-column>
+        <vxe-table-column field="description" :title="$t('desc')" :min-width="175"></vxe-table-column>
 
         <!-- 3 -->
-        <vxe-table-column field="id" title="权限" :min-width="300">
+        <vxe-table-column field="id" :title="$t('acl.permission')" :min-width="300">
           <template #default="{ row }">
             <a-tag color="cyan" v-for="perm in id2perms[row.id]" :key="perm.id">{{ perm.name }}</a-tag>
           </template>
         </vxe-table-column>
 
         <!-- 4 -->
-        <vxe-table-column field="action" title="操作" :width="100" fixed="right">
+        <vxe-table-column field="action" :title="$t('operation')" :width="100" fixed="right">
           <template #default="{ row }">
             <a @click="handleEdit(row)"><a-icon type="edit"/></a>
             <a-divider type="vertical" />
-            <a-popconfirm title="确认删除?" @confirm="handleDelete(row)" okText="是" cancelText="否">
+            <a-popconfirm :title="$t('confirmDelete')" @confirm="handleDelete(row)">
               <a style="color: red"><a-icon type="delete"/></a>
             </a-popconfirm>
           </template>
         </vxe-table-column>
       </ops-table>
-      <vxe-pager
+      <a-pagination
         size="small"
-        :layouts="['Total', 'PrevPage', 'JumpNumber', 'NextPage', 'Sizes']"
-        :current-page.sync="tablePage.currentPage"
-        :page-size.sync="tablePage.pageSize"
+        show-size-changer
+        show-quick-jumper
+        :current="tablePage.currentPage"
         :total="tablePage.total"
-        :page-sizes="pageSizeOptions"
-        @page-change="handlePageChange"
-        :style="{ marginTop: '10px' }"
-      >
-      </vxe-pager>
+        :show-total="(total, range) => `当前展示 ${range[0]}-${range[1]} 条数据, 共 ${total} 条`"
+        :page-size="tablePage.pageSize"
+        :default-current="1"
+        :page-size-options="pageSizeOptions"
+        @change="pageOrSizeChange"
+        @showSizeChange="pageOrSizeChange"
+        :style="{ marginTop: '10px', textAlign: 'right' }"
+      />
     </a-spin>
 
     <resourceTypeForm ref="resourceTypeForm" :handleOk="handleOk"> </resourceTypeForm>
@@ -87,42 +92,12 @@ export default {
       loading: false,
       groups: [],
       id2perms: {},
-      btnName: '新增资源类型',
-      pageSizeOptions: [10, 25, 50, 100],
+      pageSizeOptions: ['20', '50', '100', '200'],
       tablePage: {
         total: 0,
         currentPage: 1,
         pageSize: 50,
       },
-      tableColumns: [
-        {
-          title: '资源类型名',
-          field: 'name',
-          minWidth: '175px',
-          fixed: 'left',
-          showOverflow: 'tooltip',
-        },
-        {
-          title: '描述',
-          field: 'description',
-          minWidth: '175px',
-        },
-        {
-          title: '权限',
-          field: 'id',
-          minWidth: '300px',
-          slots: {
-            default: 'id_default',
-          },
-        },
-        {
-          title: '操作',
-          field: 'action',
-          minWidth: '175px',
-          slots: { default: 'action_default' },
-          fixed: 'right',
-        },
-      ],
       searchName: '',
     }
   },
@@ -200,16 +175,11 @@ export default {
     },
     deleteResourceType(id) {
       deleteResourceTypeById(id).then((res) => {
-        this.$message.success(`删除成功`)
+        this.$message.success(this.$t('deleteSuccess'))
         this.handleOk()
       })
-      // .catch(err => this.requestFailed(err))
     },
-    // requestFailed(err) {
-    //   const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
-    //   this.$message.error(`${msg}`)
-    // },
-    handlePageChange({ currentPage, pageSize }) {
+    pageOrSizeChange(currentPage, pageSize) {
       this.tablePage.currentPage = currentPage
       this.tablePage.pageSize = pageSize
       this.searchData()
@@ -219,8 +189,10 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import '~@/style/static.less';
+
 .acl-resource-types {
-  border-radius: 15px;
+  border-radius: @border-radius-box;
   background-color: #fff;
   height: calc(100vh - 64px);
   margin-bottom: -24px;

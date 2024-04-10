@@ -5,10 +5,14 @@ from __future__ import unicode_literals
 from flask import current_app
 
 from api.extensions import cache
+from api.extensions import db
 from api.lib.cmdb.custom_dashboard import CustomDashboardManager
 from api.models.cmdb import Attribute
+from api.models.cmdb import CI
 from api.models.cmdb import CIType
 from api.models.cmdb import CITypeAttribute
+from api.models.cmdb import PreferenceShowAttributes
+from api.models.cmdb import PreferenceTreeView
 from api.models.cmdb import RelationType
 
 
@@ -226,7 +230,9 @@ class CITypeAttributeCache(object):
 
 
 class CMDBCounterCache(object):
-    KEY = 'CMDB::Counter'
+    KEY = 'CMDB::Counter::dashboard'
+    KEY2 = 'CMDB::Counter::adc'
+    KEY3 = 'CMDB::Counter::sub'
 
     @classmethod
     def get(cls):
@@ -303,7 +309,7 @@ class CMDBCounterCache(object):
 
         s = RelSearch([i[0] for i in type_id_names], level, other_filer or '')
         try:
-            stats = s.statistics(type_ids)
+            stats = s.statistics(type_ids, need_filter=False)
         except SearchError as e:
             current_app.logger.error(e)
             return
@@ -429,3 +435,47 @@ class CMDBCounterCache(object):
             return
 
         return numfound
+
+    @classmethod
+    def flush_adc_counter(cls):
+        res = db.session.query(CI.type_id, CI.is_auto_discovery)
+        result = dict()
+        for i in res:
+            result.setdefault(i.type_id, dict(total=0, auto_discovery=0))
+            result[i.type_id]['total'] += 1
+            if i.is_auto_discovery:
+                result[i.type_id]['auto_discovery'] += 1
+
+        cache.set(cls.KEY2, result, timeout=0)
+
+        return result
+
+    @classmethod
+    def get_adc_counter(cls):
+        return cache.get(cls.KEY2) or cls.flush_adc_counter()
+
+    @classmethod
+    def flush_sub_counter(cls):
+        result = dict(type_id2users=dict())
+
+        types = db.session.query(PreferenceShowAttributes.type_id,
+                                 PreferenceShowAttributes.uid, PreferenceShowAttributes.created_at).filter(
+            PreferenceShowAttributes.deleted.is_(False)).group_by(
+            PreferenceShowAttributes.uid, PreferenceShowAttributes.type_id)
+        for i in types:
+            result['type_id2users'].setdefault(i.type_id, []).append(i.uid)
+
+        types = PreferenceTreeView.get_by(to_dict=False)
+        for i in types:
+
+            result['type_id2users'].setdefault(i.type_id, [])
+            if i.uid not in result['type_id2users'][i.type_id]:
+                result['type_id2users'][i.type_id].append(i.uid)
+
+        cache.set(cls.KEY3, result, timeout=0)
+
+        return result
+
+    @classmethod
+    def get_sub_counter(cls):
+        return cache.get(cls.KEY3) or cls.flush_sub_counter()

@@ -1,29 +1,37 @@
-export const ruleTypeList = [
-    { value: 'and', label: '与' },
-    { value: 'or', label: '或' },
-    // { value: 'not', label: '非' },
-]
+import i18n from '@/lang'
 
-export const expList = [
-    { value: 'is', label: '等于' },
-    { value: '~is', label: '不等于' },
-    { value: 'contain', label: '包含' },
-    { value: '~contain', label: '不包含' },
-    { value: 'start_with', label: '以...开始' },
-    { value: '~start_with', label: '不以...开始' },
-    { value: 'end_with', label: '以...结束' },
-    { value: '~end_with', label: '不以...结束' },
-    { value: '~value', label: '为空' }, // 为空的定义有点绕
-    { value: 'value', label: '不为空' },
-]
+export const ruleTypeList = () => {
+    return [
+        { value: 'and', label: i18n.t('cmdbFilterComp.and') },
+        { value: 'or', label: i18n.t('cmdbFilterComp.or') },
+        // { value: 'not', label: '非' },
+    ]
+}
 
-export const advancedExpList = [
-    { value: 'in', label: 'in查询' },
-    { value: '~in', label: '非in查询' },
-    { value: 'range', label: '范围' },
-    { value: '~range', label: '范围外' },
-    { value: 'compare', label: '比较' },
-]
+export const expList = () => {
+    return [
+        { value: 'is', label: i18n.t('cmdbFilterComp.is') },
+        { value: '~is', label: i18n.t('cmdbFilterComp.~is') },
+        { value: 'contain', label: i18n.t('cmdbFilterComp.contain') },
+        { value: '~contain', label: i18n.t('cmdbFilterComp.~contain') },
+        { value: 'start_with', label: i18n.t('cmdbFilterComp.start_with') },
+        { value: '~start_with', label: i18n.t('cmdbFilterComp.~start_with') },
+        { value: 'end_with', label: i18n.t('cmdbFilterComp.end_with') },
+        { value: '~end_with', label: i18n.t('cmdbFilterComp.~end_with') },
+        { value: '~value', label: i18n.t('cmdbFilterComp.~value') }, // 为空的定义有点绕
+        { value: 'value', label: i18n.t('cmdbFilterComp.value') },
+    ]
+}
+
+export const advancedExpList = () => {
+    return [
+        { value: 'in', label: i18n.t('cmdbFilterComp.in') },
+        { value: '~in', label: i18n.t('cmdbFilterComp.~in') },
+        { value: 'range', label: i18n.t('cmdbFilterComp.range') },
+        { value: '~range', label: i18n.t('cmdbFilterComp.~range') },
+        { value: 'compare', label: i18n.t('cmdbFilterComp.compare') },
+    ]
+}
 
 export const compareTypeList = [
     { value: '1', label: '>' },

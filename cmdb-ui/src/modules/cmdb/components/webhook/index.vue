@@ -18,7 +18,7 @@
         searchable
         :options="methodList"
         value-consists-of="LEAF_PRIORITY"
-        placeholder="请选择方式"
+        :placeholder="$t('cmdb.components.selectMethods')"
       >
       </treeselect>
       <a-input :style="{ display: 'inline-block', width: 'calc(100% - 100px)' }" v-model="url" />
@@ -88,7 +88,9 @@ export default {
       } catch {}
       const headers = {}
       this.$refs.Header.headers.forEach((item) => {
-        headers[item.key] = item.value
+        if (item.key) {
+          headers[item.key] = item.value
+        }
       })
       let authorization = {}
       const type = this.$refs.Authorization.authorizationType

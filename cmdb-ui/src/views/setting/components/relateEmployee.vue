@@ -1,5 +1,5 @@
 <template>
-  <a-modal title="关联员工" :visible="visible" @cancel="handleCancel" @ok="handleOK">
+  <a-modal :title="$t('cs.role.associatedEmployees')" :visible="visible" @cancel="handleCancel" @ok="handleOK">
     <EmployeeTreeSelect v-model="values" :multiple="true" />
   </a-modal>
 </template>

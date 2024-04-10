@@ -1,21 +1,23 @@
 <template>
-  <div class="attr-ad" :style="{ height: `${windowHeight - 104}px` }">
+  <div class="attr-ad" :style="{ height: `${windowHeight - 130}px` }">
     <div v-if="adCITypeList && adCITypeList.length">
       <a-tabs size="small" v-model="currentTab">
-        <a-tab-pane v-for="item in adCITypeList" :key="item.adr_id">
+        <a-tab-pane v-for="item in adCITypeList" :key="item.id">
           <a-space slot="tab">
-            <span>{{ getADCITypeParam(item.adr_id) }}</span>
+            <span v-if="item.extra_option && item.extra_option.alias">{{ item.extra_option.alias }}</span>
+            <span v-else>{{ getADCITypeParam(item.adr_id) }}</span>
             <a-icon type="close-circle" @click="(e) => deleteADT(e, item)" />
           </a-space>
           <AttrADTabpane
-            :ref="`attrAdTabpane_${item.adr_id}`"
-            :currentTab="item.adr_id"
+            :ref="`attrAdTabpane_${item.id}`"
+            :adr_id="item.adr_id"
             :adrList="adrList"
             :adCITypeList="adCITypeList"
             :currentAdt="item"
             :ciTypeAttributes="ciTypeAttributes"
             :currentAdr="getADCITypeParam(item.adr_id, undefined, true)"
             @openEditDrawer="(data, type, adType) => openEditDrawer(data, type, adType)"
+            @handleSave="getCITypeDiscovery"
           />
         </a-tab-pane>
         <a-space
@@ -27,7 +29,7 @@
           slot="tabBarExtraContent"
           :style="{ cursor: 'pointer' }"
         >
-          <ops-icon type="icon-xianxing-tianjia" :style="{ color: '#2F54EB' }" /><a>添加</a>
+          <ops-icon type="icon-xianxing-tianjia" :style="{ color: '#2F54EB' }" /><a>{{ $t('add') }}</a>
         </a-space>
       </a-tabs>
     </div>
@@ -38,7 +40,7 @@
       }"
     >
       <img slot="image" :src="require('@/assets/data_empty.png')" />
-      <span slot="description"> 暂无数据 </span>
+      <span slot="description"> {{ $t('noData') }} </span>
       <a-button
         @click="
           () => {
@@ -50,7 +52,7 @@
         icon="plus"
         class="ops-button-primary"
       >
-        添加
+        {{ $t('add') }}
       </a-button>
     </a-empty>
     <ADModal ref="adModal" :CITypeId="CITypeId" @addPlugin="openEditDrawer(null, 'add', 'agent')" />
@@ -134,8 +136,8 @@ export default {
     async getCITypeDiscovery(currentTab) {
       await getCITypeDiscovery(this.CITypeId).then((res) => {
         this.adCITypeList = res.filter((item) => item.adr_id)
-        if (res && res.length && !this.currentTab) {
-          this.currentTab = res[0].adr_id
+        if (this.adCITypeList && this.adCITypeList.length && !this.currentTab) {
+          this.currentTab = this.adCITypeList[0].id
         }
         if (currentTab) {
           this.currentTab = currentTab
@@ -156,26 +158,30 @@ export default {
       e.stopPropagation()
       const that = this
       this.$confirm({
-        title: `确认删除 【${this.getADCITypeParam(item.adr_id)}】`,
+        title: that.$t('cmdb.ciType.confirmDeleteADT', { pluginName: `${item?.extra_option?.alias || this.getADCITypeParam(item.adr_id)}` }),
         content: (h) => (
           <div>
-            <a-checkbox v-model={that.deletePlugin}>删除插件</a-checkbox>
+            <a-checkbox v-model={that.deletePlugin}>{that.$t('cmdb.ciType.deletePlugin')}</a-checkbox>
           </div>
         ),
         onOk() {
           deleteCITypeDiscovery(item.id).then(async () => {
-            if (that.currentTab === item.adr_id) {
+            if (that.currentTab === item.id) {
               that.currentTab = ''
             }
-            that.deletePlugin = false
-            that.$message.success('删除成功！')
+            that.$message.success(that.$t('deleteSuccess'))
             that.getCITypeDiscovery()
             if (that.deletePlugin) {
-              await deleteDiscovery(item.adr_id)
+              await deleteDiscovery(item.adr_id).finally(() => {
+                that.deletePlugin = false
+              })
             }
+            that.deletePlugin = false
           })
         },
-        onCancel() {},
+        onCancel() {
+          that.deletePlugin = false
+        },
       })
     },
     openEditDrawer(data, type, adType) {
@@ -183,12 +189,12 @@ export default {
     },
     async updateNotInner(adr) {
       const _idx = this.adCITypeList.findIndex((item) => item.adr_id === adr.id)
+      let res
       if (_idx < 0) {
-        await postCITypeDiscovery(this.CITypeId, { adr_id: adr.id, interval: 300 })
+        res = await postCITypeDiscovery(this.CITypeId, { adr_id: adr.id, interval: 300 })
       }
       await this.getDiscovery()
-      await this.getCITypeDiscovery()
-      this.currentTab = adr.id
+      await this.getCITypeDiscovery(res?.id ?? undefined)
       this.$nextTick(() => {
         this.$refs[`attrAdTabpane_${this.currentTab}`][0].init()
       })
@@ -201,7 +207,7 @@ export default {
 @import '~@/style/static.less';
 .attr-ad {
   position: relative;
-  padding: 0 12px;
+  padding: 0 20px;
   .attr-ad-header {
     width: 100%;
     display: inline-flex;

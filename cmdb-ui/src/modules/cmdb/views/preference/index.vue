@@ -2,10 +2,10 @@
   <div class="cmdb-preference" :style="{ height: `${windowHeight - 40}px` }">
     <div class="cmdb-preference-left">
       <div class="cmdb-preference-left-card">
-        <span class="cmdb-preference-left-card-title">我的订阅</span>
+        <span class="cmdb-preference-left-card-title">{{ $t('cmdb.preference.mySub') }}</span>
         <span
           class="cmdb-preference-left-card-content"
-        ><ops-icon type="cmdb-ci" :style="{ marginRight: '5px' }" />资源数据：
+        ><ops-icon type="cmdb-ci" :style="{ marginRight: '5px' }"/>{{ $t('cmdb.menu.ciTable') }}:
           <a-badge
             showZero
             :count="self.instance.length"
@@ -16,11 +16,10 @@
               height: '23px',
               fontSize: '14px',
             }"
-          />个</span
-        >
+          /></span>
         <span
           class="cmdb-preference-left-card-content"
-        ><ops-icon type="cmdb-tree" :style="{ marginRight: '5px' }" />资源层级：
+        ><ops-icon type="cmdb-tree" :style="{ marginRight: '5px' }"/>{{ $t('cmdb.menu.ciTree') }}:
           <a-badge
             showZero
             :count="self.tree.length"
@@ -31,61 +30,75 @@
               height: '23px',
               fontSize: '14px',
             }"
-          />个</span
-        >
+          /></span>
       </div>
       <div class="cmdb-preference-group" v-for="(group, index) in myPreferences" :key="group.name">
         <div class="cmdb-preference-group-title">
           <span> <ops-icon :style="{ marginRight: '10px' }" :type="group.icon" />{{ group.name }} </span>
         </div>
-        <div class="cmdb-preference-group-content" v-for="ciType in group.ci_types" :key="ciType.id">
-          <div
-            :class="{
-              'cmdb-preference-avatar': true,
-              'cmdb-preference-avatar-noicon': !ciType.icon,
-              'cmdb-preference-avatar-noicon-is_subscribed': !ciType.icon && ciType.is_subscribed,
-            }"
-            :style="{ width: '30px', height: '30px', marginRight: '10px' }"
-          >
-            <template v-if="ciType.icon">
-              <img
-                v-if="ciType.icon.split('$$')[2]"
-                :src="`/api/common-setting/v1/file/${ciType.icon.split('$$')[3]}`"
-                :style="{ maxHeight: '30px', maxWidth: '30px' }"
-              />
-              <ops-icon
-                v-else
-                :style="{
-                  color: ciType.icon.split('$$')[1],
-                  fontSize: '14px',
-                }"
-                :type="ciType.icon.split('$$')[0]"
-              />
-            </template>
-            <span v-else :style="{ fontSize: '20px' }">{{ ciType.name[0].toUpperCase() }}</span>
+        <draggable
+          v-model="group.ci_types"
+          :animation="300"
+          @change="
+            (e) => {
+              orderChange(e, group)
+            }
+          "
+        >
+          <div class="cmdb-preference-group-content" v-for="ciType in group.ci_types" :key="ciType.id">
+            <OpsMoveIcon class="cmdb-preference-move-icon" />
+            <div
+              :class="{
+                'cmdb-preference-avatar': true,
+                'cmdb-preference-avatar-noicon': !ciType.icon,
+              }"
+              :style="{ width: '30px', height: '30px', marginRight: '10px' }"
+            >
+              <template v-if="ciType.icon">
+                <img
+                  v-if="ciType.icon.split('$$')[2]"
+                  :src="`/api/common-setting/v1/file/${ciType.icon.split('$$')[3]}`"
+                  :style="{ maxHeight: '30px', maxWidth: '30px' }"
+                />
+                <ops-icon
+                  v-else
+                  :style="{
+                    color: ciType.icon.split('$$')[1],
+                    fontSize: '14px',
+                  }"
+                  :type="ciType.icon.split('$$')[0]"
+                />
+              </template>
+              <span v-else :style="{ fontSize: '20px' }">{{ ciType.name[0].toUpperCase() }}</span>
+            </div>
+            <span class="cmdb-preference-group-content-title">{{ ciType.alias || ciType.name }}</span>
+            <span class="cmdb-preference-group-content-action">
+              <a-tooltip :title="$t('cmdb.preference.cancelSub')">
+                <span
+                  @click="unsubscribe(ciType, group.type)"
+                ><ops-icon type="cmdb-preference-cancel-subscribe" />
+                </span>
+              </a-tooltip>
+              <a-divider type="vertical" :style="{ margin: '0 3px' }" />
+              <a-tooltip :title="$t('cmdb.preference.editSub')">
+                <span
+                  @click="openSubscribeSetting(ciType, `${index + 1}`)"
+                ><ops-icon
+                  type="cmdb-preference-subscribe"
+                /></span>
+              </a-tooltip>
+            </span>
           </div>
-          <span class="cmdb-preference-group-content-title">{{ ciType.alias || ciType.name }}</span>
-          <span class="cmdb-preference-group-content-action">
-            <a-tooltip title="取消订阅">
-              <span
-                @click="unsubscribe(ciType, group.type)"
-              ><ops-icon type="cmdb-preference-cancel-subscribe" />
-              </span>
-            </a-tooltip>
-            <a-divider type="vertical" :style="{ margin: '0 3px' }" />
-            <a-tooltip title="编辑订阅">
-              <span
-                @click="openSubscribeSetting(ciType, `${index + 1}`)"
-              ><ops-icon
-                type="cmdb-preference-subscribe"
-              /></span>
-            </a-tooltip>
-          </span>
-        </div>
+        </draggable>
       </div>
     </div>
     <div class="cmdb-preference-right">
-      <div v-for="group in citypeData" :key="group.id">
+      <a-input-search
+        v-model="searchValue"
+        :style="{ width: '300px', marginBottom: '20px' }"
+        :placeholder="$t('cmdb.preference.searchPlaceholder')"
+      />
+      <div v-for="group in filterCiTypeData" :key="group.id">
         <p @click="changeGroupExpand(group)" :style="{ display: 'inline-block', cursor: 'pointer' }">
           <a-icon :type="expandKeys.includes(group.id) ? 'caret-down' : 'caret-right'" />{{ group.name }}({{
             group.ci_types ? group.ci_types.length : 0
@@ -99,7 +112,6 @@
                   :class="{
                     'cmdb-preference-avatar': true,
                     'cmdb-preference-avatar-noicon': !item.icon,
-                    'cmdb-preference-avatar-noicon-is_subscribed': !item.icon && item.is_subscribed,
                   }"
                 >
                   <template v-if="item.icon">
@@ -124,22 +136,16 @@
                 >
               </div>
               <div class="cmdb-preference-colleague">
-                <template v-if="type_id2users[item.id] && type_id2users[item.id].length">
-                  <span
-                  >{{ type_id2users[item.id].length > 99 ? '99+' : type_id2users[item.id].length }}位同事已订阅</span
-                  >
-                  <span class="cmdb-preference-colleague-name">
-                    <span v-for="uid in type_id2users[item.id].slice(0, 4)" :key="uid">
-                      {{ getNameByUid(uid) }}
-                    </span>
-                    <span class="cmdb-preference-colleague-ellipsis" v-if="type_id2users[item.id].length > 4">...</span>
-                  </span>
-                </template>
-                <span v-else :style="{ marginLeft: 'auto' }">暂无同事订阅</span>
+                <span
+                  v-if="type_id2users[item.id] && type_id2users[item.id].length"
+                >{{ type_id2users[item.id].length > 99 ? '99+' : type_id2users[item.id].length
+                }}{{ $t('cmdb.preference.peopleSub') }}</span
+                >
+                <span v-else>{{ $t('cmdb.preference.noSub') }}</span>
               </div>
               <div class="cmdb-preference-progress">
                 <div class="cmdb-preference-progress-info">
-                  <span>自动发现</span>
+                  <span>{{ $t('cmdb.menu.ad') }}</span>
                   <span>{{ item.integrity }}%</span>
                 </div>
                 <div class="cmdb-preference-progress-gray">
@@ -148,15 +154,13 @@
               </div>
               <a-divider :style="{ margin: '10px 0 3px 0' }" />
               <div class="cmdb-preference-footor-subscribed" v-if="item.is_subscribed">
-                <span
-                ><a-icon type="clock-circle" :style="{ marginRight: '3px' }" />{{ getsubscribedDays(item) }}订阅</span
-                >
+                <span><a-icon type="clock-circle" :style="{ marginRight: '3px' }" />{{ getsubscribedDays(item) }}</span>
                 <span>
-                  <a-tooltip title="取消订阅">
+                  <a-tooltip :title="$t('cmdb.preference.cancelSub')">
                     <span @click="unsubscribe(item)"><ops-icon type="cmdb-preference-cancel-subscribe" /> </span>
                   </a-tooltip>
                   <a-divider type="vertical" :style="{ margin: '0 3px' }" />
-                  <a-tooltip title="编辑订阅">
+                  <a-tooltip :title="$t('cmdb.preference.editSub')">
                     <span @click="openSubscribeSetting(item)"><ops-icon type="cmdb-preference-subscribe"/></span>
                   </a-tooltip>
                 </span>
@@ -164,7 +168,9 @@
               <div v-else class="cmdb-preference-footor-unsubscribed">
                 <span
                   @click="openSubscribeSetting(item)"
-                ><ops-icon :style="{ marginRight: '3px' }" type="cmdb-preference-subscribe" />订阅</span
+                ><ops-icon :style="{ marginRight: '3px' }" type="cmdb-preference-subscribe" />{{
+                  $t('cmdb.preference.sub')
+                }}</span
                 >
               </div>
             </div>
@@ -185,19 +191,28 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import router, { resetRouter } from '@/router'
 import store from '@/store'
 import { mapState } from 'vuex'
 import moment from 'moment'
+import draggable from 'vuedraggable'
 import { getCITypeGroups } from '../../api/ciTypeGroup'
-import { getPreference, getPreference2, subscribeCIType, subscribeTreeView } from '@/modules/cmdb/api/preference'
+import {
+  getPreference,
+  getPreference2,
+  subscribeCIType,
+  subscribeTreeView,
+  preferenceCitypeOrder,
+} from '@/modules/cmdb/api/preference'
 import CollapseTransition from '@/components/CollapseTransition'
 import SubscribeSetting from '../../components/subscribeSetting/subscribeSetting'
 import { getCIAdcStatistics } from '../../api/ci'
+import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
 
 export default {
   name: 'Preference',
-  components: { CollapseTransition, SubscribeSetting },
+  components: { CollapseTransition, SubscribeSetting, draggable, OpsMoveIcon },
   data() {
     return {
       citypeData: [],
@@ -208,13 +223,29 @@ export default {
       },
       type_id2users: {},
       myPreferences: [],
+      searchValue: '',
     }
   },
   computed: {
     ...mapState({
       windowHeight: (state) => state.windowHeight,
-      allUsers: (state) => state.user.allUsers,
     }),
+    filterCiTypeData() {
+      if (this.searchValue) {
+        const _citypeData = _.cloneDeep(this.citypeData)
+        _citypeData.forEach((group) => {
+          if (group.ci_types) {
+            group.ci_types = group.ci_types.filter(
+              (item) =>
+                item.name.toLowerCase().includes(this.searchValue.toLowerCase()) ||
+                item.alias.toLowerCase().includes(this.searchValue.toLowerCase())
+            )
+          }
+        })
+        return _citypeData
+      }
+      return this.citypeData
+    },
   },
   mounted() {
     this.getCITypes(true)
@@ -242,7 +273,7 @@ export default {
         }
         if (!group.id) {
           group.id = -1
-          group.name = '其他'
+          group.name = this.$t('other')
         }
       })
       this.citypeData = ciTypeGroup
@@ -251,7 +282,7 @@ export default {
       this.type_id2users = type_id2users
       const _myPreferences = [
         {
-          name: '资源数据',
+          name: this.$t('cmdb.menu.ciTable'),
           ci_types: self.instance.map((item) => {
             const _find = pref.find((ci) => ci.id === item)
             return _find
@@ -260,7 +291,7 @@ export default {
           type: 'ci',
         },
         {
-          name: '资源层级',
+          name: this.$t('cmdb.menu.ciTree'),
           ci_types: self.tree.map((item) => {
             const _find = pref.find((ci) => ci.id === item)
             return _find
@@ -276,32 +307,33 @@ export default {
         }, 300)
       }
     },
-    getNameByUid(uid) {
-      const _find = this.allUsers.find((item) => item.uid === uid)
-      return _find?.username[0].toUpperCase() || 'A'
-    },
     getsubscribedDays(item) {
       const subscribedTime = this.self.type_id2subs_time[item.id]
       moment.duration(moment().diff(moment(subscribedTime)))
       const day = moment().diff(moment(subscribedTime), 'day')
       if (day > 0 && day < 1) {
-        return `${moment().diff(moment(subscribedTime), 'hour')}小时前`
+        return `${moment().diff(moment(subscribedTime), 'hour')}` + this.$t('cmdb.preference.hoursAgo')
       } else if (day >= 1 && day <= 31) {
-        return `${day}天前`
+        return `${day} ` + this.$t('cmdb.preference.daysAgo')
       } else if (day > 31 && day < 365) {
-        return `${moment().diff(moment(subscribedTime), 'month')}月前`
+        return `${moment().diff(moment(subscribedTime), 'month')}` + this.$t('cmdb.preference.monthsAgo')
       } else if (day >= 365) {
-        return `${moment().diff(moment(subscribedTime), 'year')}年前`
+        return `${moment().diff(moment(subscribedTime), 'year')}` + this.$t('cmdb.preference.yearsAgo')
       }
-      return '刚刚'
+      return this.$t('cmdb.preference.just')
     },
     unsubscribe(ciType, type = 'all') {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: `确认取消订阅 ${ciType.alias || ciType.name} ${
-          type !== 'all' ? `的${type === 'ci' ? '资源数据' : '资源层级'}` : ''
-        } 吗？`,
+        title: that.$t('warning'),
+        content:
+          that.$t('cmdb.preference.confirmcancelSub') +
+          ` ${ciType.alias || ciType.name} ${
+            type !== 'all'
+              ? that.$t('cmdb.preference.of') +
+                `${type === 'ci' ? this.$t('cmdb.menu.ciTable') : that.$t('cmdb.menu.ciTree')}`
+              : ''
+          } ？`,
         onOk() {
           const promises = []
           if (type === 'all' || type === 'ci') {
@@ -314,7 +346,13 @@ export default {
           }
 
           Promise.all(promises).then(() => {
-            that.$message.success('取消订阅成功')
+            if (type === 'all' || type === 'ci') {
+              const lastTypeId = window.localStorage.getItem('ops_ci_typeid') || undefined
+              if (Number(ciType.id) === Number(lastTypeId)) {
+                localStorage.setItem('ops_ci_typeid', '')
+              }
+            }
+            that.$message.success(that.$t('cmdb.preference.cancelSubSuccess'))
             that.resetRoute()
           })
         },
@@ -339,6 +377,17 @@ export default {
         this.expandKeys.push(group.id)
       }
     },
+    orderChange(e, group) {
+      preferenceCitypeOrder({ type_ids: group.ci_types.map((type) => type.id), is_tree: group.type !== 'ci' })
+        .then(() => {
+          if (group.type === 'ci') {
+            this.resetRoute()
+          }
+        })
+        .catch(() => {
+          this.getCITypes(false)
+        })
+    },
   },
 }
 </script>
@@ -348,7 +397,6 @@ export default {
 .cmdb-preference {
   margin: -24px;
   overflow: auto;
-  background: url('../../assets/preference_background.png');
   position: relative;
   display: flex;
   flex-direction: row;
@@ -364,7 +412,7 @@ export default {
   .cmdb-preference-left {
     width: 300px;
     height: 100%;
-    padding: 12px 18px;
+    padding: 24px 18px;
     .cmdb-preference-left-card {
       background: url('../../assets/preference_card.png');
       background-repeat: no-repeat;
@@ -398,33 +446,48 @@ export default {
       .cmdb-preference-group-title {
         text-align: center;
         margin-bottom: 5px;
+        i {
+          color: @primary-color;
+        }
         > span {
           display: inline-block;
-          color: #fff;
-          background: linear-gradient(90deg, #305bec, #78cfff);
+          color: @text-color_2;
           border-radius: 16px;
           font-weight: 600;
           padding: 6px 12px;
         }
       }
       .cmdb-preference-group-content {
-        color: rgba(0, 0, 0, 0.75);
+        color: @text-color_1;
         font-weight: 400;
         display: flex;
         align-items: center;
         height: 45px;
         padding: 0 8px;
-        cursor: default;
+        cursor: move;
         justify-content: flex-start;
         &:hover {
           background: #ffffff;
           box-shadow: 0px 2px 8px rgba(149, 160, 208, 0.25);
-          border-radius: 8px;
+          border-radius: @border-radius-box;
+          .cmdb-preference-avatar {
+            box-shadow: none;
+            background-color: @primary-color_5;
+          }
           .cmdb-preference-group-content-action {
             display: inline;
             white-space: nowrap;
             margin-left: auto;
           }
+          .cmdb-preference-move-icon {
+            visibility: visible;
+          }
+        }
+        .cmdb-preference-move-icon {
+          width: 14px;
+          height: 20px;
+          cursor: move;
+          visibility: hidden;
         }
         .cmdb-preference-group-content-title {
           flex: 1;
@@ -442,7 +505,7 @@ export default {
   .cmdb-preference-right {
     flex: 1;
     height: 100%;
-    padding-top: 18px;
+    padding-top: 24px;
     .cmdb-preference-content {
       display: flex;
       flex-direction: row;
@@ -457,11 +520,11 @@ export default {
         display: inline-block;
         width: 195px;
         height: 155px;
-        border-radius: 8px;
+        border-radius: @border-radius-box;
         background-color: #fff;
         box-shadow: 0px 2px 8px rgba(149, 160, 208, 0.25);
         margin: 0 20px 20px 0;
-        padding: 8px;
+        padding: 12px;
         &:hover {
           box-shadow: 4px 25px 30px rgba(50, 89, 134, 0.25);
           transform: scale(1.1);
@@ -513,7 +576,7 @@ export default {
           .cmdb-preference-progress-gray {
             height: 5px;
             border-radius: 5px;
-            background-color: #d9d9d9;
+            background-color: @text-color_6;
             margin-top: 5px;
             width: 100%;
             position: relative;
@@ -523,7 +586,7 @@ export default {
               top: 0;
               left: 0;
               border-radius: 5px;
-              background: linear-gradient(90deg, #305bec, #78cfff);
+              background: @primary-color_8;
             }
           }
         }
@@ -555,20 +618,17 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 34px;
+    height: 34px;
     box-shadow: 0px 4px 4px rgba(129, 140, 186, 0.25);
-    border-radius: 5px;
+    border-radius: 1px;
+    background-color: #fff;
   }
   .cmdb-preference-avatar-noicon {
-    background-color: #7f97fa;
     > span {
-      font-size: 24px;
-      color: #fff;
+      font-size: 18px;
+      color: @text-color_4;
     }
-  }
-  .cmdb-preference-avatar-noicon-is_subscribed {
-    background-color: #47a964;
   }
 }
 </style>

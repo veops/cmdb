@@ -71,6 +71,14 @@ export function subscribeRelationView(payload) {
   })
 }
 
+export function putRelationView(id, data) {
+  return axios({
+    url: `/v0.1/preference/relation/view/${id}`,
+    method: 'put',
+    data
+  })
+}
+
 // 用户保存条件过滤选项
 export function getPreferenceSearch(payload) {
   // 参数有prv_id: 关系视图的id， ptv_id: 层级视图的id, type_id: 模型id
@@ -110,6 +118,15 @@ export function grantRelationView(rid, data) {
 export function revokeRelationView(rid, data) {
   return axios({
     url: `/v0.1/preference/relation/view/roles/${rid}/revoke`,
+    method: 'POST',
+    data: data
+  })
+}
+
+// preference citype order
+export function preferenceCitypeOrder(data) {
+  return axios({
+    url: `/v0.1/preference/ci_types/order`,
     method: 'POST',
     data: data
   })

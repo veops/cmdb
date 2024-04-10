@@ -12,14 +12,17 @@ from pathlib import Path
 from flask import Flask
 from flask import jsonify
 from flask import make_response
+from flask import request
 from flask.blueprints import Blueprint
 from flask.cli import click
 from flask.json.provider import DefaultJSONProvider
+from flask_babel.speaklater import LazyString
 
 import api.views.entry
-from api.extensions import (bcrypt, cache, celery, cors, db, es, login_manager, migrate, rd)
+from api.extensions import (bcrypt, babel, cache, celery, cors, db, es, login_manager, migrate, rd)
 from api.extensions import inner_secrets
-from api.flask_cas import CAS
+from api.lib.perm.authentication.cas import CAS
+from api.lib.perm.authentication.oauth2 import OAuth2
 from api.lib.secrets.secrets import InnerKVManger
 from api.models.acl import User
 
@@ -71,7 +74,7 @@ class ReverseProxy(object):
 
 class MyJSONEncoder(DefaultJSONProvider):
     def default(self, o):
-        if isinstance(o, (decimal.Decimal, datetime.date, datetime.time)):
+        if isinstance(o, (decimal.Decimal, datetime.date, datetime.time, LazyString)):
             return str(o)
 
         if isinstance(o, datetime.datetime):
@@ -96,6 +99,7 @@ def create_app(config_object="settings"):
     register_shell_context(app)
     register_commands(app)
     CAS(app)
+    OAuth2(app)
     app.wsgi_app = ReverseProxy(app.wsgi_app)
     configure_upload_dir(app)
 
@@ -115,7 +119,13 @@ def configure_upload_dir(app):
 
 def register_extensions(app):
     """Register Flask extensions."""
+
+    def get_locale():
+        accept_languages = app.config.get('ACCEPT_LANGUAGES', ['en', 'zh'])
+        return request.accept_languages.best_match(accept_languages)
+
     bcrypt.init_app(app)
+    babel.init_app(app, locale_selector=get_locale)
     cache.init_app(app)
     db.init_app(app)
     cors.init_app(app)
@@ -192,10 +202,11 @@ def configure_logger(app):
         app.logger.addHandler(handler)
 
     log_file = app.config['LOG_PATH']
-    file_handler = RotatingFileHandler(log_file,
-                                       maxBytes=2 ** 30,
-                                       backupCount=7)
-    file_handler.setLevel(getattr(logging, app.config['LOG_LEVEL']))
-    file_handler.setFormatter(formatter)
-    app.logger.addHandler(file_handler)
+    if log_file and log_file != "/dev/stdout":
+        file_handler = RotatingFileHandler(log_file,
+                                           maxBytes=2 ** 30,
+                                           backupCount=7)
+        file_handler.setLevel(getattr(logging, app.config['LOG_LEVEL']))
+        file_handler.setFormatter(formatter)
+        app.logger.addHandler(file_handler)
     app.logger.setLevel(getattr(logging, app.config['LOG_LEVEL']))

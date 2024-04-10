@@ -1,23 +1,25 @@
 <template>
   <a-card :bordered="false" :bodyStyle="{ padding: '0' }">
-    <a-tabs :activeKey="activeKey" @change="changeTab" class="ops-tab" type="card">
-      <a-tab-pane key="1" tab="模型属性">
+    <a-tabs :activeKey="activeKey" @change="changeTab" class="ops-tab">
+      <a-tab-pane key="1" :tab="$t('cmdb.ciType.attributes')">
         <AttributesTable ref="attributesTable" :CITypeId="CITypeId" :CITypeName="CITypeName"></AttributesTable>
       </a-tab-pane>
-      <a-tab-pane forceRender key="2" tab="模型关联">
+      <a-tab-pane key="2" :tab="$t('cmdb.ciType.relation')">
         <RelationTable :CITypeId="CITypeId" :CITypeName="CITypeName"></RelationTable>
       </a-tab-pane>
-      <a-tab-pane key="3" tab="触发器">
+      <a-tab-pane key="3" :tab="$t('cmdb.ciType.trigger')">
         <TriggerTable ref="triggerTable" :CITypeId="CITypeId"></TriggerTable>
       </a-tab-pane>
-      <a-tab-pane key="4" tab="属性自动发现">
+      <a-tab-pane key="4" :tab="$t('cmdb.ciType.attributeAD')">
         <AttrAD :CITypeId="CITypeId"></AttrAD>
       </a-tab-pane>
-      <a-tab-pane key="5" tab="关系自动发现">
+      <a-tab-pane key="5" :tab="$t('cmdb.ciType.relationAD')">
         <RelationAD :CITypeId="CITypeId"></RelationAD>
       </a-tab-pane>
-      <a-tab-pane key="6" tab="权限设置">
+      <a-tab-pane key="6" :tab="$t('cmdb.ciType.grant')">
         <GrantComp :CITypeId="CITypeId" resourceType="CIType" :resourceTypeName="CITypeName"></GrantComp>
+        <div class="citype-detail-title">{{ $t('cmdb.components.relationGrant') }}</div>
+        <RelationTable isInGrantComp :CITypeId="CITypeId" :CITypeName="CITypeName"></RelationTable>
       </a-tab-pane>
     </a-tabs>
   </a-card>
@@ -74,4 +76,13 @@ export default {
 }
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+@import '~@/style/static.less';
+
+.citype-detail-title {
+  border-left: 4px solid @primary-color;
+  padding-left: 10px;
+  margin-left: 20px;
+  margin-bottom: 10px;
+}
+</style>

@@ -1,29 +1,39 @@
 <template>
   <div>
-    <a-modal v-model="addGroupModal" title="新增分组" @cancel="handleCancelCreateGroup" @ok="handleCreateGroup">
+    <a-modal
+      v-model="addGroupModal"
+      :title="$t('cmdb.ciType.addGroup')"
+      @cancel="handleCancelCreateGroup"
+      @ok="handleCreateGroup"
+    >
       <span>
-        <a-form-item label="名称" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
+        <a-form-item :label="$t('name')" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
           <a-input type="text" v-model.trim="newGroupName" />
         </a-form-item>
       </span>
     </a-modal>
-    <div class="ci-types-attributes" :style="{ maxHeight: `${windowHeight - 104}px` }">
+    <div class="ci-types-attributes" :style="{ height: `${windowHeight - 130}px` }">
       <a-space style="margin-bottom: 10px">
-        <a-button
-          type="primary"
-          @click="handleAddGroup"
-          size="small"
-          class="ops-button-primary"
-          icon="plus"
-        >分组</a-button
-        >
-        <a-button
-          type="primary"
-          @click="handleOpenUniqueConstraint"
-          size="small"
-          class="ops-button-primary"
-        >唯一校验</a-button
-        >
+        <a-button @click="handleAddGroup" size="small" icon="plus">{{ $t('cmdb.ciType.group') }}</a-button>
+        <a-button @click="handleOpenUniqueConstraint" size="small">{{ $t('cmdb.ciType.uniqueConstraint') }}</a-button>
+        <div>
+          <a-tooltip
+            v-for="type in Object.keys(valueTypeMap)"
+            :key="type"
+            :title="$t('cmdb.ciType.filterTips', { name: valueTypeMap[type] })"
+          >
+            <span
+              @click="handleFilterType(type)"
+              :class="{
+                'ci-types-attributes-filter': true,
+                'ci-types-attributes-filter-selected': attrTypeFilter.includes(type),
+              }"
+            >
+              <ops-icon :type="getPropertyIcon({ value_type: type })" />
+              {{ valueTypeMap[type] }}
+            </span>
+          </a-tooltip>
+        </div>
       </a-space>
       <div :key="CITypeGroup.id" v-for="(CITypeGroup, index) in CITypeGroups">
         <div>
@@ -33,9 +43,6 @@
           >
             <span style="font-weight:700">{{ CITypeGroup.name }}</span>
             <span style="color: #c3cdd7;margin:0 5px;">({{ CITypeGroup.attributes.length }})</span>
-            <a @click="handleEditGroupName(index, CITypeGroup)">
-              <a-icon type="edit" />
-            </a>
           </div>
           <template v-else>
             <span>
@@ -45,18 +52,18 @@
                 ref="editGroupInput"
                 v-model.trim="CITypeGroup.name"
               />
-              <a @click="handleSaveGroupName(index, CITypeGroup)" style="margin-right: 0.5rem">保存</a>
-              <a @click="handleCancelGroupName(index, CITypeGroup)">取消</a>
+              <a @click="handleSaveGroupName(index, CITypeGroup)" style="margin-right: 0.5rem">{{ $t('save') }}</a>
+              <a @click="handleCancelGroupName(index, CITypeGroup)">{{ $t('cancel') }}</a>
             </span>
           </template>
           <a-space style="float: right">
             <a-tooltip v-if="index">
-              <template slot="title">上移</template>
+              <template slot="title">{{ $t('cmdb.ciType.up') }}</template>
               <a><a-icon type="arrow-up" v-if="index" @click="handleMoveGroup(index, index - 1)"/></a>
             </a-tooltip>
 
             <a-tooltip v-if="index !== CITypeGroups.length - 1">
-              <template slot="title">下移</template>
+              <template slot="title">{{ $t('cmdb.ciType.up') }}</template>
               <a
               ><a-icon
                 type="arrow-down"
@@ -64,15 +71,24 @@
                 @click="handleMoveGroup(index, index + 1)"
               /></a>
             </a-tooltip>
-
-            <a-tooltip>
-              <template slot="title">添加属性</template>
-              <a><a-icon type="plus" @click="handleAddGroupAttr(index)"/></a>
-            </a-tooltip>
-            <a-tooltip>
-              <template slot="title">删除分组</template>
-              <a style="color:red;"><a-icon type="delete" @click="handleDeleteGroup(CITypeGroup)"/></a>
-            </a-tooltip>
+            <a-dropdown>
+              <a><ops-icon type="veops-more"/></a>
+              <a-menu slot="overlay">
+                <a-menu-item @click="handleAddGroupAttr(index)">
+                  <template slot="title"></template>
+                  <a-icon type="plus" />
+                  {{ $t('cmdb.ciType.addAttribute') }}
+                </a-menu-item>
+                <a-menu-item @click="handleEditGroupName(index, CITypeGroup)" :disabled="CITypeGroup.inherited">
+                  <a-icon type="edit" />
+                  {{ $t('cmdb.ciType.editGroupName') }}
+                </a-menu-item>
+                <a-menu-item @click="handleDeleteGroup(CITypeGroup)" :disabled="CITypeGroup.inherited">
+                  <a-icon type="delete" />
+                  {{ $t('cmdb.ciType.deleteGroup') }}
+                </a-menu-item>
+              </a-menu>
+            </a-dropdown>
           </a-space>
         </div>
         <div class="ci-types-attributes-wrapper">
@@ -82,7 +98,7 @@
             @start="drag = true"
             @change="
               (e) => {
-                handleChange(e, CITypeGroup.id)
+                handleChange(e, CITypeGroup.name)
               }
             "
             :filter="'.filter-empty'"
@@ -92,25 +108,28 @@
             handle=".handle"
           >
             <AttributeCard
-              v-for="item in CITypeGroup.attributes"
+              v-for="item in filterValueType(CITypeGroup.attributes)"
               :key="item.id"
               @edit="handleEditProperty(item)"
               :property="item"
               @ok="handleOk"
               :CITypeId="CITypeId"
+              :attributes="attributes"
             />
+            <AttributeCard isAdd @add="handleAddGroupAttr(index)" />
             <i></i> <i></i> <i></i> <i></i> <i></i>
           </draggable>
         </div>
       </div>
       <div>
         <div :style="{ height: '32px', lineHeight: '32px', display: 'inline-block', fontSize: '14px' }">
-          <span style="font-weight:700">其他</span>
+          <span style="font-weight:700">{{ $t('other') }}</span>
           <span style="color: #c3cdd7;margin-left:5px;">({{ otherGroupAttributes.length }})</span>
+          <span style="color: #c3cdd7;margin-left:5px;font-size:10px;">{{ $t('cmdb.ciType.otherGroupTips') }}</span>
         </div>
         <div style="float: right">
           <a-tooltip>
-            <template slot="title">添加属性</template>
+            <template slot="title">{{ $t('cmdb.ciType.addAttribute') }}</template>
             <a @click="handleAddGroupAttr(undefined)"><a-icon type="plus"/></a>
           </a-tooltip>
         </div>
@@ -123,7 +142,7 @@
           @start="drag = true"
           @change="
             (e) => {
-              handleChange(e, -1)
+              handleChange(e, null)
             }
           "
           :animation="300"
@@ -131,29 +150,31 @@
           handle=".handle"
         >
           <AttributeCard
-            v-for="item in otherGroupAttributes"
+            v-for="item in filterValueType(otherGroupAttributes)"
             :key="item.id"
             @edit="handleEditProperty(item)"
             :property="item"
             @ok="handleOk"
             :CITypeId="CITypeId"
+            :attributes="attributes"
           />
+          <AttributeCard isAdd @add="handleAddGroupAttr(undefined)" />
           <i></i> <i></i> <i></i> <i></i> <i></i>
         </draggable>
       </div>
     </div>
-    <attribute-edit-form
+    <AttributeEditForm
       ref="attributeEditForm"
       :CITypeId="CITypeId"
       :CITypeName="CITypeName"
       @ok="handleOk"
-    ></attribute-edit-form>
-    <new-ci-type-attr-modal
+    ></AttributeEditForm>
+    <NewCiTypeAttrModal
       ref="newCiTypeAttrModal"
       :CITypeId="CITypeId"
       :linked-ids="linkedIds"
       @ok="handleOk"
-    ></new-ci-type-attr-modal>
+    ></NewCiTypeAttrModal>
     <UniqueConstraint ref="uniqueConstraint" :CITypeId="CITypeId" />
   </div>
 </template>
@@ -177,6 +198,8 @@ import AttributeCard from './attributeCard.vue'
 import AttributeEditForm from './attributeEditForm.vue'
 import NewCiTypeAttrModal from './newCiTypeAttrModal.vue'
 import UniqueConstraint from './uniqueConstraint.vue'
+import { valueTypeMap } from '../../utils/const'
+import { getPropertyIcon } from '../../utils/helper'
 
 export default {
   name: 'AttributesTable',
@@ -206,6 +229,8 @@ export default {
       otherGroupAttributes: [],
       addGroupModal: false,
       newGroupName: '',
+      attrTypeFilter: [],
+      unique: '',
     }
   },
   computed: {
@@ -215,9 +240,17 @@ export default {
     windowHeight() {
       return this.$store.state.windowHeight
     },
+    valueTypeMap() {
+      return valueTypeMap()
+    },
   },
   provide() {
-    return { refresh: this.getCITypeGroupData }
+    return {
+      refresh: this.getCITypeGroupData,
+      unique: () => {
+        return this.unique
+      },
+    }
   },
   beforeCreate() {},
   created() {},
@@ -225,6 +258,7 @@ export default {
     this.getCITypeGroupData()
   },
   methods: {
+    getPropertyIcon,
     handleEditProperty(property) {
       this.$refs.attributeEditForm.handleEdit(property, this.attributes)
     },
@@ -252,6 +286,7 @@ export default {
         group.editable = false
         group.originOrder = group.order
         group.originName = group.name
+        // group.attributes = group.attributes.sort((a, b) => a.order - b.order)
       })
 
       this.otherGroupAttributes = this.attributes
@@ -274,6 +309,7 @@ export default {
       Promise.all(promises).then((values) => {
         console.log(values)
         this.attributes = values[0].attributes
+        this.unique = values[0].unique
         const temp = {}
         this.attributes.forEach((attr) => {
           temp[attr.id] = attr
@@ -302,7 +338,7 @@ export default {
       if (CITypeGroup.name === CITypeGroup.originName) {
         this.handleCancelGroupName(index, CITypeGroup)
       } else if (this.CITypeGroups.map((x) => x.originName).includes(CITypeGroup.name)) {
-        this.$message.error('分组名称已存在')
+        this.$message.error(this.$t('cmdb.ciType.groupExisted'))
       } else {
         updateCITypeGroupById(CITypeGroup.id, {
           name: CITypeGroup.name,
@@ -311,7 +347,7 @@ export default {
         }).then((res) => {
           CITypeGroup.editable = false
           this.$set(this.CITypeGroups, index, CITypeGroup)
-          this.$message.success('修改成功')
+          this.$message.success(this.$t('updateSuccess'))
         })
       }
     },
@@ -345,10 +381,10 @@ export default {
     },
 
     handleMoveGroup(beforeIndex, afterIndex) {
-      const fromGroupId = this.CITypeGroups[beforeIndex].id
-      const toGroupId = this.CITypeGroups[afterIndex].id
+      const fromGroupId = this.CITypeGroups[beforeIndex].name
+      const toGroupId = this.CITypeGroups[afterIndex].name
       transferCITypeGroupIndex(this.CITypeId, { from: fromGroupId, to: toGroupId }).then((res) => {
-        this.$message.success('操作成功')
+        this.$message.success(this.$t('operateSuccess'))
         const beforeGroup = this.CITypeGroups[beforeIndex]
         this.CITypeGroups[beforeIndex] = this.CITypeGroups[afterIndex]
 
@@ -379,6 +415,7 @@ export default {
               group.attributes = group.attributes.filter((x) => !values.checkedAttributes.includes(x.id))
             }
           })
+          // this.CITypeGroups = this.CITypeGroups
 
           this.otherGroupAttributes.forEach((attributes) => {
             if (values.groupId === null) {
@@ -401,8 +438,8 @@ export default {
     handleDeleteGroup(group) {
       const that = this
       this.$confirm({
-        title: '警告',
-        content: `确定要删除分组 【${group.name}】 吗？`,
+        title: that.$t('warning'),
+        content: that.$t('cmdb.ciType.confirmDeleteGroup', { groupName: `${group.name}` }),
         onOk() {
           deleteCITypeGroupById(group.id).then((res) => {
             that.CITypeGroups = that.CITypeGroups.filter((g) => g.id !== group.id)
@@ -412,16 +449,16 @@ export default {
       })
     },
     handleChange(e, group) {
-      console.log('changess')
+      console.log('changess', group)
       if (e.hasOwnProperty('moved') && e.moved.oldIndex !== e.moved.newIndex) {
         if (group === -1) {
-          this.$message.error('其他分组中的属性不能进行排序，如需排序请先拖至自定义的分组！')
+          this.$message.error(this.$t('cmdb.ciType.attributeSortedTips'))
         } else {
           transferCITypeAttrIndex(this.CITypeId, {
-            from: { attr_id: e.moved.element.id, group_id: group > -1 ? group : null },
-            to: { order: e.moved.newIndex, group_id: group > -1 ? group : null },
+            from: { attr_id: e.moved.element.id, group_name: group },
+            to: { order: e.moved.newIndex, group_name: group },
           })
-            .then((res) => this.$message.success('保存成功'))
+            .then((res) => this.$message.success(this.$t('updateSuccess')))
             .catch(() => {
               this.abortDraggable()
             })
@@ -429,16 +466,16 @@ export default {
       }
 
       if (e.hasOwnProperty('added')) {
-        this.addRemoveGroupFlag = { to: { group_id: group > -1 ? group : null, order: e.added.newIndex }, inited: true }
+        this.addRemoveGroupFlag = { to: { group_name: group, order: e.added.newIndex }, inited: true }
       }
 
       if (e.hasOwnProperty('removed')) {
         this.$nextTick(() => {
           transferCITypeAttrIndex(this.CITypeId, {
-            from: { attr_id: e.removed.element.id, group_id: group > -1 ? group : null },
-            to: { group_id: this.addRemoveGroupFlag.to.group_id, order: this.addRemoveGroupFlag.to.order },
+            from: { attr_id: e.removed.element.id, group_name: group },
+            to: { group_name: this.addRemoveGroupFlag.to.group_name, order: this.addRemoveGroupFlag.to.order },
           })
-            .then((res) => this.$message.success('保存成功'))
+            .then((res) => this.$message.success(this.$t('saveSuccess')))
             .catch(() => {
               this.abortDraggable()
             })
@@ -454,9 +491,9 @@ export default {
       })
     },
     updatePropertyIndex() {
-      const attributes = [] // 全部属性
-      let attributeOrder = 0 // 属性组
-      let groupOrder = 0 // 组排序
+      const attributes = [] // All attributes
+      let attributeOrder = 0 // attribute group
+      let groupOrder = 0 // group sort
       const promises = []
 
       this.CITypeGroups.forEach((group) => {
@@ -507,7 +544,7 @@ export default {
 
       const that = this
       Promise.all(promises).then((values) => {
-        that.$message.success(`修改成功`)
+        that.$message.success(that.$t('updateSuccess'))
         that.getCITypeGroupData()
         that.modalVisible = false
       })
@@ -515,20 +552,66 @@ export default {
     handleOpenUniqueConstraint() {
       this.$refs.uniqueConstraint.open(this.attributes)
     },
+    handleFilterType(type) {
+      const _idx = this.attrTypeFilter.findIndex((item) => item === type)
+      if (_idx > -1) {
+        this.attrTypeFilter.splice(_idx, 1)
+      } else {
+        this.attrTypeFilter.push(type)
+      }
+    },
+    filterValueType(array) {
+      const { attrTypeFilter } = this
+      return array.filter((attr) => {
+        if (!attrTypeFilter.length) {
+          return true
+        } else {
+          if (attrTypeFilter.includes('7') && attr.is_password) {
+            return true
+          }
+          if (attrTypeFilter.includes('8') && attr.is_link) {
+            return true
+          }
+          if (
+            attrTypeFilter.includes(attr.value_type) &&
+            attr.value_type === '2' &&
+            (attr.is_password || attr.is_link)
+          ) {
+            return false
+          }
+          if (attrTypeFilter.includes(attr.value_type)) {
+            return true
+          }
+          return false
+        }
+      })
+    },
   },
-  watch: {},
 }
 </script>
 
 <style lang="less" scoped>
+@import '~@/style/static.less';
+
 .fold {
   width: calc(100% - 216px);
   display: inline-block;
 }
 
 .ci-types-attributes {
-  padding: 16px 24px 24px;
+  padding: 0 20px;
   overflow-y: auto;
+  .ci-types-attributes-filter {
+    color: @text-color_4;
+    cursor: pointer;
+    padding: 3px 8px;
+    white-space: nowrap;
+    margin-right: 5px;
+  }
+  .ci-types-attributes-filter:hover,
+  .ci-types-attributes-filter-selected {
+    background-color: @primary-color_5;
+  }
   .property-item-empty {
     color: #40a9ff;
     width: calc(100% - 20px);

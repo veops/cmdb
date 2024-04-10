@@ -2,17 +2,17 @@
   <CustomDrawer
     width="800px"
     placement="left"
-    title="资源列表"
+    :title="$t('acl.resourceList')"
     @close="handleCancel"
     :visible="visible"
     :hasFooter="false"
   >
-    <a-form-item label="资源类型" :label-col="{ span: 2 }" :wrapper-col="{ span: 14 }">
+    <a-form-item :label="$t('acl.resourceType')" :label-col="{ span: 4 }" :wrapper-col="{ span: 14 }">
       <a-select v-model="typeSelected" style="width:100%" @change="refresh">
         <a-select-option v-for="type in resourceTypes" :value="type.id" :key="type.id">{{ type.name }}</a-select-option>
       </a-select>
     </a-form-item>
-    <vxe-table
+    <ops-table
       size="mini"
       stripe
       class="ops-stripe-table"
@@ -22,7 +22,7 @@
     >
       <vxe-column
         field="name"
-        title="资源名"
+        :title="$t('acl.resourceName')"
         width="30%"
         :filters="[{ data: '' }]"
         :filter-method="filterNameMethod"
@@ -30,7 +30,7 @@
       >
         <template #header="{ column }">
           <span>{{ column.title }}</span>
-          <a-tooltip title="复制资源名">
+          <a-tooltip :title="$t('acl.copyResource')">
             <a-icon @click="copyResourceName" class="resource-user-form-copy" theme="filled" type="copy" />
           </a-tooltip>
         </template>
@@ -43,84 +43,17 @@
               v-model="option.data"
               @input="$panel.changeOption($event, !!option.data, option)"
               @keyup.enter="$panel.confirmFilter()"
-              placeholder="按回车确认筛选"
+              :placeholder="$t('acl.pressEnter')"
             />
           </template>
         </template>
       </vxe-column>
-      <vxe-column field="permissions" title="权限列表" width="70%">
+      <vxe-column field="permissions" :title="$t('acl.permissionList')" width="70%">
         <template #default="{row}">
           <a-tag color="cyan" v-for="(r, index) in row.permissions" :key="index">{{ r }}</a-tag>
         </template>
       </vxe-column>
-      <template slot="empty">
-        <img :src="require(`@/assets/data_empty.png`)" />
-        <p style="font-size: 14px; line-height: 17px; color: rgba(0, 0, 0, 0.6)">暂无数据</p>
-      </template>
-    </vxe-table>
-    <!-- <a-table
-      :columns="columns"
-      :dataSource="records"
-      :rowKey="record => record.id"
-      :pagination="false"
-      ref="rTable"
-      size="middle"
-      :scroll="{ y: 300 }"
-    > -->
-    <!-- <div slot="filterDropdown" slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }" class="custom-filter-dropdown">
-          <a-input
-            v-ant-ref="c => searchInput = c"
-            :placeholder="` ${column.title}`"
-            :value="selectedKeys[0]"
-            @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
-            @pressEnter="() => handleSearch(selectedKeys, confirm, column)"
-            style="width: 188px; margin-bottom: 8px; display: block;"
-          />
-          <a-button
-            type="primary"
-            @click="() => handleSearch(selectedKeys, confirm, column)"
-            icon="search"
-            size="small"
-            style="width: 90px; margin-right: 8px"
-          >搜索</a-button>
-          <a-button
-            @click="() => handleReset(clearFilters, column)"
-            size="small"
-            style="width: 90px"
-          >重置</a-button>
-        </div>
-        <a-icon slot="filterIcon" slot-scope="filtered" type="search" :style="{ color: filtered ? '#108ee9' : undefined }" />
-
-        <template slot="nameSearchRender" slot-scope="text">
-          <span v-if="columnSearchText.name">
-            <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${columnSearchText.name})|(?=${columnSearchText.name})`, 'i'))">
-              <mark v-if="fragment.toLowerCase() === columnSearchText.name.toLowerCase()" :key="i" class="highlight">{{ fragment }}</mark>
-              <template v-else>{{ fragment }}</template>
-            </template>
-          </span>
-          <template v-else>{{ text }}</template>
-        </template> -->
-    <!-- <template slot="permissions" slot-scope="record">
-        <a-tag color="cyan" v-for="(r, index) in record" :key="index">{{ r }}</a-tag>
-      </template>
-    </a-table> -->
-    <!-- <div
-      :style="{
-        position: 'absolute',
-        left: 0,
-        bottom: 0,
-        width: '100%',
-        borderTop: '1px solid #e9e9e9',
-        padding: '10px 16px',
-        background: '#fff',
-        textAlign: 'right',
-      }"
-    >
-      <a-button :style="{marginRight: '8px'}" @click="handleCancel">
-        取消
-      </a-button>
-      <a-button @click="handleOk" type="primary">确定</a-button>
-    </div> -->
+    </ops-table>
   </CustomDrawer>
 </template>
 <script>
@@ -141,38 +74,11 @@ export default {
         name: '',
       },
       filterName: '',
-      // columns: [
-      //   {
-      //     title: '资源名',
-      //     field: 'name',
-      //     sorter: false,
-      //     width: '30%',
-      //     // scopedSlots: {
-      //     //   customRender: 'nameSearchRender',
-      //     //   filterDropdown: 'filterDropdown',
-      //     //   filterIcon: 'filterIcon'
-      //     // },
-      //     // onFilter: (value, record) => record.name && record.name.toLowerCase().includes(value.toLowerCase()),
-      //     // onFilterDropdownVisibleChange: (visible) => {
-      //     //   if (visible) {
-      //     //     setTimeout(() => {
-      //     //       this.searchInput.focus()
-      //     //     }, 0)
-      //     //   }
-      //     // }
-      //   },
-      //   {
-      //     title: '权限列表',
-      //     field: 'permissions',
-      //     width: '70%',
-      //     slots: { default: 'permissions_default' },
-      //   },
-      // ],
     }
   },
   computed: {
     ...mapState({
-      windowHeight: state => state.windowHeight,
+      windowHeight: (state) => state.windowHeight,
     }),
   },
   mounted() {
@@ -184,18 +90,10 @@ export default {
       this.rid = record.id
       this.refresh()
     },
-    // handleSearch(selectedKeys, confirm, column) {
-    //   confirm()
-    //   this.columnSearchText[column.dataIndex] = selectedKeys[0]
-    // },
-    // handleReset(clearFilters, column) {
-    //   clearFilters()
-    //   this.columnSearchText[column.dataIndex] = ''
-    // },
     loadResourceTypes() {
       this.resourceTypes = []
       const appId = this.$route.name.split('_')[0]
-      searchResourceType({ app_id: appId }).then(res => {
+      searchResourceType({ app_id: appId }).then((res) => {
         this.resourceTypes = res.groups
         if (res.groups && res.groups.length > 0) {
           this.typeSelected = res.groups[0].id
@@ -204,7 +102,6 @@ export default {
           this.typeSelected = null
         }
       })
-      // .catch(err => this.$httpError(err))
     },
     handleOk() {
       this.visible = false
@@ -214,10 +111,9 @@ export default {
         searchPermResourceByRoleId(this.rid, {
           resource_type_id: this.typeSelected,
           app_id: this.$route.name.split('_')[0],
-        }).then(res => {
+        }).then((res) => {
           this.records = res.resources
         })
-        // .catch(err=>this.$httpError(err))
       }
     },
     handleCancel() {
@@ -233,12 +129,12 @@ export default {
     },
     copyResourceName() {
       const val = this.records
-        .filter(item => item.name.toLowerCase().includes(this.filterName.toLowerCase()))
-        .map(item => item.name)
+        .filter((item) => item.name.toLowerCase().includes(this.filterName.toLowerCase()))
+        .map((item) => item.name)
         .join('\n')
 
       this.copy(val, () => {
-        this.$message.success('复制成功')
+        this.$message.success(this.$t('copySuccess'))
       })
     },
     copy(value, cb) {

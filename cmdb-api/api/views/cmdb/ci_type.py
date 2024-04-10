@@ -14,6 +14,7 @@ from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci_type import CITypeAttributeGroupManager
 from api.lib.cmdb.ci_type import CITypeAttributeManager
 from api.lib.cmdb.ci_type import CITypeGroupManager
+from api.lib.cmdb.ci_type import CITypeInheritanceManager
 from api.lib.cmdb.ci_type import CITypeManager
 from api.lib.cmdb.ci_type import CITypeTemplateManager
 from api.lib.cmdb.ci_type import CITypeTriggerManager
@@ -37,15 +38,23 @@ from api.resource import APIView
 
 
 class CITypeView(APIView):
-    url_prefix = ("/ci_types", "/ci_types/<int:type_id>", "/ci_types/<string:type_name>")
+    url_prefix = ("/ci_types", "/ci_types/<int:type_id>", "/ci_types/<string:type_name>",
+                  "/ci_types/icons")
 
     def get(self, type_id=None, type_name=None):
+        if request.url.endswith("icons"):
+            return self.jsonify(CITypeManager().get_icons())
+
         q = request.args.get("type_name")
 
         if type_id is not None:
-            ci_types = [CITypeCache.get(type_id).to_dict()]
+            ci_type = CITypeCache.get(type_id).to_dict()
+            ci_type['parent_ids'] = CITypeInheritanceManager.get_parents(type_id)
+            ci_types = [ci_type]
         elif type_name is not None:
-            ci_types = [CITypeCache.get(type_name).to_dict()]
+            ci_type = CITypeCache.get(type_name).to_dict()
+            ci_type['parent_ids'] = CITypeInheritanceManager.get_parents(ci_type['id'])
+            ci_types = [ci_type]
         else:
             ci_types = CITypeManager().get_ci_types(q)
         count = len(ci_types)
@@ -53,7 +62,7 @@ class CITypeView(APIView):
         return self.jsonify(numfound=count, ci_types=ci_types)
 
     @args_required("name")
-    @args_validate(CITypeManager.cls)
+    @args_validate(CITypeManager.cls, exclude_args=['parent_ids'])
     def post(self):
         params = request.values
 
@@ -82,6 +91,26 @@ class CITypeView(APIView):
         CITypeManager.delete(type_id)
 
         return self.jsonify(type_id=type_id)
+
+
+class CITypeInheritanceView(APIView):
+    url_prefix = ("/ci_types/inheritance",)
+
+    @args_required("parent_ids")
+    @args_required("child_id")
+    @has_perm_from_args("child_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
+    def post(self):
+        CITypeInheritanceManager.add(request.values['parent_ids'], request.values['child_id'])
+
+        return self.jsonify(**request.values)
+
+    @args_required("parent_id")
+    @args_required("child_id")
+    @has_perm_from_args("child_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
+    def delete(self):
+        CITypeInheritanceManager.delete(request.values['parent_id'], request.values['child_id'])
+
+        return self.jsonify(**request.values)
 
 
 class CITypeGroupView(APIView):
@@ -166,7 +195,8 @@ class CITypeAttributeView(APIView):
         t = CITypeCache.get(type_id) or CITypeCache.get(type_name) or abort(404, ErrFormat.ci_type_not_found)
         type_id = t.id
         unique_id = t.unique_id
-        unique = AttributeCache.get(unique_id).name
+        unique = AttributeCache.get(unique_id)
+        unique = unique and unique.name
 
         attr_filter = CIFilterPermsCRUD.get_attr_filter(type_id)
         attributes = CITypeAttributeManager.get_attributes_by_type_id(type_id)
@@ -247,8 +277,8 @@ class CITypeAttributeTransferView(APIView):
     @args_required('from')
     @args_required('to')
     def post(self, type_id):
-        _from = request.values.get('from')  # {'attr_id': xx, 'group_id': xx}
-        _to = request.values.get('to')  # {'group_id': xx, 'order': xxx}
+        _from = request.values.get('from')  # {'attr_id': xx, 'group_id': xx, 'group_name': xx}
+        _to = request.values.get('to')  # {'group_id': xx, 'group_name': xx, 'order': xxx}
 
         CITypeAttributeManager.transfer(type_id, _from, _to)
 
@@ -261,8 +291,8 @@ class CITypeAttributeGroupTransferView(APIView):
     @args_required('from')
     @args_required('to')
     def post(self, type_id):
-        _from = request.values.get('from')  # group_id
-        _to = request.values.get('to')  # group_id
+        _from = request.values.get('from')  # group_id or group_name
+        _to = request.values.get('to')  # group_id or group_name
 
         CITypeAttributeGroupManager.transfer(type_id, _from, _to)
 
@@ -295,7 +325,7 @@ class CITypeAttributeGroupView(APIView):
 
         attr_order = list(zip(attrs, orders))
         group = CITypeAttributeGroupManager.create_or_update(type_id, name, attr_order, order)
-        current_app.logger.warning(group.id)
+
         return self.jsonify(group_id=group.id)
 
     @has_perm_from_args("type_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
@@ -309,21 +339,25 @@ class CITypeAttributeGroupView(APIView):
 
         attr_order = list(zip(attrs, orders))
         CITypeAttributeGroupManager.update(group_id, name, attr_order, order)
+
         return self.jsonify(group_id=group_id)
 
     @has_perm_from_args("type_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
     def delete(self, group_id):
         CITypeAttributeGroupManager.delete(group_id)
+
         return self.jsonify(group_id=group_id)
 
 
 class CITypeTemplateView(APIView):
-    url_prefix = ("/ci_types/template/import", "/ci_types/template/export")
+    url_prefix = ("/ci_types/template/import", "/ci_types/template/export", "/ci_types/<int:type_id>/template/export")
 
     @role_required(RoleEnum.CONFIG)
-    def get(self):  # export
-        return self.jsonify(
-            dict(ci_type_template=CITypeTemplateManager.export_template()))
+    def get(self, type_id=None):  # export
+        if type_id is not None:
+            return self.jsonify(dict(ci_type_template=CITypeTemplateManager.export_template_by_type(type_id)))
+
+        return self.jsonify(dict(ci_type_template=CITypeTemplateManager.export_template()))
 
     @role_required(RoleEnum.CONFIG)
     def post(self):  # import
@@ -457,13 +491,22 @@ class CITypeGrantView(APIView):
         _type = CITypeCache.get(type_id)
         type_name = _type and _type.name or abort(404, ErrFormat.ci_type_not_found)
         acl = ACLManager('cmdb')
-        if not acl.has_permission(type_name, ResourceTypeEnum.CI_TYPE, PermEnum.GRANT) and \
-                not is_app_admin('cmdb'):
+        if not acl.has_permission(type_name, ResourceTypeEnum.CI_TYPE, PermEnum.GRANT) and not is_app_admin('cmdb'):
             return abort(403, ErrFormat.no_permission.format(type_name, PermEnum.GRANT))
 
-        acl.grant_resource_to_role_by_rid(type_name, rid, ResourceTypeEnum.CI_TYPE, perms)
+        if perms and not request.values.get('id_filter'):
+            acl.grant_resource_to_role_by_rid(type_name, rid, ResourceTypeEnum.CI_TYPE, perms, rebuild=False)
 
-        CIFilterPermsCRUD().add(type_id=type_id, rid=rid, **request.values)
+        new_resource = None
+        if 'ci_filter' in request.values or 'attr_filter' in request.values or 'id_filter' in request.values:
+            new_resource = CIFilterPermsCRUD().add(type_id=type_id, rid=rid, **request.values)
+
+        if not new_resource:
+            from api.tasks.acl import role_rebuild
+            from api.lib.perm.acl.const import ACL_QUEUE
+
+            app_id = AppCache.get('cmdb').id
+            role_rebuild.apply_async(args=(rid, app_id), queue=ACL_QUEUE)
 
         return self.jsonify(code=200)
 
@@ -481,21 +524,35 @@ class CITypeRevokeView(APIView):
         _type = CITypeCache.get(type_id)
         type_name = _type and _type.name or abort(404, ErrFormat.ci_type_not_found)
         acl = ACLManager('cmdb')
-        if not acl.has_permission(type_name, ResourceTypeEnum.CI_TYPE, PermEnum.GRANT) and \
-                not is_app_admin('cmdb'):
+        if not acl.has_permission(type_name, ResourceTypeEnum.CI_TYPE, PermEnum.GRANT) and not is_app_admin('cmdb'):
             return abort(403, ErrFormat.no_permission.format(type_name, PermEnum.GRANT))
 
-        acl.revoke_resource_from_role_by_rid(type_name, rid, ResourceTypeEnum.CI_TYPE, perms)
+        app_id = AppCache.get('cmdb').id
+        resource = None
 
-        if PermEnum.READ in perms:
-            CIFilterPermsCRUD().delete(type_id=type_id, rid=rid)
+        if request.values.get('id_filter'):
+            CIFilterPermsCRUD().delete2(
+                type_id=type_id, rid=rid, id_filter=request.values['id_filter'],
+                parent_path=request.values.get('parent_path'))
 
-            app_id = AppCache.get('cmdb').id
-            users = RoleRelationCRUD.get_users_by_rid(rid, app_id)
-            for i in (users or []):
-                if i.get('role', {}).get('id') and not RoleCRUD.has_permission(
-                        i.get('role').get('id'), type_name, ResourceTypeEnum.CI_TYPE, app_id, PermEnum.READ):
-                    PreferenceManager.delete_by_type_id(type_id, i.get('uid'))
+            return self.jsonify(type_id=type_id, rid=rid)
+
+        acl.revoke_resource_from_role_by_rid(type_name, rid, ResourceTypeEnum.CI_TYPE, perms, rebuild=False)
+
+        if PermEnum.READ in perms or not perms:
+            resource = CIFilterPermsCRUD().delete(type_id=type_id, rid=rid)
+
+        if not resource:
+            from api.tasks.acl import role_rebuild
+            from api.lib.perm.acl.const import ACL_QUEUE
+
+            role_rebuild.apply_async(args=(rid, app_id), queue=ACL_QUEUE)
+
+        users = RoleRelationCRUD.get_users_by_rid(rid, app_id)
+        for i in (users or []):
+            if i.get('role', {}).get('id') and not RoleCRUD.has_permission(
+                    i.get('role').get('id'), type_name, ResourceTypeEnum.CI_TYPE, app_id, PermEnum.READ):
+                PreferenceManager.delete_by_type_id(type_id, i.get('uid'))
 
         return self.jsonify(type_id=type_id, rid=rid)
 

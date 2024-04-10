@@ -6,6 +6,7 @@ import datetime
 import json
 import threading
 
+import redis_lock
 from flask import abort
 from flask import current_app
 from flask_login import current_user
@@ -14,8 +15,8 @@ from werkzeug.exceptions import BadRequest
 from api.extensions import db
 from api.extensions import rd
 from api.lib.cmdb.cache import AttributeCache
-from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.cache import CITypeCache
+from api.lib.cmdb.cache import CMDBCounterCache
 from api.lib.cmdb.ci_type import CITypeAttributeManager
 from api.lib.cmdb.ci_type import CITypeManager
 from api.lib.cmdb.ci_type import CITypeRelationManager
@@ -45,14 +46,12 @@ from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import validate_permission
 from api.lib.secrets.inner import InnerCrypt
 from api.lib.secrets.vault import VaultClient
-from api.lib.utils import Lock
 from api.lib.utils import handle_arg_list
 from api.lib.webhook import webhook_request
 from api.models.cmdb import AttributeHistory
 from api.models.cmdb import AutoDiscoveryCI
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
-from api.models.cmdb import CITypeAttribute
 from api.models.cmdb import CITypeRelation
 from api.models.cmdb import CITypeTrigger
 from api.tasks.cmdb import ci_cache
@@ -61,8 +60,8 @@ from api.tasks.cmdb import ci_delete_trigger
 from api.tasks.cmdb import ci_relation_add
 from api.tasks.cmdb import ci_relation_cache
 from api.tasks.cmdb import ci_relation_delete
+from api.tasks.cmdb import delete_id_filter
 
-PRIVILEGED_USERS = {"worker", "cmdb_agent", "agent"}
 PASSWORD_DEFAULT_SHOW = "******"
 
 
@@ -218,15 +217,7 @@ class CIManager(object):
 
     @classmethod
     def get_ad_statistics(cls):
-        res = CI.get_by(to_dict=False)
-        result = dict()
-        for i in res:
-            result.setdefault(i.type_id, dict(total=0, auto_discovery=0))
-            result[i.type_id]['total'] += 1
-            if i.is_auto_discovery:
-                result[i.type_id]['auto_discovery'] += 1
-
-        return result
+        return CMDBCounterCache.get_adc_counter()
 
     @staticmethod
     def ci_is_exist(unique_key, unique_value, type_id):
@@ -287,16 +278,16 @@ class CIManager(object):
 
     @staticmethod
     def _auto_inc_id(attr):
-        db.session.remove()
+        db.session.commit()
 
         value_table = TableMap(attr_name=attr.name).table
-        with Lock("auto_inc_id_{}".format(attr.name), need_lock=True):
+        with redis_lock.Lock(rd.r, "auto_inc_id_{}".format(attr.name)):
             max_v = value_table.get_by(attr_id=attr.id, only_query=True).order_by(
                 getattr(value_table, 'value').desc()).first()
             if max_v is not None:
                 return int(max_v.value) + 1
 
-            return 1
+        return 1
 
     @classmethod
     def add(cls, ci_type_name,
@@ -304,6 +295,7 @@ class CIManager(object):
             _no_attribute_policy=ExistPolicy.IGNORE,
             is_auto_discovery=False,
             _is_admin=False,
+            ticket_id=None,
             **ci_dict):
         """
         add ci
@@ -312,19 +304,24 @@ class CIManager(object):
         :param _no_attribute_policy: ignore or reject
         :param is_auto_discovery: default is False
         :param _is_admin: default is False
+        :param ticket_id:
         :param ci_dict:
         :return:
         """
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ci_type = CITypeManager.check_is_existed(ci_type_name)
+        raw_dict = copy.deepcopy(ci_dict)
 
         unique_key = AttributeCache.get(ci_type.unique_id) or abort(
             400, ErrFormat.unique_value_not_found.format("unique_id={}".format(ci_type.unique_id)))
 
-        unique_value = ci_dict.get(unique_key.name) or ci_dict.get(unique_key.alias) or ci_dict.get(unique_key.id)
-        unique_value = unique_value or abort(400, ErrFormat.unique_key_required.format(unique_key.name))
+        unique_value = None
+        if not (unique_key.default and unique_key.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID and
+                not ci_dict.get(unique_key.name)):  # primary key is not auto inc id
+            unique_value = ci_dict.get(unique_key.name) or ci_dict.get(unique_key.alias) or ci_dict.get(unique_key.id)
+            unique_value = unique_value or abort(400, ErrFormat.unique_key_required.format(unique_key.name))
 
-        attrs = CITypeAttributesCache.get2(ci_type_name)
+        attrs = CITypeAttributeManager.get_all_attributes(ci_type.id)
         ci_type_attrs_name = {attr.name: attr for _, attr in attrs}
         ci_type_attrs_alias = {attr.alias: attr for _, attr in attrs}
         ci_attr2type_attr = {type_attr.attr_id: type_attr for type_attr, _ in attrs}
@@ -332,8 +329,15 @@ class CIManager(object):
         ci = None
         record_id = None
         password_dict = {}
-        need_lock = current_user.username not in current_app.config.get('PRIVILEGED_USERS', PRIVILEGED_USERS)
-        with Lock(ci_type_name, need_lock=need_lock):
+        with redis_lock.Lock(rd.r, ci_type.name):
+            db.session.commit()
+
+            if (unique_key.default and unique_key.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID and
+                    not ci_dict.get(unique_key.name)):
+                ci_dict[unique_key.name] = cls._auto_inc_id(unique_key)
+                current_app.logger.info(ci_dict[unique_key.name])
+                unique_value = ci_dict[unique_key.name]
+
             existed = cls.ci_is_exist(unique_key, unique_value, ci_type.id)
             if existed is not None:
                 if exist_policy == ExistPolicy.REJECT:
@@ -354,7 +358,8 @@ class CIManager(object):
                         if attr.default.get('default') and attr.default.get('default') in (
                                 AttributeDefaultValueEnum.CREATED_AT, AttributeDefaultValueEnum.UPDATED_AT):
                             ci_dict[attr.name] = now
-                        elif attr.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID:
+                        elif (attr.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID and
+                              not ci_dict.get(attr.name)):
                             ci_dict[attr.name] = cls._auto_inc_id(attr)
                         elif ((attr.name not in ci_dict and attr.alias not in ci_dict) or (
                                 ci_dict.get(attr.name) is None and ci_dict.get(attr.alias) is None)):
@@ -368,6 +373,8 @@ class CIManager(object):
                     if attr.default and attr.default.get('default') == AttributeDefaultValueEnum.UPDATED_AT:
                         ci_dict[attr.name] = now
 
+            value_manager = AttributeValueManager()
+
             computed_attrs = []
             for _, attr in attrs:
                 if attr.is_computed:
@@ -378,7 +385,8 @@ class CIManager(object):
                     elif attr.alias in ci_dict:
                         password_dict[attr.id] = ci_dict.pop(attr.alias)
 
-            value_manager = AttributeValueManager()
+                    if attr.re_check and password_dict.get(attr.id):
+                        value_manager.check_re(attr.re_check, password_dict[attr.id])
 
             if computed_attrs:
                 value_manager.handle_ci_compute_attributes(ci_dict, computed_attrs, ci)
@@ -386,7 +394,7 @@ class CIManager(object):
             cls._valid_unique_constraint(ci_type.id, ci_dict, ci and ci.id)
 
             ref_ci_dict = dict()
-            for k in ci_dict:
+            for k in copy.deepcopy(ci_dict):
                 if k.startswith("$") and "." in k:
                     ref_ci_dict[k] = ci_dict[k]
                     continue
@@ -395,9 +403,13 @@ class CIManager(object):
                         k not in ci_type_attrs_alias and _no_attribute_policy == ExistPolicy.REJECT):
                     return abort(400, ErrFormat.attribute_not_found.format(k))
 
-                if limit_attrs and ci_type_attrs_name.get(k) not in limit_attrs and (
-                        ci_type_attrs_alias.get(k) not in limit_attrs):
-                    return abort(403, ErrFormat.ci_filter_perm_attr_no_permission.format(k))
+                _attr_name = ((ci_type_attrs_name.get(k) and ci_type_attrs_name[k].name) or
+                              (ci_type_attrs_alias.get(k) and ci_type_attrs_alias[k].name))
+                if limit_attrs and _attr_name not in limit_attrs:
+                    if k in raw_dict:
+                        return abort(403, ErrFormat.ci_filter_perm_attr_no_permission.format(k))
+                    else:
+                        ci_dict.pop(k)
 
             ci_dict = {k: v for k, v in ci_dict.items() if k in ci_type_attrs_name or k in ci_type_attrs_alias}
 
@@ -407,7 +419,7 @@ class CIManager(object):
             operate_type = OperateType.UPDATE if ci is not None else OperateType.ADD
             try:
                 ci = ci or CI.create(type_id=ci_type.id, is_auto_discovery=is_auto_discovery)
-                record_id = value_manager.create_or_update_attr_value(ci, ci_dict, key2attr)
+                record_id = value_manager.create_or_update_attr_value(ci, ci_dict, key2attr, ticket_id=ticket_id)
             except BadRequest as e:
                 if existed is None:
                     cls.delete(ci.id)
@@ -425,16 +437,20 @@ class CIManager(object):
 
         return ci.id
 
-    def update(self, ci_id, _is_admin=False, **ci_dict):
+    def update(self, ci_id, _is_admin=False, ticket_id=None, **ci_dict):
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ci = self.confirm_ci_existed(ci_id)
 
-        attrs = CITypeAttributesCache.get2(ci.type_id)
+        raw_dict = copy.deepcopy(ci_dict)
+
+        attrs = CITypeAttributeManager.get_all_attributes(ci.type_id)
         ci_type_attrs_name = {attr.name: attr for _, attr in attrs}
         ci_attr2type_attr = {type_attr.attr_id: type_attr for type_attr, _ in attrs}
         for _, attr in attrs:
             if attr.default and attr.default.get('default') == AttributeDefaultValueEnum.UPDATED_AT:
                 ci_dict[attr.name] = now
+
+        value_manager = AttributeValueManager()
 
         password_dict = dict()
         computed_attrs = list()
@@ -447,7 +463,8 @@ class CIManager(object):
                 elif attr.alias in ci_dict:
                     password_dict[attr.id] = ci_dict.pop(attr.alias)
 
-        value_manager = AttributeValueManager()
+                if attr.re_check and password_dict.get(attr.id):
+                    value_manager.check_re(attr.re_check, password_dict[attr.id])
 
         if computed_attrs:
             value_manager.handle_ci_compute_attributes(ci_dict, computed_attrs, ci)
@@ -455,20 +472,24 @@ class CIManager(object):
         limit_attrs = self._valid_ci_for_no_read(ci) if not _is_admin else {}
 
         record_id = None
-        need_lock = current_user.username not in current_app.config.get('PRIVILEGED_USERS', PRIVILEGED_USERS)
-        with Lock(ci.ci_type.name, need_lock=need_lock):
+        with redis_lock.Lock(rd.r, ci.ci_type.name):
+            db.session.commit()
+
             self._valid_unique_constraint(ci.type_id, ci_dict, ci_id)
 
             ci_dict = {k: v for k, v in ci_dict.items() if k in ci_type_attrs_name}
             key2attr = value_manager.valid_attr_value(ci_dict, ci.type_id, ci.id, ci_type_attrs_name,
                                                       ci_attr2type_attr=ci_attr2type_attr)
             if limit_attrs:
-                for k in ci_dict:
+                for k in copy.deepcopy(ci_dict):
                     if k not in limit_attrs:
-                        return abort(403, ErrFormat.ci_filter_perm_attr_no_permission.format(k))
+                        if k in raw_dict:
+                            return abort(403, ErrFormat.ci_filter_perm_attr_no_permission.format(k))
+                        else:
+                            ci_dict.pop(k)
 
             try:
-                record_id = value_manager.create_or_update_attr_value(ci, ci_dict, key2attr)
+                record_id = value_manager.create_or_update_attr_value(ci, ci_dict, key2attr, ticket_id=ticket_id)
             except BadRequest as e:
                 raise e
 
@@ -513,10 +534,9 @@ class CIManager(object):
 
                 ci_delete_trigger.apply_async(args=(trigger, OperateType.DELETE, ci_dict), queue=CMDB_QUEUE)
 
-        attrs = CITypeAttribute.get_by(type_id=ci.type_id, to_dict=False)
-        attr_names = set([AttributeCache.get(attr.attr_id).name for attr in attrs])
-        for attr_name in attr_names:
-            value_table = TableMap(attr_name=attr_name).table
+        attrs = [i for _, i in CITypeAttributeManager.get_all_attributes(type_id=ci.type_id)]
+        for attr in attrs:
+            value_table = TableMap(attr=attr).table
             for item in value_table.get_by(ci_id=ci_id, to_dict=False):
                 item.delete(commit=False)
 
@@ -541,6 +561,7 @@ class CIManager(object):
             AttributeHistoryManger.add(None, ci_id, [(None, OperateType.DELETE, ci_dict, None)], ci.type_id)
 
         ci_delete.apply_async(args=(ci_id,), queue=CMDB_QUEUE)
+        delete_id_filter.apply_async(args=(ci_id,), queue=CMDB_QUEUE)
 
         return ci_id
 
@@ -848,6 +869,20 @@ class CIRelationManager(object):
         return numfound, len(ci_ids), result
 
     @staticmethod
+    def recursive_children(ci_id):
+        result = []
+
+        def _get_children(_id):
+            children = CIRelation.get_by(first_ci_id=_id, to_dict=False)
+            result.extend([i.second_ci_id for i in children])
+            for child in children:
+                _get_children(child.second_ci_id)
+
+        _get_children(ci_id)
+
+        return result
+
+    @staticmethod
     def _sort_handler(sort_by, query_sql):
 
         if sort_by.startswith("+"):
@@ -902,7 +937,7 @@ class CIRelationManager(object):
 
     @staticmethod
     def _check_constraint(first_ci_id, first_type_id, second_ci_id, second_type_id, type_relation):
-        db.session.remove()
+        db.session.commit()
         if type_relation.constraint == ConstraintEnum.Many2Many:
             return
 
@@ -925,7 +960,7 @@ class CIRelationManager(object):
                     return abort(400, ErrFormat.relation_constraint.format("1-N"))
 
     @classmethod
-    def add(cls, first_ci_id, second_ci_id, more=None, relation_type_id=None, ancestor_ids=None):
+    def add(cls, first_ci_id, second_ci_id, more=None, relation_type_id=None, ancestor_ids=None, valid=True):
 
         first_ci = CIManager.confirm_ci_existed(first_ci_id)
         second_ci = CIManager.confirm_ci_existed(second_ci_id)
@@ -950,7 +985,7 @@ class CIRelationManager(object):
                 relation_type_id or abort(404, ErrFormat.relation_not_found.format("{} -> {}".format(
                     first_ci.ci_type.name, second_ci.ci_type.name)))
 
-                if current_app.config.get('USE_ACL'):
+                if current_app.config.get('USE_ACL') and valid:
                     resource_name = CITypeRelationManager.acl_resource_name(first_ci.ci_type.name,
                                                                             second_ci.ci_type.name)
                     if not ACLManager().has_permission(
@@ -962,7 +997,7 @@ class CIRelationManager(object):
             else:
                 type_relation = CITypeRelation.get_by_id(relation_type_id)
 
-            with Lock("ci_relation_add_{}_{}".format(first_ci.type_id, second_ci.type_id), need_lock=True):
+            with redis_lock.Lock(rd.r, "ci_relation_add_{}_{}".format(first_ci.type_id, second_ci.type_id)):
 
                 cls._check_constraint(first_ci_id, first_ci.type_id, second_ci_id, second_ci.type_id, type_relation)
 
@@ -998,6 +1033,7 @@ class CIRelationManager(object):
         his_manager.add(cr, operate_type=OperateType.DELETE)
 
         ci_relation_delete.apply_async(args=(cr.first_ci_id, cr.second_ci_id, cr.ancestor_ids), queue=CMDB_QUEUE)
+        delete_id_filter.apply_async(args=(cr.second_ci_id,), queue=CMDB_QUEUE)
 
         return cr_id
 
@@ -1009,9 +1045,13 @@ class CIRelationManager(object):
                                to_dict=False,
                                first=True)
 
-        ci_relation_delete.apply_async(args=(first_ci_id, second_ci_id, ancestor_ids), queue=CMDB_QUEUE)
+        if cr is not None:
+            cls.delete(cr.id)
 
-        return cr and cls.delete(cr.id)
+        ci_relation_delete.apply_async(args=(first_ci_id, second_ci_id, ancestor_ids), queue=CMDB_QUEUE)
+        delete_id_filter.apply_async(args=(second_ci_id,), queue=CMDB_QUEUE)
+
+        return cr
 
     @classmethod
     def batch_update(cls, ci_ids, parents, children, ancestor_ids=None):
@@ -1048,11 +1088,62 @@ class CIRelationManager(object):
                 for ci_id in ci_ids:
                     cls.delete_2(parent_id, ci_id, ancestor_ids=ancestor_ids)
 
+    @classmethod
+    def build_by_attribute(cls, ci_dict):
+        type_id = ci_dict['_type']
+        child_items = CITypeRelation.get_by(parent_id=type_id, only_query=True).filter(
+            CITypeRelation.parent_attr_id.isnot(None))
+        for item in child_items:
+            parent_attr = AttributeCache.get(item.parent_attr_id)
+            child_attr = AttributeCache.get(item.child_attr_id)
+            attr_value = ci_dict.get(parent_attr.name)
+            value_table = TableMap(attr=child_attr).table
+            for child in value_table.get_by(attr_id=child_attr.id, value=attr_value, only_query=True).join(
+                    CI, CI.id == value_table.ci_id).filter(CI.type_id == item.child_id):
+                CIRelationManager.add(ci_dict['_id'], child.ci_id, valid=False)
+
+        parent_items = CITypeRelation.get_by(child_id=type_id, only_query=True).filter(
+            CITypeRelation.child_attr_id.isnot(None))
+        for item in parent_items:
+            parent_attr = AttributeCache.get(item.parent_attr_id)
+            child_attr = AttributeCache.get(item.child_attr_id)
+            attr_value = ci_dict.get(child_attr.name)
+            value_table = TableMap(attr=parent_attr).table
+            for parent in value_table.get_by(attr_id=parent_attr.id, value=attr_value, only_query=True).join(
+                    CI, CI.id == value_table.ci_id).filter(CI.type_id == item.parent_id):
+                CIRelationManager.add(parent.ci_id, ci_dict['_id'], valid=False)
+
+    @classmethod
+    def rebuild_all_by_attribute(cls, ci_type_relation):
+        parent_attr = AttributeCache.get(ci_type_relation['parent_attr_id'])
+        child_attr = AttributeCache.get(ci_type_relation['child_attr_id'])
+        if not parent_attr or not child_attr:
+            return
+
+        parent_value_table = TableMap(attr=parent_attr).table
+        child_value_table = TableMap(attr=child_attr).table
+
+        parent_values = parent_value_table.get_by(attr_id=parent_attr.id, only_query=True).join(
+            CI, CI.id == parent_value_table.ci_id).filter(CI.type_id == ci_type_relation['parent_id'])
+        child_values = child_value_table.get_by(attr_id=child_attr.id, only_query=True).join(
+            CI, CI.id == child_value_table.ci_id).filter(CI.type_id == ci_type_relation['child_id'])
+
+        child_value2ci_ids = {}
+        for child in child_values:
+            child_value2ci_ids.setdefault(child.value, []).append(child.ci_id)
+
+        for parent in parent_values:
+            for child_ci_id in child_value2ci_ids.get(parent.value, []):
+                try:
+                    cls.add(parent.ci_id, child_ci_id, valid=False)
+                except:
+                    pass
+
 
 class CITriggerManager(object):
     @staticmethod
     def get(type_id):
-        db.session.remove()
+        db.session.commit()
         return CITypeTrigger.get_by(type_id=type_id, to_dict=True)
 
     @staticmethod

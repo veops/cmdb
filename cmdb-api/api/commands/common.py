@@ -5,9 +5,7 @@ from glob import glob
 from subprocess import call
 
 import click
-from flask import current_app
 from flask.cli import with_appcontext
-from werkzeug.exceptions import MethodNotAllowed, NotFound
 
 from api.extensions import db
 
@@ -90,3 +88,53 @@ def db_setup():
     """create tables
     """
     db.create_all()
+
+    try:
+        db.session.execute("set global sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,"
+                           "ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'")
+        db.session.commit()
+    except:
+        pass
+
+    try:
+        db.session.execute("set global tidb_enable_noop_functions='ON'")
+        db.session.commit()
+    except:
+        pass
+
+
+@click.group()
+def translate():
+    """Translation and localization commands."""
+
+
+@translate.command()
+@click.argument('lang')
+def init(lang):
+    """Initialize a new language."""
+
+    if os.system('pybabel extract -F babel.cfg -k _l -o messages.pot .'):
+        raise RuntimeError('extract command failed')
+    if os.system(
+            'pybabel init -i messages.pot -d api/translations -l ' + lang):
+        raise RuntimeError('init command failed')
+    os.remove('messages.pot')
+
+
+@translate.command()
+def update():
+    """Update all languages."""
+
+    if os.system('pybabel extract -F babel.cfg -k _l -o messages.pot .'):
+        raise RuntimeError('extract command failed')
+    if os.system('pybabel update -i messages.pot -d api/translations'):
+        raise RuntimeError('update command failed')
+    os.remove('messages.pot')
+
+
+@translate.command()
+def compile():
+    """Compile all languages."""
+
+    if os.system('pybabel compile -d api/translations'):
+        raise RuntimeError('compile command failed')

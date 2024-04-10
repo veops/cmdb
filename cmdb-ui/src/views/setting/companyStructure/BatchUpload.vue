@@ -1,7 +1,7 @@
 <template>
   <a-modal
     :visible="visible"
-    title="批量导入"
+    :title="$t('cs.companyStructure.batchImport')"
     dialogClass="ops-modal setting-structure-upload"
     :width="800"
     @cancel="close"
@@ -20,17 +20,24 @@
     </div>
     <template v-if="currentStep === 1">
       <a-upload :multiple="false" :customRequest="customRequest" accept=".xlsx" :showUploadList="false">
-        <a-button :style="{ marginBottom: '20px' }" type="primary"> <a-icon type="upload" />选择文件</a-button>
+        <a-button :style="{ marginBottom: '20px' }" type="primary"> <a-icon type="upload" />{{ $t('cs.companyStructure.selectFile') }}</a-button>
       </a-upload>
-      <p><a @click="download">点击下载《员工导入模板》</a></p>
+      <p><a @click="download">{{ $t('cs.companyStructure.clickDownloadImportTemplate') }}</a></p>
     </template>
     <div
-      :style="{ height: '60px', display: 'flex', justifyContent: 'center', alignItems: 'center' }"
+      :style="{
+        height: '60px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        whiteSpace: 'pre-wrap',
+      }"
       v-if="currentStep === 3"
     >
-      导入总数据{{ allCount }}条, 导入成功 <span :style="{ color: '#2362FB' }">{{ allCount - errorCount }}</span> 条,
-      导入失败<span :style="{ color: '#D81E06' }">{{ errorCount }}</span
-      >条
+      {{ $t('cs.companyStructure.importSuccess', { allCount: allCount })
+      }}<span :style="{ color: '#2362FB' }"> {{ allCount - errorCount }} </span>{{ $t('cs.companyStructure.count') }},
+      {{ $t('cs.companyStructure.importFailed') }}<span :style="{ color: '#D81E06' }"> {{ errorCount }} </span
+      >{{ $t('cs.companyStructure.count') }}
     </div>
     <vxe-table
       v-if="currentStep === 2 || has_error"
@@ -45,46 +52,25 @@
       :max-height="400"
       :column-config="{ resizable: true }"
     >
-      <vxe-column field="email" title="邮箱" min-width="120" fixed="left"></vxe-column>
-      <vxe-column field="username" title="用户名" min-width="80"></vxe-column>
-      <vxe-column field="nickname" title="姓名" min-width="80"></vxe-column>
-      <vxe-column field="password" title="密码" min-width="80"></vxe-column>
-      <vxe-column field="sex" title="性别" min-width="60"></vxe-column>
-      <vxe-column field="mobile" title="手机号" min-width="80"></vxe-column>
-      <vxe-column field="position_name" title="岗位" min-width="80"></vxe-column>
-      <vxe-column field="department_name" title="部门" min-width="80"></vxe-column>
-      <vxe-column field="entry_date" title="目前主体入职日期" min-width="120"></vxe-column>
-      <vxe-column field="is_internship" title="正式/实习生" min-width="120"></vxe-column>
-      <vxe-column field="leave_date" title="离职日期" min-width="120"></vxe-column>
-      <vxe-column field="id_card" title="身份证号码" min-width="120"></vxe-column>
-      <vxe-column field="nation" title="民族" min-width="80"></vxe-column>
-      <vxe-column field="id_place" title="籍贯" min-width="80"></vxe-column>
-      <vxe-column field="party" title="组织关系" min-width="80"></vxe-column>
-      <vxe-column field="household_registration_type" title="户籍类型" min-width="80"></vxe-column>
-      <vxe-column field="hometown" title="户口所在地" min-width="80"></vxe-column>
-      <vxe-column field="marry" title="婚姻情况" min-width="80"></vxe-column>
-      <vxe-column field="max_degree" title="最高学历" min-width="80"></vxe-column>
-      <vxe-column field="emergency_person" title="紧急联系人" min-width="120"></vxe-column>
-      <vxe-column field="emergency_phone" title="紧急联系电话" min-width="120"></vxe-column>
-      <vxe-column field="bank_card_number" title="卡号" min-width="120"></vxe-column>
-      <vxe-column field="bank_card_name" title="银行" min-width="80"></vxe-column>
-      <vxe-column field="opening_bank" title="开户行" min-width="80"></vxe-column>
-      <vxe-column field="account_opening_location" title="开户地" min-width="120"></vxe-column>
-      <vxe-column field="school" title="学校" min-width="80"></vxe-column>
-      <vxe-column field="major" title="专业" min-width="80"></vxe-column>
-      <vxe-column field="education" title="学历" min-width="80"></vxe-column>
-      <vxe-column field="graduation_year" title="毕业年份" min-width="120"></vxe-column>
-      <vxe-column v-if="has_error" field="err" title="失败原因" min-width="120" fixed="right">
+      <vxe-column field="email" :title="$t('cs.companyStructure.email')" min-width="120" fixed="left"></vxe-column>
+      <vxe-column field="username" :title="$t('cs.companyStructure.username')" min-width="80" ></vxe-column>
+      <vxe-column field="nickname" :title="$t('cs.companyStructure.nickname')" min-width="80"></vxe-column>
+      <vxe-column field="password" :title="$t('cs.companyStructure.password')" min-width="80"></vxe-column>
+      <vxe-column field="sex" :title="$t('cs.companyStructure.sex')" min-width="60"></vxe-column>
+      <vxe-column field="mobile" :title="$t('cs.companyStructure.mobile')" min-width="80"></vxe-column>
+      <vxe-column field="position_name" :title="$t('cs.companyStructure.positionName')" min-width="80"></vxe-column>
+      <vxe-column field="department_name" :title="$t('cs.companyStructure.departmentName')" min-width="80"></vxe-column>
+      <vxe-column v-if="has_error" field="err" :title="$t('cs.companyStructure.importFailedReason')" min-width="120" fixed="right">
         <template #default="{ row }">
           <span :style="{ color: '#D81E06' }">{{ row.err }}</span>
         </template>
       </vxe-column>
     </vxe-table>
     <a-space slot="footer">
-      <a-button size="small" type="primary" ghost @click="close">取消</a-button>
-      <a-button v-if="currentStep !== 1" size="small" type="primary" ghost @click="goPre">上一步</a-button>
-      <a-button v-if="currentStep !== 3" size="small" type="primary" @click="goNext">下一步</a-button>
-      <a-button v-else size="small" type="primary" @click="close">完成</a-button>
+      <a-button size="small" type="primary" ghost @click="close">{{ $t('cancel') }}</a-button>
+      <a-button v-if="currentStep !== 1" size="small" type="primary" ghost @click="goPre">{{ $t('cs.companyStructure.prevStep') }}</a-button>
+      <a-button v-if="currentStep !== 3" size="small" type="primary" @click="goNext">{{ $t('cs.companyStructure.nextStep') }}</a-button>
+      <a-button v-else size="small" type="primary" @click="close">{{ $t('cs.companyStructure.done') }}</a-button>
     </a-space>
   </a-modal>
 </template>
@@ -98,52 +84,19 @@ export default {
     const stepList = [
       {
         value: 1,
-        label: '上传文件',
+        label: this.$t('cs.companyStructure.uploadFile'),
         icon: 'icon-shidi-tianjia',
       },
       {
         value: 2,
-        label: '确认数据',
+        label: this.$t('cs.companyStructure.confirmData'),
         icon: 'icon-shidi-yunshangchuan',
       },
       {
         value: 3,
-        label: '上传完成',
+        label: this.$t('cs.companyStructure.uploadDone'),
         icon: 'icon-shidi-queren',
       },
-    ]
-    const dfc_importParamsList = [
-      'email',
-      'username',
-      'nickname',
-      'password',
-      'sex',
-      'mobile',
-      'position_name',
-      'department_name',
-      'current_company',
-      'dfc_entry_date',
-      'entry_date',
-      'is_internship',
-      'leave_date',
-      'id_card',
-      'nation',
-      'id_place',
-      'party',
-      'household_registration_type',
-      'hometown',
-      'marry',
-      'max_degree',
-      'emergency_person',
-      'emergency_phone',
-      'bank_card_number',
-      'bank_card_name',
-      'opening_bank',
-      'account_opening_location',
-      'school',
-      'major',
-      'education',
-      'graduation_year',
     ]
     const common_importParamsList = [
       'email',
@@ -178,7 +131,6 @@ export default {
     ]
     return {
       stepList,
-      dfc_importParamsList,
       common_importParamsList,
       visible: false,
       currentStep: 1,
@@ -235,10 +187,10 @@ export default {
           this.errorCount = errData.length
           this.currentStep += 1
           this.importData = errData
-          this.$message.error('数据存在错误')
+          this.$message.error(this.$t('cs.companyStructure.dataErr'))
         } else {
           this.currentStep += 1
-          this.$message.success('操作成功')
+          this.$message.success(this.$t('cs.companyStructure.opSuccess'))
         }
         this.$emit('refresh')
       }
@@ -323,103 +275,11 @@ export default {
             v: '部门',
             t: 's',
           },
-          {
-            v: '目前所属主体',
-            t: 's',
-          },
-          {
-            v: '初始入职日期',
-            t: 's',
-          },
-          {
-            v: '目前主体入职日期',
-            t: 's',
-          },
-          {
-            v: '正式/实习生',
-            t: 's',
-          },
-          {
-            v: '离职日期',
-            t: 's',
-          },
-          {
-            v: '身份证号码',
-            t: 's',
-          },
-          {
-            v: '民族',
-            t: 's',
-          },
-          {
-            v: '籍贯',
-            t: 's',
-          },
-          {
-            v: '组织关系',
-            t: 's',
-          },
-          {
-            v: '户籍类型',
-            t: 's',
-          },
-          {
-            v: '户口所在地',
-            t: 's',
-          },
-          {
-            v: '婚姻情况',
-            t: 's',
-          },
-          {
-            v: '最高学历',
-            t: 's',
-          },
-          {
-            v: '紧急联系人',
-            t: 's',
-          },
-          {
-            v: '紧急联系电话',
-            t: 's',
-          },
-          {
-            v: '卡号',
-            t: 's',
-          },
-          {
-            v: '银行',
-            t: 's',
-          },
-          {
-            v: '开户行',
-            t: 's',
-          },
-          {
-            v: '开户地',
-            t: 's',
-          },
-          {
-            v: '学校',
-            t: 's',
-          },
-          {
-            v: '专业',
-            t: 's',
-          },
-          {
-            v: '学历',
-            t: 's',
-          },
-          {
-            v: '毕业年份',
-            t: 's',
-          },
         ],
       ]
       data[1] = data[1].filter((item) => item['v'] !== '目前所属主体')
       data[1] = data[1].filter((item) => item['v'] !== '初始入职日期')
-      downloadExcel(data, '员工导入模板')
+      downloadExcel(data, this.$t('cs.companyStructure.downloadTemplateName'))
     },
     customRequest(data) {
       this.fileList = [data.file]

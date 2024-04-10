@@ -8,33 +8,38 @@
     width="500px"
   >
     <a-form :form="form" @submit="handleSubmit" :label-col="{ span: 6 }" :wrapper-col="{ span: 16 }">
-      <a-form-item label="用户名(英文)">
+      <a-form-item :label="$t('acl.username')">
         <a-input
           name="username"
-          placeholder="英文名"
-          v-decorator="['username', { rules: [{ required: true, message: '请输入用户名' }] }]"
+          :placeholder="$t('acl.username_placeholder')"
+          v-decorator="['username', { rules: [{ required: true, message: $t('acl.username_placeholder') }] }]"
         />
       </a-form-item>
-      <a-form-item label="中文名">
-        <a-input name="nickname" v-decorator="['nickname', { rules: [] }]" />
+      <a-form-item :label="$t('acl.nickname')">
+        <a-input
+          name="nickname"
+          :placeholder="$t('acl.nickname_placeholder')"
+          v-decorator="['nickname', { rules: [] }]"
+        />
       </a-form-item>
-      <a-form-item label="密码">
+      <a-form-item :label="$t('acl.password')">
         <a-input
           type="password"
           name="password"
-          v-decorator="['password', { rules: [{ required: true, message: '请输入密码' }] }]"
+          :placeholder="$t('acl.password_placeholder')"
+          v-decorator="['password', { rules: [{ required: true, message: $t('acl.password_placeholder') }] }]"
         />
       </a-form-item>
 
-      <a-form-item label="部门">
+      <a-form-item :label="$t('acl.department')">
         <a-input name="department" v-decorator="['department', { rules: [] }]" />
       </a-form-item>
 
-      <a-form-item label="小组">
+      <a-form-item :label="$t('acl.group')">
         <a-input name="catalog" v-decorator="['catalog', { rules: [] }]" />
       </a-form-item>
 
-      <a-form-item label="邮箱">
+      <a-form-item :label="$t('acl.email')">
         <a-input
           name="email"
           v-decorator="[
@@ -43,11 +48,11 @@
               rules: [
                 {
                   type: 'email',
-                  message: '请输入正确的邮箱！',
+                  message: $t('acl.email_placeholder'),
                 },
                 {
                   required: true,
-                  message: '请输入邮箱',
+                  message: $t('acl.email_placeholder'),
                 },
               ],
             },
@@ -55,14 +60,14 @@
         />
       </a-form-item>
 
-      <a-form-item label="手机号码">
+      <a-form-item :label="$t('acl.mobile')">
         <a-input
           name="mobile"
-          v-decorator="['mobile', { rules: [{ message: '请输入正确的手机号码', pattern: /^1\d{10}$/ }] }]"
+          v-decorator="['mobile', { rules: [{ message: $t('acl.mobileTips'), pattern: /^1\d{10}$/ }] }]"
         />
       </a-form-item>
 
-      <a-form-item label="是否锁定">
+      <a-form-item :label="$t('acl.isBlock')">
         <a-switch @change="onChange" name="block" v-decorator="['block', { rules: [], valuePropName: 'checked' }]" />
       </a-form-item>
 
@@ -71,8 +76,8 @@
       </a-form-item>
 
       <div class="custom-drawer-bottom-action">
-        <a-button @click="onClose">取消</a-button>
-        <a-button @click="handleSubmit" type="primary">确定</a-button>
+        <a-button @click="onClose">{{ $t('cancel') }}</a-button>
+        <a-button @click="handleSubmit" type="primary">{{ $t('confirm') }}</a-button>
       </div>
     </a-form>
   </CustomDrawer>
@@ -85,7 +90,6 @@ export default {
   name: 'AttributeForm',
   data() {
     return {
-      drawerTitle: '新增用户',
       drawerVisible: false,
     }
   },
@@ -94,7 +98,11 @@ export default {
     this.form = this.$form.createForm(this)
   },
 
-  computed: {},
+  computed: {
+    drawerTitle() {
+      return this.$t('acl.addUser')
+    },
+  },
   mounted() {},
   methods: {
     handleCreate() {
@@ -142,7 +150,7 @@ export default {
     },
     updateUser(attrId, data) {
       updateUserById(attrId, data).then((res) => {
-        this.$message.success(`更新成功`)
+        this.$message.success(this.$t('updateSuccess'))
         this.handleOk()
         this.onClose()
       })
@@ -151,17 +159,11 @@ export default {
 
     createUser(data) {
       addUser(data).then((res) => {
-        this.$message.success(`添加成功`)
+        this.$message.success(this.$t('addSuccess'))
         this.handleOk()
         this.onClose()
       })
-      // .catch(err => this.requestFailed(err))
     },
-
-    // requestFailed (err) {
-    //   const msg = ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试'
-    //   this.$message.error(`${msg}`)
-    // }
   },
   watch: {},
   props: {

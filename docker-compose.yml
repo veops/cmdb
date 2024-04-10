@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   cmdb-db:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-db:3.0
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-db:2.3
     container_name: cmdb-db
     environment:
       TZ: Asia/Shanghai
@@ -14,6 +14,12 @@ services:
       - db-data:/var/lib/mysql
       - ./docs/mysqld.cnf:/etc/mysql/conf.d/mysqld.cnf
       - ./docs/cmdb.sql:/docker-entrypoint-initdb.d/cmdb.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     networks:
       new:
         aliases:
@@ -22,17 +28,22 @@ services:
       - '23306:3306'
 
   cmdb-cache:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-cache:3.0
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-cache:2.3
     container_name: cmdb-cache
     environment:
       TZ: Asia/Shanghai
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       new:
         aliases:
           - redis
 
   cmdb-api:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.3.6
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.4.2
 #    build:
 #      context: .
 #      target: cmdb-api
@@ -40,6 +51,11 @@ services:
     environment:
       TZ: Asia/Shanghai
       WAIT_HOSTS: cmdb-db:3306, cmdb-cache:6379
+    depends_on:
+      cmdb-db:
+        condition: service_healthy
+      cmdb-cache:
+        condition: service_healthy
     command:
       - /bin/sh
       - -c
@@ -48,14 +64,19 @@ services:
         /wait
         flask db-setup
         flask common-check-new-columns
-        gunicorn --workers=3 autoapp:app -b 0.0.0.0:5000 -D
+        gunicorn --workers=4 autoapp:app -b 0.0.0.0:5000 -D
         
-        nohup celery -A celery_worker.celery worker -E -Q one_cmdb_async --autoscale=2,5 > one_cmdb_async.log 2>&1 &
-        nohup celery -A celery_worker.celery worker -E -Q acl_async --concurrency=2 > one_acl_async.log 2>&1 &  
+        #nohup celery -A celery_worker.celery worker -E -Q one_cmdb_async --autoscale=2,5 > one_cmdb_async.log 2>&1 &
+        #nohup celery -A celery_worker.celery worker -E -Q acl_async --concurrency=2 > one_acl_async.log 2>&1 &  
+        #
+        celery -A celery_worker.celery worker -E -Q one_cmdb_async --autoscale=4,1 --logfile=one_cmdb_async.log -D
+        celery -A celery_worker.celery worker -E -Q acl_async --logfile=one_acl_async.log --autoscale=2,1 -D
         
         nohup flask cmdb-trigger > trigger.log 2>&1 &
         flask cmdb-init-cache
         flask cmdb-init-acl
+        flask init-import-user-from-acl
+        flask init-department
         flask cmdb-counter > counter.log 2>&1
 
     depends_on:
@@ -67,7 +88,7 @@ services:
           - cmdb-api
 
   cmdb-ui:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.3.6
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.4.2
 #    build:
 #      context: .
 #      target: cmdb-ui
@@ -93,6 +114,10 @@ services:
 
 volumes:
   db-data:
+    driver: local
+    name: cmdb_db-data
 
 networks:
   new:
+    driver: bridge
+    name: cmdb_network

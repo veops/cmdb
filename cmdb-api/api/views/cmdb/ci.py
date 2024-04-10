@@ -11,8 +11,7 @@ from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci import CIManager
 from api.lib.cmdb.ci import CIRelationManager
 from api.lib.cmdb.const import ExistPolicy
-from api.lib.cmdb.const import PermEnum
-from api.lib.cmdb.const import ResourceTypeEnum
+from api.lib.cmdb.const import ResourceTypeEnum, PermEnum
 from api.lib.cmdb.const import RetKey
 from api.lib.cmdb.perms import has_perm_for_ci
 from api.lib.cmdb.search import SearchError
@@ -77,6 +76,7 @@ class CIView(APIView):
     @has_perm_for_ci("ci_type", ResourceTypeEnum.CI, PermEnum.ADD, lambda x: CITypeCache.get(x))
     def post(self):
         ci_type = request.values.get("ci_type")
+        ticket_id = request.values.pop("ticket_id", None)
         _no_attribute_policy = request.values.get("no_attribute_policy", ExistPolicy.IGNORE)
 
         exist_policy = request.values.pop('exist_policy', None)
@@ -88,6 +88,7 @@ class CIView(APIView):
                             exist_policy=exist_policy or ExistPolicy.REJECT,
                             _no_attribute_policy=_no_attribute_policy,
                             _is_admin=request.values.pop('__is_admin', None) or False,
+                            ticket_id=ticket_id,
                             **ci_dict)
 
         return self.jsonify(ci_id=ci_id)
@@ -96,6 +97,7 @@ class CIView(APIView):
     def put(self, ci_id=None):
         args = request.values
         ci_type = args.get("ci_type")
+        ticket_id = request.values.pop("ticket_id", None)
         _no_attribute_policy = args.get("no_attribute_policy", ExistPolicy.IGNORE)
 
         ci_dict = self._wrap_ci_dict()
@@ -103,6 +105,7 @@ class CIView(APIView):
         if ci_id is not None:
             manager.update(ci_id,
                            _is_admin=request.values.pop('__is_admin', None) or False,
+                           ticket_id=ticket_id,
                            **ci_dict)
         else:
             request.values.pop('exist_policy', None)
@@ -110,6 +113,7 @@ class CIView(APIView):
                                 exist_policy=ExistPolicy.REPLACE,
                                 _no_attribute_policy=_no_attribute_policy,
                                 _is_admin=request.values.pop('__is_admin', None) or False,
+                                ticket_id=ticket_id,
                                 **ci_dict)
 
         return self.jsonify(ci_id=ci_id)
@@ -152,9 +156,10 @@ class CISearchView(APIView):
             ret_key = RetKey.NAME
         facet = handle_arg_list(request.values.get("facet", ""))
         sort = request.values.get("sort")
+        use_id_filter = request.values.get("use_id_filter", False) in current_app.config.get('BOOL_TRUE')
 
         start = time.time()
-        s = search(query, fl, facet, page, ret_key, count, sort, excludes)
+        s = search(query, fl, facet, page, ret_key, count, sort, excludes, use_id_filter=use_id_filter)
         try:
             response, counter, total, page, numfound, facet = s.search()
         except SearchError as e:
@@ -221,7 +226,6 @@ class CIHeartbeatView(APIView):
 class CIFlushView(APIView):
     url_prefix = ("/ci/flush", "/ci/<int:ci_id>/flush")
 
-    # @auth_abandoned
     def get(self, ci_id=None):
         from api.tasks.cmdb import ci_cache
         from api.lib.cmdb.const import CMDB_QUEUE

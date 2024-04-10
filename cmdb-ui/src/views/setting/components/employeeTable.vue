@@ -26,7 +26,7 @@
     <vxe-column
       field="nickname"
       min-width="100px"
-      title="姓名"
+      :title="$t('cs.companyStructure.nickname')"
       sortable
       v-if="checkedCols.findIndex((v) => v == 'nickname') !== -1 && attributes.findIndex((v) => v == 'nickname') !== -1"
       key="nickname"
@@ -49,7 +49,7 @@
     </vxe-column>
     <vxe-column
       field="username"
-      title="用户名"
+      :title="$t('cs.companyStructure.username')"
       min-width="120px"
       sortable
       v-if="checkedCols.findIndex((v) => v == 'username') !== -1 && attributes.findIndex((v) => v == 'username') !== -1"
@@ -58,13 +58,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>用户名</span>
+          <span>{{ $t('cs.companyStructure.username') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="email"
-      title="邮箱"
+      :title="$t('cs.companyStructure.email')"
       min-width="140px"
       sortable
       v-if="checkedCols.findIndex((v) => v == 'email') !== -1 && attributes.findIndex((v) => v == 'email') !== -1"
@@ -73,13 +73,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>邮箱</span>
+          <span>{{ $t('cs.companyStructure.email') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="sex"
-      title="性别"
+      :title="$t('cs.companyStructure.sex')"
       width="70px"
       sortable
       align="center"
@@ -89,13 +89,17 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>性别</span>
+          <span>{{ $t('cs.companyStructure.sex') }}</span>
         </span>
+      </template>
+      <template #default="{row}">
+        <span v-if="row.sex === '男'">{{ $t('cs.companyStructure.male') }}</span>
+        <span v-if="row.sex === '女'">{{ $t('cs.companyStructure.female') }}</span>
       </template>
     </vxe-column>
     <vxe-column
       field="mobile"
-      title="手机号"
+      :title="$t('cs.companyStructure.mobile')"
       min-width="100px"
       v-if="checkedCols.findIndex((v) => v == 'mobile') !== -1 && attributes.findIndex((v) => v == 'mobile') !== -1"
       sortable
@@ -104,13 +108,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>手机号</span>
+          <span>{{ $t('cs.companyStructure.mobile') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="department_name"
-      title="部门"
+      :title="$t('cs.companyStructure.departmentName')"
       min-width="90px"
       sortable
       v-if="
@@ -122,7 +126,7 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>部门</span>
+          <span>{{ $t('cs.companyStructure.departmentName') }}</span>
         </span>
       </template>
       <template #default="{ row }">
@@ -132,7 +136,7 @@
     </vxe-column>
     <vxe-column
       field="position_name"
-      title="岗位"
+      :title="$t('cs.companyStructure.positionName')"
       min-width="120px"
       sortable
       v-if="
@@ -144,13 +148,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>岗位</span>
+          <span>{{ $t('cs.companyStructure.positionName') }}</span>
         </span>
       </template>
     </vxe-column>
     <vxe-column
       field="direct_supervisor_id"
-      title="直接上级"
+      :title="$t('cs.companyStructure.supervisor')"
       min-width="120px"
       sortable
       v-if="
@@ -162,561 +166,13 @@
       <template #header>
         <span class="vxe-handle">
           <OpsMoveIcon class="move-icon" />
-          <span>直接上级</span>
+          <span>{{ $t('cs.companyStructure.supervisor') }}</span>
         </span>
       </template>
       <template #default="{ row }">
         <span v-if="row.direct_supervisor_id !== 0">{{
           getDirectorName(allFlatEmployees, row.direct_supervisor_id)
         }}</span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="annual_leave"
-      title="年假"
-      sortable
-      min-width="80"
-      v-if="
-        checkedCols.findIndex((v) => v == 'annual_leave') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'annual_leave') !== -1
-      "
-      key="annual_leave"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>年假</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="virtual_annual_leave"
-      title="虚拟年假"
-      sortable
-      min-width="100"
-      v-if="
-        checkedCols.findIndex((v) => v == 'virtual_annual_leave') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'virtual_annual_leave') !== -1
-      "
-      key="virtual_annual_leave"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>虚拟年假</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="parenting_leave"
-      title="育儿假"
-      sortable
-      min-width="100"
-      v-if="
-        checkedCols.findIndex((v) => v == 'parenting_leave') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'parenting_leave') !== -1
-      "
-      key="parenting_leave"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>育儿假</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="entry_date"
-      title="目前主体入职日期"
-      sortable
-      min-width="150"
-      v-if="
-        checkedCols.findIndex((v) => v == 'entry_date') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'entry_date') !== -1
-      "
-      key="entry_date"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>目前主体入职日期</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="is_internship"
-      title="正式/实习生"
-      sortable
-      min-width="140"
-      v-bind="tableType === 'structure' ? { filters: internOptions, 'filter-multiple': false } : {}"
-      v-if="
-        checkedCols.findIndex((v) => v == 'is_internship') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'is_internship') !== -1
-      "
-      key="is_internship"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>正式/实习生</span>
-        </span>
-      </template>
-      <template #default="{ row }">
-        {{ getIsInterInship(row.is_internship) }}
-      </template> </vxe-column
-    >I
-    <vxe-column
-      field="leave_date"
-      title="离职日期"
-      sortable
-      min-width="100"
-      v-if="
-        checkedCols.findIndex((v) => v == 'leave_date') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'leave_date') !== -1
-      "
-      key="leave_date"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>离职日期</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="id_card"
-      title="身份证号码"
-      sortable
-      min-width="120"
-      v-if="
-        checkedCols.findIndex((v) => v == 'id_card') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'id_card') !== -1
-      "
-      key="id_card"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>身份证号码</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="nation"
-      title="民族"
-      sortable
-      min-width="80"
-      v-if="
-        checkedCols.findIndex((v) => v == 'nation') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'nation') !== -1
-      "
-      key="nation"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>民族</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="id_place"
-      title="籍贯"
-      sortable
-      min-width="120"
-      v-if="
-        checkedCols.findIndex((v) => v == 'id_place') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'id_place') !== -1
-      "
-      key="id_place"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>籍贯</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="party"
-      title="组织关系"
-      sortable
-      min-width="100"
-      v-if="
-        checkedCols.findIndex((v) => v == 'party') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'party') !== -1
-      "
-      key="party"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>组织关系</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="household_registration_type"
-      title="户籍类型"
-      sortable
-      min-width="100"
-      v-if="
-        checkedCols.findIndex((v) => v == 'household_registration_type') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'household_registration_type') !== -1
-      "
-      key="household_registration_type"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>户籍类型</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="hometown"
-      title="户口所在地"
-      sortable
-      min-width="120"
-      v-if="
-        checkedCols.findIndex((v) => v == 'hometown') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'hometown') !== -1
-      "
-      key="hometown"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>户口所在地</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="marry"
-      title="婚姻情况"
-      sortable
-      min-width="100"
-      v-if="
-        checkedCols.findIndex((v) => v == 'marry') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'marry') !== -1
-      "
-      key="marry"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>婚姻情况</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="max_degree"
-      title="最高学历"
-      sortable
-      min-width="100"
-      v-if="
-        checkedCols.findIndex((v) => v == 'max_degree') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'max_degree') !== -1
-      "
-      key="max_degree"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>最高学历</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="emergency_person"
-      title="紧急联系人"
-      sortable
-      min-width="110"
-      v-if="
-        checkedCols.findIndex((v) => v == 'emergency_person') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'emergency_person') !== -1
-      "
-      key="emergency_person"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>紧急联系人</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="emergency_phone"
-      title="紧急联系电话"
-      sortable
-      min-width="120"
-      v-if="
-        checkedCols.findIndex((v) => v == 'emergency_phone') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'emergency_phone') !== -1
-      "
-      key="emergency_phone"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>紧急联系电话</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="bank_card_number"
-      title="卡号"
-      sortable
-      min-width="120"
-      v-if="
-        checkedCols.findIndex((v) => v == 'bank_card_number') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'bank_card_number') !== -1
-      "
-      key="bank_card_number"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>卡号</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="bank_card_name"
-      title="银行"
-      sortable
-      min-width="100"
-      v-if="
-        checkedCols.findIndex((v) => v == 'bank_card_name') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'bank_card_name') !== -1
-      "
-      key="bank_card_name"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>银行</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="opening_bank"
-      title="开户行"
-      sortable
-      min-width="100"
-      v-if="
-        checkedCols.findIndex((v) => v == 'opening_bank') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'opening_bank') !== -1
-      "
-      key="opening_bank"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>开户行</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="account_opening_location"
-      title="开户地"
-      sortable
-      min-width="120"
-      v-if="
-        checkedCols.findIndex((v) => v == 'account_opening_location') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'account_opening_location') !== -1
-      "
-      key="account_opening_location"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>开户地</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="school"
-      title="学校"
-      min-width="100"
-      v-if="
-        checkedCols.findIndex((v) => v == 'school') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'school') !== -1
-      "
-      key="school"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>学校</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="major"
-      title="专业"
-      min-width="100"
-      v-if="
-        checkedCols.findIndex((v) => v == 'major') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'major') !== -1
-      "
-      key="major"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>专业</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="education"
-      title="学历"
-      min-width="80"
-      v-if="
-        checkedCols.findIndex((v) => v == 'education') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'education') !== -1
-      "
-      key="education"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>学历</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="graduation_year"
-      title="毕业年份"
-      min-width="100"
-      v-if="
-        checkedCols.findIndex((v) => v == 'graduation_year') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'graduation_year') !== -1
-      "
-      key="graduation_year"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>毕业年份</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="name"
-      title="子女姓名"
-      min-width="80"
-      v-if="
-        checkedCols.findIndex((v) => v == 'name') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'name') !== -1
-      "
-      key="name"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>子女姓名</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="gender"
-      title="子女性别"
-      min-width="80"
-      v-if="
-        checkedCols.findIndex((v) => v == 'gender') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'gender') !== -1
-      "
-      key="gender"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>子女性别</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="birthday"
-      title="子女出生日期"
-      min-width="100"
-      v-if="
-        checkedCols.findIndex((v) => v == 'birthday') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'birthday') !== -1
-      "
-      key="birthday"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>子女出生日期</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="parental_leave_left"
-      title="剩余育儿假"
-      min-width="100"
-      v-if="
-        checkedCols.findIndex((v) => v == 'parental_leave_left') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'parental_leave_left') !== -1
-      "
-      key="parental_leave_left"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>剩余育儿假</span>
-        </span>
-      </template>
-    </vxe-column>
-    <vxe-column
-      field="last_login"
-      title="上次登录时间"
-      min-width="140px"
-      sortable
-      :formatter="formatDate"
-      v-if="
-        checkedCols.findIndex((v) => v == 'last_login') !== -1 &&
-          tableType == 'structure' &&
-          attributes.findIndex((v) => v == 'last_login') !== -1
-      "
-      key="last_login"
-    >
-      <template #header>
-        <span class="vxe-handle">
-          <OpsMoveIcon class="move-icon" />
-          <span>上次登录时间</span>
-        </span>
       </template>
     </vxe-column>
     <vxe-column
@@ -728,10 +184,10 @@
       key="control"
     >
       <template #header>
-        <span>操作</span>
+        <span>{{ $t('operation') }}</span>
         <template>
           <a-popover
-            title="请选择需要展示的列"
+            :title="$t('cs.companyStructure.selectDisplayColumn')"
             placement="bottom"
             v-model="visible"
             trigger="click"
@@ -741,7 +197,7 @@
           >
             <template slot="content">
               <div :style="{ maxHeight: `${windowHeight - 320}px`, overflowY: 'auto', width: '160px' }">
-                <a-checkbox-group v-model="unsbmitCheckedCols" :options="options" style="display: grid">
+                <a-checkbox-group v-model="unsbmitCheckedCols" :options="options" style="display: grid;">
                 </a-checkbox-group>
               </div>
               <div
@@ -753,36 +209,44 @@
                   justifyContent: 'flex-end',
                 }"
               >
-                <a-button :style="{ marginRight: '10px' }" size="small" @click="handleCancel">取消</a-button>
-                <a-button size="small" @click="handleSubmit" type="primary">确定</a-button>
+                <a-button :style="{ marginRight: '10px' }" size="small" @click="handleCancel">{{ $t('cancel') }}</a-button>
+                <a-button size="small" @click="handleSubmit" type="primary">{{ $t('confirm') }}</a-button>
               </div>
             </template>
-            <a-icon type="control" style="cursor: pointer" />
+            <a-icon type="control" style="cursor: pointer;" />
           </a-popover>
         </template>
       </template>
       <template #default="{ row }">
         <a-space v-if="tableType === 'structure'">
-          <a><a-icon type="edit" @click="openEmployeeModal(row, 'edit')" /></a>
+          <a><a-icon type="edit" @click="openEmployeeModal(row, 'edit')"/></a>
           <a-tooltip>
-            <template slot="title"> 重置密码 </template>
-            <a><a-icon type="reload" @click="openBatchModal('password', row)" /></a>
+            <template slot="title">
+              {{ $t('cs.companyStructure.resetPassword') }}
+            </template>
+            <a><a-icon type="reload" @click="openBatchModal('password', row)"/></a>
           </a-tooltip>
           <a-tooltip v-if="!row.block">
-            <template slot="title"> 禁用 </template>
+            <template slot="title">
+              {{ $t('cs.companyStructure.block') }}
+            </template>
             <a :style="{ color: 'red' }" @click="openBatchModal('block', row, 1)">
               <ops-icon type="icon-xianxing-weilianjie" />
             </a>
           </a-tooltip>
           <a-tooltip v-else>
-            <template slot="title"> 恢复 </template>
+            <template slot="title">
+              {{ $t('cs.companyStructure.recover') }}
+            </template>
             <a @click="openBatchModal('block', row, 0)">
               <ops-icon type="icon-xianxing-yilianjie" />
             </a>
           </a-tooltip>
         </a-space>
         <a-tooltip v-else>
-          <template slot="title"> 移除 </template>
+          <template slot="title">
+            {{ $t('cs.role.remove') }}
+          </template>
           <a :style="{ color: 'red' }" @click="removeEmployee(row)">
             <ops-icon type="icon-xianxing-shanchuyonghu" />
           </a>
@@ -792,7 +256,7 @@
     <template #empty>
       <div>
         <img :style="{ width: '200px' }" :src="require('@/assets/data_empty.png')" />
-        <div>暂无数据</div>
+        <div>{{ $t('noData') }}</div>
       </div>
     </template>
   </vxe-table>
@@ -833,46 +297,14 @@ export default {
   },
   data() {
     const options = [
-      { label: '姓名', value: 'nickname' },
-      { label: '用户名', value: 'username' },
-      { label: '邮箱', value: 'email' },
-      { label: '性别', value: 'sex' },
-      { label: '手机号', value: 'mobile' },
-      { label: '部门', value: 'department_name' },
-      { label: '岗位', value: 'position_name' },
-      { label: '直接上级', value: 'direct_supervisor_id' },
-      { label: '年假', value: 'annual_leave' },
-      { label: '虚拟年假', value: 'virtual_annual_leave' },
-      { label: '育儿假', value: 'parenting_leave' },
-      { label: '目前所属主体', value: 'current_company' },
-      { label: '初始入职日期', value: 'dfc_entry_date' },
-      { label: '目前主体入职日期', value: 'entry_date' },
-      { label: '正式/实习生', value: 'is_internship' },
-      { label: '离职日期', value: 'leave_date' },
-      { label: '身份证号码', value: 'id_card' },
-      { label: '民族', value: 'nation' },
-      { label: '籍贯', value: 'id_place' },
-      { label: '组织关系', value: 'party' },
-      { label: '户籍类型', value: 'household_registration_type' },
-      { label: '户口所在地', value: 'hometown' },
-      { label: '婚姻情况', value: 'marry' },
-      { label: '最高学历', value: 'max_degree' },
-      { label: '紧急联系人', value: 'emergency_person' },
-      { label: '紧急联系电话', value: 'emergency_phone' },
-      { label: '卡号', value: 'bank_card_number' },
-      { label: '银行', value: 'bank_card_name' },
-      { label: '开户行', value: 'opening_bank' },
-      { label: '开户地', value: 'account_opening_location' },
-      { label: '学校', value: 'school' },
-      { label: '专业', value: 'major' },
-      { label: '学历', value: 'education' },
-      { label: '毕业年份', value: 'graduation_year' },
-      { label: '子女姓名', value: 'name' },
-      { label: '子女性别', value: 'gender' },
-      { label: '子女出生日期', value: 'birthday' },
-      { label: '剩余育儿假', value: 'parental_leave_left' },
-      { label: '角色', value: 'roles' },
-      { label: '上次登录时间', value: 'last_login' },
+      { label: this.$t('cs.companyStructure.nickname'), value: 'nickname' },
+      { label: this.$t('cs.companyStructure.username'), value: 'username' },
+      { label: this.$t('cs.companyStructure.email'), value: 'email' },
+      { label: this.$t('cs.companyStructure.sex'), value: 'sex' },
+      { label: this.$t('cs.companyStructure.mobile'), value: 'mobile' },
+      { label: this.$t('cs.companyStructure.departmentName'), value: 'department_name' },
+      { label: this.$t('cs.companyStructure.positionName'), value: 'position_name' },
+      { label: this.$t('cs.companyStructure.supervisor'), value: 'direct_supervisor_id' },
     ]
     const checkedCols = JSON.parse(localStorage.getItem('setting-table-CheckedCols')) || [
       'nickname',
@@ -883,38 +315,6 @@ export default {
       'department_name',
       'position_name',
       'direct_supervisor_id',
-      'annual_leave',
-      'virtual_annual_leave',
-      'parenting_leave',
-      'roles',
-      'last_login',
-      'current_company',
-      'dfc_entry_date',
-      'is_internship',
-      'entry_date',
-      'leave_date',
-      'id_card',
-      'nation',
-      'id_place',
-      'party',
-      'household_registration_type',
-      'hometown',
-      'marry',
-      'max_degree',
-      'emergency_person',
-      'emergency_phone',
-      'bank_card_number',
-      'bank_card_name',
-      'opening_bank',
-      'account_opening_location',
-      'school',
-      'major',
-      'education',
-      'graduation_year',
-      'name',
-      'gender',
-      'birthday',
-      'parental_leave_left',
     ]
     return {
       filterRoleList: [],
@@ -924,24 +324,28 @@ export default {
       visible: false,
       tableDragClassName: [], // 表格拖拽的参数
       attributes: [],
-      internMap: [
-        {
-          id: 0,
-          label: '正式',
-        },
-        {
-          id: 1,
-          label: '实习生',
-        },
-      ],
-      internOptions: [
-        { label: '正式', value: 0 },
-        { label: '实习生', value: 1 },
-      ],
     }
   },
   inject: ['provide_allFlatEmployees', 'provide_allFlatDepartments'],
   computed: {
+    internOptions() {
+      return [
+        { label: this.$t('cs.companyStructure.fullTime'), value: 0 },
+        { label: this.$t('cs.companyStructure.internship'), value: 1 },
+      ]
+    },
+    internMap() {
+      return [
+        {
+          id: 0,
+          label: this.$t('cs.companyStructure.fullTime'),
+        },
+        {
+          id: 1,
+          label: this.$t('cs.companyStructure.internship'),
+        },
+      ]
+    },
     allFlatEmployees() {
       return this.provide_allFlatEmployees()
     },
@@ -956,9 +360,6 @@ export default {
     Bus.$on('reqExportSelectEvent', () => {
       this.exportExcel()
     })
-    this.options = this.options
-      .filter((item) => item.label !== '目前所属主体')
-      .filter((item) => item.label !== '初始入职日期')
     this.unsbmitCheckedCols = this.checkedCols
   },
   beforeDestroy() {
@@ -1064,8 +465,8 @@ export default {
     removeEmployee(row) {
       const that = this
       this.$confirm({
-        title: '提示',
-        content: '确认移除该员工?',
+        title: that.$t('warning'),
+        content: that.$t('cs.role.confirmRemoveEmployee'),
         onOk() {
           that.$emit('removeEmployee', row)
         },
@@ -1140,7 +541,7 @@ export default {
         useStyle: true, // 是否导出样式
         isFooter: false, // 是否导出表尾（比如合计）
         // 过滤那个字段导出
-        columnFilterMethod: function (column, $columnIndex) {
+        columnFilterMethod: function(column, $columnIndex) {
           return !(column.$columnIndex === 0)
           // 0是复选框 不导出
         },

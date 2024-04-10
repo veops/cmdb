@@ -1,5 +1,5 @@
 <template>
-  <a-config-provider :locale="locale">
+  <a-config-provider :locale="antdLocale">
     <div id="app" :class="{ 'ops-fullscreen': isOpsFullScreen, 'ops-only-topmenu': isOpsOnlyTopMenu }">
       <router-view v-if="alive" />
     </div>
@@ -7,8 +7,9 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapState, mapActions, mapMutations } from 'vuex'
 import zhCN from 'ant-design-vue/lib/locale-provider/zh_CN'
+import enUS from 'ant-design-vue/lib/locale-provider/en_US'
 import { AppDeviceEnquire } from '@/utils/mixin'
 import { debounce } from './utils/util'
 
@@ -24,20 +25,28 @@ export default {
   },
   data() {
     return {
-      locale: zhCN,
       alive: true,
       timer: null,
     }
   },
   computed: {
+    ...mapState(['locale']),
+    antdLocale() {
+      if (this.locale === 'zh') {
+        return zhCN
+      }
+      return enUS
+    },
     isOpsFullScreen() {
-      return this.$route.name === 'cmdb_screen'
+      return ['cmdb_screen'].includes(this.$route.name)
     },
     isOpsOnlyTopMenu() {
-      return ['fullscreen_index', 'setting_person'].includes(this.$route.name)
+      return ['fullscreen_index', 'setting_person', 'notice_center'].includes(this.$route.name)
     },
   },
   created() {
+    this.SET_LOCALE(localStorage.getItem('ops_locale') || 'zh')
+    this.$i18n.locale = localStorage.getItem('ops_locale') || 'zh'
     this.timer = setInterval(() => {
       this.setTime(new Date().getTime())
     }, 1000)
@@ -184,6 +193,7 @@ export default {
   },
   methods: {
     ...mapActions(['setTime']),
+    ...mapMutations(['SET_LOCALE']),
     reload() {
       this.alive = false
       this.$nextTick(() => {

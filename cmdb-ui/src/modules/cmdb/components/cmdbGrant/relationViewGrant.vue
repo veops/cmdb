@@ -17,8 +17,8 @@
       </vxe-column>
     </vxe-table>
     <a-space>
-      <span class="grant-button" @click="grantDepart">授权用户/部门</span>
-      <span class="grant-button" @click="grantRole">授权角色</span>
+      <span class="grant-button" @click="grantDepart">{{ $t('cmdb.components.grantUser') }}</span>
+      <span class="grant-button" @click="grantRole">{{ $t('cmdb.components.grantRole') }}</span>
     </a-space>
   </div>
 </template>
@@ -51,7 +51,6 @@ export default {
   },
   data() {
     return {
-      permMap,
       columns: ['read', 'grant'],
     }
   },
@@ -65,6 +64,9 @@ export default {
       }
       return (this.windowHeight - 104) / 2 - 116
     },
+    permMap() {
+      return permMap()
+    }
   },
   methods: {
     getCurrentRowStyle,

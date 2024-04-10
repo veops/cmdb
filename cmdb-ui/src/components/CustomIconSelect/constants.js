@@ -1,8 +1,10 @@
-export const iconTypeList = [
+import i18n from '@/lang'
+
+export const iconTypeList = () => [
   // { value: '0', label: '常用' },
-  { value: '1', label: '线性' },
-  { value: '2', label: '实底' },
-  { value: '3', label: '多色' }
+  { value: '1', label: i18n.t('customIconSelect.outlined') },
+  { value: '2', label: i18n.t('customIconSelect.filled') },
+  { value: '3', label: i18n.t('customIconSelect.multicolor') }
 ]
 
 export const commonIconList = ['changyong-ubuntu',
@@ -758,6 +760,52 @@ export const multicolorIconList = [
       label: 'redis'
     }]
   }, {
+    value: 'cloud',
+    label: '云',
+    list: [{
+      value: 'AWS',
+      label: 'AWS'
+    }, {
+      value: 'Azure',
+      label: 'Azure'
+    }, {
+      value: 'Google_Cloud_Platform',
+      label: 'Google Cloud Platform'
+    }, {
+      value: 'Alibaba_Cloud',
+      label: '阿里云'
+    }, {
+      value: 'Huawei_Cloud',
+      label: '华为云'
+    }, {
+      value: 'Tencent_Cloud',
+      label: '腾讯云'
+    }, {
+      value: 'UCloud',
+      label: 'UCloud'
+    }, {
+      value: 'Ctyun',
+      label: '天翼云'
+    }, {
+      value: 'ECloud',
+      label: '移动云'
+    }, {
+      value: 'JDCloud',
+      label: '京东云'
+    }, {
+      value: 'Bytecloud',
+      label: '字节云'
+    }, {
+      value: 'OpenStack',
+      label: 'OpenStack'
+    }, {
+      value: 'ZStack',
+      label: 'ZStack'
+    }, {
+      value: 'Nutanix',
+      label: 'Nutanix'
+    }]
+  }, {
     value: 'system',
     label: '操作系统',
     list: [{
@@ -974,17 +1022,14 @@ export const multicolorIconList = [
       value: 'caise-tomcat',
       label: 'Tomcat'
     }, {
-      value: 'caise-aliyun',
-      label: '阿里云'
+      value: 'caise-VPC',
+      label: 'VPC'
     }, {
-      value: 'caise-tengxunyun',
-      label: '腾讯云'
+      value: 'caise-CDN',
+      label: 'CDN'
     }, {
-      value: 'caise-huaweiyun',
-      label: '华为云'
-    }, {
-      value: 'caise-aws',
-      label: 'AWS'
+      value: 'caise-OOS',
+      label: '对象存储'
     }]
   }, {
     value: 'data',

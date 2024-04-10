@@ -9,26 +9,30 @@
       @visibleChange="visibleChange"
     >
       <slot name="popover_item">
-        <a-button type="primary" ghost>条件过滤<a-icon type="filter"/></a-button>
+        <a-button type="primary" ghost>{{ $t('cmdbFilterComp.conditionFilter') }}<a-icon type="filter"/></a-button>
       </slot>
       <template slot="content">
         <Expression
+          :needAddHere="needAddHere"
           v-model="ruleList"
           :canSearchPreferenceAttrList="canSearchPreferenceAttrList.filter((attr) => !attr.is_password)"
+          :disabled="disabled"
         />
         <a-divider :style="{ margin: '10px 0' }" />
-        <div style="width:534px">
+        <div style="width:554px">
           <a-space :style="{ display: 'flex', justifyContent: 'flex-end' }">
-            <a-button type="primary" size="small" @click="handleSubmit">确定</a-button>
-            <a-button size="small" @click="handleClear">清空</a-button>
+            <a-button type="primary" size="small" @click="handleSubmit">{{ $t('confirm') }}</a-button>
+            <a-button size="small" @click="handleClear">{{ $t('clear') }}</a-button>
           </a-space>
         </div>
       </template>
     </a-popover>
     <Expression
+      :needAddHere="needAddHere"
       v-else
       v-model="ruleList"
       :canSearchPreferenceAttrList="canSearchPreferenceAttrList.filter((attr) => !attr.is_password)"
+      :disabled="disabled"
     />
   </div>
 </template>
@@ -62,6 +66,14 @@ export default {
     isDropdown: {
       type: Boolean,
       default: true,
+    },
+    needAddHere: {
+      type: Boolean,
+      default: false,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {

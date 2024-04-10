@@ -63,7 +63,7 @@ export default {
         updateCI(this.row.ci_id || this.row._id, {
           [`${this.column.property}`]: this.default_value_json_right ? this.jsonData : {},
         }).then(() => {
-          this.$message.success('保存成功！')
+          this.$message.success(this.$t('saveSuccess'))
           this.handleCancel()
           this.$emit('jsonEditorOk', this.row, this.column, this.default_value_json_right ? this.jsonData : {})
         })

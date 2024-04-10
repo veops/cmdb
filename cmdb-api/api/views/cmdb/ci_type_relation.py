@@ -43,16 +43,19 @@ class CITypeRelationView(APIView):
 
     @role_required(RoleEnum.CONFIG)
     def get(self):
-        res = CITypeRelationManager.get()
+        res, type2attributes = CITypeRelationManager.get()
 
-        return self.jsonify(res)
+        return self.jsonify(relations=res, type2attributes=type2attributes)
 
     @has_perm_from_args("parent_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
     @args_required("relation_type_id")
     def post(self, parent_id, child_id):
         relation_type_id = request.values.get("relation_type_id")
         constraint = request.values.get("constraint")
-        ctr_id = CITypeRelationManager.add(parent_id, child_id, relation_type_id, constraint)
+        parent_attr_id = request.values.get("parent_attr_id")
+        child_attr_id = request.values.get("child_attr_id")
+        ctr_id = CITypeRelationManager.add(parent_id, child_id, relation_type_id, constraint,
+                                           parent_attr_id, child_attr_id)
 
         return self.jsonify(ctr_id=ctr_id)
 

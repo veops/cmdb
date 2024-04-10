@@ -18,18 +18,20 @@
             visible = false
           }
         "
-      >取消</a-button
+      >{{ $t('cancel') }}</a-button
       >
-      <a-button :loading="confirmLoading" @click="handleSubmit(false)" type="primary">继续添加</a-button>
-      <a-button :loading="confirmLoading" type="primary" @click="handleSubmit">确定</a-button>
+      <a-button :loading="confirmLoading" @click="handleSubmit(false)" type="primary">{{
+        $t('cmdb.ciType.continueAdd')
+      }}</a-button>
+      <a-button :loading="confirmLoading" type="primary" @click="handleSubmit">{{ $t('confirm') }}</a-button>
     </template>
     <a-tabs v-model="activeKey">
-      <a-tab-pane key="1" tab="新建属性">
+      <a-tab-pane key="1" :tab="$t('cmdb.ciType.addAttribute')">
         <div :style="{ overflow: 'auto', maxHeight: '480px' }">
           <create-new-attribute ref="createNewAttribute" :hasFooter="false" @done="handleAddNewAttr" />
         </div>
       </a-tab-pane>
-      <a-tab-pane key="2" tab="已有属性" force-render>
+      <a-tab-pane key="2" :tab="$t('cmdb.ciType.existedAttributes')" force-render>
         <AttributesTransfer
           :dataSource="unLinkdAttrs"
           :targetKeys="targetKeys"
@@ -47,7 +49,7 @@
 <script>
 import _ from 'lodash'
 import { searchAttributes, createCITypeAttributes, updateCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
-import { updateCITypeGroupById, getCITypeGroupById } from '@/modules/cmdb/api/CIType'
+import { createCITypeGroupById, getCITypeGroupById } from '@/modules/cmdb/api/CIType'
 import CreateNewAttribute from './ceateNewAttribute.vue'
 import { valueTypeMap } from '../../utils/const'
 import AttributesTransfer from '../../components/attributesTransfer'
@@ -67,7 +69,6 @@ export default {
   },
   data() {
     return {
-      valueTypeMap,
       activeKey: '1',
       visible: false,
       attributes: [],
@@ -78,6 +79,9 @@ export default {
     }
   },
   computed: {
+    valueTypeMap() {
+      return valueTypeMap()
+    },
     windowHeight() {
       return this.$store.state.windowHeight
     },
@@ -100,11 +104,11 @@ export default {
           if (this.currentGroup) {
             await this.updateCurrentGroup()
             const { id, name, order, attributes } = this.currentGroup
-            const attrIds = attributes.map((i) => i.id)
+            const attrIds = attributes.filter((i) => !i.inherited).map((i) => i.id)
             this.targetKeys.forEach((key) => {
               attrIds.push(Number(key))
             })
-            await updateCITypeGroupById(id, { name, order, attributes: [...new Set(attrIds)] })
+            await createCITypeGroupById(this.CITypeId, { name, order, attributes: [...new Set(attrIds)] })
           }
           this.confirmLoading = false
           this.handleClose(isCloseModal)
@@ -138,9 +142,9 @@ export default {
       if (this.currentGroup) {
         await this.updateCurrentGroup()
         const { id, name, order, attributes } = this.currentGroup
-        const attrIds = attributes.map((i) => i.id)
+        const attrIds = attributes.filter((i) => !i.inherited).map((i) => i.id)
         attrIds.push(newAttrId)
-        await updateCITypeGroupById(id, { name, order, attributes: attrIds })
+        await createCITypeGroupById(this.CITypeId, { name, order, attributes: attrIds })
       }
       this.confirmLoading = false
       this.loadTotalAttrs()
@@ -154,7 +158,7 @@ export default {
     },
     handleClose(isCloseModal = true) {
       this.$emit('ok')
-      this.$message.success('添加成功！')
+      this.$message.success(this.$t('addSuccess'))
       if (isCloseModal) {
         this.visible = false
       }

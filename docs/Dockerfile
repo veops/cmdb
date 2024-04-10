@@ -34,7 +34,7 @@ RUN pip install  --no-cache-dir -r requirements.txt \
     && cp ./settings.example.py settings.py \
     && sed -i "s#{user}:{password}@127.0.0.1:3306/{db}#cmdb:123456@mysql:3306/cmdb#g" settings.py \
     && sed -i "s#redis://127.0.0.1#redis://redis#g" settings.py \
-    && sed -i 's#CACHE_REDIS_HOST = "127.0.0.1"#CACHE_REDIS_HOST = "redis"#g' settings.py
+    && sed -i "s#CACHE_REDIS_HOST = '127.0.0.1'#CACHE_REDIS_HOST = 'redis'#g" settings.py
 
 ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.7.3/wait /wait
 RUN chmod +x /wait

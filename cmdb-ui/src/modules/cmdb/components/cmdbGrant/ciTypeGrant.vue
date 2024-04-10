@@ -25,17 +25,17 @@
       </vxe-column>
       <template #empty>
         <div v-if="loading()" style="height: 200px; line-height: 200px;color:#2F54EB">
-          <a-icon type="loading" /> 加载中...
+          <a-icon type="loading" /> {{ $t('loading') }}
         </div>
         <div v-else>
           <img :style="{ width: '100px' }" :src="require('@/assets/data_empty.png')" />
-          <div>暂无数据</div>
+          <div>{{ $t('noData') }}</div>
         </div>
       </template>
     </vxe-table>
     <a-space>
-      <span class="grant-button" @click="grantDepart">授权用户/部门</span>
-      <span class="grant-button" @click="grantRole">授权角色</span>
+      <span class="grant-button" @click="grantDepart">{{ $t('cmdb.components.grantUser') }}</span>
+      <span class="grant-button" @click="grantRole">{{ $t('cmdb.components.grantRole') }}</span>
     </a-space>
   </div>
 </template>
@@ -95,10 +95,8 @@ export default {
       }
       return (this.windowHeight - 104) / 2 - 116
     },
-  },
-  data() {
-    return {
-      permMap,
+    permMap() {
+      return permMap()
     }
   },
   methods: {
@@ -131,8 +129,8 @@ export default {
       } else {
         const that = this
         this.$confirm({
-          title: '警告',
-          content: `确认删除 【${row.name}】 的 【授权】 权限？`,
+          title: that.$t('warning'),
+          content: that.$t('cmdb.components.confirmRevoke', { name: `${row.name}` }),
           onOk() {
             that.handleChange({ target: { checked: false } }, col, row)
             const _idx = that.tableData.findIndex((item) => item.rid === row.rid)

@@ -12,12 +12,10 @@
                 isEdit = true
               }
             "
-          >新增业务关系</a-button
+          >{{ $t('cmdb.preference_relation.newServiceTree') }}</a-button
           >
           <template v-else>
-            <a-input v-model="newRelationViewName" placeholder="新增业务关系名"></a-input>
-            <a-checkbox v-model="is_public">公开</a-checkbox>
-            <a-button type="primary" size="small" @click="handleSaveRelationViews">保存</a-button>
+            <a-button type="primary" size="small" @click="openServiceTreeModal({}, 'add')">{{ $t('save') }}</a-button>
             <a-button
               type="primary"
               size="small"
@@ -26,13 +24,13 @@
                 () => {
                   isEdit = false
                   checkedNodes = []
-                  newRelationViewName = ''
                 }
               "
-            >取消</a-button
+            >{{ $t('cancel') }}</a-button
             >
           </template>
-          <a-button type="primary" size="small" @click="handleSave">保存布局</a-button>
+          <a-button size="small" @click="handleSave">{{ $t('cmdb.preference_relation.saveLayout') }}</a-button>
+          <span>{{ $t('cmdb.preference_relation.tips5') }}</span>
         </a-space>
       </div>
       <SeeksRelationGraph v-if="isPullConfig" ref="ciTypeRelationGraph" :options="graphOptions">
@@ -46,7 +44,7 @@
         </div>
       </SeeksRelationGraph>
     </div>
-    <template v-if="relationViews.views">
+    <template v-if="relationViews.views && !loading">
       <a-row :gutter="4">
         <a-col
           :xl="12"
@@ -54,12 +52,18 @@
           :md="12"
           :sm="24"
           :xs="24"
-          :key="`${view}${idx}`"
-          v-for="(view, idx) in Object.keys(relationViews.views)"
+          :key="`${view}`"
+          v-for="view in Object.keys(relationViews.views)"
         >
           <div class="relation-views">
             <h3 :style="{ padding: '10px 0 0 20px' }">{{ view }}</h3>
-            <a-popconfirm :title="`确认删除 ${view}？`" @confirm="confirmDelete(view)">
+            <a
+              class="relation-views-edit"
+              @click="openServiceTreeModal({ name: view }, 'edit')"
+            ><ops-icon
+              type="icon-xianxing-edit"
+            /></a>
+            <a-popconfirm :title="$t('cmdb.ciType.confirmDelete', { name: `${view}` })" @confirm="confirmDelete(view)">
               <a class="relation-views-close"><a-icon type="close"/></a>
             </a-popconfirm>
             <div :style="{ height: '250px' }">
@@ -69,6 +73,7 @@
         </a-col>
       </a-row>
     </template>
+    <ServiceTreeModal ref="serviceTreeModal" @submitServiceTree="submitServiceTree" />
   </div>
 </template>
 
@@ -78,11 +83,17 @@ import router, { resetRouter } from '@/router'
 import store from '@/store'
 import SeeksRelationGraph from '@/modules/cmdb/3rd/relation-graph'
 import { getCITypeRelations } from '@/modules/cmdb/api/CITypeRelation'
-import { getRelationView, deleteRelationView, subscribeRelationView } from '@/modules/cmdb/api/preference'
+import {
+  getRelationView,
+  deleteRelationView,
+  subscribeRelationView,
+  putRelationView,
+} from '@/modules/cmdb/api/preference'
 import { getSystemConfig, saveSystemConfig } from '../../api/system_config'
+import ServiceTreeModal from './serviceTreeModal.vue'
 export default {
   name: 'PreferenceRelation',
-  components: { SeeksRelationGraph },
+  components: { SeeksRelationGraph, ServiceTreeModal },
   data() {
     const defaultOptions = {
       allowShowMiniToolBar: false,
@@ -103,6 +114,7 @@ export default {
     }
     const relationViewOptions = {
       ...defaultOptions,
+      disableZoom: true,
       layouts: [
         {
           layoutName: 'tree',
@@ -116,11 +128,10 @@ export default {
       relationViewOptions,
       isEdit: false,
       relationViews: {},
-      newRelationViewName: '',
       graphJsonData: {},
       checkedNodes: [],
-      is_public: true,
       isPullConfig: false,
+      loading: false,
     }
   },
   async created() {
@@ -143,7 +154,7 @@ export default {
       this.getViewsData()
     },
     async getMainData() {
-      const ciTypeRelations = await getCITypeRelations()
+      const { relations: ciTypeRelations } = await getCITypeRelations()
       const nodes = []
       const links = []
       ciTypeRelations.forEach((item) => {
@@ -210,6 +221,7 @@ export default {
       return maxEle
     },
     async getViewsData() {
+      this.loading = true
       const data = await getRelationView()
       this.relationViews = data
       const { views } = data
@@ -240,13 +252,14 @@ export default {
         this.$nextTick(() => {
           this.$refs.relationViewsGraph[index].setJsonData(_graphJsonData)
         })
+        this.loading = false
       })
     },
     checked(e, node) {
       if (e.target.checked) {
         const graph = this.$refs.ciTypeRelationGraph
         if (!graph.getNodeById(node.id).targetTo.length) {
-          this.$message.warning(`${node.text} 不存在子节点，不能形成业务关系，请重新选择！`)
+          this.$message.warning(`${node.text} ` + this.$t('cmdb.preference_relation.childNodesNotFound'))
           return
         }
         if (!this.checkedNodes.length) {
@@ -278,7 +291,7 @@ export default {
       const idFrom = startNode.targetFrom.findIndex((item) => item.id === node.id)
       const idTo = endNode.targetTo.findIndex((item) => item.id === node.id)
       if (idFrom <= -1 && idTo <= -1) {
-        this.$message.warning(`${node.text} 不能与当前选中节点形成视图，请重新选择！`)
+        this.$message.warning(`${node.text} ` + this.$t('cmdb.preference_relation.tips1'))
         return
       }
       if (idFrom > -1) {
@@ -288,32 +301,59 @@ export default {
         this.checkedNodes.push(node.id)
       }
     },
-    async handleSaveRelationViews() {
-      if (!this.newRelationViewName) {
-        this.$message.warning('请输入新增业务关系名！')
+    openServiceTreeModal(treeData, type) {
+      if (type === 'add' && this.checkedNodes.length < 2) {
+        this.$message.warning(this.$t('cmdb.preference_relation.tips3'))
         return
       }
-      if (this.checkedNodes.length < 2) {
-        this.$message.warning('请选择至少两个节点！')
-        return
-      }
-      // eslint-disable-next-line camelcase
-      const cr_ids = []
-      this.checkedNodes.forEach((item, idx) => {
-        if (idx !== this.checkedNodes.length - 1) {
-          cr_ids.push({ parent_id: Number(item), child_id: Number(this.checkedNodes[idx + 1]) })
+      let _treeData = { ...treeData }
+      if (type === 'edit') {
+        const { name } = _treeData
+        _treeData = {
+          ...treeData,
+          ...(this.relationViews?.views[name]?.option ?? {}),
+          is_public: this.relationViews?.views[name]?.is_public ?? true,
         }
-      })
-      await subscribeRelationView({
-        cr_ids,
-        name: this.newRelationViewName,
-        is_public: this.is_public,
-      })
+      }
+      this.$refs.serviceTreeModal.open(_treeData, type)
+    },
+    async submitServiceTree(treeData, type, originName) {
+      const { name, is_public, is_show_leaf_node, is_show_tree_node, sort } = treeData
+      if (type === 'add') {
+        const cr_ids = []
+        this.checkedNodes.forEach((item, idx) => {
+          if (idx !== this.checkedNodes.length - 1) {
+            cr_ids.push({ parent_id: Number(item), child_id: Number(this.checkedNodes[idx + 1]) })
+          }
+        })
+        await subscribeRelationView({
+          cr_ids,
+          name,
+          is_public,
+          option: { is_show_leaf_node, is_show_tree_node, sort, is_public },
+        })
+      } else {
+        const _name = name === originName ? name : originName
+        const topo_flatten = this.relationViews?.views[_name]?.topo_flatten ?? []
+        const name2id = this.relationViews?.name2id.find((item) => item[0] === _name)
+        const cr_ids = []
+        topo_flatten.forEach((item, idx) => {
+          if (idx !== topo_flatten.length - 1) {
+            cr_ids.push({ parent_id: Number(item), child_id: Number(topo_flatten[idx + 1]) })
+          }
+        })
+        console.log(originName, name, cr_ids, name2id)
+        await putRelationView(name2id[1], {
+          cr_ids,
+          name,
+          is_public,
+          option: { is_show_leaf_node, is_show_tree_node, sort, is_public },
+        })
+      }
       this.resetRoute()
       this.getViewsData()
       this.isEdit = false
       this.checkedNodes = []
-      this.newRelationViewName = ''
     },
     async confirmDelete(viewName) {
       await deleteRelationView(viewName)
@@ -341,7 +381,7 @@ export default {
             }
           }),
         }).then((res) => {
-          this.$message.success('保存成功！')
+          this.$message.success(this.$t('saveSuccess'))
         })
       }
     },
@@ -359,7 +399,7 @@ export default {
     width: 100%;
     .ci-type-relation-header {
       position: absolute;
-      top: 10px;
+      top: 20px;
       left: 20px;
       z-index: 10;
     }
@@ -368,11 +408,18 @@ export default {
     background-color: #fff;
     margin-top: 5px;
     position: relative;
+    .relation-views-edit,
     .relation-views-close {
       position: absolute;
       z-index: 10;
-      right: 20px;
+      right: 60px;
       top: 10px;
+    }
+    .relation-views-edit {
+      right: 46px;
+    }
+    .relation-views-close {
+      right: 20px;
     }
   }
 }

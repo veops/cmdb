@@ -2,7 +2,7 @@
   <div
     id="ci-detail-relation-topo"
     class="ci-detail-relation-topo"
-    :style="{ width: '100%', marginTop: '20px', height: 'calc(100vh - 136px)' }"
+    :style="{ width: '100%', marginTop: '20px', height: 'calc(100% - 44px)' }"
   ></div>
 </template>
 
@@ -91,7 +91,7 @@ export default {
       const newNodes = []
       const newEdges = []
       if (!res.result.length) {
-        this.$message.info('无层级关系！')
+        this.$message.info(this.$t('cmdb.ci.noLevel'))
         return
       }
       const ci_types_list = this.ci_types()
