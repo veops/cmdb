@@ -284,7 +284,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .notice-center-left {
   color: rgba(0, 0, 0, 0.7);

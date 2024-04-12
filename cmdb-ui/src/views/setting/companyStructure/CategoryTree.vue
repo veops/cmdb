@@ -155,7 +155,6 @@ export default {
 </script>
 
 <style lang="less">
-@import '~@/style/static.less';
 ul,
 li {
   list-style: none;

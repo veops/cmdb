@@ -69,7 +69,6 @@ export default {
 </script>
 
 <style lang="less">
-@import '~@/style/static.less';
 
 .custom-drawer-close {
   position: absolute;

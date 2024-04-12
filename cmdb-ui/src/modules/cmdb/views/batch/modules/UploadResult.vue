@@ -101,7 +101,6 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .cmdb-batch-upload-result {
   .cmdb-batch-upload-result-content {

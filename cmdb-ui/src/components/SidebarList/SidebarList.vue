@@ -60,7 +60,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 .sidebar-list-item {
   .ops_popover_item();
   margin: 2px 0;
