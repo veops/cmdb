@@ -96,7 +96,6 @@ export default {
 </script>
 
 <style lang="less">
-@import '~@/style/static.less';
 .color {
   color: #custom_colors[color_1];
   background-color: #custom_colors[color_2];

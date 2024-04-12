@@ -113,7 +113,6 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .cmdb-batch-upload-table {
   height: 200px;

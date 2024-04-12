@@ -50,7 +50,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 .tree-views-node {
   width: 100%;
   display: inline-flex;

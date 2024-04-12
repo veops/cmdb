@@ -222,7 +222,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 .attribute-card {
   width: 182px;
   height: 80px;

@@ -1777,7 +1777,6 @@ export default {
 
 <style lang="less">
 @import '../index.less';
-@import '~@/style/static.less';
 
 .relation-views-wrapper {
   width: 100%;

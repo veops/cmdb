@@ -64,7 +64,6 @@ name: 'SearchForm',
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
   .search-form-bar-filter {
     background-color: rgb(240, 245, 255);
     .ops_display_wrapper();

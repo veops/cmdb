@@ -112,7 +112,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 .notice-content {
   width: 100%;
   & &-main {
@@ -186,7 +185,6 @@ export default {
 </style>
 
 <style lang="less">
-@import '~@/style/static.less';
 
 .notice-content {
   .w-e-bar {

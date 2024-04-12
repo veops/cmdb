@@ -77,7 +77,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .citype-detail-title {
   border-left: 4px solid @primary-color;

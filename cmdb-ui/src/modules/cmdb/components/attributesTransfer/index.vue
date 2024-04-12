@@ -221,7 +221,6 @@ export default {
 </script>
 
 <style lang="less">
-@import '~@/style/static.less';
 
 .cmdb-transfer {
   .ant-transfer-list {

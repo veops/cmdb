@@ -55,7 +55,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .ci-detail-header {
   border-left: 3px solid @primary-color;

@@ -311,7 +311,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 .cmdb-grant {
   position: relative;
   padding: 0 20px;
@@ -324,7 +323,6 @@ export default {
 </style>
 
 <style lang="less">
-@import '~@/style/static.less';
 
 .cmdb-grant {
   .grant-button {

@@ -138,7 +138,7 @@ export default {
   padding-top: 15px;
   overflow: auto;
   margin-bottom: -24px;
-  border-radius: 15px;
+  border-radius: @border-radius-box;
   .notice-wx-wrapper-tips {
     display: inline-block;
     background-color: #ffdfdf;

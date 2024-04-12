@@ -591,7 +591,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .fold {
   width: calc(100% - 216px);

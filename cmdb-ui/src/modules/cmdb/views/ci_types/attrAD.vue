@@ -204,7 +204,6 @@ export default {
 </script>
 
 <style lang="less">
-@import '~@/style/static.less';
 .attr-ad {
   position: relative;
   padding: 0 20px;

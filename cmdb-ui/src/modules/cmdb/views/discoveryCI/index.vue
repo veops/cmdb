@@ -313,7 +313,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 .cmdb-adc {
   .cmdb-adc-group {
     margin-bottom: 20px;

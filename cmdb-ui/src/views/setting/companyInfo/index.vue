@@ -331,7 +331,7 @@ export default {
 .ops-setting-companyinfo {
   padding-top: 15px;
   background-color: #fff;
-  border-radius: 15px;
+  border-radius: @border-radius-box;
   overflow: auto;
   margin-bottom: -24px;
   .ops-setting-companyinfo-upload-show {

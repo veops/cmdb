@@ -59,7 +59,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 .read-checkbox {
   .read-checkbox-half-checked {
     width: 16px;

@@ -188,7 +188,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .acl-users {
   border-radius: @border-radius-box;

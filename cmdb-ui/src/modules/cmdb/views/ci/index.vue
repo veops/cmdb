@@ -992,7 +992,6 @@ export default {
 </style>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 .cmdb-ci {
   background-color: #fff;
   padding: 20px;

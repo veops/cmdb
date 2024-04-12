@@ -308,7 +308,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .model-relation {
   background-color: #fff;

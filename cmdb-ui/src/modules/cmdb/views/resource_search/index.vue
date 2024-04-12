@@ -535,7 +535,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .resource-search {
   margin-bottom: -24px;

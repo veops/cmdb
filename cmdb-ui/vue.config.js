@@ -91,7 +91,12 @@ module.exports = {
       },
     },
   },
-
+  pluginOptions: {
+    'style-resources-loader': {
+      preProcessor: 'less',
+      patterns: [path.resolve(__dirname, './src/style/static.less')],
+    },
+  },
   devServer: {
     disableHostCheck: true,
     port: process.env.DEV_PORT || 8000,
