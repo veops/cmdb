@@ -146,7 +146,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 .regex-select {
   width: 100%;
   height: 300px;

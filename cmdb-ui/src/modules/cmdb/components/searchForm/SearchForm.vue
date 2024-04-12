@@ -264,7 +264,6 @@ export default {
 }
 </script>
 <style lang="less">
-@import '~@/style/static.less';
 @import '../../views/index.less';
 .ci-searchform-expression {
   > input {
@@ -295,7 +294,6 @@ export default {
 </style>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .search-form-bar {
   margin-bottom: 20px;

@@ -83,7 +83,6 @@ export default {
 </script>
 
 <style lang="less">
-@import '~@/style/static.less';
 
 .cmdb-batch-upload-dragger {
   height: auto;
@@ -112,7 +111,6 @@ export default {
 }
 </style>
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .cmdb-batch-upload-dragger {
   position: relative;

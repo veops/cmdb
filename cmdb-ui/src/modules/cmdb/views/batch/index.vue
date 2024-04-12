@@ -147,7 +147,6 @@ export default {
 }
 </script>
 <style lang="less">
-@import '~@/style/static.less';
 @import '../index.less';
 .cmdb-batch-upload-label {
   color: @text-color_1;
@@ -159,7 +158,6 @@ export default {
 }
 </style>
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .cmdb-batch-upload {
   margin-bottom: -24px;

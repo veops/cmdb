@@ -142,7 +142,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 .setting-discovery {
   background-color: #fff;
   padding: 20px;

@@ -285,7 +285,6 @@ export default {
 </script>
 
 <style lang="less">
-@import '~@/style/static.less';
 
 .acl-roles {
   border-radius: @border-radius-box;

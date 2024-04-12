@@ -244,7 +244,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .relation-views-node {
   width: 100%;
@@ -314,7 +313,6 @@ export default {
 </style>
 
 <style lang="less">
-@import '~@/style/static.less';
 .relation-views-left {
   ul:has(.relation-views-node-checkbox) > li > ul {
     margin-left: 26px;

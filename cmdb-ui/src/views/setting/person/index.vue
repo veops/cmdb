@@ -354,7 +354,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 .setting-person {
   display: flex;
   flex-direction: row;
@@ -363,7 +362,7 @@ export default {
     height: 400px;
     margin-right: 24px;
     background-color: #fff;
-    border-radius: 15px;
+    border-radius: @border-radius-box;
     padding-top: 15px;
     .setting-person-left-item {
       cursor: pointer;
@@ -388,7 +387,7 @@ export default {
     width: 800px;
     height: 700px;
     background-color: #fff;
-    border-radius: 15px;
+    border-radius: @border-radius-box;
     padding: 24px 48px;
     .setting-person-right-disabled {
       background-color: #custom_colors[color_2];

@@ -233,7 +233,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .acl-history {
   border-radius: @border-radius-box;

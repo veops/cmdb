@@ -862,14 +862,13 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-@import '~@/style/static.less';
 .ops-setting-structure {
   margin-bottom: -24px;
   width: 100%;
   .ops-setting-structure-sidebar {
     height: 100%;
     padding: 15px;
-    border-radius: 15px;
+    border-radius: @border-radius-box;
     overflow-y: hidden;
     &:hover {
       overflow-y: overlay;
@@ -1026,7 +1025,7 @@ export default {
     padding: 12px;
     background-color: #fff;
     overflow-y: auto;
-    border-radius: 15px;
+    border-radius: @border-radius-box;
     .ops-setting-structure-main-controller {
       // height: 70px;
       margin-bottom: 12px;

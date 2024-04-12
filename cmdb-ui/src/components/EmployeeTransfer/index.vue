@@ -230,7 +230,6 @@ export default {
 </script>
 
 <style lang="less">
-@import '~@/style/static.less';
 .employee-transfer {
   width: 100%;
   .vue-treeselect__multi-value-item-container {
@@ -263,7 +262,6 @@ export default {
 </style>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 .employee-transfer {
   display: flex;
   justify-content: space-between;

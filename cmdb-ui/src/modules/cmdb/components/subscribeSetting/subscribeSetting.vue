@@ -244,7 +244,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .cmdb-subscribe-drawer {
   .cmdb-subscribe-drawer-container {
@@ -315,7 +314,6 @@ export default {
 </style>
 
 <style lang="less">
-@import '~@/style/static.less';
 .cmdb-subscribe-drawer {
   .ant-tabs-bar {
     background-color: #custom_colors[color_2];

@@ -393,7 +393,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 .cmdb-preference {
   margin: -24px;
   overflow: auto;

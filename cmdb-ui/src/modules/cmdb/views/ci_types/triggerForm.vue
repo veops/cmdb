@@ -634,7 +634,6 @@ export default {
 </style>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .auto-complete-wrapper {
   position: relative;

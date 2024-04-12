@@ -946,7 +946,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .ci-types-wrap {
   margin: 0 0 -24px 0;

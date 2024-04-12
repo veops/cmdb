@@ -164,7 +164,6 @@ export default {
 </style>
 
 <style lang="less">
-@import '~@/style/static.less';
 
 .attrbute-store-search {
   width: 300px;

@@ -52,7 +52,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import '~@/style/static.less';
 
 .two-column-layout {
   margin-bottom: -24px;
