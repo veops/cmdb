@@ -30,6 +30,7 @@ class CIRelationSearchView(APIView):
                     level: default is 1
                     facet: statistic
         """
+
         page = get_page(request.values.get("page", 1))
         count = get_page_size(request.values.get("count") or request.values.get("page_size"))
 
@@ -79,6 +80,26 @@ class CIRelationStatisticsView(APIView):
         s = Search(root_ids, level, ancestor_ids=ancestor_ids, descendant_ids=descendant_ids, has_m2m=has_m2m)
         try:
             result = s.statistics(type_ids)
+        except SearchError as e:
+            return abort(400, str(e))
+        current_app.logger.debug("search time is :{0}".format(time.time() - start))
+
+        return self.jsonify(result)
+
+
+class CIRelationSearchFullView(APIView):
+    url_prefix = "/ci_relations/search/full"
+
+    def get(self):
+        root_ids = list(map(int, handle_arg_list(request.values.get('root_ids'))))
+        level = request.values.get('level', 1)
+        type_ids = list(map(int, handle_arg_list(request.values.get('type_ids', []))))
+        has_m2m = request.values.get("has_m2m") in current_app.config.get('BOOL_TRUE')
+
+        start = time.time()
+        s = Search(root_ids, level, has_m2m=has_m2m)
+        try:
+            result = s.search_full(type_ids)
         except SearchError as e:
             return abort(400, str(e))
         current_app.logger.debug("search time is :{0}".format(time.time() - start))
