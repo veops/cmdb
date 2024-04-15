@@ -1,8 +1,13 @@
+import base64
+import json
+
 from api.models.cmdb import InnerKV
+from api.extensions import rd
 
 
 class InnerKVManger(object):
     def __init__(self):
+        self.cache = rd.r
         pass
 
     @classmethod
@@ -33,3 +38,26 @@ class InnerKVManger(object):
             return "success", True
 
         return "update failed", True
+
+    @classmethod
+    def get_shares(cls, key):
+        new_value = list()
+        v = rd.get_str(key)
+        if not v:
+            return new_value
+        try:
+            value = json.loads(v.decode("utf-8"))
+            for v in value:
+                new_value.append((v[0], base64.b64decode(v[1])))
+        except Exception as e:
+            return []
+        return new_value
+
+    @classmethod
+    def set_shares(cls, key, value):
+        new_value = list()
+        for v in value:
+            new_value.append((v[0], base64.b64encode(v[1]).decode("utf-8")))
+        rd.set_str(key, json.dumps(new_value))
+
+

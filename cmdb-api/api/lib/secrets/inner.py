@@ -1,19 +1,15 @@
+import json
 import os
 import secrets
 import sys
-from base64 import b64decode, b64encode
+import threading
 
+from base64 import b64decode, b64encode
 from Cryptodome.Protocol.SecretSharing import Shamir
-from colorama import Back
-from colorama import Fore
-from colorama import Style
-from colorama import init as colorama_init
+from colorama import Back, Fore, Style, init as colorama_init
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives import padding
-from cryptography.hazmat.primitives.ciphers import Cipher
-from cryptography.hazmat.primitives.ciphers import algorithms
-from cryptography.hazmat.primitives.ciphers import modes
+from cryptography.hazmat.primitives import hashes, padding
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from flask import current_app
@@ -27,11 +23,16 @@ backend_encrypt_key_name = "encrypt_key"
 backend_root_key_salt_name = "root_key_salt"
 backend_encrypt_key_salt_name = "encrypt_key_salt"
 backend_seal_key = "seal_status"
+
 success = "success"
 seal_status = True
 
+secrets_encrypt_key = ""
+secrets_root_key = ""
 
 def string_to_bytes(value):
+    if not value:
+        return ""
     if isinstance(value, bytes):
         return value
     if sys.version_info.major == 2:
@@ -44,6 +45,8 @@ def string_to_bytes(value):
 class Backend:
     def __init__(self, backend=None):
         self.backend = backend
+        # cache is a redis object
+        self.cache = backend.cache
 
     def get(self, key):
         return self.backend.get(key)
@@ -54,23 +57,33 @@ class Backend:
     def update(self, key, value):
         return self.backend.update(key, value)
 
+    def get_shares(self, key):
+        return self.backend.get_shares(key)
+
+    def set_shares(self, key, value):
+        return self.backend.set_shares(key, value)
+
 
 class KeyManage:
 
     def __init__(self, trigger=None, backend=None):
         self.trigger = trigger
         self.backend = backend
+        self.share_key = "cmdb::secret::secrets_share"
         if backend:
             self.backend = Backend(backend)
 
     def init_app(self, app, backend=None):
         if (sys.argv[0].endswith("gunicorn") or
                 (len(sys.argv) > 1 and sys.argv[1] in ("run", "cmdb-password-data-migrate"))):
+
+            self.backend = backend
+            threading.Thread(target=self.watch_root_key, args=(app,)).start()
+
             self.trigger = app.config.get("INNER_TRIGGER_TOKEN")
             if not self.trigger:
                 return
 
-            self.backend = backend
             resp = self.auto_unseal()
             self.print_response(resp)
 
@@ -124,6 +137,8 @@ class KeyManage:
         return new_shares
 
     def is_valid_root_key(self, root_key):
+        if not root_key:
+            return False
         root_key_hash, ok = self.hash_root_key(root_key)
         if not ok:
             return root_key_hash, ok
@@ -135,35 +150,42 @@ class KeyManage:
         else:
             return "", True
 
-    def auth_root_secret(self, root_key):
-        msg, ok = self.is_valid_root_key(root_key)
-        if not ok:
-            return {
-                "message": msg,
-                "status": "failed"
-            }
+    def auth_root_secret(self, root_key, app):
+        with app.app_context():
+            msg, ok = self.is_valid_root_key(root_key)
+            if not ok:
+                return {
+                    "message": msg,
+                    "status": "failed"
+                }
 
-        encrypt_key_aes = self.backend.get(backend_encrypt_key_name)
-        if not encrypt_key_aes:
-            return {
-                "message": "encrypt key is empty",
-                "status": "failed"
-            }
+            encrypt_key_aes = self.backend.get(backend_encrypt_key_name)
+            if not encrypt_key_aes:
+                return {
+                    "message": "encrypt key is empty",
+                    "status": "failed"
+                }
 
-        secrets_encrypt_key, ok = InnerCrypt.aes_decrypt(string_to_bytes(root_key), encrypt_key_aes)
-        if ok:
-            msg, ok = self.backend.update(backend_seal_key, "open")
+            secret_encrypt_key, ok = InnerCrypt.aes_decrypt(string_to_bytes(root_key), encrypt_key_aes)
             if ok:
-                current_app.config["secrets_encrypt_key"] = secrets_encrypt_key
-                current_app.config["secrets_root_key"] = root_key
-                current_app.config["secrets_shares"] = []
-                return {"message": success, "status": success}
-            return {"message": msg, "status": "failed"}
-        else:
-            return {
-                "message": secrets_encrypt_key,
-                "status": "failed"
-            }
+                msg, ok = self.backend.update(backend_seal_key, "open")
+                if ok:
+                    global secrets_encrypt_key, secrets_root_key
+                    secrets_encrypt_key = secret_encrypt_key
+                    secrets_root_key = root_key
+                    self.backend.cache.set(self.share_key, json.dumps([]))
+                    return {"message": success, "status": success}
+                return {"message": msg, "status": "failed"}
+            else:
+                return {
+                    "message": secret_encrypt_key,
+                    "status": "failed"
+                }
+
+    def parse_shares(self, shares, app):
+        if len(shares) >= global_key_threshold:
+            recovered_secret = Shamir.combine(shares[:global_key_threshold], False)
+            return self.auth_root_secret(b64encode(recovered_secret), app)
 
     def unseal(self, key):
         if not self.is_seal():
@@ -175,14 +197,12 @@ class KeyManage:
         try:
             t = [i for i in b64decode(key)]
             v = (int("".join([chr(i) for i in t[-2:]])), bytes(t[:-2]))
-            shares = current_app.config.get("secrets_shares", [])
+            shares = self.backend.get_shares(self.share_key)
             if v not in shares:
                 shares.append(v)
-                current_app.config["secrets_shares"] = shares
-
+                self.set_shares(shares)
             if len(shares) >= global_key_threshold:
-                recovered_secret = Shamir.combine(shares[:global_key_threshold], False)
-                return self.auth_root_secret(b64encode(recovered_secret))
+                return self.parse_shares(shares, current_app)
             else:
                 return {
                     "message": "waiting for inputting other unseal key {0}/{1}".format(len(shares),
@@ -242,8 +262,11 @@ class KeyManage:
             msg, ok = self.backend.add(backend_seal_key, "open")
             if not ok:
                 return {"message": msg, "status": "failed"}, False
-            current_app.config["secrets_root_key"] = root_key
-            current_app.config["secrets_encrypt_key"] = encrypt_key
+
+            global secrets_encrypt_key, secrets_root_key
+            secrets_encrypt_key = encrypt_key
+            secrets_root_key = root_key
+
             self.print_token(shares, root_token=root_key)
 
             return {"message": "OK",
@@ -266,7 +289,7 @@ class KeyManage:
             }
             #  TODO
         elif len(self.trigger.strip()) == 24:
-            res = self.auth_root_secret(self.trigger.encode())
+            res = self.auth_root_secret(self.trigger.encode(), current_app)
             if res.get("status") == success:
                 return {
                     "message": success,
@@ -298,22 +321,31 @@ class KeyManage:
                     "message": msg,
                     "status": "failed",
                 }
-            current_app.config["secrets_root_key"] = ''
-            current_app.config["secrets_encrypt_key"] = ''
+            self.clear()
+            self.backend.cache.publish(self.share_key, "clear")
+
             return {
                 "message": success,
                 "status": success
             }
 
+    @staticmethod
+    def clear():
+        global secrets_encrypt_key, secrets_root_key
+        secrets_encrypt_key = ''
+        secrets_root_key = ''
+
     def is_seal(self):
         """
-        If there is no initialization or the root key is inconsistent, it is considered to be in a sealed state.
+        If there is no initialization or the root key is inconsistent, it is considered to be in a sealed state..
         :return:
         """
-        secrets_root_key = current_app.config.get("secrets_root_key")
+        # secrets_root_key = current_app.config.get("secrets_root_key")
+        if not secrets_root_key:
+            return True
         msg, ok = self.is_valid_root_key(secrets_root_key)
         if not ok:
-            return true
+            return True
         status = self.backend.get(backend_seal_key)
         return status == "block"
 
@@ -349,22 +381,53 @@ class KeyManage:
         }
         print(status_colors.get(status, Fore.GREEN), message, Style.RESET_ALL)
 
+    def set_shares(self, values):
+        new_value = list()
+        for v in values:
+            new_value.append((v[0], b64encode(v[1]).decode("utf-8")))
+        self.backend.cache.publish(self.share_key, json.dumps(new_value))
+        self.backend.cache.set(self.share_key, json.dumps(new_value))
+
+    def watch_root_key(self, app):
+        pubsub = self.backend.cache.pubsub()
+        pubsub.subscribe(self.share_key)
+
+        new_value = set()
+        for message in pubsub.listen():
+            if message["type"] == "message":
+                if message["data"] == b"clear":
+                    self.clear()
+                    continue
+                try:
+                    value = json.loads(message["data"].decode("utf-8"))
+                    for v in value:
+                        new_value.add((v[0], b64decode(v[1])))
+                except Exception as e:
+                    return []
+                if len(new_value) >= global_key_threshold:
+                    self.parse_shares(list(new_value), app)
+                    new_value = set()
+
 
 class InnerCrypt:
     def __init__(self):
-        secrets_encrypt_key = current_app.config.get("secrets_encrypt_key", "")
-        self.encrypt_key = b64decode(secrets_encrypt_key.encode("utf-8"))
+        self.encrypt_key = b64decode(secrets_encrypt_key)
+        #self.encrypt_key = b64decode(secrets_encrypt_key, "".encode("utf-8"))
 
     def encrypt(self, plaintext):
         """
         encrypt method contain aes currently
         """
+        if not self.encrypt_key:
+            return ValueError("secret is disabled, please seal firstly"), False
         return self.aes_encrypt(self.encrypt_key, plaintext)
 
     def decrypt(self, ciphertext):
         """
         decrypt method contain aes currently
         """
+        if not self.encrypt_key:
+            return ValueError("secret is disabled, please seal firstly"), False
         return self.aes_decrypt(self.encrypt_key, ciphertext)
 
     @classmethod
@@ -381,6 +444,7 @@ class InnerCrypt:
 
             return b64encode(iv + ciphertext).decode("utf-8"), True
         except Exception as e:
+
             return str(e), False
 
     @classmethod

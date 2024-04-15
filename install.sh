@@ -21,7 +21,7 @@ check_docker_compose() {
 
 clone_repo() {
     local repo_url=$1
-    git clone $repo_url || {
+    git clone -b deploy_on_kylin_docker --single-branch $repo_url || {
         echo "error: failed to clone $repo_url"
         exit 1
     }
