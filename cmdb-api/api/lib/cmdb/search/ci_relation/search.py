@@ -8,6 +8,8 @@ from flask import current_app
 from flask_login import current_user
 
 from api.extensions import rd
+from api.lib.cmdb.cache import AttributeCache
+from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci import CIRelationManager
 from api.lib.cmdb.ci_type import CITypeRelationManager
 from api.lib.cmdb.const import ConstraintEnum
@@ -18,6 +20,7 @@ from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.search.ci.db.search import Search as SearchFromDB
 from api.lib.cmdb.search.ci.es.search import Search as SearchFromES
+from api.lib.cmdb.utils import TableMap
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import is_app_admin
 from api.models.cmdb import CI
@@ -236,7 +239,7 @@ class Search(object):
                 type2filter_perms = CIFilterPermsCRUD().get_by_ids(list(map(int, [i['name'] for i in res2])))
 
         ids = [self.root_id] if not isinstance(self.root_id, list) else self.root_id
-        _tmp = []
+        _tmp, tmp_res = [], []
         level2ids = {}
         for lv in range(1, self.level + 1):
             level2ids[lv] = []
@@ -303,25 +306,26 @@ class Search(object):
                         if key:
                             res = [json.loads(x).items() for x in [i or '{}' for i in rd.get(key, prefix) or []]]
                             if type_ids and lv == self.level:
-                                __tmp = [[i for i in x if i[1] in type_ids and
-                                          (not id_filter_limit or (
-                                                  key[idx] not in id_filter_limit or
-                                                  int(i[0]) in id_filter_limit[key[idx]]) or
-                                           int(i[0]) in id_filter_limit)] for idx, x in enumerate(res)]
+                                tmp_res = [[i for i in x if i[1] in type_ids and
+                                            (not id_filter_limit or (
+                                                    key[idx] not in id_filter_limit or
+                                                    int(i[0]) in id_filter_limit[key[idx]]) or
+                                             int(i[0]) in id_filter_limit)] for idx, x in enumerate(res)]
                             else:
-                                __tmp = [[i for i in x if (not id_filter_limit or (
+                                tmp_res = [[i for i in x if (not id_filter_limit or (
                                         key[idx] not in id_filter_limit or
                                         int(i[0]) in id_filter_limit[key[idx]]) or
-                                                           int(i[0]) in id_filter_limit)] for idx, x in enumerate(res)]
+                                                             int(i[0]) in id_filter_limit)] for idx, x in
+                                           enumerate(res)]
 
                             if ci_filter_limit:
-                                __tmp = [[j for j in i if j[1] not in ci_filter_limit or
-                                          int(j[0]) in ci_filter_limit[j[1]]] for i in __tmp]
+                                tmp_res = [[j for j in i if j[1] not in ci_filter_limit or
+                                            int(j[0]) in ci_filter_limit[j[1]]] for i in tmp_res]
                         else:
-                            __tmp = []
+                            tmp_res = []
 
-                        if __tmp:
-                            _tmp[idx] = [j for i in __tmp for j in i]
+                        if tmp_res:
+                            _tmp[idx] = [j for i in tmp_res for j in i]
                     else:
                         _tmp[idx] = []
                         level2ids[lv].append([])
@@ -330,5 +334,73 @@ class Search(object):
 
         result.update(
             detail={str(_id): dict(Counter([i[1] for i in _tmp[idx]]).items()) for idx, _id in enumerate(ids)})
+
+        return result
+
+    def search_full(self, type_ids):
+        def _get_id2name(_type_id):
+            ci_type = CITypeCache.get(_type_id)
+            attr = AttributeCache.get(ci_type.show_id) or AttributeCache.get(ci_type.unique_id)
+            value_table = TableMap(attr=attr).table
+
+            return {i.ci_id: i.value for i in value_table.get_by(attr_id=attr.id, to_dict=False)}
+
+        self.level = int(self.level)
+
+        acl = ACLManager('cmdb')
+
+        type2filter_perms = dict()
+        if not self.is_app_admin:
+            res2 = acl.get_resources(ResourceTypeEnum.CI_FILTER)
+            if res2:
+                type2filter_perms = CIFilterPermsCRUD().get_by_ids(list(map(int, [i['name'] for i in res2])))
+
+        ids = [self.root_id] if not isinstance(self.root_id, list) else self.root_id
+
+        level_ids = [str(i) for i in ids]
+        result = []
+        id2children = {}
+        id2name = _get_id2name(type_ids[0])
+        for i in level_ids:
+            item = dict(id=int(i),
+                        type_id=type_ids[0],
+                        isLeaf=False,
+                        title=id2name.get(int(i)),
+                        children=[])
+            result.append(item)
+            id2children[str(i)] = item['children']
+
+        for lv in range(1, self.level):
+
+            if len(type_ids or []) >= lv and type2filter_perms.get(type_ids[lv]):
+                id_filter_limit, _ = self._get_ci_filter(type2filter_perms[type_ids[lv]])
+            else:
+                id_filter_limit = {}
+
+            if self.has_m2m and lv != 1:
+                key, prefix = [i for i in level_ids], REDIS_PREFIX_CI_RELATION2
+            else:
+                key, prefix = [i.split(',')[-1] for i in level_ids], REDIS_PREFIX_CI_RELATION
+
+            res = [json.loads(x).items() for x in [i or '{}' for i in rd.get(key, prefix) or []]]
+            res = [[i for i in x if (not id_filter_limit or (key[idx] not in id_filter_limit or
+                                                             int(i[0]) in id_filter_limit[key[idx]]) or
+                                     int(i[0]) in id_filter_limit)] for idx, x in enumerate(res)]
+
+            _level_ids = []
+            type_id = type_ids[lv]
+            id2name = _get_id2name(type_id)
+            for idx, _id in enumerate(level_ids):
+                for child_id, _ in (res[idx] or []):
+                    item = dict(id=int(child_id),
+                                type_id=type_id,
+                                isLeaf=True if lv == self.level - 1 else False,
+                                title=id2name.get(int(child_id)),
+                                children=[])
+                    id2children[_id.split(',')[-1]].append(item)
+                    id2children[child_id] = item['children']
+                    _level_ids.append("{},{}".format(_id, child_id))
+
+            level_ids = _level_ids
 
         return result
