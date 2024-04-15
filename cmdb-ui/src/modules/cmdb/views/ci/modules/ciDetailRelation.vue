@@ -260,6 +260,24 @@ export default {
       })
       return { nodes, edges }
     },
+    exsited_ci() {
+      const _exsited_ci = [this.typeId]
+      this.parentCITypes.forEach((parent) => {
+        if (this.firstCIs[parent.name]) {
+          this.firstCIs[parent.name].forEach((parentCi) => {
+            _exsited_ci.push(parentCi._id)
+          })
+        }
+      })
+      this.childCITypes.forEach((child) => {
+        if (this.secondCIs[child.name]) {
+          this.secondCIs[child.name].forEach((childCi) => {
+            _exsited_ci.push(childCi._id)
+          })
+        }
+      })
+      return _exsited_ci
+    },
   },
   inject: {
     attrList: { from: 'attrList' },
@@ -278,6 +296,7 @@ export default {
       await Promise.all([this.getParentCITypes(), this.getChildCITypes()])
       Promise.all([this.getFirstCIs(), this.getSecondCIs()]).then(() => {
         if (isFirst && this.$refs.ciDetailRelationTopo) {
+          this.$refs.ciDetailRelationTopo.exsited_ci = this.exsited_ci
           this.$refs.ciDetailRelationTopo.setTopoData(this.topoData)
         }
       })
@@ -414,6 +433,7 @@ export default {
     handleChangeActiveKey(e) {
       if (e.target.value === '1') {
         this.$nextTick(() => {
+          this.$refs.ciDetailRelationTopo.exsited_ci = this.exsited_ci
           this.$refs.ciDetailRelationTopo.setTopoData(this.topoData)
         })
       }
