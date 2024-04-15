@@ -5,9 +5,9 @@ from api.models.cmdb import InnerKV
 from api.extensions import rd
 
 
-
 class InnerKVManger(object):
     def __init__(self):
+        self.cache = rd.r
         pass
 
     @classmethod
