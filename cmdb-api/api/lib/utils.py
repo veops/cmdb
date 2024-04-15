@@ -117,6 +117,23 @@ class RedisHandler(object):
         except Exception as e:
             current_app.logger.error("delete redis key error, {0}".format(str(e)))
 
+    def set_str(self, key, value, expired=None):
+        try:
+            if expired:
+                self.r.setex(key, expired, value)
+            else:
+                self.r.set(key, value)
+        except Exception as e:
+            current_app.logger.error("set redis error, {0}".format(str(e)))
+
+    def get_str(self, key):
+        try:
+            value = self.r.get(key)
+        except Exception as e:
+            current_app.logger.error("get redis error, {0}".format(str(e)))
+            return
+        return value
+
 
 class ESHandler(object):
     def __init__(self, flask_app=None):

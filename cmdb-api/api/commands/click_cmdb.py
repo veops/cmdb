@@ -32,7 +32,7 @@ from api.lib.perm.acl.resource import ResourceCRUD
 from api.lib.perm.acl.resource import ResourceTypeCRUD
 from api.lib.perm.acl.role import RoleCRUD
 from api.lib.secrets.inner import KeyManage
-from api.lib.secrets.inner import global_key_threshold
+from api.lib.secrets.inner import global_key_threshold, secrets_shares
 from api.lib.secrets.secrets import InnerKVManger
 from api.models.acl import App
 from api.models.acl import ResourceType
@@ -357,13 +357,13 @@ def cmdb_inner_secrets_unseal(address):
     """
     unseal the secrets feature
     """
-    if not valid_address(address):
-        return
+    # if not valid_address(address):
+    #     return
     address = "{}/api/v0.1/secrets/unseal".format(address.strip("/"))
     for i in range(global_key_threshold):
         token = click.prompt(f'Enter unseal token {i + 1}', hide_input=True, confirmation_prompt=False)
         assert token is not None
-        resp = requests.post(address, headers={"Unseal-Token": token})
+        resp = requests.post(address, headers={"Unseal-Token": token}, timeout=5)
         if resp.status_code == 200:
             KeyManage.print_response(resp.json())
             if resp.json().get("status") in ["success", "skip"]:
