@@ -6,6 +6,7 @@ from werkzeug.datastructures import MultiDict
 from api.lib.common_setting.acl import ACLManager
 from api.lib.common_setting.employee import EmployeeAddForm, GrantEmployeeACLPerm
 from api.lib.common_setting.resp_format import ErrFormat
+from api.lib.common_setting.utils import CheckNewColumn
 from api.models.common_setting import Employee, Department
 
 
@@ -209,57 +210,7 @@ def common_check_new_columns():
     """
     add new columns to tables
     """
-    from api.extensions import db
-    from sqlalchemy import inspect, text
-
-    def get_model_by_table_name(_table_name):
-        registry = getattr(db.Model, 'registry', None)
-        class_registry = getattr(registry, '_class_registry', None)
-        for _model in class_registry.values():
-            if hasattr(_model, '__tablename__') and _model.__tablename__ == _table_name:
-                return _model
-        return None
-
-    def add_new_column(target_table_name, new_column):
-        column_type = new_column.type.compile(engine.dialect)
-        default_value = new_column.default.arg if new_column.default else None
-
-        sql = "ALTER TABLE " + target_table_name + " ADD COLUMN " + f"`{new_column.name}`" + " " + column_type
-        if new_column.comment:
-            sql += f" comment '{new_column.comment}'"
-
-        if column_type == 'JSON':
-            pass
-        elif default_value:
-            if column_type.startswith('VAR') or column_type.startswith('Text'):
-                if default_value is None or len(default_value) == 0:
-                    pass
-            else:
-                sql += f" DEFAULT {default_value}"
-
-        sql = text(sql)
-        db.session.execute(sql)
-
-    engine = db.get_engine()
-    inspector = inspect(engine)
-    table_names = inspector.get_table_names()
-    for table_name in table_names:
-        existed_columns = inspector.get_columns(table_name)
-        existed_column_name_list = [c['name'] for c in existed_columns]
-
-        model = get_model_by_table_name(table_name)
-        if model is None:
-            continue
-
-        model_columns = getattr(getattr(getattr(model, '__table__'), 'columns'), '_all_columns')
-        for column in model_columns:
-            if column.name not in existed_column_name_list:
-                try:
-                    add_new_column(table_name, column)
-                    current_app.logger.info(f"add new column [{column.name}] in table [{table_name}] success.")
-                except Exception as e:
-                    current_app.logger.error(f"add new column [{column.name}] in table [{table_name}] err:")
-                    current_app.logger.error(e)
+    CheckNewColumn().run()
 
 
 @click.command()
