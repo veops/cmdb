@@ -32,7 +32,7 @@ from api.lib.perm.acl.resource import ResourceCRUD
 from api.lib.perm.acl.resource import ResourceTypeCRUD
 from api.lib.perm.acl.role import RoleCRUD
 from api.lib.secrets.inner import KeyManage
-from api.lib.secrets.inner import global_key_threshold, secrets_shares
+from api.lib.secrets.inner import global_key_threshold
 from api.lib.secrets.secrets import InnerKVManger
 from api.models.acl import App
 from api.models.acl import ResourceType
