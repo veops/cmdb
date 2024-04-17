@@ -55,9 +55,12 @@ def cmdb_init_cache():
     for cr in ci_relations:
         relations.setdefault(cr.first_ci_id, {}).update({cr.second_ci_id: cr.second_ci.type_id})
         if cr.ancestor_ids:
-            relations2.setdefault(cr.ancestor_ids, {}).update({cr.second_ci_id: cr.second_ci.type_id})
+            relations2.setdefault('{},{}'.format(cr.ancestor_ids, cr.first_ci_id), {}).update(
+                {cr.second_ci_id: cr.second_ci.type_id})
     for i in relations:
         relations[i] = json.dumps(relations[i])
+    for i in relations2:
+        relations2[i] = json.dumps(relations2[i])
     if relations:
         rd.create_or_update(relations, REDIS_PREFIX_CI_RELATION)
     if relations2:
