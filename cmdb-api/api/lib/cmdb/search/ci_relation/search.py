@@ -21,6 +21,7 @@ from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.search.ci.db.search import Search as SearchFromDB
 from api.lib.cmdb.search.ci.es.search import Search as SearchFromES
 from api.lib.cmdb.utils import TableMap
+from api.lib.cmdb.utils import ValueTypeMap
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import is_app_admin
 from api.models.cmdb import CI
@@ -340,10 +341,21 @@ class Search(object):
     def search_full(self, type_ids):
         def _get_id2name(_type_id):
             ci_type = CITypeCache.get(_type_id)
-            attr = AttributeCache.get(ci_type.show_id) or AttributeCache.get(ci_type.unique_id)
-            value_table = TableMap(attr=attr).table
 
-            return {i.ci_id: i.value for i in value_table.get_by(attr_id=attr.id, to_dict=False)}
+            attr = AttributeCache.get(ci_type.unique_id)
+            value_table = TableMap(attr=attr).table
+            serializer = ValueTypeMap.serialize[attr.value_type]
+            unique_value = {i.ci_id: serializer(i.value) for i in value_table.get_by(attr_id=attr.id, to_dict=False)}
+
+            attr = AttributeCache.get(ci_type.show_id)
+            if attr:
+                value_table = TableMap(attr=attr).table
+                serializer = ValueTypeMap.serialize[attr.value_type]
+                show_value = {i.ci_id: serializer(i.value) for i in value_table.get_by(attr_id=attr.id, to_dict=False)}
+            else:
+                show_value = unique_value
+
+            return show_value, unique_value
 
         self.level = int(self.level)
 
@@ -365,7 +377,8 @@ class Search(object):
             item = dict(id=int(i),
                         type_id=type_ids[0],
                         isLeaf=False,
-                        title=id2name.get(int(i)),
+                        title=id2name[0].get(int(i)),
+                        uniqueValue=id2name[1].get(int(i)),
                         children=[])
             result.append(item)
             id2children[str(i)] = item['children']
@@ -381,25 +394,26 @@ class Search(object):
                 key, prefix = [i for i in level_ids], REDIS_PREFIX_CI_RELATION2
             else:
                 key, prefix = [i.split(',')[-1] for i in level_ids], REDIS_PREFIX_CI_RELATION
-
             res = [json.loads(x).items() for x in [i or '{}' for i in rd.get(key, prefix) or []]]
             res = [[i for i in x if (not id_filter_limit or (key[idx] not in id_filter_limit or
                                                              int(i[0]) in id_filter_limit[key[idx]]) or
                                      int(i[0]) in id_filter_limit)] for idx, x in enumerate(res)]
-
             _level_ids = []
             type_id = type_ids[lv]
             id2name = _get_id2name(type_id)
-            for idx, _id in enumerate(level_ids):
+            for idx, node_path in enumerate(level_ids):
                 for child_id, _ in (res[idx] or []):
                     item = dict(id=int(child_id),
                                 type_id=type_id,
                                 isLeaf=True if lv == self.level - 1 else False,
-                                title=id2name.get(int(child_id)),
+                                title=id2name[0].get(int(child_id)),
+                                uniqueValue=id2name[1].get(int(child_id)),
                                 children=[])
-                    id2children[_id.split(',')[-1]].append(item)
-                    id2children[child_id] = item['children']
-                    _level_ids.append("{},{}".format(_id, child_id))
+                    id2children[node_path].append(item)
+
+                    _node_path = "{},{}".format(node_path, child_id)
+                    _level_ids.append(_node_path)
+                    id2children[_node_path] = item['children']
 
             level_ids = _level_ids
 
