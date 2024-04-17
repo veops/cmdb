@@ -1233,7 +1233,10 @@ class CITypeTemplateManager(object):
     def _import_ci_types(self, ci_types, attr_id_map):
         for i in ci_types:
             i.pop("unique_key", None)
+            i.pop("show_name", None)
             i['unique_id'] = attr_id_map.get(i['unique_id'], i['unique_id'])
+            if i.get('show_id'):
+                i['show_id'] = attr_id_map.get(i['show_id'], i['show_id'])
             i['uid'] = current_user.uid
 
         return self.__import(CIType, ci_types)
