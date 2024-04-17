@@ -997,8 +997,8 @@ export default {
         return
       }
       const treeData = []
-      const _treeKeys = _.cloneDeep(this.treeKeys)
       facet.forEach((item) => {
+        const _treeKeys = _.cloneDeep(this.treeKeys)
         _treeKeys.push(item.ciId + '%' + item.typeId + '%' + `{"${item.unique}":"${item.uniqueValue}"}`)
         treeData.push({
           title: item.showName ? item.showNameValue : item.uniqueValue,
