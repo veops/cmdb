@@ -6,6 +6,27 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "39948814",
+      "name": "veops-show",
+      "font_class": "veops-show",
+      "unicode": "e914",
+      "unicode_decimal": 59668
+    },
+    {
+      "icon_id": "39926816",
+      "name": "itsm-duration",
+      "font_class": "itsm-duration",
+      "unicode": "e913",
+      "unicode_decimal": 59667
+    },
+    {
+      "icon_id": "39926833",
+      "name": "itsm-workload (1)",
+      "font_class": "a-itsm-workload1",
+      "unicode": "e912",
+      "unicode_decimal": 59666
+    },
+    {
       "icon_id": "39782649",
       "name": "VPC",
       "font_class": "caise-VPC",

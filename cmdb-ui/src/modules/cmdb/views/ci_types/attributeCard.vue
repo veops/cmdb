@@ -10,6 +10,7 @@
     :class="{ 'attribute-card': true, 'attribute-card-add': isAdd, 'attribute-card-inherited': inherited }"
   >
     <div class="attribute-card-uniqueKey" v-if="isUnique">{{ $t('cmdb.ciType.uniqueKey') }}</div>
+    <div class="attribute-card-uniqueKey" v-if="isShowId">{{ $t('cmdb.ciType.show') }}</div>
     <template v-if="!isAdd">
       <a-tooltip :title="inherited ? $t('cmdb.ciType.inheritFrom', { name: property.inherited_from }) : ''">
         <div class="attribute-card-content">
@@ -27,6 +28,7 @@
           <div
             class="attribute-card-trigger"
             v-if="(property.value_type === '3' || property.value_type === '4') && !isStore"
+            :style="{ top: isShowId ? '18px' : '' }"
           >
             <a @click="openTrigger"><ops-icon type="ops-trigger"/></a>
           </div>
@@ -64,12 +66,24 @@
           </a-space>
         </a-popover>
 
-        <a-space class="attribute-card-operation" v-if="!inherited">
-          <a v-if="!isStore"><a-icon type="edit" @click="handleEdit"/></a>
-          <a-tooltip :title="$t('cmdb.ciType.computeForAllCITips')">
-            <a v-if="!isStore && property.is_computed"><a-icon type="redo" @click="handleCalcComputed"/></a>
+        <a-space class="attribute-card-operation">
+          <a v-if="!isStore && !inherited"><a-icon type="edit" @click="handleEdit"/></a>
+          <a-tooltip
+            v-if="
+              !isStore &&
+                !isUnique &&
+                !['6'].includes(property.value_type) &&
+                !property.is_password &&
+                !property.is_list
+            "
+            :title="$t(isShowId ? 'cmdb.ciType.cancelSetAsShow' : 'cmdb.ciType.setAsShow')"
+          >
+            <a><ops-icon type="veops-show" @click="setAsShow"/></a>
           </a-tooltip>
-          <a v-if="!isUnique" style="color:red;"><a-icon type="delete" @click="handleDelete"/></a>
+          <a-tooltip v-if="!isStore && property.is_computed" :title="$t('cmdb.ciType.computeForAllCITips')">
+            <a><a-icon type="redo" @click="handleCalcComputed"/></a>
+          </a-tooltip>
+          <a v-if="!isUnique && !inherited" style="color:red;"><a-icon type="delete" @click="handleDelete"/></a>
         </a-space>
       </div>
       <TriggerForm ref="triggerForm" :CITypeId="CITypeId" />
@@ -84,17 +98,9 @@
 <script>
 import { deleteCITypeAttributesById, deleteAttributesById, calcComputedAttribute } from '@/modules/cmdb/api/CITypeAttr'
 import ValueTypeIcon from '@/components/CMDBValueTypeMapIcon'
-import {
-  ops_default_show,
-  ops_is_choice,
-  ops_is_index,
-  ops_is_link,
-  ops_is_password,
-  ops_is_sortable,
-  ops_is_unique,
-} from '@/core/icons'
 import { valueTypeMap } from '../../utils/const'
 import TriggerForm from './triggerForm.vue'
+import { updateCIType } from '@/modules/cmdb/api/CIType'
 export default {
   name: 'AttributeCard',
   inject: {
@@ -102,17 +108,14 @@ export default {
       from: 'unique',
       default: () => undefined,
     },
+    show_id: {
+      from: 'show_id',
+      default: () => undefined,
+    },
   },
   components: {
     ValueTypeIcon,
     TriggerForm,
-    ops_default_show,
-    ops_is_choice,
-    ops_is_index,
-    ops_is_link,
-    ops_is_password,
-    ops_is_sortable,
-    ops_is_unique,
   },
   props: {
     property: {
@@ -143,6 +146,12 @@ export default {
     isUnique() {
       if (this.unique) {
         return this.property?.name === this.unique()
+      }
+      return false
+    },
+    isShowId() {
+      if (this.show_id) {
+        return this.property?.id === this.show_id()
       }
       return false
     },
@@ -215,6 +224,11 @@ export default {
             that.$message.success(that.$t('cmdb.ciType.computeSuccess'))
           })
         },
+      })
+    },
+    setAsShow() {
+      updateCIType(this.CITypeId, { show_id: this.isShowId ? null : this.property?.id }).then((res) => {
+        this.$emit('ok')
       })
     },
   },

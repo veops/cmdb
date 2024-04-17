@@ -5,7 +5,6 @@ import Vuex from 'vuex'
 import app from './global/app'
 import user from './global/user'
 import routes from './global/routes'
-import logo from './global/logo'
 import notice from './global/notice'
 import getters from './global/getters'
 import appConfig from '@/config/app'
@@ -17,7 +16,6 @@ const store = new Vuex.Store({
     app,
     user,
     routes,
-    logo,
     notice
   },
   state: {

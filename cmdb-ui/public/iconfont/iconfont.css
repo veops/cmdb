@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1711963254221') format('woff2'),
-       url('iconfont.woff?t=1711963254221') format('woff'),
-       url('iconfont.ttf?t=1711963254221') format('truetype');
+  src: url('iconfont.woff2?t=1713335725699') format('woff2'),
+       url('iconfont.woff?t=1713335725699') format('woff'),
+       url('iconfont.ttf?t=1713335725699') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,18 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.veops-show:before {
+  content: "\e914";
+}
+
+.itsm-duration:before {
+  content: "\e913";
+}
+
+.a-itsm-workload1:before {
+  content: "\e912";
 }
 
 .caise-VPC:before {

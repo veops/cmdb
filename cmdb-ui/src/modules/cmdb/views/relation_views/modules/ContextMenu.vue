@@ -27,7 +27,13 @@
         />
         <span class="relation-views-node-icon" v-else>{{ icon ? icon[0].toUpperCase() : 'i' }}</span>
       </template>
-      <span class="relation-views-node-title" v-if="!isEditNodeName" :title="title">{{ title }}</span>
+      <span
+        class="relation-views-node-title"
+        v-if="!isEditNodeName"
+        :title="title"
+        v-highlight="{ value: fullSearchValue, class: 'relation-views-node-title-highlight' }"
+      >{{ title }}
+      </span>
       <a-input
         ref="input"
         @blur="changeNodeName"
@@ -67,10 +73,7 @@
               key="editNodeName"
             ><ops-icon type="icon-xianxing-edit" />{{ $t('cmdb.serviceTree.editNodeName') }}</a-menu-item
             >
-            <a-menu-item
-              key="batch"
-            ><ops-icon type="veops-copy" />{{ $t('cmdb.serviceTree.batch') }}</a-menu-item
-            >
+            <a-menu-item key="batch"><ops-icon type="veops-copy" />{{ $t('cmdb.serviceTree.batch') }}</a-menu-item>
           </template>
           <template v-else>
             <a-menu-item
@@ -103,20 +106,17 @@
 
 <script>
 import { updateCI } from '../../../api/ci.js'
+import highlight from '@/directive/highlight'
+
 export default {
   name: 'ContextMenu',
+  directives: {
+    highlight,
+  },
   props: {
-    title: {
-      type: String,
-      default: '',
-    },
-    number: {
-      type: Number,
-      default: 0,
-    },
-    treeKey: {
-      type: String,
-      default: '',
+    treeNodeData: {
+      type: Object,
+      default: () => {},
     },
     levels: {
       type: Array,
@@ -130,10 +130,6 @@ export default {
       type: Object,
       default: () => {},
     },
-    isLeaf: {
-      type: Boolean,
-      default: () => false,
-    },
     ciTypeIcons: {
       type: Object,
       default: () => {},
@@ -145,6 +141,10 @@ export default {
     batchTreeKey: {
       type: Array,
       default: () => [],
+    },
+    fullSearchValue: {
+      type: String,
+      default: '',
     },
   },
   data() {
@@ -201,6 +201,21 @@ export default {
     showCheckbox() {
       return this.showBatchLevel === this.treeKey.split('@^@').filter((item) => !!item).length - 1
     },
+    title() {
+      return this.treeNodeData.title
+    },
+    number() {
+      return this.treeNodeData.number
+    },
+    treeKey() {
+      return this.treeNodeData.key
+    },
+    isLeaf() {
+      return this.treeNodeData.isLeaf
+    },
+    showName() {
+      return this.treeNodeData.showName
+    },
   },
   methods: {
     onContextMenuClick(treeKey, menuKey) {
@@ -230,8 +245,11 @@ export default {
           .split('%')
         const unique = Object.keys(JSON.parse(ci[2]))[0]
         const ciId = Number(ci[0])
-
-        updateCI(ciId, { [unique]: value }).then((res) => {
+        let editAttrName = unique
+        if (this.showName) {
+          editAttrName = this.showName
+        }
+        updateCI(ciId, { [editAttrName]: value }).then((res) => {
           this.$message.success(this.$t('updateSuccess'))
           this.$emit('updateTreeData', ciId, value)
         })
@@ -244,7 +262,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-
 .relation-views-node {
   width: 100%;
   display: inline-flex;
@@ -313,6 +330,9 @@ export default {
 </style>
 
 <style lang="less">
+.relation-views-node-title-highlight {
+  color: @func-color_1;
+}
 .relation-views-left {
   ul:has(.relation-views-node-checkbox) > li > ul {
     margin-left: 26px;

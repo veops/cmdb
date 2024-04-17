@@ -11,6 +11,14 @@
         <template #one>
           <div class="relation-views-left" :style="{ height: `${windowHeight - 115}px` }">
             <div class="relation-views-left-header" :title="$route.meta.name">{{ $route.meta.name }}</div>
+            <a-input
+              :placeholder="$t('cmdb.serviceTree.searchTips')"
+              class="relation-views-left-input"
+              @pressEnter="handleSearchFull"
+              v-model="fullSearchValue"
+            >
+              <a-icon slot="prefix" type="search" />
+            </a-input>
             <div
               class="ops-list-batch-action"
               :style="{ marginBottom: '10px' }"
@@ -47,6 +55,7 @@
               <span>{{ $t('selectRows', { rows: batchTreeKey.length }) }}</span>
             </div>
             <a-tree
+              v-if="!isFullSearch"
               :selectedKeys="selectedKeys"
               :loadData="onLoadData"
               :treeData="treeData"
@@ -55,13 +64,10 @@
               @drop="onDrop"
               :expandedKeys="expandedKeys"
             >
-              <template #title="{ key: treeKey, title,number, isLeaf }">
+              <template #title="treeNodeData">
                 <ContextMenu
-                  :title="title"
-                  :number="number"
-                  :treeKey="treeKey"
+                  :treeNodeData="treeNodeData"
                   :levels="levels"
-                  :isLeaf="isLeaf"
                   :currentViews="relationViews.views[viewName]"
                   :id2type="relationViews.id2type"
                   @onContextMenuClick="onContextMenuClick"
@@ -71,6 +77,30 @@
                   :batchTreeKey="batchTreeKey"
                   @clickCheckbox="clickCheckbox"
                   @updateTreeData="updateTreeData"
+                />
+              </template>
+            </a-tree>
+            <a-tree
+              v-else
+              :treeData="filterFullTreeData"
+              defaultExpandAll
+              :selectedKeys="selectedKeys"
+              :expandedKeys="expandedKeys"
+            >
+              <template #title="treeNodeData">
+                <ContextMenu
+                  :treeNodeData="treeNodeData"
+                  :levels="levels"
+                  :currentViews="relationViews.views[viewName]"
+                  :id2type="relationViews.id2type"
+                  @onContextMenuClick="onContextMenuClick"
+                  @onNodeClick="onNodeClick"
+                  :ciTypeIcons="ciTypeIcons"
+                  :showBatchLevel="showBatchLevel"
+                  :batchTreeKey="batchTreeKey"
+                  @clickCheckbox="clickCheckbox"
+                  @updateTreeData="updateTreeData"
+                  :fullSearchValue="fullSearchValue"
                 />
               </template>
             </a-tree>
@@ -342,7 +372,6 @@
                       total,
                     })
                 "
-                :style="{ alignSelf: 'flex-end', marginRight: '12px' }"
               >
                 <template slot="buildOptionText" slot-scope="props">
                   <span v-if="props.value !== '100000'">{{ props.value }}{{ $t('cmdb.history.itemsPerPage') }}</span>
@@ -392,6 +421,7 @@ import {
   batchDeleteCIRelation,
   batchUpdateCIRelationChildren,
   addCIRelationView,
+  searchCIRelationFull,
 } from '@/modules/cmdb/api/CIRelation'
 
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
@@ -489,9 +519,13 @@ export default {
 
       statisticsObj: {},
       viewOption: {},
+      loadRootStatisticsParams: {},
+      fullSearchValue: '',
+      isFullSearch: false,
+      fullTreeData: [],
+      filterFullTreeData: [],
     }
   },
-
   computed: {
     windowHeight() {
       return this.$store.state.windowHeight
@@ -500,9 +534,6 @@ export default {
       return this.windowHeight - 244
     },
     selectedKeys() {
-      if (this.treeKeys.length <= 1) {
-        return this.treeKeys.map((item) => `@^@${item}`)
-      }
       return [this.treeKeys.join('@^@')]
     },
     isLeaf() {
@@ -576,7 +607,7 @@ export default {
       this.reload()
     },
     pageNo: function(newPage, oldPage) {
-      this.loadData({ pageNo: newPage }, undefined, this.sortByTable)
+      this.loadData({ params: { pageNo: newPage }, refreshType: undefined, sortByTable: this.sortByTable })
     },
   },
 
@@ -604,7 +635,7 @@ export default {
       this.loadData()
     },
 
-    async loadData(parameter, refreshType = undefined, sortByTable = undefined) {
+    async loadData({ parameter, refreshType = undefined, sortByTable = undefined } = {}) {
       // refreshType='refreshNumber' 树图只更新number
       const params = Object.assign(parameter || {}, (this.$refs.search || {}).queryParam)
       let q = ''
@@ -624,8 +655,6 @@ export default {
 
       const exp = expression.match(regQ) ? expression.match(regQ)[0] : null
       if (exp) {
-        // exp = exp.replace(/(\:)/g, '$1*')
-        // exp = exp.replace(/(\,)/g, '*$1')
         q = `${q},${exp}`
       }
 
@@ -656,38 +685,9 @@ export default {
       }
 
       if (this.treeKeys.length === 0) {
-        // await this.judgeCITypes(q)
-        if (!refreshType) {
+        if (!refreshType && !this.isFullSearch) {
           await this.loadRoot()
         }
-
-        // const fuzzySearch = (this.$refs['search'] || {}).fuzzySearch || ''
-        // if (fuzzySearch) {
-        //   q = `q=_type:${this.currentTypeId[0]},*${fuzzySearch}*,` + q
-        // } else {
-        //   q = `q=_type:${this.currentTypeId[0]},` + q
-        // }
-        // if (this.currentTypeId[0] && this.treeData && this.treeData.length) {
-        //   // default select first node
-        //   this.onNodeClick(this.treeData[0].key)
-        //   const res = await searchCI2(q)
-        //   const root_id = this.treeData.map((item) => item.id).join(',')
-        //   q += `&root_id=${root_id}`
-
-        //   this.pageNo = res.page
-        //   this.numfound = res.numfound
-        //   res.result.forEach((item, index) => (item.key = item._id))
-        //   const jsonAttrList = this.preferenceAttrList.filter((attr) => attr.value_type === '6')
-        //   console.log(jsonAttrList)
-        //   this.instanceList = res['result'].map((item) => {
-        //     jsonAttrList.forEach(
-        //       (jsonAttr) => (item[jsonAttr.name] = item[jsonAttr.name] ? JSON.stringify(item[jsonAttr.name]) : '')
-        //     )
-        //     return { ..._.cloneDeep(item) }
-        //   })
-        //   this.initialInstanceList = _.cloneDeep(this.instanceList)
-        //   this.calcColumns()
-        // }
       } else {
         q += `&root_id=${this.treeKeys[this.treeKeys.length - 1].split('%')[0]}`
 
@@ -726,7 +726,7 @@ export default {
         }
 
         q += `&level=${this.topo_flatten.includes(this.currentTypeId[0]) ? 1 : level.join(',')}`
-        if (!refreshType) {
+        if (!refreshType && !this.isFullSearch) {
           this.loadNoRoot(this.treeKeys[this.treeKeys.length - 1], level)
         }
         const fuzzySearch = (this.$refs['search'] || {}).fuzzySearch || ''
@@ -812,9 +812,6 @@ export default {
       this.selectedRowKeys = []
       this.currentTypeId = [typeId]
       this.loadColumns()
-      // this.$nextTick(() => {
-      //   this.refreshTable()
-      // })
     },
 
     async judgeCITypes() {
@@ -854,64 +851,6 @@ export default {
         this.currentTypeId = [this.showTypeIds[0]]
         await this.loadColumns()
       }
-      // const showTypeIds = []
-      // let _showTypes = []
-      // let _showTypeIds = []
-
-      // if (this.treeKeys.length) {
-      //   const typeId = parseInt(this.treeKeys[this.treeKeys.length - 1].split('%')[1])
-
-      //   _showTypes = this.node2ShowTypes[typeId + '']
-      //   _showTypes.forEach((item) => {
-      //     _showTypeIds.push(item.id)
-      //   })
-      // } else {
-      //   _showTypeIds = JSON.parse(JSON.stringify(this.origShowTypeIds))
-      //   _showTypes = JSON.parse(JSON.stringify(this.origShowTypes))
-      // }
-      // const promises = _showTypeIds.map((typeId) => {
-      //   let _q = (`q=_type:${typeId},` + q).replace(/count=\d*/, 'count=1')
-      //   if (Object.values(this.level2constraint).includes('2')) {
-      //     _q = _q + `&has_m2m=1`
-      //   }
-      //   if (this.root_parent_path) {
-      //     _q = _q + `&root_parent_path=${this.root_parent_path}`
-      //   }
-      //   // if (this.treeKeys.length === 0) {
-      //   //   return searchCI2(_q).then((res) => {
-      //   //     if (res.numfound !== 0) {
-      //   //       showTypeIds.push(typeId)
-      //   //     }
-      //   //   })
-      //   // } else {
-      //   _q = _q + `&descendant_ids=${this.descendant_ids}`
-      //   return searchCIRelation(_q).then((res) => {
-      //     if (res.numfound !== 0) {
-      //       showTypeIds.push(typeId)
-      //     }
-      //   })
-      //   // }
-      // })
-      // await Promise.all(promises).then(async () => {
-      //   if (showTypeIds.length && showTypeIds.sort().join(',') !== this.showTypeIds.sort().join(',')) {
-      //     const showTypes = []
-      //     _showTypes.forEach((item) => {
-      //       if (showTypeIds.includes(item.id)) {
-      //         showTypes.push(item)
-      //       }
-      //     })
-      //     console.log(showTypes)
-      //     this.showTypes = showTypes
-      //     this.showTypeIds = showTypeIds
-      //     if (
-      //       !this.currentTypeId.length ||
-      //       (this.currentTypeId.length && !this.showTypeIds.includes(this.currentTypeId[0]))
-      //     ) {
-      //       this.currentTypeId = [this.showTypeIds[0]]
-      //       await this.loadColumns()
-      //     }
-      //   }
-      // })
     },
 
     async loadRoot() {
@@ -919,29 +858,41 @@ export default {
         const facet = []
         const ciIds = []
         res.result.forEach((item) => {
-          facet.push([item[item.unique], 0, item._id, item._type, item.unique])
+          const showName = this.relationViews.id2type[item._type]?.show_name ?? null
+          facet.push({
+            showName,
+            showNameValue: item[showName] ?? null,
+            uniqueValue: item[item.unique],
+            number: 0,
+            ciId: item._id,
+            typeId: item._type,
+            unique: item.unique,
+          })
           ciIds.push(item._id)
         })
-        const promises = this.leaf.map((leafId) => {
-          let level = 0
-          this.levels.forEach((item, idx) => {
-            if (item.includes(leafId)) {
-              level = idx + 1
-            }
-          })
-          return statisticsCIRelation({
-            root_ids: ciIds.join(','),
-            level: level,
-            type_ids: this.leaf2showTypes[this.leaf[0]].join(','),
-            has_m2m: Number(Object.values(this.level2constraint).includes('2')),
-            descendant_ids: this.descendant_ids_for_statistics,
-          }).then((num) => {
-            facet.forEach((item, idx) => {
-              item[1] += num[ciIds[idx] + '']
-            })
+
+        const leafId = this.leaf[0]
+        let level = 0
+        this.levels.forEach((item, idx) => {
+          if (item.includes(leafId)) {
+            level = idx + 1
+          }
+        })
+        const params = {
+          level,
+          root_ids: ciIds.join(','),
+          has_m2m: Number(Object.values(this.level2constraint).includes('2')),
+        }
+        this.loadRootStatisticsParams = params
+        await statisticsCIRelation({
+          ...params,
+          type_ids: this.leaf2showTypes[this.leaf[0]].join(','),
+          descendant_ids: this.descendant_ids_for_statistics,
+        }).then((num) => {
+          facet.forEach((item, idx) => {
+            item.number += num[ciIds[idx] + '']
           })
         })
-        await Promise.all(promises)
         this.wrapTreeData(facet)
         // default select first node
         this.onNodeClick(this.treeData[0].key)
@@ -976,7 +927,16 @@ export default {
           const facet = []
           const ciIds = []
           res.result.forEach((item) => {
-            facet.push([item[item.unique], 0, item._id, item._type, item.unique])
+            const showName = this.relationViews.id2type[item._type]?.show_name ?? null
+            facet.push({
+              showName,
+              showNameValue: item[showName] ?? null,
+              uniqueValue: item[item.unique],
+              number: 0,
+              ciId: item._id,
+              typeId: item._type,
+              unique: item.unique,
+            })
             ciIds.push(item._id)
           })
           let ancestor_ids
@@ -998,7 +958,7 @@ export default {
                 descendant_ids: this.descendant_ids_for_statistics,
               }).then((num) => {
                 facet.forEach((item, idx) => {
-                  item[1] += num[ciIds[idx] + '']
+                  item.number += num[ciIds[idx] + '']
                 })
               })
             }
@@ -1009,7 +969,7 @@ export default {
       }
     },
 
-    onNodeClick(keys) {
+    onNodeClick(keys, callback = undefined) {
       this.triggerSelect = true
       if (keys) {
         const _tempKeys = keys.split('@^@').filter((item) => item !== '')
@@ -1028,19 +988,25 @@ export default {
       }
 
       this.refreshTable()
+      if (callback && typeof callback === 'function') {
+        callback()
+      }
     },
     wrapTreeData(facet) {
       if (this.triggerSelect) {
         return
       }
       const treeData = []
+      const _treeKeys = _.cloneDeep(this.treeKeys)
       facet.forEach((item) => {
+        _treeKeys.push(item.ciId + '%' + item.typeId + '%' + `{"${item.unique}":"${item.uniqueValue}"}`)
         treeData.push({
-          title: item[0],
-          number: item[1],
-          key: this.treeKeys.join('@^@') + '@^@' + item[2] + '%' + item[3] + '%' + `{"${item[4]}":"${item[0]}"}`,
-          isLeaf: this.leaf.includes(item[3]),
-          id: item[2],
+          title: item.showName ? item.showNameValue : item.uniqueValue,
+          number: item.number,
+          key: _treeKeys.join('@^@'),
+          isLeaf: this.leaf.includes(item.typeId),
+          id: item.ciId,
+          showName: item.showName,
         })
       })
       if (this.treeNode === null) {
@@ -1060,7 +1026,6 @@ export default {
         }
         this.treeKeys = treeNode.eventKey.split('@^@').filter((item) => item !== '')
         this.treeNode = treeNode
-        // this.refreshTable()
         resolve()
       })
     },
@@ -1228,7 +1193,7 @@ export default {
             that.$refs.xTable.clearCheckboxRow()
             that.$refs.xTable.clearCheckboxReserve()
             that.selectedRowKeys = []
-            that.loadData({}, 'refreshNumber')
+            that.loadData({ params: {}, refreshType: 'refreshNumber' })
           })
         },
       })
@@ -1241,9 +1206,7 @@ export default {
       const _splitTargetKey = targetKey.split('@^@').filter((item) => item !== '')
       if (_splitDragKey.length - 1 === _splitTargetKey.length) {
         const dragId = _splitDragKey[_splitDragKey.length - 1].split('%')[0]
-        // const targetObj = JSON.parse(_splitTargetKey[_splitTargetKey.length - 1].split('%')[2])
         const targetId = _splitTargetKey[_splitTargetKey.length - 1].split('%')[0]
-        // TODO 拖拽这里不造咋弄 等等再说吧
         batchUpdateCIRelationChildren([dragId], [targetId]).then((res) => {
           this.reload()
         })
@@ -1278,7 +1241,7 @@ export default {
       this.sortByTable = sortByTable
       this.$nextTick(() => {
         if (this.pageNo === 1) {
-          this.loadData({}, undefined, sortByTable)
+          this.loadData({ params: {}, refreshType: undefined, sortByTable })
         } else {
           this.pageNo = 1
         }
@@ -1437,7 +1400,7 @@ export default {
         onOk() {
           deleteCI(record.ci_id || record._id).then((res) => {
             that.$message.success(that.$t('deleteSuccess'))
-            that.loadData({}, 'refreshNumber')
+            that.loadData({ params: {}, refreshType: 'refreshNumber' })
           })
         },
       })
@@ -1457,7 +1420,7 @@ export default {
       }
       addCIRelationView(first_ci_id, ci_id, { ancestor_ids }).then((res) => {
         setTimeout(() => {
-          this.loadData({}, 'refreshNumber')
+          this.loadData({ params: {}, refreshType: 'refreshNumber' })
         }, 500)
       })
     },
@@ -1495,7 +1458,7 @@ export default {
             .finally(() => {
               that.loading = false
               setTimeout(() => {
-                that.loadData({})
+                that.loadData({ params: {} })
               }, 800)
             })
         },
@@ -1558,7 +1521,7 @@ export default {
               that.selectedRowKeys = []
               that.$refs.xTable.clearCheckboxRow()
               that.$refs.xTable.clearCheckboxReserve()
-              that.loadData({}, 'refreshNumber')
+              that.loadData({ params: {}, refreshType: 'refreshNumber' })
             })
         },
       })
@@ -1568,7 +1531,6 @@ export default {
     },
     jsonEditorOk(row, column, jsonData) {
       // 后端写数据有快慢，不拉接口直接修改table的数据
-      // this.reloadData()
       this.instanceList.forEach((item) => {
         if (item._id === row._id) {
           item[column.property] = JSON.stringify(jsonData)
@@ -1577,7 +1539,7 @@ export default {
       this.$refs.xTable.refreshColumn()
     },
     relationViewRefreshNumber() {
-      this.loadData({}, 'refreshNumber')
+      this.loadData({ params: {}, refreshType: 'refreshNumber' })
     },
     onShowSizeChange(current, pageSize) {
       this.pageSize = pageSize
@@ -1754,11 +1716,9 @@ export default {
           return node[i]
         }
         if (node[i].children && node[i].children.length) {
-          for (let i = 0; i < node[i].children.length; i++) {
-            const found = this.findNode(node[i].children, target)
-            if (found) {
-              return found
-            }
+          const found = this.findNode(node[i].children, target)
+          if (found) {
+            return found
           }
         }
       }
@@ -1770,6 +1730,79 @@ export default {
         this.$set(_find, 'title', value)
       }
       this.refreshTable()
+    },
+    handleSearchFull(e) {
+      const value = e.target.value
+      this.treeKeys = []
+      this.expandedKeys = []
+      if (!value) {
+        this.reload()
+        return
+      }
+      if (this.isFullSearch) {
+        this.calcFilterFullTreeData()
+        return
+      }
+      searchCIRelationFull({
+        ...this.loadRootStatisticsParams,
+        type_ids: this.topo_flatten.join(','),
+      }).then((res) => {
+        this.isFullSearch = true
+        this.fullTreeData = this.formatTreeData(res)
+        this.calcFilterFullTreeData()
+      })
+    },
+    calcFilterFullTreeData() {
+      const _expandedKeys = []
+      const predicateCiIds = []
+      const filterTree = (node, predicate) => {
+        if (predicate(node)) {
+          predicateCiIds.push(node.id)
+          return true
+        }
+        if (node.children) {
+          node.children = node.children.filter((child) => {
+            if (predicateCiIds.some((id) => child.key.includes(String(id)))) {
+              return true
+            }
+            return filterTree(child, predicate)
+          })
+          if (node.children.length && !predicateCiIds.some((id) => node.key.includes(String(id)))) {
+            _expandedKeys.push(node.key)
+          }
+          return node.children.length > 0
+        }
+        return false
+      }
+      const predicate = (node) =>
+        String(node.title)
+          .toLowerCase()
+          .includes(this.fullSearchValue.toLowerCase())
+      const _fullTreeData = _.cloneDeep(this.fullTreeData)
+      this.filterFullTreeData = _fullTreeData.filter((item) => filterTree(item, predicate))
+      if (this.filterFullTreeData && this.filterFullTreeData.length) {
+        this.onNodeClick(this.filterFullTreeData[0].key, () => {
+          this.expandedKeys = _expandedKeys
+        })
+      } else {
+        this.treeKeys = []
+        this.instanceList = []
+      }
+    },
+    formatTreeData(array, parentKey = '') {
+      array.forEach((item) => {
+        const showName = this.relationViews.id2type[item.type_id]?.show_name ?? null
+        const uniqueName = this.relationViews.id2type[item.type_id]?.unique_name ?? null
+        const keyList = parentKey.split('@^@').filter((item) => !!item)
+        keyList.push(item.id + '%' + item.type_id + '%' + `{"${uniqueName}":"${item.uniqueValue}"}`)
+        const key = keyList.join('@^@')
+        item.key = key
+        item.showName = showName
+        if (!item.isLeaf && item.children && item.children.length) {
+          item.children = this.formatTreeData(item.children, key)
+        }
+      })
+      return array
     },
   },
 }
@@ -1817,6 +1850,18 @@ export default {
         display: inline-block;
         width: 100%;
         padding: 0 6px;
+      }
+    }
+    .relation-views-left-input {
+      margin-bottom: 12px;
+      input {
+        background-color: transparent;
+        border-top: none;
+        border-right: none;
+        border-left: none;
+      }
+      .ant-input:focus {
+        box-shadow: none;
       }
     }
   }

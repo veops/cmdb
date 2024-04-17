@@ -150,11 +150,11 @@ export default {
   computed: {
     topoData() {
       const ci_types_list = this.ci_types()
-      const unique_id = this.attributes().unique_id
-      const unique_name = this.attributes().unique
+      const _findCiType = ci_types_list.find((item) => item.id === this.typeId)
+      const unique_id = _findCiType.show_id || this.attributes().unique_id
+      const unique_name = _findCiType.show_name || this.attributes().unique
       const _findUnique = this.attrList().find((attr) => attr.id === unique_id)
       const unique_alias = _findUnique?.alias || _findUnique?.name || ''
-      const _findCiType = ci_types_list.find((item) => item.id === this.typeId)
       const nodes = {
         isRoot: true,
         id: `Root_${this.typeId}`,
@@ -183,6 +183,10 @@ export default {
       this.parentCITypes.forEach((parent) => {
         const _findCiType = ci_types_list.find((item) => item.id === parent.id)
         if (this.firstCIs[parent.name]) {
+          const unique_id = _findCiType.show_id || _findCiType.unique_id
+          const _findUnique = parent.attributes.find((attr) => attr.id === unique_id)
+          const unique_name = _findUnique?.name
+          const unique_alias = _findUnique?.alias || _findUnique?.name || ''
           this.firstCIs[parent.name].forEach((parentCi) => {
             nodes.children.push({
               id: `${parentCi._id}`,
@@ -190,9 +194,9 @@ export default {
               title: parent.alias || parent.name,
               name: parent.name,
               side: 'left',
-              unique_alias: parentCi.unique_alias,
-              unique_name: parentCi.unique,
-              unique_value: parentCi[parentCi.unique],
+              unique_alias,
+              unique_name,
+              unique_value: parentCi[unique_name],
               children: [],
               icon: _findCiType?.icon || '',
               endpoints: [
@@ -222,6 +226,10 @@ export default {
       this.childCITypes.forEach((child) => {
         const _findCiType = ci_types_list.find((item) => item.id === child.id)
         if (this.secondCIs[child.name]) {
+          const unique_id = _findCiType.show_id || _findCiType.unique_id
+          const _findUnique = child.attributes.find((attr) => attr.id === unique_id)
+          const unique_name = _findUnique?.name
+          const unique_alias = _findUnique?.alias || _findUnique?.name || ''
           this.secondCIs[child.name].forEach((childCi) => {
             nodes.children.push({
               id: `${childCi._id}`,
@@ -229,9 +237,9 @@ export default {
               title: child.alias || child.name,
               name: child.name,
               side: 'right',
-              unique_alias: childCi.unique_alias,
-              unique_name: childCi.unique,
-              unique_value: childCi[childCi.unique],
+              unique_alias,
+              unique_name,
+              unique_value: childCi[unique_name],
               children: [],
               icon: _findCiType?.icon || '',
               endpoints: [
@@ -333,7 +341,6 @@ export default {
               secondCIs[item.ci_type] = [item]
             }
           })
-          console.log(_.cloneDeep(secondCIs))
           this.secondCIs = secondCIs
         })
         .catch((e) => {})
