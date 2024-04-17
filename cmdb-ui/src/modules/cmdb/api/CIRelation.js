@@ -73,3 +73,11 @@ export function deleteCIRelationView(firstCiId, secondCiId, data) {
     data
   })
 }
+
+export function searchCIRelationFull(params) {
+  return axios({
+    url: `/v0.1/ci_relations/search/full`,
+    method: 'GET',
+    params,
+  })
+}

@@ -194,7 +194,10 @@ const cmdb_en = {
         attributeAssociationTip3: 'Two Attributes must be selected',
         attributeAssociationTip4: 'Please select a attribute from Source CIType',
         attributeAssociationTip5: 'Please select a attribute from Target CIType',
-
+        show: 'show attribute',
+        setAsShow: 'Set as show attribute',
+        cancelSetAsShow: 'Cancel show attribute',
+        showTips: 'The names of nodes in the service tree and topology view'
     },
     components: {
         unselectAttributes: 'Unselected',
@@ -530,7 +533,8 @@ if __name__ == "__main__":
         peopleHasRead: 'Personnel authorized to read:',
         authorizationPolicy: 'CI Authorization Policy:',
         idAuthorizationPolicy: 'Authorized by node:',
-        view: 'View permissions'
+        view: 'View permissions',
+        searchTips: 'Search in service tree'
     },
     tree: {
         tips1: 'Please go to Preference page first to complete your subscription!',

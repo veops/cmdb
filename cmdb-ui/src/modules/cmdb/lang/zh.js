@@ -194,6 +194,10 @@ const cmdb_zh = {
         attributeAssociationTip3: '属性关联必须选择两个属性',
         attributeAssociationTip4: '请选择原模型属性',
         attributeAssociationTip5: '请选择目标模型属性',
+        show: '展示属性',
+        setAsShow: '设置为展示属性',
+        cancelSetAsShow: '取消设置为展示属性',
+        showTips: '服务树和拓扑视图里节点的名称'
     },
     components: {
         unselectAttributes: '未选属性',
@@ -529,7 +533,8 @@ if __name__ == "__main__":
         peopleHasRead: '当前有查看权限的人员：',
         authorizationPolicy: '实例授权策略：',
         idAuthorizationPolicy: '按节点授权的：',
-        view: '查看权限'
+        view: '查看权限',
+        searchTips: '在服务树中筛选'
     },
     tree: {
         tips1: '请先到 我的订阅 页面完成订阅!',

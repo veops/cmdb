@@ -186,6 +186,7 @@ import {
   createCITypeGroupById,
   updateCITypeGroupById,
   getTriggerList,
+  getCIType,
 } from '@/modules/cmdb/api/CIType'
 import {
   getCITypeAttributesById,
@@ -231,6 +232,7 @@ export default {
       newGroupName: '',
       attrTypeFilter: [],
       unique: '',
+      show_id: null,
     }
   },
   computed: {
@@ -250,20 +252,31 @@ export default {
       unique: () => {
         return this.unique
       },
+      show_id: () => {
+        return this.show_id
+      },
     }
   },
   beforeCreate() {},
   created() {},
   mounted() {
-    this.getCITypeGroupData()
+    this.init()
   },
   methods: {
     getPropertyIcon,
+    init() {
+      getCIType(this.CITypeId).then((res) => {
+        if (res?.ci_types && res.ci_types.length) {
+          this.show_id = res.ci_types[0]?.show_id ?? null
+        }
+      })
+      this.getCITypeGroupData()
+    },
     handleEditProperty(property) {
       this.$refs.attributeEditForm.handleEdit(property, this.attributes)
     },
     handleOk() {
-      this.getCITypeGroupData()
+      this.init()
     },
     setOtherGroupAttributes() {
       const orderMap = this.attributes.reduce(function(map, obj) {
@@ -591,7 +604,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-
 .fold {
   width: calc(100% - 216px);
   display: inline-block;

@@ -130,22 +130,30 @@ export const isEmptySubDepartments = (item) => {
 
 // format部门员工树
 export const formatOption = (data, idType = 1, isDisabledAllCompany, departmentKey = 'department_id', employeeKey = 'employee_id') => {
-  // idType  1  表示  员工id为`${department_id}-${employee_id}`
-  //         2  表示  department-${department_id}   employee-${employee_id}
+  // idType  1  表示  员工id为`${departmentKey}-${employeeKey}`
+  //         2  表示  department-${departmentKey}   employee-${employeeKey}
+  //         3  表示  departmentKey  employeeKey
   let _data = _.cloneDeep(data)
   _data = _data.filter((item) => {
     return item.employees.length || (item.sub_departments.length && !isEmptySubDepartments(item))
   })
+  const switchEmployeeIdType = (item, employee) => {
+    switch (idType) {
+      case 1: return `${item[departmentKey]}-${employee[employeeKey]}`
+      case 2: return `employee-${employee[employeeKey]}`
+      case 3: return `${employee[employeeKey]}`
+    }
+  }
   _data.forEach((item) => {
     if (isDisabledAllCompany) {
       item.isDisabled = !item.department_id
     }
-    item.id = idType === 1 ? item[departmentKey] : `department-${item[departmentKey]}`
+    item.id = [1, 3].includes(idType) ? item[departmentKey] : `department-${item[departmentKey]}`
     item.label = item.department_name
     item.children = [
       ...formatOption(
         item.sub_departments.map((dep) => {
-          return { ...dep, id: idType === 1 ? dep[departmentKey] : `department-${dep[departmentKey]}`, label: dep.department_name }
+          return { ...dep, id: [1, 3].includes(idType) ? dep[departmentKey] : `department-${dep[departmentKey]}`, label: dep.department_name }
         }),
         idType,
         isDisabledAllCompany,
@@ -153,7 +161,7 @@ export const formatOption = (data, idType = 1, isDisabledAllCompany, departmentK
         employeeKey
       ),
       ...item.employees.map((employee) => {
-        return { ...employee, id: idType === 1 ? `${item[departmentKey]}-${employee[employeeKey]}` : `employee-${employee[employeeKey]}`, label: employee.nickname }
+        return { ...employee, id: switchEmployeeIdType(item, employee), label: employee.nickname }
       }),
     ]
   })
