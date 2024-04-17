@@ -53,11 +53,10 @@
                   </a-menu-item>
                   <a-menu-item key="1">
                     <a-space>
-                      <a
-                        href="/api/v0.1/ci_types/template/export/file"
-                      ><a-icon type="download" /> {{ $t('download') }}</a
-                      >
-                    </a-space>
+                      <a href="/api/v0.1/ci_types/template/export/file">
+                        <a-icon type="download" /> {{ $t('download') }}
+                      </a></a-space
+                    >
                   </a-menu-item>
                 </a-menu>
               </a-dropdown>
@@ -262,6 +261,7 @@
               'default_order_attr',
               { rules: [{ required: false, message: $t('cmdb.ciType.selectDefaultOrderAttr') }] },
             ]"
+            :placeholder="$t('placeholder2')"
           >
             <el-option
               :key="item.name"
@@ -299,6 +299,7 @@
                 filterInput = ''
               }
             "
+            @change="handleChangeUnique"
           >
             <el-option
               :key="item.id"
@@ -312,6 +313,40 @@
           </el-select>
           <a-divider type="vertical" />
           <a @click="handleCreatNewAttr">{{ $t('cmdb.ciType.notfound') }}</a>
+        </a-form-item>
+        <a-form-item
+          :help="$t('cmdb.ciType.showTips')"
+          :label="$t('cmdb.ciType.show')"
+          v-if="drawerTitle === $t('cmdb.ciType.editCIType')"
+        >
+          <el-select
+            size="small"
+            filterable
+            clearable
+            name="show_id"
+            :filter-method="
+              (input) => {
+                showIdFilterInput = input
+              }
+            "
+            v-decorator="['show_id', { rules: [{ required: false }] }]"
+            :placeholder="$t('placeholder2')"
+            @visible-change="
+              () => {
+                showIdFilterInput = ''
+              }
+            "
+          >
+            <el-option
+              :key="item.id"
+              :value="item.id"
+              v-for="item in showIdSelectOptions"
+              :label="item.alias || item.name"
+            >
+              <span> {{ item.alias || item.name }}</span>
+              <span :title="item.name" style="font-size: 10px; color: #afafaf"> {{ item.name }}</span>
+            </el-option>
+          </el-select>
         </a-form-item>
         <div v-if="newAttrAreaVisible" :style="{ padding: '15px 8px 0 8px', backgroundColor: '#fafafa' }">
           <create-new-attribute
@@ -418,14 +453,17 @@ export default {
       addId: null,
 
       filterInput: '',
+      showIdFilterInput: '',
 
-      orderSelectionOptions: [],
+      currentTypeAttrs: [],
       default_order_asc: '1',
 
       allTreeDepAndEmp: [],
 
       editCiType: null,
       isInherit: false,
+
+      unique_id: null,
     }
   },
   computed: {
@@ -481,6 +519,22 @@ export default {
         )
       }
       return _attributes
+    },
+    orderSelectionOptions() {
+      return this.currentTypeAttrs.filter((item) => item.is_required)
+    },
+    showIdSelectOptions() {
+      const _showIdSelectOptions = this.currentTypeAttrs.filter(
+        (item) => item.id !== this.unique_id && !['6'].includes(item.value_type) && !item.is_password && !item.is_list
+      )
+      if (this.showIdFilterInput) {
+        return _showIdSelectOptions.filter(
+          (item) =>
+            item.name.toLowerCase().includes(this.showIdFilterInput.toLowerCase()) ||
+            item.alias.toLowerCase().includes(this.showIdFilterInput.toLowerCase())
+        )
+      }
+      return _showIdSelectOptions
     },
   },
   provide() {
@@ -659,6 +713,7 @@ export default {
             delete values.parent_ids
             await this.updateCIType(values.id, {
               ...values,
+              show_id: values.show_id || null,
               icon,
             })
           } else {
@@ -864,7 +919,8 @@ export default {
       this.drawerTitle = this.$t('cmdb.ciType.editCIType')
       this.drawerVisible = true
       await getCITypeAttributesById(record.id).then((res) => {
-        this.orderSelectionOptions = res.attributes.filter((item) => item.is_required)
+        this.currentTypeAttrs = res.attributes
+        this.unique_id = res.unique_id
       })
       await getCIType(record.id).then((res) => {
         const ci_type = res.ci_types[0]
@@ -877,6 +933,9 @@ export default {
             })
           })
         }
+        this.form.setFieldsValue({
+          show_id: ci_type.show_id ?? null,
+        })
       })
       this.$nextTick(() => {
         this.default_order_asc = record.default_order_attr && record.default_order_attr.startsWith('-') ? '2' : '1'
@@ -941,12 +1000,18 @@ export default {
         this.$message.error({ content: this.$t('cmdb.ciType.uploadFailed'), key, duration: 2 })
       }
     },
+    handleChangeUnique(value) {
+      this.unique_id = value
+      const show_id = this.form.getFieldValue('show_id')
+      if (show_id === value) {
+        this.form.setFieldsValue({ show_id: '' })
+      }
+    },
   },
 }
 </script>
 
 <style lang="less" scoped>
-
 .ci-types-wrap {
   margin: 0 0 -24px 0;
   .ci-types-empty {

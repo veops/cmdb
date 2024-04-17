@@ -95,12 +95,12 @@
                 isFocusExpression = false
               }
             "
-            class="ci-searchform-expression"
+            :class="{ 'ci-searchform-expression': true, 'ci-searchform-expression-has-value': expression }"
             :style="{ width }"
             :placeholder="placeholder"
             @keyup.enter="emitRefresh"
           >
-            <ops-icon slot="suffix" type="veops-copy" @click="handleCopyExpression" />
+            <a-icon slot="suffix" type="check-circle" @click="handleCopyExpression" />
           </a-input>
           <slot></slot>
         </a-space>
@@ -284,6 +284,9 @@ export default {
     cursor: pointer;
   }
 }
+.ci-searchform-expression-has-value .ant-input-suffix {
+  color: @func-color_3;
+}
 .cmdb-search-form {
   .ant-form-item-label {
     overflow: hidden;
@@ -294,7 +297,6 @@ export default {
 </style>
 
 <style lang="less" scoped>
-
 .search-form-bar {
   margin-bottom: 20px;
   display: flex;

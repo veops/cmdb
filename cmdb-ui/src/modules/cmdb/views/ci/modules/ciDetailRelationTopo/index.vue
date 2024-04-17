@@ -10,6 +10,7 @@
 import _ from 'lodash'
 import { TreeCanvas } from 'butterfly-dag'
 import { searchCIRelation } from '@/modules/cmdb/api/CIRelation'
+import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
 import Node from './node.js'
 
 import 'butterfly-dag/dist/index.css'
@@ -87,7 +88,7 @@ export default {
         this.canvas.focusCenterWithAnimate()
       })
     },
-    redrawData(res, sourceNode, side) {
+    async redrawData(res, sourceNode, side) {
       const newNodes = []
       const newEdges = []
       if (!res.result.length) {
@@ -95,18 +96,24 @@ export default {
         return
       }
       const ci_types_list = this.ci_types()
-      res.result.forEach((r) => {
+      for (let i = 0; i < res.result.length; i++) {
+        const r = res.result[i]
         if (!this.exsited_ci.includes(r._id)) {
           const _findCiType = ci_types_list.find((item) => item.id === r._type)
+          const { attributes } = await getCITypeAttributesById(_findCiType.id)
+          const unique_id = _findCiType.show_id || _findCiType.unique_id
+          const _findUnique = attributes.find((attr) => attr.id === unique_id)
+          const unique_name = _findUnique?.name
+          const unique_alias = _findUnique?.alias || _findUnique?.name || ''
           newNodes.push({
             id: `${r._id}`,
             Class: Node,
             title: r.ci_type_alias || r.ci_type,
             name: r.ci_type,
             side: side,
-            unique_alias: r.unique_alias,
-            unique_name: r.unique,
-            unique_value: r[r.unique],
+            unique_alias,
+            unique_name,
+            unique_value: r[unique_name],
             children: [],
             icon: _findCiType?.icon || '',
             endpoints: [
@@ -131,7 +138,8 @@ export default {
           targetNode: side === 'right' ? `${r._id}` : sourceNode,
           type: 'endpoint',
         })
-      })
+      }
+
       const { nodes, edges } = this.canvas.getDataMap()
       // 删除原节点和边
       this.canvas.removeNodes(nodes.map((node) => node.id))

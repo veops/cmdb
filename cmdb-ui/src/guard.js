@@ -31,7 +31,6 @@ router.beforeEach(async (to, from, next) => {
       store.dispatch("loadAllUsers")
       store.dispatch("loadAllEmployees")
       store.dispatch("loadAllDepartments")
-      store.dispatch("getCompanyInfo")
       store.dispatch('GenerateRoutes', { roles }).then(() => {
         router.addRoutes(store.getters.appRoutes)
         const redirect = decodeURIComponent(from.query.redirect || to.path)
