@@ -92,6 +92,9 @@ class CITypeManager(object):
         for type_dict in ci_types:
             attr = AttributeCache.get(type_dict["unique_id"])
             type_dict["unique_key"] = attr and attr.name
+            if type_dict.get('show_id'):
+                attr = AttributeCache.get(type_dict["show_id"])
+                type_dict["show_name"] = attr and attr.name
             type_dict['parent_ids'] = CITypeInheritanceManager.get_parents(type_dict['id'])
             if resources is None or type_dict['name'] in resources:
                 res.append(type_dict)
@@ -192,7 +195,7 @@ class CITypeManager(object):
                 CITypeAttributeManager.update(type_id, [attr])
 
         ci_type2 = ci_type.to_dict()
-        new = ci_type.update(**kwargs)
+        new = ci_type.update(**kwargs, filter_none=False)
 
         CITypeCache.clean(type_id)
 
@@ -679,6 +682,9 @@ class CITypeAttributeManager(object):
                 db.session.commit()
 
                 CITypeAttributeCache.clean(type_id, attr_id)
+
+            if ci_type.show_id == attr_id:
+                ci_type.update(show_id=None, filter_none=False)
 
             CITypeHistoryManager.add(CITypeOperateType.DELETE_ATTRIBUTE, type_id, attr_id=attr.id,
                                      change=attr and attr.to_dict())

@@ -46,13 +46,17 @@ class CIType(Model):
     name = db.Column(db.String(32), nullable=False)
     alias = db.Column(db.String(32), nullable=False)
     unique_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"), nullable=False)
+    show_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"))
     enabled = db.Column(db.Boolean, default=True, nullable=False)
     is_attached = db.Column(db.Boolean, default=False, nullable=False)
     icon = db.Column(db.Text)
     order = db.Column(db.SmallInteger, default=0, nullable=False)
     default_order_attr = db.Column(db.String(33))
 
-    unique_key = db.relationship("Attribute", backref="c_ci_types.unique_id")
+    unique_key = db.relationship("Attribute", backref="c_ci_types.unique_id",
+                                 primaryjoin="Attribute.id==CIType.unique_id", foreign_keys=[unique_id])
+    show_key = db.relationship("Attribute", backref="c_ci_types.show_id",
+                               primaryjoin="Attribute.id==CIType.show_id", foreign_keys=[show_id])
 
     uid = db.Column(db.Integer, index=True)
 
