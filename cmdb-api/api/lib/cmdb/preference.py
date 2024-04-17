@@ -298,8 +298,9 @@ class PreferenceManager(object):
         for type_id in id2type:
             id2type[type_id] = CITypeCache.get(type_id).to_dict()
             id2type[type_id]['unique_name'] = AttributeCache.get(id2type[type_id]['unique_id']).name
-            id2type[type_id]['show_name'] = AttributeCache.get(
-                id2type[type_id]['show_id']).name if id2type[type_id]['show_id'] else None
+            if id2type[type_id]['show_id']:
+                show_attr = AttributeCache.get(id2type[type_id]['show_id'])
+                id2type[type_id]['show_name'] = show_attr and show_attr.name
 
         return result, id2type, sorted(name2id, key=lambda x: x[1])
 
