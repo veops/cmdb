@@ -32,6 +32,8 @@ services:
     container_name: cmdb-cache
     environment:
       TZ: Asia/Shanghai
+    volumes:
+      - cache-data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -66,9 +68,6 @@ services:
         flask common-check-new-columns
         gunicorn --workers=4 autoapp:app -b 0.0.0.0:5000 -D
         
-        #nohup celery -A celery_worker.celery worker -E -Q one_cmdb_async --autoscale=2,5 > one_cmdb_async.log 2>&1 &
-        #nohup celery -A celery_worker.celery worker -E -Q acl_async --concurrency=2 > one_acl_async.log 2>&1 &  
-        #
         celery -A celery_worker.celery worker -E -Q one_cmdb_async --autoscale=4,1 --logfile=one_cmdb_async.log -D
         celery -A celery_worker.celery worker -E -Q acl_async --logfile=one_acl_async.log --autoscale=2,1 -D
         
@@ -113,6 +112,9 @@ volumes:
   db-data:
     driver: local
     name: cmdb_db-data
+  cache-data:
+    driver: local
+    name: cmdb_cache-data
 
 networks:
   new:
