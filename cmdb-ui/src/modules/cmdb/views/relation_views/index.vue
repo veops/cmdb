@@ -9,7 +9,7 @@
         :triggerLength="18"
       >
         <template #one>
-          <div class="relation-views-left" :style="{ height: `${windowHeight - 115}px` }">
+          <div class="relation-views-left" :style="{ height: `${windowHeight - 64}px` }">
             <div class="relation-views-left-header" :title="$route.meta.name">{{ $route.meta.name }}</div>
             <a-input
               :placeholder="$t('cmdb.serviceTree.searchTips')"
