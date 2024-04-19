@@ -607,7 +607,7 @@ export default {
       this.reload()
     },
     pageNo: function(newPage, oldPage) {
-      this.loadData({ params: { pageNo: newPage }, refreshType: undefined, sortByTable: this.sortByTable })
+      this.loadData({ parameter: { pageNo: newPage }, refreshType: undefined, sortByTable: this.sortByTable })
     },
   },
 
@@ -1193,7 +1193,7 @@ export default {
             that.$refs.xTable.clearCheckboxRow()
             that.$refs.xTable.clearCheckboxReserve()
             that.selectedRowKeys = []
-            that.loadData({ params: {}, refreshType: 'refreshNumber' })
+            that.loadData({ parameter: {}, refreshType: 'refreshNumber' })
           })
         },
       })
@@ -1241,7 +1241,7 @@ export default {
       this.sortByTable = sortByTable
       this.$nextTick(() => {
         if (this.pageNo === 1) {
-          this.loadData({ params: {}, refreshType: undefined, sortByTable })
+          this.loadData({ parameter: {}, refreshType: undefined, sortByTable })
         } else {
           this.pageNo = 1
         }
@@ -1400,7 +1400,7 @@ export default {
         onOk() {
           deleteCI(record.ci_id || record._id).then((res) => {
             that.$message.success(that.$t('deleteSuccess'))
-            that.loadData({ params: {}, refreshType: 'refreshNumber' })
+            that.loadData({ parameter: {}, refreshType: 'refreshNumber' })
           })
         },
       })
@@ -1420,7 +1420,7 @@ export default {
       }
       addCIRelationView(first_ci_id, ci_id, { ancestor_ids }).then((res) => {
         setTimeout(() => {
-          this.loadData({ params: {}, refreshType: 'refreshNumber' })
+          this.loadData({ parameter: {}, refreshType: 'refreshNumber' })
         }, 500)
       })
     },
@@ -1458,7 +1458,7 @@ export default {
             .finally(() => {
               that.loading = false
               setTimeout(() => {
-                that.loadData({ params: {} })
+                that.loadData({ parameter: {} })
               }, 800)
             })
         },
@@ -1521,7 +1521,7 @@ export default {
               that.selectedRowKeys = []
               that.$refs.xTable.clearCheckboxRow()
               that.$refs.xTable.clearCheckboxReserve()
-              that.loadData({ params: {}, refreshType: 'refreshNumber' })
+              that.loadData({ parameter: {}, refreshType: 'refreshNumber' })
             })
         },
       })
@@ -1539,7 +1539,7 @@ export default {
       this.$refs.xTable.refreshColumn()
     },
     relationViewRefreshNumber() {
-      this.loadData({ params: {}, refreshType: 'refreshNumber' })
+      this.loadData({ parameter: {}, refreshType: 'refreshNumber' })
     },
     onShowSizeChange(current, pageSize) {
       this.pageSize = pageSize
