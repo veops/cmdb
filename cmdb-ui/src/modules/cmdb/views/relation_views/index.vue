@@ -1762,12 +1762,29 @@ export default {
         }
         if (node.children) {
           node.children = node.children.filter((child) => {
-            if (predicateCiIds.some((id) => child.key.includes(String(id)))) {
+            if (
+              predicateCiIds.some(
+                (id) =>
+                  child.key
+                    .split('@^@')
+                    .map((item) => Number(item.split('%')[0]))
+                    .indexOf(id) > -1
+              )
+            ) {
               return true
             }
             return filterTree(child, predicate)
           })
-          if (node.children.length && !predicateCiIds.some((id) => node.key.includes(String(id)))) {
+          if (
+            node.children.length &&
+            !predicateCiIds.some(
+              (id) =>
+                node.key
+                  .split('@^@')
+                  .map((item) => Number(item.split('%')[0]))
+                  .indexOf(id) > -1
+            )
+          ) {
             _expandedKeys.push(node.key)
           }
           return node.children.length > 0
