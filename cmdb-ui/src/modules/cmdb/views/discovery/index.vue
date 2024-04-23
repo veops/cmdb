@@ -153,7 +153,7 @@ export default {
     line-height: 32px;
     padding-left: 10px;
     margin-bottom: 20px;
-    border-left: 4px solid #custom_colors[color_1];
+    border-left: 4px solid @primary-color;
     justify-content: space-between;
     > div {
       font-weight: bold;

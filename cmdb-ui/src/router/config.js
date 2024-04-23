@@ -57,47 +57,37 @@ export const generatorDynamicRouter = async () => {
         {
           path: '/setting/companyinfo',
           name: 'company_info',
-          meta: { title: 'cs.menu.companyInfo', appName: 'backend', icon: 'ops-setting-companyInfo', selectedIcon: 'ops-setting-companyInfo-selected', permission: ['公司信息', 'backend_admin'] },
+          meta: { title: 'cs.menu.companyInfo', appName: 'backend', icon: 'ops-setting-companyInfo', selectedIcon: 'ops-setting-companyInfo', permission: ['公司信息', 'backend_admin'] },
           component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/companyInfo/index')
         },
         {
           path: '/setting/companystructure',
           name: 'company_structure',
-          meta: { title: 'cs.menu.companyStructure', appName: 'backend', icon: 'ops-setting-companyStructure', selectedIcon: 'ops-setting-companyStructure-selected', permission: ['公司架构', 'backend_admin'] },
+          meta: { title: 'cs.menu.companyStructure', appName: 'backend', icon: 'ops-setting-companyStructure', selectedIcon: 'ops-setting-companyStructure', permission: ['公司架构', 'backend_admin'] },
           component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/companyStructure/index')
         },
         {
           path: '/setting/notice',
           name: 'notice',
           component: RouteView,
-          meta: { title: 'cs.menu.notice', appName: 'backend', icon: 'ops-setting-notice', selectedIcon: 'ops-setting-notice-selected', permission: ['通知设置', 'backend_admin'] },
+          meta: { title: 'cs.menu.notice', appName: 'backend', icon: 'ops-setting-notice', selectedIcon: 'ops-setting-notice', permission: ['通知设置', 'backend_admin'] },
           redirect: '/setting/notice/email',
           children: [{
+            path: '/setting/notice/basic',
+            name: 'notice_basic',
+            meta: { title: 'cs.menu.basic', icon: 'ops-setting-basic', selectedIcon: 'ops-setting-basic-selected' },
+            component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/notice/basic')
+          }, {
             path: '/setting/notice/email',
             name: 'notice_email',
             meta: { title: 'cs.menu.email', icon: 'ops-setting-notice-email', selectedIcon: 'ops-setting-notice-email-selected' },
             component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/notice/email/index')
-          }, {
-            path: '/setting/notice/wx',
-            name: 'notice_wx',
-            meta: { title: 'cs.menu.wx', icon: 'ops-setting-notice-wx', selectedIcon: 'ops-setting-notice-wx-selected' },
-            component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/notice/wx')
-          }, {
-            path: '/setting/notice/dingding',
-            name: 'notice_dingding',
-            meta: { title: 'cs.menu.dingding', icon: 'ops-setting-notice-dingding', selectedIcon: 'ops-setting-notice-dingding-selected' },
-            component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/notice/dingding')
-          }, {
-            path: '/setting/notice/feishu',
-            name: 'notice_feishu',
-            meta: { title: 'cs.menu.feishu', icon: 'ops-setting-notice-feishu', selectedIcon: 'ops-setting-notice-feishu-selected' },
-            component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/notice/feishu')
           }]
         },
         {
           path: '/setting/auth',
           name: 'company_auth',
-          meta: { title: 'cs.menu.auth', appName: 'backend', icon: 'ops-setting-auth', selectedIcon: 'ops-setting-auth-selected', permission: ['acl_admin'] },
+          meta: { title: 'cs.menu.auth', appName: 'backend', icon: 'ops-setting-auth', selectedIcon: 'ops-setting-auth', permission: ['acl_admin'] },
           component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/auth/index')
         },
       ]

@@ -309,7 +309,4 @@ export default {
     margin-right: 5px;
   }
 }
-.ops-button-primary:hover {
-  background-color: #2f54eb !important;
-}
 </style>

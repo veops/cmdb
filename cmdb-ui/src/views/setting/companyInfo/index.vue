@@ -1,5 +1,5 @@
 <template>
-  <div class="ops-setting-companyinfo" :style="{ height: `${windowHeight - 64}px` }">
+  <div class="ops-setting-companyinfo">
     <a-form-model ref="infoData" :model="infoData" :label-col="labelCol" :wrapper-col="wrapperCol" :rules="rule">
       <SpanTitle>{{ $t('cs.companyInfo.spanCompany') }}</SpanTitle>
       <a-form-model-item :label="$t('cs.companyInfo.name')" prop="name">
@@ -35,9 +35,6 @@
         <a-input v-model="infoData.email" :disabled="!isEditable" />
       </a-form-model-item>
       <SpanTitle>{{ $t('cs.companyInfo.spanLogo') }}</SpanTitle>
-      <a-form-model-item :label="$t('cs.companyInfo.messenger')" prop="messenger">
-        <a-input v-model="infoData.messenger" :disabled="!isEditable" />
-      </a-form-model-item>
       <a-form-model-item :label="$t('cs.companyInfo.domainName')" prop="domainName">
         <a-input v-model="infoData.domainName" :disabled="!isEditable" />
       </a-form-model-item>
@@ -51,7 +48,6 @@
 
 <script>
 import { getCompanyInfo, postCompanyInfo, putCompanyInfo } from '@/api/company'
-import { mapState } from 'vuex'
 import SpanTitle from '../components/spanTitle.vue'
 import { mixinPermissions } from '@/utils/mixin'
 
@@ -74,7 +70,6 @@ export default {
         phone: '',
         faxCode: '',
         email: '',
-        messenger: '',
         domainName: '',
       },
       getId: -1,
@@ -90,9 +85,6 @@ export default {
     }
   },
   computed: {
-    ...mapState({
-      windowHeight: (state) => state.windowHeight,
-    }),
     isEditable() {
       return this.hasDetailPermission('backend', '公司信息', ['update'])
     },
@@ -157,7 +149,6 @@ export default {
         phone: '',
         faxCode: '',
         email: '',
-        messenger: '',
         domainName: '',
       }
     },
@@ -167,56 +158,15 @@ export default {
 
 <style lang="less">
 .ops-setting-companyinfo {
-  padding-top: 15px;
+  padding: 20px;
   background-color: #fff;
   border-radius: @border-radius-box;
   overflow: auto;
   margin-bottom: -24px;
-  .ops-setting-companyinfo-upload-show {
-    position: relative;
-    width: 290px;
-    height: 100px;
-    max-height: 100px;
-    img {
-      width: 100%;
-      height: 100%;
-    }
+  height: calc(100vh - 64px);
 
-    .delete-icon {
-      display: none;
-    }
-  }
-  .ant-upload:hover .delete-icon {
-    display: block;
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    color: rgb(247, 85, 85);
-  }
   .ant-form-item {
     margin-bottom: 10px;
-  }
-  .ant-form-item label {
-    padding-right: 10px;
-  }
-  .avatar-uploader > .ant-upload {
-    // max-width: 100px;
-    max-height: 100px;
-  }
-  // .ant-upload.ant-upload-select-picture-card {
-  //   width: 100%;
-  //   > .ant-upload {
-  //     padding: 0px;
-  .ant-upload-picture-card-wrapper {
-    height: 100px;
-    .ant-upload.ant-upload-select-picture-card {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      > .ant-upload {
-        padding: 0px;
-      }
-    }
   }
 }
 </style>

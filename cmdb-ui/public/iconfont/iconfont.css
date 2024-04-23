@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1713335725699') format('woff2'),
-       url('iconfont.woff?t=1713335725699') format('woff'),
-       url('iconfont.ttf?t=1713335725699') format('truetype');
+  src: url('iconfont.woff2?t=1713840593232') format('woff2'),
+       url('iconfont.woff?t=1713840593232') format('woff'),
+       url('iconfont.ttf?t=1713840593232') format('truetype');
 }
 
 .iconfont {
@@ -13,6 +13,30 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.ops-setting-application-selected:before {
+  content: "\e919";
+}
+
+.ops-setting-application:before {
+  content: "\e918";
+}
+
+.ops-setting-basic:before {
+  content: "\e889";
+}
+
+.ops-setting-basic-selected:before {
+  content: "\e917";
+}
+
+.ops-setting-security:before {
+  content: "\e915";
+}
+
+.ops-setting-theme:before {
+  content: "\e916";
+}
+
 .veops-show:before {
   content: "\e914";
 }
@@ -21,7 +45,7 @@
   content: "\e913";
 }
 
-.a-itsm-workload1:before {
+.itsm-workload:before {
   content: "\e912";
 }
 
@@ -269,10 +293,6 @@
   content: "\e8d5";
 }
 
-.ops-setting-auth-selected:before {
-  content: "\e8d4";
-}
-
 .itsm-knowledge2:before {
   content: "\e8d2";
 }
@@ -501,10 +521,6 @@
   content: "\e89c";
 }
 
-.ops-setting-duty-selected:before {
-  content: "\e89b";
-}
-
 .datainsight-sequential:before {
   content: "\e899";
 }
@@ -667,38 +683,6 @@
 
 .itsm-knowledge:before {
   content: "\e870";
-}
-
-.ops-itsm-ticketsetting-selected:before {
-  content: "\e860";
-}
-
-.ops-itsm-reports-selected:before {
-  content: "\e861";
-}
-
-.ops-itsm-servicecatalog-selected:before {
-  content: "\e862";
-}
-
-.ops-itsm-ticketmanage-selected:before {
-  content: "\e863";
-}
-
-.ops-itsm-knowledge-selected:before {
-  content: "\e864";
-}
-
-.ops-itsm-workstation-selected:before {
-  content: "\e865";
-}
-
-.ops-itsm-servicedesk-selected:before {
-  content: "\e866";
-}
-
-.ops-itsm-planticket-selected:before {
-  content: "\e867";
 }
 
 .ops-itsm-servicecatalog:before {
@@ -1073,24 +1057,8 @@
   content: "\e816";
 }
 
-.ops-cmdb-batch-selected:before {
-  content: "\e803";
-}
-
 .ops-cmdb-batch:before {
   content: "\e80a";
-}
-
-.ops-cmdb-adc-selected:before {
-  content: "\e7f7";
-}
-
-.ops-cmdb-resource-selected:before {
-  content: "\e7f8";
-}
-
-.ops-cmdb-preference-selected:before {
-  content: "\e7f9";
 }
 
 .ops-cmdb-preference:before {
@@ -1101,20 +1069,8 @@
   content: "\e7fb";
 }
 
-.ops-cmdb-tree-selected:before {
-  content: "\e7fc";
-}
-
-.ops-cmdb-relation-selected:before {
-  content: "\e7fd";
-}
-
 .ops-cmdb-adc:before {
   content: "\e7fe";
-}
-
-.ops-cmdb-search-selected:before {
-  content: "\e7ff";
 }
 
 .ops-cmdb-relation:before {
@@ -1125,24 +1081,12 @@
   content: "\e801";
 }
 
-.ops-cmdb-citype-selected:before {
-  content: "\e802";
-}
-
-.ops-cmdb-dashboard-selected:before {
-  content: "\e804";
-}
-
 .ops-cmdb-citype:before {
   content: "\e805";
 }
 
 .ops-cmdb-dashboard:before {
   content: "\e806";
-}
-
-.ops-cmdb-screen-selected:before {
-  content: "\e807";
 }
 
 .ops-cmdb-resource:before {
@@ -1491,14 +1435,6 @@
 
 .caise-shell:before {
   content: "\e7a6";
-}
-
-.ops-setting-role-selected:before {
-  content: "\e7a0";
-}
-
-.ops-setting-group-selected:before {
-  content: "\e7a1";
 }
 
 .ops-setting-role:before {
@@ -1941,16 +1877,8 @@
   content: "\e738";
 }
 
-.ops-setting-notice-email-selected-copy:before {
-  content: "\e889";
-}
-
 .ops-setting-notice:before {
   content: "\e72f";
-}
-
-.ops-setting-notice-selected:before {
-  content: "\e730";
 }
 
 .ops-setting-notice-email-selected:before {
@@ -1977,20 +1905,12 @@
   content: "\e736";
 }
 
-.ops-setting-companyStructure-selected:before {
-  content: "\e72b";
-}
-
 .ops-setting-companyStructure:before {
   content: "\e72c";
 }
 
 .ops-setting-companyInfo:before {
   content: "\e72d";
-}
-
-.ops-setting-companyInfo-selected:before {
-  content: "\e72e";
 }
 
 .ops-email:before {
@@ -3033,14 +2953,6 @@
   content: "\e600";
 }
 
-.ops-dag-dashboard-selected:before {
-  content: "\e601";
-}
-
-.ops-dag-applet-selected:before {
-  content: "\e602";
-}
-
 .ops-dag-applet:before {
   content: "\e603";
 }
@@ -3049,60 +2961,24 @@
   content: "\e604";
 }
 
-.ops-dag-terminal-selected:before {
-  content: "\e605";
-}
-
 .ops-dag-cron:before {
   content: "\e606";
-}
-
-.ops-dag-cron-selected:before {
-  content: "\e608";
 }
 
 .ops-dag-history:before {
   content: "\e609";
 }
 
-.ops-dag-history-selected:before {
-  content: "\e60a";
-}
-
-.ops-dag-dags-selected:before {
-  content: "\e60c";
-}
-
 .ops-dag-dagreview:before {
   content: "\e60d";
-}
-
-.ops-dag-dagreview-selected:before {
-  content: "\e60e";
 }
 
 .ops-dag-panel:before {
   content: "\e60f";
 }
 
-.ops-dag-panel-selected:before {
-  content: "\e615";
-}
-
 .ops-dag-variables:before {
   content: "\e616";
-}
-
-.ops-dag-variables-selected:before {
-  content: "\e618";
-}
-
-.ops-dag-appletadmin:before {
-  content: "\e65c";
-}
-
-.ops-dag-appletadmin-selected:before {
-  content: "\e65d";
 }
 
 .ops-dag-dags:before {

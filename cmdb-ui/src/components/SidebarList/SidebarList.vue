@@ -93,7 +93,7 @@ export default {
   background-color: transparent;
 }
 .sidebar-list-item.sidebar-list-item-selected::before {
-  background-color: #custom_colors[color_1];
+  background-color: @primary-color;
 }
 .sidebar-list-item-dotline {
   padding-left: 20px;

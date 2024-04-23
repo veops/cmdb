@@ -298,14 +298,14 @@ export default {
       width: 20px;
       height: 20px;
       border-radius: 2px;
-      background-color: #custom_colors[color_2];
-      color: #custom_colors[color_1];
+      background-color: @primary-color_5;
+      color: @primary-color;
       display: inline-flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
       &:hover {
-        background-color: #custom_colors[color_1];
+        background-color: @primary-color;
         color: #fff;
       }
     }

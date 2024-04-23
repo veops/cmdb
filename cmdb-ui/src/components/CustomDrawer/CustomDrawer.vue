@@ -73,7 +73,7 @@ export default {
 .custom-drawer-close {
   position: absolute;
   cursor: pointer;
-  background: #custom_colors[color_1];
+  background: @primary-color;
   color: white;
   text-align: center;
   transition: all 0.3s;

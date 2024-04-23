@@ -39,7 +39,7 @@
     >
       <img slot="image" :src="require('@/assets/data_empty.png')" />
       <span slot="description"> {{ $t('cmdb.components.noParamRequest') }} </span>
-      <a-button @click="add" type="primary" size="small" icon="plus" class="ops-button-primary">
+      <a-button @click="add" type="primary" size="small" icon="plus">
         {{ $t('add') }}
       </a-button>
     </a-empty>

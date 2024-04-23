@@ -372,7 +372,7 @@ export default {
       margin-bottom: 5px;
       &:hover {
         .ops_popover_item_selected();
-        border-color: #custom_colors[color_1];
+        border-color: @primary-color;
       }
       > i {
         margin-right: 10px;
@@ -380,7 +380,7 @@ export default {
     }
     .setting-person-left-item-selected {
       .ops_popover_item_selected();
-      border-color: #custom_colors[color_1];
+      border-color: @primary-color;
     }
   }
   .setting-person-right {
@@ -390,7 +390,7 @@ export default {
     border-radius: @border-radius-box;
     padding: 24px 48px;
     .setting-person-right-disabled {
-      background-color: #custom_colors[color_2];
+      background-color: @primary-color_5;
       border-radius: 4px;
       height: 30px;
       line-height: 30px;

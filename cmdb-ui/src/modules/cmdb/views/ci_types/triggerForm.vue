@@ -157,7 +157,6 @@
             "
             type="primary"
             size="small"
-            class="ops-button-primary"
           >{{ `${showCustomEmail ? $t('delete') : $t('add')}` }}{{ $t('cmdb.ciType.customEmail') }}</a-button
           >
         </div>
