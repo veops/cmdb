@@ -97,8 +97,8 @@ export default {
 
 <style lang="less">
 .color {
-  color: #custom_colors[color_1];
-  background-color: #custom_colors[color_2];
+  color: @primary-color;
+  background-color: @primary-color_5;
 }
 .custom-user {
   .custom-user-item {
@@ -117,7 +117,7 @@ export default {
 .locale {
   cursor: pointer;
   &:hover {
-    color: #custom_colors[color_1];
+    color: @primary-color;
   }
 }
 </style>

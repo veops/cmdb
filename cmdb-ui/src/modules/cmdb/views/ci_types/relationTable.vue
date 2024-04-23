@@ -6,7 +6,6 @@
       @click="handleCreate"
       type="primary"
       size="small"
-      class="ops-button-primary"
       icon="plus"
     >{{ $t('cmdb.ciType.addRelation') }}</a-button
     >

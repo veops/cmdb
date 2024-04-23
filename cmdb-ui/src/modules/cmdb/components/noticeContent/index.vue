@@ -175,8 +175,8 @@ export default {
         text-overflow: ellipsis;
         white-space: nowrap;
         &:hover {
-          background-color: #custom_colors[color_2];
-          color: #custom_colors[color_1];
+          background-color: @primary-color_5;
+          color: @primary-color;
         }
       }
     }
@@ -188,7 +188,7 @@ export default {
 
 .notice-content {
   .w-e-bar {
-    background-color: #custom_colors[color_2];
+    background-color: @primary-color_5;
   }
   .w-e-text-placeholder {
     line-height: 1.5;

@@ -1,37 +1,34 @@
 <template>
-  <a-tabs type="card" class="ops-tab" v-model="activeKey" @change="changeActiveKey">
-    <a-tab-pane v-for="item in authList" :key="item.value">
-      <span slot="tab">
-        {{ item.label }}
-        <a-icon
-          v-if="enable_list.find((en) => en.auth_type === item.value)"
-          type="check-circle"
-          theme="filled"
-          style="color:#2f54eb"
-        />
-      </span>
-      <div class="setting-auth">
-        <components :ref="item.value" :is="item.value === 'OIDC' ? 'OAUTH2' : item.value" :data_type="item.value" />
-        <a-row>
-          <a-col :offset="item.value === 'AuthCommonConfig' ? 5 : 3">
-            <a-space>
-              <a-button :loading="loading" type="primary" @click="handleSave">{{ $t('save') }}</a-button>
-              <template v-if="item.value === 'LDAP'">
-                <a-button :loading="loading" ghost type="primary" @click="handleTest('connect')">{{
-                  $t('cs.auth.testConnect')
-                }}</a-button>
-                <a-button :loading="loading" ghost type="primary" @click="handleTest('login')">{{
-                  $t('cs.auth.testLogin')
-                }}</a-button>
-              </template>
-              <a-button :loading="loading" @click="handleReset">{{ $t('reset') }}</a-button>
-            </a-space>
-          </a-col>
-        </a-row>
-      </div>
-      <LoginModal v-if="item.value === 'LDAP'" ref="loginModal" @handleOK="(values) => handleTest('login', values)" />
-    </a-tab-pane>
-  </a-tabs>
+  <div class="ops-setting-auth">
+    <a-tabs class="ops-tab" v-model="activeKey" @change="changeActiveKey">
+      <a-tab-pane v-for="item in authList" :key="item.value">
+        <span slot="tab">
+          {{ item.label }}
+          <a-icon v-if="enable_list.find((en) => en.auth_type === item.value)" type="check-circle" theme="filled" />
+        </span>
+        <div class="setting-auth">
+          <components :ref="item.value" :is="item.value === 'OIDC' ? 'OAUTH2' : item.value" :data_type="item.value" />
+          <a-row>
+            <a-col :offset="item.value === 'AuthCommonConfig' ? 5 : 3">
+              <a-space>
+                <a-button :loading="loading" type="primary" @click="handleSave">{{ $t('save') }}</a-button>
+                <template v-if="item.value === 'LDAP'">
+                  <a-button :loading="loading" ghost type="primary" @click="handleTest('connect')">{{
+                    $t('cs.auth.testConnect')
+                  }}</a-button>
+                  <a-button :loading="loading" ghost type="primary" @click="handleTest('login')">{{
+                    $t('cs.auth.testLogin')
+                  }}</a-button>
+                </template>
+                <a-button :loading="loading" @click="handleReset">{{ $t('reset') }}</a-button>
+              </a-space>
+            </a-col>
+          </a-row>
+        </div>
+        <LoginModal v-if="item.value === 'LDAP'" ref="loginModal" @handleOK="(values) => handleTest('login', values)" />
+      </a-tab-pane>
+    </a-tabs>
+  </div>
 </template>
 
 <script>
@@ -148,12 +145,20 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.ops-setting-auth {
+  padding: 20px;
+  padding-top: 0;
+  background-color: #fff;
+  border-radius: @border-radius-box;
+  overflow: auto;
+  margin-bottom: -24px;
+  height: calc(100vh - 64px);
+}
 .setting-auth {
   background-color: #fff;
-  height: calc(100vh - 128px);
+  height: calc(100vh - 150px);
   overflow: auto;
   border-radius: 0 5px 5px 5px;
-  padding-top: 24px;
 }
 </style>
 
@@ -161,10 +166,10 @@ export default {
 .setting-auth {
   .jsoneditor-outer {
     height: var(--custom-height) !important;
-    border: 1px solid #2f54eb;
+    border: 1px solid @primary-color;
   }
   div.jsoneditor-menu {
-    background-color: #2f54eb;
+    background-color: @primary-color;
   }
   .jsoneditor-modes {
     display: none;

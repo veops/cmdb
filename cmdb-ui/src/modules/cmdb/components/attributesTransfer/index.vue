@@ -230,7 +230,7 @@ export default {
       background-color: #f9fbff;
       border-bottom: none;
       .ant-transfer-list-header-title {
-        color: #custom_colors[color_1];
+        color: @primary-color;
         font-weight: 400;
         font-size: 14px;
       }
@@ -258,7 +258,7 @@ export default {
           cursor: pointer;
           font-size: 12px;
           background-color: #fff;
-          color: #custom_colors[color_1];
+          color: @primary-color;
           border-radius: 4px;
           width: 12px;
         }
@@ -271,7 +271,7 @@ export default {
           font-size: 12px;
           color: #cacdd9;
           &:hover {
-            color: #custom_colors[color_1];
+            color: @primary-color;
           }
         }
         .move-icon {
@@ -291,8 +291,8 @@ export default {
         }
       }
       .ant-transfer-list-content-item-selected {
-        background-color: #custom_colors[color_2];
-        border-color: #custom_colors[color_1];
+        background-color: @primary-color_5;
+        border-color: @primary-color;
       }
     }
   }

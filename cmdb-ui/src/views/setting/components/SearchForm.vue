@@ -68,7 +68,7 @@ name: 'SearchForm',
     background-color: rgb(240, 245, 255);
     .ops_display_wrapper();
     .search-form-bar-filter-icon {
-      color: #custom_colors[color_1];
+      color: @primary-color;
       font-size: 12px;
     }
     .search-form-bar-filter-icon_selected{

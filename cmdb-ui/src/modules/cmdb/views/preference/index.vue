@@ -494,7 +494,7 @@ export default {
         .cmdb-preference-group-content-action {
           margin-left: auto;
           font-size: 12px;
-          color: #custom_colors[color_1];
+          color: @primary-color;
           cursor: pointer;
           display: none;
         }
@@ -592,7 +592,7 @@ export default {
         .cmdb-preference-footor-unsubscribed {
           text-align: center;
           > span {
-            color: #custom_colors[color_1];
+            color: @primary-color;
             cursor: pointer;
             font-size: 12px;
           }
@@ -605,7 +605,7 @@ export default {
             color: rgba(0, 0, 0, 0.45);
           }
           > span:nth-child(2) {
-            color: #custom_colors[color_1];
+            color: @primary-color;
             cursor: pointer;
           }
         }

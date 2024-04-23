@@ -75,10 +75,10 @@ export default {
       position: absolute;
       width: 0;
       height: 0;
-      //   background-color: #custom_colors[color_1];
+      //   background-color: @primary-color;
       border-radius: 2px;
       border: 14px solid transparent;
-      border-left-color: #custom_colors[color_1];
+      border-left-color: @primary-color;
       transform: rotate(225deg);
       top: -16px;
       left: -17px;

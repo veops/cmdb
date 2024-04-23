@@ -5,7 +5,6 @@
         type="primary"
         @click="handleAddTrigger"
         size="small"
-        class="ops-button-primary"
         icon="plus"
       >{{ $t('cmdb.ciType.newTrigger') }}</a-button
       >

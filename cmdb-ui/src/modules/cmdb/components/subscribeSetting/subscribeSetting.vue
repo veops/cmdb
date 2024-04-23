@@ -253,7 +253,7 @@ export default {
     }
     .cmdb-subscribe-drawer-tree-header {
       border-radius: 4px;
-      background-color: #custom_colors[color_2];
+      background-color: @primary-color_5;
       color: rgba(0, 0, 0, 0.4);
       padding: 8px 12px;
       margin-bottom: 12px;
@@ -264,7 +264,7 @@ export default {
         > span {
           display: inline-block;
           background-color: #fff;
-          border-left: 2px solid #custom_colors[color_1];
+          border-left: 2px solid @primary-color;
           padding: 3px 12px;
           position: relative;
           white-space: nowrap;
@@ -272,7 +272,7 @@ export default {
             cursor: pointer;
             font-size: 12px;
             &:hover {
-              color: #custom_colors[color_1];
+              color: @primary-color;
             }
           }
         }
@@ -316,7 +316,7 @@ export default {
 <style lang="less">
 .cmdb-subscribe-drawer {
   .ant-tabs-bar {
-    background-color: #custom_colors[color_2];
+    background-color: @primary-color_5;
     border-bottom: none;
   }
 }
