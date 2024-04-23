@@ -161,7 +161,7 @@ export default {
       cursor: pointer;
       &-selected,
       &:hover {
-        color: #custom_colors[color_1];
+        color: @primary-color;
       }
     }
   }
@@ -179,7 +179,7 @@ export default {
       font-weight: 400;
       font-size: 14px;
       color: #000000;
-      border-left: 2px solid #custom_colors[color_1];
+      border-left: 2px solid @primary-color;
       padding-left: 6px;
       margin-left: -6px;
     }

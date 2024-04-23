@@ -171,7 +171,7 @@ export default {
   margin-right: 60px;
   .ant-input-group.ant-input-group-compact > *:first-child,
   .ant-input-group.ant-input-group-compact > .ant-select:first-child > .ant-select-selection {
-    background-color: #custom_colors[color_1];
+    background-color: @primary-color;
     color: #fff;
     border: none;
   }

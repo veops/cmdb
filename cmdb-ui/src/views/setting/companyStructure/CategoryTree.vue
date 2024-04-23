@@ -173,9 +173,9 @@ li {
   color: rgba(0, 0, 0, 0.7);
   font-size: 14px;
   .ops-setting-companystructure-sidebar-group-tree-info:hover {
-    color: #custom_colors[color_1];
+    color: @primary-color;
     > .ops-setting-companystructure-sidebar-group-tree-info::before {
-      background-color: #custom_colors[color_1];
+      background-color: @primary-color;
     }
   }
   // .ops-setting-companystructure-sidebar-group-tree-info:first-child::before {
@@ -313,7 +313,7 @@ li {
       }
     }
     > .ops-setting-companystructure-sidebar-group-tree-info::before {
-      background-color: #custom_colors[color_1];
+      background-color: @primary-color;
     }
   }
 }

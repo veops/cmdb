@@ -50,7 +50,6 @@
         type="primary"
         size="small"
         icon="plus"
-        class="ops-button-primary"
       >
         {{ $t('add') }}
       </a-button>
@@ -214,7 +213,7 @@ export default {
     line-height: 32px;
     padding-left: 10px;
     margin-bottom: 20px;
-    border-left: 4px solid #custom_colors[color_1];
+    border-left: 4px solid @primary-color;
     font-size: 16px;
     color: rgba(0, 0, 0, 0.75);
   }

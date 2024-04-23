@@ -1,5 +1,5 @@
 <template>
-  <div class="notice-email-wrapper" :style="{ height: `${windowHeight - 104}px` }">
+  <div class="notice-email-wrapper">
     <a-form-model ref="sendForm" :model="settingData" :label-col="labelCol" :rules="rules" :wrapper-col="wrapperCol">
       <SpanTitle>{{ $t('cs.duty.basicSetting') }}</SpanTitle>
       <a-form-model-item :label="$t('cs.notice.isEncrypted')">

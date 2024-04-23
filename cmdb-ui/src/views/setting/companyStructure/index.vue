@@ -6,7 +6,6 @@
       :max="500"
       :paneLengthPixel.sync="paneLengthPixel"
       appName="setting-structure"
-      triggerColor="#b1c9ff"
       :triggerLength="18"
     >
       <template #one>
@@ -395,11 +394,6 @@ export default {
           id: 0,
           title: this.$t('cs.companyStructure.employee'),
           icon: 'user',
-        },
-        {
-          id: 1,
-          title: this.$t('cs.companyStructure.departmentName'),
-          icon: 'apartment',
         },
       ]
     }
@@ -884,7 +878,7 @@ export default {
       &:hover {
         background-color: #e1efff;
         .ops-setting-structure-sidebar-group-header-title {
-          color: #custom_colors[color_1];
+          color: @primary-color;
         }
       }
       .ops-setting-structure-sidebar-group-header-avatar {
@@ -925,9 +919,9 @@ export default {
         font-size: 14px;
         width: 100%;
         &:hover {
-          color: #custom_colors[color_1];
+          color: @primary-color;
           &::before {
-            background-color: #custom_colors[color_1];
+            background-color: @primary-color;
           }
         }
         &::before {
@@ -1004,19 +998,19 @@ export default {
         }
       }
       .item-selected {
-        color: #custom_colors[color_1];
+        color: @primary-color;
         &::before {
-          background-color: #custom_colors[color_1];
+          background-color: @primary-color;
         }
       }
     }
     .group-selected {
       background-color: #e1efff;
       .ops-setting-structure-sidebar-group-header-avatar {
-        background-color: #custom_colors[color_1];
+        background-color: @primary-color;
       }
       .ops-setting-structure-sidebar-group-header-title {
-        color: #custom_colors[color_1];
+        color: @primary-color;
       }
     }
   }
@@ -1042,7 +1036,7 @@ export default {
             display: inline-block;
             .ops_display_wrapper(#fff);
             .screening-box-scene-icon {
-              color: #custom_colors[color_1];
+              color: @primary-color;
               font-size: 12px;
             }
             .history-scene-item {
@@ -1054,7 +1048,7 @@ export default {
           .search-form-bar-filter {
             .ops_display_wrapper();
             .search-form-bar-filter-icon {
-              color: #custom_colors[color_1];
+              color: @primary-color;
               font-size: 12px;
             }
 

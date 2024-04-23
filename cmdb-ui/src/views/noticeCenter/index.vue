@@ -309,10 +309,10 @@ export default {
 .notice-center-left:hover,
 .notice-center-left-select {
   background-color: #f0f5ff;
-  border-color: #custom_colors[color_1];
+  border-color: @primary-color;
   > span:nth-child(2) {
     background-color: #fff;
-    color: #custom_colors[color_1];
+    color: @primary-color;
   }
 }
 .notice-center-header {
@@ -329,7 +329,7 @@ export default {
   }
   > .notice-center-header-app:hover,
   .notice-center-header-app-selected {
-    background-color: #custom_colors[color_1];
+    background-color: @primary-color;
     color: #fff;
   }
   .notice-center-categories {
@@ -342,7 +342,7 @@ export default {
     > span:hover,
     .notice-center-categories-selected {
       color: #fff;
-      background-color: #custom_colors[color_1];
+      background-color: @primary-color;
     }
   }
 }

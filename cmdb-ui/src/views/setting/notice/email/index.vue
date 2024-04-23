@@ -1,6 +1,6 @@
 <template>
-  <div :style="{ marginBottom: '-24px' }">
-    <a-tabs :activeKey="activeKey" @change="changeTab" class="ops-tab" type="card">
+  <div class="ops-setting-notice-mail">
+    <a-tabs :activeKey="activeKey" @change="changeTab" class="ops-tab">
       <!-- <a-tab-pane key="1" tab="接收服务器">
         <Receive />
       </a-tab-pane> -->
@@ -30,4 +30,14 @@ export default {
 }
 </script>
 
-<style></style>
+<style lang="less" scoped>
+.ops-setting-notice-mail {
+  padding: 20px;
+  padding-top: 0;
+  background-color: #fff;
+  border-radius: @border-radius-box;
+  overflow: auto;
+  margin-bottom: -24px;
+  height: calc(100vh - 64px);
+}
+</style>

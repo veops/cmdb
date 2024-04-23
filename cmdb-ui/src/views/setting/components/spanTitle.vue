@@ -23,10 +23,9 @@ export default {
   height: 28px;
   margin-bottom: 12px;
   line-height: 28px;
-  padding-left: 24px;
-  border-radius: 0px 20px 20px 0px;
+  padding-left: 12px;
   font-weight: 700;
-  color: #0637bf;
-  background-color: #e0e9ff;
+  color: #000;
+  border-left: 3px solid @primary-color;
 }
 </style>
