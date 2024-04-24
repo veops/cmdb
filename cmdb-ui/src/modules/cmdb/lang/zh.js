@@ -402,7 +402,15 @@ const cmdb_zh = {
         noModifications: '没有修改',
         attr: '属性名',
         attrId: '属性ID',
-        changeDescription: '属性ID：{attr_id}，提前：{before_days}天，主题：{subject}\n内容：{body}\n通知时间：{notify_at}'
+        changeDescription: '属性ID：{attr_id}，提前：{before_days}天，主题：{subject}\n内容：{body}\n通知时间：{notify_at}',
+        ticketStartTime: '工单发起时间',
+        ticketCreator: '发起人',
+        ticketTitle: '工单名称',
+        ticketFinishTime: '节点完成时间',
+        ticketNodeName: '节点名称',
+        itsmUninstalled: '请结合维易ITSM使用',
+        applyItsm: '免费申请',
+        ticketId: '工单ID',
     },
     relation_type: {
         addRelationType: '新增关系类型',

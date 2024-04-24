@@ -9,6 +9,12 @@
       :data="tableData"
       v-bind="ci_id ? { height: 'auto' } : { height: `${windowHeight - 225}px` }"
     >
+      <template #empty>
+        <a-empty :image-style="{ height: '100px' }" :style="{ paddingTop: '10%' }">
+          <img slot="image" :src="require('@/assets/data_empty.png')" />
+          <span slot="description"> {{ $t('noData') }} </span>
+        </a-empty>
+      </template>
       <vxe-column field="trigger_name" :title="$t('cmdb.history.triggerName')"> </vxe-column>
       <vxe-column field="type" :title="$t('type')">
         <template #default="{ row }">

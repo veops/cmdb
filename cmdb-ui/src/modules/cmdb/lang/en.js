@@ -402,7 +402,15 @@ const cmdb_en = {
         noModifications: 'No Modifications',
         attr: 'attribute',
         attrId: 'attribute id',
-        changeDescription: 'attribute id: {attr_id}, {before_days} day(s) in advance, Subject: {subject}\nContent: {body}\nNotify At: {notify_at}'
+        changeDescription: 'attribute id: {attr_id}, {before_days} day(s) in advance, Subject: {subject}\nContent: {body}\nNotify At: {notify_at}',
+        ticketStartTime: 'Start Time',
+        ticketCreator: 'Creator',
+        ticketTitle: 'Title',
+        ticketFinishTime: 'Finish Time',
+        ticketNodeName: 'Node Name',
+        itsmUninstalled: 'Please use it in combination with VE ITSM',
+        applyItsm: 'Free Apply ITSM',
+        ticketId: 'Ticket ID',
     },
     relation_type: {
         addRelationType: 'New',

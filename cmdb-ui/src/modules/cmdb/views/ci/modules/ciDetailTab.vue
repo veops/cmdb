@@ -41,9 +41,16 @@
             height="auto"
             :span-method="mergeRowMethod"
             border
+            resizable
             :scroll-y="{ enabled: false }"
             class="ops-stripe-table"
           >
+            <template #empty>
+              <a-empty :image-style="{ height: '100px' }" :style="{ paddingTop: '10%' }">
+                <img slot="image" :src="require('@/assets/data_empty.png')" />
+                <span slot="description"> {{ $t('noData') }} </span>
+              </a-empty>
+            </template>
             <vxe-table-column sortable field="created_at" :title="$t('created_at')"></vxe-table-column>
             <vxe-table-column
               field="username"
@@ -82,6 +89,12 @@
           <TriggerTable :ci_id="ci._id" />
         </div>
       </a-tab-pane>
+      <a-tab-pane key="tab_5">
+        <span slot="tab"><ops-icon type="itsm-association" />{{ $t('cmdb.ci.relITSM') }}</span>
+        <div :style="{ padding: '24px', height: '100%' }">
+          <RelatedItsmTable :ci_id="ci._id" :ciHistory="ciHistory" :itsmInstalled="itsmInstalled" />
+        </div>
+      </a-tab-pane>
     </a-tabs>
     <a-empty
       v-else
@@ -100,11 +113,12 @@
 import _ from 'lodash'
 import { Descriptions, DescriptionsItem } from 'element-ui'
 import { getCITypeGroupById, getCITypes } from '@/modules/cmdb/api/CIType'
-import { getCIHistory } from '@/modules/cmdb/api/history'
+import { getCIHistory, judgeItsmInstalled } from '@/modules/cmdb/api/history'
 import { getCIById } from '@/modules/cmdb/api/ci'
 import CiDetailAttrContent from './ciDetailAttrContent.vue'
 import CiDetailRelation from './ciDetailRelation.vue'
 import TriggerTable from '../../operation_history/modules/triggerTable.vue'
+import RelatedItsmTable from './ciDetailRelatedItsmTable.vue'
 export default {
   name: 'CiDetailTab',
   components: {
@@ -113,6 +127,7 @@ export default {
     CiDetailAttrContent,
     CiDetailRelation,
     TriggerTable,
+    RelatedItsmTable,
   },
   props: {
     typeId: {
@@ -134,6 +149,7 @@ export default {
       ciId: null,
       ci_types: [],
       hasPermission: true,
+      itsmInstalled: true,
     }
   },
   computed: {
@@ -179,6 +195,7 @@ export default {
       }
       this.ciId = ciId
       await this.getCI()
+      await this.judgeItsmInstalled()
       if (this.hasPermission) {
         this.getAttributes()
         this.getCIHistory()
@@ -203,7 +220,15 @@ export default {
             this.hasPermission = false
           }
         })
-        .catch((e) => {})
+        .catch((e) => {
+          if (e.response.status === 404) {
+            this.itsmInstalled = false
+          }
+        })
+    },
+    async judgeItsmInstalled() {
+      await judgeItsmInstalled()
+        .catch((e) => { this.itsmInstalled = false })
     },
 
     getCIHistory() {
