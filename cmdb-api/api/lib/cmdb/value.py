@@ -275,16 +275,25 @@ class AttributeValueManager(object):
             if attr.is_list:
                 existed_attrs = value_table.get_by(attr_id=attr.id, ci_id=ci.id, to_dict=False)
                 existed_values = [i.value for i in existed_attrs]
-                added = set(value) - set(existed_values)
-                deleted = set(existed_values) - set(value)
-                for v in added:
-                    value_table.create(ci_id=ci.id, attr_id=attr.id, value=v, flush=False, commit=False)
-                    changed.append((ci.id, attr.id, OperateType.ADD, None, v, ci.type_id))
 
+                # Comparison array starts from which position changes
+                min_len = min(len(value), len(existed_values))
+                index = 0
+                while index < min_len:
+                    if value[index] != existed_values[index]:
+                        break
+                    index += 1
+                added = value[index:]
+                deleted = existed_values[index:]
+
+                # Delete first and then add to ensure id sorting
                 for v in deleted:
                     existed_attr = existed_attrs[existed_values.index(v)]
                     existed_attr.delete(flush=False, commit=False)
                     changed.append((ci.id, attr.id, OperateType.DELETE, v, None, ci.type_id))
+                for v in added:
+                    value_table.create(ci_id=ci.id, attr_id=attr.id, value=v, flush=False, commit=False)
+                    changed.append((ci.id, attr.id, OperateType.ADD, None, v, ci.type_id))
             else:
                 existed_attr = value_table.get_by(attr_id=attr.id, ci_id=ci.id, first=True, to_dict=False)
                 existed_value = existed_attr and existed_attr.value
