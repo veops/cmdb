@@ -10,6 +10,11 @@ from api.lib.perm.acl.role import RoleCRUD, RoleRelationCRUD
 from api.lib.perm.acl.user import UserCRUD
 
 
+def validate_app(app_id):
+    app = AppCache.get(app_id)
+    return app.id if app else None
+
+
 class ACLManager(object):
     def __init__(self, app_name='acl', uid=None):
         self.log = current_app.logger
@@ -133,7 +138,8 @@ class ACLManager(object):
         numfound, res = ResourceCRUD.search(q, u, self.validate_app().id, rt_id, page, page_size)
         return res
 
-    def grant_resource(self, rid, resource_id, perms):
+    @staticmethod
+    def grant_resource(rid, resource_id, perms):
         PermissionCRUD.grant(rid, perms, resource_id=resource_id, group_id=None)
 
     @staticmethod
@@ -141,3 +147,7 @@ class ACLManager(object):
         rt = AppCRUD.add(**payload)
 
         return rt.to_dict()
+
+    def role_has_perms(self, rid, resource_name, resource_type_name, perm):
+        app_id = validate_app(self.app_name)
+        return RoleCRUD.has_permission(rid, resource_name, resource_type_name, app_id, perm)
