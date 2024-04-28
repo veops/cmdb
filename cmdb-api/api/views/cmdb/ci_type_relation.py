@@ -11,12 +11,16 @@ from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.preference import PreferenceManager
 from api.lib.cmdb.resp_format import ErrFormat
+from api.lib.common_setting.decorator import perms_role_required
+from api.lib.common_setting.role_perm_base import CMDBApp
 from api.lib.decorator import args_required
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import has_perm_from_args
 from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import role_required
 from api.resource import APIView
+
+app_cli = CMDBApp()
 
 
 class GetChildrenView(APIView):
@@ -41,7 +45,8 @@ class GetParentsView(APIView):
 class CITypeRelationView(APIView):
     url_prefix = ("/ci_type_relations", "/ci_type_relations/<int:parent_id>/<int:child_id>")
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Service_Tree_Definition,
+                         app_cli.op.read, app_cli.admin_name)
     def get(self):
         res, type2attributes = CITypeRelationManager.get()
 
@@ -69,7 +74,8 @@ class CITypeRelationView(APIView):
 class CITypeRelationDelete2View(APIView):
     url_prefix = "/ci_type_relations/<int:ctr_id>"
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Model_Relationships,
+                         app_cli.op.read, app_cli.admin_name)
     def delete(self, ctr_id):
         CITypeRelationManager.delete(ctr_id)
 

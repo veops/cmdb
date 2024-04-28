@@ -3,13 +3,15 @@
 
 from flask import request
 
-from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.custom_dashboard import CustomDashboardManager
 from api.lib.cmdb.custom_dashboard import SystemConfigManager
+from api.lib.common_setting.decorator import perms_role_required
+from api.lib.common_setting.role_perm_base import CMDBApp
 from api.lib.decorator import args_required
 from api.lib.decorator import args_validate
-from api.lib.perm.acl.acl import role_required
 from api.resource import APIView
+
+app_cli = CMDBApp()
 
 
 class CustomDashboardApiView(APIView):
@@ -19,7 +21,8 @@ class CustomDashboardApiView(APIView):
     def get(self):
         return self.jsonify(CustomDashboardManager.get())
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Customized_Dashboard,
+                         app_cli.op.read, app_cli.admin_name)
     @args_validate(CustomDashboardManager.cls)
     def post(self):
         if request.url.endswith("/preview"):
@@ -32,7 +35,8 @@ class CustomDashboardApiView(APIView):
 
         return self.jsonify(res)
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Customized_Dashboard,
+                         app_cli.op.read, app_cli.admin_name)
     @args_validate(CustomDashboardManager.cls)
     def put(self, _id=None):
         if _id is not None:
@@ -47,7 +51,8 @@ class CustomDashboardApiView(APIView):
 
         return self.jsonify(id2options=request.values.get('id2options'))
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Customized_Dashboard,
+                         app_cli.op.read, app_cli.admin_name)
     def delete(self, _id):
         CustomDashboardManager.delete(_id)
 
@@ -57,12 +62,14 @@ class CustomDashboardApiView(APIView):
 class SystemConfigApiView(APIView):
     url_prefix = ("/system_config",)
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Service_Tree_Definition,
+                         app_cli.op.read, app_cli.admin_name)
     @args_required("name", value_required=True)
     def get(self):
         return self.jsonify(SystemConfigManager.get(request.values['name']))
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Service_Tree_Definition,
+                         app_cli.op.read, app_cli.admin_name)
     @args_validate(SystemConfigManager.cls)
     @args_required("name", value_required=True)
     @args_required("option", value_required=True)
@@ -74,7 +81,8 @@ class SystemConfigApiView(APIView):
     def put(self, _id=None):
         return self.post()
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Service_Tree_Definition,
+                         app_cli.op.read, app_cli.admin_name)
     @args_required("name")
     def delete(self):
         CustomDashboardManager.delete(request.values['name'])

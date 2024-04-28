@@ -3,12 +3,14 @@
 
 import time
 
+import redis_lock
 import six
 from flask import abort
 from flask import current_app
 from sqlalchemy import or_
 
 from api.extensions import db
+from api.extensions import rd
 from api.lib.perm.acl.app import AppCRUD
 from api.lib.perm.acl.audit import AuditCRUD, AuditOperateType, AuditScope
 from api.lib.perm.acl.cache import AppCache
@@ -62,7 +64,9 @@ class RoleRelationCRUD(object):
 
         id2parents = {}
         for i in res:
-            id2parents.setdefault(rid2uid.get(i.child_id, i.child_id), []).append(RoleCache.get(i.parent_id).to_dict())
+            parent = RoleCache.get(i.parent_id)
+            if parent:
+                id2parents.setdefault(rid2uid.get(i.child_id, i.child_id), []).append(parent.to_dict())
 
         return id2parents
 
@@ -141,24 +145,27 @@ class RoleRelationCRUD(object):
 
     @classmethod
     def add(cls, role, parent_id, child_ids, app_id):
-        result = []
-        for child_id in child_ids:
-            existed = RoleRelation.get_by(parent_id=parent_id, child_id=child_id, app_id=app_id)
-            if existed:
-                continue
+        with redis_lock.Lock(rd.r, "ROLE_RELATION_ADD"):
+            db.session.commit()
 
-            RoleRelationCache.clean(parent_id, app_id)
-            RoleRelationCache.clean(child_id, app_id)
+            result = []
+            for child_id in child_ids:
+                existed = RoleRelation.get_by(parent_id=parent_id, child_id=child_id, app_id=app_id)
+                if existed:
+                    continue
 
-            if parent_id in cls.recursive_child_ids(child_id, app_id):
-                return abort(400, ErrFormat.inheritance_dead_loop)
+                RoleRelationCache.clean(parent_id, app_id)
+                RoleRelationCache.clean(child_id, app_id)
 
-            if app_id is None:
-                for app in AppCRUD.get_all():
-                    if app.name != "acl":
-                        RoleRelationCache.clean(child_id, app.id)
+                if parent_id in cls.recursive_child_ids(child_id, app_id):
+                    return abort(400, ErrFormat.inheritance_dead_loop)
 
-            result.append(RoleRelation.create(parent_id=parent_id, child_id=child_id, app_id=app_id).to_dict())
+                if app_id is None:
+                    for app in AppCRUD.get_all():
+                        if app.name != "acl":
+                            RoleRelationCache.clean(child_id, app.id)
+
+                result.append(RoleRelation.create(parent_id=parent_id, child_id=child_id, app_id=app_id).to_dict())
 
         AuditCRUD.add_role_log(app_id, AuditOperateType.role_relation_add,
                                AuditScope.role_relation, role.id, {}, {},

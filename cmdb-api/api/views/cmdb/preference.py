@@ -8,19 +8,21 @@ from flask import request
 from api.lib.cmdb.ci_type import CITypeManager
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
-from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.cmdb.preference import PreferenceManager
 from api.lib.cmdb.resp_format import ErrFormat
+from api.lib.common_setting.decorator import perms_role_required
+from api.lib.common_setting.role_perm_base import CMDBApp
 from api.lib.decorator import args_required
 from api.lib.decorator import args_validate
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import has_perm_from_args
 from api.lib.perm.acl.acl import is_app_admin
-from api.lib.perm.acl.acl import role_required
 from api.lib.perm.acl.acl import validate_permission
 from api.lib.utils import handle_arg_list
 from api.resource import APIView
+
+app_cli = CMDBApp()
 
 
 class PreferenceShowCITypesView(APIView):
@@ -104,7 +106,8 @@ class PreferenceRelationApiView(APIView):
 
         return self.jsonify(views=views, id2type=id2type, name2id=name2id)
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Service_Tree_Definition,
+                         app_cli.op.read, app_cli.admin_name)
     @args_required("name")
     @args_required("cr_ids")
     @args_validate(PreferenceManager.pref_rel_cls)
@@ -118,14 +121,16 @@ class PreferenceRelationApiView(APIView):
 
         return self.jsonify(views=views, id2type=id2type, name2id=name2id)
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Service_Tree_Definition,
+                         app_cli.op.read, app_cli.admin_name)
     @args_required("name")
     def put(self, _id):
         views, id2type, name2id = PreferenceManager.create_or_update_relation_view(_id=_id, **request.values)
 
         return self.jsonify(views=views, id2type=id2type, name2id=name2id)
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Service_Tree_Definition,
+                         app_cli.op.read, app_cli.admin_name)
     @args_required("name")
     def delete(self):
         name = request.values.get("name")
