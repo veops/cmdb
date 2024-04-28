@@ -253,6 +253,13 @@ class CITypeManager(object):
         for item in CITypeInheritance.get_by(child_id=type_id, to_dict=False):
             item.delete(commit=False)
 
+        try:
+            from api.models.cmdb import CITypeReconciliation
+            for item in CITypeReconciliation.get_by(type_id=type_id, to_dict=False):
+                item.delete(commit=False)
+        except Exception:
+            pass
+
         db.session.commit()
 
         ci_type.soft_delete()
@@ -414,9 +421,6 @@ class CITypeGroupManager(object):
         existed = CITypeGroup.get_by_id(gid) or abort(
             404, ErrFormat.ci_type_group_not_found.format("id={}".format(gid)))
         if name is not None and name != existed.name:
-            if RoleEnum.CONFIG not in session.get("acl", {}).get("parentRoles", []) and not is_app_admin("cmdb"):
-                return abort(403, ErrFormat.role_required.format(RoleEnum.CONFIG))
-
             existed.update(name=name)
 
         max_order = max([i.order or 0 for i in CITypeGroupItem.get_by(group_id=gid, to_dict=False)] or [0])

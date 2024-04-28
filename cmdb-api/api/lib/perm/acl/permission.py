@@ -274,12 +274,14 @@ class PermissionCRUD(object):
                     perm2resource.setdefault(_perm, []).append(resource_id)
             for _perm in perm2resource:
                 perm = PermissionCache.get(_perm, resource_type_id)
-                existeds = RolePermission.get_by(rid=rid,
-                                                 app_id=app_id,
-                                                 perm_id=perm.id,
-                                                 __func_in___key_resource_id=perm2resource[_perm],
-                                                 to_dict=False)
-                for existed in existeds:
+                if perm is None:
+                    continue
+                exists = RolePermission.get_by(rid=rid,
+                                               app_id=app_id,
+                                               perm_id=perm.id,
+                                               __func_in___key_resource_id=perm2resource[_perm],
+                                               to_dict=False)
+                for existed in exists:
                     existed.deleted = True
                     existed.deleted_at = datetime.datetime.now()
                     db.session.add(existed)
