@@ -18,6 +18,8 @@ def perms_role_required(app_name, resource_type_name, resource_name, perm, role_
                 if role_name:
                     if role_name not in session.get("acl", {}).get("parentRoles", []):
                         abort(403, ErrFormat.role_required.format(role_name))
+
+                    return func(*args, **kwargs)
                 else:
                     abort(403, ErrFormat.resource_no_permission.format(resource_name, perm))
 
