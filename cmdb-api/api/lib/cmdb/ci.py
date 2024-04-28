@@ -441,10 +441,13 @@ class CIManager(object):
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ci = self.confirm_ci_existed(ci_id)
 
-        raw_dict = copy.deepcopy(ci_dict)
-
         attrs = CITypeAttributeManager.get_all_attributes(ci.type_id)
         ci_type_attrs_name = {attr.name: attr for _, attr in attrs}
+        ci_type_attrs_alias2name = {attr.alias: attr.name for _, attr in attrs}
+        ci_dict = {ci_type_attrs_alias2name[k] if k in ci_type_attrs_alias2name else k: v for k, v in ci_dict.items()}
+
+        raw_dict = copy.deepcopy(ci_dict)
+
         ci_attr2type_attr = {type_attr.attr_id: type_attr for type_attr, _ in attrs}
         for _, attr in attrs:
             if attr.default and attr.default.get('default') == AttributeDefaultValueEnum.UPDATED_AT:
@@ -824,6 +827,105 @@ class CIManager(object):
                 return abort(400, ErrFormat.password_load_failed.format(data))
 
             return data.get('v')
+
+    def baseline(self, ci_ids, before_date):
+        ci_list = self.get_cis_by_ids(ci_ids, ret_key=RetKey.ALIAS)
+        if not ci_list:
+            return dict()
+
+        ci2changed = dict()
+        changed = AttributeHistoryManger.get_records_for_attributes(
+            before_date, None, None, 1, 100000, None, None, ci_ids=ci_ids, more=True)[1]
+        for records in changed:
+            for change in records[1]:
+                if change['is_computed'] or change['is_password']:
+                    continue
+
+                if change.get('default') and change['default'].get('default') == AttributeDefaultValueEnum.UPDATED_AT:
+                    continue
+
+                ci2changed.setdefault(change['ci_id'], {})
+                item = (change['old'],
+                        change['new'],
+                        change.get('is_list'),
+                        change.get('value_type'),
+                        change['operate_type'])
+                if change.get('is_list'):
+                    ci2changed[change['ci_id']].setdefault(change.get('attr_alias'), []).append(item)
+                else:
+                    ci2changed[change['ci_id']].update({change.get('attr_alias'): item})
+
+        type2show_name = {}
+        result = []
+        for ci in ci_list:
+            list_attr2item = {}
+            for alias_name, v in (ci2changed.get(ci['_id']) or {}).items():
+                if not alias_name:
+                    continue
+                if alias_name == ci.get('unique_alias'):
+                    continue
+
+                if ci.get('_type') not in type2show_name:
+                    ci_type = CITypeCache.get(ci.get('_type'))
+                    show_id = ci_type.show_id or ci_type.unique_id
+                    type2show_name[ci['_type']] = AttributeCache.get(show_id).alias
+
+                if isinstance(v, list):
+                    for old, new, is_list, value_type, operate_type in v:
+                        if alias_name not in list_attr2item:
+                            list_attr2item[alias_name] = dict(instance=ci.get(type2show_name[ci['_type']]),
+                                                              attr_name=alias_name,
+                                                              value_type=value_type,
+                                                              is_list=is_list,
+                                                              ci_type=ci.get('ci_type'),
+                                                              unique_alias=ci.get('unique_alias'),
+                                                              unique_value=ci.get(ci['unique_alias']),
+                                                              cur=copy.deepcopy(ci.get(alias_name)),
+                                                              to=ci.get(alias_name) or [])
+
+                        old = ValueTypeMap.deserialize[value_type](old) if old else old
+                        new = ValueTypeMap.deserialize[value_type](new) if new else new
+                        if operate_type == OperateType.ADD:
+                            list_attr2item[alias_name]['to'].remove(new)
+                        elif operate_type == OperateType.DELETE and old not in list_attr2item[alias_name]['to']:
+                            list_attr2item[alias_name]['to'].append(old)
+                    continue
+
+                old, value_type = v[0], v[3]
+                old = ValueTypeMap.deserialize[value_type](old) if old else old
+                if isinstance(old, (datetime.datetime, datetime.date)):
+                    old = str(old)
+                if ci.get(alias_name) != old:
+                    item = dict(instance=ci.get(type2show_name[ci['_type']]),
+                                attr_name=alias_name,
+                                value_type=value_type,
+                                ci_type=ci.get('ci_type'),
+                                unique_alias=ci.get('unique_alias'),
+                                unique_value=ci.get(ci['unique_alias']),
+                                cur=ci.get(alias_name),
+                                to=old)
+                    result.append(item)
+
+            for alias_name, item in list_attr2item.items():
+                if sorted(item['cur'] or []) != sorted(item['to'] or []):
+                    result.append(item)
+
+        return result
+
+    def rollback(self, ci_id, before_date):
+        baseline_ci = self.baseline([ci_id], before_date)
+
+        payload = dict()
+        for item in baseline_ci:
+            payload[item.get('attr_name')] = item.get('to')
+
+        if payload:
+            payload['ci_type'] = baseline_ci[0]['ci_type']
+            payload[baseline_ci[0]['unique_alias']] = baseline_ci[0]['unique_value']
+
+            self.update(ci_id, **payload)
+
+        return payload
 
 
 class CIRelationManager(object):

@@ -224,16 +224,22 @@ class RoleRelationCache(object):
     @classmethod
     @flush_db
     def rebuild(cls, rid, app_id):
-        cls.clean(rid, app_id)
-
-        cls.get_parent_ids(rid, app_id)
-        cls.get_child_ids(rid, app_id)
-        resources = cls.get_resources(rid, app_id)
-        if resources.get('id2perms') or resources.get('group2perms'):
-            HasResourceRoleCache.add(rid, app_id)
+        if app_id is None:
+            app_ids = [None] + [i.id for i in App.get_by(to_dict=False)]
         else:
-            HasResourceRoleCache.remove(rid, app_id)
-        cls.get_resources2(rid, app_id)
+            app_ids = [app_id]
+
+        for _app_id in app_ids:
+            cls.clean(rid, _app_id)
+
+            cls.get_parent_ids(rid, _app_id)
+            cls.get_child_ids(rid, _app_id)
+            resources = cls.get_resources(rid, _app_id)
+            if resources.get('id2perms') or resources.get('group2perms'):
+                HasResourceRoleCache.add(rid, _app_id)
+            else:
+                HasResourceRoleCache.remove(rid, _app_id)
+            cls.get_resources2(rid, _app_id)
 
     @classmethod
     @flush_db

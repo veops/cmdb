@@ -78,6 +78,8 @@ class ErrFormat(CommonErrFormat):
     unique_constraint_invalid = _l("Uniquely constrained attributes cannot be JSON and multi-valued")
     ci_type_trigger_duplicate = _l("Duplicated trigger")  # 重复的触发器
     ci_type_trigger_not_found = _l("Trigger {} does not exist")  # 触发器 {} 不存在
+    ci_type_reconciliation_duplicate = _l("Duplicated reconciliation rule")  # 重复的校验规则
+    ci_type_reconciliation_not_found = _l("Reconciliation rule {} does not exist")  # 规则 {} 不存在
 
     record_not_found = _l("Operation record {} does not exist")  # 操作记录 {} 不存在
     cannot_delete_unique = _l("Unique identifier cannot be deleted")  # 不能删除唯一标识

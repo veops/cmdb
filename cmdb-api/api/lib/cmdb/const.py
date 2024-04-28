@@ -55,6 +55,9 @@ class CITypeOperateType(BaseEnum):
     DELETE_UNIQUE_CONSTRAINT = "11"  # 删除联合唯一
     ADD_RELATION = "12"  # 新增关系
     DELETE_RELATION = "13"  # 删除关系
+    ADD_RECONCILIATION = "14"  # 删除关系
+    UPDATE_RECONCILIATION = "15"  # 删除关系
+    DELETE_RECONCILIATION = "16"  # 删除关系
 
 
 class RetKey(BaseEnum):
@@ -96,6 +99,12 @@ class AttributeDefaultValueEnum(BaseEnum):
     CREATED_AT = "$created_at"
     UPDATED_AT = "$updated_at"
     AUTO_INC_ID = "$auto_inc_id"
+
+
+class ExecuteStatusEnum(BaseEnum):
+    COMPLETED = '0'
+    FAILED = '1'
+    RUNNING = '2'
 
 
 CMDB_QUEUE = "one_cmdb_async"

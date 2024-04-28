@@ -3,12 +3,13 @@
 import json
 import re
 
-from celery_once import QueueOnce
+import redis_lock
 from flask import current_app
 from werkzeug.exceptions import BadRequest
 from werkzeug.exceptions import NotFound
 
 from api.extensions import celery
+from api.extensions import rd
 from api.lib.decorator import flush_db
 from api.lib.decorator import reconnect_db
 from api.lib.perm.acl.audit import AuditCRUD
@@ -25,14 +26,14 @@ from api.models.acl import Role
 from api.models.acl import Trigger
 
 
-@celery.task(name="acl.role_rebuild",
-             queue=ACL_QUEUE,)
+@celery.task(name="acl.role_rebuild", queue=ACL_QUEUE, )
 @flush_db
 @reconnect_db
 def role_rebuild(rids, app_id):
     rids = rids if isinstance(rids, list) else [rids]
     for rid in rids:
-        RoleRelationCache.rebuild(rid, app_id)
+        with redis_lock.Lock(rd.r, "ROLE_REBUILD_{}_{}".format(rid, app_id)):
+            RoleRelationCache.rebuild(rid, app_id)
 
     current_app.logger.info("Role {0} App {1} rebuild..........".format(rids, app_id))
 

@@ -7,7 +7,6 @@ from io import BytesIO
 from flask import abort
 from flask import current_app
 from flask import request
-from flask import session
 
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeCache
@@ -23,6 +22,8 @@ from api.lib.cmdb.const import PermEnum, ResourceTypeEnum, RoleEnum
 from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.cmdb.preference import PreferenceManager
 from api.lib.cmdb.resp_format import ErrFormat
+from api.lib.common_setting.decorator import perms_role_required
+from api.lib.common_setting.role_perm_base import CMDBApp
 from api.lib.decorator import args_required
 from api.lib.decorator import args_validate
 from api.lib.perm.acl.acl import ACLManager
@@ -35,6 +36,8 @@ from api.lib.perm.acl.role import RoleRelationCRUD
 from api.lib.perm.auth import auth_with_app_token
 from api.lib.utils import handle_arg_list
 from api.resource import APIView
+
+app_cli = CMDBApp()
 
 
 class CITypeView(APIView):
@@ -125,7 +128,8 @@ class CITypeGroupView(APIView):
 
         return self.jsonify(CITypeGroupManager.get(need_other, config_required))
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Model_Configuration,
+                         app_cli.op.create_CIType_group, app_cli.admin_name)
     @args_required("name")
     @args_validate(CITypeGroupManager.cls)
     def post(self):
@@ -134,12 +138,11 @@ class CITypeGroupView(APIView):
 
         return self.jsonify(group.to_dict())
 
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Model_Configuration,
+                         app_cli.op.update_CIType_group, app_cli.admin_name)
     @args_validate(CITypeGroupManager.cls)
     def put(self, gid=None):
         if "/order" in request.url:
-            if RoleEnum.CONFIG not in session.get("acl", {}).get("parentRoles", []) and not is_app_admin("cmdb"):
-                return abort(403, ErrFormat.role_required.format(RoleEnum.CONFIG))
-
             group_ids = request.values.get('group_ids')
             CITypeGroupManager.order(group_ids)
 
@@ -152,7 +155,8 @@ class CITypeGroupView(APIView):
 
         return self.jsonify(gid=gid)
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Model_Configuration,
+                         app_cli.op.delete_CIType_group, app_cli.admin_name)
     def delete(self, gid):
         type_ids = request.values.get("type_ids")
         CITypeGroupManager.delete(gid, type_ids)
@@ -352,14 +356,16 @@ class CITypeAttributeGroupView(APIView):
 class CITypeTemplateView(APIView):
     url_prefix = ("/ci_types/template/import", "/ci_types/template/export", "/ci_types/<int:type_id>/template/export")
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Model_Configuration,
+                         app_cli.op.download_CIType, app_cli.admin_name)
     def get(self, type_id=None):  # export
         if type_id is not None:
             return self.jsonify(dict(ci_type_template=CITypeTemplateManager.export_template_by_type(type_id)))
 
         return self.jsonify(dict(ci_type_template=CITypeTemplateManager.export_template()))
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Model_Configuration,
+                         app_cli.op.download_CIType, app_cli.admin_name)
     def post(self):  # import
         tpt = request.values.get('ci_type_template') or {}
 
@@ -379,7 +385,8 @@ class CITypeCanDefineComputed(APIView):
 class CITypeTemplateFileView(APIView):
     url_prefix = ("/ci_types/template/import/file", "/ci_types/template/export/file")
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Model_Configuration,
+                         app_cli.op.download_CIType, app_cli.admin_name)
     def get(self):  # export
         tpt_json = CITypeTemplateManager.export_template()
         tpt_json = dict(ci_type_template=tpt_json)
@@ -394,7 +401,8 @@ class CITypeTemplateFileView(APIView):
                               mimetype='application/json',
                               max_age=0)
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Model_Configuration,
+                         app_cli.op.download_CIType, app_cli.admin_name)
     def post(self):  # import
         f = request.files.get('file')
 

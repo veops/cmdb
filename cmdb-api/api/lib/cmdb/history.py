@@ -26,7 +26,7 @@ from api.models.cmdb import OperationRecord
 class AttributeHistoryManger(object):
     @staticmethod
     def get_records_for_attributes(start, end, username, page, page_size, operate_type, type_id,
-                                   ci_id=None, attr_id=None):
+                                   ci_id=None, attr_id=None, ci_ids=None, more=False):
 
         records = db.session.query(OperationRecord, AttributeHistory).join(
             AttributeHistory, OperationRecord.id == AttributeHistory.record_id)
@@ -48,6 +48,9 @@ class AttributeHistoryManger(object):
         if ci_id is not None:
             records = records.filter(AttributeHistory.ci_id == ci_id)
 
+        if ci_ids and isinstance(ci_ids, list):
+            records = records.filter(AttributeHistory.ci_id.in_(ci_ids))
+
         if attr_id is not None:
             records = records.filter(AttributeHistory.attr_id == attr_id)
 
@@ -62,6 +65,12 @@ class AttributeHistoryManger(object):
             if attr_hist['attr']:
                 attr_hist['attr_name'] = attr_hist['attr'].name
                 attr_hist['attr_alias'] = attr_hist['attr'].alias
+                if more:
+                    attr_hist['is_list'] = attr_hist['attr'].is_list
+                    attr_hist['is_computed'] = attr_hist['attr'].is_computed
+                    attr_hist['is_password'] = attr_hist['attr'].is_password
+                    attr_hist['default'] = attr_hist['attr'].default
+                attr_hist['value_type'] = attr_hist['attr'].value_type
                 attr_hist.pop("attr")
 
             if record_id not in res:
@@ -161,6 +170,7 @@ class AttributeHistoryManger(object):
             record = i.OperationRecord
             item = dict(attr_name=attr.name,
                         attr_alias=attr.alias,
+                        value_type=attr.value_type,
                         operate_type=hist.operate_type,
                         username=user and user.nickname,
                         old=hist.old,
@@ -271,7 +281,7 @@ class CITypeHistoryManager(object):
         return numfound, result
 
     @staticmethod
-    def add(operate_type, type_id, attr_id=None, trigger_id=None, unique_constraint_id=None, change=None):
+    def add(operate_type, type_id, attr_id=None, trigger_id=None, unique_constraint_id=None, change=None, rc_id=None):
         if type_id is None and attr_id is not None:
             from api.models.cmdb import CITypeAttribute
             type_ids = [i.type_id for i in CITypeAttribute.get_by(attr_id=attr_id, to_dict=False)]
@@ -284,6 +294,7 @@ class CITypeHistoryManager(object):
                            uid=current_user.uid,
                            attr_id=attr_id,
                            trigger_id=trigger_id,
+                           rc_id=rc_id,
                            unique_constraint_id=unique_constraint_id,
                            change=change)
 

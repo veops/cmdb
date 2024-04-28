@@ -5,28 +5,29 @@ import datetime
 
 from flask import abort
 from flask import request
-from flask import session
 
 from api.lib.cmdb.ci import CIManager
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
-from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.history import AttributeHistoryManger
 from api.lib.cmdb.history import CITriggerHistoryManager
 from api.lib.cmdb.history import CITypeHistoryManager
 from api.lib.cmdb.resp_format import ErrFormat
+from api.lib.common_setting.decorator import perms_role_required
+from api.lib.common_setting.role_perm_base import CMDBApp
 from api.lib.perm.acl.acl import has_perm_from_args
-from api.lib.perm.acl.acl import is_app_admin
-from api.lib.perm.acl.acl import role_required
 from api.lib.utils import get_page
 from api.lib.utils import get_page_size
 from api.resource import APIView
+
+app_cli = CMDBApp()
 
 
 class RecordView(APIView):
     url_prefix = ("/history/records/attribute", "/history/records/relation")
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Operation_Audit,
+                         app_cli.op.read, app_cli.admin_name)
     def get(self):
         page = get_page(request.values.get("page", 1))
         page_size = get_page_size(request.values.get("page_size"))
@@ -80,18 +81,21 @@ class CIHistoryView(APIView):
 
 
 class CITriggerHistoryView(APIView):
-    url_prefix = ("/history/ci_triggers/<int:ci_id>", "/history/ci_triggers")
+    url_prefix = ("/history/ci_triggers/<int:ci_id>",)
 
     @has_perm_from_args("ci_id", ResourceTypeEnum.CI, PermEnum.READ, CIManager.get_type_name)
-    def get(self, ci_id=None):
-        if ci_id is not None:
-            result = CITriggerHistoryManager.get_by_ci_id(ci_id)
+    def get(self, ci_id):
+        result = CITriggerHistoryManager.get_by_ci_id(ci_id)
 
-            return self.jsonify(result)
+        return self.jsonify(result)
 
-        if RoleEnum.CONFIG not in session.get("acl", {}).get("parentRoles", []) and not is_app_admin("cmdb"):
-            return abort(403, ErrFormat.role_required.format(RoleEnum.CONFIG))
 
+class CIsTriggerHistoryView(APIView):
+    url_prefix = ("/history/ci_triggers",)
+
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Operation_Audit,
+                         app_cli.op.read, app_cli.admin_name)
+    def get(self):
         type_id = request.values.get("type_id")
         trigger_id = request.values.get("trigger_id")
         operate_type = request.values.get("operate_type")
@@ -115,7 +119,8 @@ class CITriggerHistoryView(APIView):
 class CITypeHistoryView(APIView):
     url_prefix = "/history/ci_types"
 
-    @role_required(RoleEnum.CONFIG)
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Operation_Audit,
+                         app_cli.op.read, app_cli.admin_name)
     def get(self):
         type_id = request.values.get("type_id")
         username = request.values.get("username")
