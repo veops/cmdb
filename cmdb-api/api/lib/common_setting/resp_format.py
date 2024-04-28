@@ -80,3 +80,5 @@ class ErrFormat(CommonErrFormat):
     ldap_test_username_required = _l("LDAP test username required")  # LDAP测试用户名必填
 
     company_wide = _l("Company wide")  # 全公司
+
+    resource_no_permission = _l("No permission to access resource {}, perm {} ")  # 没有权限访问 {} 资源的 {} 权限"
