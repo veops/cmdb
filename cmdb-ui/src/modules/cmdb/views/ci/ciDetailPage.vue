@@ -2,7 +2,7 @@
   <div>
     <div class="ci-detail-header">{{ this.type.alias }}</div>
     <div class="ci-detail-page">
-      <CiDetailTab ref="ciDetailTab" :typeId="typeId" />
+      <ci-detail-tab ref="ciDetailTab" :typeId="typeId" :attributeHistoryTableHeight="windowHeight - 250" />
     </div>
   </div>
 </template>
@@ -22,6 +22,11 @@ export default {
       attrList: [],
       attributes: {},
     }
+  },
+  computed: {
+    windowHeight() {
+      return this.$store.state.windowHeight
+    },
   },
   provide() {
     return {
@@ -55,7 +60,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-
 .ci-detail-header {
   border-left: 3px solid @primary-color;
   padding-left: 10px;

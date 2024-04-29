@@ -17,7 +17,6 @@
       show-header-overflow
       highlight-hover-row
       keep-source
-      :height="windowHeight - 190"
       class="ops-stripe-table"
       :row-class-name="rowClass"
       :edit-config="{ trigger: 'dblclick', mode: 'cell', showIcon: false }"
@@ -37,9 +36,9 @@
         <template #default="{row}">
           <span v-if="row.isParent && constraintMap[row.constraint]">{{
             constraintMap[row.constraint]
-              .split('')
+              .split(' ')
               .reverse()
-              .join('')
+              .join(' ')
           }}</span>
           <span v-else>{{ constraintMap[row.constraint] }}</span>
         </template>

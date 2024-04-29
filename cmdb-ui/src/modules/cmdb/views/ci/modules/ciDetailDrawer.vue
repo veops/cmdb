@@ -1,12 +1,13 @@
 <template>
   <CustomDrawer
-    width="80%"
+    width="90%"
     placement="left"
     @close="
       () => {
         visible = false
       }
     "
+    style="transform: translateX(0px)!important"
     :visible="visible"
     :hasTitle="false"
     :hasFooter="false"

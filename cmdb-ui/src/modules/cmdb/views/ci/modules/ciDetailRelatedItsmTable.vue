@@ -7,7 +7,7 @@
       resizable
       border
       size="small"
-      class="ops-stripe-table"
+      class="ops-unstripe-table"
       :span-method="mergeRowMethod"
       :data="tableData"
       v-bind="ci_id ? { height: 'auto' } : { height: `${windowHeight - 225}px` }"
@@ -35,7 +35,7 @@
         :filters="[
           { value: 0, label: $t('new') },
           { value: 1, label: $t('delete') },
-          { value: 3, label: $t('update') },
+          { value: 2, label: $t('update') },
         ]"
         :filter-method="filterOperateMethod"
         :title="$t('operation')"
@@ -104,6 +104,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    attrList: {
+      type: Array,
+      default: () => [],
+    }
   },
   data() {
     return {
@@ -170,8 +174,8 @@ export default {
           if (attrColumn) {
             $table.setFilter(
               attrColumn,
-              this.tableData.map((item) => {
-                return { value: item.attr_alias, label: item.attr_alias }
+              this.attrList().map((attr) => {
+                return { value: attr.alias || attr.name, label: attr.alias || attr.name }
               })
             )
           }
