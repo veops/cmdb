@@ -342,8 +342,8 @@ key = "Your API key"
 secret = "Your API secret"
 
 def build_api_key(path, params):
-    values = "".join([str(params[k]) for k in sorted(params.keys())
-                      if params[k] is not None and not k.startswith('_')]) if params.keys() else ""
+    values = "".join([str(params[k]) for k in sorted((params or {}).keys())
+                      if k not in ("_key", "_secret") and not isinstance(params[k], (dict, list))])
     _secret = "".join([path, secret, values]).encode("utf-8")
     params["_secret"] = hashlib.sha1(_secret).hexdigest()
     params["_key"] = key
@@ -365,8 +365,8 @@ SECRET = "Your API secret"
 
 
 def build_api_key(path, params):
-    values = "".join([str(params[k]) for k in sorted(params.keys())
-                      if params[k] is not None and not k.startswith('_')]) if params.keys() else ""
+    values = "".join([str(params[k]) for k in sorted((params or {}).keys())
+                      if k not in ("_key", "_secret") and not isinstance(params[k], (dict, list))])
     _secret = "".join([path, SECRET, values]).encode("utf-8")
     params["_secret"] = hashlib.sha1(_secret).hexdigest()
     params["_key"] = KEY
@@ -395,8 +395,8 @@ SECRET = "Your API secret"
 
 
 def build_api_key(path, params):
-    values = "".join([str(params[k]) for k in sorted(params.keys())
-                      if params[k] is not None and not k.startswith('_')]) if params.keys() else ""
+    values = "".join([str(params[k]) for k in sorted((params or {}).keys())
+                      if k not in ("_key", "_secret") and not isinstance(params[k], (dict, list))])
     _secret = "".join([path, SECRET, values]).encode("utf-8")
     params["_secret"] = hashlib.sha1(_secret).hexdigest()
     params["_key"] = KEY
