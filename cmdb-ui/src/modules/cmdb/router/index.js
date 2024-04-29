@@ -13,7 +13,7 @@ const genCmdbRoutes = async () => {
       {
         path: '/cmdb/dashboard',
         name: 'cmdb_dashboard',
-        meta: { title: 'dashboard', icon: 'ops-cmdb-dashboard', selectedIcon: 'ops-cmdb-dashboard-selected', keepAlive: false },
+        meta: { title: 'dashboard', icon: 'ops-cmdb-dashboard', selectedIcon: 'ops-cmdb-dashboard', keepAlive: false },
         component: () => import('../views/dashboard/index_v2.vue')
       },
       {
@@ -25,7 +25,7 @@ const genCmdbRoutes = async () => {
         path: '/cmdb/resourceviews',
         name: 'cmdb_resource_views',
         component: RouteView,
-        meta: { title: 'cmdb.menu.ciTable', icon: 'ops-cmdb-resource', selectedIcon: 'ops-cmdb-resource-selected', keepAlive: true },
+        meta: { title: 'cmdb.menu.ciTable', icon: 'ops-cmdb-resource', selectedIcon: 'ops-cmdb-resource', keepAlive: true },
         hideChildrenInMenu: false,
         children: []
       },
@@ -33,7 +33,7 @@ const genCmdbRoutes = async () => {
         path: '/cmdb/tree_views',
         component: () => import('../views/tree_views'),
         name: 'cmdb_tree_views',
-        meta: { title: 'cmdb.menu.ciTree', icon: 'ops-cmdb-tree', selectedIcon: 'ops-cmdb-tree-selected', keepAlive: false },
+        meta: { title: 'cmdb.menu.ciTree', icon: 'ops-cmdb-tree', selectedIcon: 'ops-cmdb-tree', keepAlive: false },
         hideChildrenInMenu: true,
         children: [
           {
@@ -47,13 +47,13 @@ const genCmdbRoutes = async () => {
       {
         path: '/cmdb/resourcesearch',
         name: 'cmdb_resource_search',
-        meta: { title: 'cmdb.menu.ciSearch', icon: 'ops-cmdb-search', selectedIcon: 'ops-cmdb-search-selected', keepAlive: false },
+        meta: { title: 'cmdb.menu.ciSearch', icon: 'ops-cmdb-search', selectedIcon: 'ops-cmdb-search', keepAlive: false },
         component: () => import('../views/resource_search/index.vue')
       },
       {
         path: '/cmdb/adc',
         name: 'cmdb_auto_discovery_ci',
-        meta: { title: 'cmdb.menu.adCIs', icon: 'ops-cmdb-adc', selectedIcon: 'ops-cmdb-adc-selected', keepAlive: false },
+        meta: { title: 'cmdb.menu.adCIs', icon: 'ops-cmdb-adc', selectedIcon: 'ops-cmdb-adc', keepAlive: false },
         component: () => import('../views/discoveryCI/index.vue')
       },
       {
@@ -72,19 +72,19 @@ const genCmdbRoutes = async () => {
         path: '/cmdb/preference',
         component: () => import('../views/preference/index'),
         name: 'cmdb_preference',
-        meta: { title: 'cmdb.menu.preference', icon: 'ops-cmdb-preference', selectedIcon: 'ops-cmdb-preference-selected', keepAlive: false }
+        meta: { title: 'cmdb.menu.preference', icon: 'ops-cmdb-preference', selectedIcon: 'ops-cmdb-preference', keepAlive: false }
       },
       {
         path: '/cmdb/batch',
         component: () => import('../views/batch'),
         name: 'cmdb_batch',
-        meta: { 'title': 'cmdb.menu.batchUpload', icon: 'ops-cmdb-batch', selectedIcon: 'ops-cmdb-batch-selected', keepAlive: false }
+        meta: { 'title': 'cmdb.menu.batchUpload', icon: 'ops-cmdb-batch', selectedIcon: 'ops-cmdb-batch', keepAlive: false }
       },
       {
         path: '/cmdb/ci_types',
         name: 'ci_type',
         component: () => import('../views/ci_types/index'),
-        meta: { title: 'cmdb.menu.citypeManage', icon: 'ops-cmdb-citype', selectedIcon: 'ops-cmdb-citype-selected', keepAlive: false, permission: ['cmdb_admin', 'admin'] }
+        meta: { title: 'cmdb.menu.citypeManage', icon: 'ops-cmdb-citype', selectedIcon: 'ops-cmdb-citype', keepAlive: false, permission: ['cmdb_admin', 'admin'] }
       },
       {
         path: '/cmdb/disabled3',
@@ -166,7 +166,7 @@ const genCmdbRoutes = async () => {
       path: `/cmdb/relationviews/${item[1]}`,
       name: `cmdb_relation_views_${item[1]}`,
       component: () => import('../views/relation_views/index'),
-      meta: { title: item[0], icon: 'ops-cmdb-relation', selectedIcon: 'ops-cmdb-relation-selected', keepAlive: false, name: item[0] },
+      meta: { title: item[0], icon: 'ops-cmdb-relation', selectedIcon: 'ops-cmdb-relation', keepAlive: false, name: item[0] },
     }
   })
   routes.children.splice(2, 0, ...relationViews)

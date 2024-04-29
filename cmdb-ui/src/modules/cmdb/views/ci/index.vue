@@ -673,7 +673,7 @@ export default {
               message: this.$t('warning'),
               description: errorMsg,
               duration: 0,
-              style: { whiteSpace: 'break-spaces', overflow: 'auto', height: this.windowHeight - 80 + 'px' },
+              style: { whiteSpace: 'break-spaces', overflow: 'auto', maxHeight: this.windowHeight - 80 + 'px' },
             })
             errorNum += 1
           })

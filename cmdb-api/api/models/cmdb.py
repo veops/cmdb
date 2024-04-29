@@ -432,6 +432,7 @@ class CITypeHistory(Model):
 
     attr_id = db.Column(db.Integer)
     trigger_id = db.Column(db.Integer)
+    rc_id = db.Column(db.Integer)
     unique_constraint_id = db.Column(db.Integer)
 
     uid = db.Column(db.Integer, index=True)
