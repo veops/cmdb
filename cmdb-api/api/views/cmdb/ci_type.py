@@ -18,7 +18,7 @@ from api.lib.cmdb.ci_type import CITypeManager
 from api.lib.cmdb.ci_type import CITypeTemplateManager
 from api.lib.cmdb.ci_type import CITypeTriggerManager
 from api.lib.cmdb.ci_type import CITypeUniqueConstraintManager
-from api.lib.cmdb.const import PermEnum, ResourceTypeEnum, RoleEnum
+from api.lib.cmdb.const import PermEnum, ResourceTypeEnum
 from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.cmdb.preference import PreferenceManager
 from api.lib.cmdb.resp_format import ErrFormat
@@ -119,7 +119,6 @@ class CITypeInheritanceView(APIView):
 class CITypeGroupView(APIView):
     url_prefix = ("/ci_types/groups",
                   "/ci_types/groups/config",
-                  "/ci_types/groups/order",
                   "/ci_types/groups/<int:gid>")
 
     def get(self):
@@ -138,16 +137,8 @@ class CITypeGroupView(APIView):
 
         return self.jsonify(group.to_dict())
 
-    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Model_Configuration,
-                         app_cli.op.update_CIType_group, app_cli.admin_name)
     @args_validate(CITypeGroupManager.cls)
     def put(self, gid=None):
-        if "/order" in request.url:
-            group_ids = request.values.get('group_ids')
-            CITypeGroupManager.order(group_ids)
-
-            return self.jsonify(group_ids=group_ids)
-
         name = request.values.get('name') or abort(400, ErrFormat.argument_value_required.format("name"))
         type_ids = request.values.get('type_ids')
 
@@ -162,6 +153,18 @@ class CITypeGroupView(APIView):
         CITypeGroupManager.delete(gid, type_ids)
 
         return self.jsonify(gid=gid)
+
+
+class CITypeGroupOrderView(APIView):
+    url_prefix = "/ci_types/groups/order"
+
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Model_Configuration,
+                         app_cli.op.update_CIType_group, app_cli.admin_name)
+    def put(self):
+        group_ids = request.values.get('group_ids')
+        CITypeGroupManager.order(group_ids)
+
+        return self.jsonify(group_ids=group_ids)
 
 
 class CITypeQueryView(APIView):
