@@ -223,10 +223,10 @@
         <a-form-item :label="$t('cmdb.ciType.isInherit')">
           <a-radio-group v-model="isInherit">
             <a-radio :value="true">
-              是
+              {{ $t('yes') }}
             </a-radio>
             <a-radio :value="false">
-              否
+              {{ $t('no') }}
             </a-radio>
           </a-radio-group>
         </a-form-item>

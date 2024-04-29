@@ -1,5 +1,5 @@
 <template>
-  <div class="cmdb-grant" :style="{ maxHeight: `${windowHeight - 130}px` }">
+  <div class="cmdb-grant" :style="{ }">
     <template v-if="cmdbGrantType.includes('ci_type')">
       <div class="cmdb-grant-title">{{ $t('cmdb.components.ciTypeGrant') }}</div>
       <CiTypeGrant
