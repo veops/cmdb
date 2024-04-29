@@ -1,13 +1,10 @@
-from api.lib.common_setting.const import RoleType
-
-
 class OperationPermission(object):
 
     def __init__(self, resource_perms):
         for _r in resource_perms:
-            setattr(self, f"{_r['page']}", _r['page'])
+            setattr(self, _r['page'], _r['page'])
             for _p in _r['perms']:
-                setattr(self, f"{_p}", _p)
+                setattr(self, _p, _p)
 
 
 class BaseApp(object):
@@ -58,71 +55,5 @@ class CMDBApp(BaseApp):
 
         self.admin_name = 'cmdb_admin'
         self.app_name = 'cmdb'
-        self.roles = self.parse_roles()
 
         self.op = OperationPermission(self.all_resource_perms)
-
-    def parse_roles(self):
-        return [self.cmdb_admin_role, self.cmdb_technician, self.cmdb_user]
-
-    @property
-    def cmdb_admin_role(self):
-        return self.format_role(
-            'CMDB管理员', RoleType.System, 0, self.all_resource_perms
-        )
-
-    @property
-    def cmdb_technician(self):
-        resource_perms_map = dict(
-            Big_Screen=["read"],
-            Dashboard=["read"],
-            Resource_Search=["read"],
-            Auto_Discovery_Pool=["read"],
-            My_Subscriptions=["read"],
-            Bulk_Import=["read"],
-            Model_Configuration=["read", "create_CIType"],
-            Backend_Management=[],
-            Customized_Dashboard=[],
-            Service_Tree_Definition=[],
-            Model_Relationships=[],
-            Operation_Audit=[],
-            Relationship_Types=[],
-            Auto_Discovery=[]
-        )
-        resource_perms = []
-        for _page, _perms in resource_perms_map.items():
-            resource_perms.append(
-                dict(page=_page, perms=_perms)
-            )
-
-        return self.format_role(
-            'CMDB技术员', RoleType.Technician, 0, resource_perms
-        )
-
-    @property
-    def cmdb_user(self):
-        resource_perms_map = dict(
-            Big_Screen=["read"],
-            Dashboard=["read"],
-            Resource_Search=["read"],
-            Auto_Discovery_Pool=["read"],
-            My_Subscriptions=["read"],
-            Bulk_Import=["read"],
-            Model_Configuration=[],
-            Backend_Management=[],
-            Customized_Dashboard=[],
-            Service_Tree_Definition=[],
-            Model_Relationships=[],
-            Operation_Audit=[],
-            Relationship_Types=[],
-            Auto_Discovery=[]
-        )
-        resource_perms = []
-        for _page, _perms in resource_perms_map.items():
-            resource_perms.append(
-                dict(page=_page, perms=_perms)
-            )
-
-        return self.format_role(
-            'CMDB用户', RoleType.User, 0, resource_perms
-        )

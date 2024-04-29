@@ -64,9 +64,3 @@ MIMEExtMap = {
     'text/plain': '.txt',
     'text/csv': '.csv',
 }
-
-
-class RoleType(BaseEnum):
-    System = 'system'
-    Technician = 'technician'
-    User = 'user'
