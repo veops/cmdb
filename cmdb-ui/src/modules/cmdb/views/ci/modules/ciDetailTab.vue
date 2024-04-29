@@ -20,7 +20,7 @@
               :key="attr.name"
               v-for="attr in group.attributes"
             >
-              <CiDetailAttrContent :ci="ci" :attr="attr" @refresh="refresh" @updateCIByself="updateCIByself" />
+              <ci-detail-attr-content :ci="ci" :attr="attr" @refresh="refresh" @updateCIByself="updateCIByself" />
             </el-descriptions-item>
           </el-descriptions>
         </div>
@@ -28,22 +28,32 @@
       <a-tab-pane key="tab_2">
         <span slot="tab"><a-icon type="branches" />{{ $t('cmdb.relation') }}</span>
         <div :style="{ height: '100%', padding: '24px', overflow: 'auto' }">
-          <CiDetailRelation ref="ciDetailRelation" :ciId="ciId" :typeId="typeId" :ci="ci" />
+          <ci-detail-relation ref="ciDetailRelation" :ciId="ciId" :typeId="typeId" :ci="ci" />
         </div>
       </a-tab-pane>
       <a-tab-pane key="tab_3">
         <span slot="tab"><a-icon type="clock-circle" />{{ $t('cmdb.ci.history') }}</span>
         <div :style="{ padding: '24px', height: '100%' }">
+          <a-space :style="{ 'margin-bottom': '10px', display: 'flex' }">
+            <a-button type="primary" class="ops-button-ghost" ghost @click="handleRollbackCI()">
+              <ops-icon type="shishizhuangtai" />{{ $t('cmdb.ci.rollback') }}
+            </a-button>
+          </a-space>
+          <ci-rollback-form ref="ciRollbackForm" :ciIds="[ciId]" @getCIHistory="getCIHistory" />
           <vxe-table
             ref="xTable"
+            show-overflow
+            show-header-overflow
             :data="ciHistory"
             size="small"
-            height="auto"
+            :height="tableHeight"
+            highlight-hover-row
             :span-method="mergeRowMethod"
+            :scroll-y="{ enabled: false, gt: 20 }"
+            :scroll-x="{ enabled: false, gt: 0 }"
             border
             resizable
-            :scroll-y="{ enabled: false }"
-            class="ops-stripe-table"
+            class="ops-unstripe-table"
           >
             <template #empty>
               <a-empty :image-style="{ height: '100px' }" :style="{ paddingTop: '10%' }">
@@ -63,7 +73,7 @@
               :filters="[
                 { value: 0, label: $t('new') },
                 { value: 1, label: $t('delete') },
-                { value: 3, label: $t('update') },
+                { value: 2, label: $t('update') },
               ]"
               :filter-method="filterOperateMethod"
               :title="$t('operation')"
@@ -78,8 +88,18 @@
               :filters="[]"
               :filter-method="filterAttrMethod"
             ></vxe-table-column>
-            <vxe-table-column field="old" :title="$t('cmdb.history.old')"></vxe-table-column>
-            <vxe-table-column field="new" :title="$t('cmdb.history.new')"></vxe-table-column>
+            <vxe-table-column field="old" :title="$t('cmdb.history.old')">
+              <template #default="{ row }">
+                <span v-if="row.value_type === '6'">{{ JSON.parse(row.old) }}</span>
+                <span v-else>{{ row.old }}</span>
+              </template>
+            </vxe-table-column>
+            <vxe-table-column field="new" :title="$t('cmdb.history.new')">
+              <template #default="{ row }">
+                <span v-if="row.value_type === '6'">{{ JSON.parse(row.new) }}</span>
+                <span v-else>{{ row.new }}</span>
+              </template>
+            </vxe-table-column>
           </vxe-table>
         </div>
       </a-tab-pane>
@@ -92,7 +112,7 @@
       <a-tab-pane key="tab_5">
         <span slot="tab"><ops-icon type="itsm-association" />{{ $t('cmdb.ci.relITSM') }}</span>
         <div :style="{ padding: '24px', height: '100%' }">
-          <RelatedItsmTable :ci_id="ci._id" :ciHistory="ciHistory" :itsmInstalled="itsmInstalled" />
+          <related-itsm-table :ci_id="ci._id" :ciHistory="ciHistory" :itsmInstalled="itsmInstalled" />
         </div>
       </a-tab-pane>
     </a-tabs>
@@ -119,6 +139,9 @@ import CiDetailAttrContent from './ciDetailAttrContent.vue'
 import CiDetailRelation from './ciDetailRelation.vue'
 import TriggerTable from '../../operation_history/modules/triggerTable.vue'
 import RelatedItsmTable from './ciDetailRelatedItsmTable.vue'
+import CiRollbackForm from './ciRollbackForm.vue'
+import { sleep } from '@/utils/util'
+
 export default {
   name: 'CiDetailTab',
   components: {
@@ -128,6 +151,7 @@ export default {
     CiDetailRelation,
     TriggerTable,
     RelatedItsmTable,
+    CiRollbackForm,
   },
   props: {
     typeId: {
@@ -138,10 +162,15 @@ export default {
       type: Array,
       default: () => [],
     },
+    attributeHistoryTableHeight: {
+      type: Number,
+      default: null
+    }
   },
   data() {
     return {
       ci: {},
+      item: [],
       attributeGroups: [],
       activeTabKey: 'tab_1',
       rowSpanMap: {},
@@ -150,6 +179,7 @@ export default {
       ci_types: [],
       hasPermission: true,
       itsmInstalled: true,
+      tableHeight: this.attributeHistoryTableHeight || (this.$store.state.windowHeight - 120),
     }
   },
   computed: {
@@ -227,8 +257,9 @@ export default {
         })
     },
     async judgeItsmInstalled() {
-      await judgeItsmInstalled()
-        .catch((e) => { this.itsmInstalled = false })
+      await judgeItsmInstalled().catch((e) => {
+        this.itsmInstalled = false
+      })
     },
 
     getCIHistory() {
@@ -367,6 +398,11 @@ export default {
         .catch(() => {
           this.$message.error(this.$t('cmdb.ci.copyFailed'))
         })
+    },
+    handleRollbackCI() {
+      this.$nextTick(() => {
+        this.$refs.ciRollbackForm.onOpen()
+      })
     },
   },
 }

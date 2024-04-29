@@ -68,6 +68,8 @@
             <span @click="openBatchDownload">{{ $t('download') }}</span>
             <a-divider type="vertical" />
             <span @click="batchDelete">{{ $t('delete') }}</span>
+            <a-divider type="vertical" />
+            <span @click="batchRollback">{{ $t('cmdb.ci.rollback') }}</span>
             <span>{{ $t('cmdb.ci.selectRows', { rows: selectedRowKeys.length }) }}</span>
           </div>
         </SearchForm>
@@ -293,6 +295,7 @@
         <create-instance-form ref="create" @reload="reloadData" @submit="batchUpdate" />
         <JsonEditor ref="jsonEditor" @jsonEditorOk="jsonEditorOk" />
         <BatchDownload ref="batchDownload" @batchDownload="batchDownload" />
+        <ci-rollback-form ref="ciRollbackForm" @batchRollbackAsync="batchRollbackAsync($event)" :ciIds="selectedRowKeys" />
         <MetadataDrawer ref="metadataDrawer" />
         <CMDBGrant ref="cmdbGrant" resourceTypeName="CIType" app_id="cmdb" />
       </a-spin>
@@ -325,6 +328,8 @@ import MetadataDrawer from './modules/MetadataDrawer.vue'
 import CMDBGrant from '../../components/cmdbGrant'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
 import { getAttrPassword } from '../../api/CITypeAttr'
+import CiRollbackForm from './modules/ciRollbackForm.vue'
+import { CIBaselineRollback } from '../../api/history'
 
 export default {
   name: 'InstanceList',
@@ -340,6 +345,7 @@ export default {
     MetadataDrawer,
     CMDBGrant,
     OpsMoveIcon,
+    CiRollbackForm,
   },
   computed: {
     windowHeight() {
@@ -429,6 +435,12 @@ export default {
     // window.onkeypress = (e) => {
     //   this.handleKeyPress(e)
     // }
+    this.$nextTick(() => {
+      const loadingNode = document.getElementsByClassName('ant-drawer-mask')
+      if (loadingNode?.style) {
+        loadingNode.style.zIndex = 8
+      }
+    })
     setTimeout(() => {
       this.columnDrop()
     }, 1000)
@@ -661,7 +673,7 @@ export default {
               message: this.$t('warning'),
               description: errorMsg,
               duration: 0,
-              style: { whiteSpace: 'break-spaces' },
+              style: { whiteSpace: 'break-spaces', overflow: 'auto', height: this.windowHeight - 80 + 'px' },
             })
             errorNum += 1
           })
@@ -742,6 +754,55 @@ export default {
             that.reloadData()
           })
         },
+      })
+    },
+    batchRollback() {
+      this.$nextTick(() => {
+        this.$refs.ciRollbackForm.onOpen(true)
+      })
+    },
+    async batchRollbackAsync(params) {
+      const mask = document.querySelector('.ant-drawer-mask')
+      const oldValue = mask.style.zIndex
+      mask.style.zIndex = 2
+      let successNum = 0
+      let errorNum = 0
+      this.loading = true
+      this.loadTip = this.$t('cmdb.ci.rollbackingTips')
+      const floor = Math.ceil(this.selectedRowKeys.length / 6)
+      for (let i = 0; i < floor; i++) {
+        const itemList = this.selectedRowKeys.slice(6 * i, 6 * i + 6)
+        const promises = itemList.map((x) => CIBaselineRollback(x, params))
+        await Promise.allSettled(promises)
+          .then((res) => {
+            res.forEach((r) => {
+              if (r.status === 'fulfilled') {
+                successNum += 1
+              } else {
+                errorNum += 1
+              }
+            })
+          })
+          .finally(() => {
+            this.loadTip = this.$t('cmdb.ci.batchRollbacking', {
+              total: this.selectedRowKeys.length,
+              successNum: successNum,
+              errorNum: errorNum,
+            })
+          })
+      }
+      this.loading = false
+      this.loadTip = ''
+      mask.style.zIndex = oldValue
+      this.selectedRowKeys = []
+      this.$refs.xTable.getVxetableRef().clearCheckboxRow()
+      this.$refs.xTable.getVxetableRef().clearCheckboxReserve()
+      this.$nextTick(() => {
+        if (this.currentPage === 1) {
+          this.loadTableData()
+        } else {
+          this.currentPage = 1
+        }
       })
     },
     async refreshAfterEditAttrs() {

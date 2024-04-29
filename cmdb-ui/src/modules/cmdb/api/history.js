@@ -71,3 +71,19 @@ export function judgeItsmInstalled() {
     isShowMessage: false
   })
 }
+
+export function getCIsBaseline(params) {
+  return axios({
+    url: `/v0.1/ci/baseline`,
+    method: 'GET',
+    params
+  })
+}
+
+export function CIBaselineRollback(ciId, params) {
+  return axios({
+    url: `/v0.1/ci/${ciId}/baseline/rollback`,
+    method: 'POST',
+    data: params
+  })
+}

@@ -5,7 +5,7 @@
       show-header-overflow
       stripe
       size="small"
-      class="ops-stripe-table"
+      class="ops-unstripe-table"
       :data="tableData"
       v-bind="ci_id ? { height: 'auto' } : { height: `${windowHeight - 225}px` }"
     >
