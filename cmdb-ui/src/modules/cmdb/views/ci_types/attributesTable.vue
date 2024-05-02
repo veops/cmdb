@@ -63,7 +63,7 @@
             </a-tooltip>
 
             <a-tooltip v-if="index !== CITypeGroups.length - 1">
-              <template slot="title">{{ $t('cmdb.ciType.up') }}</template>
+              <template slot="title">{{ $t('cmdb.ciType.down') }}</template>
               <a
               ><a-icon
                 type="arrow-down"
