@@ -263,10 +263,11 @@ class CIManager(object):
             ci_ids = None
             for attr_id in constraint.attr_ids:
                 value_table = TableMap(attr_name=id2name[attr_id]).table
-
-                _ci_ids = set([i.ci_id for i in value_table.get_by(attr_id=attr_id,
-                                                                   to_dict=False,
-                                                                   value=ci_dict.get(id2name[attr_id]) or None)])
+                values = value_table.get_by(attr_id=attr_id,
+                                            value=ci_dict.get(id2name[attr_id]) or None,
+                                            only_query=True).join(
+                    CI, CI.id == value_table.ci_id).filter(CI.type_id == type_id)
+                _ci_ids = set([i.ci_id for i in values])
                 if ci_ids is None:
                     ci_ids = _ci_ids
                 else:
