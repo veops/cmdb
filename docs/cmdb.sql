@@ -492,7 +492,7 @@ CREATE TABLE `acl_role_relations` (
 
 LOCK TABLES `acl_role_relations` WRITE;
 /*!40000 ALTER TABLE `acl_role_relations` DISABLE KEYS */;
-INSERT INTO `acl_role_relations` VALUES (NULL,0,NULL,NULL,1,1,2,NULL);
+INSERT INTO `acl_role_relations` VALUES (NULL,0,NULL,NULL,1,1,2,NULL),(NULL,0,NULL,NULL,2,3,2,2);
 /*!40000 ALTER TABLE `acl_role_relations` ENABLE KEYS */;
 UNLOCK TABLES;
 
