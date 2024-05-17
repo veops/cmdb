@@ -49,6 +49,8 @@
 import _ from 'lodash'
 import '@wangeditor/editor/dist/css/style.css'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+import { i18nChangeLanguage } from '@wangeditor/editor'
+
 export default {
   name: 'NoticeContent',
   components: { Editor, Toolbar },
@@ -75,6 +77,10 @@ export default {
     const editor = this.editor
     if (editor == null) return
     editor.destroy() // When the component is destroyed, destroy the editor in time
+  },
+  beforeCreate() {
+      const locale = this.$i18n.locale === 'zh' ? 'zh-CN' : 'en'
+      i18nChangeLanguage(locale)
   },
   methods: {
     onCreated(editor) {

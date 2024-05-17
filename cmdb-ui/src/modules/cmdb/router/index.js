@@ -19,7 +19,7 @@ const genCmdbRoutes = async () => {
       {
         path: '/cmdb/disabled1',
         name: 'cmdb_disabled1',
-        meta: { title: 'cmdb.menu.views', disabled: true },
+        meta: { title: 'cmdb.menu.resources', disabled: true },
       },
       {
         path: '/cmdb/resourceviews',
