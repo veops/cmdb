@@ -5,7 +5,6 @@ import copy
 import toposort
 from flask import abort
 from flask import current_app
-from flask import session
 from flask_login import current_user
 from toposort import toposort_flatten
 from werkzeug.exceptions import BadRequest
@@ -28,9 +27,11 @@ from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.cmdb.relation_type import RelationTypeManager
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.value import AttributeValueManager
+from api.lib.common_setting.role_perm_base import CMDBApp
 from api.lib.decorator import kwargs_required
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import is_app_admin
+from api.lib.perm.acl.acl import validate_permission
 from api.models.cmdb import Attribute
 from api.models.cmdb import AutoDiscoveryCI
 from api.models.cmdb import AutoDiscoveryCIType
@@ -130,7 +131,9 @@ class CITypeManager(object):
     def add(cls, **kwargs):
         if current_app.config.get('USE_ACL') and not is_app_admin('cmdb'):
             if ErrFormat.ci_type_config not in {i['name'] for i in ACLManager().get_resources(ResourceTypeEnum.PAGE)}:
-                return abort(403, ErrFormat.no_permission2)
+                app_cli = CMDBApp()
+                validate_permission(app_cli.op.Model_Configuration, app_cli.resource_type_name,
+                                    app_cli.op.create_CIType, app_cli.app_name)
 
         unique_key = kwargs.pop("unique_key", None) or kwargs.pop("unique_id", None)
         unique_key = AttributeCache.get(unique_key) or abort(404, ErrFormat.unique_key_not_define)
