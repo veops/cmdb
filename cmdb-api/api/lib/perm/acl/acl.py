@@ -153,11 +153,11 @@ class ACLManager(object):
         if resource:
             return ResourceCRUD.delete(resource.id, rebuild=rebuild)
 
-    def has_permission(self, resource_name, resource_type, perm, resource_id=None):
+    def has_permission(self, resource_name, resource_type, perm, resource_id=None, rid=None):
         if is_app_admin(self.app_id):
             return True
 
-        role = self._get_role(current_user.username)
+        role = self._get_role(current_user.username) if rid is None else RoleCache.get(rid)
 
         role or abort(404, ErrFormat.role_not_found.format(current_user.username))
 

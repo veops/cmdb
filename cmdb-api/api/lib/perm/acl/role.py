@@ -379,16 +379,16 @@ class RoleCRUD(object):
             resource_type_id = resource_type and resource_type.id
 
         result = dict(resources=dict(), groups=dict())
-        s = time.time()
+        # s = time.time()
         parent_ids = RoleRelationCRUD.recursive_parent_ids(rid, app_id)
-        current_app.logger.info('parent ids {0}: {1}'.format(parent_ids, time.time() - s))
+        # current_app.logger.info('parent ids {0}: {1}'.format(parent_ids, time.time() - s))
         for parent_id in parent_ids:
 
             _resources, _groups = cls._extend_resources(parent_id, resource_type_id, app_id)
-            current_app.logger.info('middle1: {0}'.format(time.time() - s))
+            # current_app.logger.info('middle1: {0}'.format(time.time() - s))
             _merge(result['resources'], _resources)
-            current_app.logger.info('middle2: {0}'.format(time.time() - s))
-            current_app.logger.info(len(_groups))
+            # current_app.logger.info('middle2: {0}'.format(time.time() - s))
+            # current_app.logger.info(len(_groups))
             if not group_flat:
                 _merge(result['groups'], _groups)
             else:
@@ -399,7 +399,7 @@ class RoleCRUD(object):
                             item.setdefault('permissions', [])
                             item['permissions'] = list(set(item['permissions'] + _groups[rg_id]['permissions']))
                             result['resources'][item['id']] = item
-        current_app.logger.info('End: {0}'.format(time.time() - s))
+        # current_app.logger.info('End: {0}'.format(time.time() - s))
 
         result['resources'] = list(result['resources'].values())
         result['groups'] = list(result['groups'].values())

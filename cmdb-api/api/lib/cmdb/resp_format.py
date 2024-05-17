@@ -140,3 +140,7 @@ class ErrFormat(CommonErrFormat):
 
     password_save_failed = _l("Failed to save password: {}")  # 保存密码失败: {}
     password_load_failed = _l("Failed to get password: {}")  # 获取密码失败: {}
+
+    cron_time_format_invalid = _l("Scheduling time format error")  # 调度时间格式错误
+    reconciliation_title = _l("CMDB data reconciliation results")  # CMDB数据合规检查结果
+    reconciliation_body = _l("Number of {} illegal: {}")  # "{} 不合规数: {}"

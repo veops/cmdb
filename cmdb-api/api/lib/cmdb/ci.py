@@ -263,6 +263,7 @@ class CIManager(object):
             ci_ids = None
             for attr_id in constraint.attr_ids:
                 value_table = TableMap(attr_name=id2name[attr_id]).table
+
                 values = value_table.get_by(attr_id=attr_id,
                                             value=ci_dict.get(id2name[attr_id]) or None,
                                             only_query=True).join(
@@ -438,7 +439,8 @@ class CIManager(object):
 
         return ci.id
 
-    def update(self, ci_id, _is_admin=False, ticket_id=None, **ci_dict):
+    def update(self, ci_id, _is_admin=False, ticket_id=None, __sync=False, **ci_dict):
+        current_app.logger.info((ci_id, ci_dict, __sync))
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ci = self.confirm_ci_existed(ci_id)
 
@@ -502,11 +504,17 @@ class CIManager(object):
                 record_id = self.save_password(ci.id, attr_id, password_dict[attr_id], record_id, ci.type_id)
 
         if record_id:  # has change
-            ci_cache.apply_async(args=(ci_id, OperateType.UPDATE, record_id), queue=CMDB_QUEUE)
+            if not __sync:
+                ci_cache.apply_async(args=(ci_id, OperateType.UPDATE, record_id), queue=CMDB_QUEUE)
+            else:
+                ci_cache((ci_id, OperateType.UPDATE, record_id))
 
         ref_ci_dict = {k: v for k, v in ci_dict.items() if k.startswith("$") and "." in k}
         if ref_ci_dict:
-            ci_relation_add.apply_async(args=(ref_ci_dict, ci.id), queue=CMDB_QUEUE)
+            if not __sync:
+                ci_relation_add.apply_async(args=(ref_ci_dict, ci.id), queue=CMDB_QUEUE)
+            else:
+                ci_relation_add((ref_ci_dict, ci.id))
 
     @staticmethod
     def update_unique_value(ci_id, unique_name, unique_value):
@@ -830,6 +838,12 @@ class CIManager(object):
             return data.get('v')
 
     def baseline(self, ci_ids, before_date):
+        """
+        return CI changes
+        :param ci_ids:
+        :param before_date:
+        :return:
+        """
         ci_list = self.get_cis_by_ids(ci_ids, ret_key=RetKey.ALIAS)
         if not ci_list:
             return dict()
@@ -912,6 +926,44 @@ class CIManager(object):
                     result.append(item)
 
         return result
+
+    def baseline_cis(self, ci_ids, before_date, fl=None):
+        """
+               return CI changes
+               :param ci_ids:
+               :param before_date:
+               :param fl:
+               :return:
+               """
+        ci_list = self.get_cis_by_ids(ci_ids, fields=fl)
+        if not ci_list:
+            return []
+
+        id2ci = {ci['_id']: ci for ci in ci_list}
+        changed = AttributeHistoryManger.get_records_for_attributes(
+            before_date, None, None, 1, 100000, None, None, ci_ids=ci_ids, more=True)[1]
+        for records in changed:
+            for change in records[1]:
+                if change['is_computed'] or change['is_password']:
+                    continue
+
+                if change.get('default') and change['default'].get('default') == AttributeDefaultValueEnum.UPDATED_AT:
+                    continue
+
+                if change['is_list']:
+                    old, new, value_type, operate_type, ci_id, attr_name = (
+                        change['old'], change['new'], change['value_type'], change['operate_type'],
+                        change['ci_id'], change['attr_name'])
+                    old = ValueTypeMap.deserialize[value_type](old) if old else old
+                    new = ValueTypeMap.deserialize[value_type](new) if new else new
+                    if operate_type == OperateType.ADD and new in (id2ci[ci_id][attr_name] or []):
+                        id2ci[ci_id][attr_name].remove(new)
+                    elif operate_type == OperateType.DELETE and old not in id2ci[ci_id][attr_name]:
+                        id2ci[ci_id][attr_name].append(old)
+                else:
+                    id2ci[change['ci_id']][change['attr_name']] = change['old']
+
+        return list(id2ci.values())
 
     def rollback(self, ci_id, before_date):
         baseline_ci = self.baseline([ci_id], before_date)
@@ -1088,7 +1140,7 @@ class CIRelationManager(object):
                 relation_type_id or abort(404, ErrFormat.relation_not_found.format("{} -> {}".format(
                     first_ci.ci_type.name, second_ci.ci_type.name)))
 
-                if current_app.config.get('USE_ACL') and valid:
+                if current_app.config.get('USE_ACL') and valid and current_user.username != 'worker':
                     resource_name = CITypeRelationManager.acl_resource_name(first_ci.ci_type.name,
                                                                             second_ci.ci_type.name)
                     if not ACLManager().has_permission(
@@ -1122,7 +1174,7 @@ class CIRelationManager(object):
     def delete(cr_id):
         cr = CIRelation.get_by_id(cr_id) or abort(404, ErrFormat.relation_not_found.format("id={}".format(cr_id)))
 
-        if current_app.config.get('USE_ACL'):
+        if current_app.config.get('USE_ACL') and current_user.username != 'worker':
             resource_name = CITypeRelationManager.acl_resource_name(cr.first_ci.ci_type.name, cr.second_ci.ci_type.name)
             if not ACLManager().has_permission(
                     resource_name,
@@ -1153,6 +1205,21 @@ class CIRelationManager(object):
 
         ci_relation_delete.apply_async(args=(first_ci_id, second_ci_id, ancestor_ids), queue=CMDB_QUEUE)
         delete_id_filter.apply_async(args=(second_ci_id,), queue=CMDB_QUEUE)
+
+        return cr
+
+    @classmethod
+    def delete_3(cls, first_ci_id, second_ci_id):
+        cr = CIRelation.get_by(first_ci_id=first_ci_id,
+                               second_ci_id=second_ci_id,
+                               to_dict=False,
+                               first=True)
+
+        if cr is not None:
+            ci_relation_delete.apply_async(args=(first_ci_id, second_ci_id, cr.ancestor_ids), queue=CMDB_QUEUE)
+            delete_id_filter.apply_async(args=(second_ci_id,), queue=CMDB_QUEUE)
+
+            cls.delete(cr.id)
 
         return cr
 
