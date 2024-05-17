@@ -107,6 +107,7 @@
                 v-decorator="[list.name, { rules: [{ required: false }] }]"
                 style="width: 100%"
                 :format="getFieldType(list.name) == '4' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss'"
+                :valueFormat="getFieldType(list.name) == '4' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss'"
                 v-if="getFieldType(list.name) === '4' || getFieldType(list.name) === '3'"
                 :showTime="getFieldType(list.name) === '4' ? false : { format: 'HH:mm:ss' }"
               />
@@ -370,7 +371,7 @@ export default {
             return 'select%%multiple'
           }
           return 'select'
-        } else if (_find.value_type === '0' || _find.value_type === '1') {
+        } else if ((_find.value_type === '0' || _find.value_type === '1') && !_find.is_list) {
           return 'input_number'
         } else if (_find.value_type === '4' || _find.value_type === '3') {
           return _find.value_type
