@@ -20,7 +20,8 @@
     </div>
     <SearchForm
       ref="search"
-      type="resourceSearch"
+      :type="type"
+      :typeId="typeId"
       @refresh="handleSearch"
       :preferenceAttrList="allAttributesList"
       @updateAllAttributesList="updateAllAttributesList"
@@ -205,7 +206,7 @@ import _ from 'lodash'
 import SearchForm from '../../components/searchForm/SearchForm.vue'
 import { searchCI } from '../../api/ci'
 import { searchAttributes, getCITypeAttributesByTypeIds, getCITypeAttributesById } from '../../api/CITypeAttr'
-import { getCITypes } from '../../api/CIType'
+import { getCITypes, getCIType } from '../../api/CIType'
 import { getSubscribeAttributes } from '../../api/preference'
 import { getCITableColumns } from '../../utils/helper'
 import EditAttrsPopover from '../ci/modules/editAttrsPopover.vue'
@@ -221,6 +222,14 @@ export default {
       type: Boolean,
       default: false,
     },
+    typeId: {
+      type: Number,
+      default: null
+    },
+    type: {
+      type: String,
+      default: 'resourceSearch'
+    }
   },
   data() {
     return {
@@ -250,13 +259,30 @@ export default {
     }
   },
   mounted() {
-    this.getAllAttr()
-    this.getAllCiTypes()
+    if (this.typeId) {
+      this.getCIType(this.typeId)
+      this.getAttrsByType(this.typeId)
+      this.loadInstance()
+    } else {
+      this.getAllAttr()
+      this.getAllCiTypes()
+    }
   },
   methods: {
     getAllCiTypes() {
       getCITypes().then((res) => {
         this.ciTypes = res.ci_types
+      })
+    },
+    getCIType(typeId) {
+      getCIType(typeId).then((res) => {
+        this.ciTypes = res.ci_types
+      })
+    },
+    async getAttrsByType(typeId) {
+      await getCITypeAttributesById(typeId).then((res) => {
+        this.allAttributesList = res.attributes
+        this.originAllAttributesList = res.attributes
       })
     },
     async getAllAttr() {

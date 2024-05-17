@@ -182,7 +182,7 @@ export default {
       const edges = []
       this.parentCITypes.forEach((parent) => {
         const _findCiType = ci_types_list.find((item) => item.id === parent.id)
-        if (this.firstCIs[parent.name]) {
+        if (this.firstCIs[parent.name] && _findCiType) {
           const unique_id = _findCiType.show_id || _findCiType.unique_id
           const _findUnique = parent.attributes.find((attr) => attr.id === unique_id)
           const unique_name = _findUnique?.name
@@ -225,7 +225,7 @@ export default {
       })
       this.childCITypes.forEach((child) => {
         const _findCiType = ci_types_list.find((item) => item.id === child.id)
-        if (this.secondCIs[child.name]) {
+        if (this.secondCIs[child.name] && _findCiType) {
           const unique_id = _findCiType.show_id || _findCiType.unique_id
           const _findUnique = child.attributes.find((attr) => attr.id === unique_id)
           const unique_name = _findUnique?.name

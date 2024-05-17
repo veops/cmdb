@@ -198,6 +198,9 @@ export default {
     if (this.type === 'resourceSearch') {
       this.getCITypeGroups()
     }
+    if (this.typeId) {
+      this.currenCiType = [this.typeId]
+    }
   },
   methods: {
     // toggleAdvanced() {

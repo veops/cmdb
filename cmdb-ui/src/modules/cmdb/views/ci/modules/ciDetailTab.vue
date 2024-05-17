@@ -112,7 +112,7 @@
       <a-tab-pane key="tab_5">
         <span slot="tab"><ops-icon type="itsm-association" />{{ $t('cmdb.ci.relITSM') }}</span>
         <div :style="{ padding: '24px', height: '100%' }">
-          <related-itsm-table :ci_id="ci._id" :ciHistory="ciHistory" :itsmInstalled="itsmInstalled" />
+          <RelatedItsmTable ref="relatedITSMTable" :ci_id="ci._id" :ciHistory="ciHistory" :itsmInstalled="itsmInstalled" :attrList="attrList" />
         </div>
       </a-tab-pane>
     </a-tabs>
@@ -140,8 +140,6 @@ import CiDetailRelation from './ciDetailRelation.vue'
 import TriggerTable from '../../operation_history/modules/triggerTable.vue'
 import RelatedItsmTable from './ciDetailRelatedItsmTable.vue'
 import CiRollbackForm from './ciRollbackForm.vue'
-import { sleep } from '@/utils/util'
-
 export default {
   name: 'CiDetailTab',
   components: {
