@@ -69,7 +69,7 @@ class Search(object):
                     if _l < int(level) and c == ConstraintEnum.Many2Many:
                         self.has_m2m = True
 
-        self.type2filter_perms = None
+        self.type2filter_perms = {}
 
         self.is_app_admin = is_app_admin('cmdb') or current_user.username == "worker"
 
@@ -79,7 +79,7 @@ class Search(object):
         key = []
         _tmp = []
         for level in range(1, sorted(self.level)[-1] + 1):
-            if len(self.descendant_ids) >= level and self.type2filter_perms.get(self.descendant_ids[level - 1]):
+            if len(self.descendant_ids or []) >= level and self.type2filter_perms.get(self.descendant_ids[level - 1]):
                 id_filter_limit, _ = self._get_ci_filter(self.type2filter_perms[self.descendant_ids[level - 1]])
             else:
                 id_filter_limit = {}
@@ -151,9 +151,9 @@ class Search(object):
 
         return True
 
-    def search(self):
-        use_ci_filter = len(self.descendant_ids) == self.level[0] - 1
-        parent_node_perm_passed = self._has_read_perm_from_parent_nodes()
+    def search(self, only_ids=False):
+        use_ci_filter = len(self.descendant_ids or []) == self.level[0] - 1
+        parent_node_perm_passed = not self.is_app_admin and self._has_read_perm_from_parent_nodes()
 
         ids = [self.root_id] if not isinstance(self.root_id, list) else self.root_id
         cis = [CI.get_by_id(_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(_id))) for _id in ids]
@@ -197,7 +197,8 @@ class Search(object):
                                 sort=self.sort,
                                 ci_ids=merge_ids,
                                 parent_node_perm_passed=parent_node_perm_passed,
-                                use_ci_filter=use_ci_filter).search()
+                                use_ci_filter=use_ci_filter,
+                                only_ids=only_ids).search()
 
     def _get_ci_filter(self, filter_perms, ci_filters=None):
         ci_filters = ci_filters or []

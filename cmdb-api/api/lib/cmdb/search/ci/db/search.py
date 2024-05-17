@@ -47,7 +47,8 @@ class Search(object):
                  excludes=None,
                  parent_node_perm_passed=False,
                  use_id_filter=False,
-                 use_ci_filter=True):
+                 use_ci_filter=True,
+                 only_ids=False):
         self.orig_query = query
         self.fl = fl or []
         self.excludes = excludes or []
@@ -64,6 +65,7 @@ class Search(object):
         self.parent_node_perm_passed = parent_node_perm_passed
         self.use_id_filter = use_id_filter
         self.use_ci_filter = use_ci_filter
+        self.only_ids = only_ids
 
         self.valid_type_names = []
         self.type2filter_perms = dict()
@@ -590,6 +592,8 @@ class Search(object):
     def search(self):
         numfound, ci_ids = self._query_build_raw()
         ci_ids = list(map(str, ci_ids))
+        if self.only_ids:
+            return ci_ids
 
         _fl = self._fl_build()
 
