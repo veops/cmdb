@@ -31,7 +31,8 @@ from api.models.cmdb import PreferenceRelationView
 from api.models.cmdb import PreferenceSearchOption
 from api.models.cmdb import PreferenceShowAttributes
 from api.models.cmdb import PreferenceTreeView
-
+from api.models.cmdb import CITypeGroup
+from api.models.cmdb import CITypeGroupItem
 
 class PreferenceManager(object):
     pref_attr_cls = PreferenceShowAttributes
@@ -43,22 +44,47 @@ class PreferenceManager(object):
     def get_types(instance=False, tree=False):
         ci_type_order = sorted(PreferenceCITypeOrder.get_by(uid=current_user.uid, to_dict=False), key=lambda x: x.order)
 
+        type2group = {}
+        for i in db.session.query(CITypeGroupItem, CITypeGroup).join(
+                CITypeGroup, CITypeGroup.id == CITypeGroupItem.group_id).filter(
+            CITypeGroup.deleted.is_(False)).filter(CITypeGroupItem.deleted.is_(False)):
+            type2group[i.CITypeGroupItem.type_id] = i.CITypeGroup.to_dict()
+
         types = db.session.query(PreferenceShowAttributes.type_id).filter(
             PreferenceShowAttributes.uid == current_user.uid).filter(
             PreferenceShowAttributes.deleted.is_(False)).group_by(
             PreferenceShowAttributes.type_id).all() if instance else []
         types = sorted(types, key=lambda x: {i.type_id: idx for idx, i in enumerate(
             ci_type_order) if not i.is_tree}.get(x.type_id, 1))
+        group_types = []
+        other_types = []
+        group2idx = {}
+        type_ids = set()
+        for ci_type in types:
+            type_id = ci_type.type_id
+            type_ids.add(type_id)
+            type_dict = CITypeCache.get(type_id).to_dict()
+            if type_id not in type2group:
+                other_types.append(type_dict)
+            else:
+                group = type2group[type_id]
+                if group['id'] not in group2idx:
+                    group_types.append(type2group[type_id])
+                    group2idx[group['id']] = len(group_types) - 1
+                group_types[group2idx[group['id']]].setdefault('ci_types', []).append(type_dict)
+        if other_types:
+            group_types.append(dict(ci_types=other_types))
 
         tree_types = PreferenceTreeView.get_by(uid=current_user.uid, to_dict=False) if tree else []
         tree_types = sorted(tree_types, key=lambda x: {i.type_id: idx for idx, i in enumerate(
             ci_type_order) if i.is_tree}.get(x.type_id, 1))
 
-        type_ids = [i.type_id for i in types + tree_types]
-        if types and tree_types:
-            type_ids = set(type_ids)
+        tree_types = [CITypeCache.get(_type.type_id).to_dict() for _type in tree_types]
+        for _type in tree_types:
+            type_ids.add(_type['id'])
 
-        return [CITypeCache.get(type_id).to_dict() for type_id in type_ids]
+        return dict(group_types=group_types, tree_types=tree_types, type_ids=list(type_ids))
+
 
     @staticmethod
     def get_types2(instance=False, tree=False):
