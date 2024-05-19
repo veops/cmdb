@@ -182,8 +182,8 @@ export default {
           <tag {...{ props, attrs }}>
             {this.renderIcon({ icon: menu.meta.icon, customIcon: menu.meta.customIcon, name: menu.meta.name, typeId: menu.meta.typeId, routeName: menu.name, selectedIcon: menu.meta.selectedIcon, })}
             <span>
-              <span class={this.renderI18n(menu.meta.title).length > 10 ? 'scroll' : ''}>{this.renderI18n(menu.meta.title)}</span>
-              {isShowDot &&
+              <span style={menu.meta.style} class={this.renderI18n(menu.meta.title).length > 10 ? 'scroll' : ''}>{this.renderI18n(menu.meta.title)}</span>
+              {isShowDot && !menu.meta.disabled &&
                 <a-popover
                   overlayClassName="custom-menu-extra-submenu"
                   placement="rightTop"

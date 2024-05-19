@@ -144,17 +144,26 @@ const genCmdbRoutes = async () => {
   // Dynamically add subscription items and business relationships
   const [preference, relation] = await Promise.all([getPreference(), getRelationView()])
 
-  preference.forEach(item => {
-    routes.children[2].children.push({
-      path: `/cmdb/instances/types/${item.id}`,
-      component: () => import(`../views/ci/index`),
-      name: `cmdb_${item.id}`,
-      meta: { title: item.alias, keepAlive: false, typeId: item.id, name: item.name, customIcon: item.icon },
-      // hideChildrenInMenu: true // Force display of MenuItem instead of SubMenu
+  preference.group_types.forEach(group => {
+    if (preference.group_types.length > 1) {
+      routes.children[2].children.push({
+        path: `/cmdb/instances/types/group${group.id}`,
+        name: `cmdb_instances_group_${group.id}`,
+        meta: { title: group.name || 'other', disabled: true, style: 'margin-left: 12px' },
+      })
+    }
+    group.ci_types.forEach(item => {
+      routes.children[2].children.push({
+        path: `/cmdb/instances/types/${item.id}`,
+        component: () => import(`../views/ci/index`),
+        name: `cmdb_${item.id}`,
+        meta: { title: item.alias, keepAlive: false, typeId: item.id, name: item.name, customIcon: item.icon },
+        // hideChildrenInMenu: true // Force display of MenuItem instead of SubMenu
+      })
     })
   })
   const lastTypeId = window.localStorage.getItem('ops_ci_typeid') || undefined
-  if (lastTypeId && preference.some(item => item.id === Number(lastTypeId))) {
+  if (lastTypeId && preference.type_ids.some(item => item === Number(lastTypeId))) {
     routes.redirect = `/cmdb/instances/types/${lastTypeId}`
   } else if (routes.children[2]?.children?.length > 0) {
     routes.redirect = routes.children[2].children.find(item => !item.hidden)?.path

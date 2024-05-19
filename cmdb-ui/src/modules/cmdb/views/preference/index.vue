@@ -32,62 +32,77 @@
             }"
           /></span>
       </div>
-      <div class="cmdb-preference-group" v-for="(group, index) in myPreferences" :key="group.name">
+      <div class="cmdb-preference-group" v-for="(subType, index) in myPreferences" :key="subType.name">
         <div class="cmdb-preference-group-title">
-          <span> <ops-icon :style="{ marginRight: '10px' }" :type="group.icon" />{{ group.name }} </span>
+          <span> <ops-icon :style="{ marginRight: '10px' }" :type="subType.icon" />{{ subType.name }} </span>
         </div>
-        <draggable
-          v-model="group.ci_types"
-          :animation="300"
-          @change="
-            (e) => {
-              orderChange(e, group)
-            }
-          "
-        >
-          <div class="cmdb-preference-group-content" v-for="ciType in group.ci_types" :key="ciType.id">
-            <OpsMoveIcon class="cmdb-preference-move-icon" />
+        <draggable class="ci-types-left-content" :list="subType.groups" @end="handleChangeGroups" filter=".undraggable">
+          <div v-for="group in subType.groups" :key="group.id || group.name">
             <div
-              :class="{
-                'cmdb-preference-avatar': true,
-                'cmdb-preference-avatar-noicon': !ciType.icon,
-              }"
-              :style="{ width: '30px', height: '30px', marginRight: '10px' }"
+              :class="
+                `${group.id === undefined ? 'undraggable' : ''}`
+              "
             >
-              <template v-if="ciType.icon">
-                <img
-                  v-if="ciType.icon.split('$$')[2]"
-                  :src="`/api/common-setting/v1/file/${ciType.icon.split('$$')[3]}`"
-                  :style="{ maxHeight: '30px', maxWidth: '30px' }"
-                />
-                <ops-icon
-                  v-else
-                  :style="{
-                    color: ciType.icon.split('$$')[1],
-                    fontSize: '14px',
-                  }"
-                  :type="ciType.icon.split('$$')[0]"
-                />
-              </template>
-              <span v-else :style="{ fontSize: '20px' }">{{ ciType.name[0].toUpperCase() }}</span>
+              <div v-if="index === 0 && subType.groups.length > 1" class="cmdb-preference-group-content">
+                <OpsMoveIcon class="cmdb-preference-move-icon" v-if="group.name || index === 1"/>
+                <span style="font-weight: 500; color: #a5a9bc">{{ group.name || $t('other') }}</span>
+                <span :style="{ color: '#c3cdd7' }">({{ group.ci_types.length }})</span>
+              </div>
             </div>
-            <span class="cmdb-preference-group-content-title">{{ ciType.alias || ciType.name }}</span>
-            <span class="cmdb-preference-group-content-action">
-              <a-tooltip :title="$t('cmdb.preference.cancelSub')">
-                <span
-                  @click="unsubscribe(ciType, group.type)"
-                ><ops-icon type="cmdb-preference-cancel-subscribe" />
+            <draggable
+              v-model="group.ci_types"
+              :animation="300"
+              @change="
+                (e) => {
+                  orderChange(e, group, index === 1)
+                }
+              "
+            >
+              <div class="cmdb-preference-group-content" v-for="ciType in group.ci_types" :key="ciType.id">
+                <OpsMoveIcon class="cmdb-preference-move-icon" />
+                <div
+                  :class="{
+                    'cmdb-preference-avatar': true,
+                    'cmdb-preference-avatar-noicon': !ciType.icon,
+                  }"
+                  :style="{ width: '30px', height: '30px', marginRight: '10px' }"
+                >
+                  <template v-if="ciType.icon">
+                    <img
+                      v-if="ciType.icon.split('$$')[2]"
+                      :src="`/api/common-setting/v1/file/${ciType.icon.split('$$')[3]}`"
+                      :style="{ maxHeight: '30px', maxWidth: '30px' }"
+                    />
+                    <ops-icon
+                      v-else
+                      :style="{
+                        color: ciType.icon.split('$$')[1],
+                        fontSize: '14px',
+                      }"
+                      :type="ciType.icon.split('$$')[0]"
+                    />
+                  </template>
+                  <span v-else :style="{ fontSize: '20px' }">{{ ciType.name[0].toUpperCase() }}</span>
+                </div>
+                <span class="cmdb-preference-group-content-title">{{ ciType.alias || ciType.name }}</span>
+                <span class="cmdb-preference-group-content-action">
+                  <a-tooltip :title="$t('cmdb.preference.cancelSub')">
+                    <span
+                      @click="unsubscribe(ciType, group.type)"
+                    ><ops-icon type="cmdb-preference-cancel-subscribe" />
+                    </span>
+                  </a-tooltip>
+                  <a-divider type="vertical" :style="{ margin: '0 3px' }" />
+                  <a-tooltip :title="$t('cmdb.preference.editSub')">
+                    <span
+                      @click="openSubscribeSetting(ciType, `${index + 1}`)"
+                    ><ops-icon
+                      type="cmdb-preference-subscribe"
+                    /></span>
+                  </a-tooltip>
                 </span>
-              </a-tooltip>
-              <a-divider type="vertical" :style="{ margin: '0 3px' }" />
-              <a-tooltip :title="$t('cmdb.preference.editSub')">
-                <span
-                  @click="openSubscribeSetting(ciType, `${index + 1}`)"
-                ><ops-icon
-                  type="cmdb-preference-subscribe"
-                /></span>
-              </a-tooltip>
-            </span>
+              </div>
+            </draggable>
           </div>
         </draggable>
       </div>
@@ -261,7 +276,7 @@ export default {
       ciTypeGroup.forEach((group) => {
         if (group.ci_types && group.ci_types.length) {
           group.ci_types.forEach((type) => {
-            const idx = pref.findIndex((p) => p.id === type.id)
+            const idx = pref.type_ids.findIndex((p) => p === type.id)
             if (idx > -1) {
               type.is_subscribed = true
             }
@@ -283,19 +298,18 @@ export default {
       const _myPreferences = [
         {
           name: this.$t('cmdb.menu.ciTable'),
-          ci_types: self.instance.map((item) => {
-            const _find = pref.find((ci) => ci.id === item)
-            return _find
-          }),
+          groups: pref.group_types,
           icon: 'cmdb-ci',
           type: 'ci',
         },
         {
           name: this.$t('cmdb.menu.ciTree'),
-          ci_types: self.tree.map((item) => {
-            const _find = pref.find((ci) => ci.id === item)
-            return _find
-          }),
+          groups: [
+            {
+              ci_types: pref.tree_types,
+              name: null,
+            }
+          ],
           icon: 'cmdb-tree',
           type: 'tree',
         },
@@ -377,10 +391,41 @@ export default {
         this.expandKeys.push(group.id)
       }
     },
-    orderChange(e, group) {
-      preferenceCitypeOrder({ type_ids: group.ci_types.map((type) => type.id), is_tree: group.type !== 'ci' })
+    async handleChangeGroups() {
+      const typeIds = []
+      this.myPreferences[0].groups.forEach(groupTypes => {
+        groupTypes.ci_types.forEach(ciType => {
+          typeIds.push(ciType.id)
+        })
+      })
+      preferenceCitypeOrder({ type_ids: typeIds, is_tree: false })
         .then(() => {
-          if (group.type === 'ci') {
+          this.resetRoute()
+        })
+        .catch(() => {
+          this.getCITypes(false)
+        })
+    },
+    orderChange(e, group, isTree) {
+      let typeIds = []
+      if (!isTree) {
+        this.myPreferences[0].groups.forEach(groupTypes => {
+          if (group.id === groupTypes.id) {
+            group.ci_types.forEach(ciType => {
+              typeIds.push(ciType.id)
+            })
+          } else {
+            groupTypes.ci_types.forEach(ciType => {
+              typeIds.push(ciType.id)
+            })
+          }
+        })
+      } else {
+        typeIds = group.ci_types.map(item => item.id)
+      }
+      preferenceCitypeOrder({ type_ids: typeIds, is_tree: isTree })
+        .then(() => {
+          if (!isTree) {
             this.resetRoute()
           }
         })
@@ -442,6 +487,18 @@ export default {
       margin-bottom: 20px;
     }
     .cmdb-preference-group {
+      .ci-types-left-content {
+        max-height: calc(100% - 45px);
+        overflow: hidden;
+        &:hover {
+          overflow: auto;
+        }
+        .undraggable{
+          .cmdb-preference-group-content {
+            cursor: default;
+          }
+        }
+      }
       .cmdb-preference-group-title {
         text-align: center;
         margin-bottom: 5px;
