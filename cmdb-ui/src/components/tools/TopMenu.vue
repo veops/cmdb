@@ -81,7 +81,7 @@ export default {
         if (route.name === 'cmdb') {
           const preference = await getPreference()
           const lastTypeId = window.localStorage.getItem('ops_ci_typeid') || undefined
-          if (lastTypeId && preference.some((item) => item.id === Number(lastTypeId))) {
+          if (lastTypeId && preference.type_ids.some((item) => item === Number(lastTypeId))) {
             this.$router.push(`/cmdb/instances/types/${lastTypeId}`)
           } else {
             this.$router.push('/cmdb/dashboard')
