@@ -166,7 +166,7 @@ const genCmdbRoutes = async () => {
   if (lastTypeId && preference.type_ids.some(item => item === Number(lastTypeId))) {
     routes.redirect = `/cmdb/instances/types/${lastTypeId}`
   } else if (routes.children[2]?.children?.length > 0) {
-    routes.redirect = routes.children[2].children.find(item => !item.hidden)?.path
+    routes.redirect = routes.children[2].children.find(item => !item.hidden && !item.meta.disabled)?.path
   } else {
     routes.redirect = '/cmdb/dashboard'
   }

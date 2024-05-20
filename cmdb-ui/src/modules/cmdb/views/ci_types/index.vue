@@ -1,5 +1,5 @@
 <template>
-  <div class="ci-types-wrap" :style="{ height: `${windowHeight - 66}px` }">
+  <div class="ci-types-wrap" :style="{ height: `${windowHeight - 96}px` }">
     <div v-if="!CITypeGroups.length" class="ci-types-empty">
       <a-empty :image="emptyImage" description=""></a-empty>
       <a-button icon="plus" size="small" type="primary" @click="handleClickAddGroup">{{
@@ -15,6 +15,13 @@
       :triggerLength="18"
     >
       <template #one>
+        <a-input
+          :placeholder="$t('cmdb.preference.searchPlaceholder')"
+          class="cmdb-ci-types-left-input"
+          @pressEnter="handleSearch"
+        >
+          <a-icon slot="prefix" type="search" />
+        </a-input>
         <div class="ci-types-left">
           <div class="ci-types-left-title">
             <a-button
@@ -62,8 +69,8 @@
               </a-dropdown>
             </a-space>
           </div>
-          <draggable class="ci-types-left-content" :list="CITypeGroups" @end="handleChangeGroups" filter=".undraggable">
-            <div v-for="g in CITypeGroups" :key="g.id || g.name">
+          <draggable class="ci-types-left-content" :list="computedCITypeGroups" @end="handleChangeGroups" filter=".undraggable">
+            <div v-for="g in computedCITypeGroups" :key="g.id || g.name">
               <div
                 :class="
                   `${currentGId === g.id && !currentCId ? 'selected' : ''} ci-types-left-group ${
@@ -74,6 +81,7 @@
               >
                 <div>
                   <OpsMoveIcon
+                    v-if="g.id !== -1"
                     style="width: 17px; height: 17px; display: none; position: absolute; left: -3px; top: 10px"
                   />
                   <span style="font-weight: 700">{{ g.name || $t('other') }}</span>
@@ -103,6 +111,7 @@
                 @start="start(g)"
                 @end="end(g)"
                 @add="add(g)"
+                filter=".undraggable"
               >
                 <div
                   v-for="ci in g.ci_types"
@@ -110,8 +119,9 @@
                   :class="`${currentCId === ci.id ? 'selected' : ''} ci-types-left-detail`"
                   @click="handleClickCIType(g.id, ci.id, ci.name)"
                 >
-                  <div>
+                  <div :class="`${ g.id === -1 ? 'undraggable' : '' }`">
                     <OpsMoveIcon
+                      v-if="g.id !== -1"
                       style="width: 17px; height: 17px; display: none; position: absolute; left: -1px; top: 8px"
                     />
                     <span class="ci-types-left-detail-icon">
@@ -464,6 +474,8 @@ export default {
       isInherit: false,
 
       unique_id: null,
+
+      searchValue: '',
     }
   },
   computed: {
@@ -536,6 +548,16 @@ export default {
       }
       return _showIdSelectOptions
     },
+    computedCITypeGroups() {
+      if (this.searchValue) {
+        const ciTypes = _.cloneDeep(this.CITypeGroups)
+        ciTypes.forEach((item) => {
+          item.ci_types = item.ci_types.filter((_item) => _item.alias.toLowerCase().includes(this.searchValue.toLowerCase()))
+        })
+        return ciTypes
+      }
+      return this.CITypeGroups
+    },
   },
   provide() {
     return {
@@ -564,6 +586,9 @@ export default {
       getAllDepAndEmployee({ block: 0 }).then((res) => {
         this.allTreeDepAndEmp = res
       })
+    },
+    handleSearch(e) {
+      this.searchValue = e.target.value
     },
     async loadCITypes(isResetCurrentId = false) {
       const groups = await getCITypeGroupsConfig({ need_other: true })
@@ -1020,6 +1045,14 @@ export default {
     left: 50%;
     top: 40%;
     transform: translate(-50%, -50%);
+  }
+  /deep/.cmdb-ci-types-left-input {
+    input {
+      background-color: transparent;
+    }
+    .ant-input:focus {
+      box-shadow: none;
+    }
   }
   .ci-types-left {
     width: 100%;
