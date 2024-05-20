@@ -88,11 +88,11 @@ def webhook_request(webhook, payload):
 
     params = webhook.get('parameters') or None
     if isinstance(params, dict):
-        params = json.loads(Template(json.dumps(params)).render(payload))
+        params = json.loads(Template(json.dumps(params)).render(payload).encode('utf-8'))
 
     headers = json.loads(Template(json.dumps(webhook.get('headers') or {})).render(payload))
 
-    data = Template(json.dumps(webhook.get('body', ''))).render(payload)
+    data = Template(json.dumps(webhook.get('body', ''))).render(payload).encode('utf-8')
     auth = _wrap_auth(**webhook.get('authorization', {}))
 
     if (webhook.get('authorization', {}).get("type") or '').lower() == 'oauth2.0':
