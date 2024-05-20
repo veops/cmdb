@@ -34,7 +34,7 @@
       </div>
       <div class="cmdb-preference-group" v-for="(subType, index) in myPreferences" :key="subType.name">
         <div class="cmdb-preference-group-title">
-          <span> <ops-icon :style="{ marginRight: '10px' }" :type="subType.icon" />{{ subType.name }} </span>
+          <span> <ops-icon :style="{ marginRight: '10px' }" :type="subType.icon" />{{ subType.name }}</span>
         </div>
         <draggable class="ci-types-left-content" :list="subType.groups" @end="handleChangeGroups" filter=".undraggable">
           <div v-for="group in subType.groups" :key="group.id || group.name">
@@ -44,8 +44,8 @@
               "
             >
               <div v-if="index === 0 && subType.groups.length > 1" class="cmdb-preference-group-content">
-                <OpsMoveIcon class="cmdb-preference-move-icon" v-if="group.name || index === 1"/>
-                <span style="font-weight: 500; color: #a5a9bc">{{ group.name || $t('other') }}</span>
+                <OpsMoveIcon class="cmdb-preference-move-icon" v-if="group.name"/>
+                <span style="font-weight: 500; color: #a5a9bc"><ellipsis :length="25" tooltip>{{ group.name || $t('other') }}</ellipsis></span>
                 <span :style="{ color: '#c3cdd7' }">({{ group.ci_types.length }})</span>
               </div>
             </div>
@@ -212,6 +212,7 @@ import store from '@/store'
 import { mapState } from 'vuex'
 import moment from 'moment'
 import draggable from 'vuedraggable'
+import { Ellipsis } from '@/components'
 import { getCITypeGroups } from '../../api/ciTypeGroup'
 import {
   getPreference,
@@ -227,7 +228,7 @@ import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
 
 export default {
   name: 'Preference',
-  components: { CollapseTransition, SubscribeSetting, draggable, OpsMoveIcon },
+  components: { CollapseTransition, SubscribeSetting, draggable, OpsMoveIcon, Ellipsis },
   data() {
     return {
       citypeData: [],
@@ -496,6 +497,11 @@ export default {
         .undraggable{
           .cmdb-preference-group-content {
             cursor: default;
+            margin-left: 20px;
+            &:hover {
+              background: transparent;
+              box-shadow: none;
+            }
           }
         }
       }
