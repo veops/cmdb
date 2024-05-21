@@ -143,17 +143,17 @@ const genCmdbRoutes = async () => {
   }
   // Dynamically add subscription items and business relationships
   const [preference, relation] = await Promise.all([getPreference(), getRelationView()])
-
+  const resourceViewsIndex = routes.children.findIndex(item => item.name === 'cmdb_resource_views')
   preference.group_types.forEach(group => {
     if (preference.group_types.length > 1) {
-      routes.children[2].children.push({
+      routes.children[resourceViewsIndex].children.push({
         path: `/cmdb/instances/types/group${group.id}`,
         name: `cmdb_instances_group_${group.id}`,
         meta: { title: group.name || 'other', disabled: true, style: 'margin-left: 12px' },
       })
     }
     group.ci_types.forEach(item => {
-      routes.children[2].children.push({
+      routes.children[resourceViewsIndex].children.push({
         path: `/cmdb/instances/types/${item.id}`,
         component: () => import(`../views/ci/index`),
         name: `cmdb_${item.id}`,
@@ -165,8 +165,8 @@ const genCmdbRoutes = async () => {
   const lastTypeId = window.localStorage.getItem('ops_ci_typeid') || undefined
   if (lastTypeId && preference.type_ids.some(item => item === Number(lastTypeId))) {
     routes.redirect = `/cmdb/instances/types/${lastTypeId}`
-  } else if (routes.children[2]?.children?.length > 0) {
-    routes.redirect = routes.children[2].children.find(item => !item.hidden && !item.meta.disabled)?.path
+  } else if (routes.children[resourceViewsIndex]?.children?.length > 0) {
+    routes.redirect = routes.children[resourceViewsIndex].children.find(item => !item.hidden && !item.meta.disabled)?.path
   } else {
     routes.redirect = '/cmdb/dashboard'
   }
@@ -178,7 +178,7 @@ const genCmdbRoutes = async () => {
       meta: { title: item[0], icon: 'ops-cmdb-relation', selectedIcon: 'ops-cmdb-relation', keepAlive: false, name: item[0] },
     }
   })
-  routes.children.splice(2, 0, ...relationViews)
+  routes.children.splice(resourceViewsIndex, 0, ...relationViews)
   return routes
 }
 
