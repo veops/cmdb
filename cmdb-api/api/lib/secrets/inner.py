@@ -3,8 +3,8 @@ import os
 import secrets
 import sys
 import threading
-
 from base64 import b64decode, b64encode
+
 from Cryptodome.Protocol.SecretSharing import Shamir
 from colorama import Back, Fore, Style, init as colorama_init
 from cryptography.hazmat.backends import default_backend
@@ -29,6 +29,7 @@ seal_status = True
 
 secrets_encrypt_key = ""
 secrets_root_key = ""
+
 
 def string_to_bytes(value):
     if not value:
@@ -78,7 +79,7 @@ class KeyManage:
                 (len(sys.argv) > 1 and sys.argv[1] in ("run", "cmdb-password-data-migrate"))):
 
             self.backend = backend
-            threading.Thread(target=self.watch_root_key, args=(app,)).start()
+            threading.Thread(target=self.watch_root_key, args=(app,), daemon=True).start()
 
             self.trigger = app.config.get("INNER_TRIGGER_TOKEN")
             if not self.trigger:
@@ -412,7 +413,7 @@ class KeyManage:
 class InnerCrypt:
     def __init__(self):
         self.encrypt_key = b64decode(secrets_encrypt_key)
-        #self.encrypt_key = b64decode(secrets_encrypt_key, "".encode("utf-8"))
+        # self.encrypt_key = b64decode(secrets_encrypt_key, "".encode("utf-8"))
 
     def encrypt(self, plaintext):
         """
