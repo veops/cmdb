@@ -144,3 +144,5 @@ class ErrFormat(CommonErrFormat):
     cron_time_format_invalid = _l("Scheduling time format error")  # 调度时间格式错误
     reconciliation_title = _l("CMDB data reconciliation results")  # CMDB数据合规检查结果
     reconciliation_body = _l("Number of {} illegal: {}")  # "{} 不合规数: {}"
+
+    topology_exists = _l("Topology view {} already exists")  # 拓扑视图 {} 已经存在

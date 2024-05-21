@@ -826,6 +826,52 @@ class CITypeRelationManager(object):
         return [cls._wrap_relation_type_dict(parent.parent_id, parent) for parent in parents]
 
     @staticmethod
+    def get_relations_by_type_id(type_id):
+        nodes, edges = [] * 2
+        node_ids, edge_tuples = set(), set()
+        ci_type = CITypeCache.get(type_id)
+        if ci_type is None:
+            return nodes, edges
+
+        nodes.append(ci_type.to_dict())
+        node_ids.add(ci_type.id)
+
+        def _find(_id):
+            for i in CITypeRelation.get_by(parent_id=_id, to_dict=False):
+                if i.child_id not in node_ids:
+                    node_ids.add(i.child_id)
+                    nodes.append(i.child.to_dict())
+
+                    edges.append(dict(from_id=i.parent_id, to_id=i.child_id, reverse=False))
+                    edge_tuples.add((i.parent_id, i.child_id))
+
+                    _find(i.child_id)
+                elif (i.parent_id, i.child_id) not in edge_tuples:
+                    edges.append(dict(from_id=i.parent_id, to_id=i.child_id, reverse=False))
+                    edge_tuples.add((i.parent_id, i.child_id))
+                    _find(i.child_id)
+
+        def _reverse_find(_id):
+            for i in CITypeRelation.get_by(child_id=_id, to_dict=False):
+                if i.parent_id not in node_ids:
+                    node_ids.add(i.parent_id)
+                    nodes.append(i.parent.to_dict())
+
+                    edges.append(dict(from_id=i.parent_id, to_id=i.child_id, reverse=True))
+                    edge_tuples.add((i.parent_id, i.child_id))
+
+                    _find(i.parent_id)
+                elif (i.parent_id, i.child_id) not in edge_tuples:
+                    edges.append(dict(from_id=i.parent_id, to_id=i.child_id, reverse=True))
+                    edge_tuples.add((i.parent_id, i.child_id))
+                    _find(i.parent_id)
+
+        _reverse_find(ci_type.id)
+        _find(ci_type.id)
+
+        return nodes, edges
+
+    @staticmethod
     def _get(parent_id, child_id):
         return CITypeRelation.get_by(parent_id=parent_id,
                                      child_id=child_id,

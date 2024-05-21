@@ -209,6 +209,26 @@ class CITriggerHistory(Model):
     webhook = db.Column(db.Text)
 
 
+class TopologyViewGroup(Model):
+    __tablename__ = 'c_topology_view_groups'
+
+    name = db.Column(db.String(64), index=True)
+    order = db.Column(db.Integer, default=0)
+
+
+class TopologyView(Model):
+    __tablename__ = 'c_topology_views'
+
+    name = db.Column(db.String(64), index=True)
+    group_id = db.Column(db.Integer, db.ForeignKey('c_topology_view_groups.id'))
+    category = db.Column(db.String(32))
+    central_node_type = db.Column(db.Integer)
+    central_node_instances = db.Column(db.Text)
+    path = db.Column(db.JSON)
+    order = db.Column(db.Integer, default=0)
+    option = db.Column(db.JSON)
+
+
 class CITypeUniqueConstraint(Model):
     __tablename__ = "c_c_t_u_c"
 

@@ -25,14 +25,15 @@ from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.exception import AbortException
 from api.lib.perm.acl.acl import ACLManager
 from api.models.cmdb import CITypeAttribute
+from api.models.cmdb import CITypeGroup
+from api.models.cmdb import CITypeGroupItem
 from api.models.cmdb import CITypeRelation
 from api.models.cmdb import PreferenceCITypeOrder
 from api.models.cmdb import PreferenceRelationView
 from api.models.cmdb import PreferenceSearchOption
 from api.models.cmdb import PreferenceShowAttributes
 from api.models.cmdb import PreferenceTreeView
-from api.models.cmdb import CITypeGroup
-from api.models.cmdb import CITypeGroupItem
+
 
 class PreferenceManager(object):
     pref_attr_cls = PreferenceShowAttributes
@@ -84,7 +85,6 @@ class PreferenceManager(object):
             type_ids.add(_type['id'])
 
         return dict(group_types=group_types, tree_types=tree_types, type_ids=list(type_ids))
-
 
     @staticmethod
     def get_types2(instance=False, tree=False):
