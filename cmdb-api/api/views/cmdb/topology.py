@@ -9,7 +9,7 @@ from api.resource import APIView
 
 
 class TopologyGroupView(APIView):
-    url_prefix = ('/topology_views/groups', '/topology_views/groups/order', '/topology_views/groups/<int:group_id>')
+    url_prefix = ('/topology_views/groups', '/topology_views/groups/<int:group_id>')
 
     @args_required('name')
     @args_validate(TopologyViewManager.group_cls)
@@ -17,17 +17,16 @@ class TopologyGroupView(APIView):
         name = request.values.get('name')
         order = request.values.get('order')
 
-        group = TopologyViewManager.upsert_group(name, order)
+        group = TopologyViewManager.add_group(name, order)
 
         return self.jsonify(group.to_dict())
 
-    @args_required('group_ids')
-    def put(self):
-        group_ids = request.values.get('group_ids')
+    def put(self, group_id):
+        name = request.values.get('name')
+        view_ids = request.values.get('view_ids')
+        group = TopologyViewManager().update_group(group_id, name, view_ids)
 
-        TopologyViewManager.group_order(group_ids)
-
-        return self.jsonify(group_ids=group_ids)
+        return self.jsonify(**group)
 
     def delete(self, group_id):
         TopologyViewManager.delete_group(group_id)
@@ -35,12 +34,30 @@ class TopologyGroupView(APIView):
         return self.jsonify(group_id=group_id)
 
 
-class TopologyView(APIView):
-    url_prefix = ('/topology_views', 'topology_views/relations/ci_types/<int:type_id>', '/topology_views/<int:_id>')
+class TopologyGroupOrderView(APIView):
+    url_prefix = ('/topology_views/groups/order',)
 
-    def get(self, type_id=None):
+    @args_required('group_ids')
+    def post(self):
+        group_ids = request.values.get('group_ids')
+
+        TopologyViewManager.group_order(group_ids)
+
+        return self.jsonify(group_ids=group_ids)
+
+    def put(self):
+        return self.post()
+
+
+class TopologyView(APIView):
+    url_prefix = ('/topology_views', '/topology_views/relations/ci_types/<int:type_id>', '/topology_views/<int:_id>')
+
+    def get(self, type_id=None, _id=None):
         if type_id is not None:
             return self.jsonify(TopologyViewManager.relation_from_ci_type(type_id))
+
+        if _id is not None:
+            return self.jsonify(TopologyViewManager().get_view_by_id(_id))
 
         return self.jsonify(TopologyViewManager.get_all())
 
@@ -81,3 +98,10 @@ class TopologyOrderView(APIView):
 
     def put(self):
         return self.post()
+
+
+class TopologyViewPreview(APIView):
+    url_prefix = ('/topology_views/<int:_id>/preview',)
+
+    def get(self, _id):
+        return self.jsonify(TopologyViewManager().topology_view(_id))

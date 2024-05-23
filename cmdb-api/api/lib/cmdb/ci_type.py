@@ -827,7 +827,7 @@ class CITypeRelationManager(object):
 
     @staticmethod
     def get_relations_by_type_id(type_id):
-        nodes, edges = [] * 2
+        nodes, edges = [], []
         node_ids, edge_tuples = set(), set()
         ci_type = CITypeCache.get(type_id)
         if ci_type is None:
@@ -836,38 +836,46 @@ class CITypeRelationManager(object):
         nodes.append(ci_type.to_dict())
         node_ids.add(ci_type.id)
 
-        def _find(_id):
+        def _find(_id, lv):
+            lv += 1
             for i in CITypeRelation.get_by(parent_id=_id, to_dict=False):
                 if i.child_id not in node_ids:
                     node_ids.add(i.child_id)
-                    nodes.append(i.child.to_dict())
+                    node = i.child.to_dict()
+                    node.update(dict(level=lv))
+                    nodes.append(node)
 
-                    edges.append(dict(from_id=i.parent_id, to_id=i.child_id, reverse=False))
+                    edges.append(dict(from_id=i.parent_id, to_id=i.child_id, text=i.relation_type.name, reverse=False))
                     edge_tuples.add((i.parent_id, i.child_id))
 
-                    _find(i.child_id)
+                    _find(i.child_id, lv)
                 elif (i.parent_id, i.child_id) not in edge_tuples:
-                    edges.append(dict(from_id=i.parent_id, to_id=i.child_id, reverse=False))
+                    edges.append(dict(from_id=i.parent_id, to_id=i.child_id, text=i.relation_type.name, reverse=False))
                     edge_tuples.add((i.parent_id, i.child_id))
-                    _find(i.child_id)
+                    _find(i.child_id, lv)
 
-        def _reverse_find(_id):
+        def _reverse_find(_id, lv):
+            lv -= 1
             for i in CITypeRelation.get_by(child_id=_id, to_dict=False):
                 if i.parent_id not in node_ids:
                     node_ids.add(i.parent_id)
-                    nodes.append(i.parent.to_dict())
+                    node = i.parent.to_dict()
+                    node.update(dict(level=lv))
+                    nodes.append(node)
 
-                    edges.append(dict(from_id=i.parent_id, to_id=i.child_id, reverse=True))
+                    edges.append(dict(from_id=i.parent_id, to_id=i.child_id, text=i.relation_type.name, reverse=True))
                     edge_tuples.add((i.parent_id, i.child_id))
 
-                    _find(i.parent_id)
+                    _reverse_find(i.parent_id, lv)
                 elif (i.parent_id, i.child_id) not in edge_tuples:
-                    edges.append(dict(from_id=i.parent_id, to_id=i.child_id, reverse=True))
+                    edges.append(dict(from_id=i.parent_id, to_id=i.child_id, text=i.relation_type.name, reverse=True))
                     edge_tuples.add((i.parent_id, i.child_id))
-                    _find(i.parent_id)
+                    _reverse_find(i.parent_id, lv)
 
-        _reverse_find(ci_type.id)
-        _find(ci_type.id)
+        level = 0
+        _reverse_find(ci_type.id, level)
+        level = 0
+        _find(ci_type.id, level)
 
         return nodes, edges
 

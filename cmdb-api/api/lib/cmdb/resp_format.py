@@ -146,3 +146,4 @@ class ErrFormat(CommonErrFormat):
     reconciliation_body = _l("Number of {} illegal: {}")  # "{} 不合规数: {}"
 
     topology_exists = _l("Topology view {} already exists")  # 拓扑视图 {} 已经存在
+    topology_group_exists = _l("Topology group {} already exists")  # 拓扑视图分组 {} 已经存在

@@ -1090,6 +1090,18 @@ class CIRelationManager(object):
 
         return ci_ids, level2ids
 
+    @classmethod
+    def get_parent_ids(cls, ci_ids):
+        cis = db.session.query(CIRelation.first_ci_id, CIRelation.second_ci_id, CI.type_id).join(
+            CI, CI.id == CIRelation.first_ci_id).filter(
+            CIRelation.second_ci_id.in_(ci_ids)).filter(CIRelation.deleted.is_(False))
+
+        result = {}
+        for ci in cis:
+            result.setdefault(ci.second_ci_id, []).append((ci.first_ci_id, ci.type_id))
+
+        return result
+
     @staticmethod
     def _check_constraint(first_ci_id, first_type_id, second_ci_id, second_type_id, type_relation):
         db.session.commit()
