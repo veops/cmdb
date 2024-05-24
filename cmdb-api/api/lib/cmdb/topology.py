@@ -3,6 +3,9 @@
 import json
 
 from flask import abort
+from flask import current_app
+from flask_login import current_user
+from werkzeug.exceptions import BadRequest
 
 from api.extensions import rd
 from api.lib.cmdb.cache import AttributeCache
@@ -10,16 +13,23 @@ from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci import CIRelationManager
 from api.lib.cmdb.ci_type import CITypeRelationManager
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
+from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.search import SearchError
 from api.lib.cmdb.search.ci import search
+from api.lib.perm.acl.acl import ACLManager
 from api.models.cmdb import TopologyView
 from api.models.cmdb import TopologyViewGroup
-
+from api.lib.perm.acl.acl import is_app_admin
 
 class TopologyViewManager(object):
     group_cls = TopologyViewGroup
     cls = TopologyView
+
+    @classmethod
+    def get_name_by_id(cls, _id):
+        res = cls.cls.get_by_id(_id)
+        return res and res.name
 
     def get_view_by_id(self, _id):
         res = self.cls.get_by_id(_id)
@@ -74,19 +84,40 @@ class TopologyViewManager(object):
             cur_max_order = cur_max_order and cur_max_order.order or 0
             order = cur_max_order + 1
 
-        return cls.cls.create(name=name, group_id=group_id, option=option, order=order, **kwargs).to_dict()
+        inst = cls.cls.create(name=name, group_id=group_id, option=option, order=order, **kwargs).to_dict()
+        if current_app.config.get('USE_ACL'):
+            try:
+                ACLManager().add_resource(name, ResourceTypeEnum.TOPOLOGY_VIEW)
+            except BadRequest:
+                pass
+
+            ACLManager().grant_resource_to_role(name,
+                                                current_user.username,
+                                                ResourceTypeEnum.TOPOLOGY_VIEW)
+
+        return inst
 
     @classmethod
     def update(cls, _id, **kwargs):
         existed = cls.cls.get_by_id(_id) or abort(404, ErrFormat.not_found)
+        existed_name = existed.name
 
-        return existed.update(filter_none=False, **kwargs).to_dict()
+        inst = existed.update(filter_none=False, **kwargs).to_dict()
+        if current_app.config.get('USE_ACL') and existed_name != kwargs.get('name') and kwargs.get('name'):
+            try:
+                ACLManager().update_resource(existed_name, kwargs['name'], ResourceTypeEnum.TOPOLOGY_VIEW)
+            except BadRequest:
+                pass
+
+        return inst
 
     @classmethod
     def delete(cls, _id):
         existed = cls.cls.get_by_id(_id) or abort(404, ErrFormat.not_found)
 
         existed.soft_delete()
+        if current_app.config.get("USE_ACL"):
+            ACLManager().del_resource(existed.name, ResourceTypeEnum.TOPOLOGY_VIEW)
 
     @classmethod
     def group_inner_order(cls, _ids):
@@ -96,6 +127,11 @@ class TopologyViewManager(object):
 
     @classmethod
     def get_all(cls):
+        resources = None
+        if current_app.config.get('USE_ACL') and not is_app_admin('cmdb'):
+            resources = set([i.get('name') for i in ACLManager().get_resources(ResourceTypeEnum.TOPOLOGY_VIEW)])
+        current_app.logger.info(resources)
+
         groups = cls.group_cls.get_by(to_dict=True)
         groups = sorted(groups, key=lambda x: x['order'])
         group2pos = {group['id']: idx for idx, group in enumerate(groups)}
@@ -103,6 +139,9 @@ class TopologyViewManager(object):
         topo_views = sorted(cls.cls.get_by(to_dict=True), key=lambda x: x['order'])
         other_group = dict(views=[])
         for view in topo_views:
+            if resources is not None and view['name'] not in resources:
+                continue
+
             if view['group_id']:
                 groups[group2pos[view['group_id']]].setdefault('views', []).append(view)
             else:
@@ -119,32 +158,43 @@ class TopologyViewManager(object):
 
         return dict(nodes=nodes, edges=edges)
 
-    def topology_view(self, view_id):
-        view = self.cls.get_by_id(view_id) or abort(404, ErrFormat.not_found)
-        nodes, links = [], []
+    def topology_view(self, view_id=None, preview=None):
+        if view_id is not None:
+            view = self.cls.get_by_id(view_id) or abort(404, ErrFormat.not_found)
+            central_node_type, central_node_instances, path = (view.central_node_type,
+                                                               view.central_node_instances, view.path)
+        else:
+            central_node_type = preview.get('central_node_type')
+            central_node_instances = preview.get('central_node_instances')
+            path = preview.get('path')
 
-        _type = CITypeCache.get(view.central_node_type)
+        nodes, links = [], []
+        _type = CITypeCache.get(central_node_type)
         if not _type:
-            return {}
+            return dict(nodes=nodes, links=links)
         root_ids = []
         show_key = AttributeCache.get(_type.show_id or _type.unique_id)
 
-        q = (view.central_node_instances[2:] if view.central_node_instances.startswith('q=') else
-             view.central_node_instances)
-        s = search(q, fl=['_id', show_key.name], count=1000000)
+        q = (central_node_instances[2:] if central_node_instances.startswith('q=') else
+             central_node_instances)
+        s = search(q, fl=['_id', show_key.name], use_id_filter=False, use_ci_filter=False, count=1000000)
         try:
             response, _, _, _, _, _ = s.search()
-        except SearchError:
-            return {}
+        except SearchError as e:
+            current_app.logger.info(e)
+            return dict(nodes=nodes, links=links)
+        current_app.logger.info(response)
         for i in response:
             root_ids.append(i['_id'])
             nodes.append(dict(id=i['_id'], name=i[show_key.name]))
+        if not root_ids:
+            return dict(nodes=nodes, links=links)
 
         prefix = REDIS_PREFIX_CI_RELATION
         key = list(map(str, root_ids))
         id2node = {}
-        for level in sorted([i for i in view.path.keys() if int(i) > 0]):
-            type_ids = {int(i) for i in view.path[level]}
+        for level in sorted([i for i in path.keys() if int(i) > 0]):
+            type_ids = {int(i) for i in path[level]}
 
             res = [json.loads(x).items() for x in [i or '{}' for i in rd.get(key, prefix) or []]]
             new_key = []
@@ -158,23 +208,22 @@ class TopologyViewManager(object):
             key = new_key
 
         ci_ids = list(map(int, root_ids))
-        for level in sorted([i for i in view.path.keys() if int(i) < 0], reverse=True):
-            type_ids = {int(i) for i in view.path[level]}
-
+        for level in sorted([i for i in path.keys() if int(i) < 0], reverse=True):
+            type_ids = {int(i) for i in path[level]}
             res = CIRelationManager.get_parent_ids(ci_ids)
             _ci_ids = []
-            for from_id in res:
-                for to_id, type_id in res[from_id]:
+            for to_id in res:
+                for from_id, type_id in res[to_id]:
                     if type_id in type_ids:
                         from_id, to_id = str(from_id), str(to_id)
                         links.append({'from': from_id, 'to': to_id})
-                        id2node[to_id] = {'id': str(to_id), 'type_id': type_id}
-                        _ci_ids.append(to_id)
+                        id2node[from_id] = {'id': str(from_id), 'type_id': type_id}
+                        _ci_ids.append(from_id)
 
             ci_ids = _ci_ids
 
         fl = set()
-        type_ids = {t for lv in view.path if lv != '0' for t in view.path[lv]}
+        type_ids = {t for lv in path if lv != '0' for t in path[lv]}
         type2show = {}
         for type_id in type_ids:
             ci_type = CITypeCache.get(type_id)
@@ -183,13 +232,16 @@ class TopologyViewManager(object):
                 if attr:
                     fl.add(attr.name)
                     type2show[type_id] = attr.name
-        s = search("_id:({})".format(';'.join(id2node.keys())), fl=list(fl), count=1000000)
-        try:
-            response, _, _, _, _, _ = s.search()
-        except SearchError:
-            return {}
-        for i in response:
-            id2node[str(i['_id'])]['name'] = i[type2show[str(i['_type'])]]
-        nodes.extend(id2node.values())
+
+        if id2node:
+            s = search("_id:({})".format(';'.join(id2node.keys())), fl=list(fl),
+                       use_id_filter=False, use_ci_filter=False, count=1000000)
+            try:
+                response, _, _, _, _, _ = s.search()
+            except SearchError:
+                return dict(nodes=nodes, links=links)
+            for i in response:
+                id2node[str(i['_id'])]['name'] = i[type2show[str(i['_type'])]]
+            nodes.extend(id2node.values())
 
         return dict(nodes=nodes, links=links)
