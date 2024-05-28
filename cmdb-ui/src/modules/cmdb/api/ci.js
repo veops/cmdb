@@ -2,11 +2,12 @@ import { axios } from '@/utils/request'
 
 const urlPrefix = '/v0.1'
 
-export function searchCI(params) {
+export function searchCI(params, isShowMessage = true) {
   return axios({
     url: urlPrefix + `/ci/s`,
     method: 'GET',
-    params: params
+    params: params,
+    isShowMessage
   })
 }
 

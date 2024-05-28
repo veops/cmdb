@@ -17,6 +17,12 @@ const genCmdbRoutes = async () => {
         component: () => import('../views/dashboard/index_v2.vue')
       },
       {
+        path: '/cmdb/topoviews',
+        name: 'cmdb_topology_views',
+        meta: { title: 'cmdb.menu.topologyView', appName: 'cmdb', icon: 'ops-topology_view', selectedIcon: 'ops-topology_view', keepAlive: false },
+        component: () => import('../views/topology_view/index.vue')
+      },
+      {
         path: '/cmdb/disabled1',
         name: 'cmdb_disabled1',
         meta: { title: 'cmdb.menu.resources', disabled: true },

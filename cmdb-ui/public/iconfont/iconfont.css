@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1713840593232') format('woff2'),
-       url('iconfont.woff?t=1713840593232') format('woff'),
-       url('iconfont.ttf?t=1713840593232') format('truetype');
+  src: url('iconfont.woff2?t=1716896994700') format('woff2'),
+       url('iconfont.woff?t=1716896994700') format('woff'),
+       url('iconfont.ttf?t=1716896994700') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,170 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.ops-topology_view:before {
+  content: "\e92b";
+}
+
+.monitor-host_analysis:before {
+  content: "\e92a";
+}
+
+.a-Group427319324:before {
+  content: "\e929";
+}
+
+.monitor-native:before {
+  content: "\e928";
+}
+
+.veops-filter2:before {
+  content: "\e927";
+}
+
+.ops-cmdb-data_companies-selected:before {
+  content: "\e601";
+}
+
+.ops-cmdb-data_companies:before {
+  content: "\e926";
+}
+
+.monitor-threshold_value:before {
+  content: "\e921";
+}
+
+.monitor-disposition:before {
+  content: "\e922";
+}
+
+.monitor-automatic_discovery:before {
+  content: "\e923";
+}
+
+.monitor-grouping_list:before {
+  content: "\e924";
+}
+
+.monitor-node_list:before {
+  content: "\e925";
+}
+
+.monitor-general_view:before {
+  content: "\e920";
+}
+
+.monitor-network_topology:before {
+  content: "\e91b";
+}
+
+.monitor-node_management:before {
+  content: "\e91c";
+}
+
+.monitor-alarm_policy:before {
+  content: "\e91d";
+}
+
+.monitor-alarm:before {
+  content: "\e91e";
+}
+
+.monitor-healing:before {
+  content: "\e91f";
+}
+
+.monitor-data_acquisition:before {
+  content: "\e8d4";
+}
+
+.monitor-analysis:before {
+  content: "\e91a";
+}
+
+.monitor-index:before {
+  content: "\e89b";
+}
+
+.monitor-user_defined:before {
+  content: "\e867";
+}
+
+.monitor-database:before {
+  content: "\e861";
+}
+
+.monitor-common:before {
+  content: "\e865";
+}
+
+.veops-edit:before {
+  content: "\e866";
+}
+
+.veops-empower:before {
+  content: "\e863";
+}
+
+.veops-share:before {
+  content: "\e864";
+}
+
+.veops-export:before {
+  content: "\e862";
+}
+
+.a-veops-import1:before {
+  content: "\e860";
+}
+
+.monitor-ip:before {
+  content: "\e807";
+}
+
+.monitor-director:before {
+  content: "\e803";
+}
+
+.monitor-host:before {
+  content: "\e804";
+}
+
+.a-cmdb-log1:before {
+  content: "\e802";
+}
+
+.monitor-add:before {
+  content: "\e7ff";
+}
+
+.monitor-down:before {
+  content: "\e7fc";
+}
+
+.monitor-up:before {
+  content: "\e7fd";
+}
+
+.itsm-unfold:before {
+  content: "\e7f9";
+}
+
+.itsm-stretch:before {
+  content: "\e7f8";
+}
+
+.monitor-data_comaparison2:before {
+  content: "\e7a1";
+}
+
+.monitor-data_comaparison1:before {
+  content: "\e7f7";
+}
+
+.a-monitor-online1:before {
+  content: "\e7a0";
 }
 
 .ops-setting-application-selected:before {
