@@ -147,3 +147,5 @@ class ErrFormat(CommonErrFormat):
 
     topology_exists = _l("Topology view {} already exists")  # 拓扑视图 {} 已经存在
     topology_group_exists = _l("Topology group {} already exists")  # 拓扑视图分组 {} 已经存在
+    # 因为该分组下定义了拓扑视图，不能删除
+    topo_view_exists_cannot_delete_group = _l("The group cannot be deleted because the topology view already exists")

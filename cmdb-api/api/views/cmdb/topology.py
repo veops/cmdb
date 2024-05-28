@@ -79,7 +79,7 @@ class TopologyView(APIView):
 
         return self.jsonify(TopologyViewManager.get_all())
 
-    @args_required('name', 'central_node_type', 'central_node_instances', 'path')
+    @args_required('name', 'central_node_type', 'central_node_instances', 'path', 'group_id')
     @args_validate(TopologyViewManager.cls)
     @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.TopologyView,
                          app_cli.op.create_topology_view, app_cli.admin_name)

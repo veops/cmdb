@@ -18,9 +18,10 @@ from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.search import SearchError
 from api.lib.cmdb.search.ci import search
 from api.lib.perm.acl.acl import ACLManager
+from api.lib.perm.acl.acl import is_app_admin
 from api.models.cmdb import TopologyView
 from api.models.cmdb import TopologyViewGroup
-from api.lib.perm.acl.acl import is_app_admin
+
 
 class TopologyViewManager(object):
     group_cls = TopologyViewGroup
@@ -64,8 +65,8 @@ class TopologyViewManager(object):
     def delete_group(cls, _id):
         existed = cls.group_cls.get_by_id(_id) or abort(404, ErrFormat.not_found)
 
-        for item in cls.cls.get_by(group_id=_id, to_dict=False):
-            item.update(group_id=None, filter_none=False)
+        if cls.cls.get_by(group_id=_id, first=True):
+            return abort(400, ErrFormat.topo_view_exists_cannot_delete_group)
 
         existed.soft_delete()
 
@@ -130,7 +131,6 @@ class TopologyViewManager(object):
         resources = None
         if current_app.config.get('USE_ACL') and not is_app_admin('cmdb'):
             resources = set([i.get('name') for i in ACLManager().get_resources(ResourceTypeEnum.TOPOLOGY_VIEW)])
-        current_app.logger.info(resources)
 
         groups = cls.group_cls.get_by(to_dict=True)
         groups = sorted(groups, key=lambda x: x['order'])
@@ -183,16 +183,16 @@ class TopologyViewManager(object):
         except SearchError as e:
             current_app.logger.info(e)
             return dict(nodes=nodes, links=links)
-        current_app.logger.info(response)
         for i in response:
             root_ids.append(i['_id'])
-            nodes.append(dict(id=i['_id'], name=i[show_key.name]))
+            nodes.append(dict(id=str(i['_id']), name=i[show_key.name], type_id=central_node_type))
         if not root_ids:
             return dict(nodes=nodes, links=links)
 
         prefix = REDIS_PREFIX_CI_RELATION
         key = list(map(str, root_ids))
         id2node = {}
+        type2meta = {}
         for level in sorted([i for i in path.keys() if int(i) > 0]):
             type_ids = {int(i) for i in path[level]}
 
@@ -204,11 +204,13 @@ class TopologyViewManager(object):
                         links.append({'from': from_id, 'to': to_id})
                         id2node[to_id] = {'id': to_id, 'type_id': type_id}
                         new_key.append(to_id)
+                        if type_id not in type2meta:
+                            type2meta[type_id] = CITypeCache.get(type_id).icon
 
             key = new_key
 
         ci_ids = list(map(int, root_ids))
-        for level in sorted([i for i in path.keys() if int(i) < 0], reverse=True):
+        for level in sorted([i for i in path.keys() if int(i) < 0]):
             type_ids = {int(i) for i in path[level]}
             res = CIRelationManager.get_parent_ids(ci_ids)
             _ci_ids = []
@@ -219,6 +221,8 @@ class TopologyViewManager(object):
                         links.append({'from': from_id, 'to': to_id})
                         id2node[from_id] = {'id': str(from_id), 'type_id': type_id}
                         _ci_ids.append(from_id)
+                        if type_id not in type2meta:
+                            type2meta[type_id] = CITypeCache.get(type_id).icon
 
             ci_ids = _ci_ids
 
@@ -244,4 +248,4 @@ class TopologyViewManager(object):
                 id2node[str(i['_id'])]['name'] = i[type2show[str(i['_type'])]]
             nodes.extend(id2node.values())
 
-        return dict(nodes=nodes, links=links)
+        return dict(nodes=nodes, links=links, type2meta=type2meta)
