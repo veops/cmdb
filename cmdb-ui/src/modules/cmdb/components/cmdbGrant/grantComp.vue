@@ -57,6 +57,20 @@
         :addedRids="addedRids"
       />
     </template>
+    <template v-if="cmdbGrantType.includes('TopologyView')">
+      <div class="cmdb-grant-title">{{ resourceTypeName }}{{ $t('cmdb.components.perm') }}</div>
+      <TopologyViewGrant
+        :resourceTypeName="resourceTypeName"
+        :tableData="tableData"
+        :viewId="CITypeId"
+        grantType="TopologyView"
+        @grantDepart="grantDepart"
+        @grantRole="grantRole"
+        @getTableData="getTableData"
+        ref="grantTopologyView"
+        :addedRids="addedRids"
+      />
+    </template>
 
     <GrantModal ref="grantModal" @handleOk="handleOk" />
     <ReadGrantModal ref="readGrantModal" :CITypeId="CITypeId" @updateTableDataRead="updateTableDataRead" />
@@ -72,11 +86,12 @@ import { getResourcePerms } from '@/modules/acl/api/permission'
 import GrantModal from './grantModal.vue'
 import ReadGrantModal from './readGrantModal'
 import RelationViewGrant from './relationViewGrant.vue'
+import TopologyViewGrant from './topologyViewGrant.vue'
 import { getCITypeGroupById, ciTypeFilterPermissions } from '../../api/CIType'
 
 export default {
   name: 'GrantComp',
-  components: { CiTypeGrant, TypeRelationGrant, RelationViewGrant, GrantModal, ReadGrantModal },
+  components: { CiTypeGrant, TypeRelationGrant, RelationViewGrant, TopologyViewGrant, GrantModal, ReadGrantModal },
   props: {
     CITypeId: {
       type: Number,
@@ -286,6 +301,20 @@ export default {
               rid,
               name,
               read: false,
+              grant: false,
+            }
+          })
+        )
+      }
+      if (grantType === 'TopologyView') {
+        this.tableData.unshift(
+          ...rids.map(({ rid, name }) => {
+            return {
+              rid,
+              name,
+              read: false,
+              update: false,
+              delete: false,
               grant: false,
             }
           })

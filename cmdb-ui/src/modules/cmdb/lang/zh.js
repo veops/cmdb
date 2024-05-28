@@ -4,6 +4,7 @@ const cmdb_zh = {
     configTable: '配置表格',
     menu: {
         views: '视图',
+        topologyView: '拓扑视图',
         resources: '资源',
         config: '配置',
         backend: '管理',
@@ -563,6 +564,30 @@ if __name__ == "__main__":
     tree: {
         tips1: '请先到 我的订阅 页面完成订阅!',
         subSettings: '订阅设置',
-    }
+    },
+    topo: {
+        addTopoView: '新增拓扑视图',
+        editTopoView: '编辑拓扑视图',
+        addTopoViewInGroup: '在分组下定义拓扑视图',
+        groupRequired: '请先选择分组或者创建分组',
+        viewName: '标题',
+        viewNamePlaceholder: '请输入拓扑视图的标题',
+        inputNameTips: '必须输入标题',
+        centralNodeType: '中心节点模型',
+        filterInstances: '中心节点实例',
+        typeRequired: '必须要选择中心节点模型',
+        instancesRequired: '实例必须要选择',
+        path: '路径选择',
+        aggregationCount: '聚合数',
+        aggreationCountTip: '当子节点数 > 聚合数 则进行分页展示',
+        preview: '预览',
+        noData: '没有数据',
+        edit: '编辑',
+        delete: '删除',
+        searchPlaceholder: '搜索拓扑视图',
+        confirmDeleteView: '您确定要删除该视图吗?',
+        noInstancePerm: '您没有该实例的查看权限',
+        noPreferenceAttributes: '该实例没有订阅属性或者没有默认展示的属性',
+    },
 }
 export default cmdb_zh

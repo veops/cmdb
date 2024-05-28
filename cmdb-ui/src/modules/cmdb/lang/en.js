@@ -4,6 +4,7 @@ const cmdb_en = {
     configTable: 'Config Table',
     menu: {
         views: 'Views',
+        topologyView: 'Topology Views',
         resources: 'Resources',
         config: 'Configuration',
         backend: 'Management',
@@ -563,6 +564,30 @@ if __name__ == "__main__":
     tree: {
         tips1: 'Please go to Preference page first to complete your subscription!',
         subSettings: 'Settings',
-    }
+    },
+    topo: {
+        addTopoView: 'Add Topology View',
+        editTopoView: 'Edit Topology View',
+        addTopoViewInGroup: 'Define topology view under grouping',
+        groupRequired: 'Please select a group first or create a group',
+        viewName: 'Title',
+        viewNamePlaceholder: 'Please enter a title for the topology view',
+        inputNameTips: 'Title is required',
+        centralNodeType: 'Central Node Model',
+        filterInstances: 'Central Node Instances',
+        typeRequired: 'Central Node Model is required',
+        instancesRequired: 'instances are required',
+        path: 'Path',
+        aggregationCount: 'Aggregation Count',
+        aggreationCountTip: 'When the number of child nodes > the number of aggregations, paging display',
+        preview: 'Preivew',
+        noData: 'No data',
+        edit: 'Edit',
+        delete: 'Delete',
+        searchPlaceholder: 'Search topology view',
+        confirmDeleteView: 'Are you sure you want to delete this view ?',
+        noInstancePerm: 'You do not have read permissions for this instance',
+        noPreferenceAttributes: 'This instance has no subscription attributes or no default displayed attributes',
+    },
 }
 export default cmdb_en

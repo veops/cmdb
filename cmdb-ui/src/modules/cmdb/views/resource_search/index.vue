@@ -274,8 +274,8 @@ export default {
         this.ciTypes = res.ci_types
       })
     },
-    getCIType(typeId) {
-      getCIType(typeId).then((res) => {
+    async getCIType(typeId) {
+      await getCIType(typeId).then((res) => {
         this.ciTypes = res.ci_types
       })
     },
