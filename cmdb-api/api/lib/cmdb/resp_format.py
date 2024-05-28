@@ -144,3 +144,8 @@ class ErrFormat(CommonErrFormat):
     cron_time_format_invalid = _l("Scheduling time format error")  # 调度时间格式错误
     reconciliation_title = _l("CMDB data reconciliation results")  # CMDB数据合规检查结果
     reconciliation_body = _l("Number of {} illegal: {}")  # "{} 不合规数: {}"
+
+    topology_exists = _l("Topology view {} already exists")  # 拓扑视图 {} 已经存在
+    topology_group_exists = _l("Topology group {} already exists")  # 拓扑视图分组 {} 已经存在
+    # 因为该分组下定义了拓扑视图，不能删除
+    topo_view_exists_cannot_delete_group = _l("The group cannot be deleted because the topology view already exists")

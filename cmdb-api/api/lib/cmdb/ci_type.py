@@ -49,6 +49,7 @@ from api.models.cmdb import CITypeTrigger
 from api.models.cmdb import CITypeUniqueConstraint
 from api.models.cmdb import CustomDashboard
 from api.models.cmdb import PreferenceCITypeOrder
+from api.models.cmdb import TopologyView
 from api.models.cmdb import PreferenceRelationView
 from api.models.cmdb import PreferenceSearchOption
 from api.models.cmdb import PreferenceShowAttributes
@@ -262,6 +263,9 @@ class CITypeManager(object):
                 item.delete(commit=False)
         except Exception:
             pass
+
+        for item in TopologyView.get_by(central_node_type=type_id, to_dict=False):
+            item.delete(commit=False)
 
         db.session.commit()
 
@@ -824,6 +828,70 @@ class CITypeRelationManager(object):
         parents = CITypeRelation.get_by(child_id=child_id, to_dict=False)
 
         return [cls._wrap_relation_type_dict(parent.parent_id, parent) for parent in parents]
+
+    @staticmethod
+    def get_relations_by_type_id(type_id):
+        nodes, edges = [], []
+        node_ids, edge_tuples = set(), set()
+        ci_type = CITypeCache.get(type_id)
+        if ci_type is None:
+            return nodes, edges
+
+        nodes.append(ci_type.to_dict())
+        node_ids.add(ci_type.id)
+
+        def _find(_id, lv):
+            lv += 1
+            for i in CITypeRelation.get_by(parent_id=_id, to_dict=False):
+                if i.child_id not in node_ids:
+                    node_ids.add(i.child_id)
+                    node = i.child.to_dict()
+                    node.setdefault('level', []).append(lv)
+                    nodes.append(node)
+
+                    edges.append(dict(from_id=i.parent_id, to_id=i.child_id, text=i.relation_type.name, reverse=False))
+                    edge_tuples.add((i.parent_id, i.child_id))
+
+                    _find(i.child_id, lv)
+                    continue
+                elif (i.parent_id, i.child_id) not in edge_tuples:
+                    edges.append(dict(from_id=i.parent_id, to_id=i.child_id, text=i.relation_type.name, reverse=False))
+                    edge_tuples.add((i.parent_id, i.child_id))
+                    _find(i.child_id, lv)
+
+                for _node in nodes:
+                    if _node['id'] == i.child_id and lv not in _node['level']:
+                        _node['level'].append(lv)
+
+        def _reverse_find(_id, lv):
+            lv -= 1
+            for i in CITypeRelation.get_by(child_id=_id, to_dict=False):
+                if i.parent_id not in node_ids:
+                    node_ids.add(i.parent_id)
+                    node = i.parent.to_dict()
+                    node.setdefault('level', []).append(lv)
+                    nodes.append(node)
+
+                    edges.append(dict(from_id=i.parent_id, to_id=i.child_id, text=i.relation_type.name, reverse=True))
+                    edge_tuples.add((i.parent_id, i.child_id))
+
+                    _reverse_find(i.parent_id, lv)
+                    continue
+                elif (i.parent_id, i.child_id) not in edge_tuples:
+                    edges.append(dict(from_id=i.parent_id, to_id=i.child_id, text=i.relation_type.name, reverse=True))
+                    edge_tuples.add((i.parent_id, i.child_id))
+                    _reverse_find(i.parent_id, lv)
+
+                for _node in nodes:
+                    if _node['id'] == i.child_id and lv not in _node['level']:
+                        _node['level'].append(lv)
+
+        level = 0
+        _reverse_find(ci_type.id, level)
+        level = 0
+        _find(ci_type.id, level)
+
+        return nodes, edges
 
     @staticmethod
     def _get(parent_id, child_id):

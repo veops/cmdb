@@ -70,6 +70,7 @@ class Search(object):
         self.valid_type_names = []
         self.type2filter_perms = dict()
         self.is_app_admin = is_app_admin('cmdb') or current_user.username == "worker"
+        self.is_app_admin = self.is_app_admin or (not self.use_ci_filter and not self.use_id_filter)
 
     @staticmethod
     def _operator_proc(key):

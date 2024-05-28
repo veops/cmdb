@@ -73,6 +73,7 @@ class ResourceTypeEnum(BaseEnum):
     RELATION_VIEW = "RelationView"  # read/update/delete/grant
     CI_FILTER = "CIFilter"  # read
     PAGE = "page"  # read
+    TOPOLOGY_VIEW = "TopologyView"  # read/update/delete/grant
 
 
 class PermEnum(BaseEnum):

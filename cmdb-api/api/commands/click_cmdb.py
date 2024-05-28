@@ -128,7 +128,7 @@ def cmdb_init_acl():
                 perms = [PermEnum.READ]
             elif resource_type == ResourceTypeEnum.CI_TYPE_RELATION:
                 perms = [PermEnum.ADD, PermEnum.DELETE, PermEnum.GRANT]
-            elif resource_type == ResourceTypeEnum.RELATION_VIEW:
+            elif resource_type in (ResourceTypeEnum.RELATION_VIEW, ResourceTypeEnum.TOPOLOGY_VIEW):
                 perms = [PermEnum.READ, PermEnum.UPDATE, PermEnum.DELETE, PermEnum.GRANT]
 
             ResourceTypeCRUD.add(app_id, resource_type, '', perms)
