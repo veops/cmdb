@@ -113,18 +113,17 @@ def ci_delete_trigger(trigger, operate_type, ci_dict):
 @reconnect_db
 def ci_relation_cache(parent_id, child_id, ancestor_ids):
     with redis_lock.Lock(rd.r, "CIRelation_{}".format(parent_id)):
-        if ancestor_ids is None:
-            children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
-            children = json.loads(children) if children is not None else {}
+        children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
+        children = json.loads(children) if children is not None else {}
 
-            cr = CIRelation.get_by(first_ci_id=parent_id, second_ci_id=child_id, ancestor_ids=ancestor_ids,
-                                   first=True, to_dict=False)
-            if str(child_id) not in children:
-                children[str(child_id)] = cr.second_ci.type_id
+        cr = CIRelation.get_by(first_ci_id=parent_id, second_ci_id=child_id, ancestor_ids=ancestor_ids,
+                               first=True, to_dict=False)
+        if str(child_id) not in children:
+            children[str(child_id)] = cr.second_ci.type_id
 
-            rd.create_or_update({parent_id: json.dumps(children)}, REDIS_PREFIX_CI_RELATION)
+        rd.create_or_update({parent_id: json.dumps(children)}, REDIS_PREFIX_CI_RELATION)
 
-        else:
+        if ancestor_ids is not None:
             key = "{},{}".format(ancestor_ids, parent_id)
             grandson = rd.get([key], REDIS_PREFIX_CI_RELATION2)[0]
             grandson = json.loads(grandson) if grandson is not None else {}
@@ -191,16 +190,15 @@ def ci_relation_add(parent_dict, child_id, uid):
 @reconnect_db
 def ci_relation_delete(parent_id, child_id, ancestor_ids):
     with redis_lock.Lock(rd.r, "CIRelation_{}".format(parent_id)):
-        if ancestor_ids is None:
-            children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
-            children = json.loads(children) if children is not None else {}
+        children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
+        children = json.loads(children) if children is not None else {}
 
-            if str(child_id) in children:
-                children.pop(str(child_id))
+        if str(child_id) in children:
+            children.pop(str(child_id))
 
-            rd.create_or_update({parent_id: json.dumps(children)}, REDIS_PREFIX_CI_RELATION)
+        rd.create_or_update({parent_id: json.dumps(children)}, REDIS_PREFIX_CI_RELATION)
 
-        else:
+        if ancestor_ids is not None:
             key = "{},{}".format(ancestor_ids, parent_id)
             grandson = rd.get([key], REDIS_PREFIX_CI_RELATION2)[0]
             grandson = json.loads(grandson) if grandson is not None else {}
