@@ -326,7 +326,7 @@ def cmdb_inner_secrets_init(address):
     """
     init inner secrets for password feature
     """
-    res, ok = KeyManage(backend=InnerKVManger).init()
+    res, ok = KeyManage(backend=InnerKVManger()).init()
     if not ok:
         if res.get("status") == "failed":
             KeyManage.print_response(res)
