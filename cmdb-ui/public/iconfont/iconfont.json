@@ -6,6 +6,293 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "40499246",
+      "name": "ops-topology_view",
+      "font_class": "ops-topology_view",
+      "unicode": "e92b",
+      "unicode_decimal": 59691
+    },
+    {
+      "icon_id": "40411336",
+      "name": "monitor-host_analysis",
+      "font_class": "monitor-host_analysis",
+      "unicode": "e92a",
+      "unicode_decimal": 59690
+    },
+    {
+      "icon_id": "40372105",
+      "name": "monitor-add2",
+      "font_class": "a-Group427319324",
+      "unicode": "e929",
+      "unicode_decimal": 59689
+    },
+    {
+      "icon_id": "40368097",
+      "name": "monitor-native",
+      "font_class": "monitor-native",
+      "unicode": "e928",
+      "unicode_decimal": 59688
+    },
+    {
+      "icon_id": "40357355",
+      "name": "veops-filter2",
+      "font_class": "veops-filter2",
+      "unicode": "e927",
+      "unicode_decimal": 59687
+    },
+    {
+      "icon_id": "40356229",
+      "name": "ops-cmdb-data_companies-selected",
+      "font_class": "ops-cmdb-data_companies-selected",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "40343814",
+      "name": "ops-cmdb-data_companies",
+      "font_class": "ops-cmdb-data_companies",
+      "unicode": "e926",
+      "unicode_decimal": 59686
+    },
+    {
+      "icon_id": "40326916",
+      "name": "monitor-threshold_value",
+      "font_class": "monitor-threshold_value",
+      "unicode": "e921",
+      "unicode_decimal": 59681
+    },
+    {
+      "icon_id": "40326913",
+      "name": "monitor-disposition",
+      "font_class": "monitor-disposition",
+      "unicode": "e922",
+      "unicode_decimal": 59682
+    },
+    {
+      "icon_id": "40326911",
+      "name": "monitor-automatic_discovery",
+      "font_class": "monitor-automatic_discovery",
+      "unicode": "e923",
+      "unicode_decimal": 59683
+    },
+    {
+      "icon_id": "40326907",
+      "name": "monitor-grouping_list",
+      "font_class": "monitor-grouping_list",
+      "unicode": "e924",
+      "unicode_decimal": 59684
+    },
+    {
+      "icon_id": "40326906",
+      "name": "monitor-node_list",
+      "font_class": "monitor-node_list",
+      "unicode": "e925",
+      "unicode_decimal": 59685
+    },
+    {
+      "icon_id": "40326667",
+      "name": "monitor-general_view",
+      "font_class": "monitor-general_view",
+      "unicode": "e920",
+      "unicode_decimal": 59680
+    },
+    {
+      "icon_id": "40326683",
+      "name": "monitor-network_topology",
+      "font_class": "monitor-network_topology",
+      "unicode": "e91b",
+      "unicode_decimal": 59675
+    },
+    {
+      "icon_id": "40326682",
+      "name": "monitor-node_management",
+      "font_class": "monitor-node_management",
+      "unicode": "e91c",
+      "unicode_decimal": 59676
+    },
+    {
+      "icon_id": "40326681",
+      "name": "monitor-alarm_policy",
+      "font_class": "monitor-alarm_policy",
+      "unicode": "e91d",
+      "unicode_decimal": 59677
+    },
+    {
+      "icon_id": "40326680",
+      "name": "monitor-alarm",
+      "font_class": "monitor-alarm",
+      "unicode": "e91e",
+      "unicode_decimal": 59678
+    },
+    {
+      "icon_id": "40326679",
+      "name": "monitor-healing",
+      "font_class": "monitor-healing",
+      "unicode": "e91f",
+      "unicode_decimal": 59679
+    },
+    {
+      "icon_id": "40326685",
+      "name": "monitor-data_acquisition",
+      "font_class": "monitor-data_acquisition",
+      "unicode": "e8d4",
+      "unicode_decimal": 59604
+    },
+    {
+      "icon_id": "40326684",
+      "name": "monitor-analysis",
+      "font_class": "monitor-analysis",
+      "unicode": "e91a",
+      "unicode_decimal": 59674
+    },
+    {
+      "icon_id": "40308359",
+      "name": "monitor-index",
+      "font_class": "monitor-index",
+      "unicode": "e89b",
+      "unicode_decimal": 59547
+    },
+    {
+      "icon_id": "40307829",
+      "name": "monitor-user_defined",
+      "font_class": "monitor-user_defined",
+      "unicode": "e867",
+      "unicode_decimal": 59495
+    },
+    {
+      "icon_id": "40307835",
+      "name": "monitor-database",
+      "font_class": "monitor-database",
+      "unicode": "e861",
+      "unicode_decimal": 59489
+    },
+    {
+      "icon_id": "40307833",
+      "name": "monitor-common",
+      "font_class": "monitor-common",
+      "unicode": "e865",
+      "unicode_decimal": 59493
+    },
+    {
+      "icon_id": "40307035",
+      "name": "veops-edit",
+      "font_class": "veops-edit",
+      "unicode": "e866",
+      "unicode_decimal": 59494
+    },
+    {
+      "icon_id": "40307027",
+      "name": "veops-empower",
+      "font_class": "veops-empower",
+      "unicode": "e863",
+      "unicode_decimal": 59491
+    },
+    {
+      "icon_id": "40307026",
+      "name": "veops-share",
+      "font_class": "veops-share",
+      "unicode": "e864",
+      "unicode_decimal": 59492
+    },
+    {
+      "icon_id": "40306997",
+      "name": "veops-export",
+      "font_class": "veops-export",
+      "unicode": "e862",
+      "unicode_decimal": 59490
+    },
+    {
+      "icon_id": "40306881",
+      "name": "veops-import",
+      "font_class": "a-veops-import1",
+      "unicode": "e860",
+      "unicode_decimal": 59488
+    },
+    {
+      "icon_id": "40262335",
+      "name": "monitor-ip (1)",
+      "font_class": "monitor-ip",
+      "unicode": "e807",
+      "unicode_decimal": 59399
+    },
+    {
+      "icon_id": "40262337",
+      "name": "monitor-director",
+      "font_class": "monitor-director",
+      "unicode": "e803",
+      "unicode_decimal": 59395
+    },
+    {
+      "icon_id": "40262336",
+      "name": "monitor-host",
+      "font_class": "monitor-host",
+      "unicode": "e804",
+      "unicode_decimal": 59396
+    },
+    {
+      "icon_id": "40262216",
+      "name": "cmdb-log",
+      "font_class": "a-cmdb-log1",
+      "unicode": "e802",
+      "unicode_decimal": 59394
+    },
+    {
+      "icon_id": "40261712",
+      "name": "monitor-add",
+      "font_class": "monitor-add",
+      "unicode": "e7ff",
+      "unicode_decimal": 59391
+    },
+    {
+      "icon_id": "40248186",
+      "name": "monitor-down",
+      "font_class": "monitor-down",
+      "unicode": "e7fc",
+      "unicode_decimal": 59388
+    },
+    {
+      "icon_id": "40248184",
+      "name": "monitor-up",
+      "font_class": "monitor-up",
+      "unicode": "e7fd",
+      "unicode_decimal": 59389
+    },
+    {
+      "icon_id": "40235502",
+      "name": "itsm-unfold",
+      "font_class": "itsm-unfold",
+      "unicode": "e7f9",
+      "unicode_decimal": 59385
+    },
+    {
+      "icon_id": "40235453",
+      "name": "itsm-shrink",
+      "font_class": "itsm-stretch",
+      "unicode": "e7f8",
+      "unicode_decimal": 59384
+    },
+    {
+      "icon_id": "40217123",
+      "name": "monitor-data_comaparison2",
+      "font_class": "monitor-data_comaparison2",
+      "unicode": "e7a1",
+      "unicode_decimal": 59297
+    },
+    {
+      "icon_id": "40217122",
+      "name": "monitor-data_comaparison1",
+      "font_class": "monitor-data_comaparison1",
+      "unicode": "e7f7",
+      "unicode_decimal": 59383
+    },
+    {
+      "icon_id": "40176936",
+      "name": "monitor-online",
+      "font_class": "a-monitor-online1",
+      "unicode": "e7a0",
+      "unicode_decimal": 59296
+    },
+    {
       "icon_id": "40043662",
       "name": "ops-setting-application-selected",
       "font_class": "ops-setting-application-selected",

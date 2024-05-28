@@ -689,7 +689,7 @@ export default {
         content: that.$t('cmdb.ciType.confirmDeleteGroup', { groupName: `${g.name}` }),
         onOk() {
           deleteCITypeGroup(g.id).then((res) => {
-            that.$message.info(that.$t('deleteSuccess'))
+            that.$message.success(that.$t('deleteSuccess'))
             that.loadCITypes(true)
           })
         },
