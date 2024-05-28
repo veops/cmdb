@@ -438,6 +438,7 @@ export default {
     },
     async handleSearch() {
       this.currentPage = 1
+      // await this.updateAllAttributesList()
       this.loadInstance()
     },
     onShowSizeChange(current, pageSize) {
