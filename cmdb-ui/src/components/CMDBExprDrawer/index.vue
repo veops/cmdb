@@ -9,7 +9,7 @@
     :bodyStyle="{ padding: '24px 12px' }"
     :placement="placement"
   >
-    <ResourceSearch :fromCronJob="true" @copySuccess="copySuccess" />
+    <ResourceSearch ref="resourceSearch" :fromCronJob="true" :type="type" :typeId="typeId" @copySuccess="copySuccess" />
   </CustomDrawer>
 </template>
 
@@ -23,6 +23,14 @@ export default {
       type: String,
       default: 'right',
     },
+    type: {
+      type: String,
+      default: 'resourceSearch'
+    },
+    typeId: {
+      type: Number,
+      default: null
+    }
   },
   data() {
     return {
