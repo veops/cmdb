@@ -36,7 +36,7 @@ Flask-Caching = ">=1.0.0"
 environs = "==4.2.0"
 marshmallow = "==2.20.2"
 # async tasks
-celery = ">=5.3.1"
+celery = "==5.3.1"
 celery_once = "==3.0.1"
 more-itertools = "==5.0.0"
 kombu = ">=5.3.1"
