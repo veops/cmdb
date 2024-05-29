@@ -127,10 +127,14 @@ class TopologyOrderView(APIView):
 class TopologyViewPreview(APIView):
     url_prefix = ('/topology_views/preview', '/topology_views/<int:_id>/view')
 
-    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.TopologyView,
-                         app_cli.op.read, app_cli.admin_name)
     def get(self, _id=None):
         if _id is not None:
+            acl = ACLManager('cmdb')
+            resource_name = TopologyViewManager.get_name_by_id(_id)
+            if (not acl.has_permission(resource_name, ResourceTypeEnum.TOPOLOGY_VIEW, PermEnum.READ) and
+                    not is_app_admin('cmdb')):
+                return abort(403, ErrFormat.no_permission.format(resource_name, PermEnum.READ))
+
             return self.jsonify(TopologyViewManager().topology_view(view_id=_id))
         else:
             return self.jsonify(TopologyViewManager().topology_view(preview=request.values))
