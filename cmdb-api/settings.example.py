@@ -20,10 +20,16 @@ DEBUG_TB_INTERCEPT_REDIRECTS = False
 
 ERROR_CODES = [400, 401, 403, 404, 405, 500, 502]
 
+MYSQL_USER = env.str('MYSQL_USER', default='cmdb')
+MYSQL_PASSWORD = env.str('MYSQL_PASSWORD', default='123456')
+MYSQL_HOST = env.str('MYSQL_HOST', default='127.0.0.1')
+MYSQL_PORT = env.int('MYSQL_PORT', default=3306)
+MYSQL_DATABASE = env.str('MYSQL_DATABASE', default='cmdb')
 # # database
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{user}:{password}@127.0.0.1:3306/{db}?charset=utf8'
+SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@' \
+                          f'{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}?charset=utf8'
 SQLALCHEMY_BINDS = {
-    'user': 'mysql+pymysql://{user}:{password}@127.0.0.1:3306/{db}?charset=utf8'
+    'user': SQLALCHEMY_DATABASE_URI
 }
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_TRACK_MODIFICATIONS = False
