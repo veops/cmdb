@@ -315,8 +315,11 @@ class ResourceCRUD(object):
         return resource
 
     @staticmethod
-    def delete(_id, rebuild=True):
+    def delete(_id, rebuild=True, app_id=None):
         resource = Resource.get_by_id(_id) or abort(404, ErrFormat.resource_not_found.format("id={}".format(_id)))
+
+        if app_id is not None and resource.app_id != app_id:
+            return abort(404, ErrFormat.resource_not_found.format("id={}".format(_id)))
 
         origin = resource.to_dict()
         resource.soft_delete()

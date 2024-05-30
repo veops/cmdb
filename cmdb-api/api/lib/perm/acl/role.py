@@ -154,18 +154,18 @@ class RoleRelationCRUD(object):
                 if existed:
                     continue
 
-                RoleRelationCache.clean(parent_id, app_id)
-                RoleRelationCache.clean(child_id, app_id)
-
                 if parent_id in cls.recursive_child_ids(child_id, app_id):
                     return abort(400, ErrFormat.inheritance_dead_loop)
+
+                result.append(RoleRelation.create(parent_id=parent_id, child_id=child_id, app_id=app_id).to_dict())
+
+                RoleRelationCache.clean(parent_id, app_id)
+                RoleRelationCache.clean(child_id, app_id)
 
                 if app_id is None:
                     for app in AppCRUD.get_all():
                         if app.name != "acl":
                             RoleRelationCache.clean(child_id, app.id)
-
-                result.append(RoleRelation.create(parent_id=parent_id, child_id=child_id, app_id=app_id).to_dict())
 
         AuditCRUD.add_role_log(app_id, AuditOperateType.role_relation_add,
                                AuditScope.role_relation, role.id, {}, {},
