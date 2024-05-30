@@ -1,4 +1,4 @@
-version: '3.5'
+version: '2.19'
 
 services:
   cmdb-db:
@@ -6,16 +6,16 @@ services:
     container_name: cmdb-db
     environment:
       TZ: Asia/Shanghai
-      MYSQL_ROOT_PASSWORD: '123456'
-      MYSQL_DATABASE: 'cmdb'
-      MYSQL_USER: 'cmdb'
-      MYSQL_PASSWORD: '123456'
+      MYSQL_ROOT_PASSWORD: "$MYSQL_ROOT_PASSWORD"
+      MYSQL_DATABASE: '$MYSQL_DATABASE'
+      MYSQL_USER: '$MYSQL_USER'
+      MYSQL_PASSWORD: '$MYSQL_PASSWORD'
     volumes:
       - db-data:/var/lib/mysql
       - ./docs/mysqld.cnf:/etc/mysql/conf.d/mysqld.cnf
       - ./docs/cmdb.sql:/docker-entrypoint-initdb.d/cmdb.sql
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-p$MYSQL_ROOT_PASSWORD"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -46,12 +46,14 @@ services:
 
   cmdb-api:
     image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.4.5
-#    build:
-#      context: .
-#      target: cmdb-api
     container_name: cmdb-api
     environment:
       TZ: Asia/Shanghai
+      MYSQL_HOST: '$MYSQL_HOST'
+      MYSQL_PORT: $MYSQL_PORT
+      MYSQL_USER: '$MYSQL_USER'
+      MYSQL_DATABASE: '$MYSQL_DATABASE'
+      MYSQL_PASSWORD: '$MYSQL_PASSWORD'
       WAIT_HOSTS: cmdb-db:3306, cmdb-cache:6379
     depends_on:
       cmdb-db:
@@ -77,7 +79,6 @@ services:
         flask init-import-user-from-acl
         flask init-department
         flask cmdb-counter > counter.log 2>&1
-
     networks:
       new:
         aliases:
@@ -85,9 +86,6 @@ services:
 
   cmdb-ui:
     image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.4.5
-#    build:
-#      context: .
-#      target: cmdb-ui
     container_name: cmdb-ui
     depends_on:
       - cmdb-api
