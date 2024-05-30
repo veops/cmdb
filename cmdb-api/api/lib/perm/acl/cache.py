@@ -3,9 +3,9 @@
 
 import msgpack
 import redis_lock
-from flask import current_app
 
 from api.extensions import cache
+from api.extensions import db
 from api.extensions import rd
 from api.lib.decorator import flush_db
 from api.models.acl import App
@@ -161,6 +161,7 @@ class RoleRelationCache(object):
     def get_parent_ids(cls, rid, app_id, force=False):
         parent_ids = cache.get(cls.PREFIX_PARENT.format(rid, app_id))
         if not parent_ids or force:
+            db.session.commit()
             from api.lib.perm.acl.role import RoleRelationCRUD
             parent_ids = RoleRelationCRUD.get_parent_ids(rid, app_id)
             cache.set(cls.PREFIX_PARENT.format(rid, app_id), parent_ids, timeout=0)
@@ -171,6 +172,7 @@ class RoleRelationCache(object):
     def get_child_ids(cls, rid, app_id, force=False):
         child_ids = cache.get(cls.PREFIX_CHILDREN.format(rid, app_id))
         if not child_ids or force:
+            db.session.commit()
             from api.lib.perm.acl.role import RoleRelationCRUD
             child_ids = RoleRelationCRUD.get_child_ids(rid, app_id)
             cache.set(cls.PREFIX_CHILDREN.format(rid, app_id), child_ids, timeout=0)
@@ -187,6 +189,7 @@ class RoleRelationCache(object):
         """
         resources = cache.get(cls.PREFIX_RESOURCES.format(rid, app_id))
         if not resources or force:
+            db.session.commit()
             from api.lib.perm.acl.role import RoleCRUD
             resources = RoleCRUD.get_resources(rid, app_id)
             if resources['id2perms'] or resources['group2perms']:
@@ -198,6 +201,7 @@ class RoleRelationCache(object):
     def get_resources2(cls, rid, app_id, force=False):
         r_g = cache.get(cls.PREFIX_RESOURCES2.format(rid, app_id))
         if not r_g or force:
+            db.session.commit()
             res = cls.get_resources(rid, app_id)
             id2perms = res['id2perms']
             group2perms = res['group2perms']
