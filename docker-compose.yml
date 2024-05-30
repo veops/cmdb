@@ -4,12 +4,10 @@ services:
   cmdb-db:
     image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-db:2.3
     container_name: cmdb-db
+    env_file:
+      - .env
     environment:
       TZ: Asia/Shanghai
-      MYSQL_ROOT_PASSWORD: "$MYSQL_ROOT_PASSWORD"
-      MYSQL_DATABASE: '$MYSQL_DATABASE'
-      MYSQL_USER: '$MYSQL_USER'
-      MYSQL_PASSWORD: '$MYSQL_PASSWORD'
     volumes:
       - db-data:/var/lib/mysql
       - ./docs/mysqld.cnf:/etc/mysql/conf.d/mysqld.cnf
@@ -47,13 +45,10 @@ services:
   cmdb-api:
     image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.4.5
     container_name: cmdb-api
+    env_file:
+      - .env
     environment:
       TZ: Asia/Shanghai
-      MYSQL_HOST: '$MYSQL_HOST'
-      MYSQL_PORT: $MYSQL_PORT
-      MYSQL_USER: '$MYSQL_USER'
-      MYSQL_DATABASE: '$MYSQL_DATABASE'
-      MYSQL_PASSWORD: '$MYSQL_PASSWORD'
       WAIT_HOSTS: cmdb-db:3306, cmdb-cache:6379
     depends_on:
       cmdb-db:
