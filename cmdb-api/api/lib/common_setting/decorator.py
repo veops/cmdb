@@ -3,6 +3,7 @@ import functools
 from flask import abort, session
 from api.lib.common_setting.acl import ACLManager
 from api.lib.common_setting.resp_format import ErrFormat
+from api.lib.perm.acl.acl import is_app_admin
 
 
 def perms_role_required(app_name, resource_type_name, resource_name, perm, role_name=None):
@@ -16,7 +17,7 @@ def perms_role_required(app_name, resource_type_name, resource_name, perm, role_
             except Exception as e:
                 # resource_type not exist, continue check role
                 if role_name:
-                    if role_name not in session.get("acl", {}).get("parentRoles", []):
+                    if role_name not in session.get("acl", {}).get("parentRoles", []) and not is_app_admin(app_name):
                         abort(403, ErrFormat.role_required.format(role_name))
 
                     return func(*args, **kwargs)
@@ -25,7 +26,7 @@ def perms_role_required(app_name, resource_type_name, resource_name, perm, role_
 
             if not has_perms:
                 if role_name:
-                    if role_name not in session.get("acl", {}).get("parentRoles", []):
+                    if role_name not in session.get("acl", {}).get("parentRoles", []) and not is_app_admin(app_name):
                         abort(403, ErrFormat.role_required.format(role_name))
                 else:
                     abort(403, ErrFormat.resource_no_permission.format(resource_name, perm))
