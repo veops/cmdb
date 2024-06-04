@@ -1274,52 +1274,83 @@ class CIRelationManager(object):
     def build_by_attribute(cls, ci_dict):
         type_id = ci_dict['_type']
         child_items = CITypeRelation.get_by(parent_id=type_id, only_query=True).filter(
-            CITypeRelation.parent_attr_id.isnot(None))
+            CITypeRelation.parent_attr_ids.isnot(None))
         for item in child_items:
-            parent_attr = AttributeCache.get(item.parent_attr_id)
-            child_attr = AttributeCache.get(item.child_attr_id)
-            attr_value = ci_dict.get(parent_attr.name)
-            value_table = TableMap(attr=child_attr).table
-            for child in value_table.get_by(attr_id=child_attr.id, value=attr_value, only_query=True).join(
-                    CI, CI.id == value_table.ci_id).filter(CI.type_id == item.child_id):
-                CIRelationManager.add(ci_dict['_id'], child.ci_id, valid=False)
+            relations = None
+            for parent_attr_id, child_attr_id in zip(item.parent_attr_ids, item.child_attr_ids):
+                _relations = set()
+                parent_attr = AttributeCache.get(parent_attr_id)
+                child_attr = AttributeCache.get(child_attr_id)
+                attr_value = ci_dict.get(parent_attr.name)
+                value_table = TableMap(attr=child_attr).table
+                for child in value_table.get_by(attr_id=child_attr.id, value=attr_value, only_query=True).join(
+                        CI, CI.id == value_table.ci_id).filter(CI.type_id == item.child_id):
+                    _relations.add((ci_dict['_id'], child.ci_id))
+                if relations is None:
+                    relations = _relations
+                else:
+                    relations &= _relations
+            for parent_ci_id, child_ci_id in relations:
+                CIRelationManager.add(parent_ci_id, child_ci_id, valid=False)
 
         parent_items = CITypeRelation.get_by(child_id=type_id, only_query=True).filter(
-            CITypeRelation.child_attr_id.isnot(None))
+            CITypeRelation.child_attr_ids.isnot(None))
         for item in parent_items:
-            parent_attr = AttributeCache.get(item.parent_attr_id)
-            child_attr = AttributeCache.get(item.child_attr_id)
-            attr_value = ci_dict.get(child_attr.name)
-            value_table = TableMap(attr=parent_attr).table
-            for parent in value_table.get_by(attr_id=parent_attr.id, value=attr_value, only_query=True).join(
-                    CI, CI.id == value_table.ci_id).filter(CI.type_id == item.parent_id):
-                CIRelationManager.add(parent.ci_id, ci_dict['_id'], valid=False)
+            relations = None
+            for parent_attr_id, child_attr_id in zip(item.parent_attr_ids, item.child_attr_ids):
+                _relations = set()
+                parent_attr = AttributeCache.get(parent_attr_id)
+                child_attr = AttributeCache.get(child_attr_id)
+                attr_value = ci_dict.get(child_attr.name)
+                value_table = TableMap(attr=parent_attr).table
+                for parent in value_table.get_by(attr_id=parent_attr.id, value=attr_value, only_query=True).join(
+                        CI, CI.id == value_table.ci_id).filter(CI.type_id == item.parent_id):
+                    _relations.add((parent.ci_id, ci_dict['_id']))
+                if relations is None:
+                    relations = _relations
+                else:
+                    relations &= _relations
+            for parent_ci_id, child_ci_id in relations:
+                CIRelationManager.add(parent_ci_id, child_ci_id, valid=False)
 
     @classmethod
     def rebuild_all_by_attribute(cls, ci_type_relation):
-        parent_attr = AttributeCache.get(ci_type_relation['parent_attr_id'])
-        child_attr = AttributeCache.get(ci_type_relation['child_attr_id'])
-        if not parent_attr or not child_attr:
-            return
+        relations = None
+        for parent_attr_id, child_attr_id in zip(ci_type_relation['parent_attr_ids'] or [],
+                                                 ci_type_relation['child_attr_ids'] or []):
 
-        parent_value_table = TableMap(attr=parent_attr).table
-        child_value_table = TableMap(attr=child_attr).table
+            _relations = set()
+            parent_attr = AttributeCache.get(parent_attr_id)
+            child_attr = AttributeCache.get(child_attr_id)
+            if not parent_attr or not child_attr:
+                continue
 
-        parent_values = parent_value_table.get_by(attr_id=parent_attr.id, only_query=True).join(
-            CI, CI.id == parent_value_table.ci_id).filter(CI.type_id == ci_type_relation['parent_id'])
-        child_values = child_value_table.get_by(attr_id=child_attr.id, only_query=True).join(
-            CI, CI.id == child_value_table.ci_id).filter(CI.type_id == ci_type_relation['child_id'])
+            parent_value_table = TableMap(attr=parent_attr).table
+            child_value_table = TableMap(attr=child_attr).table
 
-        child_value2ci_ids = {}
-        for child in child_values:
-            child_value2ci_ids.setdefault(child.value, []).append(child.ci_id)
+            parent_values = parent_value_table.get_by(attr_id=parent_attr.id, only_query=True).join(
+                CI, CI.id == parent_value_table.ci_id).filter(CI.type_id == ci_type_relation['parent_id'])
+            child_values = child_value_table.get_by(attr_id=child_attr.id, only_query=True).join(
+                CI, CI.id == child_value_table.ci_id).filter(CI.type_id == ci_type_relation['child_id'])
 
-        for parent in parent_values:
-            for child_ci_id in child_value2ci_ids.get(parent.value, []):
-                try:
-                    cls.add(parent.ci_id, child_ci_id, valid=False)
-                except:
-                    pass
+            child_value2ci_ids = {}
+            for child in child_values:
+                child_value2ci_ids.setdefault(child.value, []).append(child.ci_id)
+
+            for parent in parent_values:
+                for child_ci_id in child_value2ci_ids.get(parent.value, []):
+                    _relations.add((parent.ci_id, child_ci_id))
+
+            if relations is None:
+                relations = _relations
+            else:
+                relations &= _relations
+
+        for parent_ci_id, child_ci_id in (relations or []):
+            try:
+                cls.add(parent_ci_id, child_ci_id, valid=False)
+            except:
+                pass
 
 
 class CITriggerManager(object):
