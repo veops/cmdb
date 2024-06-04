@@ -196,6 +196,7 @@ const cmdb_zh = {
         attributeAssociationTip3: '属性关联必须选择两个属性',
         attributeAssociationTip4: '请选择原模型属性',
         attributeAssociationTip5: '请选择目标模型属性',
+        attributeAssociationTip6: '不可再删除',
         show: '展示属性',
         setAsShow: '设置为展示属性',
         cancelSetAsShow: '取消设置为展示属性',

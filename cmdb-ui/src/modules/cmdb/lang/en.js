@@ -196,6 +196,7 @@ const cmdb_en = {
         attributeAssociationTip3: 'Two Attributes must be selected',
         attributeAssociationTip4: 'Please select a attribute from Source CIType',
         attributeAssociationTip5: 'Please select a attribute from Target CIType',
+        attributeAssociationTip6: 'Cannot be deleted again.',
         show: 'show attribute',
         setAsShow: 'Set as show attribute',
         cancelSetAsShow: 'Cancel show attribute',
