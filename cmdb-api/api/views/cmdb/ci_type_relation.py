@@ -57,10 +57,10 @@ class CITypeRelationView(APIView):
     def post(self, parent_id, child_id):
         relation_type_id = request.values.get("relation_type_id")
         constraint = request.values.get("constraint")
-        parent_attr_id = request.values.get("parent_attr_id")
-        child_attr_id = request.values.get("child_attr_id")
+        parent_attr_ids = request.values.get("parent_attr_ids")
+        child_attr_ids = request.values.get("child_attr_ids")
         ctr_id = CITypeRelationManager.add(parent_id, child_id, relation_type_id, constraint,
-                                           parent_attr_id, child_attr_id)
+                                           parent_attr_ids, child_attr_ids)
 
         return self.jsonify(ctr_id=ctr_id)
 

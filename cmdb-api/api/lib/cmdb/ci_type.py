@@ -35,6 +35,7 @@ from api.lib.perm.acl.acl import validate_permission
 from api.models.cmdb import Attribute
 from api.models.cmdb import AutoDiscoveryCI
 from api.models.cmdb import AutoDiscoveryCIType
+from api.models.cmdb import AutoDiscoveryCITypeRelation
 from api.models.cmdb import CI
 from api.models.cmdb import CIFilterPerms
 from api.models.cmdb import CIType
@@ -49,12 +50,12 @@ from api.models.cmdb import CITypeTrigger
 from api.models.cmdb import CITypeUniqueConstraint
 from api.models.cmdb import CustomDashboard
 from api.models.cmdb import PreferenceCITypeOrder
-from api.models.cmdb import TopologyView
 from api.models.cmdb import PreferenceRelationView
 from api.models.cmdb import PreferenceSearchOption
 from api.models.cmdb import PreferenceShowAttributes
 from api.models.cmdb import PreferenceTreeView
 from api.models.cmdb import RelationType
+from api.models.cmdb import TopologyView
 
 
 class CITypeManager(object):
@@ -249,6 +250,12 @@ class CITypeManager(object):
                 item.soft_delete(commit=False)
 
         for item in AutoDiscoveryCI.get_by(type_id=type_id, to_dict=False):
+            item.delete(commit=False)
+
+        for item in AutoDiscoveryCITypeRelation.get_by(ad_type_id=type_id, to_dict=False):
+            item.delete(commit=False)
+
+        for item in AutoDiscoveryCITypeRelation.get_by(peer_type_id=type_id, to_dict=False):
             item.delete(commit=False)
 
         for item in CITypeInheritance.get_by(parent_id=type_id, to_dict=False):
@@ -686,9 +693,19 @@ class CITypeAttributeManager(object):
                     item = CITypeTrigger.get_by(type_id=_type_id, attr_id=attr_id, to_dict=False, first=True)
                     item and item.soft_delete(commit=False)
 
-                for item in (CITypeRelation.get_by(parent_id=type_id, parent_attr_id=attr_id, to_dict=False) +
-                             CITypeRelation.get_by(child_id=type_id, child_attr_id=attr_id, to_dict=False)):
-                    item.soft_delete(commit=False)
+                for item in (CITypeRelation.get_by(parent_id=type_id, to_dict=False) +
+                             CITypeRelation.get_by(child_id=type_id, to_dict=False)):
+                    if item.parent_id == type_id and attr_id in (item.parent_attr_ids or []):
+                        item_dict = item.to_dict()
+                        pop_idx = item.parent_attr_ids.index(attr_id)
+                    elif item.child_id == type_id and attr_id in (item.child_attr_ids or []):
+                        item_dict = item.to_dict()
+                        pop_idx = item.child_attr_ids.index(attr_id)
+                    else:
+                        continue
+                    item.update(parent_attr_ids=item_dict['parent_attr_ids'].pop(pop_idx),
+                                child_attr_ids=item_dict['child_attr_ids'].pop(pop_idx),
+                                commit=False)
 
                 db.session.commit()
 
@@ -757,10 +774,12 @@ class CITypeRelationManager(object):
             res[idx] = _item
             res[idx]['parent'] = item.parent.to_dict()
             if item.parent_id not in type2attributes:
-                type2attributes[item.parent_id] = [i[1].to_dict() for i in CITypeAttributesCache.get2(item.parent_id)]
+                type2attributes[item.parent_id] = [i[1].to_dict() for i in
+                                                   CITypeAttributeManager.get_all_attributes(item.parent_id)]
             res[idx]['child'] = item.child.to_dict()
             if item.child_id not in type2attributes:
-                type2attributes[item.child_id] = [i[1].to_dict() for i in CITypeAttributesCache.get2(item.child_id)]
+                type2attributes[item.child_id] = [i[1].to_dict() for i in
+                                                  CITypeAttributeManager.get_all_attributes(item.child_id)]
             res[idx]['relation_type'] = item.relation_type.to_dict()
 
         return res, type2attributes
@@ -795,8 +814,8 @@ class CITypeRelationManager(object):
 
         ci_type_dict["relation_type"] = relation_inst.relation_type.name
         ci_type_dict["constraint"] = relation_inst.constraint
-        ci_type_dict["parent_attr_id"] = relation_inst.parent_attr_id
-        ci_type_dict["child_attr_id"] = relation_inst.child_attr_id
+        ci_type_dict["parent_attr_ids"] = relation_inst.parent_attr_ids
+        ci_type_dict["child_attr_ids"] = relation_inst.child_attr_ids
 
         return ci_type_dict
 
@@ -906,7 +925,7 @@ class CITypeRelationManager(object):
 
     @classmethod
     def add(cls, parent, child, relation_type_id, constraint=ConstraintEnum.One2Many,
-            parent_attr_id=None, child_attr_id=None):
+            parent_attr_ids=None, child_attr_ids=None):
         p = CITypeManager.check_is_existed(parent)
         c = CITypeManager.check_is_existed(child)
 
@@ -921,21 +940,22 @@ class CITypeRelationManager(object):
             current_app.logger.warning(str(e))
             return abort(400, ErrFormat.circular_dependency_error)
 
-        old_parent_attr_id = None
+        old_parent_attr_ids, old_child_attr_ids = None, None
         existed = cls._get(p.id, c.id)
         if existed is not None:
-            old_parent_attr_id = existed.parent_attr_id
+            old_parent_attr_ids = copy.deepcopy(existed.parent_attr_ids)
+            old_child_attr_ids = copy.deepcopy(existed.child_attr_ids)
             existed = existed.update(relation_type_id=relation_type_id,
                                      constraint=constraint,
-                                     parent_attr_id=parent_attr_id,
-                                     child_attr_id=child_attr_id,
+                                     parent_attr_ids=parent_attr_ids,
+                                     child_attr_ids=child_attr_ids,
                                      filter_none=False)
         else:
             existed = CITypeRelation.create(parent_id=p.id,
                                             child_id=c.id,
                                             relation_type_id=relation_type_id,
-                                            parent_attr_id=parent_attr_id,
-                                            child_attr_id=child_attr_id,
+                                            parent_attr_ids=parent_attr_ids,
+                                            child_attr_ids=child_attr_ids,
                                             constraint=constraint)
 
             if current_app.config.get("USE_ACL"):
@@ -949,10 +969,10 @@ class CITypeRelationManager(object):
                                                     current_user.username,
                                                     ResourceTypeEnum.CI_TYPE_RELATION)
 
-        if parent_attr_id and parent_attr_id != old_parent_attr_id:
-            if parent_attr_id and parent_attr_id != existed.parent_attr_id:
-                from api.tasks.cmdb import rebuild_relation_for_attribute_changed
-                rebuild_relation_for_attribute_changed.apply_async(args=(existed.to_dict()))
+        if ((parent_attr_ids and parent_attr_ids != old_parent_attr_ids) or
+                (child_attr_ids and child_attr_ids != old_child_attr_ids)):
+            from api.tasks.cmdb import rebuild_relation_for_attribute_changed
+            rebuild_relation_for_attribute_changed.apply_async(args=(existed.to_dict(),))
 
         CITypeHistoryManager.add(CITypeOperateType.ADD_RELATION, p.id,
                                  change=dict(parent=p.to_dict(), child=c.to_dict(), relation_type_id=relation_type_id))
@@ -1246,8 +1266,8 @@ class CITypeTemplateManager(object):
                                                  id2obj_dicts[added_id].get('child_id'),
                                                  id2obj_dicts[added_id].get('relation_type_id'),
                                                  id2obj_dicts[added_id].get('constraint'),
-                                                 id2obj_dicts[added_id].get('parent_attr_id'),
-                                                 id2obj_dicts[added_id].get('child_attr_id'),
+                                                 id2obj_dicts[added_id].get('parent_attr_ids'),
+                                                 id2obj_dicts[added_id].get('child_attr_ids'),
                                                  )
             else:
                 obj = cls.create(flush=True, **id2obj_dicts[added_id])
