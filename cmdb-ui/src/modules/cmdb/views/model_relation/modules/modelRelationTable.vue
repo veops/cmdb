@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="model-relation-table">
     <vxe-table
       ref="xTable"
       stripe
@@ -7,6 +7,7 @@
       show-header-overflow
       show-overflow
       resizable
+      :scroll-y="{enabled: false}"
       :height="`${windowHeight - 160}px`"
       :data="tableData"
       :sort-config="{ defaultSort: { field: 'created_at', order: 'desc' } }"
@@ -34,7 +35,7 @@
           {{ handleConstraint(row.constraint) }}
         </template>
       </vxe-column>
-      <vxe-column :width="250" field="attributeAssociation" :edit-render="{}">
+      <vxe-column :width="300" field="attributeAssociation" :edit-render="{}">
         <template #header>
           <span>
             <a-tooltip :title="$t('cmdb.ciType.attributeAssociationTip1')">
@@ -47,37 +48,73 @@
           </span>
         </template>
         <template #default="{row}">
-          <span
-            v-if="row.parent_attr_id && row.child_attr_id"
-          >{{ getAttrNameById(type2attributes[row.parent_id], row.parent_attr_id) }}=>
-            {{ getAttrNameById(type2attributes[row.child_id], row.child_attr_id) }}</span
+          <template
+            v-for="item in row.parentAndChildAttrList"
           >
+            <div
+              :key="item.id"
+              v-if="item.parentAttrId && item.childAttrId"
+            >
+              {{ getAttrNameById(type2attributes[row.parent_id], item.parentAttrId) }}=>
+              {{ getAttrNameById(type2attributes[row.child_id], item.childAttrId) }}
+            </div>
+          </template>
         </template>
         <template #edit="{ row }">
-          <div style="display:inline-flex;align-items:center;">
+          <div
+            v-for="item in tableAttrList"
+            :key="item.id"
+            class="table-attribute-row"
+          >
             <a-select
               allowClear
               size="small"
-              v-model="parent_attr_id"
+              v-model="item.parentAttrId"
               :getPopupContainer="(trigger) => trigger.parentNode"
               :style="{ width: '100px' }"
+              show-search
+              optionFilterProp="title"
             >
-              <a-select-option v-for="attr in filterAttributes(type2attributes[row.parent_id])" :key="attr.id">
+              <a-select-option
+                v-for="attr in filterAttributes(type2attributes[row.parent_id])"
+                :key="attr.id"
+                :value="attr.id"
+                :title="attr.alias || attr.name"
+              >
                 {{ attr.alias || attr.name }}
               </a-select-option>
             </a-select>
-            =>
+            <span class="table-attribute-row-link">=></span>
             <a-select
               allowClear
               size="small"
-              v-model="child_attr_id"
+              v-model="item.childAttrId"
               :getPopupContainer="(trigger) => trigger.parentNode"
               :style="{ width: '100px' }"
+              show-search
+              optionFilterProp="title"
             >
-              <a-select-option v-for="attr in filterAttributes(type2attributes[row.child_id])" :key="attr.id">
+              <a-select-option
+                v-for="attr in filterAttributes(type2attributes[row.child_id])"
+                :key="attr.id"
+                :value="attr.id"
+                :title="attr.alias || attr.name"
+              >
                 {{ attr.alias || attr.name }}
               </a-select-option>
             </a-select>
+            <a
+              class="table-attribute-row-action"
+              @click="removeTableAttr(item.id)"
+            >
+              <a-icon type="minus-circle" />
+            </a>
+            <a
+              class="table-attribute-row-action"
+              @click="addTableAttr"
+            >
+              <a-icon type="plus-circle" />
+            </a>
           </div>
         </template>
       </vxe-column>
@@ -97,6 +134,7 @@
 </template>
 
 <script>
+import { v4 as uuidv4 } from 'uuid'
 import { getCITypeRelations, deleteRelation, createRelation } from '@/modules/cmdb/api/CITypeRelation'
 import { getRelationTypes } from '@/modules/cmdb/api/relationType'
 import CMDBGrant from '../../../components/cmdbGrant'
@@ -108,8 +146,7 @@ export default {
       tableData: [],
       relationTypeList: null,
       type2attributes: {},
-      parent_attr_id: undefined,
-      child_attr_id: undefined,
+      tableAttrList: [],
     }
   },
   components: {
@@ -137,9 +174,29 @@ export default {
     },
     async getMainData() {
       const { relations, type2attributes } = await getCITypeRelations()
-      this.tableData = relations
+      this.tableData = relations.map((item) => {
+        const parentAndChildAttrList = this.handleAttrList(item)
+        return {
+          ...item,
+          parentAndChildAttrList
+        }
+      })
       this.type2attributes = type2attributes
     },
+
+    handleAttrList(data) {
+      const length = Math.min(data?.parent_attr_ids?.length || 0, data.child_attr_ids?.length || 0)
+      const parentAndChildAttrList = []
+      for (let i = 0; i < length; i++) {
+        parentAndChildAttrList.push({
+          id: uuidv4(),
+          parentAttrId: data?.parent_attr_ids?.[i] ?? '',
+          childAttrId: data?.child_attr_ids?.[i] ?? ''
+        })
+      }
+      return parentAndChildAttrList
+    },
+
     // 获取关系
     async getRelationTypes() {
       const res = await getRelationTypes()
@@ -171,21 +228,75 @@ export default {
       })
     },
     handleEditActived({ row }) {
-      this.parent_attr_id = row?.parent_attr_id ?? undefined
-      this.child_attr_id = row?.child_attr_id ?? undefined
+      const tableAttrList = []
+
+      const length = Math.min(row?.parent_attr_ids?.length || 0, row.child_attr_ids?.length || 0)
+      if (length) {
+        for (let i = 0; i < length; i++) {
+          tableAttrList.push({
+            id: uuidv4(),
+            parentAttrId: row?.parent_attr_ids?.[i] ?? undefined,
+            childAttrId: row?.child_attr_ids?.[i] ?? undefined
+          })
+        }
+      } else {
+        tableAttrList.push({
+          id: uuidv4(),
+          parentAttrId: undefined,
+          childAttrId: undefined
+        })
+      }
+      console.log('handleEditActived', tableAttrList)
+      this.$set(this, 'tableAttrList', tableAttrList)
     },
+
+    /**
+     * 校验属性列表
+     * @param {*} attrList
+     */
+     handleValidateAttrList(attrList) {
+      const parent_attr_ids = []
+      const child_attr_ids = []
+      attrList.map((attr) => {
+        if (attr.parentAttrId) {
+          parent_attr_ids.push(attr.parentAttrId)
+        }
+        if (attr.childAttrId) {
+          child_attr_ids.push(attr.childAttrId)
+        }
+      })
+
+      if (parent_attr_ids.length !== child_attr_ids.length) {
+        this.$message.warning(this.$t('cmdb.ciType.attributeAssociationTip3'))
+        return {
+          validate: false
+        }
+      }
+
+      return {
+        validate: true,
+        parent_attr_ids,
+        child_attr_ids
+      }
+    },
+
     async handleEditClose({ row }) {
       const { parent_id, child_id, constraint, relation_type_id } = row
-      const { parent_attr_id = undefined, child_attr_id = undefined } = this
-      if ((!parent_attr_id && child_attr_id) || (parent_attr_id && !child_attr_id)) {
-        this.$message.warning(this.$t('cmdb.ciType.attributeAssociationTip3'))
+
+      const {
+        parent_attr_ids,
+        child_attr_ids,
+        validate
+      } = this.handleValidateAttrList(this.tableAttrList)
+      if (!validate) {
         return
       }
+
       await createRelation(parent_id, child_id, {
         relation_type_id,
         constraint,
-        parent_attr_id,
-        child_attr_id,
+        parent_attr_ids,
+        child_attr_ids,
       }).finally(() => {
         this.getMainData()
       })
@@ -198,8 +309,49 @@ export default {
       // filter password/json/is_list
       return attributes.filter((attr) => !attr.is_password && !attr.is_list && attr.value_type !== '6')
     },
+
+    addTableAttr() {
+      this.tableAttrList.push({
+        id: uuidv4(),
+        parentAttrId: undefined,
+        childAttrId: undefined
+      })
+    },
+    removeTableAttr(id) {
+      if (this.tableAttrList.length <= 1) {
+        this.$message.error(this.$t('cmdb.ciType.attributeAssociationTip6'))
+        return
+      }
+      const index = this.tableAttrList.findIndex((item) => item.id === id)
+      if (index !== -1) {
+        this.tableAttrList.splice(index, 1)
+      }
+    },
   },
 }
 </script>
 
-<style></style>
+<style lang="less" scoped>
+.relation-table {
+  /deep/ .vxe-cell {
+    max-height: max-content !important;
+  }
+}
+.table-attribute-row {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 5px;
+
+  &:last-child {
+    margin-bottom: 5px;
+  }
+
+  &-link {
+    margin: 0 5px;
+  }
+
+  &-action {
+    margin-left: 5px;
+  }
+}
+</style>

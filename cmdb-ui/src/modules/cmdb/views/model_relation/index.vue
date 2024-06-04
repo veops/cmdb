@@ -70,13 +70,16 @@
           </a-select>
         </a-form-item>
         <a-form-item :label="$t('cmdb.ciType.attributeAssociation')">
-          <a-row>
-            <a-col :span="11">
+          <a-row
+            v-for="item in modalAttrList"
+            :key="item.id"
+          >
+            <a-col :span="10">
               <a-form-item>
                 <a-select
                   :placeholder="$t('cmdb.ciType.attributeAssociationTip4')"
                   allowClear
-                  v-decorator="['parent_attr_id', { rules: [{ required: false }] }]"
+                  v-model="item.parentAttrId"
                 >
                   <a-select-option v-for="attr in filterAttributes(modalParentAttributes)" :key="attr.id">
                     {{ attr.alias || attr.name }}
@@ -87,18 +90,32 @@
             <a-col :span="2" :style="{ textAlign: 'center' }">
               =>
             </a-col>
-            <a-col :span="11">
+            <a-col :span="9">
               <a-form-item>
                 <a-select
                   :placeholder="$t('cmdb.ciType.attributeAssociationTip5')"
                   allowClear
-                  v-decorator="['child_attr_id', { rules: [{ required: false }] }]"
+                  v-model="item.childAttrId"
                 >
                   <a-select-option v-for="attr in filterAttributes(modalChildAttributes)" :key="attr.id">
                     {{ attr.alias || attr.name }}
                   </a-select-option>
                 </a-select>
               </a-form-item>
+            </a-col>
+            <a-col :span="3">
+              <a
+                class="modal-attribute-action"
+                @click="removeModalAttr(item.id)"
+              >
+                <a-icon type="minus-circle" />
+              </a>
+              <a
+                class="modal-attribute-action"
+                @click="addModalAttr"
+              >
+                <a-icon type="plus-circle" />
+              </a>
             </a-col>
           </a-row>
         </a-form-item>
@@ -114,6 +131,7 @@ import { getCITypeGroupsConfig } from '@/modules/cmdb/api/ciTypeGroup'
 import { getCITypes } from '@/modules/cmdb/api/CIType'
 import { createRelation, deleteRelation, getCITypeChildren, getRelationTypes } from '@/modules/cmdb/api/CITypeRelation'
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
+import { v4 as uuidv4 } from 'uuid'
 
 export default {
   name: 'Index',
@@ -139,6 +157,7 @@ export default {
 
       modalParentAttributes: [],
       modalChildAttributes: [],
+      modalAttrList: [],
     }
   },
   computed: {
@@ -228,6 +247,13 @@ export default {
     handleCreate() {
       this.drawerTitle = this.$t('cmdb.ciType.addRelation')
       this.visible = true
+      this.$set(this, 'modalAttrList', [
+        {
+          id: uuidv4(),
+          parentAttrId: undefined,
+          childAttrId: undefined
+        }
+      ])
       this.$nextTick(() => {
         this.form.setFieldsValue({
           source_ci_type_id: this.sourceCITypeId,
@@ -249,19 +275,22 @@ export default {
             ci_type_id,
             relation_type_id,
             constraint,
-            parent_attr_id = undefined,
-            child_attr_id = undefined,
           } = values
 
-          if ((!parent_attr_id && child_attr_id) || (parent_attr_id && !child_attr_id)) {
-            this.$message.warning(this.$t('cmdb.ciType.attributeAssociationTip3'))
+          const {
+            parent_attr_ids,
+            child_attr_ids,
+            validate
+          } = this.handleValidateAttrList(this.modalAttrList)
+          if (!validate) {
             return
           }
+
           createRelation(source_ci_type_id, ci_type_id, {
             relation_type_id,
             constraint,
-            parent_attr_id,
-            child_attr_id,
+            parent_attr_ids,
+            child_attr_ids,
           }).then((res) => {
             this.$message.success(this.$t('addSuccess'))
             this.onClose()
@@ -272,6 +301,37 @@ export default {
       this.sourceCITypeId = undefined
       this.targetCITypeId = undefined
     },
+
+    /**
+     * 校验属性列表
+     * @param {*} attrList
+     */
+     handleValidateAttrList(attrList) {
+      const parent_attr_ids = []
+      const child_attr_ids = []
+      attrList.map((attr) => {
+        if (attr.parentAttrId) {
+          parent_attr_ids.push(attr.parentAttrId)
+        }
+        if (attr.childAttrId) {
+          child_attr_ids.push(attr.childAttrId)
+        }
+      })
+
+      if (parent_attr_ids.length !== child_attr_ids.length) {
+        this.$message.warning(this.$t('cmdb.ciType.attributeAssociationTip3'))
+        return {
+          validate: false
+        }
+      }
+
+      return {
+        validate: true,
+        parent_attr_ids,
+        child_attr_ids
+      }
+    },
+
     handleOk() {
       this.$refs.table.refresh()
     },
@@ -284,14 +344,18 @@ export default {
     },
     handleSourceTypeChange(value) {
       this.sourceCITypeId = value
-      this.form.setFieldsValue({ parent_attr_id: undefined })
+      this.modalAttrList.forEach((item) => {
+        item.parentAttrId = undefined
+      })
       getCITypeAttributesById(value).then((res) => {
         this.modalParentAttributes = res?.attributes ?? []
       })
     },
     handleTargetTypeChange(value) {
       this.targetCITypeId = value
-      this.form.setFieldsValue({ child_attr_id: undefined })
+      this.modalAttrList.forEach((item) => {
+        item.childAttrId = undefined
+      })
       getCITypeAttributesById(value).then((res) => {
         this.modalChildAttributes = res?.attributes ?? []
       })
@@ -303,17 +367,39 @@ export default {
       // filter password/json/is_list
       return attributes.filter((attr) => !attr.is_password && !attr.is_list && attr.value_type !== '6')
     },
+
+    addModalAttr() {
+      this.modalAttrList.push({
+        id: uuidv4(),
+        parentAttrId: undefined,
+        childAttrId: undefined
+      })
+    },
+
+    removeModalAttr(id) {
+      if (this.modalAttrList.length <= 1) {
+        this.$message.error(this.$t('cmdb.ciType.attributeAssociationTip6'))
+        return
+      }
+      const index = this.modalAttrList.findIndex((item) => item.id === id)
+      if (index !== -1) {
+        this.modalAttrList.splice(index, 1)
+      }
+    }
   },
 }
 </script>
 
 <style lang="less" scoped>
-
 .model-relation {
   background-color: #fff;
   border-radius: @border-radius-box;
   padding: 24px;
   height: calc(100vh - 64px);
   margin-bottom: -24px;
+}
+
+.modal-attribute-action {
+  margin-left: 5px;
 }
 </style>
