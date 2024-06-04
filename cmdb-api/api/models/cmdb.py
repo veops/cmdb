@@ -79,8 +79,11 @@ class CITypeRelation(Model):
     relation_type_id = db.Column(db.Integer, db.ForeignKey("c_relation_types.id"), nullable=False)
     constraint = db.Column(db.Enum(*ConstraintEnum.all()), default=ConstraintEnum.One2Many)
 
-    parent_attr_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"))
-    child_attr_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"))
+    parent_attr_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"))  # CMDB > 2.4.5: deprecated
+    child_attr_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"))  # CMDB > 2.4.5: deprecated
+
+    parent_attr_ids = db.Column(db.JSON)  # [parent_attr_id, ]
+    child_attr_ids = db.Column(db.JSON)  # [child_attr_id, ]
 
     parent = db.relationship("CIType", primaryjoin="CIType.id==CITypeRelation.parent_id")
     child = db.relationship("CIType", primaryjoin="CIType.id==CITypeRelation.child_id")
