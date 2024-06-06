@@ -269,7 +269,7 @@ export default {
       return { nodes, edges }
     },
     exsited_ci() {
-      const _exsited_ci = [this.typeId]
+      const _exsited_ci = [this.ciId]
       this.parentCITypes.forEach((parent) => {
         if (this.firstCIs[parent.name]) {
           this.firstCIs[parent.name].forEach((parentCi) => {
