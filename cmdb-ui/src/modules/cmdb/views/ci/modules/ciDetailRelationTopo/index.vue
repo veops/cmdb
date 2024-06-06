@@ -100,35 +100,37 @@ export default {
         const r = res.result[i]
         if (!this.exsited_ci.includes(r._id)) {
           const _findCiType = ci_types_list.find((item) => item.id === r._type)
-          const { attributes } = await getCITypeAttributesById(_findCiType.id)
-          const unique_id = _findCiType.show_id || _findCiType.unique_id
-          const _findUnique = attributes.find((attr) => attr.id === unique_id)
-          const unique_name = _findUnique?.name
-          const unique_alias = _findUnique?.alias || _findUnique?.name || ''
-          newNodes.push({
-            id: `${r._id}`,
-            Class: Node,
-            title: r.ci_type_alias || r.ci_type,
-            name: r.ci_type,
-            side: side,
-            unique_alias,
-            unique_name,
-            unique_value: r[unique_name],
-            children: [],
-            icon: _findCiType?.icon || '',
-            endpoints: [
-              {
-                id: 'left',
-                orientation: [-1, 0],
-                pos: [0, 0.5],
-              },
-              {
-                id: 'right',
-                orientation: [1, 0],
-                pos: [0, 0.5],
-              },
-            ],
-          })
+          if (_findCiType) {
+            const { attributes } = await getCITypeAttributesById(_findCiType.id)
+            const unique_id = _findCiType.show_id || _findCiType.unique_id
+            const _findUnique = attributes.find((attr) => attr.id === unique_id)
+            const unique_name = _findUnique?.name
+            const unique_alias = _findUnique?.alias || _findUnique?.name || ''
+            newNodes.push({
+              id: `${r._id}`,
+              Class: Node,
+              title: r.ci_type_alias || r.ci_type,
+              name: r.ci_type,
+              side: side,
+              unique_alias,
+              unique_name,
+              unique_value: r[unique_name],
+              children: [],
+              icon: _findCiType?.icon || '',
+              endpoints: [
+                {
+                  id: 'left',
+                  orientation: [-1, 0],
+                  pos: [0, 0.5],
+                },
+                {
+                  id: 'right',
+                  orientation: [1, 0],
+                  pos: [0, 0.5],
+                },
+              ],
+            })
+          }
         }
         newEdges.push({
           id: `${r._id}`,
