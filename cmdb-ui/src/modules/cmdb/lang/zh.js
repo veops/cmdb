@@ -589,6 +589,7 @@ if __name__ == "__main__":
         confirmDeleteView: '您确定要删除该视图吗?',
         noInstancePerm: '您没有该实例的查看权限',
         noPreferenceAttributes: '该实例没有订阅属性或者没有默认展示的属性',
+        topoViewSearchPlaceholder: '请输入节点名字'
     },
 }
 export default cmdb_zh

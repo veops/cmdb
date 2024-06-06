@@ -140,12 +140,33 @@
             <div :style="{ height: `${windowHeight - 80}px` }" ref="rightTopoView">
               <RelationGraph ref="showTopoView" :options="graphOptions2" :on-node-click="showNodeTips">
                 <template #node="{node}">
-                  <div :style="{ lineHeight: '20px' }">
-                    <ops-icon type="caise-wuliji" />
-                    <span :style="{ marginLeft: '5px', textOverflow: 'ellipsis' }">{{ node.text }}aaa</span>
+                  <div
+                    :style="{ borderColor: node.data.btnType === 'more' ? '#A4B5E1' : nodeStyle[Math.abs(node.lot.level)] ? nodeStyle[Math.abs(node.lot.level)].backgroundColor : '#A4B5E1' }"
+                    class="relation-graph-node"
+                  >
+                    <template v-if="node.data.icon">
+                      <img
+                        v-if="node.data.icon.split('$$')[2]"
+                        :src="`/api/common-setting/v1/file/${node.data.icon.split('$$')[3]}`"
+                        class="relation-graph-node-image"
+                      />
+                      <ops-icon
+                        v-else
+                        :style="{ color: node.data.icon.split('$$')[1] }"
+                        :type="node.data.icon ? node.data.icon.split('$$')[0] : ''"
+                        class="relation-graph-node-icon"
+                      />
+                    </template>
+                    <span class="relation-graph-node-text">{{ node.text }}</span>
                   </div>
                 </template>
                 <template #graph-plug>
+                  <a-input-search
+                    class="relation-graph-search"
+                    v-model="topoViewSearchValue"
+                    :placeholder="$t('cmdb.topo.topoViewSearchPlaceholder')"
+                    @search="handleSearchTopoView"
+                  />
                   <div v-if="(isShowNodeTipsPanel && currentNodeValues && currentNodeAttributes.length) || errorMessageShow" :style="nodeTipsPosition" class="node-tips">
                     <a-descriptions
                       v-if="currentNodeValues"
@@ -236,12 +257,12 @@
             </SeeksRelationGraph>
           </div>
         </a-form-item>
-        <a-form-item :style="{ display: 'none' }" :label="$t('cmdb.topo.aggregationCount')" prop="aggregation_count" :help="$t('cmdb.topo.aggreationCountTip')">
+        <a-form-item :label="$t('cmdb.topo.aggregationCount')" prop="aggregation_count" :help="$t('cmdb.topo.aggreationCountTip')">
           <a-input-number
             :style="{ width: '100%' }"
+            :min="0"
             v-decorator="['aggregation_count']"
           >
-            <a @click="handleOpenCmdb" slot="suffix"><a-icon type="menu"/></a>
           </a-input-number>
         </a-form-item>
         <div :class="{ 'chart-left-preview': true, 'chart-left-preview-empty': !isShowPreview }">
@@ -253,9 +274,27 @@
           >
           <template v-if="isShowPreview">
             <RelationGraph ref="previewTopoView" :options="graphOptionsPrivew">
-              <div slot="node" slot-scope="{ node }" :style="{ lineHeight: '20px' }">
-                <span :style="{ marginLeft: '5px' }">{{ node.text }}</span>
-              </div>
+              <template #node="{node}">
+                <div
+                  :style="{ borderColor: nodeStyle[node.lot.level] ? nodeStyle[node.lot.level].backgroundColor : '#7F97FA' }"
+                  class="relation-graph-node"
+                >
+                  <template v-if="node.data.icon">
+                    <img
+                      v-if="node.data.icon.split('$$')[2]"
+                      :src="`/api/common-setting/v1/file/${node.data.icon.split('$$')[3]}`"
+                      class="relation-graph-node-image"
+                    />
+                    <ops-icon
+                      v-else
+                      :style="{ color: node.data.icon.split('$$')[1] }"
+                      :type="node.data.icon ? node.data.icon.split('$$')[0] : ''"
+                      class="relation-graph-node-icon"
+                    />
+                  </template>
+                  <span class="relation-graph-node-text">{{ node.text }}</span>
+                </div>
+              </template>
             </RelationGraph>
           </template>
         </div>
@@ -290,6 +329,7 @@ import { getSubscribeAttributes } from '@/modules/cmdb/api/preference'
 import { searchCI } from '@/modules/cmdb/api/ci'
 import { getTopoGroups, postTopoGroup, putTopoGroupByGId, putTopoGroupsOrder, deleteTopoGroup, getTopoView, addTopoView, updateTopoView, deleteTopoView, getRelationsByTypeId, previewTopoView, showTopoView } from '@/modules/cmdb/api/topology'
 import CMDBExprDrawer from '@/components/CMDBExprDrawer'
+import { v4 as uuidv4 } from 'uuid'
 
 const currentTopoKey = 'ops_cmdb_topo_currentId'
 export default {
@@ -326,6 +366,7 @@ export default {
     const graphOptions2 = {
       // ...defaultOptions,
       backgrounImageNoRepeat: true,
+      ovUseNodeSlot: true,
       placeOtherGroup: true,
       moveToCenterWhenRefresh: true,
       zoomToFitWhenRefresh: true,
@@ -339,10 +380,11 @@ export default {
       max_per_width: 200,
       min_per_height: 40,
       max_per_height: undefined,
-      defaultLineColor: '#CACDD9',
-      defaultNodeColor: '#29AAE1',
-      defaultNodeFontColor: '#ffffff',
-      defaultNodeBorderColor: '#b1c9ff',
+      backgroundColor: '#FFFFFF',
+      // defaultLineColor: '#CACDD9',
+      // defaultNodeColor: '#29AAE1',
+      // defaultNodeFontColor: '#ffffff',
+      // defaultNodeBorderColor: '#b1c9ff',
       defaultExpandHolderPosition: 'right',
       defaultJunctionPoint: 'lr',
       layouts: [
@@ -350,7 +392,7 @@ export default {
           layoutName: 'tree',
           from: 'left',
           layoutClassName: 'seeks-layout-center',
-          defaultExpandHolderPosition: 'hide',
+          defaultExpandHolderPosition: 'right',
           defaultJunctionPoint: 'border',
         },
       ],
@@ -411,6 +453,29 @@ export default {
 
       errorMessageShow: false,
       errorMessage: '',
+      nodeStyle: {
+        '0': {
+          backgroundColor: '#2F54EB'
+        },
+        '1': {
+          backgroundColor: '#29AAE1'
+        },
+        '2': {
+          backgroundColor: '#7F97FA'
+        },
+        '3': {
+          backgroundColor: '##75C5CA'
+        },
+        '4': {
+          backgroundColor: '#A699F6'
+        },
+        '5': {
+          backgroundColor: '#A4B5E1'
+        }
+      }, // 拓扑图节点分级别样式
+      topoViewJsonData: {}, // 拓扑图 JSON 数据
+      topoViewOption: {}, // 拓扑图配置数据 子节点分页
+      topoViewSearchValue: '', // 拓扑图搜索
     }
   },
   provide() {
@@ -484,6 +549,30 @@ export default {
           }
         : {}
     },
+  },
+  watch: {
+    '$i18n.locale': {
+      immediate: true,
+      handler(newVal) {
+        this.changeTopoViewToolbarLang(newVal)
+      },
+    },
+    isShowPreview: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal) {
+          this.changeTopoViewToolbarLang(this.$i18n.locale)
+        }
+      },
+    },
+    drawerVisible: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal) {
+          this.changeTopoViewToolbarLang(this.$i18n.locale)
+        }
+      },
+    }
   },
   methods: {
     closeNodeTips(e) {
@@ -578,7 +667,7 @@ export default {
         payload.view_ids = g.views.map(i => i.id)
       }
       if (groupId) {
-        putTopoGroupByGId(groupId, { view_ids: g.views.map((i) => i.id) })
+        putTopoGroupByGId(groupId, { view_ids: payload.view_ids })
         .then(() => {
           this.$message.success(that.$t('saveSuccess'))
         })
@@ -729,12 +818,21 @@ export default {
                 disableDefaultClickEffect: true,
               })
             })
+            const type2meta = res?.type2meta
             res.nodes.forEach(item => {
+              const icon = type2meta?.[item?.type_id] || ''
               nodes.push({
                 id: `${item.id}`,
                 text: item.name,
                 nodeShape: 1,
                 borderWidth: -1,
+                color: 'transparent',
+                styleClass: {
+                  padding: '0px'
+                },
+                data: {
+                  icon
+                },
                 disableDefaultClickEffect: true,
               })
             })
@@ -752,11 +850,15 @@ export default {
         }
       })
     },
-    showTopoView(viewId) {
+    async showTopoView(viewId) {
       if (viewId === 'null' || !viewId) {
         return
       }
-      showTopoView(viewId).then(res => {
+      const topoViewRes = await getTopoView(viewId)
+      if (topoViewRes?.option) {
+        this.topoViewOption = topoViewRes.option
+      }
+      showTopoView(viewId).then(async res => {
         const nodes = []
         const links = []
         this.currentNodes = res.nodes
@@ -768,11 +870,21 @@ export default {
             disableDefaultClickEffect: false,
           })
         })
+        const type2meta = res?.type2meta
         res.nodes.forEach(item => {
+          const icon = type2meta?.[item?.type_id] || ''
           nodes.push({
             id: `${item.id}`,
             text: item.name,
-            data: {},
+            color: 'transparent',
+            styleClass: {
+              padding: '0px'
+            },
+            data: {
+              icon
+            },
+            isHide: false,
+            opacity: 1,
           })
         })
         const _graphJsonData = {
@@ -783,11 +895,132 @@ export default {
           this.$message.error(this.$t('cmdb.topo.noData'))
           return
         }
-        // this.$nextTick(() => {
-        this.$refs.showTopoView.setJsonData(_graphJsonData)
-        // })
+        this.$refs.showTopoView.setJsonData(_.cloneDeep(_graphJsonData), async () => {
+          this.topoViewSearchValue = ''
+
+          // map 结构存储 节点
+          const nodeMap = _graphJsonData.nodes.reduce((map, node) => {
+            map.set(node.id, node)
+            return map
+          }, new Map())
+          _graphJsonData.nodes = nodeMap
+
+          if (this?.topoViewOption?.aggregation_count) {
+            const instance = this.$refs.showTopoView.getInstance()
+            const nodes = instance.getNodes()
+            const rootNodes = nodes.filter((node) => node.lot.level === 0)
+            rootNodes.forEach((node) => {
+              this.initMoreNodesData(node, _graphJsonData)
+            })
+
+            this.$refs.showTopoView.setJsonData(_.cloneDeep({
+              nodes: _graphJsonData.nodes.values(),
+              links: _graphJsonData.links
+            }))
+          }
+          this.topoViewJsonData = _graphJsonData
+          this.changeTopoViewToolbarLang(this.$i18n.locale)
+        })
       })
     },
+
+    /**
+     * 初始化子节点分页数据
+     */
+     initMoreNodesData(node, jsonData) {
+      const childs = node.lot.childs
+      // 没有子节点 终止遍历
+      if (!childs?.length) {
+        return
+      }
+
+      // 子节点分页数量
+      const aggregation_count = this?.topoViewOption?.aggregation_count || 1
+      // 展示节点数量
+      let showNodeCount = 0
+
+      childs.forEach((childNode, index) => {
+        if (childNode?.data?.btnType !== 'more') {
+          if (showNodeCount >= aggregation_count) {
+            const originNode = jsonData?.nodes?.get(childNode.id)
+            if (originNode) {
+              originNode.isHide = true
+            }
+          } else if (!childNode.isHide) {
+            showNodeCount++
+          }
+          this.initMoreNodesData(childNode, jsonData)
+        }
+      })
+
+      if (childs.length - showNodeCount > 0) {
+        const id = uuidv4()
+        jsonData.nodes.set(id, {
+          id,
+          text: `展示更多(${childs.length - showNodeCount})`,
+          data: {
+            btnType: 'more'
+          },
+          color: 'transparent',
+          styleClass: {
+            padding: '0px'
+          },
+        })
+
+        jsonData.links.push({
+          from: node.id,
+          to: id,
+        })
+      }
+    },
+
+    async clickMoreBtn(node) {
+      const childs = node?.lot?.parent?.lot?.childs
+      if (childs?.length) {
+        const topoViewJsonData = this.topoViewJsonData
+        let moreBtnNode = null
+        let showNodeCount = 0
+        let toggleNodeCount = 0
+        const aggregation_count = this?.topoViewOption?.aggregation_count || 1
+
+        childs.forEach((child) => {
+          if (!child.isHide) {
+            showNodeCount++
+          }
+
+          if (toggleNodeCount < aggregation_count && child.isHide) {
+            const childNode = topoViewJsonData?.nodes?.get(child.id)
+            if (childNode) {
+              childNode.isHide = false
+              toggleNodeCount++
+              showNodeCount++
+            }
+          }
+
+          if (child.data.btnType === 'more') {
+            moreBtnNode = topoViewJsonData?.nodes?.get(child.id)
+          }
+        })
+        if (moreBtnNode) {
+          if (showNodeCount === childs.length) {
+            moreBtnNode.isHide = true
+          } else {
+            moreBtnNode.text = `展示更多(${childs.length - showNodeCount})`
+          }
+        }
+
+        const instance = this.$refs.showTopoView.getInstance()
+        instance.setJsonData(
+          {
+            links: topoViewJsonData.links,
+            nodes: topoViewJsonData.nodes.values()
+          },
+          false
+        )
+        this.topoViewJsonData = topoViewJsonData
+      }
+    },
+
     handleOpenCmdb() {
       this.$refs.cmdbDrawer.open()
     },
@@ -921,9 +1154,16 @@ export default {
       }
     },
     async showNodeTips(nodeObject, $event) {
-      console.log('node click')
+      console.log('node click', nodeObject)
       $event.preventDefault()
       $event.stopPropagation()
+
+      const btnType = nodeObject?.data?.btnType
+      if (btnType === 'more') {
+        this.clickMoreBtn(nodeObject)
+        return
+      }
+
       const _base_position = this.$refs.showTopoView.getInstance().options.fullscreen ? { x: 0, y: 0 } : this.$refs.rightTopoView.getBoundingClientRect()
       if (this.currentNode !== nodeObject) {
         this.currentNodeValues = null
@@ -934,25 +1174,16 @@ export default {
           const [ attributes ] = await Promise.all([getSubscribeAttributes(rawNode.type_id)])
           this.currentNodeAttributes = attributes?.attributes || []
           if (!this.currentNodeAttributes.length) {
-            this.errorMessage = this.$t('cmdb.topo.noPreferenceAttributes')
-            this.errorMessageShow = true
-            this.currentNodeValues = null
-            this.isShowNodeTipsPanel = false
+            this.handleNullNodeTips(this.$t('cmdb.topo.noPreferenceAttributes'))
           }
           await searchCI({ q: `_id:${rawNode.id}` }, false).then(res => {
             if (!res.result.length) {
-              this.errorMessage = this.$t('cmdb.topo.noInstancePerm')
-              this.errorMessageShow = true
-              this.currentNodeValues = null
-              this.isShowNodeTipsPanel = false
+              this.handleNullNodeTips(this.$t('cmdb.topo.noInstancePerm'))
             } else {
               this.currentNodeValues = res.result[0]
             }
           }).catch(error => {
-            this.errorMessage = ((error.response || {}).data || {}).message
-            this.errorMessageShow = true
-            this.currentNodeValues = null
-            this.isShowNodeTipsPanel = false
+            this.handleNullNodeTips(((error.response || {}).data || {}).message)
           })
         }
       }
@@ -971,8 +1202,70 @@ export default {
       this.isShowNodeTipsPanel = true
       console.log(this.nodeTipsPosition)
     },
+
+    handleNullNodeTips(errorMessage) {
+      this.errorMessage = errorMessage
+      this.errorMessageShow = true
+      this.currentNodeValues = null
+      this.isShowNodeTipsPanel = false
+      this.currentNode = {}
+    },
+
     hideNodeTips(nodeObject, $event) {
       this.isShowNodeTipsPanel = false
+    },
+
+    handleSearchTopoView(v) {
+      const topoViewJsonData = this.topoViewJsonData
+      topoViewJsonData.nodes.keys().forEach((key) => {
+        const node = topoViewJsonData?.nodes?.get(key)
+        if (node?.data?.btnType !== 'more') {
+          node.opacity = node?.text?.indexOf(v) !== -1 ? 1 : 0.1
+        }
+      })
+      const instance = this.$refs.showTopoView.getInstance()
+      instance.setJsonData(
+        {
+          links: topoViewJsonData.links,
+          nodes: topoViewJsonData.nodes.values()
+        },
+        false
+      )
+      this.topoViewJsonData = topoViewJsonData
+    },
+
+    changeTopoViewToolbarLang(lang) {
+      setTimeout(() => {
+        const toolbarElements = document.getElementsByClassName('rel-toolbar')
+        const zhlangMap = {
+          '全屏/退出全屏': 'Full Screen/Exit Full Screen',
+          '放大': 'zoom in',
+          '缩小': 'zoom out',
+          '刷新': 'refresh ',
+          '下载图片': 'download image'
+        }
+        const enlangMap = {
+          'Full Screen/Exit Full Screen': '全屏/退出全屏',
+          'zoom in': '放大',
+          'zoom out': '缩小',
+          'refresh': '刷新 ',
+          'download image': '下载图片'
+        }
+
+        toolbarElements.forEach((toolbarElement) => {
+          if (toolbarElement?.children?.length) {
+            toolbarElement.children.forEach((node) => {
+              const oldTitle = node?.getAttribute('title')
+              if (oldTitle) {
+                const newTitle = lang === 'en' ? zhlangMap[oldTitle] : enlangMap[oldTitle]
+                if (newTitle) {
+                  node.setAttribute('title', newTitle)
+                }
+              }
+            })
+          }
+        })
+      }, 300)
     },
   },
 }
@@ -1098,6 +1391,14 @@ export default {
       top: 40%;
       transform: translate(-50%, -50%);
     }
+
+    .relation-graph-search {
+      position: absolute;
+      z-index: 10;
+      top: 20px;
+      left: 20px;
+      width: 300px;
+    }
   }
   .topo-left,
   .topo-right {
@@ -1131,6 +1432,54 @@ export default {
     padding: 6px 12px;
     height: 250px;
     border-radius: 8px;
+  }
+}
+
+.relation-graph-node {
+  padding: 6px 3px;
+  border-radius: 2px;
+  border-width: 2px;
+  border-style: solid;
+  background-color: transparent;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &-text {
+    color: #000000;
+    font-size: 12px;
+    font-weight: 400;
+    margin-left: 6px;
+    word-break: break-all;
+  }
+
+  &-icon {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.65);
+  }
+
+  &-image {
+    max-height: 20px;
+    max-width: 20px;
+  }
+}
+
+/deep/ .relation-graph {
+  background-color: #FFFFFF;
+
+  .rel-node {
+    padding: 0px;
+    height: auto !important;
+  }
+  .rel-node-checked {
+    box-shadow: none;
+  }
+  .c-expanded {
+    background-color: rgb(64, 158, 255) !important;
+  }
+  .c-collapsed {
+    background-color: rgb(64, 158, 255) !important;
   }
 }
 </style>
