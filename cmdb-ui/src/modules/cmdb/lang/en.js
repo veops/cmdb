@@ -589,6 +589,7 @@ if __name__ == "__main__":
         confirmDeleteView: 'Are you sure you want to delete this view ?',
         noInstancePerm: 'You do not have read permissions for this instance',
         noPreferenceAttributes: 'This instance has no subscription attributes or no default displayed attributes',
+        topoViewSearchPlaceholder: 'Please enter the node name.'
     },
 }
 export default cmdb_en
