@@ -220,7 +220,9 @@ export default {
       this.queryParam = {}
       this.expression = ''
       this.fuzzySearch = ''
-      this.currenCiType = []
+      if (this.type !== 'resourceView') {
+        this.currenCiType = []
+      }
       this.emitRefresh()
     },
     setExpFromFilter(filterExp) {
