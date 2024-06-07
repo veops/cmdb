@@ -180,6 +180,10 @@ export default {
           label: this.$t('cmdb.ciType.isIndex'),
           property: 'is_index',
         },
+        {
+          label: this.$t('cmdb.ciType.isDynamic'),
+          property: 'is_dynamic',
+        },
       ]
     },
     inherited() {

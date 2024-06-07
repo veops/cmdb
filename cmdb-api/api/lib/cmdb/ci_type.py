@@ -856,7 +856,9 @@ class CITypeRelationManager(object):
         if ci_type is None:
             return nodes, edges
 
-        nodes.append(ci_type.to_dict())
+        ci_type_dict = ci_type.to_dict()
+        ci_type_dict.setdefault('level', [0])
+        nodes.append(ci_type_dict)
         node_ids.add(ci_type.id)
 
         def _find(_id, lv):

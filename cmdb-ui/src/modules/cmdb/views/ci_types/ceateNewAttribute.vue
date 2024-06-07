@@ -150,42 +150,19 @@
       </a-col>
     </a-row>
 
-    <a-col :span="6">
+    <a-col :span="currentValueType === '2' ? 6 : 0" v-if="currentValueType !== '6'">
       <a-form-item
+        :hidden="currentValueType === '2' ? false : true"
         :label-col="horizontalFormItemLayout.labelCol"
         :wrapper-col="horizontalFormItemLayout.wrapperCol"
-        :label="$t('required')"
       >
-        <a-switch
-          @change="(checked) => onChange(checked, 'is_required')"
-          name="is_required"
-          v-decorator="['is_required', { rules: [], valuePropName: 'checked' }]"
-        />
-      </a-form-item>
-    </a-col>
-    <a-col :span="6" v-if="currentValueType !== '6' && currentValueType !== '7'">
-      <a-form-item
-        :label-col="{ span: 8 }"
-        :wrapper-col="horizontalFormItemLayout.wrapperCol"
-        :label="$t('cmdb.ciType.unique')"
-      >
-        <a-switch
-          :disabled="isShowComputedArea"
-          @change="onChange"
-          name="is_unique"
-          v-decorator="['is_unique', { rules: [], valuePropName: 'checked' }]"
-        />
-      </a-form-item>
-    </a-col>
-    <a-col :span="6" v-if="currentValueType === '2'">
-      <a-form-item :label-col="horizontalFormItemLayout.labelCol" :wrapper-col="horizontalFormItemLayout.wrapperCol">
         <template slot="label">
           <span
             style="position:relative;white-space:pre;"
           >{{ $t('cmdb.ciType.index') }}
             <a-tooltip :title="$t('cmdb.ciType.indexTips')">
               <a-icon
-                style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
+                style="position:absolute;top:2px;left:-17px;color:#2f54eb;"
                 type="question-circle"
                 theme="filled"
                 @click="
@@ -206,9 +183,36 @@
         />
       </a-form-item>
     </a-col>
-    <a-col :span="6">
+    <a-col :span="6" v-if="currentValueType !== '6' && currentValueType !== '7'">
       <a-form-item
         :label-col="currentValueType === '2' ? { span: 8 } : horizontalFormItemLayout.labelCol"
+        :wrapper-col="horizontalFormItemLayout.wrapperCol"
+        :label="$t('cmdb.ciType.unique')"
+      >
+        <a-switch
+          :disabled="isShowComputedArea"
+          @change="onChange"
+          name="is_unique"
+          v-decorator="['is_unique', { rules: [], valuePropName: 'checked' }]"
+        />
+      </a-form-item>
+    </a-col>
+    <a-col :span="6">
+      <a-form-item
+        :label-col="['2', '6', '7'].findIndex(i => currentValueType === i) === -1 ? { span: 8 } : horizontalFormItemLayout.labelCol"
+        :wrapper-col="horizontalFormItemLayout.wrapperCol"
+        :label="$t('required')"
+      >
+        <a-switch
+          @change="(checked) => onChange(checked, 'is_required')"
+          name="is_required"
+          v-decorator="['is_required', { rules: [], valuePropName: 'checked' }]"
+        />
+      </a-form-item>
+    </a-col>
+    <a-col :span="6">
+      <a-form-item
+        :label-col="currentValueType === '2' ? { span: 12 } : horizontalFormItemLayout.labelCol"
         :wrapper-col="horizontalFormItemLayout.wrapperCol"
       >
         <template slot="label">
@@ -217,7 +221,7 @@
           >{{ $t('cmdb.ciType.defaultShow') }}
             <a-tooltip :title="$t('cmdb.ciType.defaultShowTips')">
               <a-icon
-                style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
+                style="position:absolute;top:2px;left:-17px;color:#2f54eb;"
                 type="question-circle"
                 theme="filled"
                 @click="
@@ -281,6 +285,37 @@
           @change="(checked) => onChange(checked, 'is_list')"
           name="is_list"
           v-decorator="['is_list', { rules: [], valuePropName: 'checked' }]"
+        />
+      </a-form-item>
+    </a-col>
+    <a-col span="6">
+      <a-form-item
+        :label-col="['2', '6', '7'].findIndex(i => currentValueType === i) === -1 ? { span: 12 } : horizontalFormItemLayout.labelCol"
+        :wrapper-col="horizontalFormItemLayout.wrapperCol"
+      >
+        <template slot="label">
+          <span
+            style="position:relative;white-space:pre;"
+          >{{ $t('cmdb.ciType.isDynamic') }}
+            <a-tooltip :title="$t('cmdb.ciType.dynamicTips')">
+              <a-icon
+                style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
+                type="question-circle"
+                theme="filled"
+                @click="
+                  (e) => {
+                  e.stopPropagation()
+                    e.preventDefault()
+                  }
+                "
+              />
+            </a-tooltip>
+          </span>
+        </template>
+        <a-switch
+          @change="(checked) => onChange(checked, 'is_dynamic')"
+          name="is_dynamic"
+          v-decorator="['is_dynamic', { rules: [], valuePropName: 'checked', initialValue: currentValueType === '6' ? true: false }]"
         />
       </a-form-item>
     </a-col>
@@ -404,8 +439,8 @@ export default {
           }
 
           console.log(values)
-          const { is_required, default_show, default_value } = values
-          const data = { is_required, default_show }
+          const { is_required, default_show, default_value, is_dynamic } = values
+          const data = { is_required, default_show, is_dynamic }
           delete values.is_required
           delete values.default_show
           if (values.value_type === '0' && default_value) {

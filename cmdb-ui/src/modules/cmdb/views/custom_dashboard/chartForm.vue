@@ -91,7 +91,7 @@
               show-search
             >
               <a-select-option
-                v-for="attr in commonAttributes.filter((attr) => !attr.is_password)"
+                v-for="attr in commonAttributes.filter((attr) => !attr.is_password && attr.value_type !== '6')"
                 :key="attr.id"
                 :value="attr.id"
               >{{ attr.alias || attr.name }}</a-select-option

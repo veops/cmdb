@@ -104,6 +104,7 @@ class Attribute(Model):
     is_link = db.Column(db.Boolean, default=False)
     is_password = db.Column(db.Boolean, default=False)
     is_sortable = db.Column(db.Boolean, default=False)
+    is_dynamic = db.Column(db.Boolean, default=False)
 
     default = db.Column(db.JSON)  # {"default": None}
 

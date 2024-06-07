@@ -78,7 +78,7 @@ const cmdb_zh = {
         password: '密码',
         link: '链接',
         list: '多值',
-        listTips: '字段的值是1个或者多个，接口返回的值的类型是list',
+        listTips: '属性的值是1个或者多个，接口返回的值的类型是list',
         computeForAllCITips: '所有CI触发计算',
         confirmcomputeForAllCITips: '确认触发所有CI的计算？',
         isUnique: '是否唯一',
@@ -89,7 +89,7 @@ const cmdb_zh = {
         isSortable: '可排序',
         isIndex: '是否索引',
         index: '索引',
-        indexTips: '字段可被用于检索，加速查询',
+        indexTips: '属性可被用于全文检索，加速查询',
         confirmDelete: '确认删除【{name}】?',
         confirmDelete2: '确认删除?',
         computeSuccess: '触发成功！',
@@ -200,7 +200,9 @@ const cmdb_zh = {
         show: '展示属性',
         setAsShow: '设置为展示属性',
         cancelSetAsShow: '取消设置为展示属性',
-        showTips: '服务树和拓扑视图里节点的名称'
+        showTips: '服务树和拓扑视图里节点的名称',
+        isDynamic: '动态属性',
+        dynamicTips: '譬如监控类的数据, 频繁更新的数据, 建议设置为动态属性, 则不会记录该属性的变更历史',
     },
     components: {
         unselectAttributes: '未选属性',
@@ -538,7 +540,7 @@ if __name__ == "__main__":
         rollbackSuccess: '回滚成功',
         rollbackingTips: '正在批量回滚中',
         batchRollbacking: '正在回滚，共{total}个，成功{successNum}个，失败{errorNum}个',
-        baselineTips: '该时间点的变更也会被回滚, 唯一标识、密码属性不支持回滚',
+        baselineTips: '该时间点的变更也会被回滚, 唯一标识、密码属性、动态属性不支持回滚',
     },
     serviceTree: {
         remove: '移除',

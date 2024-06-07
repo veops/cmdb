@@ -51,12 +51,12 @@ def _auth_with_key():
     user, authenticated = User.query.authenticate_with_key(key, secret, req_args, path)
     if user and authenticated:
         login_user(user)
-        reset_session(user)
+        # reset_session(user)
         return True
 
     role, authenticated = Role.query.authenticate_with_key(key, secret, req_args, path)
     if role and authenticated:
-        reset_session(None, role=role.name)
+        # reset_session(None, role=role.name)
         return True
 
     return False

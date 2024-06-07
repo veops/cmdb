@@ -172,6 +172,7 @@ class TopologyViewManager(object):
         _type = CITypeCache.get(central_node_type)
         if not _type:
             return dict(nodes=nodes, links=links)
+        type2meta = {_type.id: _type.icon}
         root_ids = []
         show_key = AttributeCache.get(_type.show_id or _type.unique_id)
 
@@ -192,7 +193,6 @@ class TopologyViewManager(object):
         prefix = REDIS_PREFIX_CI_RELATION
         key = list(map(str, root_ids))
         id2node = {}
-        type2meta = {}
         for level in sorted([i for i in path.keys() if int(i) > 0]):
             type_ids = {int(i) for i in path[level]}
 
