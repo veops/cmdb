@@ -266,6 +266,7 @@ class AttributeValueManager(object):
         :return:
         """
         changed = []
+        has_dynamic = False
         for key, value in ci_dict.items():
             attr = key2attr.get(key)
             if not attr:
@@ -289,10 +290,16 @@ class AttributeValueManager(object):
                 for idx in range(index, len(existed_attrs)):
                     existed_attr = existed_attrs[idx]
                     existed_attr.delete(flush=False, commit=False)
-                    changed.append((ci.id, attr.id, OperateType.DELETE, existed_values[idx], None, ci.type_id))
+                    if not attr.is_dynamic:
+                        changed.append((ci.id, attr.id, OperateType.DELETE, existed_values[idx], None, ci.type_id))
+                    else:
+                        has_dynamic = True
                 for idx in range(index, len(value)):
                     value_table.create(ci_id=ci.id, attr_id=attr.id, value=value[idx], flush=False, commit=False)
-                    changed.append((ci.id, attr.id, OperateType.ADD, None, value[idx], ci.type_id))
+                    if not attr.is_dynamic:
+                        changed.append((ci.id, attr.id, OperateType.ADD, None, value[idx], ci.type_id))
+                    else:
+                        has_dynamic = True
             else:
                 existed_attr = value_table.get_by(attr_id=attr.id, ci_id=ci.id, first=True, to_dict=False)
                 existed_value = existed_attr and existed_attr.value
@@ -301,7 +308,10 @@ class AttributeValueManager(object):
                 if existed_value is None and value is not None:
                     value_table.create(ci_id=ci.id, attr_id=attr.id, value=value, flush=False, commit=False)
 
-                    changed.append((ci.id, attr.id, OperateType.ADD, None, value, ci.type_id))
+                    if not attr.is_dynamic:
+                        changed.append((ci.id, attr.id, OperateType.ADD, None, value, ci.type_id))
+                    else:
+                        has_dynamic = True
                 else:
                     if existed_value != value and existed_attr:
                         if value is None:
@@ -309,16 +319,22 @@ class AttributeValueManager(object):
                         else:
                             existed_attr.update(value=value, flush=False, commit=False)
 
-                        changed.append((ci.id, attr.id, OperateType.UPDATE, existed_value, value, ci.type_id))
+                        if not attr.is_dynamic:
+                            changed.append((ci.id, attr.id, OperateType.UPDATE, existed_value, value, ci.type_id))
+                        else:
+                            has_dynamic = True
 
-        try:
-            db.session.commit()
-        except Exception as e:
-            db.session.rollback()
-            current_app.logger.warning(str(e))
-            return abort(400, ErrFormat.attribute_value_unknown_error.format(e.args[0]))
+        if changed or has_dynamic:
+            try:
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                current_app.logger.warning(str(e))
+                return abort(400, ErrFormat.attribute_value_unknown_error.format(e.args[0]))
 
-        return self.write_change2(changed, ticket_id=ticket_id)
+            return self.write_change2(changed, ticket_id=ticket_id), has_dynamic
+        else:
+            return None, has_dynamic
 
     @staticmethod
     def delete_attr_value(attr_id, ci_id, commit=True):
