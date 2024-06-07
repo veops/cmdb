@@ -163,6 +163,12 @@ export default {
           width: 110,
           help: this.$t('cmdb.ci.tips10'),
         },
+        {
+          field: 'is_dynamic',
+          title: this.$t('cmdb.ciType.isDynamic'),
+          width: 110,
+          help: this.$t('cmdb.ciType.dynamicTips'),
+        },
       ]
     },
   },

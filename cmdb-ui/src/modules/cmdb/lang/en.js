@@ -200,7 +200,9 @@ const cmdb_en = {
         show: 'show attribute',
         setAsShow: 'Set as show attribute',
         cancelSetAsShow: 'Cancel show attribute',
-        showTips: 'The names of nodes in the service tree and topology view'
+        showTips: 'The names of nodes in the service tree and topology view',
+        isDynamic: 'Dynamic',
+        dynamicTips: 'For example, for monitoring data and frequently updated data, it is recommended to set it as a dynamic attribute, so that the change history of the attribute will not be recorded.',
     },
     components: {
         unselectAttributes: 'Unselected',
@@ -538,7 +540,7 @@ if __name__ == "__main__":
         rollbackSuccess: 'Rollback successfully',
         rollbackingTips: 'Rollbacking',
         batchRollbacking: 'Deleting {total} items in total, {successNum} items successful, {errorNum} items failed',
-        baselineTips: 'Changes at this point in time will also be rollbacked, Unique ID and password attributes do not support',
+        baselineTips: 'Changes at this point in time will also be rollbacked, Unique ID, password and dynamic attributes do not support',
     },
     serviceTree: {
         remove: 'Remove',

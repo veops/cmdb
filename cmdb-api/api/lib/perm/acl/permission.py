@@ -79,7 +79,8 @@ class PermissionCRUD(object):
         return r and cls.get_all(r.id)
 
     @staticmethod
-    def grant(rid, perms, resource_id=None, group_id=None, rebuild=True, source=AuditOperateSource.acl):
+    def grant(rid, perms, resource_id=None, group_id=None, rebuild=True,
+              source=AuditOperateSource.acl, force_update=False):
         app_id = None
         rt_id = None
 
@@ -106,8 +107,23 @@ class PermissionCRUD(object):
             if not perms:
                 perms = [i.get('name') for i in ResourceTypeCRUD.get_perms(group.resource_type_id)]
 
-        _role_permissions = []
+        if force_update:
+            revoke_role_permissions = []
+            existed_perms = RolePermission.get_by(rid=rid,
+                                                  app_id=app_id,
+                                                  group_id=group_id,
+                                                  resource_id=resource_id,
+                                                  to_dict=False)
+            for role_perm in existed_perms:
+                perm = PermissionCache.get(role_perm.perm_id, rt_id)
+                if perm and perm.name not in perms:
+                    role_perm.soft_delete()
+                    revoke_role_permissions.append(role_perm)
 
+            AuditCRUD.add_permission_log(app_id, AuditOperateType.revoke, rid, rt_id,
+                                         revoke_role_permissions, source=source)
+
+        _role_permissions = []
         for _perm in set(perms):
             perm = PermissionCache.get(_perm, rt_id)
             if not perm:

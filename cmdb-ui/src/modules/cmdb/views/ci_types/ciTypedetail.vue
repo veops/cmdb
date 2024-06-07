@@ -7,14 +7,14 @@
       <a-tab-pane key="2" :tab="$t('cmdb.ciType.relation')">
         <RelationTable :CITypeId="CITypeId" :CITypeName="CITypeName"></RelationTable>
       </a-tab-pane>
-      <a-tab-pane key="3" :tab="$t('cmdb.ciType.trigger')">
-        <TriggerTable ref="triggerTable" :CITypeId="CITypeId"></TriggerTable>
-      </a-tab-pane>
-      <a-tab-pane key="4" :tab="$t('cmdb.ciType.attributeAD')">
+      <a-tab-pane key="3" :tab="$t('cmdb.ciType.attributeAD')">
         <AttrAD :CITypeId="CITypeId"></AttrAD>
       </a-tab-pane>
-      <a-tab-pane key="5" :tab="$t('cmdb.ciType.relationAD')">
+      <a-tab-pane key="4" :tab="$t('cmdb.ciType.relationAD')">
         <RelationAD :CITypeId="CITypeId"></RelationAD>
+      </a-tab-pane>
+      <a-tab-pane key="5" :tab="$t('cmdb.ciType.trigger')">
+        <TriggerTable ref="triggerTable" :CITypeId="CITypeId"></TriggerTable>
       </a-tab-pane>
       <a-tab-pane key="6" :tab="$t('cmdb.ciType.grant')">
         <GrantComp :CITypeId="CITypeId" resourceType="CIType" :resourceTypeName="CITypeName"></GrantComp>
@@ -67,7 +67,7 @@ export default {
         if (activeKey === '1') {
           this.$refs.attributesTable.getCITypeGroupData()
         }
-        if (activeKey === '3') {
+        if (activeKey === '5') {
           this.$refs.triggerTable.getTableData()
         }
       })
