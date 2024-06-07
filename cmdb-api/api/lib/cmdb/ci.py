@@ -383,12 +383,12 @@ class CIManager(object):
                     computed_attrs.append(attr.to_dict())
                 elif attr.is_password:
                     if attr.name in ci_dict:
-                        password_dict[attr.id] = ci_dict.pop(attr.name)
+                        password_dict[attr.id] = (ci_dict.pop(attr.name), attr.is_dynamic)
                     elif attr.alias in ci_dict:
-                        password_dict[attr.id] = ci_dict.pop(attr.alias)
+                        password_dict[attr.id] = (ci_dict.pop(attr.alias), attr.is_dynamic)
 
                     if attr.re_check and password_dict.get(attr.id):
-                        value_manager.check_re(attr.re_check, password_dict[attr.id])
+                        value_manager.check_re(attr.re_check, password_dict[attr.id][0])
 
             if computed_attrs:
                 value_manager.handle_ci_compute_attributes(ci_dict, computed_attrs, ci)
@@ -421,7 +421,8 @@ class CIManager(object):
             operate_type = OperateType.UPDATE if ci is not None else OperateType.ADD
             try:
                 ci = ci or CI.create(type_id=ci_type.id, is_auto_discovery=is_auto_discovery)
-                record_id = value_manager.create_or_update_attr_value(ci, ci_dict, key2attr, ticket_id=ticket_id)
+                record_id, has_dynamic = value_manager.create_or_update_attr_value(
+                    ci, ci_dict, key2attr, ticket_id=ticket_id)
             except BadRequest as e:
                 if existed is None:
                     cls.delete(ci.id)
@@ -431,7 +432,7 @@ class CIManager(object):
             for attr_id in password_dict:
                 record_id = cls.save_password(ci.id, attr_id, password_dict[attr_id], record_id, ci_type.id)
 
-        if record_id:  # has change
+        if record_id or has_dynamic:  # has change
             ci_cache.apply_async(args=(ci.id, operate_type, record_id), queue=CMDB_QUEUE)
 
         if ref_ci_dict:  # add relations
@@ -440,7 +441,6 @@ class CIManager(object):
         return ci.id
 
     def update(self, ci_id, _is_admin=False, ticket_id=None, __sync=False, **ci_dict):
-        current_app.logger.info((ci_id, ci_dict, __sync))
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ci = self.confirm_ci_existed(ci_id)
 
@@ -465,12 +465,12 @@ class CIManager(object):
                 computed_attrs.append(attr.to_dict())
             elif attr.is_password:
                 if attr.name in ci_dict:
-                    password_dict[attr.id] = ci_dict.pop(attr.name)
+                    password_dict[attr.id] = (ci_dict.pop(attr.name), attr.is_dynamic)
                 elif attr.alias in ci_dict:
-                    password_dict[attr.id] = ci_dict.pop(attr.alias)
+                    password_dict[attr.id] = (ci_dict.pop(attr.alias), attr.is_dynamic)
 
                 if attr.re_check and password_dict.get(attr.id):
-                    value_manager.check_re(attr.re_check, password_dict[attr.id])
+                    value_manager.check_re(attr.re_check, password_dict[attr.id][0])
 
         if computed_attrs:
             value_manager.handle_ci_compute_attributes(ci_dict, computed_attrs, ci)
@@ -495,7 +495,8 @@ class CIManager(object):
                             ci_dict.pop(k)
 
             try:
-                record_id = value_manager.create_or_update_attr_value(ci, ci_dict, key2attr, ticket_id=ticket_id)
+                record_id, has_dynamic = value_manager.create_or_update_attr_value(
+                    ci, ci_dict, key2attr, ticket_id=ticket_id)
             except BadRequest as e:
                 raise e
 
@@ -503,25 +504,25 @@ class CIManager(object):
             for attr_id in password_dict:
                 record_id = self.save_password(ci.id, attr_id, password_dict[attr_id], record_id, ci.type_id)
 
-        if record_id:  # has change
+        if record_id or has_dynamic:  # has change
             if not __sync:
                 ci_cache.apply_async(args=(ci_id, OperateType.UPDATE, record_id), queue=CMDB_QUEUE)
             else:
-                ci_cache((ci_id, OperateType.UPDATE, record_id))
+                ci_cache(ci_id, OperateType.UPDATE, record_id)
 
         ref_ci_dict = {k: v for k, v in ci_dict.items() if k.startswith("$") and "." in k}
         if ref_ci_dict:
             if not __sync:
                 ci_relation_add.apply_async(args=(ref_ci_dict, ci.id), queue=CMDB_QUEUE)
             else:
-                ci_relation_add((ref_ci_dict, ci.id))
+                ci_relation_add(ref_ci_dict, ci.id)
 
     @staticmethod
     def update_unique_value(ci_id, unique_name, unique_value):
         ci = CI.get_by_id(ci_id) or abort(404, ErrFormat.ci_not_found.format("id={}".format(ci_id)))
 
         key2attr = {unique_name: AttributeCache.get(unique_name)}
-        record_id = AttributeValueManager().create_or_update_attr_value(ci, {unique_name: unique_value}, key2attr)
+        record_id, _ = AttributeValueManager().create_or_update_attr_value(ci, {unique_name: unique_value}, key2attr)
 
         ci_cache.apply_async(args=(ci_id, OperateType.UPDATE, record_id), queue=CMDB_QUEUE)
 
@@ -761,6 +762,7 @@ class CIManager(object):
 
     @classmethod
     def save_password(cls, ci_id, attr_id, value, record_id, type_id):
+        value, is_dynamic = value
         changed = None
         encrypt_value = None
         value_table = ValueTypeMap.table[ValueTypeEnum.PASSWORD]
@@ -777,14 +779,18 @@ class CIManager(object):
         if existed is None:
             if value:
                 value_table.create(ci_id=ci_id, attr_id=attr_id, value=encrypt_value)
-                changed = [(ci_id, attr_id, OperateType.ADD, '', PASSWORD_DEFAULT_SHOW, type_id)]
+                if not is_dynamic:
+                    changed = [(ci_id, attr_id, OperateType.ADD, '', PASSWORD_DEFAULT_SHOW, type_id)]
         elif existed.value != encrypt_value:
             if value:
                 existed.update(ci_id=ci_id, attr_id=attr_id, value=encrypt_value)
-                changed = [(ci_id, attr_id, OperateType.UPDATE, PASSWORD_DEFAULT_SHOW, PASSWORD_DEFAULT_SHOW, type_id)]
+                if not is_dynamic:
+                    changed = [(ci_id, attr_id, OperateType.UPDATE, PASSWORD_DEFAULT_SHOW,
+                                PASSWORD_DEFAULT_SHOW, type_id)]
             else:
                 existed.delete()
-                changed = [(ci_id, attr_id, OperateType.DELETE, PASSWORD_DEFAULT_SHOW, '', type_id)]
+                if not is_dynamic:
+                    changed = [(ci_id, attr_id, OperateType.DELETE, PASSWORD_DEFAULT_SHOW, '', type_id)]
 
         if current_app.config.get('SECRETS_ENGINE') == 'vault':
             vault = VaultClient(current_app.config.get('VAULT_URL'), current_app.config.get('VAULT_TOKEN'))
