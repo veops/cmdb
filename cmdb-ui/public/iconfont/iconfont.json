@@ -6,6 +6,279 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "40645466",
+      "name": "ops-is_dynamic-disabled",
+      "font_class": "ops-is_dynamic-disabled",
+      "unicode": "e952",
+      "unicode_decimal": 59730
+    },
+    {
+      "icon_id": "40590472",
+      "name": "itsm-pdf",
+      "font_class": "itsm-pdf",
+      "unicode": "e951",
+      "unicode_decimal": 59729
+    },
+    {
+      "icon_id": "40552176",
+      "name": "monitor-sqlserver",
+      "font_class": "monitor-sqlserver",
+      "unicode": "e950",
+      "unicode_decimal": 59728
+    },
+    {
+      "icon_id": "40548499",
+      "name": "monitor-dig",
+      "font_class": "monitor-dig2",
+      "unicode": "e94d",
+      "unicode_decimal": 59725
+    },
+    {
+      "icon_id": "40548507",
+      "name": "monitor-base",
+      "font_class": "monitor-base2",
+      "unicode": "e94e",
+      "unicode_decimal": 59726
+    },
+    {
+      "icon_id": "40548498",
+      "name": "monitor-foreground",
+      "font_class": "monitor-foreground1",
+      "unicode": "e94f",
+      "unicode_decimal": 59727
+    },
+    {
+      "icon_id": "40548504",
+      "name": "monitor-log",
+      "font_class": "monitor-log2",
+      "unicode": "e945",
+      "unicode_decimal": 59717
+    },
+    {
+      "icon_id": "40548508",
+      "name": "monitor-backgroud",
+      "font_class": "monitor-backgroud1",
+      "unicode": "e946",
+      "unicode_decimal": 59718
+    },
+    {
+      "icon_id": "40548502",
+      "name": "monitor-port",
+      "font_class": "monitor-port1",
+      "unicode": "e947",
+      "unicode_decimal": 59719
+    },
+    {
+      "icon_id": "40548501",
+      "name": "monitor-ipmi",
+      "font_class": "monitor-ipmi2",
+      "unicode": "e948",
+      "unicode_decimal": 59720
+    },
+    {
+      "icon_id": "40548511",
+      "name": "monitor-process",
+      "font_class": "monitor-process2",
+      "unicode": "e949",
+      "unicode_decimal": 59721
+    },
+    {
+      "icon_id": "40548506",
+      "name": "monitor-snmp",
+      "font_class": "monitor-snmp2",
+      "unicode": "e94a",
+      "unicode_decimal": 59722
+    },
+    {
+      "icon_id": "40548500",
+      "name": "monitor-performance",
+      "font_class": "monitor-performance1",
+      "unicode": "e94b",
+      "unicode_decimal": 59723
+    },
+    {
+      "icon_id": "40548510",
+      "name": "monitor-testing",
+      "font_class": "monitor-testing1",
+      "unicode": "e94c",
+      "unicode_decimal": 59724
+    },
+    {
+      "icon_id": "40548503",
+      "name": "monitor-ping",
+      "font_class": "monitor-ping2",
+      "unicode": "e941",
+      "unicode_decimal": 59713
+    },
+    {
+      "icon_id": "40548509",
+      "name": "monitor-prometheus",
+      "font_class": "monitor-prometheus",
+      "unicode": "e942",
+      "unicode_decimal": 59714
+    },
+    {
+      "icon_id": "40548505",
+      "name": "monitor-websocket",
+      "font_class": "monitor-websocket2",
+      "unicode": "e943",
+      "unicode_decimal": 59715
+    },
+    {
+      "icon_id": "40548512",
+      "name": "monitor-traceroute",
+      "font_class": "monitor-traceroute2",
+      "unicode": "e944",
+      "unicode_decimal": 59716
+    },
+    {
+      "icon_id": "40548205",
+      "name": "monitor-port",
+      "font_class": "monitor-port",
+      "unicode": "e93c",
+      "unicode_decimal": 59708
+    },
+    {
+      "icon_id": "40548204",
+      "name": "monitor-base",
+      "font_class": "monitor-base1",
+      "unicode": "e93d",
+      "unicode_decimal": 59709
+    },
+    {
+      "icon_id": "40548203",
+      "name": "monitor-backgroud",
+      "font_class": "monitor-backgroud",
+      "unicode": "e93e",
+      "unicode_decimal": 59710
+    },
+    {
+      "icon_id": "40548202",
+      "name": "monitor-dig",
+      "font_class": "monitor-dig1",
+      "unicode": "e93f",
+      "unicode_decimal": 59711
+    },
+    {
+      "icon_id": "40548201",
+      "name": "monitor-foreground",
+      "font_class": "monitor-foreground",
+      "unicode": "e940",
+      "unicode_decimal": 59712
+    },
+    {
+      "icon_id": "40548213",
+      "name": "monitor-log",
+      "font_class": "monitor-log1",
+      "unicode": "e934",
+      "unicode_decimal": 59700
+    },
+    {
+      "icon_id": "40548212",
+      "name": "monitor-process",
+      "font_class": "monitor-process1",
+      "unicode": "e935",
+      "unicode_decimal": 59701
+    },
+    {
+      "icon_id": "40548211",
+      "name": "monitor-testing",
+      "font_class": "monitor-testing",
+      "unicode": "e936",
+      "unicode_decimal": 59702
+    },
+    {
+      "icon_id": "40548210",
+      "name": "monitor-snmp",
+      "font_class": "monitor-snmp1",
+      "unicode": "e937",
+      "unicode_decimal": 59703
+    },
+    {
+      "icon_id": "40548209",
+      "name": "monitor-performance",
+      "font_class": "monitor-performance",
+      "unicode": "e938",
+      "unicode_decimal": 59704
+    },
+    {
+      "icon_id": "40548208",
+      "name": "monitor-traceroute",
+      "font_class": "monitor-traceroute1",
+      "unicode": "e939",
+      "unicode_decimal": 59705
+    },
+    {
+      "icon_id": "40548207",
+      "name": "monitor-ping",
+      "font_class": "monitor-ping1",
+      "unicode": "e93a",
+      "unicode_decimal": 59706
+    },
+    {
+      "icon_id": "40548206",
+      "name": "monitor-ipmi",
+      "font_class": "monitor-ipmi1",
+      "unicode": "e93b",
+      "unicode_decimal": 59707
+    },
+    {
+      "icon_id": "40548217",
+      "name": "monitor-prometheus (1)",
+      "font_class": "a-monitor-prometheus1",
+      "unicode": "e932",
+      "unicode_decimal": 59698
+    },
+    {
+      "icon_id": "40548214",
+      "name": "monitor-websocket",
+      "font_class": "monitor-websocket1",
+      "unicode": "e933",
+      "unicode_decimal": 59699
+    },
+    {
+      "icon_id": "40521692",
+      "name": "monitor-group_expansion",
+      "font_class": "monitor-group_expansion1",
+      "unicode": "e930",
+      "unicode_decimal": 59696
+    },
+    {
+      "icon_id": "40521691",
+      "name": "monitor-group_collapse",
+      "font_class": "monitor-group_collapse1",
+      "unicode": "e931",
+      "unicode_decimal": 59697
+    },
+    {
+      "icon_id": "40520774",
+      "name": "monitor-group_expansion",
+      "font_class": "monitor-group_expansion",
+      "unicode": "e92e",
+      "unicode_decimal": 59694
+    },
+    {
+      "icon_id": "40520787",
+      "name": "monitor-group_collapse",
+      "font_class": "monitor-group_collapse",
+      "unicode": "e92f",
+      "unicode_decimal": 59695
+    },
+    {
+      "icon_id": "40519707",
+      "name": "monitor-list_view",
+      "font_class": "monitor-list_view",
+      "unicode": "e92d",
+      "unicode_decimal": 59693
+    },
+    {
+      "icon_id": "40519711",
+      "name": "monitor-group_view",
+      "font_class": "monitor-group_view",
+      "unicode": "e92c",
+      "unicode_decimal": 59692
+    },
+    {
       "icon_id": "40499246",
       "name": "ops-topology_view",
       "font_class": "ops-topology_view",
