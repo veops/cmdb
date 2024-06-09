@@ -1,5 +1,3 @@
-version: '2.19'
-
 services:
   cmdb-db:
     image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-db:2.3
@@ -78,12 +76,18 @@ services:
       new:
         aliases:
           - cmdb-api
+    healthcheck:
+      timeout: 3s
+      interval: 5s
+      retries: 10
+      test: "ps aux|grep -v grep|grep -v '1 root'|grep gunicorn || exit 1"
 
   cmdb-ui:
     image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.4.5
     container_name: cmdb-ui
     depends_on:
-      - cmdb-api
+      cmdb-api:
+        condition: service_healthy
     environment:
       TZ: Asia/Shanghai
       CMDB_API_HOST: cmdb-api:5000
