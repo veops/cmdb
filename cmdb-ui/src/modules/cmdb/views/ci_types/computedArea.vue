@@ -6,7 +6,12 @@
     </a-tab-pane>
     <a-tab-pane key="script" :disabled="!canDefineComputed">
       <span style="font-size:12px;" slot="tab">{{ $t('cmdb.ciType.code') }}</span>
-      <codemirror style="z-index: 9999" :options="cmOptions" v-model="compute_script"></codemirror>
+      <codemirror
+        style="z-index: 9999"
+        :options="cmOptions"
+        v-model="compute_script"
+        @input="onCodeChange"
+      ></codemirror>
     </a-tab-pane>
     <template slot="tabBarExtraContent" v-if="showCalcComputed">
       <a-button type="primary" size="small" @click="handleCalcComputed">
@@ -49,8 +54,26 @@ export default {
         height: '200px',
         theme: 'monokai',
         tabSize: 4,
-        lineWrapping: true,
+        indentUnit: 4,
+        lineWrapping: false,
         readOnly: !this.canDefineComputed,
+        extraKeys: {
+          Tab: (cm) => {
+            if (cm.somethingSelected()) {
+              cm.indentSelection('add')
+            } else {
+              cm.replaceSelection(Array(cm.getOption('indentUnit') + 1).join(' '), 'end', '+input')
+            }
+          },
+          'Shift-Tab': (cm) => {
+            if (cm.somethingSelected()) {
+              cm.indentSelection('subtract')
+            } else {
+              const cursor = cm.getCursor()
+              cm.setCursor({ line: cursor.line, ch: cursor.ch - 4 })
+            }
+          },
+        },
       },
     }
   },
@@ -83,6 +106,9 @@ export default {
         },
       })
     },
+    onCodeChange(v) {
+      this.compute_script = v.replace('\t', '    ')
+    }
   },
 }
 </script>
