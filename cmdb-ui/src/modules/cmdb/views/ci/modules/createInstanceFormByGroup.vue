@@ -29,7 +29,7 @@
                         ? attr.default.default
                         : attr.default.default.split(',')
                       : attr.default.default
-                    : null,
+                    : attr.is_list ? [] : null,
               },
             ]"
             :placeholder="$t('placeholder2')"
