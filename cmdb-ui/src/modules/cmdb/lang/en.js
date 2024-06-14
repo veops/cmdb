@@ -416,6 +416,9 @@ const cmdb_en = {
         itsmUninstalled: 'Please use it in combination with VE ITSM',
         applyItsm: 'Free Apply ITSM',
         ticketId: 'Ticket ID',
+        addReconciliation: 'Add Reconciliation',
+        updateReconciliation: 'Update Reconciliation',
+        deleteReconciliation: 'Delete Reconciliation',
     },
     relation_type: {
         addRelationType: 'New',
