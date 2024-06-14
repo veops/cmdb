@@ -416,6 +416,9 @@ const cmdb_zh = {
         itsmUninstalled: '请结合维易ITSM使用',
         applyItsm: '免费申请',
         ticketId: '工单ID',
+        addReconciliation: '新增合规检查',
+        updateReconciliation: '修改合规检查',
+        deleteReconciliation: '删除合规检查',
     },
     relation_type: {
         addRelationType: '新增关系类型',
