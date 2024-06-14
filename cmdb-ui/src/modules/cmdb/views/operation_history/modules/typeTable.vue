@@ -162,6 +162,9 @@ export default {
             { [this.$t('cmdb.history.deleteUniqueConstraint')]: 11 },
             { [this.$t('cmdb.history.addRelation')]: 12 },
             { [this.$t('cmdb.history.deleteRelation')]: 13 },
+            { [this.$t('cmdb.history.addReconciliation')]: 14 },
+            { [this.$t('cmdb.history.updateReconciliation')]: 15 },
+            { [this.$t('cmdb.history.deleteReconciliation')]: 16 },
           ],
         },
       ],
@@ -198,6 +201,9 @@ export default {
         ['11', this.$t('cmdb.history.deleteUniqueConstraint')],
         ['12', this.$t('cmdb.history.addRelation')],
         ['13', this.$t('cmdb.history.deleteRelation')],
+        ['14', this.$t('cmdb.history.addReconciliation')],
+        ['15', this.$t('cmdb.history.updateReconciliation')],
+        ['16', this.$t('cmdb.history.deleteReconciliation')],
       ])
     },
   },
@@ -312,27 +318,22 @@ export default {
         // update CIType
         case '1': {
           item.changeArr = []
-          for (const key in item.change.old) {
-            const newVal = item.change.new[key]
-            const oldVal = item.change.old[key]
-            if (!_.isEqual(newVal, oldVal) && key !== 'updated_at') {
-              if (oldVal === null) {
-                const str = ` [ ${key} :  ${newVal || '""'} ] `
-                item.changeDescription += str
-                item.changeArr.push(str)
-              } else {
-                const str = ` [ ${key} :  ${oldVal || '""'} -> ${newVal || '""'} ] `
-                item.changeDescription += ` [ ${key} :  ${oldVal || '""'} -> ${newVal || '""'} ] `
-                item.changeArr.push(str)
-              }
-            }
+          const diffs = this.deepCompare({
+            obj1: item?.change?.old,
+            obj2: item?.change?.new,
+            ignoreKeys: ['updated_at']
+          })
+          for (const val of diffs) {
+            const str = ` [ ${val.path} :  ${val.value1} -> ${val.value2} ] `
+            item.changeDescription += str
+            item.changeArr.push(str)
           }
           if (!item.changeDescription) item.changeDescription = this.$t('cmdb.history.noModifications')
           break
         }
         // delete CIType
         case '2': {
-          item.changeDescription = this.$t('cmdb.history.addCIType') + ': ' + `${item.change.alias}`
+          item.changeDescription = this.$t('cmdb.history.deleteCIType') + ': ' + `${item.change.alias}`
           break
         }
         // add Attribute
@@ -343,24 +344,15 @@ export default {
         // update Attribute
         case '4': {
           item.changeArr = []
-          for (const key in item.change.old) {
-            if (!_.isEqual(item.change.new[key], item.change.old[key]) && key !== 'updated_at') {
-              let newStr = item.change.new[key]
-              let oldStr = item.change.old[key]
-              if (key === 'choice_value') {
-                newStr = newStr ? newStr.map((item) => item[0]).join(',') : ''
-                oldStr = oldStr ? oldStr.map((item) => item[0]).join(',') : ''
-              }
-              if (Object.prototype.toString.call(newStr) === '[object Object]') {
-                newStr = JSON.stringify(newStr)
-              }
-              if (Object.prototype.toString.call(oldStr) === '[object Object]') {
-                oldStr = JSON.stringify(oldStr)
-              }
-              const str = `${key} : ${oldStr ? ` ${oldStr || '""'} ` : ''} -> ${newStr || '""'}`
-              item.changeDescription += ` [ ${str} ] `
-              item.changeArr.push(str)
-            }
+          const diffs = this.deepCompare({
+            obj1: item?.change?.old,
+            obj2: item?.change?.new,
+            ignoreKeys: ['updated_at']
+          })
+          for (const val of diffs) {
+            const str = ` [ ${val.path} :  ${val.value1} -> ${val.value2} ] `
+            item.changeDescription += str
+            item.changeArr.push(str)
           }
           if (!item.changeDescription) item.changeDescription = this.$t('cmdb.history.noModifications')
           break
@@ -372,39 +364,29 @@ export default {
         }
         // add trigger
         case '6': {
-          item.changeDescription = this.$t('cmdb.history.noModifications', {
-            attr_id: item.change.attr_id,
-            before_days: item.change.option.before_days,
-            subject: item.change.option.subject,
-            body: item.change.option.body,
-            notify_at: item.change.option.notify_at,
-          })
+          item.changeDescription = `${this.$t('cmdb.history.addTrigger')}：${item?.change?.option?.name || ''}`
           break
         }
         // update trigger
         case '7': {
           item.changeArr = []
-          for (const key in item.change.old.option) {
-            const newVal = item.change.new.option[key]
-            const oldVal = item.change.old.option[key]
-            if (!_.isEqual(newVal, oldVal) && key !== 'updated_at') {
-              const str = ` [ ${key} :  ${oldVal} -> ${newVal} ] `
-              item.changeDescription += str
-              item.changeArr.push(str)
-            }
+          const diffs = this.deepCompare({
+            obj1: item?.change?.old,
+            obj2: item?.change?.new,
+            directDeepKeys: ['notifies'],
+            ignoreKeys: ['updated_at']
+          })
+          for (const val of diffs) {
+            const str = ` [ ${val.path} :  ${val.value1} -> ${val.value2} ] `
+            item.changeDescription += str
+            item.changeArr.push(str)
           }
           if (!item.changeDescription) item.changeDescription = this.$t('cmdb.history.noModifications')
           break
         }
         // delete trigger
         case '8': {
-          item.changeDescription = this.$t('cmdb.history.noModifications', {
-            attr_id: item.change.attr_id,
-            before_days: item.change.option.before_days,
-            subject: item.change.option.subject,
-            body: item.change.option.body,
-            notify_at: item.change.option.notify_at,
-          })
+          item.changeDescription = `${this.$t('cmdb.history.deleteTrigger')}：${item?.change?.option?.name || ''}`
           break
         }
         // add unique constraint
@@ -441,8 +423,77 @@ export default {
           )} -> ${item.change.child.alias}`
           break
         }
+        case '14': {
+          item.changeDescription = this.$t('cmdb.history.addReconciliation') + ': ' + item.change.name || item.change.alias
+          break
+        }
+        case '15': {
+          item.changeArr = []
+          const diffs = this.deepCompare({
+            obj1: item?.change?.old,
+            obj2: item?.change?.new,
+            directDeepKeys: ['notifies'],
+            ignoreKeys: ['updated_at']
+          })
+          for (const val of diffs) {
+            const str = ` [ ${val.path} :  ${val.value1} -> ${val.value2} ] `
+            item.changeDescription += str
+            item.changeArr.push(str)
+          }
+          if (!item.changeDescription) item.changeDescription = this.$t('cmdb.history.updateReconciliation')
+          break
+        }
+        case '16': {
+          item.changeDescription = this.$t('cmdb.history.deleteReconciliation') + ': ' + item.change.name || item.change.alias
+          break
+        }
       }
     },
+
+    deepCompare({
+      obj1,
+      obj2,
+      directDeepKeys = [],
+      ignoreKeys = [],
+    }) {
+      const diffs = []
+
+      function compare(obj1, obj2, path = '') {
+        if (typeof obj1 !== 'object' || typeof obj2 !== 'object' || obj1 === null || obj2 === null) {
+          if (obj1 !== obj2) {
+            diffs.push({ path, value1: formatValue(obj1), value2: formatValue(obj2) })
+          }
+          return
+        }
+
+        const keys1 = new Set(Object.keys(obj1))
+        const keys2 = new Set(Object.keys(obj2))
+        const allKeys = new Set([...keys1, ...keys2])
+
+        allKeys.forEach(key => {
+          const newPath = path ? `${path}.${key}` : key
+          if (!ignoreKeys.includes(key)) {
+            if (directDeepKeys.includes(key) && !_.isEqual(obj1[key], obj2[key])) {
+              diffs.push({ path: newPath, value1: formatValue(obj1[key]), value2: formatValue(obj2[key]) })
+            } else if (!keys1.has(key)) {
+              diffs.push({ path: newPath, value1: undefined, value2: formatValue(obj2[key]) })
+            } else if (!keys2.has(key)) {
+              diffs.push({ path: newPath, value1: formatValue(obj1[key]), value2: undefined })
+            } else {
+              compare(obj1[key], obj2[key], newPath)
+            }
+          }
+        })
+      }
+
+      function formatValue(val) {
+        return _.isObject(val) ? JSON.stringify(val) : val
+      }
+
+      compare(obj1, obj2)
+      return diffs
+    },
+
     filterOperate() {
       this.queryParams.page = 1
       this.queryParams.page_size = 50
