@@ -160,7 +160,7 @@ export default {
         landline: '座机',
         zipCode: '邮政编码',
         IDCard: '身份证号',
-        ip: 'IP地址',
+        ip: 'IPv4地址',
         email: '邮箱',
         link: '链接',
         monetaryAmount: '货币金额',

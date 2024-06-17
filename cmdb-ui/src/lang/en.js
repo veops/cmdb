@@ -160,7 +160,7 @@ export default {
         landline: 'landline',
         zipCode: 'zip code',
         IDCard: 'ID card',
-        ip: 'IP',
+        ip: 'IPv4',
         email: 'email',
         link: 'link',
         monetaryAmount: 'monetary amount',
