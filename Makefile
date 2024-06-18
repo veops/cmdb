@@ -70,14 +70,3 @@ ui-docker-build:
     			--tag $(REGISTRY)/cmdb-ui:latest  \
     			-f docker/Dockerfile-UI \
     			.
-
-es-docker-build:
-	export DOCKER_CLI_EXPERIMENTAL=enabled ;\
-	! ( docker buildx ls | grep multi-platform-builder ) && docker buildx create --use --platform=$(BUILD_ARCH) --name multi-platform-builder ;\
-	docker buildx build \
-    			--builder multi-platform-builder \
-    			--platform=$(BUILD_ARCH) \
-    			--tag $(REGISTRY)/cmdb-es:$(CMDB_DOCKER_VERSION)  \
-    			--tag $(REGISTRY)/cmdb-es:latest  \
-    			-f docker/Dockerfile-ES \
-    			.
