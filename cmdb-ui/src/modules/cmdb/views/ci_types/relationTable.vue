@@ -84,7 +84,7 @@
               show-search
               optionFilterProp="title"
             >
-            <a-select-option
+              <a-select-option
                 v-for="attr in filterAttributes(row.isParent ? row.attributes : attributes)"
                 :key="attr.id"
                 :value="attr.id"
@@ -535,7 +535,7 @@ export default {
       const { source_ci_type_id: parentId, id: childrenId, constraint, relation_type } = row
       const _find = this.relationTypes.find((item) => item.name === relation_type)
       const relation_type_id = _find?.id
-      
+
       const {
         parent_attr_ids,
         child_attr_ids,
