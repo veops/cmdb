@@ -311,7 +311,7 @@
                   theme="filled"
                   @click="
                     (e) => {
-                    e.stopPropagation()
+                      e.stopPropagation()
                       e.preventDefault()
                     }
                   "
