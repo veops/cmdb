@@ -580,6 +580,15 @@ class AutoDiscoveryCIType(Model):
     uid = db.Column(db.Integer, index=True)
 
 
+class AutoDiscoveryCITypeRelation(Model):
+    __tablename__ = "c_ad_ci_type_relations"
+
+    ad_type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'), nullable=False)
+    ad_key = db.Column(db.String(128))
+    peer_type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'), nullable=False)
+    peer_attr_id = db.Column(db.Integer, db.ForeignKey('c_attributes.id'), nullable=False)
+
+
 class AutoDiscoveryCI(Model):
     __tablename__ = "c_ad_ci"
 
