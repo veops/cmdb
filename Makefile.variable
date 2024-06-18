@@ -1,0 +1,21 @@
+SHELL := /bin/bash -o pipefail
+
+MYSQL_ROOT_PASSWORD ?= root
+MYSQL_PORT ?= 3306
+REDIS_PORT ?= 6379
+
+LATEST_TAG_DIFF:=$(shell git describe --tags --abbrev=8)
+LATEST_COMMIT:=$(VERSION)-dev-$(shell git rev-parse --short=8 HEAD)
+BUILD_ARCH ?= linux/amd64,linux/arm64
+
+# Set your version by env or using latest tags from git
+CMDB_VERSION?=$(LATEST_TAG_DIFF)
+ifeq ($(CMDB_VERSION),)
+ 	#fall back to last commit
+	CMDB_VERSION=$(LATEST_COMMIT)
+endif
+COMMIT_VERSION:=$(LATEST_COMMIT)
+CMDB_DOCKER_VERSION:=${CMDB_VERSION}
+CMDB_CHART_VERSION:=$(shell echo ${CMDB_VERSION} | sed  's/^v//g' )
+
+REGISTRY ?= local

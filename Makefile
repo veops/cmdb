@@ -1,6 +1,4 @@
-MYSQL_ROOT_PASSWORD ?= root
-MYSQL_PORT ?= 3306
-REDIS_PORT ?= 6379
+include ./Makefile.variable
 
 default: help
 help:  ## display this help
@@ -50,3 +48,36 @@ clean: ## remove unwanted files like .pyc's
 lint: ## check style with flake8
 	flake8 --exclude=env .
 .PHONY: lint
+
+api-docker-build:
+	export DOCKER_CLI_EXPERIMENTAL=enabled ;\
+	! ( docker buildx ls | grep multi-platform-builder ) && docker buildx create --use --platform=$(BUILD_ARCH) --name multi-platform-builder ;\
+	docker buildx build \
+    			--builder multi-platform-builder \
+    			--platform=$(BUILD_ARCH) \
+    			--tag $(REGISTRY)/cmdb-api:$(CMDB_DOCKER_VERSION)  \
+    			--tag $(REGISTRY)/cmdb-api:latest  \
+    			-f docker/Dockerfile-API \
+    			.
+
+ui-docker-build:
+	export DOCKER_CLI_EXPERIMENTAL=enabled ;\
+	! ( docker buildx ls | grep multi-platform-builder ) && docker buildx create --use --platform=$(BUILD_ARCH) --name multi-platform-builder ;\
+	docker buildx build \
+    			--builder multi-platform-builder \
+    			--platform=$(BUILD_ARCH) \
+    			--tag $(REGISTRY)/cmdb-ui:$(CMDB_DOCKER_VERSION)  \
+    			--tag $(REGISTRY)/cmdb-ui:latest  \
+    			-f docker/Dockerfile-UI \
+    			.
+
+es-docker-build:
+	export DOCKER_CLI_EXPERIMENTAL=enabled ;\
+	! ( docker buildx ls | grep multi-platform-builder ) && docker buildx create --use --platform=$(BUILD_ARCH) --name multi-platform-builder ;\
+	docker buildx build \
+    			--builder multi-platform-builder \
+    			--platform=$(BUILD_ARCH) \
+    			--tag $(REGISTRY)/cmdb-es:$(CMDB_DOCKER_VERSION)  \
+    			--tag $(REGISTRY)/cmdb-es:latest  \
+    			-f docker/Dockerfile-ES \
+    			.
