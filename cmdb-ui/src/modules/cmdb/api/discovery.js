@@ -46,10 +46,10 @@ export function getHttpAttributes(name, params) {
 }
 
 export function getSnmpAttributes(name) {
-    return axios({
-        url: `/v0.1/adr/snmp/${name}/attributes`,
-        method: 'GET',
-    })
+  return axios({
+    url: `/v0.1/adr/snmp/${name}/attributes`,
+    method: 'GET',
+  })
 }
 
 export function getCITypeDiscovery(type_id) {
@@ -117,4 +117,66 @@ export function deleteAdc(adc_id) {
         url: `v0.1/adc/${adc_id}`,
         method: 'DELETE',
     })
+}
+
+export function getAdcCounter(params) {
+  return axios({
+    url: `v0.1/adc/counter`,
+    method: 'GET',
+    params
+  })
+}
+
+export function getAdcExecHistories(params) {
+  return axios({
+    url: `v0.1/adc/exec/histories`,
+    method: 'GET',
+    params
+  })
+}
+
+export function getAdtSyncHistories(adt_id) {
+  return axios({
+    url: `/v0.1/adt/${adt_id}/sync/histories`,
+    method: 'GET',
+    params: {
+      page_size: 9999
+    }
+  })
+}
+
+export function postAdtTest(adt_id) {
+  return axios({
+    url: `/v0.1/adt/${adt_id}/test`,
+    method: 'POST',
+  })
+}
+
+export function getAdtTestResult(exec_id) {
+  return axios({
+    url: `/v0.1/adt/test/${exec_id}/result`,
+    method: 'GET'
+  })
+}
+
+export function getCITypeAttributes(type_id) {
+  return axios({
+    url: `/v0.1/adt/ci_types/${type_id}/attributes`,
+    method: 'GET',
+  })
+}
+
+export function getCITypeRelations(type_id) {
+  return axios({
+    url: `/v0.1/adt/ci_types/${type_id}/relations`,
+    method: 'GET',
+  })
+}
+
+export function postCITypeRelations(type_id, data) {
+  return axios({
+    url: `/v0.1/adt/ci_types/${type_id}/relations`,
+    method: 'POST',
+    data
+  })
 }

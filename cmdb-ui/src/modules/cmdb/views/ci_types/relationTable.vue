@@ -10,6 +10,7 @@
     >{{ $t('cmdb.ciType.addRelation') }}</a-button
     >
     <vxe-table
+      ref="xTable"
       stripe
       :data="tableData"
       size="small"
@@ -311,6 +312,8 @@ export default {
       tableAttrList: [],
       modalAttrList: [],
       modalChildAttributes: [],
+      currentEditData: null,
+      isContinueCloseEdit: false,
     }
   },
   computed: {
@@ -341,7 +344,7 @@ export default {
       if (!this.isInGrantComp) {
         await this.getCITypeParent()
       }
-      this.getCITypeChildren()
+      await this.getCITypeChildren()
     },
     async getCITypeParent() {
       await getCITypeParent(this.CITypeId).then((res) => {
@@ -358,8 +361,8 @@ export default {
         })
       })
     },
-    getCITypeChildren() {
-      getCITypeChildren(this.CITypeId).then((res) => {
+    async getCITypeChildren() {
+      await getCITypeChildren(this.CITypeId).then((res) => {
         const data = res.children.map((obj) => {
           const parentAndChildAttrList = this.handleAttrList(obj)
 
@@ -511,27 +514,45 @@ export default {
       if (row.isParent) return 'relation-table-parent'
     },
     handleEditActived({ row }) {
-      const tableAttrList = []
+      this.$nextTick(async () => {
+        if (this.isContinueCloseEdit) {
+          const editRecord = this.$refs.xTable.getEditRecord()
+          const { row: editRow, column } = editRecord
+          this.currentEditData = {
+            row: editRow,
+            column
+          }
+          return
+        }
+        const tableAttrList = []
 
-      const length = Math.min(row?.parent_attr_ids?.length || 0, row.child_attr_ids?.length || 0)
-      if (length) {
-        for (let i = 0; i < length; i++) {
+        const length = Math.min(row?.parent_attr_ids?.length || 0, row.child_attr_ids?.length || 0)
+        if (length) {
+          for (let i = 0; i < length; i++) {
+            tableAttrList.push({
+              id: uuidv4(),
+              parentAttrId: row?.parent_attr_ids?.[i] ?? undefined,
+              childAttrId: row?.child_attr_ids?.[i] ?? undefined
+            })
+          }
+        } else {
           tableAttrList.push({
             id: uuidv4(),
-            parentAttrId: row?.parent_attr_ids?.[i] ?? undefined,
-            childAttrId: row?.child_attr_ids?.[i] ?? undefined
+            parentAttrId: undefined,
+            childAttrId: undefined
           })
         }
-      } else {
-        tableAttrList.push({
-          id: uuidv4(),
-          parentAttrId: undefined,
-          childAttrId: undefined
-        })
-      }
-      this.$set(this, 'tableAttrList', tableAttrList)
+        this.$set(this, 'tableAttrList', tableAttrList)
+      })
     },
     async handleEditClose({ row }) {
+      if (this.currentEditData) {
+        this.currentEditData = null
+        return
+      }
+
+      this.isContinueCloseEdit = true
+
       const { source_ci_type_id: parentId, id: childrenId, constraint, relation_type } = row
       const _find = this.relationTypes.find((item) => item.name === relation_type)
       const relation_type_id = _find?.id
@@ -542,6 +563,7 @@ export default {
         validate
       } = this.handleValidateAttrList(this.tableAttrList)
       if (!validate) {
+        this.isContinueCloseEdit = false
         return
       }
 
@@ -550,8 +572,17 @@ export default {
         constraint,
         parent_attr_ids,
         child_attr_ids,
-      }).finally(() => {
-        this.getData()
+      }).finally(async () => {
+        await this.getData()
+        this.isContinueCloseEdit = false
+
+        if (this.currentEditData) {
+          setTimeout(async () => {
+            const { fullData } = this.$refs.xTable.getTableData()
+            const findEdit = fullData.find((item) => item.id === this?.currentEditData?.row?.id)
+            await this.$refs.xTable.setEditRow(findEdit, 'attributeAssociation')
+          })
+        }
       })
     },
     getAttrNameById(attributes, id) {

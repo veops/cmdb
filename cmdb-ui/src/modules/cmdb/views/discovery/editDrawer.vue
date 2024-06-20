@@ -1,6 +1,16 @@
 <template>
-  <CustomDrawer width="800px" :title="title" :visible="visible" @close="handleClose">
-    <template v-if="adType === 'agent'">
+  <CustomDrawer
+    width="800px"
+    :title="title"
+    :visible="visible"
+    :bodyStyle="{ height: 'calc(-108px + 100vh)' }"
+    @close="handleClose"
+  >
+    <AgentTable
+      v-if="adType === DISCOVERY_CATEGORY_TYPE.AGENT"
+      :tableData="tableData"
+    />
+    <template v-else-if="adType === DISCOVERY_CATEGORY_TYPE.PLUGIN">
       <a-form-model
         ref="autoDiscoveryForm"
         :model="form"
@@ -47,8 +57,9 @@
         icon="plus"
         :style="{ marginBottom: '10px' }"
         @click="insertEvent(-1)"
-      >{{ $t('new') }}</a-button
       >
+        {{ $t('new') }}
+      </a-button>
       <vxe-table
         size="mini"
         stripe
@@ -77,7 +88,11 @@
             <vxe-input v-model="row.desc" type="text"></vxe-input>
           </template>
         </vxe-column>
-        <vxe-column :title="$t('operation')" width="60" v-if="!form.is_plugin">
+        <vxe-column
+          :title="$t('operation')"
+          width="60"
+          v-if="!form.is_plugin"
+        >
           <template #default="{ row }">
             <a-space v-if="$refs.xTable.isActiveByRow(row)">
               <a @click="saveRowEvent(row)"><a-icon type="save"/></a>
@@ -103,15 +118,24 @@
 </template>
 
 <script>
-import CustomIconSelect from '@/components/CustomIconSelect'
 import { postDiscovery, putDiscovery } from '../../api/discovery'
+import { DISCOVERY_CATEGORY_TYPE } from './constants.js'
+
+import AgentTable from './agentTable.vue'
+import CustomIconSelect from '@/components/CustomIconSelect'
 import HttpSnmpAD from '../../components/httpSnmpAD'
 import CustomCodeMirror from '@/components/CustomCodeMirror'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/monokai.css'
+
 export default {
   name: 'EditDrawer',
-  components: { CustomIconSelect, CustomCodeMirror, HttpSnmpAD },
+  components: {
+    CustomIconSelect,
+    CustomCodeMirror,
+    HttpSnmpAD,
+    AgentTable
+  },
   props: {
     is_inner: {
       type: Boolean,
@@ -142,11 +166,12 @@ export default {
         tabSize: 4,
         lineWrapping: true,
       },
+      DISCOVERY_CATEGORY_TYPE,
     }
   },
   computed: {
     title() {
-      if (this.adType === 'http' || this.adType === 'snmp') {
+      if ([DISCOVERY_CATEGORY_TYPE.HTTP, DISCOVERY_CATEGORY_TYPE.SNMP, DISCOVERY_CATEGORY_TYPE.AGENT].includes(this.adType)) {
         return this.ruleData.name
       }
       if (this.type === 'edit') {
@@ -173,10 +198,15 @@ export default {
           is_plugin: true,
         }
       }
-      if (adType === 'http' || adType === 'snmp') {
+      if (adType === DISCOVERY_CATEGORY_TYPE.HTTP || adType === DISCOVERY_CATEGORY_TYPE.SNMP) {
         return
       }
       this.$nextTick(() => {
+        if (adType === DISCOVERY_CATEGORY_TYPE.AGENT) {
+          this.tableData = data?.attributes ?? []
+          return
+        }
+
         if (this.type === 'edit') {
           this.form = {
             name: data.name,
@@ -203,7 +233,7 @@ export default {
       this.tableData = []
       this.customIcon = { name: '', color: '' }
       this.form = { name: '', is_plugin: false }
-      if (this.adType === 'agent') {
+      if (this.adType === DISCOVERY_CATEGORY_TYPE.PLUGIN) {
         this.$refs.autoDiscoveryForm.clearValidate()
       } else {
         // this.$refs.httpSnmpAd.currentCate = ''
@@ -244,9 +274,10 @@ export default {
       const $table = this.$refs.xTable
       const { fullData: _tableData } = $table.getTableData()
       console.log(_tableData)
+      const type = this.adType === DISCOVERY_CATEGORY_TYPE.PLUGIN ? DISCOVERY_CATEGORY_TYPE.AGENT : this.adType
       const params = {
         ...this.form,
-        type: this.adType,
+        type,
         is_inner: this.is_inner,
         option: { icon: this.customIcon },
         attributes: this.form.is_plugin
