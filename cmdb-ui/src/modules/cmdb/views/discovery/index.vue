@@ -70,7 +70,7 @@
         </div>
       </template>
       <div class="setting-discovery-empty" v-else>
-        <img class="setting-discovery-empty-img" :src="require(`@/modules/monitor/assets/empty-state.svg`)" />
+        <img class="setting-discovery-empty-img" :src="require(`@/assets/data_empty.png`)" />
         <p class="setting-discovery-empty-text">{{ $t('noData') }}</p>
       </div>
     </div>
