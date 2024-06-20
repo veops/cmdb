@@ -10,14 +10,11 @@
       <a-tab-pane key="3" :tab="$t('cmdb.ciType.autoDiscoveryTab')">
         <ADTab v-if="activeKey === '3'" :CITypeId="CITypeId"></ADTab>
       </a-tab-pane>
-      <a-tab-pane key="5" :tab="$t('cmdb.reconciliation.tab')">
-        <ReconciliationTable ref="reconciliationTable" :CITypeId="CITypeId" :CITypeChangeDisabled="true" />
-      </a-tab-pane>
-      <a-tab-pane key="6" :tab="$t('cmdb.ciType.trigger')">
+      <a-tab-pane key="5" :tab="$t('cmdb.ciType.trigger')">
         <TriggerTable ref="triggerTable" :CITypeId="CITypeId"></TriggerTable>
       </a-tab-pane>
-      <a-tab-pane key="7" :tab="$t('cmdb.ciType.grant')">
-        <template v-if="activeKey === '7'">
+      <a-tab-pane key="6" :tab="$t('cmdb.ciType.grant')">
+        <template v-if="activeKey === '6'">
           <GrantComp :CITypeId="CITypeId" resourceType="CIType" :resourceTypeName="CITypeName"></GrantComp>
           <div class="citype-detail-title">{{ $t('cmdb.components.relationGrant') }}</div>
           <RelationTable isInGrantComp :CITypeId="CITypeId" :CITypeName="CITypeName"></RelationTable>
