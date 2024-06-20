@@ -1252,9 +1252,12 @@ export default {
           'download image': '下载图片'
         }
 
-        toolbarElements.forEach((toolbarElement) => {
-          if (toolbarElement?.children?.length) {
-            toolbarElement.children.forEach((node) => {
+        const toolbarElementArray = Array.from(toolbarElements ?? [])
+        toolbarElementArray.forEach((toolbarElement) => {
+          const childArray = Array.from(toolbarElement?.children || [])
+
+          if (childArray?.length) {
+            childArray.forEach((node) => {
               const oldTitle = node?.getAttribute('title')
               if (oldTitle) {
                 const newTitle = lang === 'en' ? zhlangMap[oldTitle] : enlangMap[oldTitle]
@@ -1441,7 +1444,7 @@ export default {
   border-width: 2px;
   border-style: solid;
   background-color: transparent;
-  position: relative;
+  position: relative !important;
   display: flex;
   justify-content: center;
   align-items: center;
