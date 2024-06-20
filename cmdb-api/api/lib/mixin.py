@@ -8,6 +8,8 @@ from api.extensions import db
 from api.lib.utils import get_page
 from api.lib.utils import get_page_size
 
+__author__ = 'pycook'
+
 
 class DBMixin(object):
     cls = None
@@ -17,13 +19,18 @@ class DBMixin(object):
         page = get_page(page)
         page_size = get_page_size(page_size)
         if fl is None:
-            query = db.session.query(cls.cls).filter(cls.cls.deleted.is_(False))
+            query = db.session.query(cls.cls)
         else:
-            query = db.session.query(*[getattr(cls.cls, i) for i in fl]).filter(cls.cls.deleted.is_(False))
+            query = db.session.query(*[getattr(cls.cls, i) for i in fl])
 
         _query = None
         if count_query:
-            _query = db.session.query(func.count(cls.cls.id)).filter(cls.cls.deleted.is_(False))
+            _query = db.session.query(func.count(cls.cls.id))
+
+        if hasattr(cls.cls, 'deleted'):
+            query = query.filter(cls.cls.deleted.is_(False))
+            if _query:
+                _query = _query.filter(cls.cls.deleted.is_(False))
 
         for k in kwargs:
             if hasattr(cls.cls, k):

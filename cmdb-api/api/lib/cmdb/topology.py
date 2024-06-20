@@ -16,7 +16,7 @@ from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.search import SearchError
-from api.lib.cmdb.search.ci import search
+from api.lib.cmdb.search.ci import search as ci_search
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import is_app_admin
 from api.models.cmdb import TopologyView
@@ -178,7 +178,7 @@ class TopologyViewManager(object):
 
         q = (central_node_instances[2:] if central_node_instances.startswith('q=') else
              central_node_instances)
-        s = search(q, fl=['_id', show_key.name], use_id_filter=False, use_ci_filter=False, count=1000000)
+        s = ci_search(q, fl=['_id', show_key.name], use_id_filter=False, use_ci_filter=False, count=1000000)
         try:
             response, _, _, _, _, _ = s.search()
         except SearchError as e:
@@ -238,7 +238,7 @@ class TopologyViewManager(object):
                     type2show[type_id] = attr.name
 
         if id2node:
-            s = search("_id:({})".format(';'.join(id2node.keys())), fl=list(fl),
+            s = ci_search("_id:({})".format(';'.join(id2node.keys())), fl=list(fl),
                        use_id_filter=False, use_ci_filter=False, count=1000000)
             try:
                 response, _, _, _, _, _ = s.search()

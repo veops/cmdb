@@ -55,9 +55,9 @@ class CITypeOperateType(BaseEnum):
     DELETE_UNIQUE_CONSTRAINT = "11"  # 删除联合唯一
     ADD_RELATION = "12"  # 新增关系
     DELETE_RELATION = "13"  # 删除关系
-    ADD_RECONCILIATION = "14"  # 删除关系
-    UPDATE_RECONCILIATION = "15"  # 删除关系
-    DELETE_RECONCILIATION = "16"  # 删除关系
+    ADD_RECONCILIATION = "14"  # 新增数据合规
+    UPDATE_RECONCILIATION = "15"  # 修改数据合规
+    DELETE_RECONCILIATION = "16"  # 删除数据合规
 
 
 class RetKey(BaseEnum):
