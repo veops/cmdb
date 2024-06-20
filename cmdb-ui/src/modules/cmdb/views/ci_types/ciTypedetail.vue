@@ -5,21 +5,23 @@
         <AttributesTable ref="attributesTable" :CITypeId="CITypeId" :CITypeName="CITypeName"></AttributesTable>
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('cmdb.ciType.relation')">
-        <RelationTable :CITypeId="CITypeId" :CITypeName="CITypeName"></RelationTable>
+        <RelationTable v-if="activeKey === '2'" :CITypeId="CITypeId" :CITypeName="CITypeName"></RelationTable>
       </a-tab-pane>
-      <a-tab-pane key="3" :tab="$t('cmdb.ciType.attributeAD')">
-        <AttrAD :CITypeId="CITypeId"></AttrAD>
+      <a-tab-pane key="3" :tab="$t('cmdb.ciType.autoDiscoveryTab')">
+        <ADTab v-if="activeKey === '3'" :CITypeId="CITypeId"></ADTab>
       </a-tab-pane>
-      <a-tab-pane key="4" :tab="$t('cmdb.ciType.relationAD')">
-        <RelationAD :CITypeId="CITypeId"></RelationAD>
+      <a-tab-pane key="5" :tab="$t('cmdb.reconciliation.tab')">
+        <ReconciliationTable ref="reconciliationTable" :CITypeId="CITypeId" :CITypeChangeDisabled="true" />
       </a-tab-pane>
-      <a-tab-pane key="5" :tab="$t('cmdb.ciType.trigger')">
+      <a-tab-pane key="6" :tab="$t('cmdb.ciType.trigger')">
         <TriggerTable ref="triggerTable" :CITypeId="CITypeId"></TriggerTable>
       </a-tab-pane>
-      <a-tab-pane key="6" :tab="$t('cmdb.ciType.grant')">
-        <GrantComp :CITypeId="CITypeId" resourceType="CIType" :resourceTypeName="CITypeName"></GrantComp>
-        <div class="citype-detail-title">{{ $t('cmdb.components.relationGrant') }}</div>
-        <RelationTable isInGrantComp :CITypeId="CITypeId" :CITypeName="CITypeName"></RelationTable>
+      <a-tab-pane key="7" :tab="$t('cmdb.ciType.grant')">
+        <template v-if="activeKey === '7'">
+          <GrantComp :CITypeId="CITypeId" resourceType="CIType" :resourceTypeName="CITypeName"></GrantComp>
+          <div class="citype-detail-title">{{ $t('cmdb.components.relationGrant') }}</div>
+          <RelationTable isInGrantComp :CITypeId="CITypeId" :CITypeName="CITypeName"></RelationTable>
+        </template>
       </a-tab-pane>
     </a-tabs>
   </a-card>
@@ -29,8 +31,7 @@
 import AttributesTable from './attributesTable'
 import RelationTable from './relationTable'
 import TriggerTable from './triggerTable.vue'
-import AttrAD from './attrAD.vue'
-import RelationAD from './relationAD.vue'
+import ADTab from './adTab.vue'
 import GrantComp from '../../components/cmdbGrant/grantComp.vue'
 
 export default {
@@ -39,8 +40,7 @@ export default {
     AttributesTable,
     RelationTable,
     TriggerTable,
-    AttrAD,
-    RelationAD,
+    ADTab,
     GrantComp,
   },
   props: {

@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1717726223524') format('woff2'),
-       url('iconfont.woff?t=1717726223524') format('woff'),
-       url('iconfont.ttf?t=1717726223524') format('truetype');
+  src: url('iconfont.woff2?t=1718872392430') format('woff2'),
+       url('iconfont.woff?t=1718872392430') format('woff'),
+       url('iconfont.ttf?t=1718872392430') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,58 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.cmdb-manual_warehousing:before {
+  content: "\e95f";
+}
+
+.cmdb-not_warehousing:before {
+  content: "\e95d";
+}
+
+.cmdb-warehousing:before {
+  content: "\e95e";
+}
+
+.cmdb-prompt:before {
+  content: "\e95c";
+}
+
+.cmdb-arrow:before {
+  content: "\e95b";
+}
+
+.cmdb-automatic_inventory:before {
+  content: "\e95a";
+}
+
+.cmdb-week_additions:before {
+  content: "\e959";
+}
+
+.cmdb-month_additions:before {
+  content: "\e958";
+}
+
+.cmdb-rule:before {
+  content: "\e955";
+}
+
+.cmdb-executing_machine:before {
+  content: "\e956";
+}
+
+.cmdb-resource:before {
+  content: "\e957";
+}
+
+.cmdb-discovery_resources:before {
+  content: "\e954";
+}
+
+.cmdb-association:before {
+  content: "\e953";
 }
 
 .ops-is_dynamic-disabled:before {

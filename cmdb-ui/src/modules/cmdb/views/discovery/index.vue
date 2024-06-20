@@ -1,39 +1,90 @@
 <template>
   <div class="setting-discovery">
-    <div :style="{ textAlign: 'right' }">
-      <a-space v-if="!isSelected">
-        <a-upload name="file" :multiple="false" accept=".json" :fileList="[]" :beforeUpload="beforeUpload">
-          <a><a-icon type="upload" />{{ $t('cmdb.ad.upload') }}</a>
-        </a-upload>
-        <a @click="download"><a-icon type="download" />{{ $t('cmdb.ad.download') }}</a>
-      </a-space>
-    </div>
-    <div v-for="{ type, label } in typeCategory" :key="type">
-      <div class="type-header">
-        <div>{{ label }}</div>
-        <a-space v-if="!isSelected && type === 'agent'">
-          <a @click="handleOpenEditDrawer(null, 'add', type)"><ops-icon type="icon-xianxing-tianjia"/></a>
-        </a-space>
+    <div v-if="!isSelected" class="setting-discovery-header">
+      <a-input-search
+        class="setting-discovery-search"
+        :placeholder="$t('cmdb.ad.pluginSearchTip')"
+        @search="onSearchDiscovery"
+      />
+      <div class="setting-discovery-radio">
+        <div
+          v-for="{ type, label } in typeCategory"
+          :key="type"
+          :class="['setting-discovery-radio-item', radioKey === type ? 'setting-discovery-radio-item_active' : '']"
+          @click="changeRadio(type)"
+        >
+          {{ label }}
+        </div>
       </div>
-      <a-row type="flex" justify="start">
-        <DiscoveryCard
-          @editRule="handleOpenEditDrawer(rule, 'edit', type)"
-          @deleteRule="deleteRule(rule)"
-          v-for="rule in typeCategoryChildren[type]"
-          :key="rule.id"
-          :rule="rule"
-          :isSelected="isSelected"
-        />
-      </a-row>
+
+      <div class="setting-discovery-header-action">
+        <a-upload
+          name="file"
+          :multiple="false"
+          accept=".json"
+          :fileList="[]"
+          :beforeUpload="beforeUpload"
+        >
+          <a class="setting-discovery-header-action-btn">
+            <a-icon type="upload" />
+            {{ $t('cmdb.ad.upload') }}
+          </a>
+        </a-upload>
+        <a
+          @click="download"
+          class="setting-discovery-header-action-btn"
+        >
+          <a-icon type="download" />
+          {{ $t('cmdb.ad.download') }}
+        </a>
+      </div>
+    </div>
+    <div class="setting-discovery-body">
+      <template v-if="!showNullData">
+        <div v-for="{ type, label } in typeCategory" :key="type">
+          <template v-if="filterCategoryChildren[type] && (filterCategoryChildren[type].children.length || (showAddPlugin && type === DISCOVERY_CATEGORY_TYPE.PLUGIN))">
+            <div class="type-header">
+              <div>{{ label }}</div>
+            </div>
+            <a-row type="flex" justify="start">
+              <DiscoveryCard
+                v-for="rule in filterCategoryChildren[type].children"
+                :key="rule.id"
+                :rule="rule"
+                :isSelected="isSelected"
+                @editRule="handleOpenEditDrawer(rule, 'edit', type)"
+                @deleteRule="deleteRule(rule)"
+              />
+              <div
+                v-if="showAddPlugin && type === DISCOVERY_CATEGORY_TYPE.PLUGIN"
+                class="setting-discovery-add"
+                @click="handleOpenEditDrawer(null, 'add', DISCOVERY_CATEGORY_TYPE.PLUGIN)"
+              >
+                <a-icon type="plus-circle" theme="twoTone" />
+                <span class="setting-discovery-add-text">
+                  {{ $t('cmdb.ad.addPlugin') }}
+                </span>
+              </div>
+            </a-row>
+          </template>
+        </div>
+      </template>
+      <div class="setting-discovery-empty" v-else>
+        <img class="setting-discovery-empty-img" :src="require(`@/modules/monitor/assets/empty-state.svg`)" />
+        <p class="setting-discovery-empty-text">{{ $t('noData') }}</p>
+      </div>
     </div>
     <EditDrawer ref="editDrawer" />
   </div>
 </template>
 
 <script>
+import _ from 'lodash'
 import { getDiscovery, deleteDiscovery } from '../../api/discovery'
+import { DISCOVERY_CATEGORY_TYPE } from './constants.js'
 import DiscoveryCard from './discoveryCard.vue'
 import EditDrawer from './editDrawer.vue'
+
 export default {
   name: 'AutoDiscovery',
   components: { DiscoveryCard, EditDrawer },
@@ -45,26 +96,56 @@ export default {
   },
   data() {
     return {
-      typeCategoryChildren: { agent: [], snmp: [], http: [] },
+      typeCategoryChildren: {},
+      DISCOVERY_CATEGORY_TYPE,
+      radioKey: '',
+      searchValue: '',
     }
   },
   computed: {
     typeCategory() {
       return [
         {
-          type: 'agent',
+          type: DISCOVERY_CATEGORY_TYPE.HTTP,
+          label: this.$t('cmdb.ad.http'),
+        },
+        {
+          type: DISCOVERY_CATEGORY_TYPE.AGENT,
           label: this.$t('cmdb.ad.agent'),
         },
         {
-          type: 'snmp',
+          type: DISCOVERY_CATEGORY_TYPE.SNMP,
           label: this.$t('cmdb.ad.snmp'),
         },
         {
-          type: 'http',
-          label: this.$t('cmdb.ad.http'),
-        },
+          type: DISCOVERY_CATEGORY_TYPE.PLUGIN,
+          label: this.$t('cmdb.ad.plugin'),
+        }
       ]
     },
+    filterCategoryChildren() {
+      const _typeCategoryChildren = _.cloneDeep(this.typeCategoryChildren)
+      const _filterCategoryChildren = Object.values(_typeCategoryChildren).reduce((obj, category) => {
+        if (this.radioKey === '' || category.type === this.radioKey) {
+          category.children = category.children.filter((item) => {
+            return item?.name?.indexOf(this.searchValue) !== -1
+          })
+          obj[category.type] = category
+        }
+        return obj
+      }, {})
+
+      return _filterCategoryChildren
+    },
+    showNullData() {
+      const showCount = Object.values(this.filterCategoryChildren).reduce((acc, item) => {
+        return acc + (item?.children?.length || 0)
+      }, 0)
+      return showCount === 0
+    },
+    showAddPlugin() {
+      return !this.isSelected && this.searchValue === ''
+    }
   },
   provide() {
     return {
@@ -76,13 +157,41 @@ export default {
   },
   methods: {
     getDiscovery() {
-      const _typeCategoryChildren = { agent: [], snmp: [], http: [] }
+      const _typeCategoryChildren = {
+        [DISCOVERY_CATEGORY_TYPE.HTTP]: {
+          type: DISCOVERY_CATEGORY_TYPE.HTTP,
+          children: []
+        },
+        [DISCOVERY_CATEGORY_TYPE.AGENT]: {
+          type: DISCOVERY_CATEGORY_TYPE.AGENT,
+          children: []
+        },
+        [DISCOVERY_CATEGORY_TYPE.SNMP]: {
+          type: DISCOVERY_CATEGORY_TYPE.SNMP,
+          children: []
+        },
+        [DISCOVERY_CATEGORY_TYPE.PLUGIN]: {
+          type: DISCOVERY_CATEGORY_TYPE.PLUGIN,
+          children: []
+        }
+      }
       getDiscovery().then((res) => {
         this.typeCategory.forEach(({ type }) => {
-          const _filterData = res.filter((list) => list.type === type && list.is_inner)
-          _typeCategoryChildren[`${type}`] = _filterData
+          let categoryChildren = []
+          switch (type) {
+            case DISCOVERY_CATEGORY_TYPE.PLUGIN:
+              categoryChildren = res.filter((list) => list.is_plugin)
+              break
+            case DISCOVERY_CATEGORY_TYPE.AGENT:
+              categoryChildren = res.filter((list) => !list.is_plugin && list.type === type)
+              break
+            default:
+              categoryChildren = res.filter((list) => list.type === type)
+              break
+          }
+          _typeCategoryChildren[`${type}`]['children'] = categoryChildren
         })
-        this.typeCategoryChildren = _typeCategoryChildren
+        this.$set(this, 'typeCategoryChildren', _typeCategoryChildren)
       })
     },
     handleOpenEditDrawer(data, type, autoType) {
@@ -137,15 +246,102 @@ export default {
       xhr.send(formData)
       return false
     },
+
+    onSearchDiscovery(v) {
+      this.searchValue = v
+    },
+
+    changeRadio(key) {
+      this.radioKey = key === this.radioKey ? '' : key
+    }
   },
 }
 </script>
 
 <style lang="less" scoped>
 .setting-discovery {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: @border-radius-box;
+  &-header {
+    display: flex;
+    align-items: center;
+
+    &-action {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+
+      &-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border: solid 1px @primary-color_8;
+        background-color: #F4F9FF;
+        color: @link-color;
+      }
+    }
+  }
+
+  &-search {
+    width: 254px;
+  }
+
+  &-radio {
+    display: flex;
+    align-items: center;
+    margin-left: 15px;
+    gap: 15px;
+
+    &-item {
+      padding: 4px 14px;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 24px;
+      cursor: pointer;
+
+      &_active {
+        background-color: @primary-color_3;
+        color: @primary-color;
+      }
+    }
+  }
+
+  &-body {
+    background-color: #fff;
+    border-radius: @border-radius-box;
+    box-shadow: 0px 0px 4px 0px rgba(158, 171, 190, 0.25);
+    padding: 20px;
+    margin-top: 24px;
+
+    .setting-discovery-add {
+      height: 105px;
+      width: 180px;
+      border-radius: @border-radius-base;
+      border: 1px dashed @primary-color_8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+
+      &-text {
+        color: @text-color_3;
+        font-size: 12px;
+        font-weight: 400;
+        margin-top: 13px;
+      }
+    }
+
+    .setting-discovery-empty {
+      text-align: center;
+      padding: 20px 0;
+
+      &-text {
+        margin-top: 20px;
+      }
+    }
+  }
+
   .type-header {
     width: 100%;
     display: inline-flex;
