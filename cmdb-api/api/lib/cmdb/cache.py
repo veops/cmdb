@@ -2,12 +2,19 @@
 
 from __future__ import unicode_literals
 
+import datetime
+
 from flask import current_app
 
 from api.extensions import cache
 from api.extensions import db
 from api.lib.cmdb.custom_dashboard import CustomDashboardManager
-from api.models.cmdb import Attribute
+from api.models.cmdb import Attribute, AutoDiscoveryExecHistory
+from api.models.cmdb import AutoDiscoveryCI
+from api.models.cmdb import AutoDiscoveryCIType
+from api.models.cmdb import AutoDiscoveryCITypeRelation
+from api.models.cmdb import AutoDiscoveryCounter
+from api.models.cmdb import AutoDiscoveryRuleSyncHistory
 from api.models.cmdb import CI
 from api.models.cmdb import CIType
 from api.models.cmdb import CITypeAttribute
@@ -448,7 +455,67 @@ class CMDBCounterCache(object):
 
         cache.set(cls.KEY2, result, timeout=0)
 
-        return result
+        res = db.session.query(AutoDiscoveryCI.created_at,
+                               AutoDiscoveryCI.updated_at,
+                               AutoDiscoveryCI.adt_id,
+                               AutoDiscoveryCI.type_id,
+                               AutoDiscoveryCI.is_accept).filter(AutoDiscoveryCI.deleted.is_(False))
+
+        today = datetime.datetime.today()
+        this_month = datetime.datetime(today.year, today.month, 1)
+        last_month = this_month - datetime.timedelta(days=1)
+        last_month = datetime.datetime(last_month.year, last_month.month, 1)
+        this_week = today - datetime.timedelta(days=datetime.date.weekday(today))
+        this_week = datetime.datetime(this_week.year, this_week.month, this_week.day)
+        last_week = this_week - datetime.timedelta(days=7)
+        last_week = datetime.datetime(last_week.year, last_week.month, last_week.day)
+        result = dict()
+        for i in res:
+            if i.type_id not in result:
+                result[i.type_id] = dict(instance_count=0, accept_count=0,
+                                         this_month_count=0, this_week_count=0, last_month_count=0, last_week_count=0)
+
+                adts = AutoDiscoveryCIType.get_by(type_id=i.type_id, to_dict=False)
+                result[i.type_id]['rule_count'] = len(adts) + AutoDiscoveryCITypeRelation.get_by(
+                    ad_type_id=i.type_id, only_query=True).count()
+                result[i.type_id]['exec_target_count'] = len(
+                    set([i.oneagent_id for adt in adts for i in db.session.query(
+                        AutoDiscoveryRuleSyncHistory.oneagent_id).filter(
+                        AutoDiscoveryRuleSyncHistory.adt_id == adt.id)]))
+
+            result[i.type_id]['instance_count'] += 1
+            if i.is_accept:
+                result[i.type_id]['accept_count'] += 1
+
+            if last_month <= i.created_at < this_month:
+                result[i.type_id]['last_month_count'] += 1
+            elif i.created_at >= this_month:
+                result[i.type_id]['this_month_count'] += 1
+
+            if last_week <= i.created_at < this_week:
+                result[i.type_id]['last_week_count'] += 1
+            elif i.created_at >= this_week:
+                result[i.type_id]['this_week_count'] += 1
+
+        for type_id in result:
+            existed = AutoDiscoveryCounter.get_by(type_id=type_id, first=True, to_dict=False)
+            if existed is None:
+                AutoDiscoveryCounter.create(type_id=type_id, **result[type_id])
+            else:
+                existed.update(**result[type_id])
+
+        for i in AutoDiscoveryCounter.get_by(to_dict=False):
+            if i.type_id not in result:
+                i.delete()
+
+    @classmethod
+    def clear_ad_exec_history(cls):
+        ci_types = CIType.get_by(to_dict=False)
+        for ci_type in ci_types:
+            for i in AutoDiscoveryExecHistory.get_by(type_id=ci_type.id, only_query=True).order_by(
+                    AutoDiscoveryExecHistory.id.desc()).offset(50000):
+                i.delete(commit=False)
+            db.session.commit()
 
     @classmethod
     def get_adc_counter(cls):

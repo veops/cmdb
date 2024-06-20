@@ -62,6 +62,7 @@ class ErrFormat(CommonErrFormat):
         "The model cannot be deleted because the CI already exists")  # 因为CI已经存在，不能删除模型
     ci_exists_and_cannot_delete_inheritance = _l(
         "The inheritance cannot be deleted because the CI already exists")  # 因为CI已经存在，不能删除继承关系
+    ci_type_inheritance_cannot_delete = _l("The model is inherited and cannot be deleted")  # 该模型被继承, 不能删除
 
     # 因为关系视图 {} 引用了该模型，不能删除模型
     ci_relation_view_exists_and_cannot_delete_type = _l(

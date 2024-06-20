@@ -2,6 +2,7 @@
 
 
 import json
+import datetime
 
 import redis_lock
 from flask import current_app
@@ -25,6 +26,8 @@ from api.lib.utils import handle_arg_list
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
 from api.models.cmdb import CITypeAttribute
+from api.models.cmdb import AutoDiscoveryCI
+from api.models.cmdb import AutoDiscoveryCIType
 
 
 @celery.task(name="cmdb.ci_cache", queue=CMDB_QUEUE)
@@ -86,6 +89,13 @@ def ci_delete(ci_id):
         es.delete(ci_id)
     else:
         rd.delete(ci_id, REDIS_PREFIX_CI)
+
+    instance = AutoDiscoveryCI.get_by(ci_id=ci_id, to_dict=False, first=True)
+    if instance is not None:
+        adt = AutoDiscoveryCIType.get_by_id(instance.adt_id)
+        if adt:
+            adt.update(updated_at=datetime.datetime.now())
+        instance.delete()
 
     current_app.logger.info("{0} delete..........".format(ci_id))
 
@@ -249,3 +259,21 @@ def calc_computed_attribute(attr_id, uid):
         cis = CI.get_by(type_id=i.type_id, to_dict=False)
         for ci in cis:
             cim.update(ci.id, {})
+
+
+@celery.task(name="cmdb.write_ad_rule_sync_history", queue=CMDB_QUEUE)
+@reconnect_db
+def write_ad_rule_sync_history(rules, oneagent_id, oneagent_name, sync_at):
+    from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryRuleSyncHistoryCRUD
+
+    for rule in rules:
+        AutoDiscoveryRuleSyncHistoryCRUD().upsert(adt_id=rule['id'],
+                                                  oneagent_id=oneagent_id,
+                                                  oneagent_name=oneagent_name,
+                                                  sync_at=sync_at,
+                                                  commit=False)
+    try:
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error("write auto discovery rule sync history failed: {}".format(e))
+        db.session.rollback()

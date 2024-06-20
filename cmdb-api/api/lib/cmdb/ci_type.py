@@ -229,6 +229,9 @@ class CITypeManager(object):
         if CI.get_by(type_id=type_id, first=True, to_dict=False) is not None:
             return abort(400, ErrFormat.ci_exists_and_cannot_delete_type)
 
+        if CITypeInheritance.get_by(parent_id=type_id, first=True):
+            return abort(400, ErrFormat.ci_type_inheritance_cannot_delete)
+
         relation_views = PreferenceRelationView.get_by(to_dict=False)
         for rv in relation_views:
             for item in (rv.cr_ids or []):
@@ -253,21 +256,21 @@ class CITypeManager(object):
             item.delete(commit=False)
 
         for item in AutoDiscoveryCITypeRelation.get_by(ad_type_id=type_id, to_dict=False):
-            item.delete(commit=False)
+            item.soft_delete(commit=False)
 
         for item in AutoDiscoveryCITypeRelation.get_by(peer_type_id=type_id, to_dict=False):
-            item.delete(commit=False)
+            item.soft_delete(commit=False)
 
         for item in CITypeInheritance.get_by(parent_id=type_id, to_dict=False):
-            item.delete(commit=False)
+            item.soft_delete(commit=False)
 
         for item in CITypeInheritance.get_by(child_id=type_id, to_dict=False):
-            item.delete(commit=False)
+            item.soft_delete(commit=False)
 
         try:
             from api.models.cmdb import CITypeReconciliation
             for item in CITypeReconciliation.get_by(type_id=type_id, to_dict=False):
-                item.delete(commit=False)
+                item.soft_delete(commit=False)
         except Exception:
             pass
 

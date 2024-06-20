@@ -190,6 +190,7 @@ def cmdb_counter():
     login_user(UserCache.get('worker'))
 
     i = 0
+    today = datetime.date.today()
     while True:
         try:
             db.session.remove()
@@ -199,6 +200,10 @@ def cmdb_counter():
             if i % 5 == 0:
                 CMDBCounterCache.flush_adc_counter()
                 i = 0
+
+            if datetime.date.today() != today:
+                CMDBCounterCache.clear_ad_exec_history()
+                today = datetime.date.today()
 
             CMDBCounterCache.flush_sub_counter()
 
@@ -493,3 +498,48 @@ def cmdb_agent_init():
 
     click.echo("Key   : {}".format(click.style(user.key, bg='red')))
     click.echo("Secret: {}".format(click.style(user.secret, bg='red')))
+
+
+@click.command()
+@click.option(
+    '-v',
+    '--version',
+    help='input cmdb version, e.g. 2.4.6',
+    required=True,
+)
+@with_appcontext
+def cmdb_patch(version):
+    """
+    CMDB upgrade patch
+    """
+
+    version = version[1:] if version.lower().startswith("v") else version
+
+    if version >= '2.4.6':
+
+        from api.models.cmdb import CITypeRelation
+        for cr in CITypeRelation.get_by(to_dict=False):
+            if hasattr(cr, 'parent_attr_id') and cr.parent_attr_id and not cr.parent_attr_ids:
+                parent_attr_ids, child_attr_ids = [cr.parent_attr_id], [cr.child_attr_id]
+                cr.update(parent_attr_ids=parent_attr_ids, child_attr_ids=child_attr_ids, commit=False)
+        db.session.commit()
+
+        from api.models.cmdb import AutoDiscoveryCIType, AutoDiscoveryCITypeRelation
+        from api.lib.cmdb.cache import CITypeCache, AttributeCache
+        for adt in AutoDiscoveryCIType.get_by(to_dict=False):
+            if adt.relation:
+                if not AutoDiscoveryCITypeRelation.get_by(ad_type_id=adt.type_id):
+                    peer_type = CITypeCache.get(list(adt.relation.values())['type_name'])
+                    peer_type_id = peer_type and peer_type.id
+                    peer_attr = AttributeCache.get(list(adt.relation.values())['attr_name'])
+                    peer_attr_id = peer_attr and peer_attr.id
+                    if peer_type_id and peer_attr_id:
+                        AutoDiscoveryCITypeRelation.create(ad_type_id=adt.type_id,
+                                                           ad_key=list(adt.relation.keys())[0],
+                                                           peer_type_id=peer_type_id,
+                                                           peer_attr_id=peer_attr_id,
+                                                           commit=False)
+            if hasattr(adt, 'interval') and adt.interval and not adt.cron:
+                adt.cron = "*/{} * * * *".format(adt.interval // 60)
+
+        db.session.commit()

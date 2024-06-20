@@ -1,34 +1,47 @@
 # -*- coding:utf-8 -*-
+import copy
 import datetime
 import json
 import os
 
+from flask import abort
+from flask import current_app
+from flask_login import current_user
+from sqlalchemy import func
+
 from api.extensions import db
 from api.lib.cmdb.auto_discovery.const import ClOUD_MAP
+from api.lib.cmdb.auto_discovery.const import DEFAULT_HTTP
+from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributeCache
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci import CIManager
 from api.lib.cmdb.ci import CIRelationManager
 from api.lib.cmdb.ci_type import CITypeGroupManager
 from api.lib.cmdb.const import AutoDiscoveryType
+from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.search import SearchError
-from api.lib.cmdb.search.ci import search
+from api.lib.cmdb.search.ci import search as ci_search
+from api.lib.common_setting.role_perm_base import CMDBApp
 from api.lib.mixin import DBMixin
+from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import validate_permission
 from api.lib.utils import AESCrypto
 from api.models.cmdb import AutoDiscoveryCI
 from api.models.cmdb import AutoDiscoveryCIType
+from api.models.cmdb import AutoDiscoveryCITypeRelation
+from api.models.cmdb import AutoDiscoveryCounter
+from api.models.cmdb import AutoDiscoveryExecHistory
 from api.models.cmdb import AutoDiscoveryRule
-from flask import abort
-from flask import current_app
-from flask_login import current_user
-from sqlalchemy import func
+from api.models.cmdb import AutoDiscoveryRuleSyncHistory
+from api.tasks.cmdb import write_ad_rule_sync_history
 
 PWD = os.path.abspath(os.path.dirname(__file__))
+app_cli = CMDBApp()
 
 
 def parse_plugin_script(script):
@@ -100,6 +113,14 @@ class AutoDiscoveryRuleCRUD(DBMixin):
         self.cls.get_by(name=kwargs['name']) and abort(400, ErrFormat.adr_duplicate.format(kwargs['name']))
         if kwargs.get('is_plugin') and kwargs.get('plugin_script'):
             kwargs = check_plugin_script(**kwargs)
+            acl = ACLManager(app_cli.app_name)
+            if not acl.has_permission(app_cli.op.Auto_Discovery,
+                                      app_cli.resource_type_name,
+                                      app_cli.op.create_plugin) and not is_app_admin(app_cli.app_name):
+                return abort(403, ErrFormat.no_permission.format(
+                    app_cli.op.Auto_Discovery, app_cli.op.create_plugin))
+
+        kwargs['owner'] = current_user.uid
 
         return kwargs
 
@@ -115,6 +136,14 @@ class AutoDiscoveryRuleCRUD(DBMixin):
             if other and other.id != existed.id:
                 return abort(400, ErrFormat.adr_duplicate.format(kwargs['name']))
 
+        if existed.is_plugin:
+            acl = ACLManager(app_cli.app_name)
+            if not acl.has_permission(app_cli.op.Auto_Discovery,
+                                      app_cli.resource_type_name,
+                                      app_cli.op.update_plugin) and not is_app_admin(app_cli.app_name):
+                return abort(403, ErrFormat.no_permission.format(
+                    app_cli.op.Auto_Discovery, app_cli.op.update_plugin))
+
         return existed
 
     def update(self, _id, **kwargs):
@@ -122,13 +151,27 @@ class AutoDiscoveryRuleCRUD(DBMixin):
         if kwargs.get('is_plugin') and kwargs.get('plugin_script'):
             kwargs = check_plugin_script(**kwargs)
 
+            for item in AutoDiscoveryCIType.get_by(adr_id=_id, to_dict=False):
+                item.update(updated_at=datetime.datetime.now())
+
         return super(AutoDiscoveryRuleCRUD, self).update(_id, filter_none=False, **kwargs)
 
     def _can_delete(self, **kwargs):
         if AutoDiscoveryCIType.get_by(adr_id=kwargs['_id'], first=True):
             return abort(400, ErrFormat.adr_referenced)
 
-        return self._can_update(**kwargs)
+        existed = self.cls.get_by_id(kwargs['_id']) or abort(
+            404, ErrFormat.adr_not_found.format("id={}".format(kwargs['_id'])))
+
+        if existed.is_plugin:
+            acl = ACLManager(app_cli.app_name)
+            if not acl.has_permission(app_cli.op.Auto_Discovery,
+                                      app_cli.resource_type_name,
+                                      app_cli.op.delete_plugin) and not is_app_admin(app_cli.app_name):
+                return abort(403, ErrFormat.no_permission.format(
+                    app_cli.op.Auto_Discovery, app_cli.op.delete_plugin))
+
+        return existed
 
 
 class AutoDiscoveryCITypeCRUD(DBMixin):
@@ -147,14 +190,34 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
         return cls.cls.get_by(type_id=type_id, to_dict=False)
 
     @classmethod
-    def get(cls, ci_id, oneagent_id, last_update_at=None):
+    def get_ad_attributes(cls, type_id):
+        result = []
+        adts = cls.get_by_type_id(type_id)
+        for adt in adts:
+            adr = AutoDiscoveryRuleCRUD.get_by_id(adt.adr_id)
+            if not adr:
+                continue
+            if adr.type == "http":
+                for i in DEFAULT_HTTP:
+                    if adr.name == i['name']:
+                        attrs = AutoDiscoveryHTTPManager.get_attributes(
+                            i['en'], (adt.extra_option or {}).get('category')) or []
+                        result.extend([i.get('name') for i in attrs])
+                        break
+            elif adr.type == "snmp":
+                attributes = AutoDiscoverySNMPManager.get_attributes()
+                result.extend([i.get('name') for i in (attributes or [])])
+            else:
+                result.extend([i.get('name') for i in (adr.attributes or [])])
+
+        return sorted(list(set(result)))
+
+    @classmethod
+    def get(cls, ci_id, oneagent_id, oneagent_name, last_update_at=None):
         result = []
         rules = cls.cls.get_by(to_dict=True)
 
         for rule in rules:
-            if rule.get('relation'):
-                continue
-
             if isinstance(rule.get("extra_option"), dict) and rule['extra_option'].get('secret'):
                 if not (current_user.username == "cmdb_agent" or current_user.uid == rule['uid']):
                     rule['extra_option'].pop('secret', None)
@@ -165,7 +228,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
                 result.append(rule)
             elif rule['query_expr']:
                 query = rule['query_expr'].lstrip('q').lstrip('=')
-                s = search(query, fl=['_id'], count=1000000)
+                s = ci_search(query, fl=['_id'], count=1000000)
                 try:
                     response, _, _, _, _, _ = s.search()
                 except SearchError as e:
@@ -182,9 +245,6 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
                 if adr.type in (AutoDiscoveryType.SNMP, AutoDiscoveryType.HTTP):
                     continue
 
-                if not rule['updated_at']:
-                    continue
-
                 result.append(rule)
 
         new_last_update_at = ""
@@ -194,6 +254,9 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
                                     i['adr']['created_at'] or "", i['adr']['updated_at'] or ""])
             if new_last_update_at < __last_update_at:
                 new_last_update_at = __last_update_at
+
+        write_ad_rule_sync_history.apply_async(args=(result, oneagent_id, oneagent_name, datetime.datetime.now()),
+                                               queue=CMDB_QUEUE)
 
         if not last_update_at or new_last_update_at > last_update_at:
             return result, new_last_update_at
@@ -213,7 +276,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
             agent_id = agent_id.strip()
             q = "op_duty:{0},-rd_duty:{0},oneagent_id:{1}"
 
-            s = search(q.format(current_user.username, agent_id.strip()))
+            s = ci_search(q.format(current_user.username, agent_id.strip()))
             try:
                 response, _, _, _, _, _ = s.search()
                 if response:
@@ -222,7 +285,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
                 current_app.logger.warning(e)
                 return abort(400, str(e))
 
-            s = search(q.format(current_user.nickname, agent_id.strip()))
+            s = ci_search(q.format(current_user.nickname, agent_id.strip()))
             try:
                 response, _, _, _, _, _ = s.search()
                 if response:
@@ -236,7 +299,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
             if query_expr.startswith('q='):
                 query_expr = query_expr[2:]
 
-            s = search(query_expr, count=1000000)
+            s = ci_search(query_expr, count=1000000)
             try:
                 response, _, _, _, _, _ = s.search()
                 for i in response:
@@ -254,19 +317,32 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
     def _can_add(**kwargs):
 
         if kwargs.get('adr_id'):
-            AutoDiscoveryRule.get_by_id(kwargs['adr_id']) or abort(
+            adr = AutoDiscoveryRule.get_by_id(kwargs['adr_id']) or abort(
                 404, ErrFormat.adr_not_found.format("id={}".format(kwargs['adr_id'])))
-            # if not adr.is_plugin:
-            #     other = self.cls.get_by(adr_id=adr.id, first=True, to_dict=False)
-            #     if other:
-            #         ci_type = CITypeCache.get(other.type_id)
-            #         return abort(400, ErrFormat.adr_default_ref_once.format(ci_type.alias))
+            if adr.type == "http":
+                kwargs.setdefault('extra_option', dict)
+                en_name = None
+                for i in DEFAULT_HTTP:
+                    if i['name'] == adr.name:
+                        en_name = i['en']
+                        break
+                if en_name and kwargs['extra_option'].get('category'):
+                    for item in ClOUD_MAP[en_name]:
+                        if item["collect_key_map"].get(kwargs['extra_option']['category']):
+                            kwargs["extra_option"]["collect_key"] = item["collect_key_map"][
+                                kwargs['extra_option']['category']]
+                            break
 
         if kwargs.get('is_plugin') and kwargs.get('plugin_script'):
             kwargs = check_plugin_script(**kwargs)
 
         if isinstance(kwargs.get('extra_option'), dict) and kwargs['extra_option'].get('secret'):
             kwargs['extra_option']['secret'] = AESCrypto.encrypt(kwargs['extra_option']['secret'])
+
+        ci_type = CITypeCache.get(kwargs['type_id'])
+        unique = AttributeCache.get(ci_type.unique_id)
+        if unique and unique.name not in (kwargs.get('attributes') or {}).values():
+            return abort(400, ErrFormat.ad_not_unique_key.format(unique.name))
 
         kwargs['uid'] = current_user.uid
 
@@ -276,7 +352,29 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
         existed = self.cls.get_by_id(kwargs['_id']) or abort(
             404, ErrFormat.ad_not_found.format("id={}".format(kwargs['_id'])))
 
-        self.__valid_exec_target(kwargs.get('agent_id'), kwargs.get('query_expr'))
+        adr = AutoDiscoveryRule.get_by_id(existed.adr_id) or abort(
+            404, ErrFormat.adr_not_found.format("id={}".format(existed.adr_id)))
+        if adr.type == "http":
+            kwargs.setdefault('extra_option', dict)
+            en_name = None
+            for i in DEFAULT_HTTP:
+                if i['name'] == adr.name:
+                    en_name = i['en']
+                    break
+            if en_name and kwargs['extra_option'].get('category'):
+                for item in ClOUD_MAP[en_name]:
+                    if item["collect_key_map"].get(kwargs['extra_option']['category']):
+                        kwargs["extra_option"]["collect_key"] = item["collect_key_map"][
+                            kwargs['extra_option']['category']]
+                        break
+
+        if 'attributes' in kwargs:
+            self.__valid_exec_target(kwargs.get('agent_id'), kwargs.get('query_expr'))
+
+            ci_type = CITypeCache.get(existed.type_id)
+            unique = AttributeCache.get(ci_type.unique_id)
+            if unique and unique.name not in (kwargs.get('attributes') or {}).values():
+                return abort(400, ErrFormat.ad_not_unique_key.format(unique.name))
 
         if isinstance(kwargs.get('extra_option'), dict) and kwargs['extra_option'].get('secret'):
             if current_user.uid != existed.uid:
@@ -292,7 +390,15 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
         if isinstance(kwargs.get('extra_option'), dict) and kwargs['extra_option'].get('secret'):
             kwargs['extra_option']['secret'] = AESCrypto.encrypt(kwargs['extra_option']['secret'])
 
-        return super(AutoDiscoveryCITypeCRUD, self).update(_id, filter_none=False, **kwargs)
+        inst = self._can_update(_id=_id, **kwargs)
+        if inst.agent_id != kwargs.get('agent_id') or inst.query_expr != kwargs.get('query_expr'):
+            for item in AutoDiscoveryRuleSyncHistory.get_by(adt_id=inst.id, to_dict=False):
+                item.delete(commit=False)
+            db.session.commit()
+
+        obj = inst.update(_id=_id, filter_none=False, **kwargs)
+
+        return obj
 
     def _can_delete(self, **kwargs):
         if AutoDiscoveryCICRUD.get_by_adt_id(kwargs['_id']):
@@ -302,6 +408,56 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
             404, ErrFormat.ad_not_found.format("id={}".format(kwargs['_id'])))
 
         return existed
+
+    def delete(self, _id):
+        inst = self._can_delete(_id=_id)
+
+        inst.soft_delete()
+
+        for item in AutoDiscoveryRuleSyncHistory.get_by(adt_id=inst.id, to_dict=False):
+            item.delete(commit=False)
+        db.session.commit()
+
+        attributes = self.get_ad_attributes(inst.type_id)
+        for item in AutoDiscoveryCITypeRelationCRUD.get_by_type_id(inst.type_id):
+            if item.ad_key not in attributes:
+                item.soft_delete()
+
+        return inst
+
+
+class AutoDiscoveryCITypeRelationCRUD(DBMixin):
+    cls = AutoDiscoveryCITypeRelation
+
+    @classmethod
+    def get_by_type_id(cls, type_id, to_dict=False):
+        return cls.cls.get_by(ad_type_id=type_id, to_dict=to_dict)
+
+    def upsert(self, ad_type_id, relations):
+        existed = self.cls.get_by(ad_type_id=ad_type_id, to_dict=False)
+        existed = {(i.ad_key, i.peer_type_id, i.peer_attr_id): i for i in existed}
+
+        new = []
+        for r in relations:
+            k = (r.get('ad_key'), r.get('peer_type_id'), r.get('peer_attr_id'))
+            if len(list(filter(lambda x: x, k))) == 3 and k not in existed:
+                self.cls.create(ad_type_id=ad_type_id, **r)
+
+            new.append(k)
+
+        for deleted in set(existed.keys()) - set(new):
+            existed[deleted].soft_delete()
+
+        return self.get_by_type_id(ad_type_id, to_dict=True)
+
+    def _can_add(self, **kwargs):
+        pass
+
+    def _can_update(self, **kwargs):
+        pass
+
+    def _can_delete(self, **kwargs):
+        pass
 
 
 class AutoDiscoveryCICRUD(DBMixin):
@@ -391,16 +547,24 @@ class AutoDiscoveryCICRUD(DBMixin):
         changed = False
         if existed is not None:
             if existed.instance != kwargs['instance']:
+                instance = copy.deepcopy(existed.instance) or {}
+                instance.update(kwargs['instance'])
+                kwargs['instance'] = instance
                 existed.update(filter_none=False, **kwargs)
+                AutoDiscoveryExecHistoryCRUD().add(type_id=adt.type_id,
+                                                   stdout="update resource: {}".format(kwargs.get('unique_value')))
                 changed = True
         else:
             existed = self.cls.create(**kwargs)
+            AutoDiscoveryExecHistoryCRUD().add(type_id=adt.type_id,
+                                               stdout="add resource: {}".format(kwargs.get('unique_value')))
             changed = True
 
         if adt.auto_accept and changed:
             try:
                 self.accept(existed)
             except Exception as e:
+                current_app.logger.error(e)
                 return abort(400, str(e))
         elif changed:
             existed.update(is_accept=False, accept_time=None, accept_by=None, filter_none=False)
@@ -420,6 +584,13 @@ class AutoDiscoveryCICRUD(DBMixin):
 
         inst.delete()
 
+        adt = AutoDiscoveryCIType.get_by_id(inst.adt_id)
+        if adt:
+            adt.update(updated_at=datetime.datetime.now())
+
+        AutoDiscoveryExecHistoryCRUD().add(type_id=inst.type_id,
+                                           stdout="delete resource: {}".format(inst.unique_value))
+
         self._after_delete(inst)
 
         return inst
@@ -435,6 +606,13 @@ class AutoDiscoveryCICRUD(DBMixin):
             not is_app_admin("cmdb") and validate_permission(ci_type.name, ResourceTypeEnum.CI, PermEnum.DELETE, "cmdb")
 
         existed.delete()
+
+        adt = AutoDiscoveryCIType.get_by_id(existed.adt_id)
+        if adt:
+            adt.update(updated_at=datetime.datetime.now())
+
+        AutoDiscoveryExecHistoryCRUD().add(type_id=type_id,
+                                           stdout="delete resource: {}".format(unique_value))
         # TODO: delete ci
 
     @classmethod
@@ -447,32 +625,34 @@ class AutoDiscoveryCICRUD(DBMixin):
         ci_id = None
         if adt.attributes:
             ci_dict = {adt.attributes[k]: v for k, v in adc.instance.items() if k in adt.attributes}
-            ci_id = CIManager.add(adc.type_id, is_auto_discovery=True, **ci_dict)
+            ci_id = CIManager.add(adc.type_id, is_auto_discovery=True, _is_admin=True, **ci_dict)
+            AutoDiscoveryExecHistoryCRUD().add(type_id=adt.type_id,
+                                               stdout="accept resource: {}".format(adc.unique_value))
 
-        relation_adts = AutoDiscoveryCIType.get_by(type_id=adt.type_id, adr_id=None, to_dict=False)
-        for r_adt in relation_adts:
-            if not r_adt.relation or ci_id is None:
+        relation_ads = AutoDiscoveryCITypeRelation.get_by(ad_type_id=adt.type_id, to_dict=False)
+        for r_adt in relation_ads:
+            ad_key = r_adt.ad_key
+            if not adc.instance.get(ad_key):
                 continue
-            for ad_key in r_adt.relation:
-                if not adc.instance.get(ad_key):
-                    continue
-                cmdb_key = r_adt.relation[ad_key]
-                query = "_type:{},{}:{}".format(cmdb_key.get('type_name'), cmdb_key.get('attr_name'),
-                                                adc.instance.get(ad_key))
-                s = search(query)
+
+            ad_key_values = [adc.instance.get(ad_key)] if not isinstance(
+                adc.instance.get(ad_key), list) else adc.instance.get(ad_key)
+            for ad_key_value in ad_key_values:
+                query = "_type:{},{}:{}".format(r_adt.peer_type_id, r_adt.peer_attr_id, ad_key_value)
+                s = ci_search(query, use_ci_filter=False, count=1000000)
                 try:
                     response, _, _, _, _, _ = s.search()
                 except SearchError as e:
                     current_app.logger.warning(e)
                     return abort(400, str(e))
 
-                relation_ci_id = response and response[0]['_id']
-                if relation_ci_id:
+                for relation_ci in response:
+                    relation_ci_id = relation_ci['_id']
                     try:
-                        CIRelationManager.add(ci_id, relation_ci_id)
+                        CIRelationManager.add(ci_id, relation_ci_id, valid=False)
                     except:
                         try:
-                            CIRelationManager.add(relation_ci_id, ci_id)
+                            CIRelationManager.add(relation_ci_id, ci_id, valid=False)
                         except:
                             pass
 
@@ -485,14 +665,35 @@ class AutoDiscoveryCICRUD(DBMixin):
 class AutoDiscoveryHTTPManager(object):
     @staticmethod
     def get_categories(name):
-        return (ClOUD_MAP.get(name) or {}).get('categories') or []
+        categories = (ClOUD_MAP.get(name) or {}) or []
+        for item in copy.deepcopy(categories):
+            item.pop('map', None)
+
+        return categories
+
+    def get_resources(self, name):
+        en_name = None
+        for i in DEFAULT_HTTP:
+            if i['name'] == name:
+                en_name = i['en']
+                break
+
+        if en_name:
+            categories = self.get_categories(en_name)
+
+            return [j for i in categories for j in i['items']]
+
+        return []
 
     @staticmethod
-    def get_attributes(name, category):
-        tpt = ((ClOUD_MAP.get(name) or {}).get('map') or {}).get(category)
-        if tpt and os.path.exists(os.path.join(PWD, tpt)):
-            with open(os.path.join(PWD, tpt)) as f:
-                return json.loads(f.read())
+    def get_attributes(provider, resource):
+        for item in (ClOUD_MAP.get(provider) or {}):
+            for _resource in (item.get('map') or {}):
+                if _resource == resource:
+                    tpt = item['map'][_resource]
+                    if tpt and os.path.exists(os.path.join(PWD, tpt)):
+                        with open(os.path.join(PWD, tpt)) as f:
+                            return json.loads(f.read())
 
         return []
 
@@ -506,3 +707,62 @@ class AutoDiscoverySNMPManager(object):
                 return json.loads(f.read())
 
         return []
+
+
+class AutoDiscoveryRuleSyncHistoryCRUD(DBMixin):
+    cls = AutoDiscoveryRuleSyncHistory
+
+    def _can_add(self, **kwargs):
+        pass
+
+    def _can_update(self, **kwargs):
+        pass
+
+    def _can_delete(self, **kwargs):
+        pass
+
+    def upsert(self, **kwargs):
+        existed = self.cls.get_by(adt_id=kwargs.get('adt_id'),
+                                  oneagent_id=kwargs.get('oneagent_id'),
+                                  oneagent_name=kwargs.get('oneagent_name'),
+                                  first=True,
+                                  to_dict=False)
+
+        if existed is not None:
+            existed.update(**kwargs)
+        else:
+            self.cls.create(**kwargs)
+
+
+class AutoDiscoveryExecHistoryCRUD(DBMixin):
+    cls = AutoDiscoveryExecHistory
+
+    def _can_add(self, **kwargs):
+        pass
+
+    def _can_update(self, **kwargs):
+        pass
+
+    def _can_delete(self, **kwargs):
+        pass
+
+
+class AutoDiscoveryCounterCRUD(DBMixin):
+    cls = AutoDiscoveryCounter
+
+    def get(self, type_id):
+        res = self.cls.get_by(type_id=type_id, first=True, to_dict=True)
+        if res is None:
+            return dict(rule_count=0, exec_target_count=0, instance_count=0, accept_count=0,
+                        this_month_count=0, this_week_count=0, last_month_count=0, last_week_count=0)
+
+        return res
+
+    def _can_add(self, **kwargs):
+        pass
+
+    def _can_update(self, **kwargs):
+        pass
+
+    def _can_delete(self, **kwargs):
+        pass
