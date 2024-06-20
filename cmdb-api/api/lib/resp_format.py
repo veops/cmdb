@@ -29,6 +29,6 @@ class CommonErrFormat(object):
 
     role_required = _l("Role {} can only operate!")  # 角色 {} 才能操作!
     user_not_found = _l("User {} does not exist")  # 用户 {} 不存在
-    no_permission = _l("You do not have {} permission for resource: {}!")  # 您没有资源: {} 的{}权限!
+    no_permission = _l("For resource: {}, you do not have {} permission!")  # 您没有资源: {} 的{}权限!
     no_permission2 = _l("You do not have permission to operate!")  # 您没有操作权限!
     no_permission_only_owner = _l("Only the creator or administrator has permission!")  # 只有创建人或者管理员才有权限!

@@ -223,7 +223,7 @@ class CIManager(object):
     def ci_is_exist(unique_key, unique_value, type_id):
         """
 
-        :param unique_key: is a attribute
+        :param unique_key: is an attribute
         :param unique_value:
         :param type_id:
         :return:
@@ -432,7 +432,7 @@ class CIManager(object):
             for attr_id in password_dict:
                 record_id = cls.save_password(ci.id, attr_id, password_dict[attr_id], record_id, ci_type.id)
 
-        if record_id or has_dynamic:  # has change
+        if record_id or has_dynamic:  # has changed
             ci_cache.apply_async(args=(ci.id, operate_type, record_id), queue=CMDB_QUEUE)
 
         if ref_ci_dict:  # add relations
@@ -504,7 +504,7 @@ class CIManager(object):
             for attr_id in password_dict:
                 record_id = self.save_password(ci.id, attr_id, password_dict[attr_id], record_id, ci.type_id)
 
-        if record_id or has_dynamic:  # has change
+        if record_id or has_dynamic:  # has changed
             if not __sync:
                 ci_cache.apply_async(args=(ci_id, OperateType.UPDATE, record_id), queue=CMDB_QUEUE)
             else:
@@ -737,7 +737,7 @@ class CIManager(object):
                        fields=None, value_tables=None, unique_required=False, excludes=None):
         """
 
-        :param ci_ids: list of CI instance ID, eg. ['1', '2']
+        :param ci_ids: list of CI instance ID, e.g. ['1', '2']
         :param ret_key: name, id or alias
         :param fields:
         :param value_tables:
@@ -1296,7 +1296,7 @@ class CIRelationManager(object):
                     relations = _relations
                 else:
                     relations &= _relations
-            for parent_ci_id, child_ci_id in relations:
+            for parent_ci_id, child_ci_id in (relations or []):
                 CIRelationManager.add(parent_ci_id, child_ci_id, valid=False)
 
         parent_items = CITypeRelation.get_by(child_id=type_id, only_query=True).filter(
@@ -1316,7 +1316,7 @@ class CIRelationManager(object):
                     relations = _relations
                 else:
                     relations &= _relations
-            for parent_ci_id, child_ci_id in relations:
+            for parent_ci_id, child_ci_id in (relations or []):
                 CIRelationManager.add(parent_ci_id, child_ci_id, valid=False)
 
     @classmethod

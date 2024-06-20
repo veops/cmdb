@@ -13,6 +13,7 @@ from api.lib.cmdb.const import OperateType
 from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.perm.acl.cache import UserCache
+from api.models.cmdb import CI
 from api.models.cmdb import Attribute
 from api.models.cmdb import AttributeHistory
 from api.models.cmdb import CIRelationHistory
@@ -306,7 +307,7 @@ class CITriggerHistoryManager(object):
     def get(page, page_size, type_id=None, trigger_id=None, operate_type=None):
         query = CITriggerHistory.get_by(only_query=True)
         if type_id:
-            query = query.filter(CITriggerHistory.type_id == type_id)
+            query = query.join(CI, CI.id == CITriggerHistory.ci_id).filter(CI.type_id == type_id)
 
         if trigger_id:
             query = query.filter(CITriggerHistory.trigger_id == trigger_id)

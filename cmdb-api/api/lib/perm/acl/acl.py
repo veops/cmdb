@@ -253,9 +253,6 @@ def is_app_admin(app=None):
     if app is None:
         return False
 
-    if hasattr(current_user, 'username') and current_user.username == 'worker':
-        return True
-
     app_id = app.id
     if 'acl_admin' in session.get("acl", {}).get("parentRoles", []):
         return True
