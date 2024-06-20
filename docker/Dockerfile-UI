@@ -1,5 +1,5 @@
 # ================================= UI ================================
-FROM node:16.20 AS builder
+FROM node:14.17.3-alpine AS builder
 
 LABEL description="cmdb-ui"
 
