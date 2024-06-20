@@ -1,6 +1,10 @@
 <template>
   <a-modal width="800px" :visible="visible" @ok="handleOK" @cancel="handleCancel" :closable="false">
-    <Discovery :isSelected="true" :style="{ maxHeight: '75vh', overflow: 'auto' }" />
+    <Discovery
+      :isSelected="true"
+      :style="{ maxHeight: '75vh', overflow: 'auto' }"
+      v-if="visible"
+    />
     <template #footer>
       <a-space>
         <a-button @click="handleCancel">{{ $t('cancel') }}</a-button>
@@ -14,7 +18,7 @@
 <script>
 import _ from 'lodash'
 import Discovery from '../discovery'
-import { postCITypeDiscovery } from '../../api/discovery'
+
 export default {
   name: 'ADModal',
   components: { Discovery },
@@ -49,20 +53,17 @@ export default {
     },
     async handleOK() {
       if (this.selectedIds && this.selectedIds.length) {
-        const promises = this.selectedIds.map(({ id, type }) => {
-          return postCITypeDiscovery(this.CITypeId, { adr_id: id, interval: type === 'agent' ? 300 : 3600 })
+        const adCITypeList = this.selectedIds.map((item, index) => {
+          return {
+            adr_id: item.id,
+            id: new Date().getTime() + index,
+            extra_option: {
+              alias: ''
+            },
+            isClient: true,
+          }
         })
-        await Promise.all(promises)
-          .then((res) => {
-            this.getCITypeDiscovery(res[0].id)
-            this.$message.success(this.$t('addSuccess'))
-          })
-          .catch(() => {
-            this.getCITypeDiscovery()
-          })
-          .finally(() => {
-            this.handleCancel()
-          })
+        this.$emit('pushCITypeList', adCITypeList)
       }
       this.handleCancel()
     },

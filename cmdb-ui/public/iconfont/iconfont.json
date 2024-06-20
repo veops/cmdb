@@ -6,6 +6,97 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "40795271",
+      "name": "cmdb-manual_warehousing",
+      "font_class": "cmdb-manual_warehousing",
+      "unicode": "e95f",
+      "unicode_decimal": 59743
+    },
+    {
+      "icon_id": "40791408",
+      "name": "cmdb-not_warehousing",
+      "font_class": "cmdb-not_warehousing",
+      "unicode": "e95d",
+      "unicode_decimal": 59741
+    },
+    {
+      "icon_id": "40791401",
+      "name": "cmdb-warehousing",
+      "font_class": "cmdb-warehousing",
+      "unicode": "e95e",
+      "unicode_decimal": 59742
+    },
+    {
+      "icon_id": "40731588",
+      "name": "cmdb-prompt",
+      "font_class": "cmdb-prompt",
+      "unicode": "e95c",
+      "unicode_decimal": 59740
+    },
+    {
+      "icon_id": "40722326",
+      "name": "cmdb-arrow",
+      "font_class": "cmdb-arrow",
+      "unicode": "e95b",
+      "unicode_decimal": 59739
+    },
+    {
+      "icon_id": "40711364",
+      "name": "cmdb-automatic_inventory",
+      "font_class": "cmdb-automatic_inventory",
+      "unicode": "e95a",
+      "unicode_decimal": 59738
+    },
+    {
+      "icon_id": "40711409",
+      "name": "cmdb-week_additions",
+      "font_class": "cmdb-week_additions",
+      "unicode": "e959",
+      "unicode_decimal": 59737
+    },
+    {
+      "icon_id": "40711428",
+      "name": "cmdb-month_additions",
+      "font_class": "cmdb-month_additions",
+      "unicode": "e958",
+      "unicode_decimal": 59736
+    },
+    {
+      "icon_id": "40711344",
+      "name": "cmdb-rule",
+      "font_class": "cmdb-rule",
+      "unicode": "e955",
+      "unicode_decimal": 59733
+    },
+    {
+      "icon_id": "40711349",
+      "name": "cmdb-executing_machine",
+      "font_class": "cmdb-executing_machine",
+      "unicode": "e956",
+      "unicode_decimal": 59734
+    },
+    {
+      "icon_id": "40711356",
+      "name": "cmdb-resource",
+      "font_class": "cmdb-resource",
+      "unicode": "e957",
+      "unicode_decimal": 59735
+    },
+    {
+      "icon_id": "40705423",
+      "name": "cmdb-discovery_resources",
+      "font_class": "cmdb-discovery_resources",
+      "unicode": "e954",
+      "unicode_decimal": 59732
+    },
+    {
+      "icon_id": "40701723",
+      "name": "cmdb-association",
+      "font_class": "cmdb-association",
+      "unicode": "e953",
+      "unicode_decimal": 59731
+    },
+    {
       "icon_id": "40645466",
       "name": "ops-is_dynamic-disabled",
       "font_class": "ops-is_dynamic-disabled",
