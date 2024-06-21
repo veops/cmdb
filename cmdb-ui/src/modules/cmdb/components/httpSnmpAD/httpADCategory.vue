@@ -214,10 +214,10 @@ export default {
         }
       }
     }
+  }
 
-    .corporate-tip {
-      margin-top: 20px;
-    }
+  .corporate-tip {
+    margin-top: 20px;
   }
 }
 </style>

@@ -339,6 +339,10 @@ export default {
       &-text {
         margin-top: 20px;
       }
+
+      &-img {
+        width: 100px;
+      }
     }
   }
 
