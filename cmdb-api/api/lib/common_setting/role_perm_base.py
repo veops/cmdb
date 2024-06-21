@@ -48,7 +48,7 @@ class CMDBApp(BaseApp):
         {"page": "Model_Relationships", "page_cn": "模型关系", "perms": ["read"]},
         {"page": "Operation_Audit", "page_cn": "操作审计", "perms": ["read"]},
         {"page": "Relationship_Types", "page_cn": "关系类型", "perms": ["read"]},
-        {"page": "Auto_Discovery", "page_cn": "自动发现", "perms": ["read"]},
+        {"page": "Auto_Discovery", "page_cn": "自动发现", "perms": ["read", "create_plugin", "update_plugin", "delete_plugin"]},
         {"page": "TopologyView", "page_cn": "拓扑视图",
          "perms": ["read", "create_topology_group", "update_topology_group", "delete_topology_group",
                    "create_topology_view"],
