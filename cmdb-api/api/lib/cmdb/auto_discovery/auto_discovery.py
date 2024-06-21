@@ -114,9 +114,17 @@ class AutoDiscoveryRuleCRUD(DBMixin):
         if kwargs.get('is_plugin') and kwargs.get('plugin_script'):
             kwargs = check_plugin_script(**kwargs)
             acl = ACLManager(app_cli.app_name)
-            if not acl.has_permission(app_cli.op.Auto_Discovery,
-                                      app_cli.resource_type_name,
-                                      app_cli.op.create_plugin) and not is_app_admin(app_cli.app_name):
+            has_perm = True
+            try:
+                if not acl.has_permission(app_cli.op.Auto_Discovery,
+                                          app_cli.resource_type_name,
+                                          app_cli.op.create_plugin) and not is_app_admin(app_cli.app_name):
+                    has_perm = False
+            except Exception:
+                if not is_app_admin(app_cli.app_name):
+                    return abort(403, ErrFormat.role_required.format(app_cli.admin_name))
+
+            if not has_perm:
                 return abort(403, ErrFormat.no_permission.format(
                     app_cli.op.Auto_Discovery, app_cli.op.create_plugin))
 
@@ -138,9 +146,17 @@ class AutoDiscoveryRuleCRUD(DBMixin):
 
         if existed.is_plugin:
             acl = ACLManager(app_cli.app_name)
-            if not acl.has_permission(app_cli.op.Auto_Discovery,
-                                      app_cli.resource_type_name,
-                                      app_cli.op.update_plugin) and not is_app_admin(app_cli.app_name):
+            has_perm = True
+            try:
+                if not acl.has_permission(app_cli.op.Auto_Discovery,
+                                          app_cli.resource_type_name,
+                                          app_cli.op.update_plugin) and not is_app_admin(app_cli.app_name):
+                    has_perm = False
+            except Exception:
+                if not is_app_admin(app_cli.app_name):
+                    return abort(403, ErrFormat.role_required.format(app_cli.admin_name))
+
+            if not has_perm:
                 return abort(403, ErrFormat.no_permission.format(
                     app_cli.op.Auto_Discovery, app_cli.op.update_plugin))
 
@@ -165,9 +181,17 @@ class AutoDiscoveryRuleCRUD(DBMixin):
 
         if existed.is_plugin:
             acl = ACLManager(app_cli.app_name)
-            if not acl.has_permission(app_cli.op.Auto_Discovery,
-                                      app_cli.resource_type_name,
-                                      app_cli.op.delete_plugin) and not is_app_admin(app_cli.app_name):
+            has_perm = True
+            try:
+                if not acl.has_permission(app_cli.op.Auto_Discovery,
+                                          app_cli.resource_type_name,
+                                          app_cli.op.delete_plugin) and not is_app_admin(app_cli.app_name):
+                    has_perm = False
+            except Exception:
+                if not is_app_admin(app_cli.app_name):
+                    return abort(403, ErrFormat.role_required.format(app_cli.admin_name))
+
+            if not has_perm:
                 return abort(403, ErrFormat.no_permission.format(
                     app_cli.op.Auto_Discovery, app_cli.op.delete_plugin))
 
