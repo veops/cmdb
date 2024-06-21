@@ -243,6 +243,7 @@ const cmdb_en = {
         relationADTip2: 'When an auto-discovered attribute matches an associated model attribute, the two instance models are automatically associated',
         relationADTip3: 'If the value of the auto-discovered attribute is a list, multiple relationships are established with the association model',
         deleteRelationAdTip: 'Cannot be deleted again',
+        cronTips: 'The format is the same as crontab, for example: 0 15 * * 1-5',
     },
     components: {
         unselectAttributes: 'Unselected',

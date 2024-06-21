@@ -32,8 +32,11 @@
               ghost
               @click="handleClickAddGroup"
               class="ops-button-ghost"
-            ><ops-icon type="veops-increase" />{{ $t('cmdb.ciType.group') }}</a-button
+              v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')"
             >
+              <ops-icon type="veops-increase" />
+              {{ $t('cmdb.ciType.group') }}
+            </a-button>
           </div>
           <draggable class="topo-left-content" :list="computedTopoGroups" @end="handleChangeGroups" filter=".undraggable">
             <div v-for="group in computedTopoGroups" :key="group.id || group.name">
@@ -56,16 +59,16 @@
                 <a-space>
                   <a-tooltip>
                     <template slot="title">{{ $t('cmdb.topo.addTopoViewInGroup') }}</template>
-                    <a><ops-icon type="veops-increase" @click="handleCreate(group)"/></a>
+                    <a v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')"><ops-icon type="veops-increase" @click="handleCreate(group)"/></a>
                   </a-tooltip>
                   <template v-if="group.id">
                     <a-tooltip >
                       <template slot="title">{{ $t('cmdb.ciType.editGroup') }}</template>
-                      <a><a-icon type="edit" @click="handleEditGroup(group)"/></a>
+                      <a v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')"><a-icon type="edit" @click="handleEditGroup(group)"/></a>
                     </a-tooltip>
                     <a-tooltip>
                       <template slot="title">{{ $t('cmdb.ciType.deleteGroup') }}</template>
-                      <a :style="{color: 'red'}"><a-icon type="delete" @click="handleDeleteGroup(group)"/></a>
+                      <a v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')" :style="{color: 'red'}"><a-icon type="delete" @click="handleDeleteGroup(group)"/></a>
                     </a-tooltip>
                   </template>
                 </a-space>
