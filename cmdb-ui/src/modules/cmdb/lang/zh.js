@@ -243,6 +243,7 @@ const cmdb_zh = {
         relationADTip2: '当自动发现属性与关联模型属性一致时，两实例模型则自动关联',
         relationADTip3: '如果自动发现的属性值是列表，则会和关联模型建立多个关系',
         deleteRelationAdTip: '不可再删除',
+        cronTips: '格式同crontab, 例如：0 15 * * 1-5',
     },
     components: {
         unselectAttributes: '未选属性',

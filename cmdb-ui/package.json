@@ -59,7 +59,7 @@
     "vue-template-compiler": "2.6.11",
     "vuedraggable": "^2.23.0",
     "vuex": "^3.1.1",
-    "vxe-table": "3.6.9",
+    "vxe-table": "3.7.10",
     "vxe-table-plugin-export-xlsx": "2.0.0",
     "xe-utils": "3",
     "xlsx": "0.15.0",
