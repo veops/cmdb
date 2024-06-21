@@ -98,7 +98,7 @@
           <a-input
             v-model="cron"
             slot="reference"
-            :placeholder="$t('cmdb.reconciliation.cronTips')"
+            :placeholder="$t('cmdb.ciType.cronTips')"
           />
         </el-popover>
       </a-form-model-item>
