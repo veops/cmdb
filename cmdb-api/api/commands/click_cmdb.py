@@ -529,9 +529,9 @@ def cmdb_patch(version):
         for adt in AutoDiscoveryCIType.get_by(to_dict=False):
             if adt.relation:
                 if not AutoDiscoveryCITypeRelation.get_by(ad_type_id=adt.type_id):
-                    peer_type = CITypeCache.get(list(adt.relation.values())['type_name'])
+                    peer_type = CITypeCache.get(list(adt.relation.values())[0]['type_name'])
                     peer_type_id = peer_type and peer_type.id
-                    peer_attr = AttributeCache.get(list(adt.relation.values())['attr_name'])
+                    peer_attr = AttributeCache.get(list(adt.relation.values())[0]['attr_name'])
                     peer_attr_id = peer_attr and peer_attr.id
                     if peer_type_id and peer_attr_id:
                         AutoDiscoveryCITypeRelation.create(ad_type_id=adt.type_id,
