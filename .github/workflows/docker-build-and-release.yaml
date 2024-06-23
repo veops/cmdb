@@ -12,10 +12,7 @@ on:
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY_SERVER_ADDRESS: ghcr.io/veops
-
-concurrency:
-  group: cmdb-docker-build-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  TAG: ${{ github.sha }}
 
 jobs:
   setup-environment:
@@ -44,8 +41,6 @@ jobs:
       contents: read
       packages: write
     timeout-minutes: 90
-    env:
-      TAG: ${{ github.sha }}
     steps:
       - name: Build and push CMDB-API Docker image
         uses: docker/build-push-action@v6
@@ -62,8 +57,6 @@ jobs:
       contents: read
       packages: write
     timeout-minutes: 90
-    env:
-      TAG: ${{ github.sha }}
     steps:
       - name: Build and push CMDB-UI Docker image
         uses: docker/build-push-action@v6
