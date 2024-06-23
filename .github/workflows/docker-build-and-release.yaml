@@ -1,4 +1,4 @@
-name: api-docker-images-build-and-release
+name: docker-images-build-and-release
 
 on:
   push:
