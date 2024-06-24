@@ -6,6 +6,27 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "40834860",
+      "name": "cmdb-enterprise_edition",
+      "font_class": "cmdb-enterprise_edition",
+      "unicode": "e962",
+      "unicode_decimal": 59746
+    },
+    {
+      "icon_id": "40832458",
+      "name": "ops-KVM",
+      "font_class": "ops-KVM",
+      "unicode": "e961",
+      "unicode_decimal": 59745
+    },
+    {
+      "icon_id": "40822644",
+      "name": "cmdb-vcenter",
+      "font_class": "cmdb-vcenter",
+      "unicode": "e960",
+      "unicode_decimal": 59744
+    },
+    {
       "icon_id": "40795271",
       "name": "cmdb-manual_warehousing",
       "font_class": "cmdb-manual_warehousing",
