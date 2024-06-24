@@ -45,9 +45,9 @@ export function getHttpAttributes(name, params) {
     })
 }
 
-export function getSnmpAttributes(name) {
+export function getSnmpAttributes(type, name) {
   return axios({
-    url: `/v0.1/adr/snmp/${name}/attributes`,
+    url: `/v0.1/adr/${type}/${name}/attributes`,
     method: 'GET',
   })
 }

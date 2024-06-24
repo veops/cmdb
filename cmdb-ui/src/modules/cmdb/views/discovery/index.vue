@@ -39,7 +39,10 @@
         </a>
       </div>
     </div>
-    <div class="setting-discovery-body">
+    <div
+      class="setting-discovery-body"
+      :style="{ height: !isSelected ? `${windowHeight - 155}px` : '' }"
+    >
       <template v-if="!showNullData">
         <div v-for="{ type, label } in typeCategory" :key="type">
           <template v-if="filterCategoryChildren[type] && (filterCategoryChildren[type].children.length || (showAddPlugin && type === DISCOVERY_CATEGORY_TYPE.PLUGIN))">
@@ -79,6 +82,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import _ from 'lodash'
 import { getDiscovery, deleteDiscovery } from '../../api/discovery'
 import { DISCOVERY_CATEGORY_TYPE } from './constants.js'
@@ -103,6 +107,9 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      windowHeight: (state) => state.windowHeight,
+    }),
     typeCategory() {
       return [
         {
@@ -110,8 +117,16 @@ export default {
           label: this.$t('cmdb.ad.http'),
         },
         {
+          type: DISCOVERY_CATEGORY_TYPE.PRIVATE_CLOUD,
+          label: this.$t('cmdb.ad.privateCloud'),
+        },
+        {
           type: DISCOVERY_CATEGORY_TYPE.AGENT,
           label: this.$t('cmdb.ad.agent'),
+        },
+        {
+          type: DISCOVERY_CATEGORY_TYPE.COMPONENT,
+          label: this.$t('cmdb.ad.component'),
         },
         {
           type: DISCOVERY_CATEGORY_TYPE.SNMP,
@@ -162,8 +177,16 @@ export default {
           type: DISCOVERY_CATEGORY_TYPE.HTTP,
           children: []
         },
+        [DISCOVERY_CATEGORY_TYPE.PRIVATE_CLOUD]: {
+          type: DISCOVERY_CATEGORY_TYPE.PRIVATE_CLOUD,
+          children: []
+        },
         [DISCOVERY_CATEGORY_TYPE.AGENT]: {
           type: DISCOVERY_CATEGORY_TYPE.AGENT,
+          children: []
+        },
+        [DISCOVERY_CATEGORY_TYPE.COMPONENT]: {
+          type: DISCOVERY_CATEGORY_TYPE.COMPONENT,
           children: []
         },
         [DISCOVERY_CATEGORY_TYPE.SNMP]: {
@@ -179,6 +202,12 @@ export default {
         this.typeCategory.forEach(({ type }) => {
           let categoryChildren = []
           switch (type) {
+            case DISCOVERY_CATEGORY_TYPE.PRIVATE_CLOUD:
+              categoryChildren = res.filter((list) => list?.option?.category === 'private_cloud' && list?.type === 'http')
+              break
+            case DISCOVERY_CATEGORY_TYPE.HTTP:
+              categoryChildren = res.filter((list) => list?.option?.category !== 'private_cloud' && list?.type === 'http')
+              break
             case DISCOVERY_CATEGORY_TYPE.PLUGIN:
               categoryChildren = res.filter((list) => list.is_plugin)
               break
@@ -269,6 +298,8 @@ export default {
       display: flex;
       align-items: center;
       gap: 14px;
+      flex-shrink: 0;
+      margin-left: 20px;
 
       &-btn {
         display: flex;
@@ -284,6 +315,7 @@ export default {
 
   &-search {
     width: 254px;
+    flex-shrink: 0;
   }
 
   &-radio {
@@ -291,6 +323,7 @@ export default {
     align-items: center;
     margin-left: 15px;
     gap: 15px;
+    overflow: auto;
 
     &-item {
       padding: 4px 14px;
@@ -298,6 +331,7 @@ export default {
       font-weight: 400;
       line-height: 24px;
       cursor: pointer;
+      flex-shrink: 0;
 
       &_active {
         background-color: @primary-color_3;
@@ -312,6 +346,7 @@ export default {
     box-shadow: 0px 0px 4px 0px rgba(158, 171, 190, 0.25);
     padding: 20px;
     margin-top: 24px;
+    overflow: auto;
 
     .setting-discovery-add {
       height: 105px;

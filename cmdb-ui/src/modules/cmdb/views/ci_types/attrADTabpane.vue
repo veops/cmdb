@@ -104,22 +104,51 @@
       </a-form-model-item>
     </a-form-model>
     <template v-if="adrType === 'http'">
-      <div class="attr-ad-header attr-ad-header-margin">{{ $t('cmdb.ciType.cloudAccessKey') }}</div>
-      <div class="public-cloud-info">{{ $t('cmdb.ciType.cloudAccessKeyTip') }}</div>
-      <a-form-model
-        :model="form2"
-        labelAlign="left"
-        :labelCol="labelCol"
-        :wrapperCol="{ span: 6 }"
-        class="attr-ad-form"
-      >
-        <a-form-model-item label="key">
-          <a-input-password v-model="form2.key" />
-        </a-form-model-item>
-        <a-form-model-item label="secret">
-          <a-input-password v-model="form2.secret" />
-        </a-form-model-item>
-      </a-form-model>
+      <template v-if="isVCenter">
+        <div class="attr-ad-header">私有云</div>
+        <a-form-model
+          :model="privateCloudForm"
+          labelAlign="left"
+          :labelCol="labelCol"
+          :wrapperCol="{ span: 6 }"
+          class="attr-ad-form"
+        >
+          <a-form-model-item label="地址">
+            <a-input v-model="privateCloudForm.host" />
+          </a-form-model-item>
+          <a-form-model-item label="账号">
+            <a-input v-model="privateCloudForm.account" />
+          </a-form-model-item>
+          <a-form-model-item label="密码">
+            <a-input-password v-model="privateCloudForm.password" />
+          </a-form-model-item>
+          <a-form-model-item label="是否证书验证">
+            <a-switch v-model="privateCloudForm.insecure" />
+          </a-form-model-item>
+          <a-form-model-item label="虚拟平台名">
+            <a-input v-model="privateCloudForm.vcenterName" />
+          </a-form-model-item>
+        </a-form-model>
+      </template>
+
+      <template v-else>
+        <div class="attr-ad-header">{{ $t('cmdb.ciType.cloudAccessKey') }}</div>
+        <!-- <div class="public-cloud-info">{{ $t('cmdb.ciType.cloudAccessKeyTip') }}</div> -->
+        <a-form-model
+          :model="form2"
+          labelAlign="left"
+          :labelCol="labelCol"
+          :wrapperCol="{ span: 6 }"
+          class="attr-ad-form"
+        >
+          <a-form-model-item label="key">
+            <a-input-password v-model="form2.key" />
+          </a-form-model-item>
+          <a-form-model-item label="secret">
+            <a-input-password v-model="form2.secret" />
+          </a-form-model-item>
+        </a-form-model>
+      </template>
     </template>
 
     <AttrADTest
@@ -199,6 +228,13 @@ export default {
         key: '',
         secret: '',
       },
+      privateCloudForm: {
+        host: '',
+        account: '',
+        password: '',
+        insecure: false,
+        vcenterName: '',
+      },
       interval: 'cron', // interval  cron
       cron: '',
       intervalValue: 3,
@@ -214,6 +250,7 @@ export default {
       form3: this.$form.createForm(this, { name: 'snmp_form' }),
       cronVisible: false,
       uniqueKey: '',
+      isVCenter: false,
     }
   },
   computed: {
@@ -264,11 +301,34 @@ export default {
       this.uniqueKey = _find?.unique_key ?? ''
 
       if (this.adrType === 'http') {
-        const { category = undefined, key = '', secret = '' } = _findADT?.extra_option ?? {}
-        this.form2 = {
-          key,
-          secret,
+        const {
+          category = undefined,
+          key = '',
+          secret = '',
+          host = '',
+          account = '',
+          password = '',
+          insecure = false,
+          vcenterName = ''
+        } = _findADT?.extra_option ?? {}
+
+        if (_find?.name === 'VCenter') {
+          this.isVCenter = true
+          this.privateCloudForm = {
+            host,
+            account,
+            password,
+            insecure,
+            vcenterName,
+          }
+        } else {
+          this.isVCenter = false
+          this.form2 = {
+            key,
+            secret,
+          }
         }
+
         this.$refs.httpSnmpAd.setCurrentCate(category)
       }
       if (this.adrType === 'snmp') {
@@ -332,7 +392,7 @@ export default {
       if (this.adrType === 'http') {
         params = {
           extra_option: {
-            ...this.form2,
+            ...(this.isVCenter ? this.privateCloudForm : this.form2),
             category: this.$refs.httpSnmpAd.currentCate,
           },
         }

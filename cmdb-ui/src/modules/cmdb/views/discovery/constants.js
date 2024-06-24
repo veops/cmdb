@@ -2,5 +2,7 @@ export const DISCOVERY_CATEGORY_TYPE = {
   AGENT: 'agent',
   SNMP: 'snmp',
   HTTP: 'http',
-  PLUGIN: 'plugin'
+  PLUGIN: 'plugin',
+  COMPONENT: 'components',
+  PRIVATE_CLOUD: 'private_cloud'
 }
