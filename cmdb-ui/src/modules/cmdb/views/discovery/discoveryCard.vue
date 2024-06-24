@@ -53,11 +53,12 @@
                 :key="index"
                 v-if="index < 2"
                 class="discovery-resources-item"
+                :style="{ maxWidth: rule.resources.length >= 2 ? '70px' : '160px' }"
               >
                 {{ item }}
               </span>
             </template>
-            <span v-if="rule.resources.length >= 2" class="discovery-resources-item">
+            <span v-if="rule.resources.length > 2" class="discovery-resources-item">
               <ops-icon type="veops-more" />
             </span>
           </div>
@@ -234,6 +235,7 @@ export default {
         color: @text-color_3;
         font-size: 12px;
         font-weight: 400;
+        flex-shrink: 0;
       }
 
       &-right {
@@ -249,7 +251,6 @@ export default {
         color: @text-color_3;
         font-size: 11px;
         font-weight: 400;
-        max-width: 95px;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;

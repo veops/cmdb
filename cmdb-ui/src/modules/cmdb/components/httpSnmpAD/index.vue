@@ -1,14 +1,15 @@
 <template>
   <div class="http-snmp-ad">
     <HttpADCategory
-      v-if="!isEdit && ruleType === 'http'"
+      v-if="!isEdit && isCloud"
       :categories="categories"
       :currentCate="currentCate"
       :tableData="tableData"
+      :ruleType="ruleType"
       @clickCategory="setCurrentCate"
     />
     <template v-else>
-      <a-select v-if="ruleType === 'http'" :style="{ marginBottom: '10px' }" v-model="currentCate">
+      <a-select v-if="isCloud" :style="{ marginBottom: '10px' }" v-model="currentCate">
         <a-select-option v-for="cate in categoriesSelect" :key="cate" :value="cate">{{ cate }}</a-select-option>
       </a-select>
       <AttrMapTable
@@ -89,8 +90,13 @@ export default {
         腾讯云: { name: 'tencentcloud' },
         华为云: { name: 'huaweicloud' },
         AWS: { name: 'aws' },
+        VCenter: { name: 'vcenter' },
+        KVM: { name: 'kvm' },
       }
     },
+    isCloud() {
+      return ['http', 'private_cloud'].includes(this.ruleType)
+    }
   },
   watch: {
     currentCate: {
@@ -113,8 +119,8 @@ export default {
         this.currentCate = ''
         this.$nextTick(() => {
           const { ruleType, ruleName } = newVal
-          if (['snmp'].includes(ruleType) && ruleName) {
-            getSnmpAttributes(ruleName).then((res) => {
+          if (['snmp', 'components'].includes(ruleType) && ruleName) {
+            getSnmpAttributes(ruleType, ruleName).then((res) => {
               if (this.isEdit) {
                 this.formatTableData(res)
               } else {
@@ -122,7 +128,8 @@ export default {
               }
             })
           }
-          if (ruleType === 'http' && ruleName) {
+
+          if (this.isCloud && ruleName) {
             getHttpCategories(this.httpMap[`${this.ruleName}`].name).then((res) => {
               this.categories = res
               const categoriesSelect = []

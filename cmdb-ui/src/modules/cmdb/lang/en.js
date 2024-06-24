@@ -480,6 +480,8 @@ const cmdb_en = {
         snmp: 'Network Devices',
         http: 'Public Clouds',
         plugin: 'Plugin',
+        component: 'Databases & Middleware',
+        privateCloud: 'Private Clouds',
         rule: 'AutoDiscovery Rules',
         timeout: 'Timeout error',
         mode: 'Mode',

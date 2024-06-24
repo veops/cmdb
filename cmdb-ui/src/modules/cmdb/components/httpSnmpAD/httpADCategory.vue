@@ -3,19 +3,25 @@
     <div class="http-ad-category-preview" v-if="currentCate">
       <div class="category-side">
         <div
-          v-for="category in categories"
+          v-for="(category, categoryIndex) in categories"
           :key="category.category"
           class="category-side-item"
         >
           <div class="category-side-title">{{ category.category }}</div>
           <div class="category-side-children">
             <div
-              v-for="item in category.items"
+              v-for="(item, itemIndex) in category.items"
               :key="item"
               :class="['category-side-children-item', item === currentCate ? 'category-side-children-item_active' : '']"
               @click="clickCategory(item)"
             >
               {{ item }}
+              <span
+                class="category-side-children-item-corporate"
+                v-if="ruleType === 'private_cloud' || (ruleType === 'http' && (categoryIndex !== 0 || itemIndex !== 0))"
+              >
+                企
+              </span>
             </div>
           </div>
         </div>
@@ -35,19 +41,25 @@
       />
       <div class="category-main">
         <div
-          v-for="category in filterCategories"
+          v-for="(category, categoryIndex) in filterCategories"
           :key="category.category"
           class="category-item"
         >
           <div class="category-title">{{ category.category }}</div>
           <div class="category-children">
             <div
-              v-for="item in category.items"
+              v-for="(item, itemIndex) in category.items"
               :key="item"
               :class="['category-children-item', item === currentCate ? 'category-children-item_active' : '']"
               @click="clickCategory(item)"
             >
               {{ item }}
+              <div
+                class="corporate-flag"
+                v-if="ruleType === 'private_cloud' || (ruleType === 'http' && (categoryIndex !== 0 || itemIndex !== 0))"
+              >
+                <span class="corporate-flag-text">企</span>
+              </div>
             </div>
           </div>
         </div>
@@ -80,6 +92,10 @@ export default {
     tableData: {
       type: Array,
       default: () => [],
+    },
+    ruleType: {
+      type: String,
+      default: 'http',
     },
   },
   data() {
@@ -150,6 +166,11 @@ export default {
           font-weight: 400;
 
           cursor: pointer;
+          position: relative;
+
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
 
           &:hover {
             background-color: @layout-sidebar-selected-color;
@@ -159,6 +180,20 @@ export default {
           &_active {
             background-color: @layout-sidebar-selected-color;
             color: @layout-header-font-selected-color;
+          }
+
+          &-corporate {
+            flex-shrink: 0;
+            width: 18px;
+            height: 18px;
+            background-color: #E1EFFF;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+
+            color: #2F54EB;
+            font-size: 12px;
           }
         }
       }
@@ -201,6 +236,7 @@ export default {
           font-weight: 400;
 
           cursor: pointer;
+          position: relative;
 
           &:hover {
             background-color: @layout-sidebar-selected-color;
@@ -218,6 +254,30 @@ export default {
 
   .corporate-tip {
     margin-top: 20px;
+  }
+
+  .corporate-flag {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 4;
+
+    width: 38px;
+    height: 28px;
+    border-left: 38px solid transparent;
+    border-top: 28px solid @primary-color_4;
+
+    &-text {
+      width: 37px;
+      position: absolute;
+      top: -28px;
+      right: 3px;
+      text-align: right;
+
+      color: @primary-color;
+      font-size: 10px;
+      font-weight: 400;
+    }
   }
 }
 </style>

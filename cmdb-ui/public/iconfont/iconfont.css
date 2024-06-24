@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1718872392430') format('woff2'),
-       url('iconfont.woff?t=1718872392430') format('woff'),
-       url('iconfont.ttf?t=1718872392430') format('truetype');
+  src: url('iconfont.woff2?t=1719208046306') format('woff2'),
+       url('iconfont.woff?t=1719208046306') format('woff'),
+       url('iconfont.ttf?t=1719208046306') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,18 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.cmdb-enterprise_edition:before {
+  content: "\e962";
+}
+
+.ops-KVM:before {
+  content: "\e961";
+}
+
+.cmdb-vcenter:before {
+  content: "\e960";
 }
 
 .cmdb-manual_warehousing:before {
