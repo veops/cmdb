@@ -7,7 +7,7 @@ COPY cmdb-ui /data/apps/cmdb-ui
 
 WORKDIR /data/apps/cmdb-ui
 
-RUN sed -i "s#http://127.0.0.1:5000##g" .env && yarn install --ignore-engines  && yarn build
+RUN sed -i "s#http://127.0.0.1:5000##g" .env && yarn install --ignore-engines --network-timeout 1000000  && yarn build
 
 FROM nginx:alpine AS cmdb-ui
 
