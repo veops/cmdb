@@ -171,7 +171,7 @@ export default {
   },
   computed: {
     title() {
-      if ([DISCOVERY_CATEGORY_TYPE.HTTP, DISCOVERY_CATEGORY_TYPE.SNMP, DISCOVERY_CATEGORY_TYPE.AGENT].includes(this.adType)) {
+      if ([DISCOVERY_CATEGORY_TYPE.HTTP, DISCOVERY_CATEGORY_TYPE.SNMP, DISCOVERY_CATEGORY_TYPE.AGENT, DISCOVERY_CATEGORY_TYPE.PRIVATE_CLOUD, DISCOVERY_CATEGORY_TYPE.COMPONENT].includes(this.adType)) {
         return this.ruleData.name
       }
       if (this.type === 'edit') {
@@ -202,7 +202,7 @@ export default {
         return
       }
       this.$nextTick(() => {
-        if (adType === DISCOVERY_CATEGORY_TYPE.AGENT) {
+        if ([DISCOVERY_CATEGORY_TYPE.HTTP, DISCOVERY_CATEGORY_TYPE.SNMP, DISCOVERY_CATEGORY_TYPE.PRIVATE_CLOUD].includes(adType)) {
           this.tableData = data?.attributes ?? []
           return
         }
