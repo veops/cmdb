@@ -299,7 +299,6 @@ export default {
       align-items: center;
       gap: 14px;
       flex-shrink: 0;
-      margin-left: 20px;
 
       &-btn {
         display: flex;

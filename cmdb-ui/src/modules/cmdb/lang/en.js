@@ -244,6 +244,11 @@ const cmdb_en = {
         relationADTip3: 'If the value of the auto-discovered attribute is a list, multiple relationships are established with the association model',
         deleteRelationAdTip: 'Cannot be deleted again',
         cronTips: 'The format is the same as crontab, for example: 0 15 * * 1-5',
+        privateCloud: 'vSphere API Configuration',
+        host: 'Host',
+        account: 'Account',
+        insecure: 'Certificate Validation',
+        vcenterName: 'Platform Name',
     },
     components: {
         unselectAttributes: 'Unselected',
@@ -651,7 +656,8 @@ if __name__ == "__main__":
         confirmDeleteView: 'Are you sure you want to delete this view ?',
         noInstancePerm: 'You do not have read permissions for this instance',
         noPreferenceAttributes: 'This instance has no subscription attributes or no default displayed attributes',
-        topoViewSearchPlaceholder: 'Please enter the node name.'
+        topoViewSearchPlaceholder: 'Please enter the node name.',
+        moreBtn: 'Show more({count})'
     },
 }
 export default cmdb_en
