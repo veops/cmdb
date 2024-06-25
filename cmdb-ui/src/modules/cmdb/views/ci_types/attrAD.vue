@@ -273,8 +273,12 @@ export default {
         const adtIndex = this.clientCITypeList.findIndex((item) => item.id === id)
         this.clientCITypeList[adtIndex].extra_option.alias = value
       } else {
+        const adtIndex = this.adCITypeList.findIndex((item) => item.id === id)
+        const oldExtraOption = this.adCITypeList?.[adtIndex]?.extra_option
+
         const params = {
           extra_option: {
+            ...(oldExtraOption || {}),
             alias: value
           }
         }

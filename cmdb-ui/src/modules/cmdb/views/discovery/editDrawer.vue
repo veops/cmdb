@@ -112,7 +112,7 @@
       </div>
     </template>
     <template v-else>
-      <HttpSnmpAD ref="httpSnmpAd" :ruleType="adType" :ruleName="ruleData.name" />
+      <HttpSnmpAD ref="httpSnmpAd" :ruleType="adType" :ruleName="ruleName" />
     </template>
   </CustomDrawer>
 </template>
@@ -179,6 +179,9 @@ export default {
       }
       return this.$t('new')
     },
+    ruleName() {
+      return this?.ruleData?.option?.en || this?.ruleData?.name || ''
+    }
   },
   inject: {
     getDiscovery: {

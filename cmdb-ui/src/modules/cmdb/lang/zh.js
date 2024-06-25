@@ -244,6 +244,11 @@ const cmdb_zh = {
         relationADTip3: '如果自动发现的属性值是列表，则会和关联模型建立多个关系',
         deleteRelationAdTip: '不可再删除',
         cronTips: '格式同crontab, 例如：0 15 * * 1-5',
+        privateCloud: 'vSphere API配置',
+        host: '地址',
+        account: '账号',
+        insecure: '是否证书验证',
+        vcenterName: '虚拟平台名',
     },
     components: {
         unselectAttributes: '未选属性',
@@ -650,7 +655,8 @@ if __name__ == "__main__":
         confirmDeleteView: '您确定要删除该视图吗?',
         noInstancePerm: '您没有该实例的查看权限',
         noPreferenceAttributes: '该实例没有订阅属性或者没有默认展示的属性',
-        topoViewSearchPlaceholder: '请输入节点名字'
+        topoViewSearchPlaceholder: '请输入节点名字',
+        moreBtn: '展示更多({count})'
     },
 }
 export default cmdb_zh
