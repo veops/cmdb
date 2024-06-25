@@ -6,3 +6,7 @@ export const DISCOVERY_CATEGORY_TYPE = {
   COMPONENT: 'components',
   PRIVATE_CLOUD: 'private_cloud'
 }
+
+export const PRIVATE_CLOUD_NAME = {
+  VCenter: 'vcenter'
+}

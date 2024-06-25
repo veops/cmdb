@@ -1,13 +1,22 @@
 <template>
   <div class="http-ad-category">
-    <div class="http-ad-category-preview" v-if="currentCate">
+    <div class="http-ad-category-preview" v-if="currentCate && isPreviewDetail">
       <div class="category-side">
         <div
           v-for="(category, categoryIndex) in categories"
           :key="category.category"
           class="category-side-item"
         >
-          <div class="category-side-title">{{ category.category }}</div>
+          <div class="category-side-title">
+            <div class="category-side-title">
+              <a-icon
+                v-if="categoryIndex === 0"
+                type="left"
+                @click="clickBack"
+              />
+              {{ category.category }}
+            </div>
+          </div>
           <div class="category-side-children">
             <div
               v-for="(item, itemIndex) in category.items"
@@ -100,7 +109,8 @@ export default {
   },
   data() {
     return {
-      searchValue: ''
+      searchValue: '',
+      isPreviewDetail: false,
     }
   },
   computed: {
@@ -121,6 +131,10 @@ export default {
     },
     clickCategory(item) {
       this.$emit('clickCategory', item)
+      this.isPreviewDetail = true
+    },
+    clickBack() {
+      this.isPreviewDetail = false
     }
   }
 }
@@ -143,8 +157,8 @@ export default {
     padding-right: 10px;
 
     &-item {
-      &:not(:first-child) {
-        margin-top: 24px;
+      &:not(:last-child) {
+        margin-bottom: 24px;
       }
 
       .category-side-title {
@@ -167,6 +181,7 @@ export default {
 
           cursor: pointer;
           position: relative;
+          margin-top: 5px;
 
           display: flex;
           align-items: center;

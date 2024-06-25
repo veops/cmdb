@@ -51,7 +51,7 @@
       :wrapperCol="{ span: 14 }"
       class="attr-ad-form"
     >
-      <a-form-model-item :label="$t('cmdb.ciType.adExecTarget')">
+      <a-form-model-item :required="true" :label="$t('cmdb.ciType.adExecTarget')">
         <CustomRadio v-model="agent_type" :radioList="agentTypeRadioList">
           <a-input
             :style="{ width: '300px' }"
@@ -82,6 +82,7 @@
         :labelCol="labelCol"
         :wrapperCol="{ span: 6 }"
         :label="$t('cmdb.ciType.adInterval')"
+        :required="true"
       >
         <el-popover v-model="cronVisible" trigger="click">
           <template slot>
@@ -104,31 +105,33 @@
       </a-form-model-item>
     </a-form-model>
     <template v-if="adrType === 'http'">
-      <template v-if="isVCenter">
-        <div class="attr-ad-header">私有云</div>
-        <a-form-model
-          :model="privateCloudForm"
-          labelAlign="left"
-          :labelCol="labelCol"
-          :wrapperCol="{ span: 6 }"
-          class="attr-ad-form"
-        >
-          <a-form-model-item label="地址">
-            <a-input v-model="privateCloudForm.host" />
-          </a-form-model-item>
-          <a-form-model-item label="账号">
-            <a-input v-model="privateCloudForm.account" />
-          </a-form-model-item>
-          <a-form-model-item label="密码">
-            <a-input-password v-model="privateCloudForm.password" />
-          </a-form-model-item>
-          <a-form-model-item label="是否证书验证">
-            <a-switch v-model="privateCloudForm.insecure" />
-          </a-form-model-item>
-          <a-form-model-item label="虚拟平台名">
-            <a-input v-model="privateCloudForm.vcenterName" />
-          </a-form-model-item>
-        </a-form-model>
+      <template v-if="isPrivateCloud">
+        <template v-if="privateCloudName === PRIVATE_CLOUD_NAME.VCenter">
+          <div class="attr-ad-header">{{ $t('cmdb.ciType.privateCloud') }}</div>
+          <a-form-model
+            :model="privateCloudForm"
+            labelAlign="left"
+            :labelCol="labelCol"
+            :wrapperCol="{ span: 6 }"
+            class="attr-ad-form"
+          >
+            <a-form-model-item :required="true" :label="$t('cmdb.ciType.host')">
+              <a-input v-model="privateCloudForm.host" />
+            </a-form-model-item>
+            <a-form-model-item :required="true" :label="$t('cmdb.ciType.account')">
+              <a-input v-model="privateCloudForm.account" />
+            </a-form-model-item>
+            <a-form-model-item :required="true" :label="$t('cmdb.ciType.password')">
+              <a-input-password v-model="privateCloudForm.password" />
+            </a-form-model-item>
+            <a-form-model-item :label="$t('cmdb.ciType.insecure')">
+              <a-switch v-model="privateCloudForm.insecure" />
+            </a-form-model-item>
+            <a-form-model-item :label="$t('cmdb.ciType.vcenterName')">
+              <a-input v-model="privateCloudForm.vcenterName" />
+            </a-form-model-item>
+          </a-form-model>
+        </template>
       </template>
 
       <template v-else>
@@ -141,10 +144,10 @@
           :wrapperCol="{ span: 6 }"
           class="attr-ad-form"
         >
-          <a-form-model-item label="key">
+          <a-form-model-item :required="true" label="key">
             <a-input-password v-model="form2.key" />
           </a-form-model-item>
-          <a-form-model-item label="secret">
+          <a-form-model-item :required="true" label="secret">
             <a-input-password v-model="form2.secret" />
           </a-form-model-item>
         </a-form-model>
@@ -167,6 +170,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { mapState } from 'vuex'
 import Vcrontab from '@/components/Crontab'
 import { putCITypeDiscovery, postCITypeDiscovery } from '../../api/discovery'
+import { PRIVATE_CLOUD_NAME } from '@/modules/cmdb/views/discovery/constants.js'
 
 import HttpSnmpAD from '../../components/httpSnmpAD'
 import AttrMapTable from '@/modules/cmdb/components/attrMapTable/index.vue'
@@ -250,7 +254,9 @@ export default {
       form3: this.$form.createForm(this, { name: 'snmp_form' }),
       cronVisible: false,
       uniqueKey: '',
-      isVCenter: false,
+      isPrivateCloud: false,
+      privateCloudName: '',
+      PRIVATE_CLOUD_NAME
     }
   },
   computed: {
@@ -262,7 +268,7 @@ export default {
       return this.currentAdr?.type || ''
     },
     adrName() {
-      return this.currentAdr?.name || ''
+      return this?.currentAdr?.option?.en || this.currentAdr?.name || ''
     },
     adrIsInner() {
       return this.currentAdr?.is_inner || ''
@@ -287,7 +293,7 @@ export default {
       ]
     },
     labelCol() {
-      const span = this.$i18n.locale === 'en' ? 4 : 2
+      const span = this.$i18n.locale === 'en' ? 5 : 3
       return {
         span
       }
@@ -312,17 +318,21 @@ export default {
           vcenterName = ''
         } = _findADT?.extra_option ?? {}
 
-        if (_find?.name === 'VCenter') {
-          this.isVCenter = true
-          this.privateCloudForm = {
-            host,
-            account,
-            password,
-            insecure,
-            vcenterName,
+        if (_find?.option?.category === 'private_cloud') {
+          this.isPrivateCloud = true
+          this.privateCloudName = _find?.option?.en || ''
+
+          if (this.privateCloudName === PRIVATE_CLOUD_NAME.VCenter) {
+            this.privateCloudForm = {
+              host,
+              account,
+              password,
+              insecure,
+              vcenterName,
+            }
           }
         } else {
-          this.isVCenter = false
+          this.isPrivateCloud = false
           this.form2 = {
             key,
             secret,
@@ -389,10 +399,25 @@ export default {
     handleSave() {
       const { currentAdt } = this
       let params
+
+      const isError = this.validateForm()
+      if (isError) {
+        return
+      }
+
       if (this.adrType === 'http') {
+        let cloudOption = {}
+        if (this.isPrivateCloud) {
+          if (this.privateCloudName === PRIVATE_CLOUD_NAME.VCenter) {
+            cloudOption = this.privateCloudForm
+          }
+        } else {
+          cloudOption = this.form2
+        }
+
         params = {
           extra_option: {
-            ...(this.isVCenter ? this.privateCloudForm : this.form2),
+            ...cloudOption,
             category: this.$refs.httpSnmpAd.currentCate,
           },
         }
@@ -457,13 +482,14 @@ export default {
         return
       }
 
-      if (currentAdt?.isClient) {
-        if (currentAdt?.extra_option) {
-          params.extra_option = {
-            ...(params?.extra_option || {}),
-            ...(currentAdt?.extra_option || {})
-          }
+      if (currentAdt?.extra_option) {
+        params.extra_option = {
+          ...(currentAdt?.extra_option || {}),
+          ...(params?.extra_option || {})
         }
+      }
+
+      if (currentAdt?.isClient) {
         postCITypeDiscovery(this.CITypeId, params).then((res) => {
           this.$message.success(this.$t('saveSuccess'))
           this.$emit('handleSave', res.id)
@@ -475,6 +501,40 @@ export default {
         })
       }
     },
+
+    validateForm() {
+      let isError = false
+
+      if (this.adrType === 'http') {
+        if (this.isPrivateCloud) {
+          if (this.privateCloudName === PRIVATE_CLOUD_NAME.VCenter) {
+            const vcenterErros = {
+              'host': `${this.$t('placeholder1')} ${this.$t('cmdb.ciType.host')}`,
+              'account': `${this.$t('placeholder1')} ${this.$t('cmdb.ciType.account')}`,
+              'password': `${this.$t('placeholder1')} ${this.$t('cmdb.ciType.password')}`
+            }
+            const findError = Object.keys(this.privateCloudForm).find((key) => !this.privateCloudForm[key] && vcenterErros[key])
+            if (findError) {
+              isError = true
+              this.$message.error(this.$t(vcenterErros[findError]))
+            }
+          }
+        } else {
+          const publicCloudErros = {
+            'key': `${this.$t('placeholder1')} key`,
+            'secret': `${this.$t('placeholder1')} secret`
+          }
+          const findError = Object.keys(this.form2).find((key) => !this.form2[key] && publicCloudErros[key])
+          if (findError) {
+            isError = true
+            this.$message.error(this.$t(publicCloudErros[findError]))
+          }
+        }
+      }
+
+      return isError
+    },
+
     handleOpenCmdb() {
       this.$refs.cmdbDrawer.open()
     },

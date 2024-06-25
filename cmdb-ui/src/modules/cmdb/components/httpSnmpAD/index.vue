@@ -9,7 +9,7 @@
       @clickCategory="setCurrentCate"
     />
     <template v-else>
-      <a-select v-if="isCloud" :style="{ marginBottom: '10px' }" v-model="currentCate">
+      <a-select v-if="isCloud" :style="{ marginBottom: '10px', minWidth: '120px' }" v-model="currentCate">
         <a-select-option v-for="cate in categoriesSelect" :key="cate" :value="cate">{{ cate }}</a-select-option>
       </a-select>
       <AttrMapTable
@@ -103,7 +103,7 @@ export default {
       immediate: true,
       handler(newVal) {
         if (newVal) {
-          getHttpAttributes(this.httpMap[`${this.ruleName}`].name, { resource: newVal }).then((res) => {
+          getHttpAttributes(this.ruleName, { resource: newVal }).then((res) => {
             if (this.isEdit) {
               this.formatTableData(res)
             } else {
@@ -130,7 +130,7 @@ export default {
           }
 
           if (this.isCloud && ruleName) {
-            getHttpCategories(this.httpMap[`${this.ruleName}`].name).then((res) => {
+            getHttpCategories(this.ruleName).then((res) => {
               this.categories = res
               const categoriesSelect = []
               res.forEach((category) => {
