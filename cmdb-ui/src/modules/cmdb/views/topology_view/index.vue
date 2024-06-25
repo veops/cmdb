@@ -160,7 +160,9 @@
                         class="relation-graph-node-icon"
                       />
                     </template>
-                    <span class="relation-graph-node-text">{{ node.text }}</span>
+                    <span class="relation-graph-node-text">
+                      {{ node.data.btnType === 'more' ? $t('cmdb.topo.moreBtn', { count: node.text }) : node.text }}
+                    </span>
                   </div>
                 </template>
                 <template #graph-plug>
@@ -960,7 +962,7 @@ export default {
         const id = uuidv4()
         jsonData.nodes.set(id, {
           id,
-          text: `展示更多(${childs.length - showNodeCount})`,
+          text: childs.length - showNodeCount,
           data: {
             btnType: 'more'
           },
@@ -1008,7 +1010,7 @@ export default {
           if (showNodeCount === childs.length) {
             moreBtnNode.isHide = true
           } else {
-            moreBtnNode.text = `展示更多(${childs.length - showNodeCount})`
+            moreBtnNode.text = childs.length - showNodeCount
           }
         }
 
