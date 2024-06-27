@@ -6,6 +6,69 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "40896913",
+      "name": "veops-markdown",
+      "font_class": "veops-markdown",
+      "unicode": "e96a",
+      "unicode_decimal": 59754
+    },
+    {
+      "icon_id": "40896859",
+      "name": "veops-bar_horizontal",
+      "font_class": "veops-bar_horizontal",
+      "unicode": "e860",
+      "unicode_decimal": 59488
+    },
+    {
+      "icon_id": "40896881",
+      "name": "veops-gauge",
+      "font_class": "veops-gauge",
+      "unicode": "e965",
+      "unicode_decimal": 59749
+    },
+    {
+      "icon_id": "40896882",
+      "name": "veops-heatmap",
+      "font_class": "veops-heatmap",
+      "unicode": "e966",
+      "unicode_decimal": 59750
+    },
+    {
+      "icon_id": "40896884",
+      "name": "veops-treemap",
+      "font_class": "veops-treemap",
+      "unicode": "e967",
+      "unicode_decimal": 59751
+    },
+    {
+      "icon_id": "40896887",
+      "name": "veops-radar",
+      "font_class": "veops-radar",
+      "unicode": "e968",
+      "unicode_decimal": 59752
+    },
+    {
+      "icon_id": "40896905",
+      "name": "veops-data",
+      "font_class": "veops-data",
+      "unicode": "e969",
+      "unicode_decimal": 59753
+    },
+    {
+      "icon_id": "40872369",
+      "name": "veops-import",
+      "font_class": "veops-import",
+      "unicode": "e963",
+      "unicode_decimal": 59747
+    },
+    {
+      "icon_id": "40872361",
+      "name": "veops-batch_operation",
+      "font_class": "veops-batch_operation",
+      "unicode": "e964",
+      "unicode_decimal": 59748
+    },
+    {
       "icon_id": "40834860",
       "name": "cmdb-enterprise_edition",
       "font_class": "cmdb-enterprise_edition",
@@ -407,7 +470,7 @@
     {
       "icon_id": "40372105",
       "name": "monitor-add2",
-      "font_class": "a-Group427319324",
+      "font_class": "monitor-add2",
       "unicode": "e929",
       "unicode_decimal": 59689
     },
@@ -585,13 +648,6 @@
       "font_class": "veops-export",
       "unicode": "e862",
       "unicode_decimal": 59490
-    },
-    {
-      "icon_id": "40306881",
-      "name": "veops-import",
-      "font_class": "a-veops-import1",
-      "unicode": "e860",
-      "unicode_decimal": 59488
     },
     {
       "icon_id": "40262335",
