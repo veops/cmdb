@@ -515,44 +515,47 @@ def cmdb_patch(version):
 
     version = version[1:] if version.lower().startswith("v") else version
 
-    if version >= '2.4.6':
+    try:
+        if version >= '2.4.6':
 
-        from api.models.cmdb import CITypeRelation
-        for cr in CITypeRelation.get_by(to_dict=False):
-            if hasattr(cr, 'parent_attr_id') and cr.parent_attr_id and not cr.parent_attr_ids:
-                parent_attr_ids, child_attr_ids = [cr.parent_attr_id], [cr.child_attr_id]
-                cr.update(parent_attr_ids=parent_attr_ids, child_attr_ids=child_attr_ids, commit=False)
-        db.session.commit()
+            from api.models.cmdb import CITypeRelation
+            for cr in CITypeRelation.get_by(to_dict=False):
+                if hasattr(cr, 'parent_attr_id') and cr.parent_attr_id and not cr.parent_attr_ids:
+                    parent_attr_ids, child_attr_ids = [cr.parent_attr_id], [cr.child_attr_id]
+                    cr.update(parent_attr_ids=parent_attr_ids, child_attr_ids=child_attr_ids, commit=False)
+            db.session.commit()
 
-        from api.models.cmdb import AutoDiscoveryCIType, AutoDiscoveryCITypeRelation
-        from api.lib.cmdb.cache import CITypeCache, AttributeCache
-        for adt in AutoDiscoveryCIType.get_by(to_dict=False):
-            if adt.relation:
-                if not AutoDiscoveryCITypeRelation.get_by(ad_type_id=adt.type_id):
-                    peer_type = CITypeCache.get(list(adt.relation.values())[0]['type_name'])
-                    peer_type_id = peer_type and peer_type.id
-                    peer_attr = AttributeCache.get(list(adt.relation.values())[0]['attr_name'])
-                    peer_attr_id = peer_attr and peer_attr.id
-                    if peer_type_id and peer_attr_id:
-                        AutoDiscoveryCITypeRelation.create(ad_type_id=adt.type_id,
-                                                           ad_key=list(adt.relation.keys())[0],
-                                                           peer_type_id=peer_type_id,
-                                                           peer_attr_id=peer_attr_id,
-                                                           commit=False)
-            if hasattr(adt, 'interval') and adt.interval and not adt.cron:
-                adt.cron = "*/{} * * * *".format(adt.interval // 60 or 1)
+            from api.models.cmdb import AutoDiscoveryCIType, AutoDiscoveryCITypeRelation
+            from api.lib.cmdb.cache import CITypeCache, AttributeCache
+            for adt in AutoDiscoveryCIType.get_by(to_dict=False):
+                if adt.relation:
+                    if not AutoDiscoveryCITypeRelation.get_by(ad_type_id=adt.type_id):
+                        peer_type = CITypeCache.get(list(adt.relation.values())[0]['type_name'])
+                        peer_type_id = peer_type and peer_type.id
+                        peer_attr = AttributeCache.get(list(adt.relation.values())[0]['attr_name'])
+                        peer_attr_id = peer_attr and peer_attr.id
+                        if peer_type_id and peer_attr_id:
+                            AutoDiscoveryCITypeRelation.create(ad_type_id=adt.type_id,
+                                                               ad_key=list(adt.relation.keys())[0],
+                                                               peer_type_id=peer_type_id,
+                                                               peer_attr_id=peer_attr_id,
+                                                               commit=False)
+                if hasattr(adt, 'interval') and adt.interval and not adt.cron:
+                    adt.cron = "*/{} * * * *".format(adt.interval // 60 or 1)
 
-        db.session.commit()
+            db.session.commit()
 
-    if version >= "2.4.7":
-        from api.lib.cmdb.auto_discovery.const import DEFAULT_INNER
-        from api.models.cmdb import AutoDiscoveryRule
-        for i in DEFAULT_INNER:
-            existed = AutoDiscoveryRule.get_by(name=i['name'], first=True, to_dict=False)
-            if existed is not None:
-                if "en" in i['option'] and 'en' not in (existed.option or {}):
-                    option = copy.deepcopy(existed.option)
-                    option['en'] = i['option']['en']
-                    existed.update(option=option, commit=False)
+        if version >= "2.4.7":
+            from api.lib.cmdb.auto_discovery.const import DEFAULT_INNER
+            from api.models.cmdb import AutoDiscoveryRule
+            for i in DEFAULT_INNER:
+                existed = AutoDiscoveryRule.get_by(name=i['name'], first=True, to_dict=False)
+                if existed is not None:
+                    if "en" in i['option'] and 'en' not in (existed.option or {}):
+                        option = copy.deepcopy(existed.option)
+                        option['en'] = i['option']['en']
+                        existed.update(option=option, commit=False)
 
-        db.session.commit()
+            db.session.commit()
+    except Exception as e:
+        print("cmdb patch failed: {}".format(e))
