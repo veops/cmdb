@@ -50,3 +50,13 @@ export const putCITypeGroups = (data) => {
         data: data
     })
 }
+
+// 导出模型分组
+export function exportCITypeGroups(params) {
+  return axios({
+    url: `${urlPrefix}/ci_types/template/export`,
+    method: 'GET',
+    params: params,
+    timeout: 30 * 1000,
+  })
+}
