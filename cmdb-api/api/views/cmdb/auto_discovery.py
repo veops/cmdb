@@ -2,23 +2,24 @@
 import copy
 import json
 import uuid
-from io import BytesIO
-
 from flask import abort
 from flask import current_app
 from flask import request
 from flask_login import current_user
+from io import BytesIO
 
 from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryCICRUD
 from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryCITypeCRUD
 from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryCITypeRelationCRUD
+from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryComponentsManager
 from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryCounterCRUD
 from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryExecHistoryCRUD
 from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryHTTPManager
 from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryRuleCRUD
 from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryRuleSyncHistoryCRUD
 from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoverySNMPManager
-from api.lib.cmdb.auto_discovery.const import DEFAULT_HTTP
+from api.lib.cmdb.auto_discovery.const import DEFAULT_INNER
+from api.lib.cmdb.auto_discovery.const import PRIVILEGED_USERS
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.resp_format import ErrFormat
@@ -42,7 +43,7 @@ class AutoDiscoveryRuleView(APIView):
 
         rebuild = False
         exists = {i['name'] for i in res}
-        for i in copy.deepcopy(DEFAULT_HTTP):
+        for i in copy.deepcopy(DEFAULT_INNER):
             if i['name'] not in exists:
                 i.pop('en', None)
                 AutoDiscoveryRuleCRUD().add(**i)
@@ -110,11 +111,15 @@ class AutoDiscoveryRuleTemplateFileView(APIView):
 class AutoDiscoveryRuleHTTPView(APIView):
     url_prefix = ("/adr/http/<string:name>/categories",
                   "/adr/http/<string:name>/attributes",
-                  "/adr/snmp/<string:name>/attributes")
+                  "/adr/snmp/<string:name>/attributes",
+                  "/adr/components/<string:name>/attributes",)
 
     def get(self, name):
         if "snmp" in request.url:
             return self.jsonify(AutoDiscoverySNMPManager.get_attributes())
+
+        if "components" in request.url:
+            return self.jsonify(AutoDiscoveryComponentsManager.get_attributes(name))
 
         if "attributes" in request.url:
             resource = request.values.get('resource')
@@ -250,7 +255,7 @@ class AutoDiscoveryRuleSyncView(APIView):
     url_prefix = ("/adt/sync",)
 
     def get(self):
-        if current_user.username not in ("cmdb_agent", "worker", "admin"):
+        if current_user.username not in PRIVILEGED_USERS:
             return abort(403)
 
         oneagent_name = request.values.get('oneagent_name')

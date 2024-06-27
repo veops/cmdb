@@ -268,6 +268,7 @@ class CIBaselineView(APIView):
         return self.jsonify(CIManager().baseline(list(map(int, ci_ids)), before_date))
 
     @args_required("before_date")
+    @has_perm_for_ci("ci_id", ResourceTypeEnum.CI, PermEnum.UPDATE, CIManager.get_type)
     def post(self, ci_id):
         if 'rollback' in request.url:
             before_date = request.values.get('before_date')
