@@ -101,10 +101,14 @@
           :cell-style="getCellStyle"
           :scroll-y="{ enabled: true, gt: 20 }"
           :scroll-x="{ enabled: true, gt: 0 }"
-          class="ops-unstripe-table"
+          class="ops-unstripe-table checkbox-hover-table"
           :custom-config="{ storage: true }"
         >
-          <vxe-column align="center" type="checkbox" width="60" :fixed="isCheckboxFixed ? 'left' : ''"></vxe-column>
+          <vxe-column align="center" type="checkbox" width="60" :fixed="isCheckboxFixed ? 'left' : ''">
+            <template #default="{row}">
+              {{ getRowSeq(row) }}
+            </template>
+          </vxe-column>
           <vxe-table-column
             v-for="(col, index) in columns"
             :key="`${col.field}_${index}`"
@@ -1048,6 +1052,9 @@ export default {
         this.visible = false
       }
     },
+    getRowSeq(row) {
+      return this.$refs.xTable.getVxetableRef().getRowSeq(row)
+    }
   },
 }
 </script>
@@ -1064,5 +1071,34 @@ export default {
   height: calc(100vh - 64px);
   overflow: auto;
   margin-bottom: -24px;
+}
+.checkbox-hover-table {
+  /deep/ .vxe-table--body-wrapper {
+    .vxe-checkbox--label {
+      display: inline;
+      padding-left: 0px !important;
+      color: #bfbfbf;
+    }
+
+    .vxe-icon-checkbox-unchecked {
+      display: none;
+    }
+
+    .vxe-icon-checkbox-checked ~ .vxe-checkbox--label {
+      display: none;
+    }
+
+    .vxe-cell--checkbox {
+      &:hover {
+        .vxe-icon-checkbox-unchecked {
+          display: inline;
+        }
+
+        .vxe-checkbox--label {
+          display: none;
+        }
+      }
+    }
+  }
 }
 </style>

@@ -58,7 +58,7 @@
           ref="xTable"
           size="mini"
           stripe
-          class="ops-stripe-table"
+          class="ops-stripe-table checkbox-hover-table"
           :data="filterTableData"
           :height="tableHeight"
           :scroll-y="{ enabled: true, gt: 50 }"
@@ -74,7 +74,11 @@
             type="checkbox"
             width="60"
             fixed="left"
-          ></vxe-column>
+          >
+            <template #default="{row}">
+              {{ getRowSeq(row) }}
+            </template>
+          </vxe-column>
           <vxe-column
             v-for="(col, index) in columns"
             :key="`${col.field}_${index}`"
@@ -399,6 +403,9 @@ export default {
           textEl.scrollTop = textEl.scrollHeight
         }
       })
+    },
+    getRowSeq(row) {
+      return this.$refs.xTable.getVxetableRef().getRowSeq(row)
     }
   },
 }
@@ -461,6 +468,36 @@ export default {
     display: flex;
     align-items: center;
     gap: 6px;
+  }
+
+  .checkbox-hover-table {
+    /deep/ .vxe-table--body-wrapper {
+      .vxe-checkbox--label {
+        display: inline;
+        padding-left: 0px !important;
+        color: #bfbfbf;
+      }
+
+      .vxe-icon-checkbox-unchecked {
+        display: none;
+      }
+
+      .vxe-icon-checkbox-checked ~ .vxe-checkbox--label {
+        display: none;
+      }
+
+      .vxe-cell--checkbox {
+        &:hover {
+          .vxe-icon-checkbox-unchecked {
+            display: inline;
+          }
+
+          .vxe-checkbox--label {
+            display: none;
+          }
+        }
+      }
+    }
   }
 }
 

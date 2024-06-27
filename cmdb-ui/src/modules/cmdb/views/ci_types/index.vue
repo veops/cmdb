@@ -15,59 +15,59 @@
       :triggerLength="18"
     >
       <template #one>
-        <a-input
-          :placeholder="$t('cmdb.preference.searchPlaceholder')"
-          class="cmdb-ci-types-left-input"
-          @pressEnter="handleSearch"
-        >
-          <a-icon slot="prefix" type="search" />
-        </a-input>
         <div class="ci-types-left">
-          <div class="ci-types-left-title">
-            <a-button
-              :disabled="!permissions.includes('admin') && !permissions.includes('cmdb_admin')"
-              type="primary"
-              size="small"
-              ghost
-              @click="handleClickAddGroup"
-              class="ops-button-ghost"
-            ><ops-icon type="veops-increase" />{{ $t('cmdb.ciType.group') }}</a-button
+          <div class="ci-types-left-header">
+            <a-input
+              :placeholder="$t('cmdb.preference.searchPlaceholder')"
+              class="ci-types-left-header-input"
+              @pressEnter="handleSearch"
             >
-            <a-space>
-              <span
-                :style="{ cursor: 'pointer' }"
-                @click="
-                  () => {
-                    $refs.attributeStore.open()
-                  }
-                "
-              >{{ $t('cmdb.ciType.attributeLibray') }}
-              </span>
-              <a-dropdown v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')">
-                <ops-icon type="ops-menu" :style="{ cursor: 'pointer' }" />
-                <a-menu slot="overlay">
-                  <a-menu-item key="0">
-                    <a-upload
-                      name="file"
-                      accept=".json"
-                      :showUploadList="false"
-                      style="display: inline-block"
-                      action="/api/v0.1/ci_types/template/import/file"
-                      @change="changeUploadFile"
-                    >
-                      <a><a-icon type="upload"/></a><a> {{ $t('upload') }}</a>
-                    </a-upload>
-                  </a-menu-item>
-                  <a-menu-item key="1">
-                    <a-space>
-                      <a href="/api/v0.1/ci_types/template/export/file">
-                        <a-icon type="download" /> {{ $t('download') }}
-                      </a></a-space
-                    >
-                  </a-menu-item>
-                </a-menu>
-              </a-dropdown>
-            </a-space>
+              <a-icon slot="prefix" type="search" />
+            </a-input>
+            <a-dropdown>
+              <a-button class="ci-types-left-header-more">
+                <ops-icon type="veops-more" />
+              </a-button>
+              <a-menu slot="overlay">
+                <a-menu-item @click="handleClickAddGroup" key="0">
+                  <ops-icon type="veops-increase"/>
+                  <span>
+                    {{ $t('cmdb.ciType.addGroup2') }}
+                  </span>
+                </a-menu-item>
+                <a-menu-item
+                  key="1"
+                  @click="
+                    () => {
+                      $refs.attributeStore.open()
+                    }
+                  "
+                >
+                  <ops-icon type="ops-menu"/>
+                  <span>
+                    {{ $t('cmdb.ciType.viewAttributeLibray') }}
+                  </span>
+                </a-menu-item>
+                <a-menu-item v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')" key="2">
+                  <a-upload
+                    name="file"
+                    accept=".json"
+                    :showUploadList="false"
+                    style="display: inline-block"
+                    action="/api/v0.1/ci_types/template/import/file"
+                    @change="changeUploadFile"
+                  >
+                    <ops-icon type="veops-import"/>
+                    <span style="margin-left: 8px">{{ $t('upload') }}</span>
+                  </a-upload>
+                </a-menu-item>
+                <a-menu-item @click="modelExportVisible = true" v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')" key="3">
+                  <span>
+                    <ops-icon type="veops-export" /> {{ $t('export') }}
+                  </span>
+                </a-menu-item>
+              </a-menu>
+            </a-dropdown>
           </div>
           <draggable class="ci-types-left-content" :list="computedCITypeGroups" @end="handleChangeGroups" filter=".undraggable">
             <div v-for="g in computedCITypeGroups" :key="g.id || g.name">
@@ -158,7 +158,6 @@
                       </a-menu-item>
                       <a-menu-item
                         v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')"
-                        :disabled="ci.inherited"
                         @click="(e) => handleDownloadCiType(e, ci)"
                       >
                         <a-icon type="download" />
@@ -378,6 +377,11 @@
     </CustomDrawer>
     <CMDBGrant ref="cmdbGrant" resourceType="CIType" app_id="cmdb" />
     <AttributeStore ref="attributeStore" />
+    <ModelExport
+      :visible="modelExportVisible"
+      :CITypeGroups="CITypeGroups"
+      @cancel="() => modelExportVisible = false"
+    />
   </div>
 </template>
 
@@ -401,6 +405,7 @@ import {
   putCITypeGroupByGId,
   deleteCITypeGroup,
   putCITypeGroups,
+  exportCITypeGroups
 } from '@/modules/cmdb/api/ciTypeGroup'
 import { searchAttributes, getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
 import CreateNewAttribute from './ceateNewAttribute.vue'
@@ -415,6 +420,7 @@ import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
 import AttributeStore from './attributeStore.vue'
 import { getAllDepAndEmployee } from '@/api/company'
 import CMDBTypeSelect from '../../components/cmdbTypeSelect'
+import ModelExport from './modelExport.vue'
 
 export default {
   name: 'CITypes',
@@ -430,6 +436,7 @@ export default {
     OpsMoveIcon,
     AttributeStore,
     CMDBTypeSelect,
+    ModelExport
   },
   inject: ['reload'],
   data() {
@@ -476,6 +483,7 @@ export default {
       unique_id: null,
 
       searchValue: '',
+      modelExportVisible: false,
     }
   },
   computed: {
@@ -916,20 +924,37 @@ export default {
         },
       })
     },
-    handleDownloadCiType(e, ci) {
+    async handleDownloadCiType(e, ci) {
       e.domEvent.preventDefault()
       e.domEvent.stopPropagation()
-      const x = new XMLHttpRequest()
-      x.open('GET', `/api/v0.1/ci_types/${ci.id}/template/export`, true)
-      x.responseType = 'blob'
-      x.onload = function(e) {
-        const url = window.URL.createObjectURL(x.response)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `${ci.alias || ci.name}.json`
-        a.click()
+
+      const hide = this.$message.loading(this.$t('loading'), 0)
+      try {
+        const res = await exportCITypeGroups({
+          type_ids: ci.id
+        })
+        console.log('exportCITypeGroups res', res)
+
+        if (res) {
+          const jsonStr = JSON.stringify(res)
+          const blob = new Blob([jsonStr], { type: 'application/json' })
+
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+
+          const fileName = `${ci.alias || ci.name}.json`
+          a.download = fileName
+
+          a.click()
+          URL.revokeObjectURL(url)
+        }
+      } catch (error) {
+        console.log('exportCITypeGroups fail', error)
+        hide()
       }
-      x.send()
+
+      hide()
     },
     resetRoute() {
       resetRouter()
@@ -1022,7 +1047,7 @@ export default {
         this.reload()
       }
       if (file.status === 'error') {
-        this.$message.error({ content: this.$t('cmdb.ciType.uploadFailed'), key, duration: 2 })
+        this.$message.error({ content: file?.response?.message || this.$t('cmdb.ciType.uploadFailed'), key, duration: 2 })
       }
     },
     handleChangeUnique(value) {
@@ -1046,33 +1071,39 @@ export default {
     top: 40%;
     transform: translate(-50%, -50%);
   }
-  /deep/.cmdb-ci-types-left-input {
-    input {
-      background-color: transparent;
-    }
-    .ant-input:focus {
-      box-shadow: none;
-    }
-  }
+
   .ci-types-left {
     width: 100%;
     overflow: auto;
     float: left;
 
+    &-header {
+      display: flex;
+      gap: 6px;
+
+      &-more {
+        flex-shrink: 0;
+        width: 32px;
+        padding: 0px;
+      }
+
+      /deep/ &-input {
+        .ant-input:focus {
+          box-shadow: none;
+        }
+      }
+    }
+
     .ci-types-left-content {
       max-height: calc(100% - 45px);
       overflow: hidden;
+      margin-top: 10px;
+
       &:hover {
         overflow: auto;
       }
     }
-    .ci-types-left-title {
-      padding: 10px 0;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      color: @text-color_3;
-    }
+
     .ci-types-left-group {
       position: relative;
       padding: 8px 0 8px 14px;

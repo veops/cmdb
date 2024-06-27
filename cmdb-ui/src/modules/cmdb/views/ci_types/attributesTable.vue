@@ -104,7 +104,7 @@
             :filter="'.filter-empty'"
             :animation="300"
             tag="div"
-            style="width: 100%; display: flex;flex-flow: wrap"
+            style="width: 100%; display: flex; flex-flow: wrap; column-gap: 10px;"
             handle=".handle"
           >
             <AttributeCard
@@ -146,7 +146,7 @@
             }
           "
           :animation="300"
-          style="min-height: 2rem; width: 100%; display: flex; flex-flow: wrap"
+          style="min-height: 2rem; width: 100%; display: flex; flex-flow: wrap; column-gap: 10px;"
           handle=".handle"
         >
           <AttributeCard

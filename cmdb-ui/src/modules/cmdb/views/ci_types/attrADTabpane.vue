@@ -69,6 +69,13 @@
           >
             <a @click="handleOpenCmdb" slot="suffix"><a-icon type="menu"/></a>
           </a-input>
+          <span
+            v-show="agent_type === 'master'"
+            slot="extra_master"
+            class="radio-master-tip"
+          >
+            {{ $t('cmdb.ciType.masterNodeTip') }}
+          </span>
         </CustomRadio>
       </a-form-model-item>
       <a-form-model-item
@@ -284,6 +291,10 @@ export default {
         radios.unshift({ value: 'all', label: this.$t('cmdb.ciType.allNodes') })
       }
 
+      if (this.adrType !== 'agent' || this?.currentAdr?.is_plugin) {
+        radios.unshift({ value: 'master', label: this.$t('cmdb.ciType.masterNode') })
+      }
+
       return radios
     },
     radioList() {
@@ -378,13 +389,13 @@ export default {
       }
       this.form = {
         auto_accept: _findADT?.auto_accept || false,
-        agent_id: _findADT.agent_id || '',
+        agent_id: _findADT?.agent_id && _findADT?.agent_id !== '0x0000' ? _findADT.agent_id : '',
         query_expr: _findADT.query_expr || '',
       }
       if (_findADT.query_expr) {
         this.agent_type = 'query_expr'
       } else if (_findADT.agent_id) {
-        this.agent_type = 'agent_id'
+        this.agent_type = _findADT.agent_id === '0x0000' ? 'master' : 'agent_id'
       } else {
         this.agent_type = this.agentTypeRadioList[0].value
       }
@@ -475,6 +486,10 @@ export default {
           this.$message.error(this.$t('cmdb.ciType.selectFromCMDBTips'))
           return
         }
+      }
+
+      if (this.agent_type === 'master') {
+        params.agent_id = '0x0000'
       }
 
       if (!this.cron) {
@@ -577,6 +592,11 @@ export default {
     font-weight: 400;
     margin-left: 17px;
     margin-bottom: 20px;
+  }
+
+  .radio-master-tip {
+    font-size: 12px;
+    color: #86909c;
   }
 }
 .attr-ad-snmp-form {
