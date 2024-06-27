@@ -241,8 +241,8 @@ export default {
 
 <style lang="less" scoped>
 .attribute-card {
-  width: 182px;
-  height: 80px;
+  width: 172px;
+  height: 75px;
   background: @primary-color_6;
   border-radius: 2px;
   position: relative;
@@ -308,7 +308,7 @@ export default {
     }
   }
   .attribute-card-footer {
-    width: 182px;
+    width: 172px;
     height: 30px;
     padding: 0 8px;
     position: absolute;
