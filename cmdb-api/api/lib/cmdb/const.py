@@ -93,7 +93,8 @@ class RoleEnum(BaseEnum):
 class AutoDiscoveryType(BaseEnum):
     AGENT = "agent"
     SNMP = "snmp"
-    HTTP = "http"
+    HTTP = "http" # cloud
+    COMPONENTS = "components"
 
 
 class AttributeDefaultValueEnum(BaseEnum):

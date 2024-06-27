@@ -540,6 +540,19 @@ def cmdb_patch(version):
                                                            peer_attr_id=peer_attr_id,
                                                            commit=False)
             if hasattr(adt, 'interval') and adt.interval and not adt.cron:
-                adt.cron = "*/{} * * * *".format(adt.interval // 60)
+                adt.cron = "*/{} * * * *".format(adt.interval // 60 or 1)
+
+        db.session.commit()
+
+    if version >= "2.4.7":
+        from api.lib.cmdb.auto_discovery.const import DEFAULT_INNER
+        from api.models.cmdb import AutoDiscoveryRule
+        for i in DEFAULT_INNER:
+            existed = AutoDiscoveryRule.get_by(name=i['name'], first=True, to_dict=False)
+            if existed is not None:
+                if "en" in i['option'] and 'en' not in (existed.option or {}):
+                    option = copy.deepcopy(existed.option)
+                    option['en'] = i['option']['en']
+                    existed.update(option=option, commit=False)
 
         db.session.commit()

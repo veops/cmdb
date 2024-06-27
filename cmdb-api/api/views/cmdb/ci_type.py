@@ -51,7 +51,11 @@ class CITypeView(APIView):
         q = request.args.get("type_name")
 
         if type_id is not None:
-            ci_type = CITypeCache.get(type_id).to_dict()
+            ci_type = CITypeCache.get(type_id)
+            if ci_type is None:
+                return abort(404, ErrFormat.ci_type_not_found)
+
+            ci_type = ci_type.to_dict()
             ci_type['parent_ids'] = CITypeInheritanceManager.get_parents(type_id)
             ci_types = [ci_type]
         elif type_name is not None:
@@ -357,15 +361,13 @@ class CITypeAttributeGroupView(APIView):
 
 
 class CITypeTemplateView(APIView):
-    url_prefix = ("/ci_types/template/import", "/ci_types/template/export", "/ci_types/<int:type_id>/template/export")
+    url_prefix = ("/ci_types/template/import", "/ci_types/template/export")
 
     @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Model_Configuration,
                          app_cli.op.download_CIType, app_cli.admin_name)
-    def get(self, type_id=None):  # export
-        if type_id is not None:
-            return self.jsonify(dict(ci_type_template=CITypeTemplateManager.export_template_by_type(type_id)))
-
-        return self.jsonify(dict(ci_type_template=CITypeTemplateManager.export_template()))
+    def get(self):  # export
+        type_ids = list(map(int, handle_arg_list(request.values.get('type_ids')))) or None
+        return self.jsonify(dict(ci_type_template=CITypeTemplateManager.export_template(type_ids=type_ids)))
 
     @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.Model_Configuration,
                          app_cli.op.download_CIType, app_cli.admin_name)

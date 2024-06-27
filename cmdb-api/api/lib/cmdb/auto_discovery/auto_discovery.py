@@ -3,7 +3,6 @@ import copy
 import datetime
 import json
 import os
-
 from flask import abort
 from flask import current_app
 from flask_login import current_user
@@ -11,7 +10,8 @@ from sqlalchemy import func
 
 from api.extensions import db
 from api.lib.cmdb.auto_discovery.const import ClOUD_MAP
-from api.lib.cmdb.auto_discovery.const import DEFAULT_HTTP
+from api.lib.cmdb.auto_discovery.const import DEFAULT_INNER
+from api.lib.cmdb.auto_discovery.const import PRIVILEGED_USERS
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributeCache
 from api.lib.cmdb.cache import CITypeCache
@@ -22,6 +22,7 @@ from api.lib.cmdb.const import AutoDiscoveryType
 from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
+from api.lib.cmdb.custom_dashboard import SystemConfigManager
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.search import SearchError
 from api.lib.cmdb.search.ci import search as ci_search
@@ -109,9 +110,9 @@ class AutoDiscoveryRuleCRUD(DBMixin):
             else:
                 self.cls.create(**rule)
 
-    def _can_add(self, **kwargs):
+    def _can_add(self, valid=True, **kwargs):
         self.cls.get_by(name=kwargs['name']) and abort(400, ErrFormat.adr_duplicate.format(kwargs['name']))
-        if kwargs.get('is_plugin') and kwargs.get('plugin_script'):
+        if kwargs.get('is_plugin') and kwargs.get('plugin_script') and valid:
             kwargs = check_plugin_script(**kwargs)
             acl = ACLManager(app_cli.app_name)
             has_perm = True
@@ -132,7 +133,7 @@ class AutoDiscoveryRuleCRUD(DBMixin):
 
         return kwargs
 
-    def _can_update(self, **kwargs):
+    def _can_update(self, valid=True, **kwargs):
         existed = self.cls.get_by_id(kwargs['_id']) or abort(
             404, ErrFormat.adr_not_found.format("id={}".format(kwargs['_id'])))
 
@@ -144,7 +145,7 @@ class AutoDiscoveryRuleCRUD(DBMixin):
             if other and other.id != existed.id:
                 return abort(400, ErrFormat.adr_duplicate.format(kwargs['name']))
 
-        if existed.is_plugin:
+        if existed.is_plugin and valid:
             acl = ACLManager(app_cli.app_name)
             has_perm = True
             try:
@@ -202,8 +203,9 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
     cls = AutoDiscoveryCIType
 
     @classmethod
-    def get_all(cls):
-        return cls.cls.get_by(to_dict=False)
+    def get_all(cls, type_ids=None):
+        res = cls.cls.get_by(to_dict=False)
+        return [i for i in res if type_ids is None or i.type_id in type_ids]
 
     @classmethod
     def get_by_id(cls, _id):
@@ -222,7 +224,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
             if not adr:
                 continue
             if adr.type == "http":
-                for i in DEFAULT_HTTP:
+                for i in DEFAULT_INNER:
                     if adr.name == i['name']:
                         attrs = AutoDiscoveryHTTPManager.get_attributes(
                             i['en'], (adt.extra_option or {}).get('category')) or []
@@ -243,10 +245,16 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
 
         for rule in rules:
             if isinstance(rule.get("extra_option"), dict) and rule['extra_option'].get('secret'):
-                if not (current_user.username == "cmdb_agent" or current_user.uid == rule['uid']):
+                if not (current_user.username in PRIVILEGED_USERS or current_user.uid == rule['uid']):
                     rule['extra_option'].pop('secret', None)
                 else:
                     rule['extra_option']['secret'] = AESCrypto.decrypt(rule['extra_option']['secret'])
+
+            if isinstance(rule.get("extra_option"), dict) and rule['extra_option'].get('password'):
+                if not (current_user.username in PRIVILEGED_USERS or current_user.uid == rule['uid']):
+                    rule['extra_option'].pop('password', None)
+                else:
+                    rule['extra_option']['password'] = AESCrypto.decrypt(rule['extra_option']['password'])
 
             if oneagent_id and rule['agent_id'] == oneagent_id:
                 result.append(rule)
@@ -271,17 +279,19 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
 
                 result.append(rule)
 
+
+        ad_rules_updated_at = (SystemConfigManager.get('ad_rules_updated_at') or {}).get('option', {}).get('v') or ""
         new_last_update_at = ""
         for i in result:
             i['adr'] = AutoDiscoveryRule.get_by_id(i['adr_id']).to_dict()
+            i['adr'].pop("attributes", None)
             __last_update_at = max([i['updated_at'] or "", i['created_at'] or "",
-                                    i['adr']['created_at'] or "", i['adr']['updated_at'] or ""])
+                                    i['adr']['created_at'] or "", i['adr']['updated_at'] or "", ad_rules_updated_at])
             if new_last_update_at < __last_update_at:
                 new_last_update_at = __last_update_at
 
         write_ad_rule_sync_history.apply_async(args=(result, oneagent_id, oneagent_name, datetime.datetime.now()),
                                                queue=CMDB_QUEUE)
-
         if not last_update_at or new_last_update_at > last_update_at:
             return result, new_last_update_at
         else:
@@ -346,7 +356,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
             if adr.type == "http":
                 kwargs.setdefault('extra_option', dict)
                 en_name = None
-                for i in DEFAULT_HTTP:
+                for i in DEFAULT_INNER:
                     if i['name'] == adr.name:
                         en_name = i['en']
                         break
@@ -362,10 +372,13 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
 
         if isinstance(kwargs.get('extra_option'), dict) and kwargs['extra_option'].get('secret'):
             kwargs['extra_option']['secret'] = AESCrypto.encrypt(kwargs['extra_option']['secret'])
+        if isinstance(kwargs.get('extra_option'), dict) and kwargs['extra_option'].get('password'):
+            kwargs['extra_option']['password'] = AESCrypto.encrypt(kwargs['extra_option']['password'])
 
         ci_type = CITypeCache.get(kwargs['type_id'])
         unique = AttributeCache.get(ci_type.unique_id)
         if unique and unique.name not in (kwargs.get('attributes') or {}).values():
+            current_app.logger.warning((unique.name, kwargs.get('attributes'), ci_type.alias))
             return abort(400, ErrFormat.ad_not_unique_key.format(unique.name))
 
         kwargs['uid'] = current_user.uid
@@ -381,7 +394,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
         if adr.type == "http":
             kwargs.setdefault('extra_option', dict)
             en_name = None
-            for i in DEFAULT_HTTP:
+            for i in DEFAULT_INNER:
                 if i['name'] == adr.name:
                     en_name = i['en']
                     break
@@ -398,9 +411,13 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
             ci_type = CITypeCache.get(existed.type_id)
             unique = AttributeCache.get(ci_type.unique_id)
             if unique and unique.name not in (kwargs.get('attributes') or {}).values():
+                current_app.logger.warning((unique.name, kwargs.get('attributes'), ci_type.alias))
                 return abort(400, ErrFormat.ad_not_unique_key.format(unique.name))
 
         if isinstance(kwargs.get('extra_option'), dict) and kwargs['extra_option'].get('secret'):
+            if current_user.uid != existed.uid:
+                return abort(403, ErrFormat.adt_secret_no_permission)
+        if isinstance(kwargs.get('extra_option'), dict) and kwargs['extra_option'].get('password'):
             if current_user.uid != existed.uid:
                 return abort(403, ErrFormat.adt_secret_no_permission)
 
@@ -413,12 +430,17 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
 
         if isinstance(kwargs.get('extra_option'), dict) and kwargs['extra_option'].get('secret'):
             kwargs['extra_option']['secret'] = AESCrypto.encrypt(kwargs['extra_option']['secret'])
+        if isinstance(kwargs.get('extra_option'), dict) and kwargs['extra_option'].get('password'):
+            kwargs['extra_option']['password'] = AESCrypto.encrypt(kwargs['extra_option']['password'])
 
         inst = self._can_update(_id=_id, **kwargs)
         if inst.agent_id != kwargs.get('agent_id') or inst.query_expr != kwargs.get('query_expr'):
             for item in AutoDiscoveryRuleSyncHistory.get_by(adt_id=inst.id, to_dict=False):
                 item.delete(commit=False)
             db.session.commit()
+
+            SystemConfigManager.create_or_update("ad_rules_updated_at",
+                                                 dict(v=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
         obj = inst.update(_id=_id, filter_none=False, **kwargs)
 
@@ -453,6 +475,10 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
 class AutoDiscoveryCITypeRelationCRUD(DBMixin):
     cls = AutoDiscoveryCITypeRelation
 
+    @classmethod
+    def get_all(cls, type_ids=None):
+        res = cls.cls.get_by(to_dict=False)
+        return [i for i in res if type_ids is None or i.ad_type_id in type_ids]
     @classmethod
     def get_by_type_id(cls, type_id, to_dict=False):
         return cls.cls.get_by(ad_type_id=type_id, to_dict=to_dict)
@@ -692,12 +718,13 @@ class AutoDiscoveryHTTPManager(object):
         categories = (ClOUD_MAP.get(name) or {}) or []
         for item in copy.deepcopy(categories):
             item.pop('map', None)
+            item.pop('collect_key_map', None)
 
         return categories
 
     def get_resources(self, name):
         en_name = None
-        for i in DEFAULT_HTTP:
+        for i in DEFAULT_INNER:
             if i['name'] == name:
                 en_name = i['en']
                 break
@@ -728,6 +755,17 @@ class AutoDiscoverySNMPManager(object):
     def get_attributes():
         if os.path.exists(os.path.join(PWD, "templates/net_device.json")):
             with open(os.path.join(PWD, "templates/net_device.json")) as f:
+                return json.loads(f.read())
+
+        return []
+
+
+class AutoDiscoveryComponentsManager(object):
+
+    @staticmethod
+    def get_attributes(name):
+        if os.path.exists(os.path.join(PWD, "templates/{}.json".format(name))):
+            with open(os.path.join(PWD, "templates/{}.json".format(name))) as f:
                 return json.loads(f.read())
 
         return []
