@@ -14,17 +14,18 @@
         <TriggerTable ref="triggerTable" :CITypeId="CITypeId"></TriggerTable>
       </a-tab-pane>
       <a-tab-pane key="6" :tab="$t('cmdb.ciType.grant')">
-        <template v-if="activeKey === '6'">
+        <div class="grant-config-wrap" :style="{ maxHeight: `${windowHeight - 150}px` }" v-if="activeKey === '6'">
           <GrantComp :CITypeId="CITypeId" resourceType="CIType" :resourceTypeName="CITypeName"></GrantComp>
           <div class="citype-detail-title">{{ $t('cmdb.components.relationGrant') }}</div>
           <RelationTable isInGrantComp :CITypeId="CITypeId" :CITypeName="CITypeName"></RelationTable>
-        </template>
+        </div>
       </a-tab-pane>
     </a-tabs>
   </a-card>
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import AttributesTable from './attributesTable'
 import RelationTable from './relationTable'
 import TriggerTable from './triggerTable.vue'
@@ -57,6 +58,11 @@ export default {
   },
   beforeCreate() {},
   mounted() {},
+  computed: {
+    ...mapState({
+      windowHeight: (state) => state.windowHeight,
+    }),
+  },
   methods: {
     changeTab(activeKey) {
       this.activeKey = activeKey
@@ -80,5 +86,8 @@ export default {
   padding-left: 10px;
   margin-left: 20px;
   margin-bottom: 10px;
+}
+.grant-config-wrap {
+  overflow: auto;
 }
 </style>

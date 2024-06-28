@@ -252,6 +252,8 @@ export default {
 
           cursor: pointer;
           position: relative;
+          min-width: 100px;
+          text-align: center;
 
           &:hover {
             background-color: @layout-sidebar-selected-color;

@@ -586,7 +586,7 @@ export default {
     searchResourceType({ page_size: 9999, app_id: 'cmdb' }).then((res) => {
       this.resource_type = { groups: res.groups, id2perms: res.id2perms }
     })
-    this.loadCITypes(!_currentId)
+    this.loadCITypes(!_currentId, true)
     this.getAttributes()
   },
   methods: {
@@ -598,7 +598,7 @@ export default {
     handleSearch(e) {
       this.searchValue = e.target.value
     },
-    async loadCITypes(isResetCurrentId = false) {
+    async loadCITypes(isResetCurrentId = false, isInit = false) {
       const groups = await getCITypeGroupsConfig({ need_other: true })
       let alreadyReset = false
       if (isResetCurrentId) {
@@ -618,6 +618,21 @@ export default {
             g.ci_types = []
           }
         })
+
+        if (isInit) {
+          const isMatch = groups.some((g) => {
+            const matchGroup = `${g?.id}%null%null` === this.currentId
+            const matchCITypes = g?.ci_types?.some((item) => `${g?.id}%${item?.id}%${item?.name}` === this.currentId)
+            return matchGroup || matchCITypes
+          })
+
+          if (!isMatch) {
+            if (groups?.[0]?.ci_types?.[0]?.id) {
+              this.currentId = `${groups[0].id}%${groups[0].ci_types[0].id}%${groups[0].ci_types[0].name}`
+            }
+          }
+        }
+
         this.CITypeGroups = groups
         localStorage.setItem('ops_cityps_currentId', this.currentId)
       })
