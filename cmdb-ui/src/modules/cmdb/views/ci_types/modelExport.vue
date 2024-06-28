@@ -33,7 +33,7 @@
         >
           <template
             slot="children"
-            slot-scope="{ props: { direction, selectedKeys }, on: { itemSelect } }"
+            slot-scope="{ props: { direction, selectedKeys }, on: { itemSelect, itemSelectAll } }"
           >
             <a-tree
               v-if="direction === 'left'"
@@ -41,15 +41,15 @@
               checkable
               :checkedKeys="[...selectedKeys, ...targetKeys]"
               :treeData="treeData"
-              :checkStrictly="true"
+              :checkStrictly="false"
               @check="
                 (_, props) => {
-                  onChecked(_, props, [...selectedKeys, ...targetKeys], itemSelect);
+                  onChecked(_, props, [...selectedKeys, ...targetKeys], itemSelect, itemSelectAll);
                 }
               "
               @select="
                 (_, props) => {
-                  onChecked(_, props, [...selectedKeys, ...targetKeys], itemSelect);
+                  onChecked(_, props, [...selectedKeys, ...targetKeys], itemSelect, itemSelectAll);
                 }
               "
             />
@@ -108,7 +108,6 @@ export default {
             key,
             title: child?.alias || child?.name || this.$t('other'),
             disabled,
-            checkable: true,
             children: []
           }
         })
@@ -118,8 +117,6 @@ export default {
           children,
           childrenKeys,
           disabled: children.every((item) => item.disabled),
-          checkable: false,
-          selectable: false
         }
       })
       console.log('treeData', newTreeData)
@@ -130,13 +127,40 @@ export default {
   },
   methods: {
     onChange(targetKeys, direction, moveKeys) {
-      this.targetKeys = targetKeys
+      const childKeys = []
+      const newTargetKeys = [...targetKeys]
+
+      if (direction === 'right') {
+        // 如果是选中父节点，添加时去除父节点，添加其子节点
+        this.treeData.forEach((item) => {
+          const parentIndex = newTargetKeys.findIndex((key) => item.key === key)
+          if (parentIndex !== -1) {
+            newTargetKeys.splice(parentIndex, 1)
+            childKeys.push(...item.childrenKeys)
+          }
+        })
+      }
+
+      const uniqTargetKeys = _.uniq([...newTargetKeys, ...childKeys])
+      this.targetKeys = uniqTargetKeys
     },
-    onChecked(_, e, checkedKeys, itemSelect) {
+    onChecked(_, e, checkedKeys, itemSelect, itemSelectAll) {
       const { eventKey } = e.node
       const selected = checkedKeys.indexOf(eventKey) === -1
+      const childrenKeys = this.treeData.find((item) => item.key === eventKey)?.childrenKeys || []
 
-      itemSelect(eventKey, selected)
+      // 如果当前点击是子节点，处理其联动父节点
+      this.treeData.forEach((item) => {
+        if (item.childrenKeys.includes(eventKey)) {
+          if (selected && item.childrenKeys.every((childKey) => [eventKey, ...checkedKeys].includes(childKey))) {
+            itemSelect(item.key, true)
+          } else if (!selected) {
+            itemSelect(item.key, false)
+          }
+        }
+      })
+
+      itemSelectAll([eventKey, ...childrenKeys], selected)
     },
     handleCancel() {
       this.$emit('cancel')
@@ -187,14 +211,26 @@ export default {
 
 <style lang="less" scoped>
 .model-export-transfer {
-  /deep/ .ant-transfer-list-body {
-    overflow: auto;
-  }
+  /deep/ .ant-transfer-list {
+    .ant-transfer-list-body {
+      overflow: auto;
+    }
 
-  /deep/ .ant-transfer-list-header-title {
-    color: @primary-color;
-    font-weight: 400;
-    font-size: 12px;
+    &:first-child {
+      .ant-transfer-list-header {
+        .ant-transfer-list-header-selected {
+          span:first-child {
+            display: none;
+          }
+        }
+      }
+    }
+
+    .ant-transfer-list-header-title {
+      color: @primary-color;
+      font-weight: 400;
+      font-size: 12px;
+    }
   }
 }
 </style>
