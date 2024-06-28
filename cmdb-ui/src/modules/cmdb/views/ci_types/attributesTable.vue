@@ -645,7 +645,7 @@ export default {
     width: 100%;
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: flex-start;
     min-height: 20px;
     > i {
       width: 182px;
