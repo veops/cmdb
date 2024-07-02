@@ -149,6 +149,11 @@ class AutoDiscoveryCITypeView(APIView):
                     i['extra_option'].pop('secret', None)
                 else:
                     i['extra_option']['secret'] = AESCrypto.decrypt(i['extra_option']['secret'])
+            if isinstance(i.get("extra_option"), dict) and i['extra_option'].get('password'):
+                if not (current_user.username == "cmdb_agent" or current_user.uid == i['uid']):
+                    i['extra_option'].pop('password', None)
+                else:
+                    i['extra_option']['password'] = AESCrypto.decrypt(i['extra_option']['password'])
 
         return self.jsonify(res)
 

@@ -273,6 +273,12 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
                         result.append(rule)
                         break
             elif not rule['agent_id'] and not rule['query_expr'] and rule['adr_id']:
+                try:
+                    if not int(oneagent_id, 16): # excludes master
+                        continue
+                except Exception:
+                    pass
+
                 adr = AutoDiscoveryRuleCRUD.get_by_id(rule['adr_id'])
                 if not adr:
                     continue
