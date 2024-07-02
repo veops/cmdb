@@ -2,6 +2,7 @@
 import copy
 import datetime
 import json
+import jsonpath
 import os
 from flask import abort
 from flask import current_app
@@ -9,10 +10,11 @@ from flask_login import current_user
 from sqlalchemy import func
 
 from api.extensions import db
-from api.lib.cmdb.auto_discovery.const import ClOUD_MAP
+from api.lib.cmdb.auto_discovery.const import CLOUD_MAP
 from api.lib.cmdb.auto_discovery.const import DEFAULT_INNER
 from api.lib.cmdb.auto_discovery.const import PRIVILEGED_USERS
 from api.lib.cmdb.cache import AttributeCache
+from api.lib.cmdb.cache import AutoDiscoveryMappingCache
 from api.lib.cmdb.cache import CITypeAttributeCache
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci import CIManager
@@ -279,7 +281,6 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
 
                 result.append(rule)
 
-
         ad_rules_updated_at = (SystemConfigManager.get('ad_rules_updated_at') or {}).get('option', {}).get('v') or ""
         new_last_update_at = ""
         for i in result:
@@ -361,10 +362,11 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
                         en_name = i['en']
                         break
                 if en_name and kwargs['extra_option'].get('category'):
-                    for item in ClOUD_MAP[en_name]:
+                    for item in CLOUD_MAP[en_name]:
                         if item["collect_key_map"].get(kwargs['extra_option']['category']):
                             kwargs["extra_option"]["collect_key"] = item["collect_key_map"][
                                 kwargs['extra_option']['category']]
+                            kwargs["extra_option"]["provider"] = en_name
                             break
 
         if kwargs.get('is_plugin') and kwargs.get('plugin_script'):
@@ -399,10 +401,11 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
                     en_name = i['en']
                     break
             if en_name and kwargs['extra_option'].get('category'):
-                for item in ClOUD_MAP[en_name]:
+                for item in CLOUD_MAP[en_name]:
                     if item["collect_key_map"].get(kwargs['extra_option']['category']):
                         kwargs["extra_option"]["collect_key"] = item["collect_key_map"][
                             kwargs['extra_option']['category']]
+                        kwargs["extra_option"]["provider"] = en_name
                         break
 
         if 'attributes' in kwargs:
@@ -479,6 +482,7 @@ class AutoDiscoveryCITypeRelationCRUD(DBMixin):
     def get_all(cls, type_ids=None):
         res = cls.cls.get_by(to_dict=False)
         return [i for i in res if type_ids is None or i.ad_type_id in type_ids]
+
     @classmethod
     def get_by_type_id(cls, type_id, to_dict=False):
         return cls.cls.get_by(ad_type_id=type_id, to_dict=to_dict)
@@ -543,7 +547,6 @@ class AutoDiscoveryCICRUD(DBMixin):
         adts = AutoDiscoveryCITypeCRUD.get_by_type_id(type_id)
         for adt in adts:
             attr_names |= set((adt.attributes or {}).values())
-
         return [attr for attr in attributes if attr['name'] in attr_names]
 
     @classmethod
@@ -674,7 +677,16 @@ class AutoDiscoveryCICRUD(DBMixin):
 
         ci_id = None
         if adt.attributes:
-            ci_dict = {adt.attributes[k]: v for k, v in adc.instance.items() if k in adt.attributes}
+            ci_dict = {adt.attributes[k]: None if not v and isinstance(v, (list, dict)) else v
+                       for k, v in adc.instance.items() if k in adt.attributes}
+            extra_option = adt.extra_option or {}
+            mapping, path_mapping = AutoDiscoveryHTTPManager.get_predefined_value_mapping(
+                extra_option.get('provider'), extra_option.get('category'))
+            if mapping:
+                ci_dict = {k: (mapping.get(k) or {}).get(str(v), v) for k, v in ci_dict.items()}
+            if path_mapping:
+                ci_dict = {k: jsonpath.jsonpath(v, path_mapping[k]) if k in path_mapping else v
+                           for k, v in ci_dict.items()}
             ci_id = CIManager.add(adc.type_id, is_auto_discovery=True, _is_admin=True, **ci_dict)
             AutoDiscoveryExecHistoryCRUD().add(type_id=adt.type_id,
                                                stdout="accept resource: {}".format(adc.unique_value))
@@ -715,7 +727,7 @@ class AutoDiscoveryCICRUD(DBMixin):
 class AutoDiscoveryHTTPManager(object):
     @staticmethod
     def get_categories(name):
-        categories = (ClOUD_MAP.get(name) or {}) or []
+        categories = (CLOUD_MAP.get(name) or {}) or []
         for item in copy.deepcopy(categories):
             item.pop('map', None)
             item.pop('collect_key_map', None)
@@ -738,15 +750,51 @@ class AutoDiscoveryHTTPManager(object):
 
     @staticmethod
     def get_attributes(provider, resource):
-        for item in (ClOUD_MAP.get(provider) or {}):
+        for item in (CLOUD_MAP.get(provider) or {}):
             for _resource in (item.get('map') or {}):
                 if _resource == resource:
                     tpt = item['map'][_resource]
+                    if isinstance(tpt, dict):
+                        tpt = tpt.get('template')
                     if tpt and os.path.exists(os.path.join(PWD, tpt)):
                         with open(os.path.join(PWD, tpt)) as f:
                             return json.loads(f.read())
 
         return []
+
+    @staticmethod
+    def get_mapping(provider, resource):
+        for item in (CLOUD_MAP.get(provider) or {}):
+            for _resource in (item.get('map') or {}):
+                if _resource == resource:
+                    mapping = item['map'][_resource]
+                    if not isinstance(mapping, dict):
+                        return {}
+                    name = mapping.get('mapping')
+                    mapping = AutoDiscoveryMappingCache.get(name)
+                    if isinstance(mapping, dict):
+                        return {mapping[key][provider]['key'].split('.')[0]: key for key in mapping if
+                                mapping[key].get(provider, {}).get('key')}
+
+        return {}
+
+    @staticmethod
+    def get_predefined_value_mapping(provider, resource):
+        for item in (CLOUD_MAP.get(provider) or {}):
+            for _resource in (item.get('map') or {}):
+                if _resource == resource:
+                    mapping = item['map'][_resource]
+                    if not isinstance(mapping, dict):
+                        return {}, {}
+                    name = mapping.get('mapping')
+                    mapping = AutoDiscoveryMappingCache.get(name)
+                    if isinstance(mapping, dict):
+                        return ({key: mapping[key][provider].get('map') for key in mapping if
+                                 mapping[key].get(provider, {}).get('map')},
+                                {key: mapping[key][provider]['key'].split('.', 1)[1] for key in mapping if
+                                 (mapping[key].get(provider, {}).get('key') or '').split('.')[1:]})
+
+        return {}, {}
 
 
 class AutoDiscoverySNMPManager(object):

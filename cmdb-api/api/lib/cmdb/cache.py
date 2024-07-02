@@ -3,6 +3,8 @@
 from __future__ import unicode_literals
 
 import datetime
+import os
+import yaml
 
 from flask import current_app
 
@@ -546,3 +548,20 @@ class CMDBCounterCache(object):
     @classmethod
     def get_sub_counter(cls):
         return cache.get(cls.KEY3) or cls.flush_sub_counter()
+
+
+class AutoDiscoveryMappingCache(object):
+    PREFIX = 'CMDB::AutoDiscovery::Mapping::{}'
+
+    @classmethod
+    def get(cls, name):
+        res = cache.get(cls.PREFIX.format(name)) or {}
+        if not res:
+            path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "auto_discovery/mapping/{}.yaml".format(name))
+            if os.path.exists(path):
+                with open(path, 'r') as f:
+                    mapping = yaml.safe_load(f)
+                    res = mapping.get('mapping') or {}
+                    res and cache.set(cls.PREFIX.format(name), res, timeout=0)
+
+        return res

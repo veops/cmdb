@@ -12,7 +12,7 @@ DEFAULT_INNER = [
     dict(name="华为云", en="huaweicloud", type=AutoDiscoveryType.HTTP, is_inner=True, is_plugin=False,
          option={'icon': {'name': 'caise-huaweiyun'}, "en": "huaweicloud"}),
     dict(name="AWS", en="aws", type=AutoDiscoveryType.HTTP, is_inner=True, is_plugin=False,
-         option={'icon': {'name': 'caise-aws'}}),
+         option={'icon': {'name': 'caise-aws'}, "en": "aws"}),
 
     dict(name="VCenter", en="vcenter", type=AutoDiscoveryType.HTTP, is_inner=True, is_plugin=False,
          option={'icon': {'name': 'cmdb-vcenter'}, "category": "private_cloud", "en": "vcenter"}),
@@ -34,14 +34,14 @@ DEFAULT_INNER = [
          option={'icon': {'name': 'caise-dayinji'}}),
 ]
 
-ClOUD_MAP = {
+CLOUD_MAP = {
     "aliyun": [
         {
             "category": "计算",
             "items": ["云服务器 ECS", "云服务器 Disk"],
             "map": {
-                "云服务器 ECS": "templates/aliyun_ecs.json",
-                "云服务器 Disk": "templates/aliyun_ecs_disk2.json",
+                "云服务器 ECS": {"template": "templates/aliyun_ecs.json", "mapping": "ecs"},
+                "云服务器 Disk": {"template": "templates/aliyun_ecs_disk2.json", "mapping": "evs"},
             },
             "collect_key_map": {
                 "云服务器 ECS": "ali.ecs",
@@ -57,10 +57,10 @@ ClOUD_MAP = {
                 "交换机Switch",
             ],
             "map": {
-                "内容分发CDN": "templates/aliyun_cdn.json",
-                "负载均衡SLB": "templates/aliyun_slb.json",
-                "专有网络VPC": "templates/aliyun_vpc.json",
-                "交换机Switch": "templates/aliyun_switch.json",
+                "内容分发CDN": {"template": "templates/aliyun_cdn.json", "mapping": "CDN"},
+                "负载均衡SLB": {"template": "templates/aliyun_slb.json", "mapping": "loadbalancer"},
+                "专有网络VPC": {"template": "templates/aliyun_vpc.json", "mapping": "vpc"},
+                "交换机Switch": {"template": "templates/aliyun_switch.json", "mapping": "vswitch"},
             },
             "collect_key_map": {
                 "内容分发CDN": "ali.cdn",
