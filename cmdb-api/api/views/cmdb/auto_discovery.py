@@ -111,6 +111,7 @@ class AutoDiscoveryRuleTemplateFileView(APIView):
 class AutoDiscoveryRuleHTTPView(APIView):
     url_prefix = ("/adr/http/<string:name>/categories",
                   "/adr/http/<string:name>/attributes",
+                  "/adr/http/<string:name>/mapping",
                   "/adr/snmp/<string:name>/attributes",
                   "/adr/components/<string:name>/attributes",)
 
@@ -124,6 +125,10 @@ class AutoDiscoveryRuleHTTPView(APIView):
         if "attributes" in request.url:
             resource = request.values.get('resource')
             return self.jsonify(AutoDiscoveryHTTPManager.get_attributes(name, resource))
+
+        if "mapping" in request.url:
+            resource = request.values.get('resource')
+            return self.jsonify(AutoDiscoveryHTTPManager.get_mapping(name, resource))
 
         return self.jsonify(AutoDiscoveryHTTPManager.get_categories(name))
 

@@ -29,12 +29,21 @@ def string2int(x):
 
 
 def str2datetime(x):
+
+    x = x.replace('T', ' ')
+    x = x.replace('Z', '')
+
     try:
         return datetime.datetime.strptime(x, "%Y-%m-%d").date()
     except ValueError:
         pass
 
-    return datetime.datetime.strptime(x, "%Y-%m-%d %H:%M:%S")
+    try:
+        return datetime.datetime.strptime(x, "%Y-%m-%d %H:%M:%S").date()
+    except ValueError:
+        pass
+
+    return datetime.datetime.strptime(x, "%Y-%m-%d %H:%M")
 
 
 class ValueTypeMap(object):
