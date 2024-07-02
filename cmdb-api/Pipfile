@@ -67,6 +67,7 @@ colorama = ">=0.4.6"
 pycryptodomex = ">=3.19.0"
 lz4 = ">=4.3.2"
 python-magic = "==0.4.27"
+jsonpath = "==0.82.2"
 
 [dev-packages]
 # Testing
