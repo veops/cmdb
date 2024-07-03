@@ -179,7 +179,10 @@
               :data="instanceList"
               @checkbox-change="onSelectChange"
               @checkbox-all="onSelectChange"
-              :checkbox-config="{ reserve: true, trigger: 'cell' }"
+              @checkbox-range-start="checkboxRangeStart"
+              @checkbox-range-change="checkboxRangeChange"
+              @checkbox-range-end="checkboxRangeEnd"
+              :checkbox-config="{ reserve: true, range: true }"
               @edit-closed="handleEditClose"
               @edit-actived="handleEditActived"
               :edit-config="{ trigger: 'dblclick', mode: 'row', showIcon: false }"
@@ -528,6 +531,8 @@ export default {
       isFullSearch: false,
       fullTreeData: [],
       filterFullTreeData: [],
+
+      lastSelected: [], // checkbox range 记录
     }
   },
   computed: {
@@ -1164,6 +1169,21 @@ export default {
     },
     onSelectChange({ records, reserves }) {
       this.selectedRowKeys = [...records, ...reserves]
+    },
+    checkboxRangeStart(e) {
+      const xTable = this.$refs.xTable
+      const lastSelected = xTable.getCheckboxRecords()
+      const selectedReserve = xTable.getCheckboxReserveRecords()
+      this.lastSelected = [...lastSelected, ...selectedReserve]
+    },
+    checkboxRangeChange(e) {
+      const xTable = this.$refs.xTable
+      xTable.setCheckboxRow(this.lastSelected, true)
+    },
+    checkboxRangeEnd(e) {
+      const xTable = this.$refs.xTable
+      this.lastSelected = []
+      this.selectedRowKeys = [...xTable.getCheckboxRecords(), ...xTable.getCheckboxReserveRecords()]
     },
     batchDeleteCIRelation() {
       const currentShowType = this.showTypes.find((item) => item.id === Number(this.currentTypeId[0]))
