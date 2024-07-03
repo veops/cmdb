@@ -29,7 +29,8 @@
 </template>
 
 <script>
-import { getHttpCategories, getHttpAttributes, getSnmpAttributes } from '../../api/discovery'
+import _ from 'lodash'
+import { getHttpCategories, getHttpAttributes, getSnmpAttributes, getHttpAttrMapping } from '../../api/discovery'
 import AttrMapTable from '@/modules/cmdb/components/attrMapTable/index.vue'
 import ADPreviewTable from './adPreviewTable.vue'
 import HttpADCategory from './httpADCategory.vue'
@@ -77,6 +78,7 @@ export default {
       categoriesSelect: [],
       currentCate: '',
       tableData: [],
+      httpAttrMap: {}
     }
   },
   computed: {
@@ -103,13 +105,7 @@ export default {
       immediate: true,
       handler(newVal) {
         if (newVal) {
-          getHttpAttributes(this.ruleName, { resource: newVal }).then((res) => {
-            if (this.isEdit) {
-              this.formatTableData(res)
-            } else {
-              this.tableData = res
-            }
-          })
+          this.getHttpAttr(newVal)
         }
       },
     },
@@ -158,28 +154,49 @@ export default {
     },
     formatTableData(list) {
       const _findADT = this.adCITypeList.find((item) => Number(item.adr_id) === Number(this.currentTab))
-      this.tableData = (list || []).map((item) => {
-        if (_findADT.attributes) {
-          return {
-            ...item,
-            attr: _findADT.attributes[`${item.name}`],
-          }
+      this.tableData = (list || []).map((val) => {
+        const item = _.cloneDeep(val)
+
+        if (_findADT?.attributes?.[item.name]) {
+          item.attr = _findADT.attributes[item.name]
         } else {
           const _find = this.ciTypeAttributes.find((ele) => ele.name === item.name)
           if (_find) {
-            return {
-              ...item,
-              attr: _find.name,
-            }
+            item.attr = _find.name
           }
-          return item
         }
+
+        if (
+          this.isEdit &&
+          !item.attr &&
+          this.httpAttrMap?.[item.name]
+        ) {
+          item.attr = this.httpAttrMap[item.name]
+        }
+
+        return item
       })
     },
     getTableData() {
       const $table = this.$refs.attrMapTable
       const { fullData } = $table.getTableData()
       return fullData || []
+    },
+
+    async getHttpAttr(val) {
+      await this.getHttpAttrMapping(this.ruleName, val)
+      getHttpAttributes(this.ruleName, { resource: val }).then((res) => {
+        if (this.isEdit) {
+          this.formatTableData(res)
+        } else {
+          this.tableData = res
+        }
+      })
+    },
+
+    async getHttpAttrMapping(name, resource) {
+      const res = await getHttpAttrMapping(name, resource)
+      this.httpAttrMap = res || {}
     }
   },
 }
