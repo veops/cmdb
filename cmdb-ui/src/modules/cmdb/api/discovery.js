@@ -52,6 +52,16 @@ export function getSnmpAttributes(type, name) {
   })
 }
 
+export function getHttpAttrMapping(name, resource) {
+  return axios({
+    url: `/v0.1/adr/http/${name}/mapping`,
+    method: 'GET',
+    params: {
+      resource
+    }
+  })
+}
+
 export function getCITypeDiscovery(type_id) {
     return axios({
         url: `/v0.1/adt/ci_types/${type_id}`,
