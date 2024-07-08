@@ -993,7 +993,7 @@ class CITypeRelationManager(object):
         if ((parent_attr_ids and parent_attr_ids != old_parent_attr_ids) or
                 (child_attr_ids and child_attr_ids != old_child_attr_ids)):
             from api.tasks.cmdb import rebuild_relation_for_attribute_changed
-            rebuild_relation_for_attribute_changed.apply_async(args=(existed.to_dict(),))
+            rebuild_relation_for_attribute_changed.apply_async(args=(existed.to_dict(), current_user.uid))
 
         CITypeHistoryManager.add(CITypeOperateType.ADD_RELATION, p.id,
                                  change=dict(parent=p.to_dict(), child=c.to_dict(), relation_type_id=relation_type_id))

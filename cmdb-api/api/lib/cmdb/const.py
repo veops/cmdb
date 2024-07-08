@@ -41,23 +41,23 @@ class OperateType(BaseEnum):
 
 
 class CITypeOperateType(BaseEnum):
-    ADD = "0"  # 新增模型
-    UPDATE = "1"  # 修改模型
-    DELETE = "2"  # 删除模型
-    ADD_ATTRIBUTE = "3"  # 新增属性
-    UPDATE_ATTRIBUTE = "4"  # 修改属性
-    DELETE_ATTRIBUTE = "5"  # 删除属性
-    ADD_TRIGGER = "6"  # 新增触发器
-    UPDATE_TRIGGER = "7"  # 修改触发器
-    DELETE_TRIGGER = "8"  # 删除触发器
-    ADD_UNIQUE_CONSTRAINT = "9"  # 新增联合唯一
-    UPDATE_UNIQUE_CONSTRAINT = "10"  # 修改联合唯一
-    DELETE_UNIQUE_CONSTRAINT = "11"  # 删除联合唯一
-    ADD_RELATION = "12"  # 新增关系
-    DELETE_RELATION = "13"  # 删除关系
-    ADD_RECONCILIATION = "14"  # 新增数据合规
-    UPDATE_RECONCILIATION = "15"  # 修改数据合规
-    DELETE_RECONCILIATION = "16"  # 删除数据合规
+    ADD = "0"  # add CIType
+    UPDATE = "1"  # update CIType
+    DELETE = "2"  # delete CIType
+    ADD_ATTRIBUTE = "3"
+    UPDATE_ATTRIBUTE = "4"
+    DELETE_ATTRIBUTE = "5"
+    ADD_TRIGGER = "6"
+    UPDATE_TRIGGER = "7"
+    DELETE_TRIGGER = "8"
+    ADD_UNIQUE_CONSTRAINT = "9"
+    UPDATE_UNIQUE_CONSTRAINT = "10"
+    DELETE_UNIQUE_CONSTRAINT = "11"
+    ADD_RELATION = "12"
+    DELETE_RELATION = "13"
+    ADD_RECONCILIATION = "14"
+    UPDATE_RECONCILIATION = "15"
+    DELETE_RECONCILIATION = "16"
 
 
 class RetKey(BaseEnum):
@@ -93,7 +93,7 @@ class RoleEnum(BaseEnum):
 class AutoDiscoveryType(BaseEnum):
     AGENT = "agent"
     SNMP = "snmp"
-    HTTP = "http" # cloud
+    HTTP = "http"  # cloud
     COMPONENTS = "components"
 
 
@@ -107,6 +107,10 @@ class ExecuteStatusEnum(BaseEnum):
     COMPLETED = '0'
     FAILED = '1'
     RUNNING = '2'
+
+class RelationSourceEnum(BaseEnum):
+    ATTRIBUTE_VALUES = "0"
+    AUTO_DISCOVERY = "1"
 
 
 CMDB_QUEUE = "one_cmdb_async"
