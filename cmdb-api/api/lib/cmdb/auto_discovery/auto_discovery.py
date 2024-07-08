@@ -23,6 +23,7 @@ from api.lib.cmdb.ci_type import CITypeGroupManager
 from api.lib.cmdb.const import AutoDiscoveryType
 from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import PermEnum
+from api.lib.cmdb.const import RelationSourceEnum
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.custom_dashboard import SystemConfigManager
 from api.lib.cmdb.resp_format import ErrFormat
@@ -246,6 +247,9 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
         rules = cls.cls.get_by(to_dict=True)
 
         for rule in rules:
+            if not rule['enabled']:
+                continue
+
             if isinstance(rule.get("extra_option"), dict) and rule['extra_option'].get('secret'):
                 if not (current_user.username in PRIVILEGED_USERS or current_user.uid == rule['uid']):
                     rule['extra_option'].pop('secret', None)
@@ -274,7 +278,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
                         break
             elif not rule['agent_id'] and not rule['query_expr'] and rule['adr_id']:
                 try:
-                    if not int(oneagent_id, 16): # excludes master
+                    if not int(oneagent_id, 16):  # excludes master
                         continue
                 except Exception:
                     pass
@@ -717,10 +721,15 @@ class AutoDiscoveryCICRUD(DBMixin):
                 for relation_ci in response:
                     relation_ci_id = relation_ci['_id']
                     try:
-                        CIRelationManager.add(ci_id, relation_ci_id, valid=False)
+                        CIRelationManager.add(ci_id, relation_ci_id,
+                                              valid=False,
+                                              source=RelationSourceEnum.AUTO_DISCOVERY)
+
                     except:
                         try:
-                            CIRelationManager.add(relation_ci_id, ci_id, valid=False)
+                            CIRelationManager.add(relation_ci_id, ci_id,
+                                                  valid=False,
+                                                  source=RelationSourceEnum.AUTO_DISCOVERY)
                         except:
                             pass
 

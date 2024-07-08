@@ -58,10 +58,10 @@ def ci_cache(ci_id, operate_type, record_id):
 
 @celery.task(name="cmdb.rebuild_relation_for_attribute_changed", queue=CMDB_QUEUE)
 @reconnect_db
-def rebuild_relation_for_attribute_changed(ci_type_relation):
+def rebuild_relation_for_attribute_changed(ci_type_relation, uid):
     from api.lib.cmdb.ci import CIRelationManager
 
-    CIRelationManager.rebuild_all_by_attribute(ci_type_relation)
+    CIRelationManager.rebuild_all_by_attribute(ci_type_relation, uid)
 
 
 @celery.task(name="cmdb.batch_ci_cache", queue=CMDB_QUEUE)

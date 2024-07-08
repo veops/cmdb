@@ -232,8 +232,8 @@ class AttributeHistoryManger(object):
 
 class CIRelationHistoryManager(object):
     @staticmethod
-    def add(rel_obj, operate_type=OperateType.ADD):
-        record = OperationRecord.create(uid=current_user.uid)
+    def add(rel_obj, operate_type=OperateType.ADD, uid=None):
+        record = OperationRecord.create(uid=uid or current_user.uid)
 
         CIRelationHistory.create(relation_id=rel_obj.id,
                                  record_id=record.id,

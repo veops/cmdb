@@ -4,12 +4,12 @@
 import copy
 import datetime
 import json
-import threading
-
 import redis_lock
+import threading
 from flask import abort
 from flask import current_app
 from flask_login import current_user
+from sqlalchemy.orm import aliased
 from werkzeug.exceptions import BadRequest
 
 from api.extensions import db
@@ -28,6 +28,7 @@ from api.lib.cmdb.const import ExistPolicy
 from api.lib.cmdb.const import OperateType
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import REDIS_PREFIX_CI
+from api.lib.cmdb.const import RelationSourceEnum
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RetKey
 from api.lib.cmdb.const import ValueTypeEnum
@@ -1133,7 +1134,14 @@ class CIRelationManager(object):
                     return abort(400, ErrFormat.relation_constraint.format("1-N"))
 
     @classmethod
-    def add(cls, first_ci_id, second_ci_id, more=None, relation_type_id=None, ancestor_ids=None, valid=True):
+    def add(cls, first_ci_id, second_ci_id,
+            more=None,
+            relation_type_id=None,
+            ancestor_ids=None,
+            valid=True,
+            apply_async=True,
+            source=None,
+            uid=None):
 
         first_ci = CIManager.confirm_ci_existed(first_ci_id)
         second_ci = CIManager.confirm_ci_existed(second_ci_id)
@@ -1145,9 +1153,10 @@ class CIRelationManager(object):
                                     first=True)
         if existed is not None:
             if existed.relation_type_id != relation_type_id and relation_type_id is not None:
-                existed.update(relation_type_id=relation_type_id)
+                source = existed.source or source
+                existed.update(relation_type_id=relation_type_id, source=source)
 
-                CIRelationHistoryManager().add(existed, OperateType.UPDATE)
+                CIRelationHistoryManager().add(existed, OperateType.UPDATE, uid=uid)
         else:
             if relation_type_id is None:
                 type_relation = CITypeRelation.get_by(parent_id=first_ci.type_id,
@@ -1177,11 +1186,13 @@ class CIRelationManager(object):
                 existed = CIRelation.create(first_ci_id=first_ci_id,
                                             second_ci_id=second_ci_id,
                                             relation_type_id=relation_type_id,
-                                            ancestor_ids=ancestor_ids)
-
-                CIRelationHistoryManager().add(existed, OperateType.ADD)
-
-                ci_relation_cache.apply_async(args=(first_ci_id, second_ci_id, ancestor_ids), queue=CMDB_QUEUE)
+                                            ancestor_ids=ancestor_ids,
+                                            source=source)
+                CIRelationHistoryManager().add(existed, OperateType.ADD, uid=uid)
+                if apply_async:
+                    ci_relation_cache.apply_async(args=(first_ci_id, second_ci_id, ancestor_ids), queue=CMDB_QUEUE)
+                else:
+                    ci_relation_cache(first_ci_id, second_ci_id, ancestor_ids)
 
         if more is not None:
             existed.upadte(more=more)
@@ -1189,7 +1200,7 @@ class CIRelationManager(object):
         return existed.id
 
     @staticmethod
-    def delete(cr_id):
+    def delete(cr_id, apply_async=True):
         cr = CIRelation.get_by_id(cr_id) or abort(404, ErrFormat.relation_not_found.format("id={}".format(cr_id)))
 
         if current_app.config.get('USE_ACL') and current_user.username != 'worker':
@@ -1205,8 +1216,12 @@ class CIRelationManager(object):
         his_manager = CIRelationHistoryManager()
         his_manager.add(cr, operate_type=OperateType.DELETE)
 
-        ci_relation_delete.apply_async(args=(cr.first_ci_id, cr.second_ci_id, cr.ancestor_ids), queue=CMDB_QUEUE)
-        delete_id_filter.apply_async(args=(cr.second_ci_id,), queue=CMDB_QUEUE)
+        if apply_async:
+            ci_relation_delete.apply_async(args=(cr.first_ci_id, cr.second_ci_id, cr.ancestor_ids), queue=CMDB_QUEUE)
+            delete_id_filter.apply_async(args=(cr.second_ci_id,), queue=CMDB_QUEUE)
+        else:
+            ci_relation_delete(cr.first_ci_id, cr.second_ci_id, cr.ancestor_ids)
+            delete_id_filter(cr.second_ci_id)
 
         return cr_id
 
@@ -1221,23 +1236,23 @@ class CIRelationManager(object):
         if cr is not None:
             cls.delete(cr.id)
 
-        ci_relation_delete.apply_async(args=(first_ci_id, second_ci_id, ancestor_ids), queue=CMDB_QUEUE)
-        delete_id_filter.apply_async(args=(second_ci_id,), queue=CMDB_QUEUE)
+        # ci_relation_delete.apply_async(args=(first_ci_id, second_ci_id, ancestor_ids), queue=CMDB_QUEUE)
+        # delete_id_filter.apply_async(args=(second_ci_id,), queue=CMDB_QUEUE)
 
         return cr
 
     @classmethod
-    def delete_3(cls, first_ci_id, second_ci_id):
+    def delete_3(cls, first_ci_id, second_ci_id, apply_async=True):
         cr = CIRelation.get_by(first_ci_id=first_ci_id,
                                second_ci_id=second_ci_id,
                                to_dict=False,
                                first=True)
 
         if cr is not None:
-            ci_relation_delete.apply_async(args=(first_ci_id, second_ci_id, cr.ancestor_ids), queue=CMDB_QUEUE)
-            delete_id_filter.apply_async(args=(second_ci_id,), queue=CMDB_QUEUE)
+            # ci_relation_delete.apply_async(args=(first_ci_id, second_ci_id, cr.ancestor_ids), queue=CMDB_QUEUE)
+            # delete_id_filter.apply_async(args=(second_ci_id,), queue=CMDB_QUEUE)
 
-            cls.delete(cr.id)
+            cls.delete(cr.id, apply_async=apply_async)
 
         return cr
 
@@ -1277,6 +1292,27 @@ class CIRelationManager(object):
                     cls.delete_2(parent_id, ci_id, ancestor_ids=ancestor_ids)
 
     @classmethod
+    def delete_relations_by_source(cls, source,
+                                   first_ci_id=None, second_ci_type_id=None,
+                                   second_ci_id=None, first_ci_type_id=None,
+                                   added=None):
+        existed = []
+        if first_ci_id is not None and second_ci_type_id is not None:
+            existed = [(i.first_ci_id, i.second_ci_id) for i in CIRelation.get_by(
+                source=source, first_ci_id=first_ci_id, only_query=True).join(
+                CI, CIRelation.second_ci_id == CI.id).filter(CI.type_id == second_ci_type_id)]
+
+        if second_ci_id is not None and first_ci_type_id is not None:
+            existed = [(i.first_ci_id, i.second_ci_id) for i in CIRelation.get_by(
+                source=source, second_ci_id=second_ci_id, only_query=True).join(
+                CI, CIRelation.first_ci_id == CI.id).filter(CI.type_id == first_ci_type_id)]
+
+        deleted = set(existed) - set(added or [])
+
+        for first, second in deleted:
+            cls.delete_3(first, second, apply_async=False)
+
+    @classmethod
     def build_by_attribute(cls, ci_dict):
         type_id = ci_dict['_type']
         child_items = CITypeRelation.get_by(parent_id=type_id, only_query=True).filter(
@@ -1296,8 +1332,15 @@ class CIRelationManager(object):
                     relations = _relations
                 else:
                     relations &= _relations
+
+            cls.delete_relations_by_source(RelationSourceEnum.ATTRIBUTE_VALUES,
+                                           first_ci_id=ci_dict['_id'],
+                                           second_ci_type_id=item.child_id,
+                                           added=relations)
             for parent_ci_id, child_ci_id in (relations or []):
-                CIRelationManager.add(parent_ci_id, child_ci_id, valid=False)
+                cls.add(parent_ci_id, child_ci_id,
+                        valid=False,
+                        source=RelationSourceEnum.ATTRIBUTE_VALUES)
 
         parent_items = CITypeRelation.get_by(child_id=type_id, only_query=True).filter(
             CITypeRelation.child_attr_ids.isnot(None))
@@ -1316,11 +1359,18 @@ class CIRelationManager(object):
                     relations = _relations
                 else:
                     relations &= _relations
+
+            cls.delete_relations_by_source(RelationSourceEnum.ATTRIBUTE_VALUES,
+                                           second_ci_id=ci_dict['_id'],
+                                           first_ci_type_id=item.parent_id,
+                                           added=relations)
             for parent_ci_id, child_ci_id in (relations or []):
-                CIRelationManager.add(parent_ci_id, child_ci_id, valid=False)
+                cls.add(parent_ci_id, child_ci_id,
+                        valid=False,
+                        source=RelationSourceEnum.ATTRIBUTE_VALUES)
 
     @classmethod
-    def rebuild_all_by_attribute(cls, ci_type_relation):
+    def rebuild_all_by_attribute(cls, ci_type_relation, uid):
         relations = None
         for parent_attr_id, child_attr_id in zip(ci_type_relation['parent_attr_ids'] or [],
                                                  ci_type_relation['child_attr_ids'] or []):
@@ -1352,11 +1402,29 @@ class CIRelationManager(object):
             else:
                 relations &= _relations
 
+        t1 = aliased(CI)
+        t2 = aliased(CI)
+        query = db.session.query(CIRelation).join(t1, t1.id == CIRelation.first_ci_id).join(
+            t2, t2.id == CIRelation.second_ci_id).filter(t1.type_id == ci_type_relation['parent_id']).filter(
+            t2.type_id == ci_type_relation['child_id'])
+        for i in query:
+            db.session.delete(i)
+            ci_relation_delete(i.first_ci_id, i.second_ci_id, i.ancestor_ids)
+        try:
+            db.session.commit()
+        except Exception as e:
+            current_app.logger.error(e)
+            db.session.rollback()
+
         for parent_ci_id, child_ci_id in (relations or []):
             try:
-                cls.add(parent_ci_id, child_ci_id, valid=False)
-            except:
-                pass
+                cls.add(parent_ci_id, child_ci_id,
+                        valid=False,
+                        apply_async=False,
+                        source=RelationSourceEnum.ATTRIBUTE_VALUES,
+                        uid=uid)
+            except Exception as e:
+                current_app.logger.error(e)
 
 
 class CITriggerManager(object):

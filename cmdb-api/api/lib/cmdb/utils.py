@@ -28,10 +28,7 @@ def string2int(x):
     return v
 
 
-def str2datetime(x):
-
-    x = x.replace('T', ' ')
-    x = x.replace('Z', '')
+def str2date(x):
 
     try:
         return datetime.datetime.strptime(x, "%Y-%m-%d").date()
@@ -43,7 +40,19 @@ def str2datetime(x):
     except ValueError:
         pass
 
+
+def str2datetime(x):
+
+    x = x.replace('T', ' ')
+    x = x.replace('Z', '')
+
+    try:
+        return datetime.datetime.strptime(x, "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        pass
+
     return datetime.datetime.strptime(x, "%Y-%m-%d %H:%M")
+
 
 
 class ValueTypeMap(object):
@@ -53,7 +62,7 @@ class ValueTypeMap(object):
         ValueTypeEnum.TEXT: lambda x: x,
         ValueTypeEnum.TIME: lambda x: TIME_RE.findall(x)[0],
         ValueTypeEnum.DATETIME: str2datetime,
-        ValueTypeEnum.DATE: str2datetime,
+        ValueTypeEnum.DATE: str2date,
         ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) and x else x,
     }
 
