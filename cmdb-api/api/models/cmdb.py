@@ -2,7 +2,6 @@
 
 
 import datetime
-
 from sqlalchemy.dialects.mysql import DOUBLE
 
 from api.extensions import db
@@ -11,6 +10,7 @@ from api.lib.cmdb.const import CIStatusEnum
 from api.lib.cmdb.const import CITypeOperateType
 from api.lib.cmdb.const import ConstraintEnum
 from api.lib.cmdb.const import OperateType
+from api.lib.cmdb.const import RelationSourceEnum
 from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.database import Model
 from api.lib.database import Model2
@@ -260,6 +260,7 @@ class CIRelation(Model):
     second_ci_id = db.Column(db.Integer, db.ForeignKey("c_cis.id"), nullable=False)
     relation_type_id = db.Column(db.Integer, db.ForeignKey("c_relation_types.id"), nullable=False)
     more = db.Column(db.Integer, db.ForeignKey("c_cis.id"))
+    source = db.Column(db.Enum(*RelationSourceEnum.all()), name="source")
 
     ancestor_ids = db.Column(db.String(128), index=True)
 

@@ -41,7 +41,7 @@ CLOUD_MAP = {
             "items": ["云服务器 ECS", "云服务器 Disk"],
             "map": {
                 "云服务器 ECS": {"template": "templates/aliyun_ecs.json", "mapping": "ecs"},
-                "云服务器 Disk": {"template": "templates/aliyun_ecs_disk2.json", "mapping": "evs"},
+                "云服务器 Disk": {"template": "templates/aliyun_ecs_disk.json", "mapping": "evs"},
             },
             "collect_key_map": {
                 "云服务器 ECS": "ali.ecs",
