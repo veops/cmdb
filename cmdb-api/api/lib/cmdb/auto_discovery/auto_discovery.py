@@ -365,7 +365,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
             adr = AutoDiscoveryRule.get_by_id(kwargs['adr_id']) or abort(
                 404, ErrFormat.adr_not_found.format("id={}".format(kwargs['adr_id'])))
             if adr.type == "http":
-                kwargs.setdefault('extra_option', dict)
+                kwargs.setdefault('extra_option', dict())
                 en_name = None
                 for i in DEFAULT_INNER:
                     if i['name'] == adr.name:
@@ -404,7 +404,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
         adr = AutoDiscoveryRule.get_by_id(existed.adr_id) or abort(
             404, ErrFormat.adr_not_found.format("id={}".format(existed.adr_id)))
         if adr.type == "http":
-            kwargs.setdefault('extra_option', dict)
+            kwargs.setdefault('extra_option', dict())
             en_name = None
             for i in DEFAULT_INNER:
                 if i['name'] == adr.name:
@@ -447,7 +447,9 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
             kwargs['extra_option']['password'] = AESCrypto.encrypt(kwargs['extra_option']['password'])
 
         inst = self._can_update(_id=_id, **kwargs)
-        if inst.agent_id != kwargs.get('agent_id') or inst.query_expr != kwargs.get('query_expr'):
+        if len(kwargs) == 1 and 'enabled' in kwargs: # enable or disable
+            pass
+        elif inst.agent_id != kwargs.get('agent_id') or inst.query_expr != kwargs.get('query_expr'):
             for item in AutoDiscoveryRuleSyncHistory.get_by(adt_id=inst.id, to_dict=False):
                 item.delete(commit=False)
             db.session.commit()
@@ -789,7 +791,7 @@ class AutoDiscoveryHTTPManager(object):
                     mapping = AutoDiscoveryMappingCache.get(name)
                     if isinstance(mapping, dict):
                         return {mapping[key][provider]['key'].split('.')[0]: key for key in mapping if
-                                mapping[key].get(provider, {}).get('key')}
+                                (mapping[key].get(provider) or {}).get('key')}
 
         return {}
 
@@ -807,7 +809,7 @@ class AutoDiscoveryHTTPManager(object):
                         return ({key: mapping[key][provider].get('map') for key in mapping if
                                  mapping[key].get(provider, {}).get('map')},
                                 {key: mapping[key][provider]['key'].split('.', 1)[1] for key in mapping if
-                                 (mapping[key].get(provider, {}).get('key') or '').split('.')[1:]})
+                                 ((mapping[key].get(provider) or {}).get('key') or '').split('.')[1:]})
 
         return {}, {}
 

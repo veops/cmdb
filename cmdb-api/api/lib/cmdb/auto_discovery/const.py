@@ -73,8 +73,8 @@ CLOUD_MAP = {
             "category": "存储",
             "items": ["块存储EBS", "对象存储OSS"],
             "map": {
-                "块存储EBS": "templates/aliyun_ebs.json",
-                "对象存储OSS": "templates/aliyun_oss.json",
+                "块存储EBS": {"template": "templates/aliyun_ebs.json", "mapping": "evs"},
+                "对象存储OSS": {"template": "templates/aliyun_oss.json", "mapping": "objectStorage"},
             },
             "collect_key_map": {
                 "块存储EBS": "ali.ebs",
@@ -85,9 +85,9 @@ CLOUD_MAP = {
             "category": "数据库",
             "items": ["云数据库RDS MySQL", "云数据库RDS PostgreSQL", "云数据库 Redis"],
             "map": {
-                "云数据库RDS MySQL": "templates/aliyun_rds_mysql.json",
-                "云数据库RDS PostgreSQL": "templates/aliyun_rds_postgre.json",
-                "云数据库 Redis": "templates/aliyun_redis.json",
+                "云数据库RDS MySQL": {"template": "templates/aliyun_rds_mysql.json", "mapping": "mysql"},
+                "云数据库RDS PostgreSQL": {"template": "templates/aliyun_rds_postgre.json", "mapping": "postgresql"},
+                "云数据库 Redis": {"template": "templates/aliyun_redis.json", "mapping": "redis"},
             },
             "collect_key_map": {
                 "云数据库RDS MySQL": "ali.rds_mysql",
@@ -101,7 +101,7 @@ CLOUD_MAP = {
             "category": "计算",
             "items": ["云服务器 CVM"],
             "map": {
-                "云服务器 CVM": "templates/tencent_cvm.json",
+                "云服务器 CVM": {"template": "templates/tencent_cvm.json", "mapping": "ecs"},
             },
             "collect_key_map": {
                 "云服务器 CVM": "tencent.cvm",
@@ -111,7 +111,7 @@ CLOUD_MAP = {
             "category": "CDN与边缘",
             "items": ["内容分发CDN"],
             "map": {
-                "内容分发CDN": "templates/tencent_cdn.json",
+                "内容分发CDN": {"template": "templates/tencent_cdn.json", "mapping": "CDN"},
             },
             "collect_key_map": {
                 "内容分发CDN": "tencent.cdn",
@@ -121,9 +121,9 @@ CLOUD_MAP = {
             "category": "网络",
             "items": ["负载均衡CLB", "私有网络VPC", "子网"],
             "map": {
-                "负载均衡CLB": "templates/tencent_clb.json",
-                "私有网络VPC": "templates/tencent_vpc.json",
-                "子网": "templates/tencent_subnet.json",
+                "负载均衡CLB": {"template": "templates/tencent_clb.json", "mapping": "loadbalancer"},
+                "私有网络VPC": {"template": "templates/tencent_vpc.json", "mapping": "vpc"},
+                "子网": {"template": "templates/tencent_subnet.json", "mapping": "vswitch"},
             },
             "collect_key_map": {
                 "负载均衡CLB": "tencent.clb",
@@ -135,21 +135,21 @@ CLOUD_MAP = {
             "category": "存储",
             "items": ["云硬盘CBS", "对象存储COS"],
             "map": {
-                "云硬盘CBS": "templates/tencent_cbs.json",
-                "对象存储OSS": "templates/tencent_cos.json",
+                "云硬盘CBS": {"template": "templates/tencent_cbs.json", "mapping": "evs"},
+                "对象存储COS": {"template": "templates/tencent_cos.json", "mapping": "objectStorage"},
             },
             "collect_key_map": {
                 "云硬盘CBS": "tencent.cbs",
-                "对象存储OSS": "tencent.cos",
+                "对象存储COS": "tencent.cos",
             },
         },
         {
             "category": "数据库",
             "items": ["云数据库 MySQL", "云数据库 PostgreSQL", "云数据库 Redis"],
             "map": {
-                "云数据库 MySQL": "templates/tencent_rdb.json",
-                "云数据库 PostgreSQL": "templates/tencent_postgres.json",
-                "云数据库 Redis": "templates/tencent_redis.json",
+                "云数据库 MySQL": {"template": "templates/tencent_rdb.json", "mapping": "mysql"},
+                "云数据库 PostgreSQL": {"template": "templates/tencent_postgres.json", "mapping": "postgresql"},
+                "云数据库 Redis": {"template": "templates/tencent_redis.json", "mapping": "redis"},
             },
             "collect_key_map": {
                 "云数据库 MySQL": "tencent.rdb",
@@ -163,7 +163,7 @@ CLOUD_MAP = {
             "category": "计算",
             "items": ["云服务器 ECS"],
             "map": {
-                "云服务器 ECS": "templates/huaweicloud_ecs.json",
+                "云服务器 ECS": {"template": "templates/huaweicloud_ecs.json", "mapping": "ecs"},
             },
             "collect_key_map": {
                 "云服务器 ECS": "huawei.ecs",
@@ -173,7 +173,7 @@ CLOUD_MAP = {
             "category": "CDN与智能边缘",
             "items": ["内容分发网络CDN"],
             "map": {
-                "内容分发网络CDN": "templates/huawei_cdn.json",
+                "内容分发网络CDN": {"template": "templates/huawei_cdn.json", "mapping": "CDN"},
             },
             "collect_key_map": {
                 "内容分发网络CDN": "huawei.cdn",
@@ -183,9 +183,9 @@ CLOUD_MAP = {
             "category": "网络",
             "items": ["弹性负载均衡ELB", "虚拟私有云VPC", "子网"],
             "map": {
-                "弹性负载均衡ELB": "templates/huawei_elb.json",
-                "虚拟私有云VPC": "templates/huawei_vpc.json",
-                "子网": "templates/huawei_subnet.json",
+                "弹性负载均衡ELB": {"template": "templates/huawei_elb.json", "mapping": "loadbalancer"},
+                "虚拟私有云VPC": {"template": "templates/huawei_vpc.json", "mapping": "vpc"},
+                "子网": {"template": "templates/huawei_subnet.json", "mapping": "vswitch"},
             },
             "collect_key_map": {
                 "弹性负载均衡ELB": "huawei.elb",
@@ -197,8 +197,8 @@ CLOUD_MAP = {
             "category": "存储",
             "items": ["云硬盘EVS", "对象存储OBS"],
             "map": {
-                "云硬盘EVS": "templates/huawei_evs.json",
-                "对象存储OBS": "templates/huawei_obs.json",
+                "云硬盘EVS": {"template": "templates/huawei_evs.json", "mapping": "evs"},
+                "对象存储OBS": {"template": "templates/huawei_obs.json", "mapping": "objectStorage"},
             },
             "collect_key_map": {
                 "云硬盘EVS": "huawei.evs",
@@ -209,8 +209,8 @@ CLOUD_MAP = {
             "category": "数据库",
             "items": ["云数据库RDS MySQL", "云数据库RDS PostgreSQL"],
             "map": {
-                "云数据库RDS MySQL": "templates/huawei_rds_mysql.json",
-                "云数据库RDSPostgreSQL": "templates/huaweirds_postgre.json",
+                "云数据库RDS MySQL": {"template": "templates/huawei_rds_mysql.json", "mapping": "mysql"},
+                "云数据库RDS PostgreSQL": {"template": "templates/huawei_rds_postgre.json", "mapping": "postgresql"},
             },
             "collect_key_map": {
                 "云数据库RDS MySQL": "huawei.rds_mysql",
@@ -221,7 +221,7 @@ CLOUD_MAP = {
             "category": "应用中间件",
             "items": ["分布式缓存Redis"],
             "map": {
-                "分布式缓存Redis": "templates/huawei_dcs.json",
+                "分布式缓存Redis": {"template": "templates/huawei_dcs.json", "mapping": "redis"},
             },
             "collect_key_map": {
                 "分布式缓存Redis": "huawei.dcs",
@@ -233,7 +233,7 @@ CLOUD_MAP = {
             "category": "计算",
             "items": ["云服务器 EC2"],
             "map": {
-                "云服务器 EC2": "templates/aws_ec2.json",
+                "云服务器 EC2": {"template": "templates/aws_ec2.json", "mapping": "ecs"},
             },
             "collect_key_map": {
                 "云服务器 EC2": "aws.ec2",
@@ -283,7 +283,7 @@ CLOUD_MAP = {
             "items": ["数据存储", "数据存储集群"],
             "map": {
                 "数据存储": "templates/vsphere_datastore.json",
-                "数据存储集群": "templates/vsphere.storage_pod.json",
+                "数据存储集群": "templates/vsphere_storage_pod.json",
             },
             "collect_key_map": {
                 "数据存储": "vsphere.datastore",
