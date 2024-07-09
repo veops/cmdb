@@ -9,7 +9,7 @@
       @clickCategory="setCurrentCate"
     />
     <template v-else>
-      <a-select v-if="isCloud" :style="{ marginBottom: '10px', minWidth: '120px' }" v-model="currentCate">
+      <a-select v-if="isCloud" :style="{ marginBottom: '10px', minWidth: '200px' }" v-model="currentCate">
         <a-select-option v-for="cate in categoriesSelect" :key="cate" :value="cate">{{ cate }}</a-select-option>
       </a-select>
       <AttrMapTable
@@ -70,6 +70,10 @@ export default {
     uniqueKey: {
       type: String,
       default: '',
+    },
+    currentAdt: {
+      type: Object,
+      default: () => {},
     }
   },
   data() {
@@ -136,7 +140,7 @@ export default {
               })
               this.categoriesSelect = categoriesSelect
               if (this.isEdit && categoriesSelect?.length) {
-                this.currentCate = categoriesSelect[0]
+                this.currentCate = this?.currentAdt?.extra_option?.category || categoriesSelect[0]
               }
             })
           }
@@ -159,19 +163,24 @@ export default {
 
         if (_findADT?.attributes?.[item.name]) {
           item.attr = _findADT.attributes[item.name]
-        } else {
-          const _find = this.ciTypeAttributes.find((ele) => ele.name === item.name)
-          if (_find) {
-            item.attr = _find.name
-          }
         }
+
+        const attrMapName = this.httpAttrMap?.[item?.name]
 
         if (
           this.isEdit &&
           !item.attr &&
-          this.httpAttrMap?.[item.name]
+          attrMapName &&
+          this.ciTypeAttributes.some((ele) => ele.name === attrMapName)
         ) {
-          item.attr = this.httpAttrMap[item.name]
+          item.attr = attrMapName
+        }
+
+        if (!item.attr) {
+          const _find = this.ciTypeAttributes.find((ele) => ele.name === item.name)
+          if (_find) {
+            item.attr = _find.name
+          }
         }
 
         return item
