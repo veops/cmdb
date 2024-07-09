@@ -259,6 +259,11 @@ const cmdb_zh = {
         account: '账号',
         insecure: '是否证书验证',
         vcenterName: '虚拟平台名',
+        resourceSearchTip1: '请使用条件过滤进行CI筛选，并将过滤表达式复制粘贴到上一步填写框中。',
+        resourceSearchTip2: '注1：请使用表达式右侧的绿色按钮进行复制',
+        resourceSearchTip3: '注2：如不需要筛选，请直接点击灰色按钮进行复制粘贴，即可配置为所有节点',
+        enable: '开启',
+        enableTip: '确定切换开启状态吗',
     },
     components: {
         unselectAttributes: '未选属性',
