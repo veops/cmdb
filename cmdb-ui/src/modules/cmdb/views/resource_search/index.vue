@@ -18,6 +18,11 @@
       >{{ $t('download') }}</a-button
       >
     </div>
+    <div v-if="fromCronJob" class="resource-search-tip">
+      <div class="resource-search-tip-item">{{ $t('cmdb.ciType.resourceSearchTip1') }}</div>
+      <div class="resource-search-tip-item">{{ $t('cmdb.ciType.resourceSearchTip2') }}</div>
+      <div class="resource-search-tip-item">{{ $t('cmdb.ciType.resourceSearchTip3') }}</div>
+    </div>
     <SearchForm
       ref="search"
       :type="type"
@@ -44,7 +49,7 @@
       size="small"
       row-id="_id"
       :loading="loading"
-      :height="fromCronJob ? windowHeight - 180 : windowHeight - 240"
+      :height="fromCronJob ? windowHeight - 280 : windowHeight - 240"
       show-header-overflow
       highlight-hover-row
       :data="instanceList"
@@ -568,5 +573,14 @@ export default {
   background-color: #fff;
   padding: 20px;
   border-radius: @border-radius-box;
+
+  &-tip {
+    margin-bottom: 16px;
+
+    &-item {
+      font-size: 12px;
+      color: @text-color_4
+    }
+  }
 }
 </style>

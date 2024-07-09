@@ -259,6 +259,11 @@ const cmdb_en = {
         account: 'Account',
         insecure: 'Certificate Validation',
         vcenterName: 'Platform Name',
+        resourceSearchTip1: 'Please use conditional filtering for CI filtering and copy and paste the filter expression into the fill-in box in the previous step.',
+        resourceSearchTip2: 'Note 1: Please use the green button to the right of the expression to copy it',
+        resourceSearchTip3: 'Note 2: If you do not need to filter, please click the grey button to copy and paste directly to configure for all nodes',
+        enable: 'Enable',
+        enableTip: 'Confirm switching on?',
     },
     components: {
         unselectAttributes: 'Unselected',

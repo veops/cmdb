@@ -14,7 +14,22 @@
         <span>{{ $t('edit') }}</span>
       </a-space>
     </a>
-    <div class="attr-ad-header">{{ $t('cmdb.ciType.attributeMap') }}</div>
+    <div class="attr-ad-header attr-ad-header_between">
+      {{ $t('cmdb.ciType.attributeMap') }}
+      <div class="attr-ad-open">
+        <span class="attr-ad-open-label">{{ $t('cmdb.ciType.enable') }}</span>
+        <a-switch v-model="form.enabled" v-if="isClient" />
+        <a-popconfirm
+          v-else
+          :title="$t('cmdb.ciType.enableTip')"
+          :ok-text="$t('confirm')"
+          :cancel-text="$t('cancel')"
+          @confirm="changeEnabled"
+        >
+          <a-switch :checked="form.enabled" />
+        </a-popconfirm>
+      </div>
+    </div>
     <div class="attr-ad-attributemap-main">
       <AttrMapTable
         v-if="adrType === 'agent'"
@@ -34,6 +49,7 @@
         :adCITypeList="adCITypeList"
         :currentTab="adr_id"
         :uniqueKey="uniqueKey"
+        :currentAdt="currentAdt"
         :style="{ marginBottom: '20px' }"
       />
     </div>
@@ -234,6 +250,7 @@ export default {
         agent_id: '',
         auto_accept: false,
         query_expr: '',
+        enabled: true,
       },
       form2: {
         key: '',
@@ -263,7 +280,8 @@ export default {
       uniqueKey: '',
       isPrivateCloud: false,
       privateCloudName: '',
-      PRIVATE_CLOUD_NAME
+      PRIVATE_CLOUD_NAME,
+      isClient: false, // 是否前端新增临时数据
     }
   },
   computed: {
@@ -316,6 +334,7 @@ export default {
       const _find = this.adrList.find((item) => Number(item.id) === Number(this.adr_id))
       const _findADT = this.adCITypeList.find((item) => Number(item.id) === Number(this.currentAdt.id))
       this.uniqueKey = _find?.unique_key ?? ''
+      this.isClient = _findADT?.isClient ?? false
 
       if (this.adrType === 'http') {
         const {
@@ -391,6 +410,7 @@ export default {
         auto_accept: _findADT?.auto_accept || false,
         agent_id: _findADT?.agent_id && _findADT?.agent_id !== '0x0000' ? _findADT.agent_id : '',
         query_expr: _findADT.query_expr || '',
+        enabled: _findADT?.enabled ?? true,
       }
       if (_findADT.query_expr) {
         this.agent_type = 'query_expr'
@@ -562,6 +582,17 @@ export default {
     hideCron() {
       this.cronVisible = false
     },
+    changeEnabled() {
+      if (!this.isClient) {
+        putCITypeDiscovery(this.currentAdt.id, {
+          enabled: !this.form.enabled
+        }).then((res) => {
+          this.form.enabled = !this.form.enabled
+          this.$message.success(this.$t('saveSuccess'))
+          this.$emit('handleSave', res.id)
+        })
+      }
+    }
   },
 }
 </script>
@@ -571,6 +602,26 @@ export default {
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
+
+  .attr-ad-header_between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+
+  .attr-ad-open {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0px 20px;
+
+    &-label {
+      font-size: 14px;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+  }
 
   .attr-ad-attributemap-main {
     margin-left: 17px;
