@@ -242,16 +242,20 @@
                   #default="{row}"
                 >
                   <span v-if="col.value_type === '6' && row[col.field]">{{ row[col.field] }}</span>
-                  <a
-                    v-else-if="col.is_link && row[col.field]"
-                    :href="
-                      row[col.field].startsWith('http') || row[col.field].startsWith('https')
-                        ? `${row[col.field]}`
-                        : `http://${row[col.field]}`
-                    "
-                    target="_blank"
-                  >{{ row[col.field] }}</a
-                  >
+                  <template v-else-if="col.is_link && row[col.field]">
+                    <a
+                      v-for="(item, linkIndex) in (col.is_list ? row[col.field] : [row[col.field]])"
+                      :key="linkIndex"
+                      :href="
+                        item.startsWith('http') || item.startsWith('https')
+                          ? `${item}`
+                          : `http://${item}`
+                      "
+                      target="_blank"
+                    >
+                      {{ item }}
+                    </a>
+                  </template>
                   <PasswordField
                     v-else-if="col.is_password && row[col.field]"
                     :ci_id="row._id"

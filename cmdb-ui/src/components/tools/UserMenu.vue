@@ -57,7 +57,9 @@ export default {
   computed: {
     ...mapState(['user', 'locale']),
     hasBackendPermission() {
-      return this.user?.detailPermissions?.backend?.length
+      const isAdmin = this?.user?.roles?.permissions?.includes('acl_admin')
+
+      return isAdmin || this.user?.detailPermissions?.backend?.length
     },
   },
   methods: {

@@ -147,9 +147,9 @@
             <a-form-model-item :required="true" :label="$t('cmdb.ciType.password')">
               <a-input-password v-model="privateCloudForm.password" />
             </a-form-model-item>
-            <a-form-model-item :label="$t('cmdb.ciType.insecure')">
+            <!-- <a-form-model-item :label="$t('cmdb.ciType.insecure')">
               <a-switch v-model="privateCloudForm.insecure" />
-            </a-form-model-item>
+            </a-form-model-item> -->
             <a-form-model-item :label="$t('cmdb.ciType.vcenterName')">
               <a-input v-model="privateCloudForm.vcenterName" />
             </a-form-model-item>
@@ -189,6 +189,7 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import { v4 as uuidv4 } from 'uuid'
 import { mapState } from 'vuex'
 import Vcrontab from '@/components/Crontab'
@@ -260,7 +261,7 @@ export default {
         host: '',
         account: '',
         password: '',
-        insecure: false,
+        // insecure: false,
         vcenterName: '',
       },
       interval: 'cron', // interval  cron
@@ -344,7 +345,7 @@ export default {
           host = '',
           account = '',
           password = '',
-          insecure = false,
+          // insecure = false,
           vcenterName = ''
         } = _findADT?.extra_option ?? {}
 
@@ -357,7 +358,7 @@ export default {
               host,
               account,
               password,
-              insecure,
+              // insecure,
               vcenterName,
             }
           }
@@ -522,6 +523,10 @@ export default {
           ...(currentAdt?.extra_option || {}),
           ...(params?.extra_option || {})
         }
+      }
+
+      if (params.extra_option) {
+        params.extra_option = _.omit(params.extra_option, 'insecure')
       }
 
       if (currentAdt?.isClient) {
