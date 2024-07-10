@@ -41,7 +41,7 @@ services:
           - redis
 
   cmdb-api:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.4.7
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.4.8
     container_name: cmdb-api
     env_file:
       - .env
@@ -82,9 +82,12 @@ services:
       interval: 5s
       retries: 10
       test: "ps aux|grep -v grep|grep -v '1 root'|grep gunicorn || exit 1"
+    volumes:
+      - /Users/yong.huang/PycharmProjects/oneops-api/api/lib/cmdb/auto_discovery/templates:/data/apps/cmdb/api/lib/cmdb/auto_discovery/templates
+      - /Users/yong.huang/PycharmProjects/oneops-api/api/lib/cmdb/auto_discovery/mapping:/data/apps/cmdb/api/lib/cmdb/auto_discovery/mapping
 
   cmdb-ui:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.4.7
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.4.8
     container_name: cmdb-ui
     depends_on:
       cmdb-api:
