@@ -1225,7 +1225,7 @@ export default {
       topoViewJsonData.nodes.keys().forEach((key) => {
         const node = topoViewJsonData?.nodes?.get(key)
         if (node?.data?.btnType !== 'more') {
-          node.opacity = node?.text?.indexOf(v) !== -1 ? 1 : 0.1
+          node.opacity = `${node?.text ?? ''}`?.indexOf?.(v) !== -1 ? 1 : 0.1
         }
       })
       const instance = this.$refs.showTopoView.getInstance()
