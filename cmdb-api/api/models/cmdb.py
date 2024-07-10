@@ -579,6 +579,7 @@ class AutoDiscoveryCIType(Model):
 
     extra_option = db.Column(db.JSON)
     uid = db.Column(db.Integer, index=True)
+    enabled = db.Column(db.Boolean, default=True)
 
 
 class AutoDiscoveryCITypeRelation(Model):

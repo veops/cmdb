@@ -218,7 +218,7 @@ class CIManager(object):
 
     @classmethod
     def get_ad_statistics(cls):
-        return CMDBCounterCache.get_adc_counter()
+        return CMDBCounterCache.get_adc_counter() or {}
 
     @staticmethod
     def ci_is_exist(unique_key, unique_value, type_id):
@@ -382,6 +382,7 @@ class CIManager(object):
             for _, attr in attrs:
                 if attr.is_computed:
                     computed_attrs.append(attr.to_dict())
+                    ci_dict[attr.name] = None
                 elif attr.is_password:
                     if attr.name in ci_dict:
                         password_dict[attr.id] = (ci_dict.pop(attr.name), attr.is_dynamic)
@@ -389,10 +390,7 @@ class CIManager(object):
                         password_dict[attr.id] = (ci_dict.pop(attr.alias), attr.is_dynamic)
 
                     if attr.re_check and password_dict.get(attr.id):
-                        value_manager.check_re(attr.re_check, password_dict[attr.id][0])
-
-            if computed_attrs:
-                value_manager.handle_ci_compute_attributes(ci_dict, computed_attrs, ci)
+                        value_manager.check_re(attr.re_check, attr.alias, password_dict[attr.id][0])
 
             cls._valid_unique_constraint(ci_type.id, ci_dict, ci and ci.id)
 
@@ -418,6 +416,9 @@ class CIManager(object):
 
             key2attr = value_manager.valid_attr_value(ci_dict, ci_type.id, ci and ci.id,
                                                       ci_type_attrs_name, ci_type_attrs_alias, ci_attr2type_attr)
+
+            if computed_attrs:
+                value_manager.handle_ci_compute_attributes(ci_dict, computed_attrs, ci)
 
             operate_type = OperateType.UPDATE if ci is not None else OperateType.ADD
             try:
@@ -464,6 +465,7 @@ class CIManager(object):
         for _, attr in attrs:
             if attr.is_computed:
                 computed_attrs.append(attr.to_dict())
+                ci_dict[attr.name] = None
             elif attr.is_password:
                 if attr.name in ci_dict:
                     password_dict[attr.id] = (ci_dict.pop(attr.name), attr.is_dynamic)
@@ -471,10 +473,7 @@ class CIManager(object):
                     password_dict[attr.id] = (ci_dict.pop(attr.alias), attr.is_dynamic)
 
                 if attr.re_check and password_dict.get(attr.id):
-                    value_manager.check_re(attr.re_check, password_dict[attr.id][0])
-
-        if computed_attrs:
-            value_manager.handle_ci_compute_attributes(ci_dict, computed_attrs, ci)
+                    value_manager.check_re(attr.re_check, attr.alias, password_dict[attr.id][0])
 
         limit_attrs = self._valid_ci_for_no_read(ci) if not _is_admin else {}
 
@@ -487,6 +486,10 @@ class CIManager(object):
             ci_dict = {k: v for k, v in ci_dict.items() if k in ci_type_attrs_name}
             key2attr = value_manager.valid_attr_value(ci_dict, ci.type_id, ci.id, ci_type_attrs_name,
                                                       ci_attr2type_attr=ci_attr2type_attr)
+
+            if computed_attrs:
+                value_manager.handle_ci_compute_attributes(ci_dict, computed_attrs, ci)
+
             if limit_attrs:
                 for k in copy.deepcopy(ci_dict):
                     if k not in limit_attrs:
