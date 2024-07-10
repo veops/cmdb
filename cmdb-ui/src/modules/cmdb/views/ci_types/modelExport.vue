@@ -85,10 +85,10 @@ export default {
   },
   computed: {
     transferDataSource() {
-      const dataSource = this.CITypeGroups.reduce((acc, item) => {
-        const types = _.cloneDeep(item?.ci_types || [])
+      const dataSource = this.CITypeGroups.reduce((acc, group) => {
+        const types = _.cloneDeep(group?.ci_types || [])
         types.forEach((item) => {
-          item.key = String(item.id)
+          item.key = `${group.id}-${item.id}`
           item.title = item?.alias || item?.name || this.$t('other')
         })
         return acc.concat(types)
@@ -100,7 +100,7 @@ export default {
       let newTreeData = treeData.map((item) => {
         const childrenKeys = []
         const children = (item.ci_types || []).map((child) => {
-          const key = String(child?.id)
+          const key = `${item.id}-${child.id}`
           const disabled = this.targetKeys.includes(key)
           childrenKeys.push(key)
 
@@ -119,9 +119,7 @@ export default {
           disabled: children.every((item) => item.disabled),
         }
       })
-      console.log('treeData', newTreeData)
       newTreeData = newTreeData.filter((item) => item.children.length > 0)
-
       return newTreeData
     }
   },
@@ -148,7 +146,6 @@ export default {
       const { eventKey } = e.node
       const selected = checkedKeys.indexOf(eventKey) === -1
       const childrenKeys = this.treeData.find((item) => item.key === eventKey)?.childrenKeys || []
-
       // 如果当前点击是子节点，处理其联动父节点
       this.treeData.forEach((item) => {
         if (item.childrenKeys.includes(eventKey)) {
@@ -159,7 +156,6 @@ export default {
           }
         }
       })
-
       itemSelectAll([eventKey, ...childrenKeys], selected)
     },
     handleCancel() {
@@ -176,7 +172,7 @@ export default {
         const hide = this.$message.loading(this.$t('loading'), 0)
 
         try {
-          const typeIds = this.targetKeys.join(',')
+          const typeIds = this.getTypeIds(this.targetKeys)
           const res = await exportCITypeGroups({
             type_ids: typeIds
           })
@@ -204,6 +200,13 @@ export default {
         hide()
         this.btnLoading = false
       })
+    },
+    getTypeIds(targetKeys) {
+      let typeIds = targetKeys?.map((key) => {
+        return this?.transferDataSource?.find((node) => node?.key === key)?.id || ''
+      })
+      typeIds = typeIds.filter((id) => id)
+      return typeIds?.join(',')
     }
   }
 }
