@@ -94,7 +94,7 @@ class AttributeValueManager(object):
         except ValueDeserializeError as e:
             return abort(400, ErrFormat.attribute_value_invalid2.format(alias, e))
         except ValueError:
-            return abort(400, ErrFormat.attribute_value_invalid.format(value))
+            return abort(400, ErrFormat.attribute_value_invalid2.format(alias, value))
 
     @staticmethod
     def _check_is_choice(attr, value_type, value):
@@ -123,9 +123,9 @@ class AttributeValueManager(object):
             return abort(400, ErrFormat.attribute_value_required.format(attr.alias))
 
     @staticmethod
-    def check_re(expr, value):
+    def check_re(expr, alias, value):
         if not re.compile(expr).match(str(value)):
-            return abort(400, ErrFormat.attribute_value_invalid.format(value))
+            return abort(400, ErrFormat.attribute_value_invalid2.format(alias, value))
 
     def _validate(self, attr, value, value_table, ci=None, type_id=None, ci_id=None, type_attr=None):
         ci = ci or {}
@@ -141,7 +141,7 @@ class AttributeValueManager(object):
             v = None
 
         if attr.re_check and value:
-            self.check_re(attr.re_check, value)
+            self.check_re(attr.re_check, attr.alias, value)
 
         return v
 
