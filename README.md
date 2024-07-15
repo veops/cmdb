@@ -115,5 +115,5 @@ _**欢迎关注公众号(维易科技OneOps)，关注后可加入微信群，进
 
 
 <p align="center">
-  <img src="images/wechat.png" alt="公众号: 维易科技OneOps" />
+  <img src="docs/images/wechat.png" alt="公众号: 维易科技OneOps" />
 </p>
