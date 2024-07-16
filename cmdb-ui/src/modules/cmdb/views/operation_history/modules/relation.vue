@@ -5,6 +5,7 @@
       @expandChange="handleExpandChange"
       @search="handleSearch"
       @searchFormReset="searchFormReset"
+      @export="handleExport"
     ></search-form>
     <vxe-table
       ref="xTable"
@@ -122,7 +123,7 @@
     <pager
       :current-page.sync="queryParams.page"
       :page-size.sync="queryParams.page_size"
-      :page-sizes="[50, 100, 200]"
+      :page-sizes="[50, 100, 200, 500]"
       :total="total"
       :isLoading="loading"
       @change="onChange"
@@ -379,6 +380,58 @@ export default {
     filterOption(input, option) {
       return option.componentOptions.children[0].text.indexOf(input) >= 0
     },
+
+    async handleExport(params) {
+      const hide = this.$message.loading(this.$t('loading'), 0)
+      const res = await getRelationTable({
+        ...params,
+        page: this.queryParams.page,
+        page_size: this.queryParams.page_size,
+      })
+      hide()
+      const data = []
+      res.records.forEach((item) => {
+        item[1].forEach((subItem) => {
+          subItem.operate_type = this.handleOperateType(subItem.operate_type)
+          subItem.relation_type_id = this.handleRelationType(subItem.relation_type_id)
+          subItem.first = res.cis[String(subItem.first_ci_id)]
+          subItem.second = res.cis[String(subItem.second_ci_id)]
+
+          const tempObj = Object.assign(subItem, item[0])
+
+          tempObj.changeDescription = this.getExportChangeDescription(tempObj)
+
+          data.push(tempObj)
+        })
+      })
+
+      this.$refs.xTable.exportData({
+        filename: this.$t('cmdb.history.relationChange'),
+        sheetName: 'Sheet1',
+        type: 'xlsx',
+        types: ['xlsx', 'csv', 'html', 'xml', 'txt'],
+        isMerge: true,
+        isColgroup: true,
+        data,
+      })
+    },
+
+    getExportChangeDescription(item) {
+      const first = item.first ? `${item.first.ci_type_alias}${item.first.unique_alias && item.first[item.first.unique] ? `（${item.first.unique_alias}：${item.first[item.first.unique]}）` : ''}` : ''
+      const second = item.second ? `${item.second.ci_type_alias}${item.second.unique_alias && item.second[item.second.unique] ? `（${item.second.unique_alias}：${item.second[item.second.unique]}）` : ''}` : ''
+      let center = ''
+      if (item.changeDescription === this.$t('cmdb.history.noUpdate')) {
+        center = item.relation_type_id
+      } else if (item.operate_type.includes(this.$t('update'))) {
+        center = item.changeArr.join(';')
+      } else if (item.operate_type.includes(this.$t('new'))) {
+        center = item.relation_type_id
+      } else if (item.operate_type.includes(this.$t('delete'))) {
+        center = item.relation_type_id
+      }
+
+      return `${first || ''} => ${center || ''} => ${second || ''}`
+    }
   },
 }
 </script>
