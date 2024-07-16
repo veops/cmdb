@@ -7,6 +7,7 @@
       @search="handleSearch"
       @searchFormReset="searchFormReset"
       @searchFormChange="searchFormChange"
+      @export="handleExport"
     ></search-form>
     <vxe-table
       ref="xTable"
@@ -86,13 +87,13 @@
         </template>
       </vxe-column>
       <vxe-column field="attr_alias" :title="$t('cmdb.history.attribute')"></vxe-column>
-      <vxe-column field="old" :title="$t('cmdb.history.old')"></vxe-column>
-      <vxe-column field="new" :title="$t('cmdb.history.new')"></vxe-column>
+      <vxe-column :cell-type="'string'" field="old" :title="$t('cmdb.history.old')"></vxe-column>
+      <vxe-column :cell-type="'string'" field="new" :title="$t('cmdb.history.new')"></vxe-column>
     </vxe-table>
     <pager
       :current-page.sync="queryParams.page"
       :page-size.sync="queryParams.page_size"
-      :page-sizes="[50, 100, 200]"
+      :page-sizes="[50, 100, 200, 500]"
       :total="total"
       :isLoading="loading"
       @change="onChange"
@@ -391,6 +392,37 @@ export default {
     filterOption(input, option) {
       return option.componentOptions.children[0].text.indexOf(input) >= 0
     },
+
+    async handleExport(params) {
+      const hide = this.$message.loading(this.$t('loading'), 0)
+      const res = await getCIHistoryTable({
+        ...params,
+        page: this.queryParams.page,
+        page_size: this.queryParams.page_size,
+      })
+      hide()
+      const data = []
+      res.records.forEach((item) => {
+        item[0].type_id = this.handleTypeId(item[0].type_id)
+        item[1].forEach((subItem) => {
+          subItem.operate_type = this.handleOperateType(subItem.operate_type)
+          subItem.new = subItem.new || ''
+          subItem.old = subItem.old || ''
+          const tempObj = Object.assign(subItem, item[0])
+          data.push(tempObj)
+        })
+      })
+
+      this.$refs.xTable.exportData({
+        filename: this.$t('cmdb.history.ciChange'),
+        sheetName: 'Sheet1',
+        type: 'xlsx',
+        types: ['xlsx', 'csv', 'html', 'xml', 'txt'],
+        isMerge: true,
+        isColgroup: true,
+        data,
+      })
+    }
   },
 }
 </script>
