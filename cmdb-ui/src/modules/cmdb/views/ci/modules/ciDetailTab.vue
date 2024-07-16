@@ -38,6 +38,9 @@
             <a-button type="primary" class="ops-button-ghost" ghost @click="handleRollbackCI()">
               <ops-icon type="shishizhuangtai" />{{ $t('cmdb.ci.rollback') }}
             </a-button>
+            <a-button type="primary" class="ops-button-ghost" ghost @click="handleExport">
+              <ops-icon type="veops-export" />{{ $t('export') }}
+            </a-button>
           </a-space>
           <ci-rollback-form ref="ciRollbackForm" :ciIds="[ciId]" @getCIHistory="getCIHistory" />
           <vxe-table
@@ -88,13 +91,13 @@
               :filters="[]"
               :filter-method="filterAttrMethod"
             ></vxe-table-column>
-            <vxe-table-column field="old" :title="$t('cmdb.history.old')">
+            <vxe-table-column :cell-type="'string'" field="old" :title="$t('cmdb.history.old')">
               <template #default="{ row }">
                 <span v-if="row.value_type === '6'">{{ JSON.parse(row.old) }}</span>
                 <span v-else>{{ row.old }}</span>
               </template>
             </vxe-table-column>
-            <vxe-table-column field="new" :title="$t('cmdb.history.new')">
+            <vxe-table-column :cell-type="'string'" field="new" :title="$t('cmdb.history.new')">
               <template #default="{ row }">
                 <span v-if="row.value_type === '6'">{{ JSON.parse(row.new) }}</span>
                 <span v-else>{{ row.new }}</span>
@@ -402,6 +405,17 @@ export default {
         this.$refs.ciRollbackForm.onOpen()
       })
     },
+    async handleExport() {
+      this.$refs.xTable.exportData({
+        filename: this.$t('cmdb.ci.history'),
+        sheetName: 'Sheet1',
+        type: 'xlsx',
+        types: ['xlsx', 'csv', 'html', 'xml', 'txt'],
+        data: this.ciHistory,
+        isMerge: true,
+        isColgroup: true,
+      })
+    }
   },
 }
 </script>
