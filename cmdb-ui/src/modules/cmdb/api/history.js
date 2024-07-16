@@ -11,7 +11,8 @@ export function getCIHistoryTable(params) {
   return axios({
     url: `/v0.1/history/records/attribute`,
     method: 'GET',
-    params: params
+    params: params,
+    timeout: 30 * 1000
   })
 }
 
@@ -19,7 +20,8 @@ export function getRelationTable(params) {
   return axios({
     url: `/v0.1/history/records/relation`,
     method: 'GET',
-    params: params
+    params: params,
+    timeout: 30 * 1000
   })
 }
 
@@ -27,7 +29,8 @@ export function getCITypesTable(params) {
   return axios({
     url: `/v0.1/history/ci_types`,
     method: 'GET',
-    params: params
+    params: params,
+    timeout: 30 * 1000
   })
 }
 

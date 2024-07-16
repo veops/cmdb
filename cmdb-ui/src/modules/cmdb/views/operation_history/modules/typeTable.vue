@@ -5,6 +5,7 @@
       @expandChange="handleExpandChange"
       @search="handleSearch"
       @searchFormReset="searchFormReset"
+      @export="handleExport"
     ></search-form>
     <vxe-table
       ref="xTable"
@@ -121,7 +122,7 @@ export default {
       relationTypeList: null,
       typeList: null,
       userList: [],
-      pageSizeOptions: ['50', '100', '200'],
+      pageSizeOptions: ['50', '100', '200', '500'],
       isExpand: false,
       current: 1,
       pageSize: 50,
@@ -507,6 +508,36 @@ export default {
     },
     filterOption(input, option) {
       return option.componentOptions.children[0].text.indexOf(input) >= 0
+    },
+
+    async handleExport(params) {
+      const hide = this.$message.loading(this.$t('loading'), 0)
+      const res = await getCITypesTable({
+        ...params,
+        page: this.queryParams.page,
+        page_size: this.queryParams.page_size,
+      })
+      hide()
+
+      res.result.forEach((item) => {
+        this.handleChangeDescription(item, item.operate_type)
+        item.operate_type = this.handleOperateType(item.operate_type)
+        item.type_id = this.handleTypeId(item.type_id)
+        item.uid = this.handleUID(item.uid)
+        if (item.operate_type.includes(this.$t('update'))) {
+          item.changeDescription = item.changeArr.join(';')
+        }
+      })
+
+      this.$refs.xTable.exportData({
+        filename: this.$t('cmdb.history.ciTypeChange'),
+        sheetName: 'Sheet1',
+        type: 'xlsx',
+        types: ['xlsx', 'csv', 'html', 'xml', 'txt'],
+        isMerge: true,
+        isColgroup: true,
+        data: res.result,
+      })
     },
   },
 }

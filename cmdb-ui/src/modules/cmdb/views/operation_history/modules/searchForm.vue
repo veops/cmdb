@@ -27,7 +27,7 @@
               <a-select-option
                 :value="Object.values(choice)[0]"
                 v-for="(choice, index) in attr.choice_value"
-                :key="'Search_' + attr.name + index"
+                :key="'Search_' + attr.name + Object.values(choice)[0] + index"
               >
                 {{ Object.keys(choice)[0] }}
               </a-select-option>
@@ -42,7 +42,7 @@
                 hideDisabledOptions: true,
                 defaultValue: [moment('00:00:00', 'HH:mm:ss'), moment('23:59:59', 'HH:mm:ss')],
               }"
-              v-else-if="valueTypeMap[attr.value_type] == 'date' || valueTypeMap[attr.value_type] == 'datetime'"
+              v-else-if="attr.value_type === '3'"
             />
             <a-input v-model="queryParams[attr.name]" style="width: 100%" allowClear v-else />
           </a-form-item>
@@ -85,7 +85,7 @@
                 @change="onChange"
                 format="YYYY-MM-DD HH:mm"
                 :placeholder="[$t('cmdb.history.startTime'), $t('cmdb.history.endTime')]"
-                v-else-if="valueTypeMap[item.value_type] == 'date' || valueTypeMap[item.value_type] == 'datetime'"
+                v-else-if="attr.value_type === '3'"
                 :show-time="{
                   hideDisabledOptions: true,
                   defaultValue: [moment('00:00:00', 'HH:mm:ss'), moment('23:59:59', 'HH:mm:ss')],
@@ -100,6 +100,9 @@
         <a-col :span="24" :style="{ textAlign: 'right' , marginBottom: '10px' }">
           <a-button type="primary" html-type="submit" @click="handleSearch">
             {{ $t('query') }}
+          </a-button>
+          <a-button :style="{ marginLeft: '8px' }" @click="handleExport">
+            {{ $t('export') }}
           </a-button>
           <a-button :style="{ marginLeft: '8px' }" @click="handleReset">
             {{ $t('reset') }}
@@ -153,6 +156,13 @@ export default {
     handleSearch() {
       this.queryParams.page = 1
       this.$emit('search', this.queryParams)
+    },
+
+    handleExport() {
+      const queryParams = {
+        ...this.queryParams
+      }
+      this.$emit('export', queryParams)
     },
 
     handleReset() {
