@@ -57,6 +57,7 @@
                 :isSelected="isSelected"
                 @editRule="handleOpenEditDrawer(rule, 'edit', type)"
                 @deleteRule="deleteRule(rule)"
+                @openAccountConfig="openAccountConfig(rule)"
               />
               <div
                 v-if="showAddPlugin && type === DISCOVERY_CATEGORY_TYPE.PLUGIN"
@@ -78,6 +79,7 @@
       </div>
     </div>
     <EditDrawer ref="editDrawer" />
+    <AccountConfig ref="accountConfig"/>
   </div>
 </template>
 
@@ -88,10 +90,15 @@ import { getDiscovery, deleteDiscovery } from '../../api/discovery'
 import { DISCOVERY_CATEGORY_TYPE } from './constants.js'
 import DiscoveryCard from './discoveryCard.vue'
 import EditDrawer from './editDrawer.vue'
+import AccountConfig from './accountConfig/index.vue'
 
 export default {
   name: 'AutoDiscovery',
-  components: { DiscoveryCard, EditDrawer },
+  components: {
+    DiscoveryCard,
+    EditDrawer,
+    AccountConfig
+  },
   props: {
     isSelected: {
       type: Boolean,
@@ -104,6 +111,7 @@ export default {
       DISCOVERY_CATEGORY_TYPE,
       radioKey: '',
       searchValue: '',
+      accountConfigVisible: false,
     }
   },
   computed: {
@@ -282,6 +290,10 @@ export default {
 
     changeRadio(key) {
       this.radioKey = key === this.radioKey ? '' : key
+    },
+
+    openAccountConfig(rule) {
+      this.$refs.accountConfig.open(rule)
     }
   },
 }

@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1719487341033') format('woff2'),
-       url('iconfont.woff?t=1719487341033') format('woff'),
-       url('iconfont.ttf?t=1719487341033') format('truetype');
+  src: url('iconfont.woff2?t=1721640768584') format('woff2'),
+       url('iconfont.woff?t=1721640768584') format('woff'),
+       url('iconfont.ttf?t=1721640768584') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,58 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.caise-data_center:before {
+  content: "\e96f";
+}
+
+.caise-folder:before {
+  content: "\e970";
+}
+
+.caise-resource_pool:before {
+  content: "\e971";
+}
+
+.caise-network:before {
+  content: "\e972";
+}
+
+.caise-distributed_switch:before {
+  content: "\e973";
+}
+
+.caise-standard_switch:before {
+  content: "\e974";
+}
+
+.caise-host_cluster:before {
+  content: "\e975";
+}
+
+.caise-storage_cluster:before {
+  content: "\e976";
+}
+
+.caise-data_storage:before {
+  content: "\e977";
+}
+
+.veops-account:before {
+  content: "\e96e";
+}
+
+.veops-collect:before {
+  content: "\e96d";
+}
+
+.veops-collected:before {
+  content: "\e96c";
+}
+
+.veops-text:before {
+  content: "\e96b";
 }
 
 .veops-markdown:before {
