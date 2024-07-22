@@ -571,7 +571,13 @@ if __name__ == "__main__":
         discoveryCardResoureTip: 'Number of resource types automatically discovered',
         addPlugin: 'Add plugin',
         pluginSearchTip: 'Please search the rules',
-        innerFlag: 'Inner'
+        innerFlag: 'Inner',
+        defaultName: 'Default Name',
+        deleteTip: 'Cannot be deleted again.',
+        tabCustom: 'Custom',
+        tabConfig: 'Configured',
+        addConfig: 'Add Config',
+        configErrTip: 'Please select config'
     },
     ci: {
         attributeDesc: 'Attribute Description',

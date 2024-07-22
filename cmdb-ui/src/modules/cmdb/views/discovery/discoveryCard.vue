@@ -79,8 +79,14 @@
               <a-icon type="delete" />
             </a>
           </a-space>
-          <a v-else @click="handleEdit"><a-icon type="eye"/></a>
-          <span>{{ rule.is_plugin ? 'Plugin' : $t('cmdb.custom_dashboard.default') }}</span>
+          <a
+            v-if="showHTTPAcountBtn"
+            class="discovery-footer-account"
+            @click="openAccountConfig"
+          >
+            <ops-icon type="veops-account"/>
+          </a>
+          <span class="discovery-footer-tag">{{ rule.is_plugin ? 'Plugin' : $t('cmdb.custom_dashboard.default') }}</span>
         </div>
       </template>
     </div>
@@ -120,6 +126,10 @@ export default {
     isDeletable() {
       return ![this.$t('cmdb.ad.server'), this.$t('cmdb.ad.vserver'), this.$t('cmdb.ad.nic'), this.$t('cmdb.ad.disk'), 'server', 'vserver', 'NIC', 'harddisk'].includes(this.rule.name)
     },
+    showHTTPAcountBtn() {
+      const showNameList = ['aliyun', 'tencentcloud', 'huaweicloud', 'aws', 'vcenter']
+      return this?.rule?.type === DISCOVERY_CATEGORY_TYPE.HTTP && showNameList.includes(this?.rule?.option?.en || '')
+    }
   },
   inject: {
     setSelectedIds: {
@@ -142,6 +152,9 @@ export default {
         this.setSelectedIds(this.rule.id, this.rule.type)
       }
     },
+    openAccountConfig() {
+      this.$emit('openAccountConfig')
+    }
   },
 }
 </script>
@@ -264,8 +277,13 @@ export default {
     .discovery-footer {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      > span {
+
+      &-account {
+        margin-left: 9px;
+      }
+
+      &-tag {
+        margin-left: auto;
         color: #86909c;
         background-color: #f0f5ff;
         border-radius: 2px;
@@ -292,11 +310,6 @@ export default {
   width: 170px;
   height: 80px;
   cursor: pointer;
-  // &:hover {
-  //   .discovery-top {
-  //     background-color: #f0f1f5;
-  //   }
-  // }
 }
 .discovery-card-small:hover,
 .discovery-card-small-selected {

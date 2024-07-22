@@ -6,6 +6,97 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "41143117",
+      "name": "caise-数据中心",
+      "font_class": "caise-data_center",
+      "unicode": "e96f",
+      "unicode_decimal": 59759
+    },
+    {
+      "icon_id": "41143118",
+      "name": "caise-文件夹",
+      "font_class": "caise-folder",
+      "unicode": "e970",
+      "unicode_decimal": 59760
+    },
+    {
+      "icon_id": "41143119",
+      "name": "caise-资源池",
+      "font_class": "caise-resource_pool",
+      "unicode": "e971",
+      "unicode_decimal": 59761
+    },
+    {
+      "icon_id": "41143120",
+      "name": "caise-网络",
+      "font_class": "caise-network",
+      "unicode": "e972",
+      "unicode_decimal": 59762
+    },
+    {
+      "icon_id": "41143121",
+      "name": "caise-分布式交换机",
+      "font_class": "caise-distributed_switch",
+      "unicode": "e973",
+      "unicode_decimal": 59763
+    },
+    {
+      "icon_id": "41143122",
+      "name": "caise-标准式交换机",
+      "font_class": "caise-standard_switch",
+      "unicode": "e974",
+      "unicode_decimal": 59764
+    },
+    {
+      "icon_id": "41143128",
+      "name": "caise-主机集群",
+      "font_class": "caise-host_cluster",
+      "unicode": "e975",
+      "unicode_decimal": 59765
+    },
+    {
+      "icon_id": "41143129",
+      "name": "caise-数据存储集群",
+      "font_class": "caise-storage_cluster",
+      "unicode": "e976",
+      "unicode_decimal": 59766
+    },
+    {
+      "icon_id": "41143143",
+      "name": "caise-数据存储",
+      "font_class": "caise-data_storage",
+      "unicode": "e977",
+      "unicode_decimal": 59767
+    },
+    {
+      "icon_id": "41141857",
+      "name": "veops-account",
+      "font_class": "veops-account",
+      "unicode": "e96e",
+      "unicode_decimal": 59758
+    },
+    {
+      "icon_id": "41128804",
+      "name": "veops-collect",
+      "font_class": "veops-collect",
+      "unicode": "e96d",
+      "unicode_decimal": 59757
+    },
+    {
+      "icon_id": "41128781",
+      "name": "veops-collected",
+      "font_class": "veops-collected",
+      "unicode": "e96c",
+      "unicode_decimal": 59756
+    },
+    {
+      "icon_id": "41106846",
+      "name": "veops-text",
+      "font_class": "veops-text",
+      "unicode": "e96b",
+      "unicode_decimal": 59755
+    },
+    {
       "icon_id": "40896913",
       "name": "veops-markdown",
       "font_class": "veops-markdown",
