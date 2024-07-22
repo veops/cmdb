@@ -62,6 +62,22 @@ export function getHttpAttrMapping(name, resource) {
   })
 }
 
+export function getHTTPAccounts(params) {
+  return axios({
+      url: `/v0.1/adr/accounts`,
+      method: 'GET',
+      params
+  })
+}
+
+export function postHTTPAccounts(data) {
+  return axios({
+      url: `/v0.1/adr/accounts`,
+      method: 'POST',
+      data
+  })
+}
+
 export function getCITypeDiscovery(type_id) {
     return axios({
         url: `/v0.1/adt/ci_types/${type_id}`,
