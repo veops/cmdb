@@ -131,49 +131,20 @@
       <template v-if="isPrivateCloud">
         <template v-if="privateCloudName === PRIVATE_CLOUD_NAME.VCenter">
           <div class="attr-ad-header">{{ $t('cmdb.ciType.privateCloud') }}</div>
-          <a-form-model
-            :model="privateCloudForm"
-            labelAlign="left"
-            :labelCol="labelCol"
-            :wrapperCol="{ span: 6 }"
-            class="attr-ad-form"
-          >
-            <a-form-model-item :required="true" :label="$t('cmdb.ciType.host')">
-              <a-input v-model="privateCloudForm.host" />
-            </a-form-model-item>
-            <a-form-model-item :required="true" :label="$t('cmdb.ciType.account')">
-              <a-input v-model="privateCloudForm.account" />
-            </a-form-model-item>
-            <a-form-model-item :required="true" :label="$t('cmdb.ciType.password')">
-              <a-input-password v-model="privateCloudForm.password" />
-            </a-form-model-item>
-            <!-- <a-form-model-item :label="$t('cmdb.ciType.insecure')">
-              <a-switch v-model="privateCloudForm.insecure" />
-            </a-form-model-item> -->
-            <a-form-model-item :label="$t('cmdb.ciType.vcenterName')">
-              <a-input v-model="privateCloudForm.vcenterName" />
-            </a-form-model-item>
-          </a-form-model>
+          <VcenterForm
+            v-model="privateCloudForm"
+            ref="httpForm"
+          />
         </template>
       </template>
 
       <template v-else>
         <div class="attr-ad-header">{{ $t('cmdb.ciType.cloudAccessKey') }}</div>
         <!-- <div class="public-cloud-info">{{ $t('cmdb.ciType.cloudAccessKeyTip') }}</div> -->
-        <a-form-model
-          :model="form2"
-          labelAlign="left"
-          :labelCol="labelCol"
-          :wrapperCol="{ span: 6 }"
-          class="attr-ad-form"
-        >
-          <a-form-model-item :required="true" label="key">
-            <a-input-password v-model="form2.key" />
-          </a-form-model-item>
-          <a-form-model-item :required="true" label="secret">
-            <a-input-password v-model="form2.secret" />
-          </a-form-model-item>
-        </a-form-model>
+        <PublicCloud
+          v-model="form2"
+          ref="httpForm"
+        />
       </template>
     </template>
 
@@ -195,6 +166,7 @@ import { mapState } from 'vuex'
 import Vcrontab from '@/components/Crontab'
 import { putCITypeDiscovery, postCITypeDiscovery } from '../../api/discovery'
 import { PRIVATE_CLOUD_NAME } from '@/modules/cmdb/views/discovery/constants.js'
+import { TAB_KEY } from './attrAD/constants.js'
 
 import HttpSnmpAD from '../../components/httpSnmpAD'
 import AttrMapTable from '@/modules/cmdb/components/attrMapTable/index.vue'
@@ -202,6 +174,8 @@ import CMDBExprDrawer from '@/components/CMDBExprDrawer'
 import NodeSetting from '@/modules/cmdb/components/nodeSetting/index.vue'
 import AttrADTest from './attrADTest.vue'
 import { Popover } from 'element-ui'
+import VcenterForm from './attrAD/privateCloud/vcenterForm.vue'
+import PublicCloud from './attrAD/publicCloud/index.vue'
 
 export default {
   name: 'AttrADTabpane',
@@ -212,7 +186,9 @@ export default {
     NodeSetting,
     AttrMapTable,
     AttrADTest,
-    ElPopover: Popover
+    ElPopover: Popover,
+    VcenterForm,
+    PublicCloud
   },
   props: {
     adr_id: {
@@ -256,6 +232,8 @@ export default {
       form2: {
         key: '',
         secret: '',
+        _reference: '',
+        tabActive: TAB_KEY.CUSTOM,
       },
       privateCloudForm: {
         host: '',
@@ -263,6 +241,8 @@ export default {
         password: '',
         // insecure: false,
         vcenterName: '',
+        _reference: '',
+        tabActive: TAB_KEY.CUSTOM,
       },
       interval: 'cron', // interval  cron
       cron: '',
@@ -283,6 +263,13 @@ export default {
       privateCloudName: '',
       PRIVATE_CLOUD_NAME,
       isClient: false, // 是否前端新增临时数据
+    }
+  },
+  provide() {
+    return {
+      provide_labelCol: () => {
+        return this.labelCol
+      },
     }
   },
   computed: {
@@ -346,31 +333,43 @@ export default {
           account = '',
           password = '',
           // insecure = false,
-          vcenterName = ''
+          vcenterName = '',
+          _reference = ''
         } = _findADT?.extra_option ?? {}
 
         if (_find?.option?.category === 'private_cloud') {
           this.isPrivateCloud = true
           this.privateCloudName = _find?.option?.en || ''
 
-          if (this.privateCloudName === PRIVATE_CLOUD_NAME.VCenter) {
-            this.privateCloudForm = {
-              host,
-              account,
-              password,
-              // insecure,
-              vcenterName,
-            }
+          switch (this.privateCloudName) {
+            case PRIVATE_CLOUD_NAME.VCenter:
+              this.privateCloudForm = {
+                host,
+                account,
+                password,
+                // insecure,
+                vcenterName,
+                _reference,
+                tabActive: _reference ? TAB_KEY.CONFIG : TAB_KEY.CUSTOM
+              }
+              break
+            default:
+              break
           }
         } else {
           this.isPrivateCloud = false
           this.form2 = {
             key,
             secret,
+            _reference,
+            tabActive: _reference ? TAB_KEY.CONFIG : TAB_KEY.CUSTOM
           }
         }
 
         this.$refs.httpSnmpAd.setCurrentCate(category)
+        this.$nextTick(() => {
+          this.$refs.httpForm.init(this.adr_id)
+        })
       }
       if (this.adrType === 'snmp') {
         this.nodes = _findADT?.extra_option?.nodes?.length ? _findADT?.extra_option?.nodes : [
@@ -432,21 +431,13 @@ export default {
       const { currentAdt } = this
       let params
 
-      const isError = this.validateForm()
+      // 校验 HTTP 表单
+      const { isError, data: cloudOption } = this.validateHTTPForm()
       if (isError) {
         return
       }
 
       if (this.adrType === 'http') {
-        let cloudOption = {}
-        if (this.isPrivateCloud) {
-          if (this.privateCloudName === PRIVATE_CLOUD_NAME.VCenter) {
-            cloudOption = this.privateCloudForm
-          }
-        } else {
-          cloudOption = this.form2
-        }
-
         params = {
           extra_option: {
             ...cloudOption,
@@ -525,8 +516,9 @@ export default {
         }
       }
 
+      // 去除合并后的旧配置
       if (params.extra_option) {
-        params.extra_option = _.omit(params.extra_option, 'insecure')
+        params.extra_option = this.handleOldExtraOption(params.extra_option)
       }
 
       if (currentAdt?.isClient) {
@@ -542,12 +534,32 @@ export default {
       }
     },
 
-    validateForm() {
+    validateHTTPForm() {
       let isError = false
+      let data = {}
 
       if (this.adrType === 'http') {
+        const formData = this?.[this.isPrivateCloud ? 'privateCloudForm' : 'form2']
+        if (formData.tabActive === TAB_KEY.CONFIG) {
+          if (!formData._reference) {
+            isError = true
+            this.$message.error(this.$t('cmdb.ad.configErrTip'))
+          }
+
+          data._reference = formData._reference
+          if (this.privateCloudName === PRIVATE_CLOUD_NAME.VCenter) {
+            data.vcenterName = formData.vcenterName
+          }
+
+          return {
+            isError,
+            data
+          }
+        }
+
         if (this.isPrivateCloud) {
           if (this.privateCloudName === PRIVATE_CLOUD_NAME.VCenter) {
+            data = _.pick(this.privateCloudForm, ['host', 'account', 'password', 'vcenterName'])
             const vcenterErros = {
               'host': `${this.$t('placeholder1')} ${this.$t('cmdb.ciType.host')}`,
               'account': `${this.$t('placeholder1')} ${this.$t('cmdb.ciType.account')}`,
@@ -560,6 +572,7 @@ export default {
             }
           }
         } else {
+          data = _.pick(this.form2, ['key', 'secret'])
           const publicCloudErros = {
             'key': `${this.$t('placeholder1')} key`,
             'secret': `${this.$t('placeholder1')} secret`
@@ -572,12 +585,40 @@ export default {
         }
       }
 
-      return isError
+      return {
+        isError,
+        data
+      }
+    },
+
+    handleOldExtraOption(option) {
+      let extra_option = _.cloneDeep(option)
+
+      // VCenter 旧配置
+      if (extra_option?.insecure) {
+        Reflect.deleteProperty(extra_option, 'insecure')
+      }
+
+      // 根据 HTTP 选项去除多余属性
+      const formData = this?.[this.isPrivateCloud ? 'privateCloudForm' : 'form2']
+      switch (formData.tabActive) {
+        case TAB_KEY.CUSTOM:
+          Reflect.deleteProperty(extra_option, '_reference')
+          break
+        case TAB_KEY.CONFIG:
+          extra_option = _.omit(extra_option, ['host', 'account', 'password', 'key', 'secret'])
+          break
+        default:
+          break
+      }
+
+      return extra_option
     },
 
     handleOpenCmdb() {
       this.$refs.cmdbDrawer.open()
     },
+
     copySuccess(text) {
       this.form = {
         ...this.form,

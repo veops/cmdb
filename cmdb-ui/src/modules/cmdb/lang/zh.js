@@ -570,7 +570,13 @@ if __name__ == "__main__":
         discoveryCardResoureTip: '自动发现的资源类型数',
         addPlugin: '新增插件',
         pluginSearchTip: '请搜索规则',
-        innerFlag: '内置'
+        innerFlag: '内置',
+        defaultName: '默认名称',
+        deleteTip: '不可再删除',
+        tabCustom: '自定义',
+        tabConfig: '已有配置',
+        addConfig: '添加配置',
+        configErrTip: '请选择配置'
     },
     ci: {
         attributeDesc: '查看属性配置',

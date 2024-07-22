@@ -94,6 +94,7 @@ export default {
       clientCITypeList: [],
       currentTab: '',
       deletePlugin: false,
+      queryLoaded: false,
     }
   },
   computed: {
@@ -116,7 +117,7 @@ export default {
   watch: {
     currentTab: {
       handler() {
-        if (this.currentTab) {
+        if (this.currentTab && this.queryLoaded) {
           this.$nextTick(() => {
             this.$refs[`attrAdTabpaneRef`].init()
           })
@@ -131,6 +132,7 @@ export default {
       this.ciTypeAttributes = res.attributes.map((item) => {
         return { ...item, value: item.name, label: item.name }
       })
+      this.queryLoaded = true
       if (this.currentTab) {
         this.$nextTick(() => {
           this.$refs[`attrAdTabpaneRef`].init()
