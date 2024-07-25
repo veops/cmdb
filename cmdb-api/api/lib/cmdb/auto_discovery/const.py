@@ -19,10 +19,21 @@ DEFAULT_INNER = [
     dict(name="KVM", en="kvm", type=AutoDiscoveryType.HTTP, is_inner=True, is_plugin=False,
          option={'icon': {'name': 'ops-KVM'}, "category": "private_cloud", "en": "kvm"}),
 
+
     dict(name="Nginx", en="nginx", type=AutoDiscoveryType.COMPONENTS, is_inner=True, is_plugin=False,
-         option={'icon': {'name': 'caise-nginx'}, "en": "nginx"}),
+         option={'icon': {'name': 'caise-nginx'}, "en": "nginx", "collect_key": "nginx"}),
+    dict(name="Apache", en="apache", type=AutoDiscoveryType.COMPONENTS, is_inner=True, is_plugin=False,
+         option={'icon': {'name': 'caise-apache'}, "en": "apache", "collect_key": "apache"}),
+    dict(name="Tomcat", en="tomcat", type=AutoDiscoveryType.COMPONENTS, is_inner=True, is_plugin=False,
+         option={'icon': {'name': 'caise-tomcat'}, "en": "tomcat", "collect_key": "tomcat"}),
+    dict(name="MySQL", en="mysql", type=AutoDiscoveryType.COMPONENTS, is_inner=True, is_plugin=False,
+         option={'icon': {'name': 'caise-mySQL'}, "en": "mysql", "collect_key": "mysql"}),
+    dict(name="MSSQL", en="mssql", type=AutoDiscoveryType.COMPONENTS, is_inner=True, is_plugin=False,
+             option={'icon': {'name': 'caise-SQLServer'}, "en": "mssql", "collect_key": "sqlserver"}),
+    dict(name="Oracle", en="oracle", type=AutoDiscoveryType.COMPONENTS, is_inner=True, is_plugin=False,
+         option={'icon': {'name': 'caise-oracle'}, "en": "oracle", "collect_key": "oracle"}),
     dict(name="Redis", en="redis", type=AutoDiscoveryType.COMPONENTS, is_inner=True, is_plugin=False,
-         option={'icon': {'name': 'caise-redis'}, "en": "redis"}),
+         option={'icon': {'name': 'caise-redis'}, "en": "redis", "collect_key": "redis"}),
 
     dict(name="交换机", type=AutoDiscoveryType.SNMP, is_inner=True, is_plugin=False,
          option={'icon': {'name': 'caise-jiaohuanji'}}),
@@ -294,7 +305,7 @@ CLOUD_MAP = {
             "category": "其他",
             "items": ["资源池", "数据中心", "文件夹"],
             "map": {
-                "资源池": "templates/vsphere_datastore.json",
+                "资源池": "templates/vsphere_pool.json",
                 "数据中心": "templates/vsphere_datacenter.json",
                 "文件夹": "templates/vsphere_folder.json",
             },

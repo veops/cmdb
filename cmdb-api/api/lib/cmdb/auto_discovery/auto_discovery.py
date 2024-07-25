@@ -18,12 +18,10 @@ from api.lib.cmdb.cache import AutoDiscoveryMappingCache
 from api.lib.cmdb.cache import CITypeAttributeCache
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci import CIManager
-from api.lib.cmdb.ci import CIRelationManager
 from api.lib.cmdb.ci_type import CITypeGroupManager
 from api.lib.cmdb.const import AutoDiscoveryType
 from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import PermEnum
-from api.lib.cmdb.const import RelationSourceEnum
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.custom_dashboard import SystemConfigManager
 from api.lib.cmdb.resp_format import ErrFormat
@@ -35,6 +33,7 @@ from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import validate_permission
 from api.lib.utils import AESCrypto
+from api.models.cmdb import AutoDiscoveryAccount
 from api.models.cmdb import AutoDiscoveryCI
 from api.models.cmdb import AutoDiscoveryCIType
 from api.models.cmdb import AutoDiscoveryCITypeRelation
@@ -42,6 +41,7 @@ from api.models.cmdb import AutoDiscoveryCounter
 from api.models.cmdb import AutoDiscoveryExecHistory
 from api.models.cmdb import AutoDiscoveryRule
 from api.models.cmdb import AutoDiscoveryRuleSyncHistory
+from api.tasks.cmdb import build_relations_for_ad_accept
 from api.tasks.cmdb import write_ad_rule_sync_history
 
 PWD = os.path.abspath(os.path.dirname(__file__))
@@ -226,14 +226,14 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
             adr = AutoDiscoveryRuleCRUD.get_by_id(adt.adr_id)
             if not adr:
                 continue
-            if adr.type == "http":
+            if adr.type == AutoDiscoveryType.HTTP:
                 for i in DEFAULT_INNER:
                     if adr.name == i['name']:
                         attrs = AutoDiscoveryHTTPManager.get_attributes(
                             i['en'], (adt.extra_option or {}).get('category')) or []
                         result.extend([i.get('name') for i in attrs])
                         break
-            elif adr.type == "snmp":
+            elif adr.type == AutoDiscoveryType.SNMP:
                 attributes = AutoDiscoverySNMPManager.get_attributes()
                 result.extend([i.get('name') for i in (attributes or [])])
             else:
@@ -243,6 +243,14 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
 
     @classmethod
     def get(cls, ci_id, oneagent_id, oneagent_name, last_update_at=None):
+        """
+        OneAgent sync rules
+        :param ci_id:
+        :param oneagent_id:
+        :param oneagent_name:
+        :param last_update_at:
+        :return:
+        """
         result = []
         rules = cls.cls.get_by(to_dict=True)
 
@@ -250,17 +258,14 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
             if not rule['enabled']:
                 continue
 
-            if isinstance(rule.get("extra_option"), dict) and rule['extra_option'].get('secret'):
-                if not (current_user.username in PRIVILEGED_USERS or current_user.uid == rule['uid']):
-                    rule['extra_option'].pop('secret', None)
-                else:
-                    rule['extra_option']['secret'] = AESCrypto.decrypt(rule['extra_option']['secret'])
+            if isinstance(rule.get("extra_option"), dict):
+                decrypt_account(rule['extra_option'], rule['uid'])
 
-            if isinstance(rule.get("extra_option"), dict) and rule['extra_option'].get('password'):
-                if not (current_user.username in PRIVILEGED_USERS or current_user.uid == rule['uid']):
+                if rule['extra_option'].get('_reference'):
                     rule['extra_option'].pop('password', None)
-                else:
-                    rule['extra_option']['password'] = AESCrypto.decrypt(rule['extra_option']['password'])
+                    rule['extra_option'].pop('secret', None)
+                    rule['extra_option'].update(
+                        AutoDiscoveryAccountCRUD().get_config_by_id(rule['extra_option']['_reference']))
 
             if oneagent_id and rule['agent_id'] == oneagent_id:
                 result.append(rule)
@@ -364,7 +369,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
         if kwargs.get('adr_id'):
             adr = AutoDiscoveryRule.get_by_id(kwargs['adr_id']) or abort(
                 404, ErrFormat.adr_not_found.format("id={}".format(kwargs['adr_id'])))
-            if adr.type == "http":
+            if adr.type == AutoDiscoveryType.HTTP:
                 kwargs.setdefault('extra_option', dict())
                 en_name = None
                 for i in DEFAULT_INNER:
@@ -379,13 +384,16 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
                             kwargs["extra_option"]["provider"] = en_name
                             break
 
+            if adr.type == AutoDiscoveryType.COMPONENTS and kwargs.get('extra_option'):
+                for i in DEFAULT_INNER:
+                    if i['name'] == adr.name:
+                        kwargs['extra_option']['collect_key'] = i['option'].get('collect_key')
+                        break
+
         if kwargs.get('is_plugin') and kwargs.get('plugin_script'):
             kwargs = check_plugin_script(**kwargs)
 
-        if isinstance(kwargs.get('extra_option'), dict) and kwargs['extra_option'].get('secret'):
-            kwargs['extra_option']['secret'] = AESCrypto.encrypt(kwargs['extra_option']['secret'])
-        if isinstance(kwargs.get('extra_option'), dict) and kwargs['extra_option'].get('password'):
-            kwargs['extra_option']['password'] = AESCrypto.encrypt(kwargs['extra_option']['password'])
+        encrypt_account(kwargs.get('extra_option'))
 
         ci_type = CITypeCache.get(kwargs['type_id'])
         unique = AttributeCache.get(ci_type.unique_id)
@@ -403,7 +411,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
 
         adr = AutoDiscoveryRule.get_by_id(existed.adr_id) or abort(
             404, ErrFormat.adr_not_found.format("id={}".format(existed.adr_id)))
-        if adr.type == "http":
+        if adr.type == AutoDiscoveryType.HTTP:
             kwargs.setdefault('extra_option', dict())
             en_name = None
             for i in DEFAULT_INNER:
@@ -417,6 +425,12 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
                             kwargs['extra_option']['category']]
                         kwargs["extra_option"]["provider"] = en_name
                         break
+
+        if adr.type == AutoDiscoveryType.COMPONENTS and kwargs.get('extra_option'):
+            for i in DEFAULT_INNER:
+                if i['name'] == adr.name:
+                    kwargs['extra_option']['collect_key'] = i['option'].get('collect_key')
+                    break
 
         if 'attributes' in kwargs:
             self.__valid_exec_target(kwargs.get('agent_id'), kwargs.get('query_expr'))
@@ -441,13 +455,10 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
         if kwargs.get('is_plugin') and kwargs.get('plugin_script'):
             kwargs = check_plugin_script(**kwargs)
 
-        if isinstance(kwargs.get('extra_option'), dict) and kwargs['extra_option'].get('secret'):
-            kwargs['extra_option']['secret'] = AESCrypto.encrypt(kwargs['extra_option']['secret'])
-        if isinstance(kwargs.get('extra_option'), dict) and kwargs['extra_option'].get('password'):
-            kwargs['extra_option']['password'] = AESCrypto.encrypt(kwargs['extra_option']['password'])
+        encrypt_account(kwargs.get('extra_option'))
 
         inst = self._can_update(_id=_id, **kwargs)
-        if len(kwargs) == 1 and 'enabled' in kwargs: # enable or disable
+        if len(kwargs) == 1 and 'enabled' in kwargs:  # enable or disable
             pass
         elif inst.agent_id != kwargs.get('agent_id') or inst.query_expr != kwargs.get('query_expr'):
             for item in AutoDiscoveryRuleSyncHistory.get_by(adt_id=inst.id, to_dict=False):
@@ -688,9 +699,11 @@ class AutoDiscoveryCICRUD(DBMixin):
         adt = AutoDiscoveryCITypeCRUD.get_by_id(adc.adt_id) or abort(404, ErrFormat.adt_not_found)
 
         ci_id = None
-        if adt.attributes:
-            ci_dict = {adt.attributes[k]: None if not v and isinstance(v, (list, dict)) else v
-                       for k, v in adc.instance.items() if k in adt.attributes}
+
+        ad_key2attr = adt.attributes or {}
+        if ad_key2attr:
+            ci_dict = {ad_key2attr[k]: None if not v and isinstance(v, (list, dict)) else v
+                       for k, v in adc.instance.items() if k in ad_key2attr}
             extra_option = adt.extra_option or {}
             mapping, path_mapping = AutoDiscoveryHTTPManager.get_predefined_value_mapping(
                 extra_option.get('provider'), extra_option.get('category'))
@@ -703,37 +716,7 @@ class AutoDiscoveryCICRUD(DBMixin):
             AutoDiscoveryExecHistoryCRUD().add(type_id=adt.type_id,
                                                stdout="accept resource: {}".format(adc.unique_value))
 
-        relation_ads = AutoDiscoveryCITypeRelation.get_by(ad_type_id=adt.type_id, to_dict=False)
-        for r_adt in relation_ads:
-            ad_key = r_adt.ad_key
-            if not adc.instance.get(ad_key):
-                continue
-
-            ad_key_values = [adc.instance.get(ad_key)] if not isinstance(
-                adc.instance.get(ad_key), list) else adc.instance.get(ad_key)
-            for ad_key_value in ad_key_values:
-                query = "_type:{},{}:{}".format(r_adt.peer_type_id, r_adt.peer_attr_id, ad_key_value)
-                s = ci_search(query, use_ci_filter=False, count=1000000)
-                try:
-                    response, _, _, _, _, _ = s.search()
-                except SearchError as e:
-                    current_app.logger.warning(e)
-                    return abort(400, str(e))
-
-                for relation_ci in response:
-                    relation_ci_id = relation_ci['_id']
-                    try:
-                        CIRelationManager.add(ci_id, relation_ci_id,
-                                              valid=False,
-                                              source=RelationSourceEnum.AUTO_DISCOVERY)
-
-                    except:
-                        try:
-                            CIRelationManager.add(relation_ci_id, ci_id,
-                                                  valid=False,
-                                                  source=RelationSourceEnum.AUTO_DISCOVERY)
-                        except:
-                            pass
+        build_relations_for_ad_accept.apply_async(args=(adc.to_dict(), ci_id, ad_key2attr), queue=CMDB_QUEUE)
 
         adc.update(is_accept=True,
                    accept_by=nickname or current_user.nickname,
@@ -890,6 +873,124 @@ class AutoDiscoveryCounterCRUD(DBMixin):
 
     def _can_update(self, **kwargs):
         pass
+
+    def _can_delete(self, **kwargs):
+        pass
+
+
+def encrypt_account(config):
+    if isinstance(config, dict):
+        if config.get('secret'):
+            config['secret'] = AESCrypto.encrypt(config['secret'])
+        if config.get('password'):
+            config['password'] = AESCrypto.encrypt(config['password'])
+
+
+def decrypt_account(config, uid):
+    if isinstance(config, dict):
+        if config.get('password'):
+            if not (current_user.username in PRIVILEGED_USERS or current_user.uid == uid):
+                config.pop('password', None)
+            else:
+                try:
+                    config['password'] = AESCrypto.decrypt(config['password'])
+                except Exception as e:
+                    current_app.logger.error('decrypt account failed: {}'.format(e))
+
+        if config.get('secret'):
+            if not (current_user.username in PRIVILEGED_USERS or current_user.uid == uid):
+                config.pop('secret', None)
+            else:
+                try:
+                    config['secret'] = AESCrypto.decrypt(config['secret'])
+                except Exception as e:
+                    current_app.logger.error('decrypt account failed: {}'.format(e))
+
+
+class AutoDiscoveryAccountCRUD(DBMixin):
+    cls = AutoDiscoveryAccount
+
+    def get(self, adr_id):
+        res = self.cls.get_by(adr_id=adr_id, to_dict=True)
+
+        for i in res:
+            decrypt_account(i.get('config'), i['uid'])
+
+        return res
+
+    def get_config_by_id(self, _id):
+        res = self.cls.get_by_id(_id)
+        if not res:
+            return {}
+
+        config = res.to_dict().get('config') or {}
+
+        decrypt_account(config, res.uid)
+
+        return config
+
+    def _can_add(self, **kwargs):
+        encrypt_account(kwargs.get('config'))
+
+        kwargs['uid'] = current_user.uid
+
+        return kwargs
+
+    def upsert(self, adr_id, accounts):
+        existed_all = self.cls.get_by(adr_id=adr_id, to_dict=False)
+        account_names = {i['name'] for i in accounts}
+
+        name_changed = dict()
+        for account in accounts:
+            existed = None
+            if account.get('id'):
+                existed = self.cls.get_by_id(account.get('id'))
+                if existed is None:
+                    continue
+
+                account.pop('id')
+                name_changed[existed.name] = account.get('name')
+            else:
+                account = self._can_add(**account)
+
+            if existed is not None:
+                if current_user.uid == existed.uid:
+                    config = copy.deepcopy(existed.config) or {}
+                    config.update(account.get('config') or {})
+                    account['config'] = config
+                    existed.update(**account)
+            else:
+                self.cls.create(adr_id=adr_id, **account)
+
+        for item in existed_all:
+            if name_changed.get(item.name, item.name) not in account_names:
+                if current_user.uid == item.uid:
+                    item.soft_delete()
+
+    def _can_update(self, **kwargs):
+        existed = self.cls.get_by_id(kwargs['_id']) or abort(404, ErrFormat.not_found)
+
+        if isinstance(kwargs.get('config'), dict) and kwargs['config'].get('secret'):
+            if current_user.uid != existed.uid:
+                return abort(403, ErrFormat.adt_secret_no_permission)
+        if isinstance(kwargs.get('config'), dict) and kwargs['config'].get('password'):
+            if current_user.uid != existed.uid:
+                return abort(403, ErrFormat.adt_secret_no_permission)
+
+        return existed
+
+    def update(self, _id, **kwargs):
+
+        if kwargs.get('is_plugin') and kwargs.get('plugin_script'):
+            kwargs = check_plugin_script(**kwargs)
+
+        encrypt_account(kwargs.get('config'))
+
+        inst = self._can_update(_id=_id, **kwargs)
+
+        obj = inst.update(_id=_id, filter_none=False, **kwargs)
+
+        return obj
 
     def _can_delete(self, **kwargs):
         pass
