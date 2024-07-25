@@ -1,9 +1,8 @@
 # -*- coding:utf-8 -*- 
 
 
-import json
 import datetime
-
+import json
 import redis_lock
 from flask import current_app
 from flask_login import login_user
@@ -13,21 +12,24 @@ from api.extensions import celery
 from api.extensions import db
 from api.extensions import es
 from api.extensions import rd
+from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import REDIS_PREFIX_CI
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION2
+from api.lib.cmdb.const import RelationSourceEnum
 from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.decorator import flush_db
 from api.lib.decorator import reconnect_db
 from api.lib.perm.acl.cache import UserCache
 from api.lib.utils import handle_arg_list
+from api.models.cmdb import AutoDiscoveryCI
+from api.models.cmdb import AutoDiscoveryCIType
+from api.models.cmdb import AutoDiscoveryCITypeRelation
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
 from api.models.cmdb import CITypeAttribute
-from api.models.cmdb import AutoDiscoveryCI
-from api.models.cmdb import AutoDiscoveryCIType
 
 
 @celery.task(name="cmdb.ci_cache", queue=CMDB_QUEUE)
@@ -277,3 +279,75 @@ def write_ad_rule_sync_history(rules, oneagent_id, oneagent_name, sync_at):
     except Exception as e:
         current_app.logger.error("write auto discovery rule sync history failed: {}".format(e))
         db.session.rollback()
+
+
+@celery.task(name="cmdb.build_relations_for_ad_accept", queue=CMDB_QUEUE)
+@reconnect_db
+def build_relations_for_ad_accept(adc, ci_id, ad_key2attr):
+    from api.lib.cmdb.ci import CIRelationManager
+    from api.lib.cmdb.search import SearchError
+    from api.lib.cmdb.search.ci import search as ci_search
+
+    current_app.test_request_context().push()
+    login_user(UserCache.get('worker'))
+
+    relation_ads = AutoDiscoveryCITypeRelation.get_by(ad_type_id=adc['type_id'], to_dict=False)
+    for r_adt in relation_ads:
+        ad_key = r_adt.ad_key
+        if not adc['instance'].get(ad_key):
+            continue
+
+        ad_key_values = [adc['instance'].get(ad_key)] if not isinstance(
+            adc['instance'].get(ad_key), list) else adc['instance'].get(ad_key)
+        for ad_key_value in ad_key_values:
+            query = "_type:{},{}:{}".format(r_adt.peer_type_id, r_adt.peer_attr_id, ad_key_value)
+            s = ci_search(query, use_ci_filter=False, count=1000000)
+            try:
+                response, _, _, _, _, _ = s.search()
+            except SearchError as e:
+                current_app.logger.error("build_relations_for_ad_accept failed: {}".format(e))
+                return
+
+            for relation_ci in response:
+                relation_ci_id = relation_ci['_id']
+                try:
+                    CIRelationManager.add(ci_id, relation_ci_id,
+                                          valid=False,
+                                          source=RelationSourceEnum.AUTO_DISCOVERY)
+
+                except:
+                    try:
+                        CIRelationManager.add(relation_ci_id, ci_id,
+                                              valid=False,
+                                              source=RelationSourceEnum.AUTO_DISCOVERY)
+                    except:
+                        pass
+
+    # build relations in reverse
+    relation_ads = AutoDiscoveryCITypeRelation.get_by(peer_type_id=adc['type_id'], to_dict=False)
+    attr2ad_key = {v: k for k, v in ad_key2attr.items()}
+    for r_adt in relation_ads:
+        attr = AttributeCache.get(r_adt.peer_attr_id)
+        ad_key = attr2ad_key.get(attr and attr.name)
+        if not ad_key:
+            continue
+
+        ad_value = adc['instance'].get(ad_key)
+        peer_ad_key = r_adt.ad_key
+        peer_instances = AutoDiscoveryCI.get_by(type_id=r_adt.ad_type_id, to_dict=False)
+        for peer_instance in peer_instances:
+            peer_ad_values = peer_instance.instance.get(peer_ad_key)
+            peer_ad_values = [peer_ad_values] if not isinstance(peer_ad_values, list) else peer_ad_values
+            if ad_value in peer_ad_values and peer_instance.ci_id:
+                try:
+                    CIRelationManager.add(peer_instance.ci_id, ci_id,
+                                          valid=False,
+                                          source=RelationSourceEnum.AUTO_DISCOVERY)
+
+                except:
+                    try:
+                        CIRelationManager.add(ci_id, peer_instance.ci_id,
+                                              valid=False,
+                                              source=RelationSourceEnum.AUTO_DISCOVERY)
+                    except:
+                        pass

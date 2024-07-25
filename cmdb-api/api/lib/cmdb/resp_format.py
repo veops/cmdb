@@ -35,7 +35,7 @@ class ErrFormat(CommonErrFormat):
         "Only creators and administrators are allowed to delete attributes!")  # 目前只允许 属性创建人、管理员 删除属性!
     # 属性字段名不能是内置字段: id, _id, ci_id, type, _type, ci_type
     attribute_name_cannot_be_builtin = _l(
-        "Attribute field names cannot be built-in fields: id, _id, ci_id, type, _type, ci_type")
+        "Attribute field names cannot be built-in fields: id, _id, ci_id, type, _type, ci_type, ticket_id")
     attribute_choice_other_invalid = _l(
         "Predefined value: Other model request parameters are illegal!")  # 预定义值: 其他模型请求参数不合法!
 

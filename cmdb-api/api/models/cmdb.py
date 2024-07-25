@@ -636,6 +636,15 @@ class AutoDiscoveryCounter(Model2):
     last_week_count = db.Column(db.Integer, default=0)
 
 
+class AutoDiscoveryAccount(Model):
+    __tablename__ = "c_ad_accounts"
+
+    uid = db.Column(db.Integer, index=True)
+    name = db.Column(db.String(64))
+    adr_id = db.Column(db.Integer, db.ForeignKey('c_ad_rules.id'))
+    config = db.Column(db.JSON)
+
+
 class CIFilterPerms(Model):
     __tablename__ = "c_ci_filter_perms"
 

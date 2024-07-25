@@ -1,21 +1,19 @@
 # -*- coding:utf-8 -*-
 
 
-from flask import abort
 from sqlalchemy import func
 
 from api.extensions import db
 from api.lib.utils import get_page
 from api.lib.utils import get_page_size
 
-__author__ = 'pycook'
-
 
 class DBMixin(object):
     cls = None
 
     @classmethod
-    def search(cls, page, page_size, fl=None, only_query=False, reverse=False, count_query=False, **kwargs):
+    def search(cls, page, page_size, fl=None, only_query=False, reverse=False, count_query=False,
+               last_size=None, **kwargs):
         page = get_page(page)
         page_size = get_page_size(page_size)
         if fl is None:
@@ -47,14 +45,15 @@ class DBMixin(object):
             return _query, query
 
         numfound = query.count()
-        return numfound, [i.to_dict() if fl is None else getattr(i, '_asdict')()
-                          for i in query.offset((page - 1) * page_size).limit(page_size)]
-
-    def _must_be_required(self, _id):
-        existed = self.cls.get_by_id(_id)
-        existed or abort(404, "Factor [{}] does not exist".format(_id))
-
-        return existed
+        if not last_size:
+            return numfound, [i.to_dict() if fl is None else getattr(i, '_asdict')()
+                              for i in query.offset((page - 1) * page_size).limit(page_size)]
+        else:
+            offset = numfound - last_size
+            if offset < 0:
+                offset = 0
+            return numfound, [i.to_dict() if fl is None else getattr(i, '_asdict')()
+                              for i in query.offset(offset).limit(last_size)]
 
     def _can_add(self, **kwargs):
         raise NotImplementedError

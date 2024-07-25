@@ -1244,17 +1244,16 @@ class CITypeAttributeGroupManager(object):
         if isinstance(_from, int):
             from_group = CITypeAttributeGroup.get_by_id(_from)
         else:
-            from_group = CITypeAttributeGroup.get_by(name=_from, first=True, to_dict=False)
+            from_group = CITypeAttributeGroup.get_by(name=_from, type_id=type_id, first=True, to_dict=False)
         from_group or abort(404, ErrFormat.ci_type_attribute_group_not_found.format("id={}".format(_from)))
 
         if isinstance(_to, int):
             to_group = CITypeAttributeGroup.get_by_id(_to)
         else:
-            to_group = CITypeAttributeGroup.get_by(name=_to, first=True, to_dict=False)
+            to_group = CITypeAttributeGroup.get_by(name=_to, type_id=type_id, first=True, to_dict=False)
         to_group or abort(404, ErrFormat.ci_type_attribute_group_not_found.format("id={}".format(_to)))
 
         from_order, to_order = from_group.order, to_group.order
-
         from_group.update(order=to_order)
         to_group.update(order=from_order)
 
@@ -1541,6 +1540,9 @@ class CITypeTemplateManager(object):
                 if ((i.extra_option or {}).get('alias') or None) == (
                         (rule.get('extra_option') or {}).get('alias') or None):
                     existed = True
+                    rule.pop('extra_option', None)
+                    rule.pop('enabled', None)
+                    rule.pop('cron', None)
                     AutoDiscoveryCITypeCRUD().update(i.id, **rule)
                     break
 
@@ -1697,6 +1699,9 @@ class CITypeTemplateManager(object):
         rules = []
         for r in ad_rules:
             r = r.to_dict()
+
+            if r.get('extra_option') and '_reference' in r['extra_option']:
+                r['extra_option'].pop('_reference')
 
             r['type_name'] = type_id2name.get(r.pop('type_id'))
             if r.get('adr_id'):

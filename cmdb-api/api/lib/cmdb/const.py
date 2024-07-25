@@ -118,7 +118,7 @@ REDIS_PREFIX_CI = "ONE_CMDB"
 REDIS_PREFIX_CI_RELATION = "CMDB_CI_RELATION"
 REDIS_PREFIX_CI_RELATION2 = "CMDB_CI_RELATION2"
 
-BUILTIN_KEYWORDS = {'id', '_id', 'ci_id', 'type', '_type', 'ci_type'}
+BUILTIN_KEYWORDS = {'id', '_id', 'ci_id', 'type', '_type', 'ci_type', 'ticket_id'}
 
 L_TYPE = None
 L_CI = None
