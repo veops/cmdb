@@ -8,6 +8,7 @@ from flask import request
 from flask_login import current_user
 from io import BytesIO
 
+from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryAccountCRUD
 from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryCICRUD
 from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryCITypeCRUD
 from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryCITypeRelationCRUD
@@ -20,6 +21,7 @@ from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoveryRuleSyncHist
 from api.lib.cmdb.auto_discovery.auto_discovery import AutoDiscoverySNMPManager
 from api.lib.cmdb.auto_discovery.const import DEFAULT_INNER
 from api.lib.cmdb.auto_discovery.const import PRIVILEGED_USERS
+from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.resp_format import ErrFormat
@@ -272,14 +274,16 @@ class AutoDiscoveryRuleSyncView(APIView):
         oneagent_id = request.values.get('oneagent_id')
         last_update_at = request.values.get('last_update_at')
 
-        query = "oneagent_id:{}".format(oneagent_id)
-        s = ci_search(query)
-        try:
-            response, _, _, _, _, _ = s.search()
-        except SearchError as e:
-            import traceback
-            current_app.logger.error(traceback.format_exc())
-            return abort(400, str(e))
+        response = []
+        if AttributeCache.get('oneagent_id'):
+            query = "oneagent_id:{}".format(oneagent_id)
+            s = ci_search(query)
+            try:
+                response, _, _, _, _, _ = s.search()
+            except SearchError as e:
+                import traceback
+                current_app.logger.error(traceback.format_exc())
+                return abort(400, str(e))
 
         for res in response:
             if res.get('{}_name'.format(res['ci_type'])) == oneagent_name or oneagent_name == res.get('oneagent_name'):
@@ -328,8 +332,12 @@ class AutoDiscoveryExecHistoryView(APIView):
     def get(self):
         page = get_page(request.values.pop('page', 1))
         page_size = get_page_size(request.values.pop('page_size', None))
+        last_size = request.values.pop('last_size', None)
+        if last_size and last_size.isdigit():
+            last_size = int(last_size)
         numfound, res = AutoDiscoveryExecHistoryCRUD.search(page=page,
                                                             page_size=page_size,
+                                                            last_size=last_size,
                                                             **request.values)
 
         return self.jsonify(page=page,
@@ -355,3 +363,31 @@ class AutoDiscoveryCounterView(APIView):
         type_id = request.values.get('type_id')
 
         return self.jsonify(AutoDiscoveryCounterCRUD().get(type_id))
+
+
+class AutoDiscoveryAccountView(APIView):
+    url_prefix = ("/adr/accounts", "/adr/accounts/<int:account_id>")
+
+    @args_required('adr_id')
+    def get(self):
+        adr_id = request.values.get('adr_id')
+
+        return self.jsonify(AutoDiscoveryAccountCRUD().get(adr_id))
+
+    @args_required('adr_id')
+    @args_required('accounts', value_required=False)
+    def post(self):
+        AutoDiscoveryAccountCRUD().upsert(**request.values)
+
+        return self.jsonify(code=200)
+
+    @args_required('config')
+    def put(self, account_id):
+        res = AutoDiscoveryAccountCRUD().update(account_id, **request.values)
+
+        return self.jsonify(res.to_dict())
+
+    def delete(self, account_id):
+        AutoDiscoveryAccountCRUD().delete(account_id)
+
+        return self.jsonify(account_id=account_id)

@@ -319,8 +319,8 @@ class CIManager(object):
             400, ErrFormat.unique_value_not_found.format("unique_id={}".format(ci_type.unique_id)))
 
         unique_value = None
-        if not (unique_key.default and unique_key.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID and
-                not ci_dict.get(unique_key.name)):  # primary key is not auto inc id
+        # primary key is not auto inc id
+        if not (unique_key.default and unique_key.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID):
             unique_value = ci_dict.get(unique_key.name) or ci_dict.get(unique_key.alias) or ci_dict.get(unique_key.id)
             unique_value = unique_value or abort(400, ErrFormat.unique_key_required.format(unique_key.name))
 

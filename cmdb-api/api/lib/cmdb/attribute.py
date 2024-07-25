@@ -229,7 +229,7 @@ class AttributeManager(object):
         is_choice = True if choice_value or kwargs.get('choice_web_hook') or kwargs.get('choice_other') else False
 
         name = kwargs.pop("name")
-        if name in BUILTIN_KEYWORDS:
+        if name in BUILTIN_KEYWORDS or kwargs.get('alias') in BUILTIN_KEYWORDS:
             return abort(400, ErrFormat.attribute_name_cannot_be_builtin)
 
         while kwargs.get('choice_other'):
