@@ -388,7 +388,7 @@ export default {
       this.logModalVisible = true
       const logRes = await getAdcExecHistories({
         type_id: this.currentType,
-        page_size: 1000
+        last_size: 1000
       })
       let logTextArray = []
       if (logRes?.result?.length) {

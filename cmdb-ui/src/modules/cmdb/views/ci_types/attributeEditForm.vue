@@ -375,6 +375,10 @@
               name="is_computed"
               v-decorator="['is_computed', { rules: [], valuePropName: 'checked' }]"
             />
+            <div v-show="isShowComputedArea" class="computed-attr-tip">
+              <div>1. {{ $t('cmdb.ciType.computedAttrTip1') }}</div>
+              <div>2. {{ $t('cmdb.ciType.computedAttrTip2') }}</div>
+            </div>
             <ComputedArea
               showCalcComputed
               ref="computedArea"
@@ -795,7 +799,13 @@ export default {
 }
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.computed-attr-tip {
+  font-size: 12px;
+  line-height: 22px;
+  color: #a5a9bc;
+}
+</style>
 <style lang="less">
 .attribute-edit-form {
   .jsoneditor-outer {

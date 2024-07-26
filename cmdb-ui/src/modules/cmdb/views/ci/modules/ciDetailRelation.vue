@@ -132,6 +132,10 @@ export default {
       type: Object,
       default: () => {},
     },
+    initQueryLoading: {
+      type: Boolean,
+      default: false,
+    }
   },
   data() {
     return {
@@ -145,129 +149,13 @@ export default {
       firstCIJsonAttr: {},
       secondCIJsonAttr: {},
       canEdit: {},
+      topoData: {
+        nodes: {},
+        edges: []
+      }
     }
   },
   computed: {
-    topoData() {
-      const ci_types_list = this.ci_types()
-      const _findCiType = ci_types_list.find((item) => item.id === this.typeId)
-      const unique_id = _findCiType.show_id || this.attributes().unique_id
-      const unique_name = _findCiType.show_name || this.attributes().unique
-      const _findUnique = this.attrList().find((attr) => attr.id === unique_id)
-      const unique_alias = _findUnique?.alias || _findUnique?.name || ''
-      const nodes = {
-        isRoot: true,
-        id: `Root_${this.typeId}`,
-        title: _findCiType.alias || _findCiType.name, // 中文名
-        name: _findCiType.name, // 英文名
-        Class: Node,
-        unique_alias,
-        unique_name,
-        unique_value: this.ci[unique_name],
-        icon: _findCiType?.icon || '',
-        endpoints: [
-          {
-            id: 'left',
-            orientation: [-1, 0],
-            pos: [0, 0.5],
-          },
-          {
-            id: 'right',
-            orientation: [1, 0],
-            pos: [0, 0.5],
-          },
-        ],
-        children: [],
-      }
-      const edges = []
-      this.parentCITypes.forEach((parent) => {
-        const _findCiType = ci_types_list.find((item) => item.id === parent.id)
-        if (this.firstCIs[parent.name] && _findCiType) {
-          const unique_id = _findCiType.show_id || _findCiType.unique_id
-          const _findUnique = parent.attributes.find((attr) => attr.id === unique_id)
-          const unique_name = _findUnique?.name
-          const unique_alias = _findUnique?.alias || _findUnique?.name || ''
-          this.firstCIs[parent.name].forEach((parentCi) => {
-            nodes.children.push({
-              id: `${parentCi._id}`,
-              Class: Node,
-              title: parent.alias || parent.name,
-              name: parent.name,
-              side: 'left',
-              unique_alias,
-              unique_name,
-              unique_value: parentCi[unique_name],
-              children: [],
-              icon: _findCiType?.icon || '',
-              endpoints: [
-                {
-                  id: 'left',
-                  orientation: [-1, 0],
-                  pos: [0, 0.5],
-                },
-                {
-                  id: 'right',
-                  orientation: [1, 0],
-                  pos: [0, 0.5],
-                },
-              ],
-            })
-            edges.push({
-              id: `${parentCi._id}_Root`,
-              source: 'right',
-              target: 'left',
-              sourceNode: `${parentCi._id}`,
-              targetNode: `Root_${this.typeId}`,
-              type: 'endpoint',
-            })
-          })
-        }
-      })
-      this.childCITypes.forEach((child) => {
-        const _findCiType = ci_types_list.find((item) => item.id === child.id)
-        if (this.secondCIs[child.name] && _findCiType) {
-          const unique_id = _findCiType.show_id || _findCiType.unique_id
-          const _findUnique = child.attributes.find((attr) => attr.id === unique_id)
-          const unique_name = _findUnique?.name
-          const unique_alias = _findUnique?.alias || _findUnique?.name || ''
-          this.secondCIs[child.name].forEach((childCi) => {
-            nodes.children.push({
-              id: `${childCi._id}`,
-              Class: Node,
-              title: child.alias || child.name,
-              name: child.name,
-              side: 'right',
-              unique_alias,
-              unique_name,
-              unique_value: childCi[unique_name],
-              children: [],
-              icon: _findCiType?.icon || '',
-              endpoints: [
-                {
-                  id: 'left',
-                  orientation: [-1, 0],
-                  pos: [0, 0.5],
-                },
-                {
-                  id: 'right',
-                  orientation: [1, 0],
-                  pos: [0, 0.5],
-                },
-              ],
-            })
-            edges.push({
-              id: `Root_${childCi._id}`,
-              source: 'right',
-              target: 'left',
-              sourceNode: `Root_${this.typeId}`,
-              targetNode: `${childCi._id}`,
-              type: 'endpoint',
-            })
-          })
-        }
-      })
-      return { nodes, edges }
-    },
     exsited_ci() {
       const _exsited_ci = [this.ciId]
       this.parentCITypes.forEach((parent) => {
@@ -297,20 +185,28 @@ export default {
     },
   },
   mounted() {
-    this.init(true)
+    if (!this.initQueryLoading) {
+      this.init(true)
+    }
   },
   methods: {
     async init(isFirst) {
       await Promise.all([this.getParentCITypes(), this.getChildCITypes()])
       Promise.all([this.getFirstCIs(), this.getSecondCIs()]).then(() => {
-        if (isFirst && this.$refs.ciDetailRelationTopo) {
+        const ci_types_list = this.ci_types()
+        this.handleTopoData()
+        if (
+          isFirst &&
+          this.$refs.ciDetailRelationTopo &&
+          ci_types_list.length
+        ) {
           this.$refs.ciDetailRelationTopo.exsited_ci = this.exsited_ci
           this.$refs.ciDetailRelationTopo.setTopoData(this.topoData)
         }
       })
     },
     async getFirstCIs() {
-      await searchCIRelation(`root_id=${Number(this.ciId)}&&level=1&&reverse=1&&count=10000`)
+      await searchCIRelation(`root_id=${Number(this.ciId)}&level=1&reverse=1&count=10000`)
         .then((res) => {
           const firstCIs = {}
           res.result.forEach((item) => {
@@ -328,7 +224,7 @@ export default {
         .catch((e) => {})
     },
     async getSecondCIs() {
-      await searchCIRelation(`root_id=${Number(this.ciId)}&&level=1&&reverse=0&&count=10000`)
+      await searchCIRelation(`root_id=${Number(this.ciId)}&level=1&reverse=0&count=10000`)
         .then((res) => {
           const secondCIs = {}
           res.result.forEach((item) => {
@@ -445,6 +341,137 @@ export default {
         })
       }
     },
+    handleTopoData() {
+      const ci_types_list = this.ci_types()
+      if (!ci_types_list?.length) {
+        this.$set(this, 'topoData', {
+          nodes: {},
+          edges: []
+        })
+        return
+      }
+
+      const _findCiType = ci_types_list.find((item) => item.id === this.typeId)
+      const unique_id = _findCiType.show_id || this.attributes().unique_id
+      const unique_name = _findCiType.show_name || this.attributes().unique
+      const _findUnique = this.attrList().find((attr) => attr.id === unique_id)
+      const unique_alias = _findUnique?.alias || _findUnique?.name || ''
+      const nodes = {
+        isRoot: true,
+        id: `Root_${this.typeId}`,
+        title: _findCiType.alias || _findCiType.name, // 中文名
+        name: _findCiType.name, // 英文名
+        Class: Node,
+        unique_alias,
+        unique_name,
+        unique_value: this.ci[unique_name],
+        icon: _findCiType?.icon || '',
+        endpoints: [
+          {
+            id: 'left',
+            orientation: [-1, 0],
+            pos: [0, 0.5],
+          },
+          {
+            id: 'right',
+            orientation: [1, 0],
+            pos: [0, 0.5],
+          },
+        ],
+        children: [],
+      }
+      const edges = []
+      this.parentCITypes.forEach((parent) => {
+        const _findCiType = ci_types_list.find((item) => item.id === parent.id)
+        if (this.firstCIs[parent.name] && _findCiType) {
+          const unique_id = _findCiType.show_id || _findCiType.unique_id
+          const _findUnique = parent.attributes.find((attr) => attr.id === unique_id)
+          const unique_name = _findUnique?.name
+          const unique_alias = _findUnique?.alias || _findUnique?.name || ''
+          this.firstCIs[parent.name].forEach((parentCi) => {
+            nodes.children.push({
+              id: `${parentCi._id}`,
+              Class: Node,
+              title: parent.alias || parent.name,
+              name: parent.name,
+              side: 'left',
+              unique_alias,
+              unique_name,
+              unique_value: parentCi[unique_name],
+              children: [],
+              icon: _findCiType?.icon || '',
+              endpoints: [
+                {
+                  id: 'left',
+                  orientation: [-1, 0],
+                  pos: [0, 0.5],
+                },
+                {
+                  id: 'right',
+                  orientation: [1, 0],
+                  pos: [0, 0.5],
+                },
+              ],
+            })
+            edges.push({
+              id: `${parentCi._id}_Root`,
+              source: 'right',
+              target: 'left',
+              sourceNode: `${parentCi._id}`,
+              targetNode: `Root_${this.typeId}`,
+              type: 'endpoint',
+            })
+          })
+        }
+      })
+      this.childCITypes.forEach((child) => {
+        const _findCiType = ci_types_list.find((item) => item.id === child.id)
+        if (this.secondCIs[child.name] && _findCiType) {
+          const unique_id = _findCiType.show_id || _findCiType.unique_id
+          const _findUnique = child.attributes.find((attr) => attr.id === unique_id)
+          const unique_name = _findUnique?.name
+          const unique_alias = _findUnique?.alias || _findUnique?.name || ''
+          this.secondCIs[child.name].forEach((childCi) => {
+            nodes.children.push({
+              id: `${childCi._id}`,
+              Class: Node,
+              title: child.alias || child.name,
+              name: child.name,
+              side: 'right',
+              unique_alias,
+              unique_name,
+              unique_value: childCi[unique_name],
+              children: [],
+              icon: _findCiType?.icon || '',
+              endpoints: [
+                {
+                  id: 'left',
+                  orientation: [-1, 0],
+                  pos: [0, 0.5],
+                },
+                {
+                  id: 'right',
+                  orientation: [1, 0],
+                  pos: [0, 0.5],
+                },
+              ],
+            })
+            edges.push({
+              id: `Root_${childCi._id}`,
+              source: 'right',
+              target: 'left',
+              sourceNode: `Root_${this.typeId}`,
+              targetNode: `${childCi._id}`,
+              type: 'endpoint',
+            })
+          })
+        }
+      })
+      this.$set(this, 'topoData', {
+        nodes,
+        edges
+      })
+    }
   },
 }
 </script>
