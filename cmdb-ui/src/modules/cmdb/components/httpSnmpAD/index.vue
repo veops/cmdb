@@ -31,6 +31,7 @@
 <script>
 import _ from 'lodash'
 import { getHttpCategories, getHttpAttributes, getSnmpAttributes, getHttpAttrMapping } from '../../api/discovery'
+import { DISCOVERY_CATEGORY_TYPE } from '@/modules/cmdb/views/discovery/constants.js'
 import AttrMapTable from '@/modules/cmdb/components/attrMapTable/index.vue'
 import ADPreviewTable from './adPreviewTable.vue'
 import HttpADCategory from './httpADCategory.vue'
@@ -101,7 +102,7 @@ export default {
       }
     },
     isCloud() {
-      return ['http', 'private_cloud'].includes(this.ruleType)
+      return [DISCOVERY_CATEGORY_TYPE.HTTP, DISCOVERY_CATEGORY_TYPE.PRIVATE_CLOUD].includes(this.ruleType)
     }
   },
   watch: {
@@ -119,7 +120,7 @@ export default {
         this.currentCate = ''
         this.$nextTick(() => {
           const { ruleType, ruleName } = newVal
-          if (['snmp', 'components'].includes(ruleType) && ruleName) {
+          if ([DISCOVERY_CATEGORY_TYPE.SNMP, DISCOVERY_CATEGORY_TYPE.COMPONENT].includes(ruleType) && ruleName) {
             getSnmpAttributes(ruleType, ruleName).then((res) => {
               if (this.isEdit) {
                 this.formatTableData(res)

@@ -13,18 +13,26 @@
         @input="onCodeChange"
       ></codemirror>
     </a-tab-pane>
-    <template slot="tabBarExtraContent" v-if="showCalcComputed">
-      <a-button type="primary" size="small" @click="handleCalcComputed">
-        {{ $t('cmdb.ciType.apply') }}
+    <template slot="tabBarExtraContent">
+      <a-button size="small" @click="showAllPropDrawer">
+        {{ $t('cmdb.ciType.viewAllAttr') }}
       </a-button>
-      <a-tooltip :title="$t('cmdb.ciType.computeForAllCITips')">
-        <a-icon type="question-circle" style="margin-left:5px" />
-      </a-tooltip>
+      <AllAttrDrawer ref="allAttrDrawer" />
+
+      <template v-if="showCalcComputed">
+        <a-button style="margin: 0px 5px;" type="primary" size="small" @click="handleCalcComputed">
+          {{ $t('cmdb.ciType.apply') }}
+        </a-button>
+        <a-tooltip :title="$t('cmdb.ciType.computeForAllCITips')">
+          <a-icon type="question-circle" />
+        </a-tooltip>
+      </template>
     </template>
   </a-tabs>
 </template>
 
 <script>
+import AllAttrDrawer from './allAttrDrawer.vue'
 import { codemirror } from 'vue-codemirror'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/monokai.css'
@@ -32,7 +40,10 @@ import 'codemirror/theme/monokai.css'
 require('codemirror/mode/python/python.js')
 export default {
   name: 'ComputedArea',
-  components: { codemirror },
+  components: {
+    codemirror,
+    AllAttrDrawer
+  },
   props: {
     canDefineComputed: {
       type: Boolean,
@@ -108,6 +119,9 @@ export default {
     },
     onCodeChange(v) {
       this.compute_script = v.replace('\t', '    ')
+    },
+    showAllPropDrawer() {
+      this.$refs.allAttrDrawer.open()
     }
   },
 }

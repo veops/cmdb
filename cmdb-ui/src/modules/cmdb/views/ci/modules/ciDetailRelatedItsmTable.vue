@@ -105,7 +105,7 @@ export default {
       default: true,
     },
     attrList: {
-      type: Array,
+      type: Function,
       default: () => [],
     }
   },

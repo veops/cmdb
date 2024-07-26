@@ -255,6 +255,12 @@ export default {
       show_id: () => {
         return this.show_id
       },
+      providerGroupsData: () => {
+        return {
+          CITypeGroups: this.CITypeGroups,
+          otherGroupAttributes: this.otherGroupAttributes
+        }
+      }
     }
   },
   beforeCreate() {},

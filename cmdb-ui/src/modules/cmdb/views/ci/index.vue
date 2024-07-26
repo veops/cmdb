@@ -140,6 +140,7 @@
                 :mode="col.is_list ? 'multiple' : 'default'"
                 class="ci-table-edit-select"
                 allowClear
+                showSearch
               >
                 <a-select-option
                   :value="choice[0]"
@@ -161,7 +162,7 @@
                         :type="choice[1].icon.name"
                       />
                     </template>
-                    {{ choice[0] }}
+                    <span>{{ choice[0] }}</span>
                   </span>
                 </a-select-option>
               </a-select>
@@ -199,6 +200,7 @@
                       borderRadius: '4px',
                       padding: '1px 5px',
                       margin: '2px',
+                      verticalAlign: 'bottom',
                       ...getChoiceValueStyle(col, value),
                       display: 'inline-flex',
                       alignItems: 'center',
@@ -210,7 +212,7 @@
                       :style="{ maxHeight: '13px', maxWidth: '13px', marginRight: '5px' }"
                     />
                     <ops-icon
-                      v-else
+                      v-else-if="getChoiceValueIcon(col, value).name"
                       :style="{ color: getChoiceValueIcon(col, value).color, marginRight: '5px' }"
                       :type="getChoiceValueIcon(col, value).name"
                     />{{ value }}
@@ -222,6 +224,7 @@
                     borderRadius: '4px',
                     padding: '1px 5px',
                     margin: '2px 0',
+                    verticalAlign: 'bottom',
                     ...getChoiceValueStyle(col, row[col.field]),
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -233,7 +236,7 @@
                     :style="{ maxHeight: '13px', maxWidth: '13px', marginRight: '5px' }"
                   />
                   <ops-icon
-                    v-else
+                    v-else-if="getChoiceValueIcon(col, row[col.field]).name"
                     :style="{ color: getChoiceValueIcon(col, row[col.field]).color, marginRight: '5px' }"
                     :type="getChoiceValueIcon(col, row[col.field]).name"
                   />

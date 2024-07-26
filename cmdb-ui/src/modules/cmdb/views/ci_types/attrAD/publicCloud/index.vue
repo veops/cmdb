@@ -6,7 +6,7 @@
     />
     <a-form-model
       :model="formData"
-      labelAlign="left"
+      labelAlign="right"
       :labelCol="labelCol"
       :wrapperCol="{ span: 6 }"
       class="attr-ad-form"
