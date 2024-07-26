@@ -79,6 +79,7 @@
               <a-icon type="delete" />
             </a>
           </a-space>
+          <a v-else @click="handleEdit"><a-icon type="eye"/></a>
           <a
             v-if="showHTTPAcountBtn"
             class="discovery-footer-account"
