@@ -32,7 +32,7 @@
     </div>
     <div class="attr-ad-attributemap-main">
       <AttrMapTable
-        v-if="adrType === 'agent'"
+        v-if="adrType === DISCOVERY_CATEGORY_TYPE.AGENT"
         ref="attrMapTable"
         :ruleType="adrType"
         :tableData="tableData"
@@ -53,17 +53,18 @@
         :style="{ marginBottom: '20px' }"
       />
     </div>
-    <template v-if="adrType === 'snmp'">
+    <template v-if="adrType === DISCOVERY_CATEGORY_TYPE.SNMP">
       <div class="attr-ad-header">{{ $t('cmdb.ciType.nodeConfig') }}</div>
-      <a-form :form="form3" layout="inline" class="attr-ad-snmp-form">
-        <NodeSetting ref="nodeSetting" :initNodes="nodes" :form="form3" />
+      <a-form :form="nodeSettingForm" layout="inline" class="attr-ad-snmp-form">
+        <NodeSetting ref="nodeSetting" :initNodes="nodes" />
+        <CIDRTags v-model="cidrList" />
       </a-form>
     </template>
     <div class="attr-ad-header">{{ $t('cmdb.ciType.adExecConfig') }}</div>
     <a-form-model
       :model="form"
       :labelCol="labelCol"
-      labelAlign="left"
+      labelAlign="right"
       :wrapperCol="{ span: 14 }"
       class="attr-ad-form"
     >
@@ -127,7 +128,7 @@
         </el-popover>
       </a-form-model-item>
     </a-form-model>
-    <template v-if="adrType === 'http'">
+    <template v-if="adrType === DISCOVERY_CATEGORY_TYPE.HTTP">
       <template v-if="isPrivateCloud">
         <template v-if="privateCloudName === PRIVATE_CLOUD_NAME.VCenter">
           <div class="attr-ad-header">{{ $t('cmdb.ciType.privateCloud') }}</div>
@@ -142,10 +143,15 @@
         <div class="attr-ad-header">{{ $t('cmdb.ciType.cloudAccessKey') }}</div>
         <!-- <div class="public-cloud-info">{{ $t('cmdb.ciType.cloudAccessKeyTip') }}</div> -->
         <PublicCloud
-          v-model="form2"
+          v-model="publicCloudForm"
           ref="httpForm"
         />
       </template>
+    </template>
+
+    <template v-if="adrType === DISCOVERY_CATEGORY_TYPE.COMPONENT">
+      <div class="attr-ad-header">{{ $t('cmdb.ciType.portScanConfig') }}</div>
+      <PortScanConfig v-model="portScanConfigForm" />
     </template>
 
     <AttrADTest
@@ -165,7 +171,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { mapState } from 'vuex'
 import Vcrontab from '@/components/Crontab'
 import { putCITypeDiscovery, postCITypeDiscovery } from '../../api/discovery'
-import { PRIVATE_CLOUD_NAME } from '@/modules/cmdb/views/discovery/constants.js'
+import { DISCOVERY_CATEGORY_TYPE, PRIVATE_CLOUD_NAME } from '@/modules/cmdb/views/discovery/constants.js'
 import { TAB_KEY } from './attrAD/constants.js'
 
 import HttpSnmpAD from '../../components/httpSnmpAD'
@@ -176,6 +182,8 @@ import AttrADTest from './attrADTest.vue'
 import { Popover } from 'element-ui'
 import VcenterForm from './attrAD/privateCloud/vcenterForm.vue'
 import PublicCloud from './attrAD/publicCloud/index.vue'
+import PortScanConfig from './attrAD/portScanConfig/index.vue'
+import CIDRTags from './attrAD/cidrTags/index.vue'
 
 export default {
   name: 'AttrADTabpane',
@@ -188,7 +196,9 @@ export default {
     AttrADTest,
     ElPopover: Popover,
     VcenterForm,
-    PublicCloud
+    PublicCloud,
+    PortScanConfig,
+    CIDRTags
   },
   props: {
     adr_id: {
@@ -229,7 +239,7 @@ export default {
         query_expr: '',
         enabled: true,
       },
-      form2: {
+      publicCloudForm: {
         key: '',
         secret: '',
         _reference: '',
@@ -244,25 +254,31 @@ export default {
         _reference: '',
         tabActive: TAB_KEY.CUSTOM,
       },
-      interval: 'cron', // interval  cron
+      portScanConfigForm: {
+        cidr: '',
+        ports: '',
+        enable_cidr: '',
+      },
       cron: '',
+      cronVisible: false,
       intervalValue: 3,
       agent_type: 'agent_id',
       nodes: [
         {
           id: uuidv4(),
           ip: '',
-          community: '',
+          community: 'public',
           version: '',
         },
       ],
-      form3: this.$form.createForm(this, { name: 'snmp_form' }),
-      cronVisible: false,
+      nodeSettingForm: this.$form.createForm(this, { name: 'snmp_form' }),
       uniqueKey: '',
       isPrivateCloud: false,
       privateCloudName: '',
       PRIVATE_CLOUD_NAME,
+      DISCOVERY_CATEGORY_TYPE,
       isClient: false, // 是否前端新增临时数据
+      cidrList: [],
     }
   },
   provide() {
@@ -293,26 +309,28 @@ export default {
       ]
 
       const permissions = this?.user?.roles?.permissions
-      if ((permissions.includes('cmdb_admin') || permissions.includes('admin')) && this.adrType === 'agent') {
+      if ((permissions.includes('cmdb_admin') || permissions.includes('admin')) && this.adrType === DISCOVERY_CATEGORY_TYPE.AGENT) {
         radios.unshift({ value: 'all', label: this.$t('cmdb.ciType.allNodes') })
       }
 
-      if (this.adrType !== 'agent' || this?.currentAdr?.is_plugin) {
+      if (this.adrType !== DISCOVERY_CATEGORY_TYPE.AGENTv || this?.currentAdr?.is_plugin) {
         radios.unshift({ value: 'master', label: this.$t('cmdb.ciType.masterNode') })
       }
 
       return radios
     },
-    radioList() {
-      return [
-        { value: 'interval', label: this.$t('cmdb.ciType.byInterval') },
-        { value: 'cron', label: '按cron', layout: 'vertical' },
-      ]
-    },
     labelCol() {
-      const span = this.$i18n.locale === 'en' ? 5 : 3
+      const isEn = this.$i18n.locale === 'en'
       return {
-        span
+        xl: {
+          span: isEn ? 4 : 2
+        },
+        lg: {
+          span: isEn ? 5 : 3
+        },
+        sm: {
+          span: isEn ? 6 : 4
+        }
       }
     }
   },
@@ -324,7 +342,7 @@ export default {
       this.uniqueKey = _find?.unique_key ?? ''
       this.isClient = _findADT?.isClient ?? false
 
-      if (this.adrType === 'http') {
+      if (this.adrType === DISCOVERY_CATEGORY_TYPE.HTTP) {
         const {
           category = undefined,
           key = '',
@@ -358,7 +376,7 @@ export default {
           }
         } else {
           this.isPrivateCloud = false
-          this.form2 = {
+          this.publicCloudForm = {
             key,
             secret,
             _reference,
@@ -371,23 +389,47 @@ export default {
           this.$refs.httpForm.init(this.adr_id)
         })
       }
-      if (this.adrType === 'snmp') {
-        this.nodes = _findADT?.extra_option?.nodes?.length ? _findADT?.extra_option?.nodes : [
+
+      if (this.adrType === DISCOVERY_CATEGORY_TYPE.COMPONENT) {
+        const {
+          cidr = '',
+          ports = '',
+          enable_cidr = '',
+        } = _findADT?.extra_option ?? {}
+        this.portScanConfigForm = {
+          cidr,
+          ports,
+          enable_cidr
+        }
+      }
+
+      if (this.adrType === DISCOVERY_CATEGORY_TYPE.SNMP) {
+        const nodes = _findADT?.extra_option?.nodes?.length ? _findADT?.extra_option?.nodes : [
           {
             id: uuidv4(),
             ip: '',
-            community: '',
+            community: 'public',
             version: '',
           },
         ]
+        this.nodes = nodes
         this.$nextTick(() => {
           this.$refs.nodeSetting.initNodesFunc()
-          this.$nextTick(() => {
-            this.$refs.nodeSetting.setNodeField()
-          })
         })
+
+        let cidrList = []
+        const cidr = _findADT?.extra_option?.cidr
+        if (Array.isArray(cidr) && cidr?.length) {
+          cidrList = cidr.map((v) => {
+            return {
+              id: uuidv4(),
+              value: v?.value ? v.value : v
+            }
+          })
+        }
+        this.cidrList = cidrList
       }
-      if (this.adrType === 'agent') {
+      if (this.adrType === DISCOVERY_CATEGORY_TYPE.AGENT) {
         this.tableData = (_find?.attributes || []).map((item) => {
           if (_findADT.attributes) {
             return {
@@ -420,7 +462,6 @@ export default {
         this.agent_type = this.agentTypeRadioList[0].value
       }
 
-      this.interval = 'cron'
       this.cron = _findADT?.cron || ''
     },
 
@@ -431,13 +472,12 @@ export default {
       const { currentAdt } = this
       let params
 
-      // 校验 HTTP 表单
-      const { isError, data: cloudOption } = this.validateHTTPForm()
-      if (isError) {
-        return
-      }
+      if (this.adrType === DISCOVERY_CATEGORY_TYPE.HTTP) {
+        const { isError, data: cloudOption } = this.validateHTTPForm()
+        if (isError) {
+          return
+        }
 
-      if (this.adrType === 'http') {
         params = {
           extra_option: {
             ...cloudOption,
@@ -445,12 +485,25 @@ export default {
           },
         }
       }
-      if (this.adrType === 'snmp') {
+
+      if (this.adrType === DISCOVERY_CATEGORY_TYPE.COMPONENT) {
+        const portScanConfigForm = _.omitBy(this.portScanConfigForm, _.isEmpty) || {}
         params = {
-          extra_option: { nodes: this.$refs.nodeSetting?.getNodeValue() ?? [] },
+          extra_option: {
+            ...portScanConfigForm,
+          },
         }
       }
-      if (this.adrType === 'agent') {
+
+      if (this.adrType === DISCOVERY_CATEGORY_TYPE.SNMP) {
+        params = {
+          extra_option: {
+            nodes: this.$refs.nodeSetting?.getNodeValue() ?? [],
+            cidr: this?.cidrList?.map((item) => item.value) || []
+          },
+        }
+      }
+      if (this.adrType === DISCOVERY_CATEGORY_TYPE.AGENT) {
         const $table = this.$refs.attrMapTable
         const { fullData: _tableData } = $table.getTableData()
         const attributes = {}
@@ -481,7 +534,7 @@ export default {
         ...params,
         ...this.form,
         adr_id: currentAdt.adr_id,
-        cron: this.interval === 'cron' ? this.cron : null,
+        cron: this.cron,
       }
 
       if (this.agent_type === 'agent_id' || this.agent_type === 'all') {
@@ -534,54 +587,56 @@ export default {
       }
     },
 
+    /**
+     * HTTP 表单校验
+     * 公有云 私有云
+     */
     validateHTTPForm() {
       let isError = false
       let data = {}
 
-      if (this.adrType === 'http') {
-        const formData = this?.[this.isPrivateCloud ? 'privateCloudForm' : 'form2']
-        if (formData.tabActive === TAB_KEY.CONFIG) {
-          if (!formData._reference) {
-            isError = true
-            this.$message.error(this.$t('cmdb.ad.configErrTip'))
-          }
-
-          data._reference = formData._reference
-          if (this.privateCloudName === PRIVATE_CLOUD_NAME.VCenter) {
-            data.vcenterName = formData.vcenterName
-          }
-
-          return {
-            isError,
-            data
-          }
+      const formData = this?.[this.isPrivateCloud ? 'privateCloudForm' : 'publicCloudForm']
+      if (formData.tabActive === TAB_KEY.CONFIG) {
+        if (!formData._reference) {
+          isError = true
+          this.$message.error(this.$t('cmdb.ad.configErrTip'))
         }
 
-        if (this.isPrivateCloud) {
-          if (this.privateCloudName === PRIVATE_CLOUD_NAME.VCenter) {
-            data = _.pick(this.privateCloudForm, ['host', 'account', 'password', 'vcenterName'])
-            const vcenterErros = {
-              'host': `${this.$t('placeholder1')} ${this.$t('cmdb.ciType.host')}`,
-              'account': `${this.$t('placeholder1')} ${this.$t('cmdb.ciType.account')}`,
-              'password': `${this.$t('placeholder1')} ${this.$t('cmdb.ciType.password')}`
-            }
-            const findError = Object.keys(this.privateCloudForm).find((key) => !this.privateCloudForm[key] && vcenterErros[key])
-            if (findError) {
-              isError = true
-              this.$message.error(this.$t(vcenterErros[findError]))
-            }
+        data._reference = formData._reference
+        if (this.privateCloudName === PRIVATE_CLOUD_NAME.VCenter) {
+          data.vcenterName = formData.vcenterName
+        }
+
+        return {
+          isError,
+          data
+        }
+      }
+
+      if (this.isPrivateCloud) {
+        if (this.privateCloudName === PRIVATE_CLOUD_NAME.VCenter) {
+          data = _.pick(this.privateCloudForm, ['host', 'account', 'password', 'vcenterName'])
+          const vcenterErros = {
+            'host': `${this.$t('placeholder1')} ${this.$t('cmdb.ciType.host')}`,
+            'account': `${this.$t('placeholder1')} ${this.$t('cmdb.ciType.account')}`,
+            'password': `${this.$t('placeholder1')} ${this.$t('cmdb.ciType.password')}`
           }
-        } else {
-          data = _.pick(this.form2, ['key', 'secret'])
-          const publicCloudErros = {
-            'key': `${this.$t('placeholder1')} key`,
-            'secret': `${this.$t('placeholder1')} secret`
-          }
-          const findError = Object.keys(this.form2).find((key) => !this.form2[key] && publicCloudErros[key])
+          const findError = Object.keys(this.privateCloudForm).find((key) => !this.privateCloudForm[key] && vcenterErros[key])
           if (findError) {
             isError = true
-            this.$message.error(this.$t(publicCloudErros[findError]))
+            this.$message.error(this.$t(vcenterErros[findError]))
           }
+        }
+      } else {
+        data = _.pick(this.publicCloudForm, ['key', 'secret'])
+        const publicCloudErros = {
+          'key': `${this.$t('placeholder1')} key`,
+          'secret': `${this.$t('placeholder1')} secret`
+        }
+        const findError = Object.keys(this.publicCloudForm).find((key) => !this.publicCloudForm[key] && publicCloudErros[key])
+        if (findError) {
+          isError = true
+          this.$message.error(this.$t(publicCloudErros[findError]))
         }
       }
 
@@ -591,6 +646,9 @@ export default {
       }
     },
 
+    /**
+     * 去除多余旧配置
+     */
     handleOldExtraOption(option) {
       let extra_option = _.cloneDeep(option)
 
@@ -600,7 +658,7 @@ export default {
       }
 
       // 根据 HTTP 选项去除多余属性
-      const formData = this?.[this.isPrivateCloud ? 'privateCloudForm' : 'form2']
+      const formData = this?.[this.isPrivateCloud ? 'privateCloudForm' : 'publicCloudForm']
       switch (formData.tabActive) {
         case TAB_KEY.CUSTOM:
           Reflect.deleteProperty(extra_option, '_reference')
@@ -694,6 +752,7 @@ export default {
   .radio-master-tip {
     font-size: 12px;
     color: #86909c;
+    line-height: 14px;
   }
 }
 .attr-ad-snmp-form {

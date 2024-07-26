@@ -1,53 +1,27 @@
 <template>
   <div class="node-setting-wrap">
-    <a-row v-for="(node) in nodes" :key="node.id">
-      <a-col :span="6">
-        <a-form-item :label="$t('cmdb.ciType.nodeSettingIp')">
-          <a-input
-            allowClear
-            v-decorator="[
-              `node_ip_${node.id}`,
-              {
-                rules: [
-                  { required: false, message: $t('cmdb.ciType.nodeSettingIpTip') },
-                  {
-                    pattern:
-                      '^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$',
-                    message: $t('cmdb.ciType.nodeSettingIpTip1'),
-                    trigger: 'blur',
-                  },
-                ],
-              },
-            ]"
-            :placeholder="$t('cmdb.ciType.nodeSettingIpTip')"
-          />
-        </a-form-item>
-      </a-col>
-
-      <a-col :span="6">
-        <a-form-item :label="$t('cmdb.ciType.nodeSettingCommunity')">
-          <a-input
-            allowClear
-            v-decorator="[
-              `node_community_${node.id}`,
-              {
-                rules: [{ required: false, message: $t('cmdb.ciType.nodeSettingCommunityTip') }],
-              },
-            ]"
-            :placeholder="$t('cmdb.ciType.nodeSettingCommunityTip')"
-          />
-        </a-form-item>
-      </a-col>
-
-      <a-col :span="5">
-        <a-form-item :label="$t('cmdb.ciType.nodeSettingVersion')">
+    <ops-table
+      :data="nodes"
+      size="mini"
+      show-header-overflow
+      :row-config="{ height: 42 }"
+      border
+      :min-height="78"
+    >
+      <vxe-column width="170" :title="$t('cmdb.ciType.nodeSettingIp')">
+        <template #default="{ row }">
+          <a-input v-model="row.ip"></a-input>
+        </template>
+      </vxe-column>
+      <vxe-column width="170" :title="$t('cmdb.ciType.nodeSettingCommunity')">
+        <template #default="{ row }">
+          <a-input v-model="row.community"></a-input>
+        </template>
+      </vxe-column>
+      <vxe-column width="170" :title="$t('cmdb.ciType.nodeSettingVersion')">
+        <template #default="{ row }">
           <a-select
-            v-decorator="[
-              `node_version_${node.id}`,
-              {
-                rules: [{ required: false, message: $t('cmdb.ciType.nodeSettingVersionTip') }],
-              },
-            ]"
+            v-model="row.version"
             :placeholder="$t('cmdb.ciType.nodeSettingVersionTip')"
             allowClear
             class="node-setting-select"
@@ -58,26 +32,25 @@
             <a-select-option value="2c">
               v2c
             </a-select-option>
-            <a-select-option value="3">
-              v3
-            </a-select-option>
           </a-select>
-        </a-form-item>
-      </a-col>
-      <a-col :span="3">
-        <div class="action">
-          <a @click="() => copyNode(node.id)">
-            <a-icon type="copy" />
-          </a>
-          <a @click="() => removeNode(node.id, 1)">
-            <a-icon type="minus-circle" />
-          </a>
-          <a @click="addNode">
-            <a-icon type="plus-circle" />
-          </a>
-        </div>
-      </a-col>
-    </a-row>
+        </template>
+      </vxe-column>
+      <vxe-column wdith="170">
+        <template #default="{ row }">
+          <div class="action">
+            <a @click="() => copyNode(row.id)">
+              <a-icon type="copy" />
+            </a>
+            <a @click="() => removeNode(row.id, 1)">
+              <a-icon type="minus-circle" />
+            </a>
+            <a @click="addNode">
+              <a-icon type="plus-circle" />
+            </a>
+          </div>
+        </template>
+      </vxe-column>
+    </ops-table>
   </div>
 </template>
 
@@ -110,17 +83,10 @@ export default {
       const newNode = {
         id: uuidv4(),
         ip: '',
-        community: '',
+        community: 'public',
         version: '',
       }
       this.nodes.push(newNode)
-      this.$nextTick(() => {
-        this.form.setFieldsValue({
-          [`node_ip_${newNode.id}`]: newNode.ip,
-          [`node_community_${newNode.id}`]: newNode.community,
-          [`node_version_${newNode.id}`]: newNode.version,
-        })
-      })
     },
     removeNode(removeId, minLength) {
       if (this.nodes.length <= minLength) {
@@ -133,45 +99,20 @@ export default {
       }
     },
     copyNode(id) {
-      const newNode = {
-        id: uuidv4(),
-        ip: this.form.getFieldValue(`node_ip_${id}`),
-        community: this.form.getFieldValue(`node_community_${id}`),
-        version: this.form.getFieldValue(`node_version_${id}`),
-      }
-      this.nodes.push(newNode)
-      this.$nextTick(() => {
-        this.form.setFieldsValue({
-          [`node_ip_${newNode.id}`]: newNode.ip,
-          [`node_community_${newNode.id}`]: newNode.community,
-          [`node_version_${newNode.id}`]: newNode.version,
-        })
-      })
-    },
-    getInfoValuesFromForm(values) {
-      return this.nodes.map((item) => {
-        return {
-          id: item.id,
-          ip: values[`node_ip_${item.id}`],
-          community: values[`node_community_${item.id}`],
-          version: values[`node_version_${item.id}`],
+      const copyNode = this.nodes.find((item) => item.id === id)
+      if (copyNode) {
+        const newNode = {
+          ...copyNode,
+          id: uuidv4(),
         }
-      })
-    },
-    setNodeField() {
-      if (this.nodes && this.nodes.length) {
-        this.nodes.forEach((item) => {
-          this.form.setFieldsValue({
-            [`node_ip_${item.id}`]: item.ip,
-            [`node_community_${item.id}`]: item.community,
-            [`node_version_${item.id}`]: item.version,
-          })
-        })
+        this.nodes.push(newNode)
       }
     },
     getNodeValue() {
-      const values = this.form.getFieldsValue()
-      return this.getInfoValuesFromForm(values)
+      const nodes = this.nodes.map((node) => {
+        return _.pick(node, ['ip', 'community', 'version'])
+      })
+      return nodes
     },
   },
 }
@@ -180,10 +121,9 @@ export default {
 <style lang="less" scoped>
 .node-setting-wrap {
   margin-left: 17px;
+  width: 600px;
 
   .ant-row {
-    // display: flex;
-
     /deep/ .ant-input-clear-icon {
       color: rgba(0,0,0,.25);
 

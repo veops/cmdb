@@ -21,15 +21,15 @@
               >
                 *
               </span>
-              <vxe-select
-                filterable
-                clearable
+              <a-select
                 v-model="row.attr"
-                type="text"
-                :options="ciTypeAttributes"
-                transfer
                 :placeholder="$t('cmdb.ciType.attrMapTableAttrPlaceholder')"
-              ></vxe-select>
+                showSearch
+                allowClear
+                :options="ciTypeAttributes"
+                style="width: 100%; height: 28px; line-height: 28px;"
+                class="attr-map-table-left-select"
+              ></a-select>
             </div>
           </template>
         </vxe-column>
@@ -49,7 +49,7 @@
       >
         <vxe-column field="name" :title="$t('name')"></vxe-column>
         <vxe-column field="type" :title="$t('type')"></vxe-column>
-        <vxe-column v-if="ruleType !== 'agent'" field="example" :title="$t('cmdb.components.example')">
+        <vxe-column v-if="ruleType !== DISCOVERY_CATEGORY_TYPE.AGENT" field="example" :title="$t('cmdb.components.example')">
           <template #default="{row}">
             <span v-if="row.type === 'json'">{{ JSON.stringify(row.example) }}</span>
             <span v-else>{{ row.example }}</span>
@@ -72,6 +72,8 @@
 </template>
 
 <script>
+import { DISCOVERY_CATEGORY_TYPE } from '@/modules/cmdb/views/discovery/constants.js'
+
 export default {
   name: 'AttrMapTable',
   props: {
@@ -93,7 +95,9 @@ export default {
     }
   },
   data() {
-    return {}
+    return {
+      DISCOVERY_CATEGORY_TYPE
+    }
   },
   methods: {
     getTableData() {
@@ -123,6 +127,18 @@ export default {
 
   &-left {
     width: 30%;
+
+    &-select {
+      /deep/ .ant-select-selection {
+        height: 28px;
+        line-height: 28px;
+
+        .ant-select-selection__rendered {
+          height: 28px;
+          line-height: 28px;
+        }
+      }
+    }
   }
 
   &-right {

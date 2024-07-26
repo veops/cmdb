@@ -905,6 +905,33 @@ export const multicolorIconList = [
     value: 'caise-application',
     label: '应用',
     list: [{
+      value: 'caise-data_center',
+      label: '数据中心'
+    }, {
+      value: 'caise-folder',
+      label: '文件夹'
+    }, {
+      value: 'caise-resource_pool',
+      label: '资源池'
+    }, {
+      value: 'caise-network',
+      label: '网络'
+    }, {
+      value: 'caise-distributed_switch',
+      label: '分布式交换机'
+    }, {
+      value: 'caise-standard_switch',
+      label: '标准式交换机'
+    }, {
+      value: 'caise-host_cluster',
+      label: '主机集群'
+    }, {
+      value: 'caise-storage_cluster',
+      label: '数据存储集群'
+    }, {
+      value: 'caise-data_storage',
+      label: '数据存储'
+    }, {
       value: 'caise-yilianjie',
       label: '已连接'
     }, {

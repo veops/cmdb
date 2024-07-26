@@ -28,7 +28,7 @@
       <a-tab-pane key="tab_2">
         <span slot="tab"><a-icon type="branches" />{{ $t('cmdb.relation') }}</span>
         <div :style="{ height: '100%', padding: '24px', overflow: 'auto' }">
-          <ci-detail-relation ref="ciDetailRelation" :ciId="ciId" :typeId="typeId" :ci="ci" />
+          <ci-detail-relation ref="ciDetailRelation" :ciId="ciId" :typeId="typeId" :ci="ci" :initQueryLoading="initQueryLoading" />
         </div>
       </a-tab-pane>
       <a-tab-pane key="tab_3">
@@ -181,6 +181,7 @@ export default {
       hasPermission: true,
       itsmInstalled: true,
       tableHeight: this.attributeHistoryTableHeight || (this.$store.state.windowHeight - 120),
+      initQueryLoading: true,
     }
   },
   computed: {
@@ -218,6 +219,7 @@ export default {
   },
   methods: {
     async create(ciId, activeTabKey = 'tab_1', ciDetailRelationKey = '1') {
+      this.initQueryLoading = true
       this.activeTabKey = activeTabKey
       if (activeTabKey === 'tab_2') {
         this.$nextTick(() => {
@@ -230,10 +232,13 @@ export default {
       if (this.hasPermission) {
         this.getAttributes()
         this.getCIHistory()
-        getCITypes().then((res) => {
-          this.ci_types = res.ci_types
-        })
+        const ciTypeRes = await getCITypes()
+        this.ci_types = ciTypeRes.ci_types
+        if (this.activeTabKey === 'tab_2') {
+          this.$refs.ciDetailRelation.init(true)
+        }
       }
+      this.initQueryLoading = false
     },
     getAttributes() {
       getCITypeGroupById(this.typeId, { need_other: 1 })
