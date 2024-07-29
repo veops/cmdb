@@ -235,10 +235,16 @@ class AttributeValueManager(object):
 
             try:
                 if attr.is_list:
+                    if isinstance(value, dict):
+                        if value.get('op') == "delete":
+                            continue
+                        _value = value.get('v') or []
+                    else:
+                        _value = value
                     value_list = [self._validate(attr, i, value_table, ci=None, type_id=type_id, ci_id=ci_id,
                                                  type_attr=ci_attr2type_attr.get(attr.id))
-                                  for i in handle_arg_list(value)]
-                    ci_dict[key] = value_list
+                                  for i in handle_arg_list(_value)]
+                    ci_dict[key] = value_list if not isinstance(value, dict) else dict(op=value.get('op'), v=value_list)
                     if not value_list:
                         self._check_is_required(type_id, attr, '')
 
@@ -278,28 +284,47 @@ class AttributeValueManager(object):
                 existed_values = [(ValueTypeMap.serialize[attr.value_type](i.value) if
                                    i.value or i.value == 0 else i.value) for i in existed_attrs]
 
-                # Comparison array starts from which position changes
-                min_len = min(len(value), len(existed_values))
-                index = 0
-                while index < min_len:
-                    if value[index] != existed_values[index]:
-                        break
-                    index += 1
+                if isinstance(value, dict):
+                    if value.get('op') == "add":
+                        for v in (value.get('v') or []):
+                            if v not in existed_values:
+                                value_table.create(ci_id=ci.id, attr_id=attr.id, value=v, flush=False, commit=False)
+                                if not attr.is_dynamic:
+                                    changed.append((ci.id, attr.id, OperateType.ADD, None, v, ci.type_id))
+                                else:
+                                    has_dynamic = True
 
-                # Delete first and then add to ensure id sorting
-                for idx in range(index, len(existed_attrs)):
-                    existed_attr = existed_attrs[idx]
-                    existed_attr.delete(flush=False, commit=False)
-                    if not attr.is_dynamic:
-                        changed.append((ci.id, attr.id, OperateType.DELETE, existed_values[idx], None, ci.type_id))
-                    else:
-                        has_dynamic = True
-                for idx in range(index, len(value)):
-                    value_table.create(ci_id=ci.id, attr_id=attr.id, value=value[idx], flush=False, commit=False)
-                    if not attr.is_dynamic:
-                        changed.append((ci.id, attr.id, OperateType.ADD, None, value[idx], ci.type_id))
-                    else:
-                        has_dynamic = True
+                    elif value.get('op') == "delete":
+                        for idx, v in enumerate((value.get('v') or [])):
+                            if v in existed_values:
+                                existed_values[idx].delete(flush=False, commit=False)
+                                if not attr.is_dynamic:
+                                    changed.append((ci.id, attr.id, OperateType.DELETE, v, None, ci.type_id))
+                                else:
+                                    has_dynamic = True
+                else:
+                    # Comparison array starts from which position changes
+                    min_len = min(len(value), len(existed_values))
+                    index = 0
+                    while index < min_len:
+                        if value[index] != existed_values[index]:
+                            break
+                        index += 1
+
+                    # Delete first and then add to ensure id sorting
+                    for idx in range(index, len(existed_attrs)):
+                        existed_attr = existed_attrs[idx]
+                        existed_attr.delete(flush=False, commit=False)
+                        if not attr.is_dynamic:
+                            changed.append((ci.id, attr.id, OperateType.DELETE, existed_values[idx], None, ci.type_id))
+                        else:
+                            has_dynamic = True
+                    for idx in range(index, len(value)):
+                        value_table.create(ci_id=ci.id, attr_id=attr.id, value=value[idx], flush=False, commit=False)
+                        if not attr.is_dynamic:
+                            changed.append((ci.id, attr.id, OperateType.ADD, None, value[idx], ci.type_id))
+                        else:
+                            has_dynamic = True
             else:
                 existed_attr = value_table.get_by(attr_id=attr.id, ci_id=ci.id, first=True, to_dict=False)
                 existed_value = existed_attr and existed_attr.value
