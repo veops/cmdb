@@ -328,7 +328,8 @@ class CIManager(object):
         ci_type_attrs_name = {attr.name: attr for _, attr in attrs}
         ci_type_attrs_alias = {attr.alias: attr for _, attr in attrs}
         ci_attr2type_attr = {type_attr.attr_id: type_attr for type_attr, _ in attrs}
-
+        ci_type_attrs_name_alias = {**ci_type_attrs_name, **ci_type_attrs_alias}
+        
         ci = None
         record_id = None
         password_dict = {}
@@ -412,7 +413,7 @@ class CIManager(object):
                     else:
                         ci_dict.pop(k)
 
-            ci_dict = {k: v for k, v in ci_dict.items() if k in ci_type_attrs_name or k in ci_type_attrs_alias}
+            ci_dict = {ci_type_attrs_name_alias[k].name: v for k, v in ci_dict.items() if k in ci_type_attrs_name_alias}
 
             key2attr = value_manager.valid_attr_value(ci_dict, ci_type.id, ci and ci.id,
                                                       ci_type_attrs_name, ci_type_attrs_alias, ci_attr2type_attr)
