@@ -237,6 +237,9 @@ class AttributeValueManager(object):
                 if attr.is_list:
                     if isinstance(value, dict):
                         if value.get('op') == "delete":
+                            value['v'] = [ValueTypeMap.serialize[attr.value_type](
+                                self._deserialize_value(attr.alias, attr.value_type, i))
+                                          for i in handle_arg_list(value['v'])]
                             continue
                         _value = value.get('v') or []
                     else:
@@ -295,9 +298,9 @@ class AttributeValueManager(object):
                                     has_dynamic = True
 
                     elif value.get('op') == "delete":
-                        for idx, v in enumerate((value.get('v') or [])):
+                        for v in (value.get('v') or []):
                             if v in existed_values:
-                                existed_values[idx].delete(flush=False, commit=False)
+                                existed_attrs[existed_values.index(v)].delete(flush=False, commit=False)
                                 if not attr.is_dynamic:
                                     changed.append((ci.id, attr.id, OperateType.DELETE, v, None, ci.type_id))
                                 else:
