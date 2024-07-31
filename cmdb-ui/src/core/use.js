@@ -69,6 +69,8 @@ Vue.prototype.$httpError = function (err, describe) {
 
 window.$message = Vue.prototype.$message
 
+Vue.prototype.isOpenSource = process.env.VUE_APP_IS_OPEN_SOURCE === 'true'
+
 Vue.use(Antd)
 Vue.use(Viser)
 

@@ -454,10 +454,15 @@ export default {
         query_expr: _findADT.query_expr || '',
         enabled: _findADT?.enabled ?? true,
       }
+
+      const allMachineIndex = this.agentTypeRadioList.findIndex((item) => item.value === 'all')
+
       if (_findADT.query_expr) {
         this.agent_type = 'query_expr'
       } else if (_findADT.agent_id) {
         this.agent_type = _findADT.agent_id === '0x0000' ? 'master' : 'agent_id'
+      } else if (_findADT.agent_id === '' && allMachineIndex !== -1) {
+        this.agent_type = 'all'
       } else {
         this.agent_type = this.agentTypeRadioList[0].value
       }

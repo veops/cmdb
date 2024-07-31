@@ -18,19 +18,19 @@
         <a-button @click="handleOpenUniqueConstraint" size="small">{{ $t('cmdb.ciType.uniqueConstraint') }}</a-button>
         <div>
           <a-tooltip
-            v-for="type in Object.keys(valueTypeMap)"
-            :key="type"
-            :title="$t('cmdb.ciType.filterTips', { name: valueTypeMap[type] })"
+            v-for="typeKey in Object.keys(valueTypeMap)"
+            :key="typeKey"
+            :title="$t('cmdb.ciType.filterTips', { name: valueTypeMap[typeKey] })"
           >
             <span
-              @click="handleFilterType(type)"
+              @click="handleFilterType(typeKey)"
               :class="{
                 'ci-types-attributes-filter': true,
-                'ci-types-attributes-filter-selected': attrTypeFilter.includes(type),
+                'ci-types-attributes-filter-selected': attrTypeFilter.includes(typeKey),
               }"
             >
-              <ops-icon :type="getPropertyIcon({ value_type: type })" />
-              {{ valueTypeMap[type] }}
+              <ops-icon :type="getPropertyIcon({ value_type: typeKey })" />
+              {{ valueTypeMap[typeKey] }}
             </span>
           </a-tooltip>
         </div>

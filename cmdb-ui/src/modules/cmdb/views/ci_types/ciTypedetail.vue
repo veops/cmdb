@@ -32,6 +32,8 @@ import TriggerTable from './triggerTable.vue'
 import ADTab from './adTab.vue'
 import GrantComp from '../../components/cmdbGrant/grantComp.vue'
 
+const ACTIVE_KEY_STORAGE_KEY = 'ops_model_config_tab_key'
+
 export default {
   name: 'CITypeDetail',
   components: {
@@ -53,11 +55,24 @@ export default {
   },
   data() {
     return {
-      activeKey: '1',
+      activeKey: localStorage.getItem(ACTIVE_KEY_STORAGE_KEY) || '1',
     }
   },
   beforeCreate() {},
-  mounted() {},
+  mounted() {
+    this.$nextTick(() => {
+      switch (this.activeKey) {
+        case '6':
+          this.$refs.triggerTable.getTableData()
+          break
+        case '5':
+          this.$refs.reconciliationTable.getTableData()
+          break
+        default:
+          break
+      }
+    })
+  },
   computed: {
     ...mapState({
       windowHeight: (state) => state.windowHeight,
@@ -66,15 +81,23 @@ export default {
   methods: {
     changeTab(activeKey) {
       this.activeKey = activeKey
+      localStorage.setItem(ACTIVE_KEY_STORAGE_KEY, activeKey)
       this.$nextTick(() => {
-        if (activeKey === '1') {
-          this.$refs.attributesTable.getCITypeGroupData()
-        }
-        if (activeKey === '5') {
-          this.$refs.triggerTable.getTableData()
+        switch (activeKey) {
+          case '1':
+            this.$refs.attributesTable.getCITypeGroupData()
+            break
+          case '6':
+            this.$refs.triggerTable.getTableData()
+            break
+          case '5':
+            this.$refs.reconciliationTable.getTableData()
+            break
+          default:
+            break
         }
       })
-    },
+    }
   },
 }
 </script>

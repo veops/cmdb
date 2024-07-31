@@ -345,6 +345,7 @@
               :canDefineScript="canDefineScript"
               ref="preValueArea"
               :disabled="isShowComputedArea"
+              :CITypeId="CITypeId"
             />
           </a-form-item>
         </a-col>

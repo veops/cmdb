@@ -19,8 +19,8 @@
           :ref="`createInstanceFormByGroup_${group.id}`"
           :key="group.id || group.name"
           :group="group"
-          @handleFocusInput="handleFocusInput"
           :attributeList="attributeList"
+          @handleFocusInput="handleFocusInput"
         />
       </template>
       <template v-if="parentsType && parentsType.length">
@@ -57,8 +57,8 @@
     <template v-if="action === 'update'">
       <a-form :form="form">
         <p>{{ $t('cmdb.ci.tips2') }}</p>
-        <a-row :gutter="24" v-for="list in batchUpdateLists" :key="list.name">
-          <a-col :span="11">
+        <a-row :gutter="8" v-for="list in batchUpdateLists" :key="list.name">
+          <a-col :span="6">
             <a-form-item>
               <el-select showSearch size="small" filterable v-model="list.name" :placeholder="$t('cmdb.ci.tips3')">
                 <el-option
@@ -72,11 +72,24 @@
               </el-select>
             </a-form-item>
           </a-col>
-          <a-col :span="11">
+          <a-col v-if="showListOperation(list.name)" :span="3">
+            <a-form-item>
+              <el-select size="small" filterable v-model="list.operation" :placeholder="$t('placeholder2')">
+                <el-option
+                  v-for="(option) in listOperationOptions"
+                  :key="option.value"
+                  :value="option.value"
+                  :label="$t(option.label)"
+                >
+                </el-option>
+              </el-select>
+            </a-form-item>
+          </a-col>
+          <a-col :span="showListOperation(list.name) ? 10 : 13">
             <a-form-item>
               <a-select
                 :style="{ width: '100%' }"
-                v-decorator="[list.name, { rules: [{ required: false }] }]"
+                v-decorator="[list.name, { rules: getDecoratorRules(list) }]"
                 :placeholder="$t('placeholder2')"
                 v-if="getFieldType(list.name).split('%%')[0] === 'select'"
                 :mode="getFieldType(list.name).split('%%')[1] === 'multiple' ? 'multiple' : 'default'"
@@ -99,12 +112,12 @@
                 </a-select-option>
               </a-select>
               <a-input-number
-                v-decorator="[list.name, { rules: [{ required: false }] }]"
+                v-decorator="[list.name, { rules: getDecoratorRules(list) }]"
                 style="width: 100%"
                 v-if="getFieldType(list.name) === 'input_number'"
               />
               <a-date-picker
-                v-decorator="[list.name, { rules: [{ required: false }] }]"
+                v-decorator="[list.name, { rules: getDecoratorRules(list) }]"
                 style="width: 100%"
                 :format="getFieldType(list.name) == '4' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss'"
                 :valueFormat="getFieldType(list.name) == '4' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss'"
@@ -114,7 +127,7 @@
               <a-input
                 v-if="getFieldType(list.name) === 'input'"
                 @focus="(e) => handleFocusInput(e, list)"
-                v-decorator="[list.name, { rules: [{ required: false }] }]"
+                v-decorator="[list.name, { rules: getDecoratorRules(list) }]"
               />
             </a-form-item>
           </a-col>
@@ -173,6 +186,20 @@ export default {
       parentsType: [],
       parentsForm: {},
       canEdit: {},
+      listOperationOptions: [
+        {
+          value: 'cover',
+          label: 'cmdb.ci.cover'
+        },
+        {
+          value: 'add',
+          label: 'add'
+        },
+        {
+          value: 'delete',
+          label: 'delete'
+        }
+      ]
     }
   },
   computed: {
@@ -228,7 +255,7 @@ export default {
     createInstance() {
       const _this = this
       if (_this.action === 'update') {
-        this.form.validateFields((err, values) => {
+        this.form.validateFields({ force: true }, (err, values) => {
           if (err) {
             return
           }
@@ -250,6 +277,21 @@ export default {
             }
             if (_tempFind.value_type === '6') {
               values[k] = values[k] ? JSON.parse(values[k]) : undefined
+            }
+
+            if (_tempFind.is_list) {
+              const operation = this.batchUpdateLists?.find((item) => item.name === k)?.operation || 'cover'
+              switch (operation) {
+                case 'add':
+                case 'delete':
+                  values[k] = {
+                    op: operation,
+                    v: values[k]
+                  }
+                  break
+                default:
+                  break
+              }
             }
           })
 
@@ -340,7 +382,10 @@ export default {
       this.$nextTick(() => {
         this.form.resetFields()
         Promise.all([this.getCIType(), this.getAttributeList()]).then(() => {
-          this.batchUpdateLists = [{ name: this.attributeList[0].name }]
+          this.batchUpdateLists = [{
+            name: this.attributeList?.[0]?.name || undefined,
+            operation: 'cover'
+          }]
         })
         if (action === 'create') {
           getCITypeParent(this.typeId).then(async (res) => {
@@ -389,7 +434,10 @@ export default {
       return []
     },
     handleAdd() {
-      this.batchUpdateLists.push({ name: undefined })
+      this.batchUpdateLists.push({
+        name: undefined,
+        operation: 'cover'
+      })
     },
     handleDelete(name) {
       const _idx = this.batchUpdateLists.findIndex((item) => item.name === name)
@@ -415,6 +463,31 @@ export default {
     jsonEditorOk(jsonData) {
       this.form.setFieldsValue({ [this.editAttr.name]: JSON.stringify(jsonData) })
     },
+
+    showListOperation(name) {
+      if (!name) {
+        return false
+      }
+      const attr = this.attributeList.find((attr) => attr.name === name)
+
+      return attr && attr.is_list
+    },
+
+    getDecoratorRules(data) {
+      const { name, operation } = data
+      const isList = this.showListOperation(name)
+      const rules = [
+        { required: false }
+      ]
+      if (isList && ['delete', 'add'].includes(operation)) {
+        rules[0] = {
+          required: true,
+          message: this.$t('placeholder1')
+        }
+      }
+
+      return rules
+    }
   },
 }
 </script>
