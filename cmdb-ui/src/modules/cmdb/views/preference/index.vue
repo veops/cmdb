@@ -181,12 +181,19 @@
                 </span>
               </div>
               <div v-else class="cmdb-preference-footor-unsubscribed">
-                <span
-                  @click="openSubscribeSetting(item)"
-                ><ops-icon :style="{ marginRight: '3px' }" type="cmdb-preference-subscribe" />{{
-                  $t('cmdb.preference.sub')
-                }}</span
+                <a
+                  @click="handleSubscribeCIType(item)"
+                  class="cmdb-preference-footor-unsubscribed-item"
                 >
+                  <ops-icon type="cmdb-ci" />{{ $t('cmdb.preference.subCITable') }}
+                </a>
+                <span class="cmdb-preference-footor-unsubscribed-gap"></span>
+                <a
+                  @click="openSubscribeSetting(item, '2')"
+                  class="cmdb-preference-footor-unsubscribed-item"
+                >
+                  <ops-icon type="cmdb-tree" />{{ $t('cmdb.preference.subCITree') }}
+                </a>
               </div>
             </div>
             <i></i><i></i><i></i><i></i><i></i>
@@ -221,6 +228,7 @@ import {
   subscribeTreeView,
   preferenceCitypeOrder,
 } from '@/modules/cmdb/api/preference'
+import { getCITypeAttributesByName } from '@/modules/cmdb/api/CITypeAttr'
 import CollapseTransition from '@/components/CollapseTransition'
 import SubscribeSetting from '../../components/subscribeSetting/subscribeSetting'
 import { getCIAdcStatistics } from '../../api/ci'
@@ -381,9 +389,39 @@ export default {
         this.getCITypes()
       })
     },
+
+    async handleSubscribeCIType(ciType) {
+      try {
+        const res = await getCITypeAttributesByName(ciType.id)
+        const attributes = res?.attributes || []
+        const subscribeList = attributes
+          .filter((item) => item?.default_show)
+          .map((item) => {
+            return [item?.id?.toString(), false]
+          })
+        if (subscribeList.length === 0) {
+          const uniqueItem = attributes.find((item) => item?.id === res?.unique_id)
+          if (uniqueItem) {
+            subscribeList.push([uniqueItem?.id?.toString(), false])
+          }
+        }
+
+        await subscribeCIType(
+          ciType.id,
+          subscribeList
+        )
+        this.$message.success(this.$t('cmdb.components.subSuccess'))
+        this.resetRoute()
+      } catch (error) {
+        console.error('handleSubscribeCIType failed', error)
+        this.$message.success(this.$t('cmdb.components.subFailed'))
+      }
+    },
+
     openSubscribeSetting(ciType, activeKey = '1') {
       this.$refs.subscribeSetting.open({ ...ciType, type_id: ciType.id }, activeKey)
     },
+
     changeGroupExpand(group) {
       const _idx = this.expandKeys.findIndex((expand) => expand === group.id)
       if (_idx > -1) {
@@ -653,11 +691,27 @@ export default {
           }
         }
         .cmdb-preference-footor-unsubscribed {
-          text-align: center;
-          > span {
-            color: @primary-color;
-            cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 10px;
+
+          &-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
             font-size: 12px;
+            color: rgba(0, 0, 0, 0.76);
+
+            &:hover {
+              color: #1890ff;
+            }
+          }
+
+          &-gap {
+            width: 1px;
+            height: 18px;
+            background-color: #e8e8e8;
           }
         }
         .cmdb-preference-footor-subscribed {

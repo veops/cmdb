@@ -92,7 +92,7 @@ export default {
         }
 
         attr.groupId = -1
-        attr.groupName = '其他'
+        attr.groupName = this.$t('other')
         attr.code = `{{ ${attr.name} }}`
         attr.typeText = typeMap?.[attr.value_type] ?? ''
       })
