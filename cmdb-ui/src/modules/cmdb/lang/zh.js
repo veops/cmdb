@@ -2,6 +2,8 @@ const cmdb_zh = {
     relation: '关系',
     attribute: '属性',
     configTable: '配置表格',
+    enterpriseVersionFlag: '企',
+    enterpriseVersionTip: '仅限企业版',
     menu: {
         views: '视图',
         topologyView: '拓扑视图',
@@ -274,8 +276,12 @@ const cmdb_zh = {
         attrAlias: '属性别名',
         attrCode: '属性代码',
         computedAttrTip1: '引用属性遵循jinja2语法',
-        computedAttrTip2: `多值属性(列表)默认呈现包括[ ], 如果要去掉, 引用方法为: """{{ attr_name | join(',')}}"""  其中逗号为分隔符`,
-        example: '例如'
+        computedAttrTip2: `多值属性(列表)默认呈现包括[ ], 如果要去掉, 引用方法为: """{{ attr_name | join(',') }}"""  其中逗号为分隔符`,
+        example: '例如',
+        attrFilterTip: '第三列值可选择本模型的属性，来实现级联属性的功能',
+        rule: '规则',
+        cascadeAttr: '级联',
+        cascadeAttrTip: '级联属性注意顺序',
     },
     components: {
         unselectAttributes: '未选属性',
@@ -325,6 +331,7 @@ const cmdb_zh = {
         sub: '订阅',
         selectBelow: '请在下方进行选择',
         subSuccess: '订阅成功',
+        subFailed: '订阅失败，请稍后再试',
         selectMethods: '请选择方式',
         noAuthRequest: '暂无请求认证',
         noParamRequest: '暂无参数认证',
@@ -379,6 +386,8 @@ const cmdb_zh = {
         yearsAgo: '年前',
         just: '刚刚',
         searchPlaceholder: '请搜索模型',
+        subCITable: '数据订阅',
+        subCITree: '层级订阅',
     },
     custom_dashboard: {
         charts: '图表',
@@ -638,6 +647,7 @@ if __name__ == "__main__":
         rollbackingTips: '正在批量回滚中',
         batchRollbacking: '正在回滚，共{total}个，成功{successNum}个，失败{errorNum}个',
         baselineTips: '该时间点的变更也会被回滚, 唯一标识、密码属性、动态属性不支持回滚',
+        cover: '覆盖',
     },
     serviceTree: {
         remove: '移除',

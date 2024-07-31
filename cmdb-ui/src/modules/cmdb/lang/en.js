@@ -2,6 +2,8 @@ const cmdb_en = {
     relation: 'Relation',
     attribute: 'Attributes',
     configTable: 'Config Table',
+    enterpriseVersionFlag: 'Pro',
+    enterpriseVersionTip: 'Enterprise version only',
     menu: {
         views: 'Views',
         topologyView: 'Topology Views',
@@ -274,8 +276,12 @@ const cmdb_en = {
         attrAlias: 'Attr Alias',
         attrCode: 'Attr Code',
         computedAttrTip1: 'Reference attributes follow jinja2 syntax',
-        computedAttrTip2: `Multi-valued attributes (lists) are rendered with [ ] included by default, if you want to remove it, the reference method is: ‘’‘{{ attr_name | join(’,‘)}}}’‘’ where commas are separators`,
-        example: 'Example'
+        computedAttrTip2: `Multi-valued attributes (lists) are rendered with [ ] included by default, if you want to remove it, the reference method is: """{{ attr_name | join(',') }}""" where commas are separators`,
+        example: 'Example',
+        attrFilterTip: `The third column of values allows you to select attributes of this model to cascade attributes`,
+        rule: 'Rule',
+        cascadeAttr: 'Cascade',
+        cascadeAttrTip: 'Cascading attributes note the order',
     },
     components: {
         unselectAttributes: 'Unselected',
@@ -325,6 +331,7 @@ const cmdb_en = {
         sub: 'subscription',
         selectBelow: 'Please select below',
         subSuccess: 'Subscription successful',
+        subFailed: 'Subscription failed, please try again later',
         selectMethods: 'Please select a method',
         noAuthRequest: 'No certification requested yet',
         noParamRequest: 'No parameter certification yet',
@@ -380,6 +387,8 @@ const cmdb_en = {
         yearsAgo: 'years ago',
         just: 'just now',
         searchPlaceholder: 'Please search CIType',
+        subCITable: 'Data',
+        subCITree: 'Tree',
     },
     custom_dashboard: {
         charts: 'Chart',
@@ -639,6 +648,7 @@ if __name__ == "__main__":
         rollbackingTips: 'Rollbacking',
         batchRollbacking: 'Deleting {total} items in total, {successNum} items successful, {errorNum} items failed',
         baselineTips: 'Changes at this point in time will also be rollbacked, Unique ID, password and dynamic attributes do not support',
+        cover: 'Cover',
     },
     serviceTree: {
         remove: 'Remove',

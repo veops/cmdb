@@ -29,7 +29,7 @@
                 class="category-side-children-item-corporate"
                 v-if="ruleType === 'private_cloud' || (ruleType === 'http' && (categoryIndex !== 0 || itemIndex !== 0))"
               >
-                企
+                {{ $t('cmdb.enterpriseVersionFlag') }}
               </span>
             </div>
           </div>
@@ -67,7 +67,7 @@
                 class="corporate-flag"
                 v-if="ruleType === 'private_cloud' || (ruleType === 'http' && (categoryIndex !== 0 || itemIndex !== 0))"
               >
-                <span class="corporate-flag-text">企</span>
+                <span class="corporate-flag-text">{{ $t('cmdb.enterpriseVersionFlag') }}</span>
               </div>
             </div>
           </div>
