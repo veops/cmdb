@@ -122,6 +122,31 @@ export function deleteCITypeGroupById(groupId, data) {
   })
 }
 
+/**
+ * 获取级联属性配置
+ * @param {*} typeId
+ * @returns
+ */
+export function getCITypeCascadeAttributes(typeId) {
+  return axios({
+    url: `/v0.1/cascade_attributes/ci_types/${typeId}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取级联属性数据
+ * @param {*} typeId
+ * @returns
+ */
+export function postCITypeCascadeAttributesValues(attrId, data) {
+  return axios({
+    url: `/v0.1/cascade_attributes/${attrId}/values`,
+    method: 'post',
+    data
+  })
+}
+
 export function getUniqueConstraintList(type_id) {
   return axios({
     url: `/v0.1/ci_types/${type_id}/unique_constraint`,

@@ -61,12 +61,12 @@
     <a-tab-pane key="choice_other" :disabled="disabled">
       <span style="font-size:12px;" slot="tab">{{ $t('cmdb.ciType.choiceOther') }}</span>
       <a-row :gutter="[24, 24]">
-        <a-col :span="12">
+        <a-col :span="24">
           <a-form-item
             :style="{ lineHeight: '24px', marginBottom: '5px' }"
             :label="$t('cmdb.ciType.ciType')"
-            :label-col="{ span: 4 }"
-            :wrapper-col="{ span: 20 }"
+            :label-col="{ span: 3 }"
+            :wrapper-col="{ span: 12 }"
           >
             <treeselect
               :disable-branch-nodes="true"
@@ -117,12 +117,12 @@
             </treeselect>
           </a-form-item>
         </a-col>
-        <a-col :span="12" v-if="choice_other.type_ids && choice_other.type_ids.length">
+        <a-col :span="24" v-if="choice_other.type_ids && choice_other.type_ids.length">
           <a-form-item
             :style="{ marginBottom: '5px' }"
             :label="$t('cmdb.ciType.attributes')"
-            :label-col="{ span: 4 }"
-            :wrapper-col="{ span: 20 }"
+            :label-col="{ span: 3 }"
+            :wrapper-col="{ span: 12 }"
           >
             <treeselect
               :disable-branch-nodes="true"
@@ -162,15 +162,17 @@
             :style="{ marginBottom: '5px' }"
             class="pre-value-filter"
             :label="$t('cmdb.ciType.filter')"
-            :label-col="{ span: 2 }"
-            :wrapper-col="{ span: 22 }"
+            :label-col="{ span: 3 }"
+            :wrapper-col="{ span: 19 }"
           >
-            <FilterComp
-              ref="filterComp"
+            <AttrFilter
+              ref="attrFilter"
               :isDropdown="false"
               :canSearchPreferenceAttrList="typeAttrs"
-              @setExpFromFilter="setExpFromFilter"
+              :CITypeId="CITypeId"
               :expression="filterExp ? `q=${filterExp}` : ''"
+              :curModelAttrList="curModelAttrList"
+              @setExpFromFilter="setExpFromFilter"
             />
           </a-form-item>
         </a-col>
@@ -178,6 +180,42 @@
     </a-tab-pane>
     <a-tab-pane key="script" :disabled="disabled || !canDefineScript">
       <span style="font-size:12px;" slot="tab">{{ $t('cmdb.ciType.code') }}</span>
+      <a-form-item
+        :style="{ marginBottom: '5px' }"
+        :label="$t('cmdb.ciType.cascadeAttr')"
+        :label-col="{ span: 3 }"
+        :wrapper-col="{ span: 19 }"
+        :extra="scriptCodeExtraText"
+        labelAlign="left"
+      >
+        <a-select
+          mode="multiple"
+          style="width: 100%"
+          placeholder="Please select"
+          optionFilterProp="title"
+          v-model="cascade_attributes"
+        >
+          <a-select-option
+            v-for="attr in curModelAttrList"
+            :key="attr.id"
+            :title="attr.name"
+
+          >
+            {{ attr.name }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <div class="script-tip">
+        <div>1. {{ $t('cmdb.ciType.computedAttrTip1') }}</div>
+        <div>2. {{ $t('cmdb.ciType.computedAttrTip2') }}</div>
+      </div>
+
+      <a-button size="small" @click="showAllPropDrawer">
+        {{ $t('cmdb.ciType.viewAllAttr') }}
+      </a-button>
+      <AllAttrDrawer ref="allAttrDrawer" />
+
       <CustomCodeMirror
         codeMirrorId="cmdb-pre-value"
         ref="codemirror"
@@ -196,16 +234,18 @@ import { defautValueColor } from '../../utils/const'
 import ColorPicker from '../../components/colorPicker/index.vue'
 import Webhook from '../../components/webhook'
 import { getCITypeGroups } from '../../api/ciTypeGroup'
-import { getCITypeCommonAttributesByTypeIds } from '../../api/CITypeAttr'
-import FilterComp from '@/components/CMDBFilterComp'
+import { getCITypeCommonAttributesByTypeIds, getCITypeAttributesById } from '../../api/CITypeAttr'
+import AttrFilter from './preValueAttr/attrFilter/index.vue'
+import AllAttrDrawer from './allAttrDrawer.vue'
 
 import CustomCodeMirror from '@/components/CustomCodeMirror'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/monokai.css'
 require('codemirror/mode/python/python.js')
+
 export default {
   name: 'PreValueArea',
-  components: { draggable, PreValueTag, ColorPicker, Webhook, FilterComp, CustomCodeMirror },
+  components: { draggable, PreValueTag, ColorPicker, Webhook, AttrFilter, CustomCodeMirror, AllAttrDrawer },
   props: {
     disabled: {
       type: Boolean,
@@ -214,6 +254,10 @@ export default {
     canDefineScript: {
       type: Boolean,
       default: false,
+    },
+    CITypeId: {
+      type: Number,
+      default: null,
     },
   },
   data() {
@@ -242,6 +286,13 @@ export default {
         lineWrapping: true,
         readOnly: this.disabled || !this.canDefineScript,
       },
+      curModelAttrList: [], // 当前模型属性
+      cascade_attributes: [] // 级联属性id列表
+    }
+  },
+  computed: {
+    scriptCodeExtraText() {
+      return this.$t('cmdb.ciType.cascadeAttrTip') + (this.isOpenSource ? ` (${this.$t('cmdb.enterpriseVersionTip')})` : '')
     }
   },
   watch: {
@@ -276,8 +327,18 @@ export default {
           return { ..._.cloneDeep(item) }
         })
     })
+    this.getCITypeAttributesById()
   },
   methods: {
+    async getCITypeAttributesById() {
+      const res = await getCITypeAttributesById(this.CITypeId)
+      let curModelAttrList = []
+      if (res?.attributes?.length) {
+        curModelAttrList = res.attributes.filter(attr => !attr.is_password)
+      }
+      this.curModelAttrList = curModelAttrList
+    },
+
     addNewValue(newValue, newStyle, newIcon) {
       if (newValue) {
         const idx = this.valueList.findIndex((v) => v[0] === newValue)
@@ -321,12 +382,13 @@ export default {
           choice_web_hook: null,
           choice_other: {
             script: this.script,
+            cascade_attributes: this.cascade_attributes,
           },
         }
       } else {
         let choice_other = {}
         if (this.choice_other.type_ids && this.choice_other.type_ids.length) {
-          this.$refs.filterComp.handleSubmit()
+          this.$refs.attrFilter.handleSubmit()
           choice_other = { ...this.choice_other, filter: this.filterExp }
         }
         return {
@@ -355,9 +417,10 @@ export default {
           const { type_ids, attr_id, filter } = choice_other
           this.choice_other = { type_ids, attr_id }
           this.filterExp = filter
+          this.cascade_attributes = choice_other?.cascade_attributes || []
           if (type_ids && type_ids.length) {
             this.$nextTick(() => {
-              this.$refs.filterComp.visibleChange(true, false)
+              this.$refs.attrFilter.init(true, false)
             })
           }
         }
@@ -390,6 +453,10 @@ export default {
         })
       }
     },
+
+    showAllPropDrawer() {
+      this.$refs.allAttrDrawer.open()
+    },
   },
 }
 </script>
@@ -407,6 +474,12 @@ export default {
     height: 20px;
     margin: 5px;
   }
+}
+
+.script-tip {
+  font-size: 12px;
+  line-height: 22px;
+  color: #a5a9bc;
 }
 </style>
 

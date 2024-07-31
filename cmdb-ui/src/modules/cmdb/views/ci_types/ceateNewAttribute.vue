@@ -333,7 +333,12 @@
       </a-col>
       <a-col :span="24" v-if="!['6', '7'].includes(currentValueType)">
         <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" :label="$t('cmdb.ciType.choiceValue')">
-          <PreValueArea ref="preValueArea" :canDefineScript="canDefineScript" :disabled="isShowComputedArea" />
+          <PreValueArea
+            ref="preValueArea"
+            :canDefineScript="canDefineScript"
+            :disabled="isShowComputedArea"
+            :CITypeId="CITypeId"
+          />
         </a-form-item>
       </a-col>
       <a-col :span="24" v-if="!['6', '7'].includes(currentValueType)">
@@ -402,6 +407,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    CITypeId: {
+      type: Number,
+      default: null
+    }
   },
   data() {
     return {

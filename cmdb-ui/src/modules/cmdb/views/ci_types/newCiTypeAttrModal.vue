@@ -28,7 +28,7 @@
     <a-tabs v-model="activeKey">
       <a-tab-pane key="1" :tab="$t('cmdb.ciType.addAttribute')">
         <div :style="{ overflow: 'auto', maxHeight: '480px' }">
-          <create-new-attribute ref="createNewAttribute" :hasFooter="false" @done="handleAddNewAttr" />
+          <create-new-attribute ref="createNewAttribute" :hasFooter="false" :CITypeId="CITypeId" @done="handleAddNewAttr" />
         </div>
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('cmdb.ciType.existedAttributes')" force-render>
