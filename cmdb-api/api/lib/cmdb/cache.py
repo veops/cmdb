@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import datetime
 import os
 import yaml
-
 from flask import current_app
 
 from api.extensions import cache
@@ -307,16 +306,22 @@ class CMDBCounterCache(object):
         from api.lib.cmdb.search.ci import search
 
         query = "_type:{}".format(type_id)
+        if other_filer:
+            query = "{},{}".format(query, other_filer)
         s = search(query, count=1000000)
         try:
             type_names, _, _, _, _, _ = s.search()
         except SearchError as e:
             current_app.logger.error(e)
             return
+        root_type = CITypeCache.get(type_id)
+        show_attr_id = root_type and root_type.show_id
+        show_attr = AttributeCache.get(show_attr_id)
 
-        type_id_names = [(str(i.get('_id')), i.get(i.get('unique'))) for i in type_names]
+        type_id_names = [(str(i.get('_id')), i.get(show_attr and show_attr.name) or i.get(i.get('unique')))
+                         for i in type_names]
 
-        s = RelSearch([i[0] for i in type_id_names], level, other_filer or '')
+        s = RelSearch([i[0] for i in type_id_names], level)
         try:
             stats = s.statistics(type_ids, need_filter=False)
         except SearchError as e:
@@ -557,7 +562,8 @@ class AutoDiscoveryMappingCache(object):
     def get(cls, name):
         res = cache.get(cls.PREFIX.format(name)) or {}
         if not res:
-            path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "auto_discovery/mapping/{}.yaml".format(name))
+            path = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                "auto_discovery/mapping/{}.yaml".format(name))
             if os.path.exists(path):
                 with open(path, 'r') as f:
                     mapping = yaml.safe_load(f)
