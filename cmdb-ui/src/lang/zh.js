@@ -10,6 +10,7 @@ export default {
         resourceType: '资源类型',
         trigger: '触发器',
     },
+    settings: '通用设置',
     screen: '大屏',
     dashboard: '仪表盘',
     admin: '管理员',
