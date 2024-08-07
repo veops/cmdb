@@ -102,7 +102,7 @@ const genCmdbRoutes = async () => {
         name: 'cmdb_ci_type',
         component: RouteView,
         redirect: '/cmdb/ci_type',
-        meta: { title: 'cmdb.menu.backendManage', icon: 'setting', permission: ['cmdb_admin', 'OneOPS_Application_Admin', 'admin'], },
+        meta: { title: 'cmdb.menu.backendManage', icon: 'veops-setting2', permission: ['cmdb_admin', 'OneOPS_Application_Admin', 'admin'], },
         children: [
           {
             path: '/cmdb/customdashboard',

@@ -5,12 +5,12 @@
       <span
         v-if="hasBackendPermission"
         @click="handleClick"
-        class="action"
-        style="width: 40px; display: flex; justify-content: center"
+        class="common-settings-btn"
       >
-        <a-icon type="setting" />
+        <ops-icon class="common-settings-btn-icon" type="veops-setting" />
+        <span class="common-settings-btn-text">{{ $t('settings') }}</span>
       </span>
-      <span class="locale" @click="changeLang">{{ locale === 'zh' ? 'English' : '中文' }}</span>
+      <span class="locale" @click="changeLang">{{ locale === 'zh' ? '简中' : 'EN' }}</span>
       <a-popover
         trigger="click"
         :overlayStyle="{ width: '150px' }"
@@ -120,6 +120,33 @@ export default {
   cursor: pointer;
   &:hover {
     color: @primary-color;
+  }
+}
+</style>
+
+<style lang="less" scoped>
+.user-wrapper {
+  .common-settings-btn {
+    cursor: pointer;
+    padding: 0px 18px;
+    background-color: #F0F5FF;
+    border-radius: 22px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &-icon {
+      font-size: 12px;
+      color: #2F54EB;
+    }
+
+    &-text {
+      margin-left: 4px;
+      font-size: 12px;
+      font-weight: 400;
+      color: #4E5969;
+    }
   }
 }
 </style>
