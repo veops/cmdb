@@ -6,6 +6,223 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "41363381",
+      "name": "duose-quote",
+      "font_class": "duose-quote",
+      "unicode": "e995",
+      "unicode_decimal": 59797
+    },
+    {
+      "icon_id": "41363378",
+      "name": "duose-boole",
+      "font_class": "duose-boole",
+      "unicode": "e996",
+      "unicode_decimal": 59798
+    },
+    {
+      "icon_id": "41341306",
+      "name": "veops-rule1",
+      "font_class": "veops-rule1",
+      "unicode": "e994",
+      "unicode_decimal": 59796
+    },
+    {
+      "icon_id": "41337509",
+      "name": "veops-operation_report",
+      "font_class": "veops-operation_report",
+      "unicode": "e993",
+      "unicode_decimal": 59795
+    },
+    {
+      "icon_id": "41335526",
+      "name": "veops-ranking1",
+      "font_class": "veops-ranking1",
+      "unicode": "e992",
+      "unicode_decimal": 59794
+    },
+    {
+      "icon_id": "41335530",
+      "name": "veops-ranking2",
+      "font_class": "veops-ranking2",
+      "unicode": "e98f",
+      "unicode_decimal": 59791
+    },
+    {
+      "icon_id": "41335529",
+      "name": "veops-ranking3",
+      "font_class": "veops-ranking3",
+      "unicode": "e990",
+      "unicode_decimal": 59792
+    },
+    {
+      "icon_id": "41335528",
+      "name": "veops-ranking4",
+      "font_class": "veops-ranking4",
+      "unicode": "e991",
+      "unicode_decimal": 59793
+    },
+    {
+      "icon_id": "41334746",
+      "name": "veops-title5",
+      "font_class": "veops-title5",
+      "unicode": "e98d",
+      "unicode_decimal": 59789
+    },
+    {
+      "icon_id": "41334744",
+      "name": "veops-repair (1)",
+      "font_class": "veops-repair1",
+      "unicode": "e98e",
+      "unicode_decimal": 59790
+    },
+    {
+      "icon_id": "41334753",
+      "name": "veops-ticket",
+      "font_class": "veops-ticket",
+      "unicode": "e988",
+      "unicode_decimal": 59784
+    },
+    {
+      "icon_id": "41334751",
+      "name": "veops-model4",
+      "font_class": "veops-model4",
+      "unicode": "e989",
+      "unicode_decimal": 59785
+    },
+    {
+      "icon_id": "41334752",
+      "name": "veops-resource2 (1)",
+      "font_class": "veops-resource21",
+      "unicode": "e98a",
+      "unicode_decimal": 59786
+    },
+    {
+      "icon_id": "41334750",
+      "name": "veops-relationship3",
+      "font_class": "veops-relationship3",
+      "unicode": "e98b",
+      "unicode_decimal": 59787
+    },
+    {
+      "icon_id": "41334748",
+      "name": "veops-title6",
+      "font_class": "veops-title6",
+      "unicode": "e98c",
+      "unicode_decimal": 59788
+    },
+    {
+      "icon_id": "41334404",
+      "name": "veops-resource1 (1)",
+      "font_class": "veops-resource11",
+      "unicode": "e97a",
+      "unicode_decimal": 59770
+    },
+    {
+      "icon_id": "41334505",
+      "name": "veops-model1 (1)",
+      "font_class": "veops-model11",
+      "unicode": "e97b",
+      "unicode_decimal": 59771
+    },
+    {
+      "icon_id": "41334533",
+      "name": "veops-relationship1",
+      "font_class": "veops-relationship1",
+      "unicode": "e97c",
+      "unicode_decimal": 59772
+    },
+    {
+      "icon_id": "41334535",
+      "name": "veops-title1",
+      "font_class": "veops-title1",
+      "unicode": "e97d",
+      "unicode_decimal": 59773
+    },
+    {
+      "icon_id": "41334572",
+      "name": "veops-title2",
+      "font_class": "veops-title2",
+      "unicode": "e97e",
+      "unicode_decimal": 59774
+    },
+    {
+      "icon_id": "41334579",
+      "name": "veops-model2",
+      "font_class": "veops-model2",
+      "unicode": "e97f",
+      "unicode_decimal": 59775
+    },
+    {
+      "icon_id": "41334590",
+      "name": "veops-resource2",
+      "font_class": "veops-resource2",
+      "unicode": "e980",
+      "unicode_decimal": 59776
+    },
+    {
+      "icon_id": "41334594",
+      "name": "veops-warehousing",
+      "font_class": "veops-warehousing",
+      "unicode": "e981",
+      "unicode_decimal": 59777
+    },
+    {
+      "icon_id": "41334598",
+      "name": "veops-relationship2",
+      "font_class": "veops-relationship2",
+      "unicode": "e982",
+      "unicode_decimal": 59778
+    },
+    {
+      "icon_id": "41334602",
+      "name": "veops-title3",
+      "font_class": "veops-title3",
+      "unicode": "e983",
+      "unicode_decimal": 59779
+    },
+    {
+      "icon_id": "41334603",
+      "name": "veops-rule2",
+      "font_class": "veops-rule2",
+      "unicode": "e984",
+      "unicode_decimal": 59780
+    },
+    {
+      "icon_id": "41334604",
+      "name": "veops-model3",
+      "font_class": "veops-model3",
+      "unicode": "e985",
+      "unicode_decimal": 59781
+    },
+    {
+      "icon_id": "41334725",
+      "name": "veops-title4",
+      "font_class": "veops-title4",
+      "unicode": "e986",
+      "unicode_decimal": 59782
+    },
+    {
+      "icon_id": "41334739",
+      "name": "veops-rule3",
+      "font_class": "veops-rule3",
+      "unicode": "e987",
+      "unicode_decimal": 59783
+    },
+    {
+      "icon_id": "41334004",
+      "name": "veops-decline",
+      "font_class": "veops-decline",
+      "unicode": "e978",
+      "unicode_decimal": 59768
+    },
+    {
+      "icon_id": "41333990",
+      "name": "veops-rise",
+      "font_class": "veops-rise",
+      "unicode": "e979",
+      "unicode_decimal": 59769
+    },
+    {
       "icon_id": "41143117",
       "name": "caise-数据中心",
       "font_class": "caise-data_center",
