@@ -225,6 +225,7 @@ class AutoDiscoveryCIView(APIView):
     @args_required("type_id")
     @args_required("adt_id")
     @args_required("instance")
+    @args_required("unique_value")
     def post(self):
         request.values.pop("_key", None)
         request.values.pop("_secret", None)
