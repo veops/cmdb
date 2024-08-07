@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1721959219377') format('woff2'),
-       url('iconfont.woff?t=1721959219377') format('woff'),
-       url('iconfont.ttf?t=1721959219377') format('truetype');
+  src: url('iconfont.woff2?t=1723012344599') format('woff2'),
+       url('iconfont.woff?t=1723012344599') format('woff'),
+       url('iconfont.ttf?t=1723012344599') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,130 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.duose-quote:before {
+  content: "\e995";
+}
+
+.duose-boole:before {
+  content: "\e996";
+}
+
+.veops-rule1:before {
+  content: "\e994";
+}
+
+.veops-operation_report:before {
+  content: "\e993";
+}
+
+.veops-ranking1:before {
+  content: "\e992";
+}
+
+.veops-ranking2:before {
+  content: "\e98f";
+}
+
+.veops-ranking3:before {
+  content: "\e990";
+}
+
+.veops-ranking4:before {
+  content: "\e991";
+}
+
+.veops-title5:before {
+  content: "\e98d";
+}
+
+.veops-repair1:before {
+  content: "\e98e";
+}
+
+.veops-ticket:before {
+  content: "\e988";
+}
+
+.veops-model4:before {
+  content: "\e989";
+}
+
+.veops-resource21:before {
+  content: "\e98a";
+}
+
+.veops-relationship3:before {
+  content: "\e98b";
+}
+
+.veops-title6:before {
+  content: "\e98c";
+}
+
+.veops-resource11:before {
+  content: "\e97a";
+}
+
+.veops-model11:before {
+  content: "\e97b";
+}
+
+.veops-relationship1:before {
+  content: "\e97c";
+}
+
+.veops-title1:before {
+  content: "\e97d";
+}
+
+.veops-title2:before {
+  content: "\e97e";
+}
+
+.veops-model2:before {
+  content: "\e97f";
+}
+
+.veops-resource2:before {
+  content: "\e980";
+}
+
+.veops-warehousing:before {
+  content: "\e981";
+}
+
+.veops-relationship2:before {
+  content: "\e982";
+}
+
+.veops-title3:before {
+  content: "\e983";
+}
+
+.veops-rule2:before {
+  content: "\e984";
+}
+
+.veops-model3:before {
+  content: "\e985";
+}
+
+.veops-title4:before {
+  content: "\e986";
+}
+
+.veops-rule3:before {
+  content: "\e987";
+}
+
+.veops-decline:before {
+  content: "\e978";
+}
+
+.veops-rise:before {
+  content: "\e979";
 }
 
 .caise-data_center:before {
