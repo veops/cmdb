@@ -144,209 +144,25 @@
                 </template>
               </div>
             </SearchForm>
-            <ops-table
-              :id="`cmdb-tree-${typeId}`"
-              border
+
+            <CITable
               ref="xTable"
-              size="small"
-              keep-source
+              :id="`cmdb-tree-${typeId}`"
               :loading="loading"
+              :attrList="currentAttrList"
+              :columns="columns"
+              :passwordValue="passwordValue"
               :data="instanceList"
-              highlight-hover-row
-              show-overflow
-              show-header-overflow
-              row-id="_id"
-              resizable
-              :row-key="true"
-              :column-key="true"
-              :sort-config="{ remote: true, trigger: 'cell' }"
-              @sort-change="handleSortCol"
-              :cell-style="getCellStyle"
-              :scroll-y="{ enabled: true, gt: 20 }"
-              :scroll-x="{ enabled: true, gt: 0 }"
               :height="`${windowHeight - 240}px`"
-              @checkbox-change="onSelectChange"
-              @checkbox-all="onSelectChange"
-              @checkbox-range-end="onSelectRangeEnd"
-              :checkbox-config="{ reserve: true, highlight: true, range: true }"
+              :loadingTip="loadTip"
+              @onSelectChange="onSelectChange"
               @edit-closed="handleEditClose"
               @edit-actived="handleEditActived"
-              :edit-config="{ trigger: 'dblclick', mode: 'row', showIcon: false }"
-              class="ops-unstripe-table checkbox-hover-table"
-              :custom-config="{ storage: true }"
-            >
-              <vxe-column align="center" type="checkbox" width="60" :fixed="isCheckboxFixed ? 'left' : ''">
-                <template #default="{row}">
-                  {{ getRowSeq(row) }}
-                </template>
-              </vxe-column>
-              <vxe-table-column
-                v-for="(col, index) in columns"
-                :key="`${col.field}_${index}`"
-                :title="col.title"
-                :field="col.field"
-                :width="col.width"
-                :sortable="col.sortable"
-                :edit-render="getColumnsEditRender(col)"
-                :cell-type="col.value_type === '2' ? 'string' : 'auto'"
-                :fixed="col.is_fixed ? 'left' : ''"
-              >
-                <template #header>
-                  <span class="vxe-handle">
-                    <OpsMoveIcon
-                      style="width: 17px; height: 17px; display: none; position: absolute; left: -3px; top: 12px"
-                    />
-                    {{ col.title }}</span
-                  >
-                </template>
-                <template v-if="col.is_choice || col.is_password" #edit="{ row }">
-                  <vxe-input v-if="col.is_password" v-model="passwordValue[col.field]" />
-                  <a-select
-                    :getPopupContainer="(trigger) => trigger.parentElement"
-                    :style="{ width: '100%', height: '32px' }"
-                    v-model="row[col.field]"
-                    :placeholder="$t('placeholder2')"
-                    v-if="col.is_choice"
-                    :showArrow="false"
-                    :mode="col.is_list ? 'multiple' : 'default'"
-                    class="ci-table-edit-select"
-                    allowClear
-                  >
-                    <a-select-option
-                      :value="choice[0]"
-                      :key="'edit_' + col.field + idx"
-                      v-for="(choice, idx) in col.filters"
-                    >
-                      <span
-                        :style="{ ...(choice[1] ? choice[1].style : {}), display: 'inline-flex', alignItems: 'center' }"
-                      >
-                        <template v-if="choice[1] && choice[1].icon && choice[1].icon.name">
-                          <img
-                            v-if="choice[1].icon.id && choice[1].icon.url"
-                            :src="`/api/common-setting/v1/file/${choice[1].icon.url}`"
-                            :style="{ maxHeight: '13px', maxWidth: '13px', marginRight: '5px' }"
-                          />
-                          <ops-icon
-                            v-else
-                            :style="{ color: choice[1].icon.color, marginRight: '5px' }"
-                            :type="choice[1].icon.name"
-                          />
-                        </template>
-                        {{ choice[0] }}
-                      </span>
-                    </a-select-option>
-                  </a-select>
-                </template>
-                <template
-                  v-if="col.value_type === '6' || col.is_link || col.is_password || col.is_choice"
-                  #default="{row}"
-                >
-                  <span v-if="col.value_type === '6' && row[col.field]">{{ row[col.field] }}</span>
-                  <template v-else-if="col.is_link && row[col.field]">
-                    <a
-                      v-for="(item, linkIndex) in (col.is_list ? row[col.field] : [row[col.field]])"
-                      :key="linkIndex"
-                      :href="
-                        item.startsWith('http') || item.startsWith('https')
-                          ? `${item}`
-                          : `http://${item}`
-                      "
-                      target="_blank"
-                    >
-                      {{ item }}
-                    </a>
-                  </template>
-                  <PasswordField
-                    v-else-if="col.is_password && row[col.field]"
-                    :ci_id="row._id"
-                    :attr_id="col.attr_id"
-                  ></PasswordField>
-                  <template v-else-if="col.is_choice">
-                    <template v-if="col.is_list">
-                      <span
-                        v-for="value in row[col.field]"
-                        :key="value"
-                        :style="{
-                          borderRadius: '4px',
-                          padding: '1px 5px',
-                          margin: '2px',
-                          ...getChoiceValueStyle(col, value),
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                        }"
-                      >
-                        <img
-                          v-if="getChoiceValueIcon(col, value).id && getChoiceValueIcon(col, value).url"
-                          :src="`/api/common-setting/v1/file/${getChoiceValueIcon(col, value).url}`"
-                          :style="{ maxHeight: '13px', maxWidth: '13px', marginRight: '5px' }"
-                        />
-                        <ops-icon
-                          v-else
-                          :style="{ color: getChoiceValueIcon(col, value).color, marginRight: '5px' }"
-                          :type="getChoiceValueIcon(col, value).name"
-                        />{{ value }}</span
-                      >
-                    </template>
-                    <span
-                      v-else-if="row[col.field]"
-                      :style="{
-                        borderRadius: '4px',
-                        padding: '1px 5px',
-                        margin: '2px 0',
-                        ...getChoiceValueStyle(col, row[col.field]),
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                      }"
-                    >
-                      <img
-                        v-if="getChoiceValueIcon(col, row[col.field]).id && getChoiceValueIcon(col, row[col.field]).url"
-                        :src="`/api/common-setting/v1/file/${getChoiceValueIcon(col, row[col.field]).url}`"
-                        :style="{ maxHeight: '13px', maxWidth: '13px', marginRight: '5px' }"
-                      />
-                      <ops-icon
-                        v-else
-                        :style="{ color: getChoiceValueIcon(col, row[col.field]).color, marginRight: '5px' }"
-                        :type="getChoiceValueIcon(col, row[col.field]).name"
-                      />{{ row[col.field] }}</span
-                    >
-                  </template>
-                </template>
-              </vxe-table-column>
-              <vxe-table-column align="left" field="operate" fixed="right" width="120">
-                <template #header>
-                  <span>{{ $t('operation') }}</span>
-                </template>
-                <template #default="{ row }">
-                  <a-space>
-                    <a @click="$refs.detail.create(row.ci_id || row._id)">
-                      <a-icon type="unordered-list" />
-                    </a>
-                    <a-tooltip :title="$t('cmdb.ci.addRelation')">
-                      <a @click="$refs.detail.create(row.ci_id || row._id, 'tab_2', '2')">
-                        <a-icon type="retweet" />
-                      </a>
-                    </a-tooltip>
-                    <template>
-                      <a-tooltip :title="$t('cmdb.ciType.deleteInstance')">
-                        <a @click="deleteCI(row)" :style="{ color: 'red' }">
-                          <a-icon type="delete" />
-                        </a>
-                      </a-tooltip>
-                    </template>
-                  </a-space>
-                </template>
-              </vxe-table-column>
-              <template #empty>
-                <div v-if="loading" style="height: 200px; line-height: 200px">{{ $t('loading') }}</div>
-                <div v-else>
-                  <img :style="{ width: '200px' }" :src="require('@/assets/data_empty.png')" />
-                  <div>{{ $t('noData') }}</div>
-                </div>
-              </template>
-              <template #loading>
-                <div style="height: 200px; line-height: 200px">{{ loadTip || $t('loading') }}</div>
-              </template>
-            </ops-table>
+              @sort-change="handleSortCol"
+              @openDetail="openDetail"
+              @deleteCI="deleteCI"
+            />
+
             <div :style="{ textAlign: 'right', marginTop: '4px' }">
               <a-pagination
                 :showSizeChanger="true"
@@ -398,7 +214,6 @@
       @reload="sumbitFromCreateInstance"
       @submit="batchUpdateFromCreateInstance"
     />
-    <JsonEditor ref="jsonEditor" @jsonEditorOk="jsonEditorOk" />
     <BatchDownload ref="batchDownload" @batchDownload="batchDownload" />
     <MetadataDrawer ref="metadataDrawer" />
   </div>
@@ -420,38 +235,36 @@ import { getCITypes } from '@/modules/cmdb/api/CIType'
 import { getCITableColumns } from '../../utils/helper'
 import SearchForm from '../../components/searchForm/SearchForm.vue'
 import SubscribeSetting from '../../components/subscribeSetting/subscribeSetting'
-import PasswordField from '../../components/passwordField/index.vue'
 import SplitPane from '@/components/SplitPane'
 import TreeViewsNode from './modules/treeViewsNode.vue'
 import EditAttrsPopover from '../ci/modules/editAttrsPopover.vue'
 import CiDetailDrawer from '../ci/modules/ciDetailDrawer.vue'
 import CreateInstanceForm from '../ci/modules/CreateInstanceForm'
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
-import JsonEditor from '../../components/JsonEditor/jsonEditor.vue'
 import BatchDownload from '../../components/batchDownload/batchDownload.vue'
 import PreferenceSearch from '../../components/preferenceSearch/preferenceSearch.vue'
 import MetadataDrawer from '../ci/modules/MetadataDrawer.vue'
 import { intersection } from '@/utils/functions/set'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
 import { getAttrPassword } from '../../api/CITypeAttr'
+import CITable from '@/modules/cmdb/components/ciTable/index.vue'
 
 export default {
   name: 'TreeViews',
   components: {
     SearchForm,
     SubscribeSetting,
-    PasswordField,
     SplitPane,
     TreeViewsNode,
     EditAttrsPopover,
     CiDetailDrawer,
     CreateInstanceForm,
-    JsonEditor,
     BatchDownload,
     PreferenceSearch,
     MetadataDrawer,
     OpsMoveIcon,
     draggable,
+    CITable
   },
   data() {
     return {
@@ -515,10 +328,6 @@ export default {
       // 当前页面的id
       const _find = this.subscribeTreeViewCiTypes.find((item) => item.type_id === Number(this.typeId))
       return _find?.id
-    },
-    isCheckboxFixed() {
-      const idx = this.columns.findIndex((item) => item.is_fixed)
-      return idx > -1
     },
     currentCiTypeName() {
       const _find = this.citypes.find((item) => Number(item.id) === Number(this.typeId))
@@ -858,33 +667,6 @@ export default {
       this.currentPage = 1
       this.handleLoadInstance({ sortByTable })
     },
-    getChoiceValueStyle(col, colValue) {
-      const _find = col.filters.find((item) => String(item[0]) === String(colValue))
-      if (_find) {
-        return _find[1]?.style || {}
-      }
-      return {}
-    },
-    getChoiceValueIcon(col, colValue) {
-      const _find = col.filters.find((item) => String(item[0]) === String(colValue))
-      if (_find) {
-        return _find[1]?.icon || {}
-      }
-      return {}
-    },
-    getCellStyle({ row, rowIndex, $rowIndex, column, columnIndex, $columnIndex }) {
-      const { property } = column
-      const _find = this.currentAttrList.find((attr) => attr.name === property)
-      if (
-        _find &&
-        _find.option &&
-        _find.option.fontOptions &&
-        row[`${property}`] !== undefined &&
-        row[`${property}`] !== null
-      ) {
-        return { ..._find.option.fontOptions }
-      }
-    },
     onNodeClick(keys, type) {
       console.log(keys)
       if (keys) {
@@ -921,9 +703,7 @@ export default {
         },
       })
     },
-    onSelectChange(e) {
-      const xTable = this.$refs.xTable.getVxetableRef()
-      const records = [...xTable.getCheckboxRecords(), ...xTable.getCheckboxReserveRecords()]
+    onSelectChange(records) {
       this.selectedRowKeys = records.map((i) => i.ci_id || i._id)
     },
     setSelectRows() {
@@ -941,9 +721,6 @@ export default {
         })
         this.$refs['xTable'].getVxetableRef().setCheckboxRow(rows, true)
       }
-    },
-    onSelectRangeEnd({ records }) {
-      this.selectedRowKeys = records.map((i) => i.ci_id || i._id)
     },
     handleEditActived() {
       const passwordCol = this.columns.filter((col) => col.is_password)
@@ -1022,28 +799,6 @@ export default {
           this.passwordValue[col.field] = ''
         }
       })
-    },
-    jsonEditorOk(row, column, jsonData) {
-      // 后端写数据有快慢，不拉接口直接修改table的数据
-      // this.reloadData()
-      this.instanceList.forEach((item) => {
-        if (item._id === row._id) {
-          item[column.property] = JSON.stringify(jsonData)
-        }
-      })
-      this.$refs.xTable.getVxetableRef().refreshColumn()
-    },
-    getColumnsEditRender(col) {
-      const _editRender = {
-        ...col.editRender,
-      }
-      if (col.value_type === '6') {
-        _editRender.events = { focus: this.handleFocusJson }
-      }
-      return _editRender
-    },
-    handleFocusJson({ column, row }) {
-      this.$refs.jsonEditor.open(column, row)
     },
     async openBatchDownload() {
       this.$refs.batchDownload.open({ preferenceAttrList: this.currentAttrList, ciTypeName: this.currentCiTypeName })
@@ -1237,8 +992,8 @@ export default {
         }
       )
     },
-    getRowSeq(row) {
-      return this.$refs.xTable.getVxetableRef().getRowSeq(row)
+    openDetail(id, activeTabKey, ciDetailRelationKey) {
+      this.$refs.detail.create(id, activeTabKey, ciDetailRelationKey)
     }
   },
 }
@@ -1348,36 +1103,6 @@ export default {
     overflow: auto;
     width: 100%;
     border-radius: @border-radius-box;
-
-    .checkbox-hover-table {
-      .vxe-table--body-wrapper {
-        .vxe-checkbox--label {
-          display: inline;
-          padding-left: 0px !important;
-          color: #bfbfbf;
-        }
-
-        .vxe-icon-checkbox-unchecked {
-          display: none;
-        }
-
-        .vxe-icon-checkbox-checked ~ .vxe-checkbox--label {
-          display: none;
-        }
-
-        .vxe-cell--checkbox {
-          &:hover {
-            .vxe-icon-checkbox-unchecked {
-              display: inline;
-            }
-
-            .vxe-checkbox--label {
-              display: none;
-            }
-          }
-        }
-      }
-    }
   }
 }
 </style>
