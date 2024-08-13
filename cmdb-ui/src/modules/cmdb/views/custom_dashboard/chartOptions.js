@@ -73,6 +73,7 @@ export const category_1_bar_options = (data, options) => {
                 type: 'bar',
                 stack: options?.barStack ?? 'total',
                 barGap: 0,
+                barMaxWidth: '16px',
                 emphasis: {
                     focus: 'series'
                 },
@@ -242,6 +243,7 @@ export const category_2_bar_options = (data, options, chartType) => {
                 label: {
                     show: false,
                 },
+                barMaxWidth: '16px',
                 areaStyle: chartType === 'line' && options?.isShadow ? {
                     opacity: 0.5,
                     color: {
