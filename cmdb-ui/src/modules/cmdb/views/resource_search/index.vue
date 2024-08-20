@@ -101,8 +101,18 @@
           :minWidth="100"
           :cell-type="col.value_type === '2' ? 'string' : 'auto'"
         >
-          <template v-if="col.value_type === '6' || col.is_link || col.is_password || col.is_choice" #default="{row}">
-            <span v-if="col.value_type === '6' && row[col.field]">{{ JSON.stringify(row[col.field]) }}</span>
+          <template v-if="col.value_type === '6' || col.is_link || col.is_password || col.is_choice || col.is_reference" #default="{row}">
+            <template v-if="col.is_reference && row[col.field]" >
+              <a
+                v-for="(ciId) in (col.is_list ? row[col.field] : [row[col.field]])"
+                :key="ciId"
+                :href="`/cmdb/cidetail/${col.reference_type_id}/${ciId}`"
+                target="_blank"
+              >
+                {{ getReferenceAttrValue(ciId, col) }}
+              </a>
+            </template>
+            <span v-else-if="col.value_type === '6' && row[col.field]">{{ JSON.stringify(row[col.field]) }}</span>
             <template v-else-if="col.is_link && row[col.field]">
               <a
                 v-for="(item, linkIndex) in (col.is_list ? row[col.field] : [row[col.field]])"
@@ -254,6 +264,8 @@ export default {
       sortByTable: undefined,
       loading: false,
       columnsGroup: [],
+      referenceShowAttrNameMap: {},
+      referenceCIIdMap: {},
     }
   },
   computed: {
@@ -433,12 +445,99 @@ export default {
           await Promise.all(promises1).then(() => {
             this.columnsGroup = [..._commonColumnsGroup, ..._columnsGroup]
             this.instanceList = res['result']
+            this.handlePerference()
           })
         })
         .finally(() => {
           this.loading = false
         })
     },
+
+    handlePerference() {
+      let needRequiredCIType = []
+      this.columnsGroup.forEach((group) => {
+        group.children.forEach((col) => {
+          if (col?.is_reference && col?.reference_type_id) {
+            needRequiredCIType.push(col)
+          }
+        })
+      })
+      needRequiredCIType = _.uniq(needRequiredCIType)
+
+      if (!needRequiredCIType.length) {
+        this.referenceShowAttrNameMap = {}
+        this.referenceCIIdMap = {}
+        return
+      }
+
+      this.handleReferenceShowAttrName(needRequiredCIType)
+      this.handleReferenceCIIdMap(needRequiredCIType)
+    },
+
+    async handleReferenceShowAttrName(needRequiredCIType) {
+      const res = await getCITypes({
+        type_ids: needRequiredCIType.map((col) => col.reference_type_id).join(',')
+      })
+
+      const map = {}
+      res.ci_types.forEach((ciType) => {
+        map[ciType.id] = ciType?.show_name || ciType?.unique_name || ''
+      })
+
+      this.referenceShowAttrNameMap = map
+    },
+
+    async handleReferenceCIIdMap(needRequiredCIType) {
+      const map = {}
+      this.instanceList.forEach((row) => {
+        needRequiredCIType.forEach((col) => {
+          const ids = Array.isArray(row[col.field]) ? row[col.field] : row[col.field] ? [row[col.field]] : []
+          if (ids.length) {
+            if (!map?.[col.reference_type_id]) {
+              map[col.reference_type_id] = {}
+            }
+            ids.forEach((id) => {
+              map[col.reference_type_id][id] = {}
+            })
+          }
+        })
+      })
+
+      if (!Object.keys(map).length) {
+        this.referenceCIIdMap = {}
+        return
+      }
+
+      const allRes = await Promise.all(
+        Object.keys(map).map((key) => {
+          return searchCI({
+            q: `_type:${key},_id:(${Object.keys(map[key]).join(';')})`,
+            count: 9999
+          })
+        })
+      )
+
+      allRes.forEach((res) => {
+        res.result.forEach((item) => {
+          if (map?.[item._type]?.[item._id]) {
+            map[item._type][item._id] = item
+          }
+        })
+      })
+
+      this.referenceCIIdMap = map
+    },
+
+    getReferenceAttrValue(id, col) {
+      const ci = this?.referenceCIIdMap?.[col?.reference_type_id]?.[id]
+      if (!ci) {
+        return id
+      }
+
+      const attrName = this.referenceShowAttrNameMap?.[col.reference_type_id]
+      return ci?.[attrName] || id
+    },
+
     getColumns(data, attrList) {
       const width = document.getElementById('resource_search').clientWidth - 50
       return getCITableColumns(data, attrList, width).map((item) => {

@@ -15,18 +15,38 @@ export default {
   },
   methods: {
     getPropertyIcon(attr) {
-      switch (attr.value_type) {
+      let valueType = attr.value_type
+
+      if (valueType === '2') {
+        if (attr.is_password) {
+          valueType = '7'
+        } else if (attr.is_link) {
+          valueType = '8'
+        } else if (!attr.is_index) {
+          valueType = '9'
+        }
+      }
+
+      if (
+        valueType === '7' &&
+        attr.is_bool
+      ) {
+        valueType = '10'
+      }
+
+      if (
+        valueType === '0' &&
+        attr.is_reference
+      ) {
+        valueType = '11'
+      }
+
+      switch (valueType) {
         case '0':
           return 'duose-shishu'
         case '1':
           return 'duose-fudianshu'
         case '2':
-          if (attr.is_password) {
-            return 'duose-password'
-          }
-          if (attr.is_link) {
-            return 'duose-link'
-          }
           return 'duose-wenben'
         case '3':
           return 'duose-datetime'
@@ -40,6 +60,14 @@ export default {
           return 'duose-password'
         case '8':
           return 'duose-link'
+        case '9':
+          return 'duose-changwenben1'
+        case '10':
+          return 'duose-boole'
+        case '11':
+          return 'duose-quote'
+        default:
+          return ''
       }
     },
   },

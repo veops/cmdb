@@ -189,6 +189,14 @@ const cmdb_zh = {
         confirmDeleteTrigger: '确认删除该触发器吗?',
         int: '整数',
         float: '浮点数',
+        longText: '长文本',
+        shortText: '短文本',
+        shortTextTip: '文本长度 <= 128',
+        referenceModel: '引用模型',
+        referenceModelTip: '请选择引用模型',
+        referenceModelTip1: '用于快捷查看引用模型实例',
+        bool: '布尔',
+        reference: '引用',
         text: '文本',
         datetime: '日期时间',
         date: '日期',
@@ -206,7 +214,7 @@ const cmdb_zh = {
         otherGroupTips: '其他分组属性不可排序',
         filterTips: '点击可仅查看{name}属性',
         attributeAssociation: '属性关联',
-        attributeAssociationTip1: '通过2个模型的属性值(除密码、json、多值)来自动建立关系',
+        attributeAssociationTip1: '通过2个模型的属性值(除密码、json、多值、长文本、布尔、引用)来自动建立关系',
         attributeAssociationTip2: '双击可编辑',
         attributeAssociationTip3: '属性关联必须选择两个属性',
         attributeAssociationTip4: '请选择原模型属性',
@@ -282,6 +290,9 @@ const cmdb_zh = {
         rule: '规则',
         cascadeAttr: '级联',
         cascadeAttrTip: '级联属性注意顺序',
+        enumValue: '枚举值',
+        label: '标签',
+        valueInputTip: '请输入枚举值'
     },
     components: {
         unselectAttributes: '未选属性',
@@ -323,7 +334,7 @@ const cmdb_zh = {
         pleaseSearch: '请查找',
         conditionFilter: '条件过滤',
         attributeDesc: '属性说明',
-        ciSearchTips: '1. json、密码、链接属性不能搜索\n2. 搜索内容包括逗号, 则需转义\n3. 只搜索索引属性, 非索引属性使用条件过滤',
+        ciSearchTips: '1. json、密码、链接、长文本、引用属性不能搜索\n2. 搜索内容包括逗号, 则需转义\n3. 只搜索索引属性, 非索引属性使用条件过滤',
         ciSearchTips2: '例: q=hostname:*0.0.0.0*',
         subCIType: '订阅模型',
         already: '已',
@@ -547,7 +558,7 @@ class AutoDiscovery(object):
         """
         Define attribute fields
         :return: Returns a list of attribute fields. The list items are (name, type, description). The name must be in English.
-        type: String Integer Float Date DateTime Time JSON
+        type: String Integer Float Date DateTime Time JSON Bool Reference
         For example:
         return [
             ("ci_type", "String", "CIType name"),

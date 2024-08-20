@@ -16,6 +16,29 @@
         :key="attr.name + attr_idx"
       >
         <a-form-item :label="attr.alias || attr.name" :colon="false">
+          <CIReferenceAttr
+            v-if="attr.is_reference"
+            :referenceTypeId="attr.reference_type_id"
+            :isList="attr.is_list"
+            v-decorator="[
+              attr.name,
+              {
+                rules: [{ required: attr.is_required, message: $t('placeholder2') + `${attr.alias || attr.name}` }],
+                initialValue: attr.is_list ? [] : ''
+              }
+            ]"
+          />
+          <a-switch
+            v-else-if="attr.is_bool"
+            v-decorator="[
+              attr.name,
+              {
+                rules: [{ required: false }],
+                valuePropName: 'checked',
+                initialValue: attr.default ? Boolean(attr.default.default) : false
+              }
+            ]"
+          />
           <a-select
             :style="{ width: '100%' }"
             v-decorator="[
@@ -33,7 +56,7 @@
               },
             ]"
             :placeholder="$t('placeholder2')"
-            v-if="attr.is_choice"
+            v-else-if="attr.is_choice"
             :mode="attr.is_list ? 'multiple' : 'default'"
             showSearch
             allowClear
@@ -133,10 +156,14 @@
 import _ from 'lodash'
 import moment from 'moment'
 import JsonEditor from '../../../components/JsonEditor/jsonEditor.vue'
+import CIReferenceAttr from '@/components/ciReferenceAttr/index.vue'
 
 export default {
   name: 'CreateInstanceFormByGroup',
-  components: { JsonEditor },
+  components: {
+    JsonEditor,
+    CIReferenceAttr
+  },
   props: {
     group: {
       type: Object,
@@ -146,6 +173,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    ciTypeId: {
+      type: [Number, String],
+      default: ''
+    }
   },
   inject: ['getFieldType'],
   data() {

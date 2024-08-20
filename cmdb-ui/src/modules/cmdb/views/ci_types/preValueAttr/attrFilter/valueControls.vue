@@ -47,9 +47,32 @@
       >
         <ops-icon class="text-group-icon" type="veops-text" />
       </div>
+      <CIReferenceAttr
+        v-if="getAttr(rule.property).is_reference && (rule.exp === 'is' || rule.exp === '~is')"
+        class="select-filter"
+        :referenceTypeId="getAttr(rule.property).reference_type_id"
+        :value="rule.value"
+        :disabled="disabled"
+        @change="(value) => handleChange('value', value)"
+      />
+      <a-select
+        v-else-if="getAttr(rule.property).is_bool && (rule.exp === 'is' || rule.exp === '~is')"
+        class="select-filter"
+        :disabled="disabled"
+        :placeholder="$t('placeholder2')"
+        :value="rule.value"
+        @change="(value) => handleChange('value', value)"
+      >
+        <a-select-option key="1">
+          true
+        </a-select-option>
+        <a-select-option key="0">
+          false
+        </a-select-option>
+      </a-select>
       <div
         class="input-group"
-        v-if="isChoiceByProperty(rule.property) && (rule.exp === 'is' || rule.exp === '~is')"
+        v-else-if="isChoiceByProperty(rule.property) && (rule.exp === 'is' || rule.exp === '~is')"
       >
         <treeselect
           class="custom-treeselect"
@@ -148,9 +171,13 @@
 
 <script>
 import { compareTypeList } from '../constants.js'
+import CIReferenceAttr from '@/components/ciReferenceAttr/index.vue'
 
 export default {
   name: 'ValueControls',
+  components: {
+    CIReferenceAttr
+  },
   props: {
     rule: {
       type: Object,
@@ -215,7 +242,10 @@ export default {
         ...this.rule,
         [key]: value
       })
-    }
+    },
+    getAttr(property) {
+      return this.attrList.find((item) => item.name === property) || {}
+    },
   }
 }
 </script>
@@ -268,6 +298,23 @@ export default {
   &-icon {
     font-size: 12px;
     color: #FFFFFF;
+  }
+}
+
+.select-filter {
+  height: 36px;
+  width: 136px;
+
+  /deep/ .ant-select-selection {
+    height: 36px;
+    background: #f7f8fa;
+    line-height: 36px;
+    border: none;
+
+    .ant-select-selection__rendered {
+      height: 36px;
+      line-height: 36px;
+    }
   }
 }
 </style>

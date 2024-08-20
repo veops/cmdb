@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1723012344599') format('woff2'),
-       url('iconfont.woff?t=1723012344599') format('woff'),
-       url('iconfont.ttf?t=1723012344599') format('truetype');
+  src: url('iconfont.woff2?t=1724135954264') format('woff2'),
+       url('iconfont.woff?t=1724135954264') format('woff'),
+       url('iconfont.ttf?t=1724135954264') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,10 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.duose-changwenben1:before {
+  content: "\e997";
 }
 
 .duose-quote:before {

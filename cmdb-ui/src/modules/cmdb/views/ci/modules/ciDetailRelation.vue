@@ -38,6 +38,16 @@
             resizable
             class="ops-stripe-table"
           >
+            <template #reference_default="{ row, column }">
+              <a
+                v-for="(id) in (column.params.attr.is_list ? row[column.field] : [row[column.field]])"
+                :key="id"
+                :href="`/cmdb/cidetail/${column.params.attr.reference_type_id}/${id}`"
+                target="_blank"
+              >
+                {{ id }}
+              </a>
+            </template>
             <template #operation_default="{ row }">
               <a-popconfirm
                 arrowPointAtCenter
@@ -85,6 +95,16 @@
             resizable
             class="ops-stripe-table"
           >
+            <template #reference_default="{ row, column }">
+              <a
+                v-for="(id) in (column.params.attr.is_list ? row[column.field] : [row[column.field]])"
+                :key="id"
+                :href="`/cmdb/cidetail/${column.params.attr.reference_type_id}/${id}`"
+                target="_blank"
+              >
+                {{ id }}
+              </a>
+            </template>
             <template #operation_default="{ row }">
               <a-popconfirm
                 arrowPointAtCenter
@@ -258,7 +278,22 @@ export default {
         const columns = []
         const jsonAttr = []
         item.attributes.forEach((attr) => {
-          columns.push({ key: 'p_' + attr.id, field: attr.name, title: attr.alias, minWidth: '100px' })
+          const column = {
+            key: 'p_' + attr.id,
+            field: attr.name,
+            title: attr.alias,
+            minWidth: '100px',
+            params: {
+              attr
+            },
+          }
+          if (attr.is_reference) {
+            column.slots = {
+              default: 'reference_default'
+            }
+          }
+          columns.push(column)
+
           if (attr.value_type === '6') {
             jsonAttr.push(attr.name)
           }
@@ -299,7 +334,22 @@ export default {
         const columns = []
         const jsonAttr = []
         item.attributes.forEach((attr) => {
-          columns.push({ key: 'c_' + attr.id, field: attr.name, title: attr.alias, minWidth: '100px' })
+          const column = {
+            key: 'c_' + attr.id,
+            field: attr.name,
+            title: attr.alias,
+            minWidth: '100px',
+            params: {
+              attr
+            },
+          }
+          if (attr.is_reference) {
+            column.slots = {
+              default: 'reference_default'
+            }
+          }
+          columns.push(column)
+
           if (attr.value_type === '6') {
             jsonAttr.push(attr.name)
           }

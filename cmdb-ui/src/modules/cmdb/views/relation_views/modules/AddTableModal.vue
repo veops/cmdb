@@ -53,8 +53,18 @@
             :width="col.width"
             :sortable="col.sortable"
           >
-            <template #default="{row}" v-if="col.value_type === '6'">
-              <span v-if="col.value_type === '6' && row[col.field]">{{ JSON.stringify(row[col.field]) }}</span>
+            <template v-if="col.is_reference" #default="{row}">
+              <a
+                v-for="(id) in (col.is_list ? row[col.field] : [row[col.field]])"
+                :key="id"
+                :href="`/cmdb/cidetail/${col.reference_type_id}/${id}`"
+                target="_blank"
+              >
+                {{ id }}
+              </a>
+            </template>
+            <template #default="{row}" v-else-if="col.value_type == '6'">
+              <span v-if="col.value_type == '6' && row[col.field]">{{ JSON.stringify(row[col.field]) }}</span>
             </template>
           </vxe-table-column>
         </vxe-table>

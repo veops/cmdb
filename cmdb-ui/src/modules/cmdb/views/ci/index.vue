@@ -465,13 +465,12 @@ export default {
       this.loadTip = this.$t('cmdb.ci.batchUpdateInProgress') + '...'
       const payload = {}
       Object.keys(values).forEach((key) => {
-        if (values[key] || values[key] === 0) {
-          payload[key] = values[key]
-        }
         // Field values support blanking
         // There are currently field values that do not support blanking and will be returned by the backend.
         if (values[key] === undefined || values[key] === null) {
           payload[key] = null
+        } else {
+          payload[key] = values[key]
         }
       })
       this.$refs.create.visible = false
