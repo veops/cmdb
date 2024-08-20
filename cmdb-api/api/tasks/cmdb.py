@@ -20,10 +20,12 @@ from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION2
 from api.lib.cmdb.const import RelationSourceEnum
 from api.lib.cmdb.perms import CIFilterPermsCRUD
+from api.lib.cmdb.utils import TableMap
 from api.lib.decorator import flush_db
 from api.lib.decorator import reconnect_db
 from api.lib.perm.acl.cache import UserCache
 from api.lib.utils import handle_arg_list
+from api.models.cmdb import Attribute
 from api.models.cmdb import AutoDiscoveryCI
 from api.models.cmdb import AutoDiscoveryCIType
 from api.models.cmdb import AutoDiscoveryCITypeRelation
@@ -84,7 +86,7 @@ def batch_ci_cache(ci_ids, ):  # only for attribute change index
 
 @celery.task(name="cmdb.ci_delete", queue=CMDB_QUEUE)
 @reconnect_db
-def ci_delete(ci_id):
+def ci_delete(ci_id, type_id):
     current_app.logger.info(ci_id)
 
     if current_app.config.get("USE_ES"):
@@ -98,6 +100,12 @@ def ci_delete(ci_id):
         if adt:
             adt.update(updated_at=datetime.datetime.now())
         instance.delete()
+
+    for attr in Attribute.get_by(reference_type_id=type_id, to_dict=False):
+        table = TableMap(attr=attr).table
+        for i in getattr(table, 'get_by')(attr_id=attr.id, value=ci_id, to_dict=False):
+            i.delete()
+            ci_cache(i.ci_id, None, None)
 
     current_app.logger.info("{0} delete..........".format(ci_id))
 

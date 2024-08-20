@@ -266,7 +266,7 @@ class CIManager(object):
                 value_table = TableMap(attr_name=id2name[attr_id]).table
 
                 values = value_table.get_by(attr_id=attr_id,
-                                            value=ci_dict.get(id2name[attr_id]) or None,
+                                            value=ci_dict.get(id2name[attr_id]),
                                             only_query=True).join(
                     CI, CI.id == value_table.ci_id).filter(CI.type_id == type_id)
                 _ci_ids = set([i.ci_id for i in values])
@@ -291,6 +291,53 @@ class CIManager(object):
                 return int(max_v.value) + 1
 
         return 1
+
+    @staticmethod
+    def _reference_to_ci_id(attr, payload):
+        def __unique_value2id(_type, _v):
+            value_table = TableMap(attr_name=_type.unique_id).table
+            ci = value_table.get_by(attr_id=attr.id, value=_v)
+            if ci is not None:
+                return ci.ci_id
+
+            return abort(400, ErrFormat.ci_reference_invalid.format(attr.alias, _v))
+
+        def __valid_reference_id_existed(_id, _type_id):
+            ci = CI.get_by_id(_id) or abort(404, ErrFormat.ci_reference_not_found.format(attr.alias, _id))
+
+            if ci.type_id != _type_id:
+                return abort(400, ErrFormat.ci_reference_invalid.format(attr.alias, _id))
+
+        if attr.name in payload:
+            k, reference_value = attr.name, payload[attr.name]
+        elif attr.alias in payload:
+            k, reference_value = attr.alias, payload[attr.alias]
+        else:
+            return
+        if not reference_value:
+            return
+
+        reference_type = None
+        if isinstance(reference_value, list):
+            for idx, v in enumerate(reference_value):
+                if isinstance(v, dict) and v.get('unique'):
+                    if reference_type is None:
+                        reference_type = CITypeCache.get(attr.reference_type_id)
+                    if reference_type is not None:
+                        reference_value[idx] = __unique_value2id(reference_type, v)
+                else:
+                    __valid_reference_id_existed(v, attr.reference_type_id)
+
+        elif isinstance(reference_value, dict) and reference_value.get('unique'):
+            if reference_type is None:
+                reference_type = CITypeCache.get(attr.reference_type_id)
+            if reference_type is not None:
+                reference_value = __unique_value2id(reference_type, reference_value)
+        elif str(reference_value).isdigit():
+            reference_value = int(reference_value)
+            __valid_reference_id_existed(reference_value, attr.reference_type_id)
+
+        payload[k] = reference_value
 
     @classmethod
     def add(cls, ci_type_name,
@@ -392,6 +439,8 @@ class CIManager(object):
 
                     if attr.re_check and password_dict.get(attr.id):
                         value_manager.check_re(attr.re_check, attr.alias, password_dict[attr.id][0])
+                elif attr.is_reference:
+                    cls._reference_to_ci_id(attr, ci_dict)
 
             cls._valid_unique_constraint(ci_type.id, ci_dict, ci and ci.id)
 
@@ -443,9 +492,10 @@ class CIManager(object):
 
         return ci.id
 
-    def update(self, ci_id, _is_admin=False, ticket_id=None, __sync=False, **ci_dict):
+    def update(self, ci_id, _is_admin=False, ticket_id=None, _sync=False, **ci_dict):
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ci = self.confirm_ci_existed(ci_id)
+        ci_type = ci.ci_type
 
         attrs = CITypeAttributeManager.get_all_attributes(ci.type_id)
         ci_type_attrs_name = {attr.name: attr for _, attr in attrs}
@@ -475,11 +525,13 @@ class CIManager(object):
 
                 if attr.re_check and password_dict.get(attr.id):
                     value_manager.check_re(attr.re_check, attr.alias, password_dict[attr.id][0])
+            elif attr.is_reference:
+                self._reference_to_ci_id(attr, ci_dict)
 
         limit_attrs = self._valid_ci_for_no_read(ci) if not _is_admin else {}
 
         record_id = None
-        with redis_lock.Lock(rd.r, ci.ci_type.name):
+        with redis_lock.Lock(rd.r, ci_type.name):
             db.session.commit()
 
             self._valid_unique_constraint(ci.type_id, ci_dict, ci_id)
@@ -510,14 +562,14 @@ class CIManager(object):
                 record_id = self.save_password(ci.id, attr_id, password_dict[attr_id], record_id, ci.type_id)
 
         if record_id or has_dynamic:  # has changed
-            if not __sync:
+            if not _sync:
                 ci_cache.apply_async(args=(ci_id, OperateType.UPDATE, record_id), queue=CMDB_QUEUE)
             else:
                 ci_cache(ci_id, OperateType.UPDATE, record_id)
 
         ref_ci_dict = {k: v for k, v in ci_dict.items() if k.startswith("$") and "." in k}
         if ref_ci_dict:
-            if not __sync:
+            if not _sync:
                 ci_relation_add.apply_async(args=(ref_ci_dict, ci.id), queue=CMDB_QUEUE)
             else:
                 ci_relation_add(ref_ci_dict, ci.id)
@@ -578,7 +630,7 @@ class CIManager(object):
         if ci_dict:
             AttributeHistoryManger.add(None, ci_id, [(None, OperateType.DELETE, ci_dict, None)], ci.type_id)
 
-        ci_delete.apply_async(args=(ci_id,), queue=CMDB_QUEUE)
+        ci_delete.apply_async(args=(ci_id, ci.type_id), queue=CMDB_QUEUE)
         delete_id_filter.apply_async(args=(ci_id,), queue=CMDB_QUEUE)
 
         return ci_id
@@ -773,7 +825,7 @@ class CIManager(object):
         value_table = ValueTypeMap.table[ValueTypeEnum.PASSWORD]
         if current_app.config.get('SECRETS_ENGINE') == 'inner':
             if value:
-                encrypt_value, status = InnerCrypt().encrypt(value)
+                encrypt_value, status = InnerCrypt().encrypt(str(value))
                 if not status:
                     current_app.logger.error('save password failed: {}'.format(encrypt_value))
                     return abort(400, ErrFormat.password_save_failed.format(encrypt_value))
@@ -801,7 +853,7 @@ class CIManager(object):
             vault = VaultClient(current_app.config.get('VAULT_URL'), current_app.config.get('VAULT_TOKEN'))
             if value:
                 try:
-                    vault.update("/{}/{}".format(ci_id, attr_id), dict(v=value))
+                    vault.update("/{}/{}".format(ci_id, attr_id), dict(v=str(value)))
                 except Exception as e:
                     current_app.logger.error('save password to vault failed: {}'.format(e))
                     return abort(400, ErrFormat.password_save_failed.format('write vault failed'))

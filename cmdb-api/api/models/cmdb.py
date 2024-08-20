@@ -105,6 +105,10 @@ class Attribute(Model):
     is_password = db.Column(db.Boolean, default=False)
     is_sortable = db.Column(db.Boolean, default=False)
     is_dynamic = db.Column(db.Boolean, default=False)
+    is_bool = db.Column(db.Boolean, default=False)
+
+    is_reference = db.Column(db.Boolean, default=False)
+    reference_type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'))
 
     default = db.Column(db.JSON)  # {"default": None}
 
