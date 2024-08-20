@@ -58,7 +58,7 @@ def _request_messenger(subject, body, tos, sender, payload):
 
 def notify_send(subject, body, methods, tos, payload=None):
     payload = payload or {}
-    payload = {k: v or '' for k, v in payload.items()}
+    payload = {k: '' if v is None else v for k, v in payload.items()}
     subject = Template(subject).render(payload)
     body = Template(body).render(payload)
 
