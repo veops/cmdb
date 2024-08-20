@@ -61,7 +61,13 @@
         </template>
       </div>
     </div>
-    <a-input ref="regInput" :placeholder="$t('regexSelect.placeholder')" :value="current.label" @change="changeLabel">
+    <a-input
+      ref="regInput"
+      :placeholder="$t('regexSelect.placeholder')"
+      :value="current.label"
+      :disabled="disabled"
+      @change="changeLabel"
+    >
     </a-input>
   </a-popover>
 </template>
@@ -88,6 +94,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    disabled: {
+      type: Boolean,
+      default: false,
+    }
   },
   data() {
     return {

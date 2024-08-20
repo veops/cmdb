@@ -79,6 +79,8 @@
 import XEUtils from 'xe-utils'
 import { getCITypeAttributesByName } from '@/modules/cmdb/api/CITypeAttr'
 import { valueTypeMap } from '@/modules/cmdb/utils/const'
+import { getPropertyType } from '@/modules/cmdb/utils/helper'
+
 export default {
   name: 'MetadataDrawer',
   data() {
@@ -187,12 +189,7 @@ export default {
       this.loading = true
       const { attributes = [] } = await getCITypeAttributesByName(this.typeId)
       this.tableData = attributes.map((attr) => {
-        if (attr.is_password) {
-          attr.value_type = '7'
-        }
-        if (attr.is_link) {
-          attr.value_type = '8'
-        }
+        attr.value_type = getPropertyType(attr)
         return attr
       })
       this.loading = false

@@ -85,6 +85,29 @@
         :disabled="disabled"
       >
       </treeselect>
+      <CIReferenceAttr
+        v-if="getAttr(item.property).is_reference && (item.exp === 'is' || item.exp === '~is')"
+        :style="{ width: '175px' }"
+        class="select-filter-component"
+        :referenceTypeId="getAttr(item.property).reference_type_id"
+        :disabled="disabled"
+        v-model="item.value"
+      />
+      <a-select
+        v-else-if="getAttr(item.property).is_bool && (item.exp === 'is' || item.exp === '~is')"
+        v-model="item.value"
+        class="select-filter-component"
+        :style="{ width: '175px' }"
+        :disabled="disabled"
+        :placeholder="$t('placeholder2')"
+      >
+        <a-select-option key="1">
+          true
+        </a-select-option>
+        <a-select-option key="0">
+          false
+        </a-select-option>
+      </a-select>
       <treeselect
         class="custom-treeselect"
         :style="{ width: '175px', '--custom-height': '24px' }"
@@ -92,7 +115,7 @@
         :multiple="false"
         :clearable="false"
         searchable
-        v-if="isChoiceByProperty(item.property) && (item.exp === 'is' || item.exp === '~is')"
+        v-else-if="isChoiceByProperty(item.property) && (item.exp === 'is' || item.exp === '~is')"
         :options="getChoiceValueByProperty(item.property)"
         :placeholder="$t('placeholder2')"
         :normalizer="
@@ -199,10 +222,11 @@ import _ from 'lodash'
 import { v4 as uuidv4 } from 'uuid'
 import { ruleTypeList, expList, advancedExpList, compareTypeList } from './constants'
 import ValueTypeMapIcon from '../CMDBValueTypeMapIcon'
+import CIReferenceAttr from '../ciReferenceAttr/index.vue'
 
 export default {
   name: 'Expression',
-  components: { ValueTypeMapIcon },
+  components: { ValueTypeMapIcon, CIReferenceAttr },
   model: {
     prop: 'value',
     event: 'change',
@@ -255,7 +279,7 @@ export default {
     getExpListByProperty(property) {
       if (property) {
         const _find = this.canSearchPreferenceAttrList.find((item) => item.name === property)
-        if (_find && ['0', '1', '3', '4', '5'].includes(_find.value_type)) {
+        if (_find && (['0', '1', '3', '4', '5'].includes(_find.value_type) || _find.is_reference || _find.is_bool)) {
           return [
             { value: 'is', label: this.$t('cmdbFilterComp.is') },
             { value: '~is', label: this.$t('cmdbFilterComp.~is') },
@@ -315,6 +339,9 @@ export default {
       }
       return []
     },
+    getAttr(property) {
+      return this.canSearchPreferenceAttrList.find((item) => item.name === property) || {}
+    },
     handleChangeExp({ value }, item, index) {
       const _ruleList = _.cloneDeep(this.ruleList)
       if (value === 'range') {
@@ -343,4 +370,20 @@ export default {
 }
 </script>
 
-<style></style>
+<style lang="less" scoped>
+.select-filter-component {
+  height: 24px;
+
+  /deep/ .ant-select-selection {
+    height: 24px;
+    background: #f7f8fa;
+    line-height: 24px;
+    border: none;
+
+    .ant-select-selection__rendered {
+      height: 24px;
+      line-height: 24px;
+    }
+  }
+}
+</style>
