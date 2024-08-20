@@ -137,6 +137,7 @@ import {
   getCITypeChildren,
   getCITypeParent
 } from '../../api/CITypeRelation.js'
+import { getCITypeAttributesById } from '../../api/CITypeAttr'
 
 export default {
   name: 'RelationAutoDiscovery',
@@ -169,7 +170,18 @@ export default {
   methods: {
     async getCITypeAttributes() {
       const res = await getCITypeAttributes(this.CITypeId)
-      this.ciTypeADTAttributes = res.map((item) => {
+      const attr = await getCITypeAttributesById(this.CITypeId)
+
+      const filterAttr = res.filter((name) => {
+        const currentAttr = attr?.attributes?.find((item) => item?.name === name)
+        if (!currentAttr) {
+          return true
+        }
+
+        return this.filterAttributes(name)
+      })
+
+      this.ciTypeADTAttributes = filterAttr.map((item) => {
         return {
           id: item,
           value: item,
@@ -239,7 +251,7 @@ export default {
         const peer_type_id = item.peer_type_id
         const attributes = this?.relationOptions?.find((option) => option?.value === peer_type_id)?.attributes
 
-        item.attributes = attributes
+        item.attributes = attributes.filter((attr) => this.filterAttributes(attr))
         item.peer_attr_id = undefined
       })
     },
@@ -287,6 +299,15 @@ export default {
         this.$message.success(this.$t('saveSuccess'))
         this.getCITypeRelations()
       }
+    },
+
+    filterAttributes(attr) {
+      // filter password/json/is_list/longText/bool/reference
+      if (attr?.value_type === '2' && !attr?.is_index) {
+        return false
+      }
+
+      return !attr?.is_password && !attr?.is_list && attr?.value_type !== '6' && !attr?.is_bool && !attr?.is_reference
     },
   },
 }

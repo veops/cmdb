@@ -189,6 +189,14 @@ const cmdb_en = {
         confirmDeleteTrigger: 'Are you sure to delete this trigger?',
         int: 'Integer',
         float: 'Float',
+        longText: 'Long Text',
+        shortText: 'Short Text',
+        shortTextTip: 'Text length <= 128',
+        referenceModel: 'Reference Model',
+        referenceModelTip: 'Please select reference model',
+        referenceModelTip1: 'For quick view of referenced model instances',
+        bool: 'Bool',
+        reference: 'Reference',
         text: 'Text',
         datetime: 'DateTime',
         date: 'Date',
@@ -206,7 +214,7 @@ const cmdb_en = {
         otherGroupTips: 'Non sortable within the other group',
         filterTips: 'click to show {name}',
         attributeAssociation: 'Attribute Association',
-        attributeAssociationTip1: 'Automatically establish relationships through the attributes except password, json and multiple of two models',
+        attributeAssociationTip1: 'Automatically establish relationships through attribute values (except password, json, multi-value, long text, boolean, reference) of two models',
         attributeAssociationTip2: 'Double click to edit',
         attributeAssociationTip3: 'Two Attributes must be selected',
         attributeAssociationTip4: 'Please select a attribute from Source CIType',
@@ -282,6 +290,9 @@ const cmdb_en = {
         rule: 'Rule',
         cascadeAttr: 'Cascade',
         cascadeAttrTip: 'Cascading attributes note the order',
+        enumValue: 'Value',
+        label: 'Label',
+        valueInputTip: 'Please input value'
     },
     components: {
         unselectAttributes: 'Unselected',
@@ -323,7 +334,7 @@ const cmdb_en = {
         pleaseSearch: 'Please search',
         conditionFilter: 'Conditional filtering',
         attributeDesc: 'Attribute Description',
-        ciSearchTips: '1. JSON/password/link attributes cannot be searched\n2. If the search content includes commas, they need to be escaped\n3. Only index attributes are searched, non-index attributes use conditional filtering',
+        ciSearchTips: '1. JSON/password/link/longText/reference attributes cannot be searched\n2. If the search content includes commas, they need to be escaped\n3. Only index attributes are searched, non-index attributes use conditional filtering',
         ciSearchTips2: 'For example: q=hostname:*0.0.0.0*',
         subCIType: 'Subscription CIType',
         already: 'already',
@@ -548,7 +559,7 @@ class AutoDiscovery(object):
         """
         Define attribute fields
         :return: Returns a list of attribute fields. The list items are (name, type, description). The name must be in English.
-        type: String Integer Float Date DateTime Time JSON
+        type: String Integer Float Date DateTime Time JSON Bool Reference
         For example:
         return [
             ("ci_type", "String", "CIType name"),

@@ -39,6 +39,7 @@
 import { mapState } from 'vuex'
 import _ from 'lodash'
 import { valueTypeMap } from '@/modules/cmdb/utils/const'
+import { getPropertyType } from '@/modules/cmdb/utils/helper'
 
 export default {
   name: 'AllAttrDrawer',
@@ -84,12 +85,7 @@ export default {
       })
 
       otherAttrData.forEach((attr) => {
-        if (attr.is_password) {
-          attr.value_type = '7'
-        }
-        if (attr.is_link) {
-          attr.value_type = '8'
-        }
+        attr.value_type = getPropertyType(attr)
 
         attr.groupId = -1
         attr.groupName = this.$t('other')

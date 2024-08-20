@@ -16,21 +16,21 @@
       <a-space style="margin-bottom: 10px">
         <a-button @click="handleAddGroup" size="small" icon="plus">{{ $t('cmdb.ciType.group') }}</a-button>
         <a-button @click="handleOpenUniqueConstraint" size="small">{{ $t('cmdb.ciType.uniqueConstraint') }}</a-button>
-        <div>
+        <div class="ci-types-attributes-flex">
           <a-tooltip
-            v-for="typeKey in Object.keys(valueTypeMap)"
-            :key="typeKey"
-            :title="$t('cmdb.ciType.filterTips', { name: valueTypeMap[typeKey] })"
+            v-for="item in valueTypeMap"
+            :key="item.key"
+            :title="$t('cmdb.ciType.filterTips', { name: item.value })"
           >
             <span
-              @click="handleFilterType(typeKey)"
+              @click="handleFilterType(item.key)"
               :class="{
                 'ci-types-attributes-filter': true,
-                'ci-types-attributes-filter-selected': attrTypeFilter.includes(typeKey),
+                'ci-types-attributes-filter-selected': attrTypeFilter.includes(item.key),
               }"
             >
-              <ops-icon :type="getPropertyIcon({ value_type: typeKey })" />
-              {{ valueTypeMap[typeKey] }}
+              <ops-icon :type="getPropertyIcon({ value_type: item.key })" />
+              {{ item.value }}
             </span>
           </a-tooltip>
         </div>
@@ -200,7 +200,7 @@ import AttributeEditForm from './attributeEditForm.vue'
 import NewCiTypeAttrModal from './newCiTypeAttrModal.vue'
 import UniqueConstraint from './uniqueConstraint.vue'
 import { valueTypeMap } from '../../utils/const'
-import { getPropertyIcon } from '../../utils/helper'
+import { getPropertyIcon, getPropertyType } from '../../utils/helper'
 
 export default {
   name: 'AttributesTable',
@@ -243,7 +243,12 @@ export default {
       return this.$store.state.windowHeight
     },
     valueTypeMap() {
-      return valueTypeMap()
+      const map = valueTypeMap()
+      const keys = ['0', '1', '2', '9', '3', '4', '5', '6', '7', '8', '10', '11']
+      return keys.map((key) => ({
+        key,
+        value: map[key]
+      }))
     },
   },
   provide() {
@@ -585,23 +590,8 @@ export default {
         if (!attrTypeFilter.length) {
           return true
         } else {
-          if (attrTypeFilter.includes('7') && attr.is_password) {
-            return true
-          }
-          if (attrTypeFilter.includes('8') && attr.is_link) {
-            return true
-          }
-          if (
-            attrTypeFilter.includes(attr.value_type) &&
-            attr.value_type === '2' &&
-            (attr.is_password || attr.is_link)
-          ) {
-            return false
-          }
-          if (attrTypeFilter.includes(attr.value_type)) {
-            return true
-          }
-          return false
+          const valueType = getPropertyType(attr)
+          return attrTypeFilter.includes(valueType)
         }
       })
     },
@@ -618,6 +608,12 @@ export default {
 .ci-types-attributes {
   padding: 0 20px;
   overflow-y: auto;
+
+  &-flex {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
   .ci-types-attributes-filter {
     color: @text-color_4;
     cursor: pointer;

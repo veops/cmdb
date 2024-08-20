@@ -14,7 +14,7 @@ export default {
   name: 'TreeViewsNode',
   props: {
     title: {
-      type: [String, Number],
+      type: [String, Number, Boolean],
       default: '',
     },
     treeKey: {

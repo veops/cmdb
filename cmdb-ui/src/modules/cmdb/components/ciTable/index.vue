@@ -8,6 +8,7 @@
       resizable
       ref="xTable"
       size="small"
+      :data="data"
       :loading="loading"
       :row-config="{ useKey: true, keyField: '_id' }"
       show-header-overflow
@@ -56,8 +57,20 @@
             <span>{{ col.title }}</span>
           </span>
         </template>
-        <template v-if="col.is_choice || col.is_password" #edit="{ row }">
-          <vxe-input v-if="col.is_password" v-model="passwordValue[col.field]" />
+        <template v-if="col.is_choice || col.is_password || col.is_bool || col.is_reference" #edit="{ row }">
+          <CIReferenceAttr
+            v-if="col.is_reference"
+            :referenceTypeId="col.reference_type_id"
+            :isList="col.is_list"
+            :referenceShowAttrName="referenceShowAttrNameMap[col.reference_type_id] || ''"
+            :initSelectOption="getInitReferenceSelectOption(row[col.field], col)"
+            v-model="row[col.field]"
+          />
+          <a-switch
+            v-else-if="col.is_bool"
+            v-model="row[col.field]"
+          />
+          <vxe-input v-else-if="col.is_password" v-model="passwordValue[col.field]" />
           <a-select
             v-if="col.is_choice"
             v-model="row[col.field]"
@@ -100,10 +113,20 @@
           </a-select>
         </template>
         <template
-          v-if="col.value_type === '6' || col.is_link || col.is_password || col.is_choice"
+          v-if="col.value_type === '6' || col.is_link || col.is_password || col.is_choice || col.is_reference"
           #default="{ row }"
         >
-          <span v-if="col.value_type === '6' && row[col.field]">{{ row[col.field] }}</span>
+          <template v-if="col.is_reference" >
+            <a
+              v-for="(ciId) in (col.is_list ? row[col.field] : [row[col.field]])"
+              :key="ciId"
+              :href="`/cmdb/cidetail/${col.reference_type_id}/${ciId}`"
+              target="_blank"
+            >
+              {{ getReferenceAttrValue(ciId, col) }}
+            </a>
+          </template>
+          <span v-else-if="col.value_type === '6' && row[col.field]">{{ row[col.field] }}</span>
           <template v-else-if="col.is_link && row[col.field]">
             <a
               v-for="(item, linkIndex) in (col.is_list ? row[col.field] : [row[col.field]])"
@@ -187,16 +210,21 @@
 </template>
 
 <script>
+import _ from 'lodash'
+import { getCITypes } from '@/modules/cmdb/api/CIType'
+import { searchCI } from '@/modules/cmdb/api/ci'
 import JsonEditor from '../JsonEditor/jsonEditor.vue'
 import PasswordField from '../passwordField/index.vue'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
+import CIReferenceAttr from '@/components/ciReferenceAttr/index.vue'
 
 export default {
   name: 'CITable',
   components: {
     JsonEditor,
     PasswordField,
-    OpsMoveIcon
+    OpsMoveIcon,
+    CIReferenceAttr
   },
   props: {
     // table ID
@@ -237,6 +265,18 @@ export default {
     showDelete: {
       type: Boolean,
       default: true
+    },
+    // 表格数据
+    data: {
+      type: Array,
+      default: () => []
+    }
+  },
+
+  data() {
+    return {
+      referenceShowAttrNameMap: {},
+      referenceCIIdMap: {},
     }
   },
 
@@ -245,6 +285,46 @@ export default {
       const idx = this.columns.findIndex((item) => item.is_fixed)
       return idx > -1
     },
+    tableDataWatch() {
+      return {
+        data: this.data,
+        columns: this.columns
+      }
+    },
+    referenceCIIdWatch() {
+      const referenceTypeCol = this.columns?.filter((col) => col?.is_reference && col?.reference_type_id) || []
+      if (!this.data?.length || !referenceTypeCol?.length) {
+        return []
+      }
+
+      const ids = []
+      this.data.forEach((row) => {
+        referenceTypeCol.forEach((col) => {
+          if (row[col.field]) {
+            ids.push(...(Array.isArray(row[col.field]) ? row[col.field] : [row[col.field]]))
+          }
+        })
+      })
+
+      return _.uniq(ids)
+    }
+  },
+
+  watch: {
+    columns: {
+      immediate: true,
+      deep: true,
+      handler(newVal) {
+        this.handleReferenceShowAttrName(newVal)
+      }
+    },
+    referenceCIIdWatch: {
+      immediate: true,
+      deep: true,
+      handler() {
+        this.handleReferenceCIIdMap()
+      }
+    }
   },
 
   methods: {
@@ -330,6 +410,101 @@ export default {
 
     getRowSeq(row) {
       return this.getVxetableRef().getRowSeq(row)
+    },
+
+    async handleReferenceShowAttrName(columns) {
+      const needRequiredCITypeIds = columns?.filter((col) => col?.is_reference && col?.reference_type_id).map((col) => col.reference_type_id) || []
+      if (!needRequiredCITypeIds.length) {
+        this.referenceShowAttrNameMap = {}
+        return
+      }
+
+      const res = await getCITypes({
+        type_ids: needRequiredCITypeIds.join(',')
+      })
+
+      const map = {}
+      res.ci_types.forEach((ciType) => {
+        map[ciType.id] = ciType?.show_name || ciType?.unique_name || ''
+      })
+
+      this.referenceShowAttrNameMap = map
+    },
+
+    async handleReferenceCIIdMap() {
+      const referenceTypeCol = this.columns.filter((col) => col?.is_reference && col?.reference_type_id) || []
+      if (!this.data?.length || !referenceTypeCol?.length) {
+        this.referenceCIIdMap = {}
+        return
+      }
+
+      const map = {}
+      this.data.forEach((row) => {
+        referenceTypeCol.forEach((col) => {
+          const ids = Array.isArray(row[col.field]) ? row[col.field] : row[col.field] ? [row[col.field]] : []
+          if (ids.length) {
+            if (!map?.[col.reference_type_id]) {
+              map[col.reference_type_id] = {}
+            }
+            ids.forEach((id) => {
+              map[col.reference_type_id][id] = {}
+            })
+          }
+        })
+      })
+
+      if (!Object.keys(map).length) {
+        this.referenceCIIdMap = {}
+        return
+      }
+
+      const allRes = await Promise.all(
+        Object.keys(map).map((key) => {
+          return searchCI({
+            q: `_type:${key},_id:(${Object.keys(map[key]).join(';')})`,
+            count: 9999
+          })
+        })
+      )
+
+      allRes.forEach((res) => {
+        res.result.forEach((item) => {
+          if (map?.[item._type]?.[item._id]) {
+            map[item._type][item._id] = item
+          }
+        })
+      })
+
+      this.referenceCIIdMap = map
+    },
+
+    getReferenceAttrValue(id, col) {
+      const ci = this?.referenceCIIdMap?.[col?.reference_type_id]?.[id]
+      if (!ci) {
+        return id
+      }
+
+      const attrName = this.referenceShowAttrNameMap?.[col.reference_type_id]
+      return ci?.[attrName] || id
+    },
+
+    getInitReferenceSelectOption(value, col) {
+      const ids = Array.isArray(value) ? value : value ? [value] : []
+      if (!ids.length) {
+        return []
+      }
+
+      const map = this?.referenceCIIdMap?.[col?.reference_type_id]
+      const attrName = this.referenceShowAttrNameMap?.[col?.reference_type_id]
+
+      const option = (Array.isArray(value) ? value : [value]).map((id) => {
+        return {
+          key: id,
+          title: map?.[id]?.[attrName] || id
+        }
+      })
+
+      return option
     }
   }
 }
