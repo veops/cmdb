@@ -451,6 +451,9 @@ class Search(object):
             if field_type == ValueTypeEnum.DATE and len(v) == 10:
                 v = "{} 00:00:00".format(v)
 
+            if field_type == ValueTypeEnum.BOOL and "*" not in str(v):
+                v = str(int(v in current_app.config.get('BOOL_TRUE')))
+
             # in query
             if v.startswith("(") and v.endswith(")"):
                 _query_sql = self._in_query_handler(attr, v, is_not)

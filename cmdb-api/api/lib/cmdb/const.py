@@ -14,6 +14,8 @@ class ValueTypeEnum(BaseEnum):
     JSON = "6"
     PASSWORD = TEXT
     LINK = TEXT
+    BOOL = "7"
+    REFERENCE = INT
 
 
 class ConstraintEnum(BaseEnum):
