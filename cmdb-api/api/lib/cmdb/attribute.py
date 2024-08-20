@@ -167,24 +167,30 @@ class AttributeManager(object):
     def get_attribute_by_name(self, name):
         attr = Attribute.get_by(name=name, first=True)
         if attr.get("is_choice"):
-            attr["choice_value"] = self.get_choice_values(attr["id"], attr["value_type"],
-                                                          attr["choice_web_hook"], attr.get("choice_other"))
+            attr["choice_value"] = self.get_choice_values(attr["id"],
+                                                          attr["value_type"],
+                                                          attr["choice_web_hook"],
+                                                          attr.get("choice_other"))
 
         return attr
 
     def get_attribute_by_alias(self, alias):
         attr = Attribute.get_by(alias=alias, first=True)
         if attr.get("is_choice"):
-            attr["choice_value"] = self.get_choice_values(attr["id"], attr["value_type"],
-                                                          attr["choice_web_hook"], attr.get("choice_other"))
+            attr["choice_value"] = self.get_choice_values(attr["id"],
+                                                          attr["value_type"],
+                                                          attr["choice_web_hook"],
+                                                          attr.get("choice_other"))
 
         return attr
 
     def get_attribute_by_id(self, _id):
         attr = Attribute.get_by_id(_id).to_dict()
         if attr.get("is_choice"):
-            attr["choice_value"] = self.get_choice_values(attr["id"], attr["value_type"],
-                                                          attr["choice_web_hook"], attr.get("choice_other"))
+            attr["choice_value"] = self.get_choice_values(attr["id"],
+                                                          attr["value_type"],
+                                                          attr["choice_web_hook"],
+                                                          attr.get("choice_other"))
 
         return attr
 

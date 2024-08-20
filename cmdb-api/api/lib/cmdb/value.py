@@ -128,14 +128,20 @@ class AttributeValueManager(object):
             return abort(400, ErrFormat.attribute_value_invalid2.format(alias, value))
 
     def _validate(self, attr, value, value_table, ci=None, type_id=None, ci_id=None, type_attr=None):
-        ci = ci or {}
-        v = self._deserialize_value(attr.alias, attr.value_type, value)
+        if not attr.is_reference:
+            ci = ci or {}
+            v = self._deserialize_value(attr.alias, attr.value_type, value)
 
-        attr.is_choice and value and self._check_is_choice(attr, attr.value_type, v)
+            attr.is_choice and value and self._check_is_choice(attr, attr.value_type, v)
+
+        else:
+            v = value or None
+
         attr.is_unique and self._check_is_unique(
             value_table, attr, ci and ci.id or ci_id, ci and ci.type_id or type_id, v)
-
         self._check_is_required(ci and ci.type_id or type_id, attr, v, type_attr=type_attr)
+        if attr.is_reference:
+            return v
 
         if v == "" and attr.value_type not in (ValueTypeEnum.TEXT,):
             v = None

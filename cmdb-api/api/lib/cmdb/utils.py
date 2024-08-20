@@ -7,6 +7,7 @@ import json
 import re
 
 import six
+from flask import current_app
 
 import api.models.cmdb as model
 from api.lib.cmdb.cache import AttributeCache
@@ -64,6 +65,7 @@ class ValueTypeMap(object):
         ValueTypeEnum.DATETIME: str2datetime,
         ValueTypeEnum.DATE: str2date,
         ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) and x else x,
+        ValueTypeEnum.BOOL: lambda x: x in current_app.config.get('BOOL_TRUE'),
     }
 
     serialize = {
@@ -74,6 +76,7 @@ class ValueTypeMap(object):
         ValueTypeEnum.DATE: lambda x: x.strftime("%Y-%m-%d") if not isinstance(x, six.string_types) else x,
         ValueTypeEnum.DATETIME: lambda x: x.strftime("%Y-%m-%d %H:%M:%S") if not isinstance(x, six.string_types) else x,
         ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) and x else x,
+        ValueTypeEnum.BOOL: lambda x: x in current_app.config.get('BOOL_TRUE'),
     }
 
     serialize2 = {
@@ -84,6 +87,7 @@ class ValueTypeMap(object):
         ValueTypeEnum.DATE: lambda x: (x.decode() if not isinstance(x, six.string_types) else x).split()[0],
         ValueTypeEnum.DATETIME: lambda x: x.decode() if not isinstance(x, six.string_types) else x,
         ValueTypeEnum.JSON: lambda x: json.loads(x) if isinstance(x, six.string_types) and x else x,
+        ValueTypeEnum.BOOL: lambda x: x in current_app.config.get('BOOL_TRUE'),
     }
 
     choice = {
@@ -105,6 +109,7 @@ class ValueTypeMap(object):
         'index_{0}'.format(ValueTypeEnum.TIME): model.CIIndexValueText,
         'index_{0}'.format(ValueTypeEnum.FLOAT): model.CIIndexValueFloat,
         'index_{0}'.format(ValueTypeEnum.JSON): model.CIValueJson,
+        'index_{0}'.format(ValueTypeEnum.BOOL): model.CIIndexValueInteger,
     }
 
     table_name = {
@@ -117,6 +122,7 @@ class ValueTypeMap(object):
         'index_{0}'.format(ValueTypeEnum.TIME): 'c_value_index_texts',
         'index_{0}'.format(ValueTypeEnum.FLOAT): 'c_value_index_floats',
         'index_{0}'.format(ValueTypeEnum.JSON): 'c_value_json',
+        'index_{0}'.format(ValueTypeEnum.BOOL): 'c_value_index_integers',
     }
 
     es_type = {
