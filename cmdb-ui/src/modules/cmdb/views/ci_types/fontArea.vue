@@ -21,7 +21,13 @@
       <a-icon type="underline" />
     </div>
     <div :style="{ width: '100px', marginLeft: '10px', display: 'inline-flex', alignItems: 'center' }">
-      <a-icon type="font-colors" /><el-color-picker size="mini" v-model="fontOptions.color"> </el-color-picker>
+      <a-icon type="font-colors" />
+      <el-color-picker
+        size="mini"
+        :disabled="fontColorDisabled"
+        v-model="fontOptions.color"
+      >
+      </el-color-picker>
     </div>
   </div>
 </template>
@@ -30,6 +36,12 @@
 import _ from 'lodash'
 export default {
   name: 'FontArea',
+  props: {
+    fontColorDisabled: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       fontOptions: {
@@ -57,7 +69,11 @@ export default {
       if (flag) {
         return undefined
       } else {
-        return this.fontOptions
+        const fontOptions = _.cloneDeep(this.fontOptions)
+        if (this.fontColorDisabled) {
+          Reflect.deleteProperty(fontOptions, 'color')
+        }
+        return fontOptions
       }
     },
     setData({ fontOptions = {} }) {
