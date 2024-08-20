@@ -130,6 +130,7 @@ const cmdb_zh = {
         selectAttribute: '添加属性',
         groupExisted: '分组名称已存在',
         attributeSortedTips: '其他分组中的属性不能进行排序，如需排序请先拖至自定义的分组！',
+        attributeSortedTips2: '非继承属性不能插入到继承属性前！',
         buildinAttribute: '内置字段',
         expr: '表达式',
         code: '代码',
