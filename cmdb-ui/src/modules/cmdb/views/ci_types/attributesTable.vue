@@ -596,14 +596,7 @@ export default {
           return attrTypeFilter.includes(valueType)
         }
       })
-    },
-    refreshPage() {
-      const path = this.$route.path
-      const query = { ...this.$route.query, refresh: new Date().getTime() }
-      this.$router.replace({ path: '/cmdb/dashboard' }).then(() => {
-        this.$router.replace({ path, query })
-      })
-    },
+    }
   },
 }
 </script>
