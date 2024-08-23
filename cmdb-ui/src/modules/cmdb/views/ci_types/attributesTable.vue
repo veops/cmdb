@@ -479,53 +479,42 @@ export default {
       console.log('changess', group)
       if (e.hasOwnProperty('moved') && e.moved.oldIndex !== e.moved.newIndex) {
         if (group === -1 || group === null) {
-          this.$message.error(this.$t('cmdb.ciType.attributeSortedTips'))
-          this.refreshPage()
+          this.refreshPage(this.$t('cmdb.ciType.attributeSortedTips'))
         } else if (e.moved.newIndex < this.groupMaxCount[group]) {
-          this.$message.error(this.$t('cmdb.ciType.attributeSortedTips2'))
-          this.refreshPage()
+          this.refreshPage(this.$t('cmdb.ciType.attributeSortedTips2'))
         } else {
           transferCITypeAttrIndex(this.CITypeId, {
             from: { attr_id: e.moved.element.id, group_name: group },
-            to: { order: e.moved.newIndex, group_name: group },
+            to: { order: e.moved.newIndex, group_name: group }
           })
-            .then((res) => this.$message.success(this.$t('updateSuccess')))
-            .catch(() => {
-              this.refreshPage()
-            })
+            .then(() => this.$message.success(this.$t('updateSuccess')))
+            .catch(() => this.init())
         }
       }
-
       if (e.hasOwnProperty('added')) {
         this.addRemoveGroupFlag = { to: { group_name: group, order: e.added.newIndex }, inited: true }
       }
-
       if (e.hasOwnProperty('removed')) {
         this.$nextTick(() => {
           if (this.addRemoveGroupFlag.to.order < this.groupMaxCount[this.addRemoveGroupFlag.to.group_name]) {
-            this.$message.error(this.$t('cmdb.ciType.attributeSortedTips2'))
-            this.refreshPage()
-            this.addRemoveGroupFlag = {}
+            this.refreshPage(this.$t('cmdb.ciType.attributeSortedTips2'))
           } else {
-          transferCITypeAttrIndex(this.CITypeId, {
-            from: { attr_id: e.removed.element.id, group_name: group },
-            to: { group_name: this.addRemoveGroupFlag.to.group_name, order: this.addRemoveGroupFlag.to.order },
-          })
-            .then((res) => this.$message.success(this.$t('saveSuccess')))
-            .catch(() => {
-              this.refreshPage()
+            transferCITypeAttrIndex(this.CITypeId, {
+              from: { attr_id: e.removed.element.id, group_name: group },
+              to: { group_name: this.addRemoveGroupFlag.to.group_name, order: this.addRemoveGroupFlag.to.order }
             })
-            .finally(() => {
-              this.addRemoveGroupFlag = {}
-            })
+              .then(() => this.$message.success(this.$t('saveSuccess')))
+              .catch(() => this.init())
+              .finally(() => {
+                this.addRemoveGroupFlag = {}
+              })
           }
         })
       }
     },
-    abortDraggable() {
-      this.$nextTick(() => {
-        this.$router.push({ name: 'ci_type' })
-      })
+    refreshPage(errorMessage) {
+      this.$message.error(errorMessage)
+      this.init()
     },
     updatePropertyIndex() {
       const attributes = [] // All attributes
