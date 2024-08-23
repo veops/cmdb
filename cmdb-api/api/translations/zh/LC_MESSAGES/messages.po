@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-06-20 19:12+0800\n"
+"POT-Creation-Date: 2024-08-20 13:47+0800\n"
 "PO-Revision-Date: 2023-12-25 20:21+0800\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -16,7 +16,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.14.0\n"
+"Generated-By: Babel 2.16.0\n"
 
 #: api/lib/resp_format.py:7
 msgid "unauthorized"
@@ -169,8 +169,8 @@ msgstr "目前只允许 属性创建人、管理员 删除属性!"
 #: api/lib/cmdb/resp_format.py:37
 msgid ""
 "Attribute field names cannot be built-in fields: id, _id, ci_id, type, "
-"_type, ci_type"
-msgstr "属性字段名不能是内置字段: id, _id, ci_id, type, _type, ci_type"
+"_type, ci_type, ticket_id"
+msgstr "属性字段名不能是内置字段: id, _id, ci_id, type, _type, ci_type, ci_type, ticket_id"
 
 #: api/lib/cmdb/resp_format.py:39
 msgid "Predefined value: Other model request parameters are illegal!"
@@ -197,286 +197,298 @@ msgid "CI already exists!"
 msgstr "CI 已经存在!"
 
 #: api/lib/cmdb/resp_format.py:47
+msgid "{}: CI reference {} does not exist!"
+msgstr "{}: CI引用 {} 不存在!"
+
+#: api/lib/cmdb/resp_format.py:48
+msgid "{}: CI reference {} is illegal!"
+msgstr "{}, CI引用 {} 不合法!"
+
+#: api/lib/cmdb/resp_format.py:49
 msgid "Relationship constraint: {}, verification failed"
 msgstr "关系约束: {}, 校验失败"
 
-#: api/lib/cmdb/resp_format.py:49
+#: api/lib/cmdb/resp_format.py:51
 msgid ""
 "Many-to-many relationship constraint: Model {} <-> {} already has a many-"
 "to-many relationship!"
 msgstr "多对多关系 限制: 模型 {} <-> {} 已经存在多对多关系!"
 
-#: api/lib/cmdb/resp_format.py:52
+#: api/lib/cmdb/resp_format.py:54
 msgid "CI relationship: {} does not exist"
 msgstr "CI关系: {} 不存在"
 
-#: api/lib/cmdb/resp_format.py:55
+#: api/lib/cmdb/resp_format.py:57
 msgid "In search expressions, not supported before parentheses: or, not"
 msgstr "搜索表达式里小括号前不支持: 或、非"
 
-#: api/lib/cmdb/resp_format.py:57
+#: api/lib/cmdb/resp_format.py:59
 msgid "Model {} does not exist"
 msgstr "模型 {} 不存在"
 
-#: api/lib/cmdb/resp_format.py:58
+#: api/lib/cmdb/resp_format.py:60
 msgid "Model {} already exists"
 msgstr "模型 {} 已经存在"
 
-#: api/lib/cmdb/resp_format.py:59
+#: api/lib/cmdb/resp_format.py:61
 msgid "The primary key is undefined or has been deleted"
 msgstr "主键未定义或者已被删除"
 
-#: api/lib/cmdb/resp_format.py:60
+#: api/lib/cmdb/resp_format.py:62
 msgid "Only the creator can delete it!"
 msgstr "只有创建人才能删除它!"
 
-#: api/lib/cmdb/resp_format.py:61
+#: api/lib/cmdb/resp_format.py:63
 msgid "The model cannot be deleted because the CI already exists"
 msgstr "因为CI已经存在，不能删除模型"
 
-#: api/lib/cmdb/resp_format.py:63
+#: api/lib/cmdb/resp_format.py:65
 msgid "The inheritance cannot be deleted because the CI already exists"
 msgstr "因为CI已经存在，不能删除继承关系"
 
-#: api/lib/cmdb/resp_format.py:65
+#: api/lib/cmdb/resp_format.py:67
 msgid "The model is inherited and cannot be deleted"
 msgstr "该模型被继承, 不能删除"
 
 #: api/lib/cmdb/resp_format.py:68
+msgid "The model is referenced by attribute {} and cannot be deleted"
+msgstr "该模型被属性 {} 引用, 不能删除"
+
+#: api/lib/cmdb/resp_format.py:72
 msgid ""
 "The model cannot be deleted because the model is referenced by the "
 "relational view {}"
 msgstr "因为关系视图 {} 引用了该模型，不能删除模型"
 
-#: api/lib/cmdb/resp_format.py:70
+#: api/lib/cmdb/resp_format.py:74
 msgid "Model group {} does not exist"
 msgstr "模型分组 {} 不存在"
 
-#: api/lib/cmdb/resp_format.py:71
+#: api/lib/cmdb/resp_format.py:75
 msgid "Model group {} already exists"
 msgstr "模型分组 {} 已经存在"
 
-#: api/lib/cmdb/resp_format.py:72
+#: api/lib/cmdb/resp_format.py:76
 msgid "Model relationship {} does not exist"
 msgstr "模型关系 {} 不存在"
 
-#: api/lib/cmdb/resp_format.py:73
+#: api/lib/cmdb/resp_format.py:77
 msgid "Attribute group {} already exists"
 msgstr "属性分组 {} 已存在"
 
-#: api/lib/cmdb/resp_format.py:74
+#: api/lib/cmdb/resp_format.py:78
 msgid "Attribute group {} does not exist"
 msgstr "属性分组 {} 不存在"
 
-#: api/lib/cmdb/resp_format.py:76
+#: api/lib/cmdb/resp_format.py:80
 msgid "Attribute group <{0}> - attribute <{1}> does not exist"
 msgstr "属性组<{0}> - 属性<{1}> 不存在"
 
-#: api/lib/cmdb/resp_format.py:77
+#: api/lib/cmdb/resp_format.py:81
 msgid "The unique constraint already exists!"
 msgstr "唯一约束已经存在!"
 
-#: api/lib/cmdb/resp_format.py:79
+#: api/lib/cmdb/resp_format.py:83
 msgid "Uniquely constrained attributes cannot be JSON and multi-valued"
 msgstr "唯一约束的属性不能是 JSON 和 多值"
 
-#: api/lib/cmdb/resp_format.py:80
+#: api/lib/cmdb/resp_format.py:84
 msgid "Duplicated trigger"
 msgstr "重复的触发器"
 
-#: api/lib/cmdb/resp_format.py:81
+#: api/lib/cmdb/resp_format.py:85
 msgid "Trigger {} does not exist"
 msgstr "触发器 {} 不存在"
 
-#: api/lib/cmdb/resp_format.py:82
+#: api/lib/cmdb/resp_format.py:86
 msgid "Duplicated reconciliation rule"
 msgstr ""
 
-#: api/lib/cmdb/resp_format.py:83
+#: api/lib/cmdb/resp_format.py:87
 msgid "Reconciliation rule {} does not exist"
 msgstr "关系类型 {} 不存在"
 
-#: api/lib/cmdb/resp_format.py:85
+#: api/lib/cmdb/resp_format.py:89
 msgid "Operation record {} does not exist"
 msgstr "操作记录 {} 不存在"
 
-#: api/lib/cmdb/resp_format.py:86
+#: api/lib/cmdb/resp_format.py:90
 msgid "Unique identifier cannot be deleted"
 msgstr "不能删除唯一标识"
 
-#: api/lib/cmdb/resp_format.py:87
+#: api/lib/cmdb/resp_format.py:91
 msgid "Cannot delete default sorted attributes"
 msgstr "不能删除默认排序的属性"
 
-#: api/lib/cmdb/resp_format.py:89
+#: api/lib/cmdb/resp_format.py:93
 msgid "No node selected"
 msgstr "没有选择节点"
 
-#: api/lib/cmdb/resp_format.py:90
+#: api/lib/cmdb/resp_format.py:94
 msgid "This search option does not exist!"
 msgstr "该搜索选项不存在!"
 
-#: api/lib/cmdb/resp_format.py:91
+#: api/lib/cmdb/resp_format.py:95
 msgid "This search option has a duplicate name!"
 msgstr "该搜索选项命名重复!"
 
-#: api/lib/cmdb/resp_format.py:93
+#: api/lib/cmdb/resp_format.py:97
 msgid "Relationship type {} already exists"
 msgstr "关系类型 {} 已经存在"
 
-#: api/lib/cmdb/resp_format.py:94
+#: api/lib/cmdb/resp_format.py:98
 msgid "Relationship type {} does not exist"
 msgstr "关系类型 {} 不存在"
 
-#: api/lib/cmdb/resp_format.py:96
+#: api/lib/cmdb/resp_format.py:100
 msgid "Invalid attribute value: {}"
 msgstr "无效的属性值: {}"
 
-#: api/lib/cmdb/resp_format.py:97
+#: api/lib/cmdb/resp_format.py:101
 msgid "{} Invalid value: {}"
 msgstr "{} 无效的值: {}"
 
-#: api/lib/cmdb/resp_format.py:98
+#: api/lib/cmdb/resp_format.py:102
 msgid "{} is not in the predefined values"
 msgstr "{} 不在预定义值里"
 
-#: api/lib/cmdb/resp_format.py:100
+#: api/lib/cmdb/resp_format.py:104
 msgid "The value of attribute {} must be unique, {} already exists"
 msgstr "属性 {} 的值必须是唯一的, 当前值 {} 已存在"
 
-#: api/lib/cmdb/resp_format.py:101
+#: api/lib/cmdb/resp_format.py:105
 msgid "Attribute {} value must exist"
 msgstr "属性 {} 值必须存在"
 
-#: api/lib/cmdb/resp_format.py:102
+#: api/lib/cmdb/resp_format.py:106
 msgid "Out of range value, the maximum value is 2147483647"
 msgstr "超过最大值限制, 最大值是2147483647"
 
-#: api/lib/cmdb/resp_format.py:104
+#: api/lib/cmdb/resp_format.py:108
 msgid "Unknown error when adding or modifying attribute value: {}"
 msgstr "新增或者修改属性值未知错误: {}"
 
-#: api/lib/cmdb/resp_format.py:106
+#: api/lib/cmdb/resp_format.py:110
 msgid "Duplicate custom name"
 msgstr "订制名重复"
 
-#: api/lib/cmdb/resp_format.py:108
+#: api/lib/cmdb/resp_format.py:112
 msgid "Number of models exceeds limit: {}"
 msgstr "模型数超过限制: {}"
 
-#: api/lib/cmdb/resp_format.py:109
+#: api/lib/cmdb/resp_format.py:113
 msgid "The number of CIs exceeds the limit: {}"
 msgstr "CI数超过限制: {}"
 
-#: api/lib/cmdb/resp_format.py:111
+#: api/lib/cmdb/resp_format.py:115
 msgid "Auto-discovery rule: {} already exists!"
 msgstr "自动发现规则: {} 已经存在!"
 
-#: api/lib/cmdb/resp_format.py:112
+#: api/lib/cmdb/resp_format.py:116
 msgid "Auto-discovery rule: {} does not exist!"
 msgstr "自动发现规则: {} 不存在!"
 
-#: api/lib/cmdb/resp_format.py:114
+#: api/lib/cmdb/resp_format.py:118
 msgid "This auto-discovery rule is referenced by the model and cannot be deleted!"
 msgstr "该自动发现规则被模型引用, 不能删除!"
 
-#: api/lib/cmdb/resp_format.py:116
+#: api/lib/cmdb/resp_format.py:120
 msgid "The application of auto-discovery rules cannot be defined repeatedly!"
 msgstr "自动发现规则的应用不能重复定义!"
 
-#: api/lib/cmdb/resp_format.py:117
+#: api/lib/cmdb/resp_format.py:121
 msgid "The auto-discovery you want to modify: {} does not exist!"
 msgstr "您要修改的自动发现: {} 不存在!"
 
-#: api/lib/cmdb/resp_format.py:118
+#: api/lib/cmdb/resp_format.py:122
 msgid "Attribute does not include unique identifier: {}"
 msgstr "属性字段没有包括唯一标识: {}"
 
-#: api/lib/cmdb/resp_format.py:119
+#: api/lib/cmdb/resp_format.py:123
 msgid "The auto-discovery instance does not exist!"
 msgstr "自动发现的实例不存在!"
 
-#: api/lib/cmdb/resp_format.py:120
+#: api/lib/cmdb/resp_format.py:124
 msgid "The model is not associated with this auto-discovery!"
 msgstr "模型并未关联该自动发现!"
 
-#: api/lib/cmdb/resp_format.py:121
+#: api/lib/cmdb/resp_format.py:125
 msgid "Only the creator can modify the Secret!"
 msgstr "只有创建人才能修改Secret!"
 
-#: api/lib/cmdb/resp_format.py:123
+#: api/lib/cmdb/resp_format.py:127
 msgid "This rule already has auto-discovery instances and cannot be deleted!"
 msgstr "该规则已经有自动发现的实例, 不能被删除!"
 
-#: api/lib/cmdb/resp_format.py:125
+#: api/lib/cmdb/resp_format.py:129
 msgid "The default auto-discovery rule is already referenced by model {}!"
 msgstr "该默认的自动发现规则 已经被模型 {} 引用!"
 
-#: api/lib/cmdb/resp_format.py:127
+#: api/lib/cmdb/resp_format.py:131
 msgid "The unique_key method must return a non-empty string!"
 msgstr "unique_key方法必须返回非空字符串!"
 
-#: api/lib/cmdb/resp_format.py:128
+#: api/lib/cmdb/resp_format.py:132
 msgid "The attributes method must return a list"
 msgstr "attributes方法必须返回的是list"
 
-#: api/lib/cmdb/resp_format.py:130
+#: api/lib/cmdb/resp_format.py:134
 msgid "The list returned by the attributes method cannot be empty!"
 msgstr "attributes方法返回的list不能为空!"
 
-#: api/lib/cmdb/resp_format.py:132
+#: api/lib/cmdb/resp_format.py:136
 msgid "Only administrators can define execution targets as: all nodes!"
 msgstr "只有管理员才可以定义执行机器为: 所有节点!"
 
-#: api/lib/cmdb/resp_format.py:133
+#: api/lib/cmdb/resp_format.py:137
 msgid "Execute targets permission check failed: {}"
 msgstr "执行机器权限检查不通过: {}"
 
-#: api/lib/cmdb/resp_format.py:135
+#: api/lib/cmdb/resp_format.py:139
 msgid "CI filter authorization must be named!"
 msgstr "CI过滤授权 必须命名!"
 
-#: api/lib/cmdb/resp_format.py:136
+#: api/lib/cmdb/resp_format.py:140
 msgid "CI filter authorization is currently not supported or query"
 msgstr "CI过滤授权 暂时不支持 或 查询"
 
-#: api/lib/cmdb/resp_format.py:139
+#: api/lib/cmdb/resp_format.py:143
 msgid "You do not have permission to operate attribute {}!"
 msgstr "您没有属性 {} 的操作权限!"
 
-#: api/lib/cmdb/resp_format.py:140
+#: api/lib/cmdb/resp_format.py:144
 msgid "You do not have permission to operate this CI!"
 msgstr "您没有该CI的操作权限!"
 
-#: api/lib/cmdb/resp_format.py:142
+#: api/lib/cmdb/resp_format.py:146
 msgid "Failed to save password: {}"
 msgstr "保存密码失败: {}"
 
-#: api/lib/cmdb/resp_format.py:143
+#: api/lib/cmdb/resp_format.py:147
 msgid "Failed to get password: {}"
 msgstr "获取密码失败: {}"
 
-#: api/lib/cmdb/resp_format.py:145
+#: api/lib/cmdb/resp_format.py:149
 msgid "Scheduling time format error"
 msgstr "{}格式错误，应该为：%Y-%m-%d %H:%M:%S"
 
-#: api/lib/cmdb/resp_format.py:146
+#: api/lib/cmdb/resp_format.py:150
 msgid "CMDB data reconciliation results"
 msgstr ""
 
-#: api/lib/cmdb/resp_format.py:147
+#: api/lib/cmdb/resp_format.py:151
 msgid "Number of {} illegal: {}"
 msgstr ""
 
-#: api/lib/cmdb/resp_format.py:149
+#: api/lib/cmdb/resp_format.py:153
 msgid "Topology view {} already exists"
 msgstr "拓扑视图 {} 已经存在"
 
-#: api/lib/cmdb/resp_format.py:150
+#: api/lib/cmdb/resp_format.py:154
 msgid "Topology group {} already exists"
 msgstr "拓扑视图分组 {} 已经存在"
 
-#: api/lib/cmdb/resp_format.py:152
+#: api/lib/cmdb/resp_format.py:156
 msgid "The group cannot be deleted because the topology view already exists"
 msgstr "因为该分组下定义了拓扑视图，不能删除"
 

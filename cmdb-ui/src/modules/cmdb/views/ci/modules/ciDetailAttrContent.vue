@@ -1,9 +1,19 @@
 <template>
   <span :id="`ci-detail-attr-${attr.name}`">
     <span v-if="!isEdit || attr.value_type === '6'">
+      <template v-if="attr.is_reference" >
+        <a
+          v-for="(ciId) in (attr.is_list ? ci[attr.name] : [ci[attr.name]])"
+          :key="ciId"
+          :href="`/cmdb/cidetail/${attr.reference_type_id}/${ciId}`"
+          target="_blank"
+        >
+          {{ attr.referenceShowAttrNameMap ? attr.referenceShowAttrNameMap[ciId] || ciId : ciId }}
+        </a>
+      </template>
       <PasswordField
         :style="{ display: 'inline-block' }"
-        v-if="attr.is_password && ci[attr.name]"
+        v-else-if="attr.is_password && ci[attr.name]"
         :ci_id="ci._id"
         :attr_id="attr.id"
       ></PasswordField>
@@ -67,6 +77,29 @@
     <template v-else>
       <a-form :form="form">
         <a-form-item label="" :colon="false">
+          <CIReferenceAttr
+            v-if="attr.is_reference"
+            :referenceTypeId="attr.reference_type_id"
+            :isList="attr.is_list"
+            :referenceShowAttrName="attr.showAttrName"
+            :initSelectOption="getInitReferenceSelectOption(attr)"
+            v-decorator="[
+              attr.name,
+              {
+                rules: [{ required: attr.is_required, message: $t('placeholder2') + `${attr.alias || attr.name}` }],
+              }
+            ]"
+          />
+          <a-switch
+            v-else-if="attr.is_bool"
+            v-decorator="[
+              attr.name,
+              {
+                rules: [{ required: attr.is_required }],
+                valuePropName: 'checked',
+              }
+            ]"
+          />
           <a-select
             :style="{ width: '100%' }"
             v-decorator="[
@@ -76,7 +109,7 @@
               },
             ]"
             :placeholder="$t('placeholder2')"
-            v-if="attr.is_choice"
+            v-else-if="attr.is_choice"
             :mode="attr.is_list ? 'multiple' : 'default'"
             showSearch
             allowClear
@@ -157,10 +190,11 @@ import { updateCI } from '@/modules/cmdb/api/ci'
 import JsonEditor from '../../../components/JsonEditor/jsonEditor.vue'
 import PasswordField from '../../../components/passwordField/index.vue'
 import { getAttrPassword } from '../../../api/CITypeAttr'
+import CIReferenceAttr from '@/components/ciReferenceAttr/index.vue'
 
 export default {
   name: 'CiDetailAttrContent',
-  components: { JsonEditor, PasswordField },
+  components: { JsonEditor, PasswordField, CIReferenceAttr },
   props: {
     ci: {
       type: Object,
@@ -209,7 +243,7 @@ export default {
       }
       this.isEdit = true
       this.$nextTick(async () => {
-        if (this.attr.is_list && !this.attr.is_choice) {
+        if (this.attr.is_list && !this.attr.is_choice && !this.attr.is_reference) {
           this.form.setFieldsValue({
             [`${this.attr.name}`]: Array.isArray(this.ci[this.attr.name])
               ? this.ci[this.attr.name].join(',')
@@ -237,6 +271,10 @@ export default {
           .then(() => {
             this.$message.success(this.$t('updateSuccess'))
             this.$emit('updateCIByself', { [`${this.attr.name}`]: newData }, this.attr.name)
+
+            if (this.attr.is_reference) {
+              this.$emit('refreshReferenceAttr')
+            }
           })
           .catch(() => {
             this.$emit('refresh', this.attr.name)
@@ -283,6 +321,16 @@ export default {
     getName(name) {
       return name ?? ''
     },
+
+    getInitReferenceSelectOption(attr) {
+      const option = Object.keys(attr?.referenceShowAttrNameMap || {}).map((key) => {
+        return {
+          key: Number(key),
+          title: attr?.referenceShowAttrNameMap?.[key] ?? ''
+        }
+      })
+      return option
+    }
   },
 }
 </script>

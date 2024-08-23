@@ -545,7 +545,7 @@ export default {
     },
     showIdSelectOptions() {
       const _showIdSelectOptions = this.currentTypeAttrs.filter(
-        (item) => item.id !== this.unique_id && !['6'].includes(item.value_type) && !item.is_password && !item.is_list
+        (item) => item.id !== this.unique_id && !['6'].includes(item.value_type) && !item.is_password && !item.is_list && !item.is_bool && !item.is_reference
       )
       if (this.showIdFilterInput) {
         return _showIdSelectOptions.filter(
@@ -898,6 +898,7 @@ export default {
         this.loadCITypes()
         this.loading = false
         this.drawerVisible = false
+        this.isInherit = false
       }, 1000)
     },
     async updateCIType(CITypeId, data) {
@@ -916,6 +917,7 @@ export default {
               this.loadCITypes()
               this.loading = false
               this.drawerVisible = false
+              this.isInherit = false
             }, 1000)
           })
         })

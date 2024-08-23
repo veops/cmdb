@@ -4,13 +4,16 @@ export const valueTypeMap = () => {
   return {
     '0': i18n.t('cmdb.ciType.int'),
     '1': i18n.t('cmdb.ciType.float'),
-    '2': i18n.t('cmdb.ciType.text'),
+    '2': i18n.t('cmdb.ciType.shortText'),
     '3': i18n.t('cmdb.ciType.datetime'),
     '4': i18n.t('cmdb.ciType.date'),
     '5': i18n.t('cmdb.ciType.time'),
     '6': 'JSON',
     '7': i18n.t('cmdb.ciType.password'),
-    '8': i18n.t('cmdb.ciType.link')
+    '8': i18n.t('cmdb.ciType.link'),
+    '9': i18n.t('cmdb.ciType.longText'),
+    '10': i18n.t('cmdb.ciType.bool'),
+    '11': i18n.t('cmdb.ciType.reference'),
   }
 }
 

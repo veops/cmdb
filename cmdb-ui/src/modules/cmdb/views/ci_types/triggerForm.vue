@@ -471,10 +471,15 @@ export default {
       this.dateForm = _.cloneDeep(this.defaultDateForm)
       this.notifies = _.cloneDeep(this.defaultNotify)
       this.category = 1
-      this.triggerAction = '1'
       this.filterExp = ''
       this.selectedBot = undefined
-      this.visible = false
+      if (this.$refs.noticeContent) {
+        this.$refs.noticeContent.destroy()
+      }
+
+      this.$nextTick(() => {
+        this.visible = false
+      })
     },
     filterChange(value) {
       this.filterValue = value

@@ -20,7 +20,7 @@
               :key="attr.name"
               v-for="attr in group.attributes"
             >
-              <ci-detail-attr-content :ci="ci" :attr="attr" @refresh="refresh" @updateCIByself="updateCIByself" />
+              <ci-detail-attr-content :ci="ci" :attr="attr" @refresh="refresh" @updateCIByself="updateCIByself" @refreshReferenceAttr="handleReferenceAttr" />
             </el-descriptions-item>
           </el-descriptions>
         </div>
@@ -137,7 +137,7 @@ import _ from 'lodash'
 import { Descriptions, DescriptionsItem } from 'element-ui'
 import { getCITypeGroupById, getCITypes } from '@/modules/cmdb/api/CIType'
 import { getCIHistory, judgeItsmInstalled } from '@/modules/cmdb/api/history'
-import { getCIById } from '@/modules/cmdb/api/ci'
+import { getCIById, searchCI } from '@/modules/cmdb/api/ci'
 import CiDetailAttrContent from './ciDetailAttrContent.vue'
 import CiDetailRelation from './ciDetailRelation.vue'
 import TriggerTable from '../../operation_history/modules/triggerTable.vue'
@@ -244,9 +244,78 @@ export default {
       getCITypeGroupById(this.typeId, { need_other: 1 })
         .then((res) => {
           this.attributeGroups = res
+
+          this.handleReferenceAttr()
         })
         .catch((e) => {})
     },
+
+    async handleReferenceAttr() {
+      const map = {}
+      this.attributeGroups.forEach((group) => {
+        group.attributes.forEach((attr) => {
+          if (attr?.is_reference && attr?.reference_type_id && this.ci[attr.name]) {
+            const ids = Array.isArray(this.ci[attr.name]) ? this.ci[attr.name] : this.ci[attr.name] ? [this.ci[attr.name]] : []
+            if (ids.length) {
+              if (!map?.[attr.reference_type_id]) {
+                map[attr.reference_type_id] = {}
+              }
+              ids.forEach((id) => {
+                map[attr.reference_type_id][id] = {}
+              })
+            }
+          }
+        })
+      })
+
+      if (!Object.keys(map).length) {
+        return
+      }
+
+      const ciTypesRes = await getCITypes({
+        type_ids: Object.keys(map).join(',')
+      })
+      const showAttrNameMap = {}
+      ciTypesRes.ci_types.forEach((ciType) => {
+        showAttrNameMap[ciType.id] = ciType?.show_name || ciType?.unique_name || ''
+      })
+
+      const allRes = await Promise.all(
+        Object.keys(map).map((key) => {
+          return searchCI({
+            q: `_type:${key},_id:(${Object.keys(map[key]).join(';')})`,
+            count: 9999
+          })
+        })
+      )
+
+      const ciNameMap = {}
+      allRes.forEach((res) => {
+        res.result.forEach((item) => {
+          ciNameMap[item._id] = item
+        })
+      })
+
+      const newAttrGroups = _.cloneDeep(this.attributeGroups)
+
+      newAttrGroups.forEach((group) => {
+        group.attributes.forEach((attr) => {
+          if (attr?.is_reference && attr?.reference_type_id) {
+            attr.showAttrName = showAttrNameMap?.[attr?.reference_type_id] || ''
+
+            const referenceShowAttrNameMap = {}
+            const referenceCIIds = this.ci[attr.name];
+            (Array.isArray(referenceCIIds) ? referenceCIIds : referenceCIIds ? [referenceCIIds] : []).forEach((id) => {
+              referenceShowAttrNameMap[id] = ciNameMap?.[id]?.[attr.showAttrName] ?? id
+            })
+            attr.referenceShowAttrNameMap = referenceShowAttrNameMap
+          }
+        })
+      })
+
+      this.$set(this, 'attributeGroups', newAttrGroups)
+    },
+
     async getCI() {
       await getCIById(this.ciId)
         .then((res) => {

@@ -35,7 +35,7 @@
                   <a-select v-model="parentsForm[item.name].attr">
                     <a-select-option
                       :title="attr.alias || attr.name"
-                      v-for="attr in item.attributes"
+                      v-for="attr in filterAttributes(item.attributes)"
                       :key="attr.name"
                       :value="attr.name"
                     >
@@ -87,11 +87,32 @@
           </a-col>
           <a-col :span="showListOperation(list.name) ? 10 : 13">
             <a-form-item>
+              <CIReferenceAttr
+                v-if="getAttr(list.name).is_reference"
+                :referenceTypeId="getAttr(list.name).reference_type_id"
+                :isList="getAttr(list.name).is_list"
+                v-decorator="[
+                  list.name,
+                  {
+                    initialValue: getAttr(list.name).is_list ? [] : ''
+                  }
+                ]"
+              />
+              <a-switch
+                v-else-if="getAttr(list.name).is_bool"
+                v-decorator="[
+                  list.name,
+                  {
+                    valuePropName: 'checked',
+                    initialValue: false
+                  }
+                ]"
+              />
               <a-select
                 :style="{ width: '100%' }"
                 v-decorator="[list.name, { rules: getDecoratorRules(list) }]"
                 :placeholder="$t('placeholder2')"
-                v-if="getFieldType(list.name).split('%%')[0] === 'select'"
+                v-else-if="getFieldType(list.name).split('%%')[0] === 'select'"
                 :mode="getFieldType(list.name).split('%%')[1] === 'multiple' ? 'multiple' : 'default'"
                 showSearch
                 allowClear
@@ -114,18 +135,18 @@
               <a-input-number
                 v-decorator="[list.name, { rules: getDecoratorRules(list) }]"
                 style="width: 100%"
-                v-if="getFieldType(list.name) === 'input_number'"
+                v-else-if="getFieldType(list.name) === 'input_number'"
               />
               <a-date-picker
                 v-decorator="[list.name, { rules: getDecoratorRules(list) }]"
                 style="width: 100%"
                 :format="getFieldType(list.name) == '4' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss'"
                 :valueFormat="getFieldType(list.name) == '4' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss'"
-                v-if="getFieldType(list.name) === '4' || getFieldType(list.name) === '3'"
+                v-else-if="getFieldType(list.name) === '4' || getFieldType(list.name) === '3'"
                 :showTime="getFieldType(list.name) === '4' ? false : { format: 'HH:mm:ss' }"
               />
               <a-input
-                v-if="getFieldType(list.name) === 'input'"
+                v-else-if="getFieldType(list.name) === 'input'"
                 @focus="(e) => handleFocusInput(e, list)"
                 v-decorator="[list.name, { rules: getDecoratorRules(list) }]"
               />
@@ -156,6 +177,7 @@ import JsonEditor from '../../../components/JsonEditor/jsonEditor.vue'
 import { valueTypeMap } from '../../../utils/const'
 import CreateInstanceFormByGroup from './createInstanceFormByGroup.vue'
 import { getCITypeParent, getCanEditByParentIdChildId } from '@/modules/cmdb/api/CITypeRelation'
+import CIReferenceAttr from '@/components/ciReferenceAttr/index.vue'
 
 export default {
   name: 'CreateInstanceForm',
@@ -164,6 +186,7 @@ export default {
     ElOption: Option,
     JsonEditor,
     CreateInstanceFormByGroup,
+    CIReferenceAttr
   },
   props: {
     typeIdFromRelation: {
@@ -261,6 +284,11 @@ export default {
           }
           Object.keys(values).forEach((k) => {
             const _tempFind = this.attributeList.find((item) => item.name === k)
+
+            if (_tempFind.is_reference) {
+              values[k] = values[k] ? values[k] : null
+            }
+
             if (
               _tempFind.value_type === '3' &&
               values[k] &&
@@ -309,6 +337,11 @@ export default {
 
         Object.keys(values).forEach((k) => {
           const _tempFind = this.attributeList.find((item) => item.name === k)
+
+          if (_tempFind.is_reference) {
+            values[k] = values[k] ? values[k] : null
+          }
+
           if (
             _tempFind.value_type === '3' &&
             values[k] &&
@@ -426,6 +459,9 @@ export default {
       }
       return 'input'
     },
+    getAttr(name) {
+      return this.attributeList.find((item) => item.name === name) ?? {}
+    },
     getSelectFieldOptions(name) {
       const _find = this.attributeList.find((item) => item.name === name)
       if (_find) {
@@ -487,7 +523,12 @@ export default {
       }
 
       return rules
-    }
+    },
+    filterAttributes(attributes) {
+      return attributes.filter((attr) => {
+        return !attr.is_bool && !attr.is_reference
+      })
+    },
   },
 }
 </script>
@@ -498,7 +539,7 @@ export default {
   }
   .ant-drawer-body {
     overflow-y: auto;
-    max-height: calc(100vh - 110px);
+    height: calc(100vh - 110px);
   }
 }
 </style>

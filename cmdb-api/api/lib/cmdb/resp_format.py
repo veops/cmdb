@@ -44,6 +44,8 @@ class ErrFormat(CommonErrFormat):
     unique_value_not_found = _l("The model's primary key {} does not exist!")  # 模型的主键 {} 不存在!
     unique_key_required = _l("Primary key {} is missing")  # 主键字段 {} 缺失
     ci_is_already_existed = _l("CI already exists!")  # CI 已经存在!
+    ci_reference_not_found = _l("{}: CI reference {} does not exist!")  # {}: CI引用 {} 不存在!
+    ci_reference_invalid = _l("{}: CI reference {} is illegal!")  # {}, CI引用 {} 不合法!
     relation_constraint = _l("Relationship constraint: {}, verification failed")  # 关系约束: {}, 校验失败
     # 多对多关系 限制: 模型 {} <-> {} 已经存在多对多关系!
     m2m_relation_constraint = _l(
@@ -63,6 +65,8 @@ class ErrFormat(CommonErrFormat):
     ci_exists_and_cannot_delete_inheritance = _l(
         "The inheritance cannot be deleted because the CI already exists")  # 因为CI已经存在，不能删除继承关系
     ci_type_inheritance_cannot_delete = _l("The model is inherited and cannot be deleted")  # 该模型被继承, 不能删除
+    ci_type_referenced_cannot_delete = _l(
+        "The model is referenced by attribute {} and cannot be deleted")  # 该模型被属性 {} 引用, 不能删除
 
     # 因为关系视图 {} 引用了该模型，不能删除模型
     ci_relation_view_exists_and_cannot_delete_type = _l(
