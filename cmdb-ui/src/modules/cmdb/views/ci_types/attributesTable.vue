@@ -1,6 +1,5 @@
 <template>
   <div>
-    <router-view :key="$route.fullPath"></router-view>
     <a-modal
       v-model="addGroupModal"
       :title="$t('cmdb.ciType.addGroup')"
