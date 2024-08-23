@@ -97,6 +97,9 @@ export function getCITableColumns(data, attrList, width = 1600, height) {
             is_list: attr.is_list,
             is_choice: attr.is_choice,
             is_fixed: attr.is_fixed,
+            is_bool: attr.is_bool,
+            is_reference: attr.is_reference,
+            reference_type_id: attr.reference_type_id
         })
     }
 
@@ -137,6 +140,10 @@ export const getPropertyStyle = (attr) => {
 export const getPropertyIcon = (attr) => {
     switch (attr.value_type) {
         case '0':
+            if (attr.is_reference) {
+              return 'duose-quote'
+            }
+
             return 'duose-shishu'
         case '1':
             return 'duose-fudianshu'
@@ -146,6 +153,9 @@ export const getPropertyIcon = (attr) => {
             }
             if (attr.is_link) {
                 return 'duose-link'
+            }
+            if (attr.is_index === false) {
+              return 'duose-changwenben1'
             }
             return 'duose-wenben'
         case '3':
@@ -157,10 +167,50 @@ export const getPropertyIcon = (attr) => {
         case '6':
             return 'duose-json'
         case '7':
+            if (attr.is_bool) {
+              return 'duose-boole'
+            }
             return 'duose-password'
         case '8':
             return 'duose-link'
+        case '9':
+            return 'duose-changwenben1'
+        case '10':
+            return 'duose-boole'
+        case '11':
+            return 'duose-quote'
+        default:
+            return ''
     }
+}
+
+export const getPropertyType = (attr) => {
+  if (attr.is_password) {
+    return '7'
+  }
+  if (attr.is_link) {
+    return '8'
+  }
+
+  switch (attr.value_type) {
+    case '0':
+      if (attr.is_reference) {
+        return '11'
+      }
+      return '0'
+    case '2':
+      if (!attr.is_index) {
+        return '9'
+      }
+      return '2'
+    case '7':
+      if (attr.is_bool) {
+        return '10'
+      }
+      return '7'
+    default:
+      return attr?.value_type ?? ''
+  }
 }
 
 export const getLastLayout = (data, x1 = 0, y1 = 0, w1 = 0) => {

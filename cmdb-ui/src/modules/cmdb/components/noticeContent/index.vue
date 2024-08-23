@@ -113,6 +113,11 @@ export default {
         this.editor.insertNode(node)
       }
     },
+    destroy() {
+      const editor = this.editor
+      if (editor == null) return
+      editor.destroy()
+    }
   },
 }
 </script>

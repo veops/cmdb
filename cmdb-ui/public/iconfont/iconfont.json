@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "41437322",
+      "name": "duose-changwenben (1)",
+      "font_class": "duose-changwenben1",
+      "unicode": "e997",
+      "unicode_decimal": 59799
+    },
+    {
       "icon_id": "41363381",
       "name": "duose-quote",
       "font_class": "duose-quote",

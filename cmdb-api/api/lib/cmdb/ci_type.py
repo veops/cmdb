@@ -145,7 +145,7 @@ class CITypeManager(object):
         kwargs["alias"] = kwargs["name"] if not kwargs.get("alias") else kwargs["alias"]
 
         cls._validate_unique(name=kwargs['name'])
-        cls._validate_unique(alias=kwargs['alias'])
+        # cls._validate_unique(alias=kwargs['alias'])
 
         kwargs["unique_id"] = unique_key.id
         kwargs['uid'] = current_user.uid
@@ -184,7 +184,7 @@ class CITypeManager(object):
         ci_type = cls.check_is_existed(type_id)
 
         cls._validate_unique(type_id=type_id, name=kwargs.get('name'))
-        cls._validate_unique(type_id=type_id, alias=kwargs.get('alias') or kwargs.get('name'))
+        # cls._validate_unique(type_id=type_id, alias=kwargs.get('alias') or kwargs.get('name'))
 
         unique_key = kwargs.pop("unique_key", None)
         unique_key = AttributeCache.get(unique_key)
@@ -233,6 +233,10 @@ class CITypeManager(object):
 
         if CITypeInheritance.get_by(parent_id=type_id, first=True):
             return abort(400, ErrFormat.ci_type_inheritance_cannot_delete)
+
+        reference = Attribute.get_by(reference_type_id=type_id, first=True, to_dict=False)
+        if reference is not None:
+            return abort(400, ErrFormat.ci_type_referenced_cannot_delete.format(reference.alias))
 
         relation_views = PreferenceRelationView.get_by(to_dict=False)
         for rv in relation_views:
@@ -1323,6 +1327,7 @@ class CITypeTemplateManager(object):
     def _import_attributes(self, type2attributes):
         attributes = [attr for type_id in type2attributes for attr in type2attributes[type_id]]
         attrs = []
+        references = []
         for i in copy.deepcopy(attributes):
             if i.pop('inherited', None):
                 continue
@@ -1337,6 +1342,10 @@ class CITypeTemplateManager(object):
             if not choice_value:
                 i['is_choice'] = False
 
+            if i.get('reference_type_id'):
+                references.append(copy.deepcopy(i))
+                i.pop('reference_type_id')
+
             attrs.append((i, choice_value))
 
         attr_id_map = self.__import(Attribute, [i[0] for i in copy.deepcopy(attrs)])
@@ -1345,7 +1354,7 @@ class CITypeTemplateManager(object):
             if choice_value and not i.get('choice_web_hook') and not i.get('choice_other'):
                 AttributeManager.add_choice_values(attr_id_map.get(i['id'], i['id']), i['value_type'], choice_value)
 
-        return attr_id_map
+        return attr_id_map, references
 
     def _import_ci_types(self, ci_types, attr_id_map):
         for i in ci_types:
@@ -1358,6 +1367,11 @@ class CITypeTemplateManager(object):
             i['uid'] = current_user.uid
 
         return self.__import(CIType, ci_types)
+
+    def _import_reference_attributes(self, attrs, type_id_map):
+        for attr in attrs:
+            attr['reference_type_id'] = type_id_map.get(attr['reference_type_id'], attr['reference_type_id'])
+        self.__import(Attribute, attrs)
 
     def _import_ci_type_groups(self, ci_type_groups, type_id_map):
         _ci_type_groups = copy.deepcopy(ci_type_groups)
@@ -1584,12 +1598,14 @@ class CITypeTemplateManager(object):
 
         import time
         s = time.time()
-        attr_id_map = self._import_attributes(tpt.get('type2attributes') or {})
+        attr_id_map, references = self._import_attributes(tpt.get('type2attributes') or {})
         current_app.logger.info('import attributes cost: {}'.format(time.time() - s))
 
         s = time.time()
         ci_type_id_map = self._import_ci_types(tpt.get('ci_types') or [], attr_id_map)
         current_app.logger.info('import ci_types cost: {}'.format(time.time() - s))
+
+        self._import_reference_attributes(references, ci_type_id_map)
 
         s = time.time()
         self._import_ci_type_groups(tpt.get('ci_type_groups') or [], ci_type_id_map)
@@ -1675,6 +1691,16 @@ class CITypeTemplateManager(object):
             type_ids.extend(extend_type_ids)
             ci_types.extend(CITypeManager.get_ci_types(type_ids=extend_type_ids))
 
+        # handle reference type
+        references = Attribute.get_by(only_query=True).join(
+            CITypeAttribute, CITypeAttribute.attr_id == Attribute.id).filter(
+            CITypeAttribute.type_id.in_(type_ids)).filter(CITypeAttribute.deleted.is_(False)).filter(
+            Attribute.reference_type_id.isnot(None))
+        reference_type_ids = list(set([i.reference_type_id for i in references if i.reference_type_id]))
+        if reference_type_ids:
+            type_ids.extend(reference_type_ids)
+            ci_types.extend(CITypeManager.get_ci_types(type_ids=reference_type_ids))
+
         tpt = dict(
             ci_types=ci_types,
             relation_types=[i.to_dict() for i in RelationTypeManager.get_all()],
@@ -1687,6 +1713,7 @@ class CITypeTemplateManager(object):
             icons=dict()
         )
         tpt['ci_type_groups'] = CITypeGroupManager.get(ci_types=tpt['ci_types'], type_ids=type_ids)
+        tpt['ci_type_groups'] = [i for i in tpt['ci_type_groups'] if i.get('ci_types')]
 
         def get_icon_value(icon):
             try:

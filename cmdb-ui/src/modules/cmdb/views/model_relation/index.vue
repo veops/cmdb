@@ -364,8 +364,14 @@ export default {
       return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     },
     filterAttributes(attributes) {
-      // filter password/json/is_list
-      return attributes.filter((attr) => !attr.is_password && !attr.is_list && attr.value_type !== '6')
+      // filter password/json/is_list/longText/bool/reference
+      return attributes.filter((attr) => {
+        if (attr.value_type === '2' && !attr.is_index) {
+          return false
+        }
+
+        return !attr.is_password && !attr.is_list && attr.value_type !== '6' && !attr.is_bool && !attr.is_reference
+      })
     },
 
     addModalAttr() {
