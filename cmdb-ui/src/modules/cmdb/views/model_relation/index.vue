@@ -24,9 +24,10 @@
             @change="handleSourceTypeChange"
             :filterOption="filterOption"
           >
-            <a-select-option :value="CIType.id" :key="CIType.id" v-for="CIType in displayCITypes">{{
-              CIType.alias || CIType.name
-            }}</a-select-option>
+            <a-select-option :value="CIType.id" :key="CIType.id" v-for="CIType in displayCITypes">
+              {{ CIType.alias || CIType.name }}
+              <span class="model-select-name">({{ CIType.name }})</span>
+            </a-select-option>
           </a-select>
         </a-form-item>
         <a-form-item :label="$t('cmdb.ciType.dstCIType')">
@@ -39,6 +40,7 @@
           >
             <a-select-option :value="CIType.id" :key="CIType.id" v-for="CIType in displayTargetCITypes">
               {{ CIType.alias || CIType.name }}
+              <span class="model-select-name">({{ CIType.name }})</span>
             </a-select-option>
           </a-select>
         </a-form-item>
@@ -407,5 +409,10 @@ export default {
 
 .modal-attribute-action {
   margin-left: 5px;
+}
+
+.model-select-name {
+  font-size: 12px;
+  color: #A5A9BC;
 }
 </style>

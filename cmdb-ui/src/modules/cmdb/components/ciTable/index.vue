@@ -107,7 +107,9 @@
                     :type="choice[1].icon.name"
                   />
                 </template>
-                <span>{{ choice[0] }}</span>
+                <a-tooltip placement="topLeft" :title="choice[1].label || choice[0]">
+                  <span>{{ choice[1].label || choice[0] }}</span>
+                </a-tooltip>
               </span>
             </a-select-option>
           </a-select>
@@ -138,7 +140,7 @@
               "
               target="_blank"
             >
-              {{ item }}
+              {{ getChoiceValueLabel(col, item) || item }}
             </a>
           </template>
           <PasswordField
@@ -163,7 +165,7 @@
                 :style="{ color: getChoiceValueIcon(col, value).color, marginRight: '5px' }"
                 :type="getChoiceValueIcon(col, value).name"
               />
-              {{ value }}
+              {{ getChoiceValueLabel(col, value) || value }}
             </span>
           </template>
         </template>
@@ -395,6 +397,14 @@ export default {
         return _find[1]?.icon || {}
       }
       return {}
+    },
+
+    getChoiceValueLabel(col, colValue) {
+      const _find = col?.filters?.find((item) => String(item[0]) === String(colValue))
+      if (_find) {
+        return _find[1]?.label || ''
+      }
+      return ''
     },
 
     /**

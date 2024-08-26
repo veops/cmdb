@@ -545,7 +545,7 @@ export default {
     },
     showIdSelectOptions() {
       const _showIdSelectOptions = this.currentTypeAttrs.filter(
-        (item) => item.id !== this.unique_id && !['6'].includes(item.value_type) && !item.is_password && !item.is_list && !item.is_bool && !item.is_reference
+        (item) => item.id !== this.unique_id && !['6'].includes(item.value_type) && !item.is_password && !item.is_list && !item.is_bool && !item.is_reference && !item?.choice_value?.length
       )
       if (this.showIdFilterInput) {
         return _showIdSelectOptions.filter(

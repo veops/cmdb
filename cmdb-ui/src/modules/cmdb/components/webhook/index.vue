@@ -105,7 +105,7 @@ export default {
       return { method, url, parameters, body, headers, authorization }
     },
     setParams(params) {
-      const { method, url, parameters, body, headers, authorization = {} } = params ?? {}
+      const { method = 'GET', url = '', parameters = {}, body = '', headers = {}, authorization = {} } = params ?? {}
       this.method = method
       this.url = url
       this.$refs.Parameters.parameters =

@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "41570722",
+      "name": "veops-department",
+      "font_class": "veops-department",
+      "unicode": "e998",
+      "unicode_decimal": 59800
+    },
+    {
       "icon_id": "41437322",
       "name": "duose-changwenben (1)",
       "font_class": "duose-changwenben1",

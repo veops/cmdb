@@ -359,7 +359,10 @@
             :canDefineScript="canDefineScript"
             :disabled="isShowComputedArea"
             :CITypeId="CITypeId"
+            :enumValueType="enumValueType"
           />
+
+          <a-button type="primary" size="small" ghost @click="resetPreValue" >{{ $t('reset') }}</a-button>
         </a-form-item>
       </a-col>
       <a-col :span="24" v-if="!['6', '7', '10', '11'].includes(currentValueType)">
@@ -416,6 +419,7 @@ import FontArea from './fontArea.vue'
 import RegSelect from '@/components/RegexSelect'
 import { getPropertyIcon } from '../../utils/helper'
 import ReferenceModelSelect from './attributeEdit/referenceModelSelect.vue'
+import { ENUM_VALUE_TYPE } from './preValueAttr/constants.js'
 
 export default {
   name: 'CreateNewAttribute',
@@ -458,6 +462,7 @@ export default {
       defaultForDatetime: '',
 
       re_check: {},
+      enumValueType: ENUM_VALUE_TYPE.INPUT
     }
   },
   computed: {
@@ -485,8 +490,7 @@ export default {
           console.log(values)
           const { is_required, default_show, default_value, is_dynamic } = values
           const data = { is_required, default_show, is_dynamic }
-          delete values.is_required
-          delete values.default_show
+
           if (values.value_type === '10') {
             values.default = { default: values.is_list ? (default_value || null) : Boolean(default_value) }
           } else if (values.value_type === '0' && default_value) {
@@ -516,7 +520,7 @@ export default {
           } else {
             values.default = { default: null }
           }
-          delete values.default_value
+
           if (values.is_computed) {
             const computedAreaData = this.$refs.computedArea.getData()
             values = { ...values, ...computedAreaData }
@@ -524,9 +528,18 @@ export default {
             // If it is a non-computed attribute, check to see if there is a predefined value
             if (!['6', '7', '10', '11'].includes(values.value_type)) {
               const preValueAreaData = this.$refs.preValueArea.getData()
+              // 预定义值校验错误
+              if (preValueAreaData?.isError) {
+                return
+              }
               values = { ...values, ...preValueAreaData }
             }
           }
+
+          delete values.is_required
+          delete values.default_show
+          delete values.default_value
+
           const fontOptions = this.$refs.fontArea.getData()
 
           // 索引
@@ -587,6 +600,28 @@ export default {
         if (['6', '10', '11'].includes(value)) {
           this.re_check = {}
         }
+
+        switch (value) {
+          case '0':
+          case '1':
+            this.enumValueType = ENUM_VALUE_TYPE.NUMBER
+            break
+          case '3':
+            this.enumValueType = ENUM_VALUE_TYPE.DATE_TIME
+            break
+          case '4':
+            this.enumValueType = ENUM_VALUE_TYPE.DATE
+            break
+          default:
+            this.enumValueType = ENUM_VALUE_TYPE.INPUT
+            break
+        }
+        if (['0', '1', '3', '4'].includes(value)) {
+          if (this.$refs.preValueArea) {
+            this.$refs.preValueArea.initEnumValue()
+          }
+        }
+
         this.handleSwitchType({ valueType: value })
       })
     },
@@ -660,10 +695,19 @@ export default {
     },
     changeDefaultForDatetime(value) {
       this.defaultForDatetime = value
-      if (value === '$custom_time') {
-        this.form.setFieldsValue({
-          default_value: undefined,
-        })
+      switch (value) {
+        case '$custom_time':
+          this.form.setFieldsValue({
+            default_value: undefined,
+          })
+          break
+        case '$updated_at':
+          this.form.setFieldsValue({
+            is_dynamic: true,
+          })
+          break
+        default:
+          break
       }
     },
     onClick({ key }) {
@@ -688,6 +732,12 @@ export default {
       }
       return []
     },
+
+    resetPreValue() {
+      if (this.$refs.preValueArea) {
+        this.$refs.preValueArea.resetData()
+      }
+    }
   },
 }
 </script>
