@@ -1,5 +1,7 @@
 # -*- coding:utf-8 -*-
 
+from collections import defaultdict
+
 import copy
 import toposort
 from flask import abort
@@ -347,9 +349,9 @@ class CITypeInheritanceManager(object):
     @classmethod
     def add(cls, parent_ids, child_id):
 
-        rels = {}
+        rels = defaultdict(set)
         for i in cls.cls.get_by(to_dict=False):
-            rels.setdefault(i.child_id, set()).add(i.parent_id)
+            rels[i.child_id].add(i.parent_id)
 
         try:
             toposort_flatten(rels)
@@ -363,7 +365,7 @@ class CITypeInheritanceManager(object):
 
             existed = cls.cls.get_by(parent_id=parent_id, child_id=child_id, first=True, to_dict=False)
             if existed is None:
-                rels.setdefault(child_id, set()).add(parent_id)
+                rels[child_id].add(parent_id)
                 try:
                     toposort_flatten(rels)
                 except toposort.CircularDependencyError as e:
@@ -504,14 +506,13 @@ class CITypeAttributeManager(object):
     def __init__(self):
         pass
 
-    @staticmethod
-    def get_attr_name(ci_type_name, key):
+    @classmethod
+    def get_attr_name(cls, ci_type_name, key):
         ci_type = CITypeCache.get(ci_type_name)
         if ci_type is None:
             return
 
-        for i in CITypeAttributesCache.get(ci_type.id):
-            attr = AttributeCache.get(i.attr_id)
+        for _, attr in cls.get_all_attributes(ci_type.id):
             if attr and (attr.name == key or attr.alias == key):
                 return attr.name
 
@@ -528,6 +529,18 @@ class CITypeAttributeManager(object):
     @classmethod
     def get_attr_names_by_type_id(cls, type_id):
         return [attr.name for _, attr in cls.get_all_attributes(type_id)]
+
+    @classmethod
+    def get_attr_names_label_enum(cls, type_id):
+        attr_names, enum_map = list(), defaultdict(dict)
+        for _, attr in cls.get_all_attributes(type_id):
+            attr_names.append(attr.name)
+            if attr.is_choice and not attr.choice_other and not attr.choice_web_hook:
+                _map = AttributeManager.get_enum_map(attr.id)
+                if _map:
+                    enum_map[attr.name].update(_map)
+
+        return attr_names, enum_map
 
     @staticmethod
     def get_attributes_by_type_id(type_id, choice_web_hook_parse=True, choice_other_parse=True):
@@ -569,10 +582,10 @@ class CITypeAttributeManager(object):
                 CITypeManager.get_name_by_id(type_id), ResourceTypeEnum.CI, PermEnum.CONFIG)
 
         result = {type_id: [i for _, i in cls.get_all_attributes(type_id)] for type_id in type_ids}
-        attr2types = {}
+        attr2types = defaultdict(list)
         for type_id in result:
             for i in result[type_id]:
-                attr2types.setdefault(i.id, []).append(type_id)
+                attr2types[i.id].append(type_id)
 
         attrs = []
         for attr_id in attr2types:
@@ -850,12 +863,12 @@ class CITypeRelationManager(object):
 
     @classmethod
     def recursive_level2children(cls, parent_id):
-        result = dict()
+        result = defaultdict(list)
 
         def get_children(_id, level):
             children = CITypeRelation.get_by(parent_id=_id, to_dict=False)
             if children:
-                result.setdefault(level + 1, []).extend([i.child.to_dict() for i in children])
+                result[level + 1].extend([i.child.to_dict() for i in children])
 
             for i in children:
                 if i.child_id != _id:
@@ -954,10 +967,10 @@ class CITypeRelationManager(object):
         p = CITypeManager.check_is_existed(parent)
         c = CITypeManager.check_is_existed(child)
 
-        rels = {}
+        rels = defaultdict(set)
         for i in CITypeRelation.get_by(to_dict=False):
-            rels.setdefault(i.child_id, set()).add(i.parent_id)
-        rels.setdefault(c.id, set()).add(p.id)
+            rels[i.child_id].add(i.parent_id)
+        rels[c.id].add(p.id)
 
         try:
             toposort_flatten(rels)

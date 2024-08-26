@@ -40,6 +40,7 @@ from api.models.cmdb import CITypeAttribute
 def ci_cache(ci_id, operate_type, record_id):
     from api.lib.cmdb.ci import CITriggerManager
     from api.lib.cmdb.ci import CIRelationManager
+    from api.lib.cmdb.ci_type import CITypeAttributeManager
 
     m = api.lib.cmdb.ci.CIManager()
     ci_dict = m.get_ci_by_id_from_db(ci_id, need_children=False, use_master=False)
@@ -55,7 +56,17 @@ def ci_cache(ci_id, operate_type, record_id):
         current_app.test_request_context().push()
         login_user(UserCache.get('worker'))
 
-        CITriggerManager.fire(operate_type, ci_dict, record_id)
+        _, enum_map = CITypeAttributeManager.get_attr_names_label_enum(ci_dict.get('_type'))
+        payload = dict()
+        for k, v in ci_dict.items():
+            if k in enum_map:
+                if isinstance(v, list):
+                    payload[k] = [enum_map[k].get(i, i) for i in v]
+                else:
+                    payload[k] = enum_map[k].get(v, v)
+            else:
+                payload[k] = v
+        CITriggerManager.fire(operate_type, payload, record_id)
 
     ci_dict and CIRelationManager.build_by_attribute(ci_dict)
 
@@ -196,7 +207,7 @@ def ci_relation_add(parent_dict, child_id, uid):
             for ci in response:
                 try:
                     CIRelationManager.add(ci['_id'], child_id)
-                    ci_relation_cache(ci['_id'], child_id)
+                    ci_relation_cache(ci['_id'], child_id, None)
                 except Exception as e:
                     current_app.logger.warning(e)
                 finally:

@@ -136,6 +136,15 @@ class AttributeManager(object):
         db.session.flush()
 
     @classmethod
+    def get_enum_map(cls, _attr_id, _attr=None):
+        attr = AttributeCache.get(_attr_id) if _attr_id else _attr
+        if attr and attr.is_choice:
+            choice_values = cls.get_choice_values(attr.id, attr.value_type, None, None)
+            return {i[0]: i[1]['label'] for i in choice_values if i[1].get('label')}
+
+        return {}
+
+    @classmethod
     def search_attributes(cls, name=None, alias=None, page=1, page_size=None):
         """
         :param name:
