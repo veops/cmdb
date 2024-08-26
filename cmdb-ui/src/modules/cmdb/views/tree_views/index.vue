@@ -808,7 +808,7 @@ export default {
       })
     },
     async openBatchDownload() {
-      this.$refs.batchDownload.open({ preferenceAttrList: this.currentAttrList, ciTypeName: this.currentCiTypeName })
+      this.$refs.batchDownload.open({ preferenceAttrList: this.currentAttrList.filter((attr) => !attr?.is_reference), ciTypeName: this.currentCiTypeName })
     },
     batchDownload({ filename, type, checkedKeys }) {
       console.log(filename, type)
