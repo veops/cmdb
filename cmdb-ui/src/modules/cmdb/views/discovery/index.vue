@@ -78,7 +78,7 @@
         <p class="setting-discovery-empty-text">{{ $t('noData') }}</p>
       </div>
     </div>
-    <EditDrawer ref="editDrawer" />
+    <EditDrawer ref="editDrawer" :isDiscoveryPage="true" />
     <AccountConfig ref="accountConfig"/>
   </div>
 </template>

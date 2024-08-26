@@ -22,11 +22,11 @@
         <a-form-model-item :label="$t('name')" prop="name">
           <a-input v-model="form.name" />
         </a-form-model-item>
-        <a-form-model-item :label="$t('icon')" v-if="is_inner">
+        <a-form-model-item :label="$t('icon')">
           <CustomIconSelect v-model="customIcon" :style="{ marginTop: '6px' }" />
         </a-form-model-item>
         <a-form-model-item :label="$t('cmdb.ad.mode')" prop="is_plugin">
-          <a-radio-group v-model="form.is_plugin" @change="changeIsPlugin" :disabled="!is_inner">
+          <a-radio-group v-model="form.is_plugin" @change="changeIsPlugin" :disabled="true">
             <a-radio :value="false">{{ $t('cmdb.custom_dashboard.default') }}</a-radio>
             <a-radio :value="true">plugin</a-radio>
           </a-radio-group>
@@ -137,9 +137,9 @@ export default {
     AgentTable
   },
   props: {
-    is_inner: {
+    isDiscoveryPage: {
       type: Boolean,
-      default: true,
+      default: false,
     },
   },
   data() {
@@ -152,7 +152,7 @@ export default {
       ruleData: {},
       type: 'add',
       adType: '',
-      form: { name: '', is_plugin: false },
+      form: { name: '', is_plugin: true },
       rules: {},
       customIcon: { name: '', color: '' },
       tableData: [],
@@ -195,11 +195,9 @@ export default {
       this.type = type
       this.ruleData = data
       this.adType = adType
-      if (!this.is_inner) {
-        this.form = {
-          name: '',
-          is_plugin: true,
-        }
+      this.form = {
+        name: '',
+        is_plugin: true,
       }
       if (adType === DISCOVERY_CATEGORY_TYPE.HTTP || adType === DISCOVERY_CATEGORY_TYPE.SNMP) {
         return
@@ -225,7 +223,7 @@ export default {
           // eslint-disable-next-line no-useless-escape
           this.plugin_script = this.default_plugin_script
         }
-        if (data?.is_plugin || !this.is_inner) {
+        if (this.form?.is_plugin) {
           this.$nextTick(() => {
             this.$refs.codemirror.initCodeMirror(this.plugin_script)
           })
@@ -281,7 +279,7 @@ export default {
       const params = {
         ...this.form,
         type,
-        is_inner: this.is_inner,
+        is_inner: !this.form.is_plugin,
         option: { icon: this.customIcon },
         attributes: this.form.is_plugin
           ? undefined
@@ -301,14 +299,14 @@ export default {
         this.type = 'edit'
         this.ruleData = res
         this.$message.success(this.$t('updateSuccess'))
-        if (this.is_inner) {
+        if (this.isDiscoveryPage) {
           this.getDiscovery()
         }
         return
       }
       this.handleClose()
-      console.log(this.is_inner)
-      if (this.is_inner) {
+
+      if (this.isDiscoveryPage) {
         this.$message.success(this.$t('saveSuccess'))
         this.getDiscovery()
       } else {

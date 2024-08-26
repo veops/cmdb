@@ -51,7 +51,7 @@
       @pushCITypeList="pushCITypeList"
       @addPlugin="openEditDrawer(null, 'add', 'plugin')"
     />
-    <EditDrawer ref="editDrawer" :is_inner="false" @updateNotInner="updateNotInner" />
+    <EditDrawer ref="editDrawer" :isDiscoveryPage="false" @updateNotInner="updateNotInner" />
   </div>
 </template>
 
