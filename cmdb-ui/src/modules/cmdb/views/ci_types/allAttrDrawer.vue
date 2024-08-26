@@ -49,7 +49,18 @@ export default {
       tableData: [],
     }
   },
-  inject: ['providerGroupsData'],
+  inject: {
+    providerGroupsData: {
+      default: () => {
+        return () => {
+          return {
+            CITypeGroups: [],
+            otherGroupAttributes: [],
+          }
+        }
+      }
+    }
+  },
   computed: {
     ...mapState({
       windowHeight: (state) => state.windowHeight,

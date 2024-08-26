@@ -124,7 +124,7 @@
                 "
                 target="_blank"
               >
-                {{ item }}
+                {{ getChoiceValueLabel(col, item) || item }}
               </a>
             </template>
             <PasswordField
@@ -143,11 +143,13 @@
                     margin: '2px',
                     ...getChoiceValueStyle(col, value),
                   }"
-                ><ops-icon
-                  :style="{ color: getChoiceValueIcon(col, value).color }"
-                  :type="getChoiceValueIcon(col, value).name"
-                />{{ value }}</span
                 >
+                  <ops-icon
+                    :style="{ color: getChoiceValueIcon(col, value).color }"
+                    :type="getChoiceValueIcon(col, value).name"
+                  />
+                  {{ getChoiceValueLabel(col, value) || value }}
+                </span>
               </template>
               <span
                 v-else
@@ -162,8 +164,8 @@
                   :style="{ color: getChoiceValueIcon(col, row[col.field]).color }"
                   :type="getChoiceValueIcon(col, row[col.field]).name"
                 />
-                {{ row[col.field] }}</span
-              >
+                {{ getChoiceValueLabel(col, row[col.field]) || row[col.field] }}
+              </span>
             </template>
           </template>
         </vxe-column>
@@ -582,6 +584,13 @@ export default {
       }
       return {}
     },
+    getChoiceValueLabel(col, colValue) {
+      const _find = col?.filters?.find((item) => String(item[0]) === String(colValue))
+      if (_find) {
+        return _find[1]?.label || ''
+      }
+      return ''
+    },
     handleExport() {
       this.$refs.batchDownload.open({
         preferenceAttrList: [
@@ -611,6 +620,7 @@ export default {
             return { ...item }
           }),
         ],
+        original: true,
         download: false,
       })
       this.selectedRowKeys = []

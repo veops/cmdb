@@ -42,7 +42,7 @@
               :style="{ color: getChoiceValueIcon(attr, value).color, marginRight: '5px' }"
               :type="getChoiceValueIcon(attr, value).name"
             />
-            {{ value }}</span
+            {{ getChoiceValueLabel(attr, value) || value }}</span
           >
         </template>
         <span
@@ -66,7 +66,7 @@
             :style="{ color: getChoiceValueIcon(attr, ci[attr.name]).color, marginRight: '5px' }"
             :type="getChoiceValueIcon(attr, ci[attr.name]).name"
           />
-          {{ ci[attr.name] }}
+          {{ getChoiceValueLabel(attr, ci[attr.name]) || ci[attr.name] }}
         </span>
       </template>
       <template v-else-if="attr.is_list">
@@ -134,7 +134,7 @@
                     :type="choice[1].icon.name"
                   />
                 </template>
-                {{ choice[0] }}
+                {{ choice[1].label || choice[0] }}
               </span>
             </a-select-option>
           </a-select>
@@ -318,6 +318,15 @@ export default {
       }
       return {}
     },
+
+    getChoiceValueLabel(col, colValue) {
+      const _find = col.choice_value.find((item) => String(item[0]) === String(colValue))
+      if (_find) {
+        return _find[1]?.label || ''
+      }
+      return ''
+    },
+
     getName(name) {
       return name ?? ''
     },
