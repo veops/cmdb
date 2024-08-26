@@ -389,6 +389,7 @@ class CMDBCounterCache(object):
 
             return cis
 
+        origin_result = dict()
         result = dict()
         # level = 1
         query = "_type:({}),{}".format(";".join(map(str, type_ids)), other_filter)
@@ -399,16 +400,17 @@ class CMDBCounterCache(object):
             current_app.logger.error(e)
             return
 
-        enum_map = AttributeManager.get_enum_map(attr_ids[0])
+        enum_map1 = AttributeManager.get_enum_map(attr_ids[0])
         for i in (list(facet.values()) or [[]])[0]:
             k = ValueTypeMap.serialize2[attr2value_type[0]](str(i[0]))
-            result[enum_map.get(k, k)] = i[1]
+            result[enum_map1.get(k, k)] = i[1]
+            origin_result[k] = i[1]
         if len(attr_ids) == 1:
             return result
 
         # level = 2
-        enum_map = AttributeManager.get_enum_map(attr_ids[1])
-        for v in result:
+        enum_map2 = AttributeManager.get_enum_map(attr_ids[1])
+        for v in origin_result:
             query = "_type:({}),{},{}:{}".format(";".join(map(str, type_ids)), other_filter, attr_ids[0], v)
             s = search(query, fl=attr_ids, facet=[attr_ids[1]], count=1)
             try:
@@ -416,20 +418,22 @@ class CMDBCounterCache(object):
             except SearchError as e:
                 current_app.logger.error(e)
                 return
-            result[v] = dict()
+            result[enum_map1.get(v, v)] = dict()
+            origin_result[v] = dict()
             for i in (list(facet.values()) or [[]])[0]:
                 k = ValueTypeMap.serialize2[attr2value_type[1]](str(i[0]))
-                result[v][enum_map.get(k, k)] = i[1]
+                result[enum_map1.get(v, v)][enum_map2.get(k, k)] = i[1]
+                origin_result[v][k] = i[1]
 
         if len(attr_ids) == 2:
             return result
 
         # level = 3
-        enum_map = AttributeManager.get_enum_map(attr_ids[2])
-        for v1 in result:
+        enum_map3 = AttributeManager.get_enum_map(attr_ids[2])
+        for v1 in origin_result:
             if not isinstance(result[v1], dict):
                 continue
-            for v2 in result[v1]:
+            for v2 in origin_result[v1]:
                 query = "_type:({}),{},{}:{},{}:{}".format(";".join(map(str, type_ids)), other_filter,
                                                            attr_ids[0], v1, attr_ids[1], v2)
                 s = search(query, fl=attr_ids, facet=[attr_ids[2]], count=1)
@@ -438,10 +442,10 @@ class CMDBCounterCache(object):
                 except SearchError as e:
                     current_app.logger.error(e)
                     return
-                result[v1][v2] = dict()
+                result[enum_map1.get(v1, v1)][enum_map2.get(v2, v2)] = dict()
                 for i in (list(facet.values()) or [[]])[0]:
                     k = ValueTypeMap.serialize2[attr2value_type[2]](str(i[0]))
-                    result[v1][v2][enum_map.get(k, k)] = i[1]
+                    result[enum_map1.get(v1, v1)][enum_map2.get(v2, v2)][enum_map3.get(k, k)] = i[1]
 
         return result
 
