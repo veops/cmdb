@@ -8,7 +8,7 @@ import datetime
 import os
 import yaml
 from flask import current_app
-
+import json
 from api.extensions import cache
 from api.extensions import db
 from api.lib.cmdb.custom_dashboard import CustomDashboardManager
@@ -255,7 +255,7 @@ class CMDBCounterCache(object):
 
     @classmethod
     def set(cls, result):
-        cache.set(cls.KEY, result, timeout=0)
+        cache.set(cls.KEY, json.loads(json.dumps(result)), timeout=0)
 
     @classmethod
     def reset(cls):
@@ -277,7 +277,7 @@ class CMDBCounterCache(object):
 
         cls.set(result)
 
-        return result
+        return json.loads(json.dumps(result))
 
     @classmethod
     def update(cls, custom, flush=True):
@@ -299,7 +299,7 @@ class CMDBCounterCache(object):
             result[custom['id']] = res
             cls.set(result)
 
-        return res
+        return json.loads(json.dumps(res))
 
     @classmethod
     def relation_counter(cls, type_id, level, other_filer, type_ids):
@@ -418,7 +418,7 @@ class CMDBCounterCache(object):
                 return
             result[v] = dict()
             for i in (list(facet.values()) or [[]])[0]:
-                k = ValueTypeMap.serialize2[attr2value_type[0]](str(i[0]))
+                k = ValueTypeMap.serialize2[attr2value_type[1]](str(i[0]))
                 result[v][enum_map.get(k, k)] = i[1]
 
         if len(attr_ids) == 2:
