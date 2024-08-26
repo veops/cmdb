@@ -77,7 +77,7 @@ class AttributeValueManager(object):
             else:
                 res[field_name] = ValueTypeMap.serialize[attr.value_type](rs[0].value) if rs else None
 
-            if field_name in enum_map:
+            if enum_map and field_name in enum_map:
                 if attr.is_list:
                     res[field_name] = [enum_map[field_name].get(i, i) for i in res[field_name]]
                 else:
