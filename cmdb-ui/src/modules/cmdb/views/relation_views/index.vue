@@ -1259,7 +1259,7 @@ export default {
     },
     async openBatchDownload() {
       this.$refs.batchDownload.open({
-        preferenceAttrList: this.preferenceAttrList,
+        preferenceAttrList: this.preferenceAttrList.filter((attr) => !attr?.is_reference),
         ciTypeName: this.$route.meta.name,
       })
     },
