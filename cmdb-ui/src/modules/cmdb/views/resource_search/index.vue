@@ -592,11 +592,21 @@ export default {
       return ''
     },
     handleExport() {
+      const preferenceAttrList = [
+        { id: `ci_type_alias`, value: 'ci_type_alias', label: this.$t('cmdb.ciType.ciType') },
+        ...this.columnsGroup,
+      ]
+
+      preferenceAttrList.forEach((attr) => {
+        if (Array.isArray(attr?.children) && attr?.children?.length) {
+          attr.children = attr.filter((child) => {
+            return !child?.is_reference
+          })
+        }
+      })
+
       this.$refs.batchDownload.open({
-        preferenceAttrList: [
-          { id: `ci_type_alias`, value: 'ci_type_alias', label: this.$t('cmdb.ciType.ciType') },
-          ...this.columnsGroup,
-        ],
+        preferenceAttrList,
       })
     },
     batchDownload({ filename, type, checkedKeys }) {
