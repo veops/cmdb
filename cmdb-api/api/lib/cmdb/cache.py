@@ -379,10 +379,17 @@ class CMDBCounterCache(object):
         other_filter = "{}".format(other_filter) if other_filter else ''
 
         if custom['options'].get('ret') == 'cis':
+            enum_map = {}
+            for _attr_id in attr_ids:
+                _attr = AttributeCache.get(_attr_id)
+                if _attr:
+                    enum_map[_attr.alias] = AttributeManager.get_enum_map(_attr_id)
+
             query = "_type:({}),{}".format(";".join(map(str, type_ids)), other_filter)
             s = search(query, fl=attr_ids, ret_key='alias', count=100)
             try:
                 cis, _, _, _, _, _ = s.search()
+                cis = [{k: (enum_map.get(k) or {}).get(v, v) for k, v in ci.items()} for ci in cis]
             except SearchError as e:
                 current_app.logger.error(e)
                 return
@@ -431,7 +438,7 @@ class CMDBCounterCache(object):
         # level = 3
         enum_map3 = AttributeManager.get_enum_map(attr_ids[2])
         for v1 in origin_result:
-            if not isinstance(result[v1], dict):
+            if not isinstance(result[enum_map1.get(v1, v1)], dict):
                 continue
             for v2 in origin_result[v1]:
                 query = "_type:({}),{},{}:{},{}:{}".format(";".join(map(str, type_ids)), other_filter,
