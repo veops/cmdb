@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals
 
+from collections import defaultdict
+
 import datetime
 import os
 import yaml
@@ -299,11 +301,12 @@ class CMDBCounterCache(object):
 
         return res
 
-    @staticmethod
-    def relation_counter(type_id, level, other_filer, type_ids):
+    @classmethod
+    def relation_counter(cls, type_id, level, other_filer, type_ids):
         from api.lib.cmdb.search.ci_relation.search import Search as RelSearch
         from api.lib.cmdb.search import SearchError
         from api.lib.cmdb.search.ci import search
+        from api.lib.cmdb.attribute import AttributeManager
 
         query = "_type:{}".format(type_id)
         if other_filer:
@@ -318,8 +321,12 @@ class CMDBCounterCache(object):
         show_attr_id = root_type and root_type.show_id
         show_attr = AttributeCache.get(show_attr_id)
 
-        type_id_names = [(str(i.get('_id')), i.get(show_attr and show_attr.name) or i.get(i.get('unique')))
-                         for i in type_names]
+        type_id_names = []
+        for i in type_names:
+            attr_value = i.get(show_attr and show_attr.name) or i.get(i.get('unique'))
+            enum_map = AttributeManager.get_enum_map(show_attr_id or i.get('unique'))
+
+            type_id_names.append((str(i.get('_id')), enum_map.get(attr_value, attr_value)))
 
         s = RelSearch([i[0] for i in type_id_names], level)
         try:
@@ -351,11 +358,12 @@ class CMDBCounterCache(object):
 
         return result
 
-    @staticmethod
-    def attribute_counter(custom):
+    @classmethod
+    def attribute_counter(cls, custom):
         from api.lib.cmdb.search import SearchError
         from api.lib.cmdb.search.ci import search
         from api.lib.cmdb.utils import ValueTypeMap
+        from api.lib.cmdb.attribute import AttributeManager
 
         custom.setdefault('options', {})
         type_id = custom.get('type_id')
@@ -390,12 +398,16 @@ class CMDBCounterCache(object):
         except SearchError as e:
             current_app.logger.error(e)
             return
+
+        enum_map = AttributeManager.get_enum_map(attr_ids[0])
         for i in (list(facet.values()) or [[]])[0]:
-            result[ValueTypeMap.serialize2[attr2value_type[0]](str(i[0]))] = i[1]
+            k = ValueTypeMap.serialize2[attr2value_type[0]](str(i[0]))
+            result[enum_map.get(k, k)] = i[1]
         if len(attr_ids) == 1:
             return result
 
         # level = 2
+        enum_map = AttributeManager.get_enum_map(attr_ids[1])
         for v in result:
             query = "_type:({}),{},{}:{}".format(";".join(map(str, type_ids)), other_filter, attr_ids[0], v)
             s = search(query, fl=attr_ids, facet=[attr_ids[1]], count=1)
@@ -406,12 +418,14 @@ class CMDBCounterCache(object):
                 return
             result[v] = dict()
             for i in (list(facet.values()) or [[]])[0]:
-                result[v][ValueTypeMap.serialize2[attr2value_type[1]](str(i[0]))] = i[1]
+                k = ValueTypeMap.serialize2[attr2value_type[0]](str(i[0]))
+                result[v][enum_map.get(k, k)] = i[1]
 
         if len(attr_ids) == 2:
             return result
 
         # level = 3
+        enum_map = AttributeManager.get_enum_map(attr_ids[2])
         for v1 in result:
             if not isinstance(result[v1], dict):
                 continue
@@ -426,7 +440,8 @@ class CMDBCounterCache(object):
                     return
                 result[v1][v2] = dict()
                 for i in (list(facet.values()) or [[]])[0]:
-                    result[v1][v2][ValueTypeMap.serialize2[attr2value_type[2]](str(i[0]))] = i[1]
+                    k = ValueTypeMap.serialize2[attr2value_type[2]](str(i[0]))
+                    result[v1][v2][enum_map.get(k, k)] = i[1]
 
         return result
 
@@ -530,19 +545,18 @@ class CMDBCounterCache(object):
 
     @classmethod
     def flush_sub_counter(cls):
-        result = dict(type_id2users=dict())
+        result = dict(type_id2users=defaultdict(list))
 
         types = db.session.query(PreferenceShowAttributes.type_id,
                                  PreferenceShowAttributes.uid, PreferenceShowAttributes.created_at).filter(
             PreferenceShowAttributes.deleted.is_(False)).group_by(
             PreferenceShowAttributes.uid, PreferenceShowAttributes.type_id)
         for i in types:
-            result['type_id2users'].setdefault(i.type_id, []).append(i.uid)
+            result['type_id2users'][i.type_id].append(i.uid)
 
         types = PreferenceTreeView.get_by(to_dict=False)
         for i in types:
 
-            result['type_id2users'].setdefault(i.type_id, [])
             if i.uid not in result['type_id2users'][i.type_id]:
                 result['type_id2users'][i.type_id].append(i.uid)
 
