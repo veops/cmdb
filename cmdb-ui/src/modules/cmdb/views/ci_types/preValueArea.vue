@@ -354,10 +354,9 @@ export default {
     getData() {
       if (this.activeKey === 'builtin') {
         return {
-          choice_value: this.valueList,
+          choice_value: [],
           choice_web_hook: null,
           choice_other: null,
-          choice_builtin: null,
         }
       } else if (this.activeKey === 'define') {
         if (this.validateDefine()) {
@@ -369,18 +368,16 @@ export default {
         return {
           choice_value: this.valueList.filter((item) => item?.[0]),
           choice_web_hook: null,
-          choice_other: null,
-          choice_builtin: null
+          choice_other: null
         }
       } else if (this.activeKey === 'webhook') {
         const choice_web_hook = this.$refs.webhook.getParams()
         choice_web_hook.ret_key = this.form.ret_key
-        return { choice_value: [], choice_web_hook, choice_other: null, choice_builtin: null }
+        return { choice_value: [], choice_web_hook, choice_other: null }
       } else if (this.activeKey === 'script') {
         return {
           choice_value: [],
           choice_web_hook: null,
-          choice_builtin: null,
           choice_other: {
             script: this.script,
             cascade_attributes: this.cascade_attributes,
@@ -395,8 +392,7 @@ export default {
         return {
           choice_value: [],
           choice_web_hook: null,
-          choice_other,
-          choice_builtin: null,
+          choice_other
         }
       }
     },
