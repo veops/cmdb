@@ -91,6 +91,7 @@ export function getCITableColumns(data, attrList, width = 1600, height) {
             value_type: attr.value_type,
             sortable: !!attr.is_sortable,
             filters: attr.is_choice ? attr.choice_value : null,
+            choice_builtin: null,
             width: Math.min(Math.max(100, ...data.map(item => strLength(item[attr.name]))), 350),
             is_link: attr.is_link,
             is_password: attr.is_password,

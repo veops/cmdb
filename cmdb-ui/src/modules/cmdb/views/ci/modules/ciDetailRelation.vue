@@ -233,6 +233,7 @@ export default {
             this.firstCIJsonAttr[item._type].forEach((attr) => {
               item[`${attr}`] = item[`${attr}`] ? JSON.stringify(item[`${attr}`]) : ''
             })
+            this.formatCI(item, this.firstCIColumns)
             if (item.ci_type in firstCIs) {
               firstCIs[item.ci_type].push(item)
             } else {
@@ -251,6 +252,7 @@ export default {
             this.secondCIJsonAttr[item._type].forEach((attr) => {
               item[`${attr}`] = item[`${attr}`] ? JSON.stringify(item[`${attr}`]) : ''
             })
+            this.formatCI(item, this.secondCIColumns)
             if (item.ci_type in secondCIs) {
               secondCIs[item.ci_type].push(item)
             } else {
@@ -261,6 +263,26 @@ export default {
         })
         .catch((e) => {})
     },
+
+    formatCI(ci, columns) {
+      Object.keys(ci).forEach((key) => {
+        const attr = columns?.[ci?._type]?.find((item) => item?.params?.attr?.name === key)?.params?.attr
+        if (attr?.is_choice && attr?.choice_value?.length) {
+          if (attr?.is_list) {
+            ci[key] = ci[key].map((value) => {
+              const label = attr?.choice_value?.find((choice) => choice?.[0] === value)?.[1]?.label
+              return label || ci[key]
+            })
+          } else {
+            const label = attr?.choice_value?.find((choice) => choice?.[0] === ci[key])?.[1]?.label
+            ci[key] = label || ci[key]
+          }
+        }
+      })
+
+      return ci
+    },
+
     async getParentCITypes() {
       const res = await getCITypeParent(this.typeId)
       this.parentCITypes = res.parents

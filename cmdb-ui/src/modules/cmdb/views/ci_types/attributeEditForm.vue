@@ -73,7 +73,7 @@
       >
         <a-form-item
           :label-col="{ span: currentValueType === '6' ? 4 : 8 }"
-          :wrapper-col="{ span: currentValueType === '6' ? 18 : 12 }"
+          :wrapper-col="{ span: currentValueType === '6' ? 18 : 15 }"
           :label="$t('cmdb.ciType.defaultValue')"
         >
           <template>
@@ -367,7 +367,10 @@
               ref="preValueArea"
               :disabled="isShowComputedArea"
               :CITypeId="CITypeId"
+              :enumValueType="enumValueType"
             />
+
+            <a-button type="primary" size="small" ghost @click="resetPreValue" >{{ $t('reset') }}</a-button>
           </a-form-item>
         </a-col>
         <a-col :span="24" v-if="!['6', '7', '10', '11'].includes(currentValueType)">
@@ -442,6 +445,7 @@ import PreValueArea from './preValueArea.vue'
 import FontArea from './fontArea.vue'
 import RegSelect from '@/components/RegexSelect'
 import ReferenceModelSelect from './attributeEdit/referenceModelSelect.vue'
+import { ENUM_VALUE_TYPE } from './preValueAttr/constants.js'
 
 export default {
   name: 'AttributeEditForm',
@@ -474,6 +478,7 @@ export default {
 
       defaultForDatetime: '',
       re_check: {},
+      enumValueType: ENUM_VALUE_TYPE.INPUT
     }
   },
 
@@ -686,6 +691,22 @@ export default {
         }
         const _find = attributes.find((item) => item.id === _record.id)
         if (!['6', '7', '10', '11'].includes(_record.value_type)) {
+          switch (_record.value_type) {
+            case '0':
+            case '1':
+              this.enumValueType = ENUM_VALUE_TYPE.NUMBER
+              break
+            case '3':
+              this.enumValueType = ENUM_VALUE_TYPE.DATE_TIME
+              break
+            case '4':
+              this.enumValueType = ENUM_VALUE_TYPE.DATE
+              break
+            default:
+              this.enumValueType = ENUM_VALUE_TYPE.INPUT
+              break
+          }
+
           this.$refs.preValueArea.setData({
             choice_value: (_find || {}).choice_value || [],
             choice_web_hook: _record.choice_web_hook,
@@ -715,8 +736,6 @@ export default {
             })
           }
 
-          delete values['default_show']
-          delete values['is_required']
           const { default_value } = values
           if (values.value_type === '10') {
             values.default = { default: values.is_list ? default_value : Boolean(default_value) }
@@ -748,7 +767,6 @@ export default {
             values.default = { default: null }
           }
 
-          delete values.default_value
           if (values.is_computed) {
             const computedAreaData = this.$refs.computedArea.getData()
             values = { ...values, ...computedAreaData }
@@ -756,9 +774,18 @@ export default {
             // If it is a non-computed attribute, check to see if there is a predefined value
             if (!['6', '7', '10', '11'].includes(values.value_type)) {
               const preValueAreaData = this.$refs.preValueArea.getData()
+              // 预定义值校验错误
+              if (preValueAreaData?.isError) {
+                return
+              }
               values = { ...values, ...preValueAreaData }
             }
           }
+
+          delete values['default_show']
+          delete values['is_required']
+          delete values.default_value
+
           const fontOptions = this.$refs.fontArea.getData()
 
           if (!['6', '10', '11'].includes(values.value_type)) {
@@ -831,10 +858,19 @@ export default {
     },
     changeDefaultForDatetime(value) {
       this.defaultForDatetime = value
-      if (value === '$custom_time') {
-        this.form.setFieldsValue({
-          default_value: undefined,
-        })
+      switch (value) {
+        case '$custom_time':
+          this.form.setFieldsValue({
+            default_value: undefined,
+          })
+          break
+        case '$updated_at':
+          this.form.setFieldsValue({
+            is_dynamic: true,
+          })
+          break
+        default:
+          break
       }
     },
     onClick({ key }) {
@@ -862,6 +898,12 @@ export default {
       }
       return []
     },
+
+    resetPreValue() {
+      if (this.$refs.preValueArea) {
+        this.$refs.preValueArea.resetData()
+      }
+    }
   },
   watch: {},
 }

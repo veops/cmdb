@@ -375,10 +375,9 @@ export default {
   },
   methods: {
     async getAttributeList() {
-      await getCITypeAttributesById(Number(this.typeId)).then((res) => {
-        this.attrList = res.attributes
-        this.attributes = res
-      })
+      const res = await getCITypeAttributesById(Number(this.typeId))
+      this.attrList = res.attributes
+      this.attributes = res
     },
     async getTreeViews() {
       this.subscribeTreeViewCiTypesLoading = true
@@ -519,10 +518,18 @@ export default {
 
     wrapTreeData(facet) {
       // 切面
-      console.log('facet', facet)
       const _treeData = Object.values(facet)[0].map((item) => {
+        let title = item[0]
+        const attr = this.attrList.find((attr) => attr.name === item[2])
+        if (attr?.choice_value?.length) {
+          const choice = attr.choice_value.find((choice) => item[0] === choice?.[0])
+          if (choice?.[1]?.label) {
+            title = choice[1].label
+          }
+        }
+
         return {
-          title: item[0],
+          title: title,
           childLength: item[1],
           key: this.treeKeys.join(this.keySplit) + this.keySplit + item[0],
           isLeaf: this.levels.length - 1 === this.treeKeys.length,

@@ -88,7 +88,7 @@
             (node) => {
               return {
                 id: node[0],
-                label: node[0],
+                label: node[1].label || node[0],
                 children: node.children,
               }
             }
