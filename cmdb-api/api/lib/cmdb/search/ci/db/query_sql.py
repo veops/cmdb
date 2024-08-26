@@ -56,7 +56,7 @@ QUERY_CI_BY_ATTR_NAME = """
     SELECT {0}.ci_id
     FROM {0}
     WHERE {0}.attr_id={1:d}
-      AND {0}.value {2}
+      AND ({0}.value {2})
 """
 
 QUERY_CI_BY_ID = """
