@@ -161,7 +161,7 @@ class CIManager(object):
 
     @classmethod
     def get_ci_by_id_from_db(cls, ci_id, ret_key=RetKey.NAME, fields=None, need_children=True, use_master=False,
-                             valid=False):
+                             valid=False, enum_use_label=False):
         """
 
         :param ci_id:
@@ -170,6 +170,7 @@ class CIManager(object):
         :param need_children:
         :param use_master: whether to use master db
         :param valid:
+        :param enum_use_label:
         :return:
         """
 
@@ -187,13 +188,19 @@ class CIManager(object):
 
         res["ci_type"] = ci_type.name
 
-        fields = CITypeAttributeManager.get_attr_names_by_type_id(ci.type_id) if not fields else fields
+        enum_map = dict()
+        if not enum_use_label:
+            fields = CITypeAttributeManager.get_attr_names_by_type_id(ci.type_id) if not fields else fields
+        else:
+            fields, enum_map = CITypeAttributeManager.get_attr_names_label_enum(
+                ci.type_id) if not fields else (fields, {})
         unique_key = AttributeCache.get(ci_type.unique_id)
         _res = AttributeValueManager().get_attr_values(fields,
                                                        ci_id,
                                                        ret_key=ret_key,
                                                        unique_key=unique_key,
-                                                       use_master=use_master)
+                                                       use_master=use_master,
+                                                       enum_map=enum_map)
         res.update(_res)
 
         res['_type'] = ci_type.id
@@ -376,7 +383,7 @@ class CIManager(object):
         ci_type_attrs_alias = {attr.alias: attr for _, attr in attrs}
         ci_attr2type_attr = {type_attr.attr_id: type_attr for type_attr, _ in attrs}
         ci_type_attrs_name_alias = {**ci_type_attrs_name, **ci_type_attrs_alias}
-        
+
         ci = None
         record_id = None
         password_dict = {}
@@ -1509,7 +1516,8 @@ class CITriggerManager(object):
                 cls._update_old_attr_value(record_id, ci_dict)
 
             if ci_id is not None:
-                ci_dict = CIManager().get_ci_by_id_from_db(ci_id, need_children=False, use_master=False)
+                ci_dict = CIManager().get_ci_by_id_from_db(
+                    ci_id, need_children=False, use_master=False, enum_use_label=True)
 
             try:
                 response = webhook_request(webhook, ci_dict).text
@@ -1536,7 +1544,8 @@ class CITriggerManager(object):
         with app.app_context():
 
             if ci_id is not None:
-                ci_dict = CIManager().get_ci_by_id_from_db(ci_id, need_children=False, use_master=False)
+                ci_dict = CIManager().get_ci_by_id_from_db(
+                    ci_id, need_children=False, use_master=False, enum_use_label=True)
 
             if operate_type == OperateType.UPDATE:
                 cls._update_old_attr_value(record_id, ci_dict)

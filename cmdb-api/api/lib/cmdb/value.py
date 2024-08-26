@@ -3,13 +3,13 @@
 
 from __future__ import unicode_literals
 
-import copy
 import imp
+
+import copy
+import jinja2
 import os
 import re
 import tempfile
-
-import jinja2
 from flask import abort
 from flask import current_app
 from jinja2schema import infer
@@ -47,7 +47,7 @@ class AttributeValueManager(object):
         """
         return AttributeCache.get(key)
 
-    def get_attr_values(self, fields, ci_id, ret_key="name", unique_key=None, use_master=False):
+    def get_attr_values(self, fields, ci_id, ret_key="name", unique_key=None, use_master=False, enum_map=None):
         """
 
         :param fields:
@@ -55,6 +55,7 @@ class AttributeValueManager(object):
         :param ret_key: It can be name or alias
         :param unique_key: primary attribute
         :param use_master: Only for master-slave read-write separation
+        :param enum_map:
         :return:
         """
         res = dict()
@@ -75,6 +76,12 @@ class AttributeValueManager(object):
                 res[field_name] = '******' if rs[0].value else ''
             else:
                 res[field_name] = ValueTypeMap.serialize[attr.value_type](rs[0].value) if rs else None
+
+            if field_name in enum_map:
+                if attr.is_list:
+                    res[field_name] = [enum_map[field_name].get(i, i) for i in res[field_name]]
+                else:
+                    res[field_name] = enum_map[field_name].get(res[field_name], res[field_name])
 
             if unique_key is not None and attr.id == unique_key.id and rs:
                 res['unique'] = unique_key.name
@@ -245,7 +252,7 @@ class AttributeValueManager(object):
                         if value.get('op') == "delete":
                             value['v'] = [ValueTypeMap.serialize[attr.value_type](
                                 self._deserialize_value(attr.alias, attr.value_type, i))
-                                          for i in handle_arg_list(value['v'])]
+                                for i in handle_arg_list(value['v'])]
                             continue
                         _value = value.get('v') or []
                     else:

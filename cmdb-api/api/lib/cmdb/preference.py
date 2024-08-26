@@ -1,8 +1,9 @@
 # -*- coding:utf-8 -*-
 
 
-import copy
+from collections import defaultdict
 
+import copy
 import six
 import toposort
 from flask import abort
@@ -263,12 +264,12 @@ class PreferenceManager(object):
         else:
             views = _views
 
-        view2cr_ids = dict()
+        view2cr_ids = defaultdict(list)
         name2view = dict()
         result = dict()
         name2id = list()
         for view in views:
-            view2cr_ids.setdefault(view['name'], []).extend(view['cr_ids'])
+            view2cr_ids[view['name']].extend(view['cr_ids'])
             name2id.append([view['name'], view['id']])
             name2view[view['name']] = view
 
