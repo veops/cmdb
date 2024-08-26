@@ -366,7 +366,7 @@ export default {
         }
 
         return {
-          choice_value: this.valueList.filter((item) => item?.[0]),
+          choice_value: this.valueList.filter((item) => !['', null, undefined].includes(item?.[0])),
           choice_web_hook: null,
           choice_other: null
         }
@@ -398,8 +398,10 @@ export default {
     },
 
     validateDefine() {
-      const valueList = this.valueList.filter((item) => item?.[0])
-      const isRepeat = _.uniq(valueList.map(item => item?.[0] || '')).length !== valueList.length
+      const valueList = this.valueList.filter((item) => {
+        return !['', null, undefined].includes(item?.[0])
+      })
+      const isRepeat = _.uniq(valueList.map(item => item?.[0])).length !== valueList.length
       if (isRepeat) {
         this.$message.warning(this.$t('cmdb.ciType.enumValueTip2'))
         return true
