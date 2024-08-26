@@ -130,6 +130,7 @@ const cmdb_en = {
         selectAttribute: 'Select Attribute',
         groupExisted: 'Group name already exists',
         attributeSortedTips: 'Attributes in other groups cannot be sorted. If you need to sort, please drag them to a custom group first!',
+        attributeSortedTips2: 'Non-inherited attributes cannot be inserted before inherited attributes!',
         buildinAttribute: 'built-in attributes',
         expr: 'Expression',
         code: 'Code',

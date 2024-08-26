@@ -233,6 +233,7 @@ export default {
       attrTypeFilter: [],
       unique: '',
       show_id: null,
+      groupMaxCount: {},
     }
   },
   computed: {
@@ -340,6 +341,7 @@ export default {
         })
         this.CITypeGroups = values[1]
         this.CITypeGroups.forEach((g) => {
+          this.groupMaxCount[g.name] = g.attributes.filter(a => a.inherited).length
           g.attributes.forEach((a) => {
             a.is_required = (temp[a.id] && temp[a.id].is_required) || false
             a.default_show = (temp[a.id] && temp[a.id].default_show) || false
@@ -475,44 +477,43 @@ export default {
     handleChange(e, group) {
       console.log('changess', group)
       if (e.hasOwnProperty('moved') && e.moved.oldIndex !== e.moved.newIndex) {
-        if (group === -1) {
-          this.$message.error(this.$t('cmdb.ciType.attributeSortedTips'))
+        if (group === -1 || group === null) {
+          this.refreshPage(this.$t('cmdb.ciType.attributeSortedTips'))
+        } else if (e.moved.newIndex < this.groupMaxCount[group]) {
+          this.refreshPage(this.$t('cmdb.ciType.attributeSortedTips2'))
         } else {
           transferCITypeAttrIndex(this.CITypeId, {
             from: { attr_id: e.moved.element.id, group_name: group },
-            to: { order: e.moved.newIndex, group_name: group },
+            to: { order: e.moved.newIndex, group_name: group }
           })
-            .then((res) => this.$message.success(this.$t('updateSuccess')))
-            .catch(() => {
-              this.abortDraggable()
-            })
+            .then(() => this.$message.success(this.$t('updateSuccess')))
+            .catch(() => this.init())
         }
       }
-
       if (e.hasOwnProperty('added')) {
         this.addRemoveGroupFlag = { to: { group_name: group, order: e.added.newIndex }, inited: true }
       }
-
       if (e.hasOwnProperty('removed')) {
         this.$nextTick(() => {
-          transferCITypeAttrIndex(this.CITypeId, {
-            from: { attr_id: e.removed.element.id, group_name: group },
-            to: { group_name: this.addRemoveGroupFlag.to.group_name, order: this.addRemoveGroupFlag.to.order },
-          })
-            .then((res) => this.$message.success(this.$t('saveSuccess')))
-            .catch(() => {
-              this.abortDraggable()
+          if (this.addRemoveGroupFlag.to.order < this.groupMaxCount[this.addRemoveGroupFlag.to.group_name]) {
+            this.refreshPage(this.$t('cmdb.ciType.attributeSortedTips2'))
+          } else {
+            transferCITypeAttrIndex(this.CITypeId, {
+              from: { attr_id: e.removed.element.id, group_name: group },
+              to: { group_name: this.addRemoveGroupFlag.to.group_name, order: this.addRemoveGroupFlag.to.order }
             })
-            .finally(() => {
-              this.addRemoveGroupFlag = {}
-            })
+              .then(() => this.$message.success(this.$t('saveSuccess')))
+              .catch(() => this.init())
+              .finally(() => {
+                this.addRemoveGroupFlag = {}
+              })
+          }
         })
       }
     },
-    abortDraggable() {
-      this.$nextTick(() => {
-        this.$router.push({ name: 'ci_type' })
-      })
+    refreshPage(errorMessage) {
+      this.$message.error(errorMessage)
+      this.init()
     },
     updatePropertyIndex() {
       const attributes = [] // All attributes
@@ -594,7 +595,7 @@ export default {
           return attrTypeFilter.includes(valueType)
         }
       })
-    },
+    }
   },
 }
 </script>
