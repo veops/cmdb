@@ -246,7 +246,6 @@
                 <a-icon
                   style="position:absolute;top:2px;left:-17px;color:#A5A9BC;"
                   type="info-circle"
-                  theme="filled"
                   @click="
                     (e) => {
                       e.stopPropagation()
@@ -281,7 +280,7 @@
 
       <a-col :span="6" v-if="!['6', '7', '10'].includes(currentValueType)">
         <a-form-item
-          :label-col="currentValueType === '2' ? { span: 8 } : horizontalFormItemLayout.labelCol"
+          :label-col="horizontalFormItemLayout.labelCol"
           :wrapper-col="horizontalFormItemLayout.wrapperCol"
         >
           <template slot="label">
@@ -292,7 +291,6 @@
                 <a-icon
                   style="position:absolute;top:3px;left:-17px;color:#A5A9BC;"
                   type="info-circle"
-                  theme="filled"
                   @click="
                     (e) => {
                       e.stopPropagation()
@@ -324,7 +322,6 @@
                 <a-icon
                   style="position:absolute;top:3px;left:-17px;color:#A5A9BC;"
                   type="info-circle"
-                  theme="filled"
                   @click="
                     (e) => {
                       e.stopPropagation()
@@ -383,7 +380,6 @@
                   <a-icon
                     style="position:absolute;top:3px;left:-17px;color:#A5A9BC;"
                     type="info-circle"
-                    theme="filled"
                     @click="
                       (e) => {
                         e.stopPropagation()
