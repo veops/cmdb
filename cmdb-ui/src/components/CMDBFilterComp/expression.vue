@@ -84,6 +84,24 @@
         :zIndex="1050"
         :disabled="disabled"
       >
+        <div
+          slot="option-label"
+          slot-scope="{ node }"
+          :style="{ width: '100%', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }"
+        >
+          <a-tooltip :title="node.label">
+            {{ node.label }}
+          </a-tooltip>
+        </div>
+        <div
+          :style="{ width: '100%', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }"
+          slot="value-label"
+          slot-scope="{ node }"
+        >
+          <a-tooltip :title="node.label">
+            {{ node.label }}
+          </a-tooltip>
+        </div>
       </treeselect>
       <CIReferenceAttr
         v-if="getAttr(item.property).is_reference && (item.exp === 'is' || item.exp === '~is')"
@@ -121,8 +139,8 @@
         :normalizer="
           (node) => {
             return {
-              id: node[0],
-              label: node[0],
+              id: String(node[0]),
+              label: node[1].label || node[0],
               children: node.children,
             }
           }
