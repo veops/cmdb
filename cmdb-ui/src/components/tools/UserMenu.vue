@@ -118,6 +118,8 @@ export default {
 
 .locale {
   cursor: pointer;
+  padding: 0 8px;
+
   &:hover {
     color: @primary-color;
   }
@@ -135,6 +137,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0 8px;
 
     &-icon {
       font-size: 12px;

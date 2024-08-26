@@ -166,7 +166,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
 import _ from 'lodash'
 import { v4 as uuidv4 } from 'uuid'
 import Treeselect from '@riophae/vue-treeselect'
@@ -191,20 +190,7 @@ export default {
       userFilterSelect: [],
     }
   },
-  computed: {
-    ...mapState(['user'])
-  },
-  created() {
-    this.initUserFilterSelect()
-  },
   methods: {
-    initUserFilterSelect() {
-      const permissions = this.user?.detailPermissions?.backend?.find((item) => item.name === 'Employee_Fields')?.permissions
-      const userFilterSelect = USER_FILTER_SELECT.filter((item) => {
-        return permissions.includes(item.value)
-      })
-      this.userFilterSelect = userFilterSelect
-    },
     async setRuleList(ruleList) {
       this.ruleList = ruleList?.length ? ruleList : []
     },

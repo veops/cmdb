@@ -62,11 +62,8 @@ export default {
   mounted() {
     this.$nextTick(() => {
       switch (this.activeKey) {
-        case '6':
-          this.$refs.triggerTable.getTableData()
-          break
         case '5':
-          this.$refs.reconciliationTable.getTableData()
+          this.$refs.triggerTable.getTableData()
           break
         default:
           break
@@ -87,11 +84,8 @@ export default {
           case '1':
             this.$refs.attributesTable.getCITypeGroupData()
             break
-          case '6':
-            this.$refs.triggerTable.getTableData()
-            break
           case '5':
-            this.$refs.reconciliationTable.getTableData()
+            this.$refs.triggerTable.getTableData()
             break
           default:
             break
