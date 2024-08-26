@@ -79,7 +79,9 @@
                     :type="choice[1].icon.name"
                   />
                 </template>
-                {{ choice[0] }}
+                <a-tooltip placement="topLeft" :title="choice[1].label || choice[0]">
+                  {{ choice[1].label || choice[0] }}
+                </a-tooltip>
               </span>
             </a-select-option>
           </a-select>
@@ -90,7 +92,7 @@
               attr.name,
               {
                 rules: [{ required: attr.is_required, message: $t('placeholder2') + `${attr.alias || attr.name}` }],
-                initialValue: attr.default && attr.default.default ? attr.default.default : '',
+                initialValue: attr.default && attr.default.default ? Array.isArray(attr.default.default) ? attr.default.default.join(',') : attr.default.default : '',
               },
             ]"
           >

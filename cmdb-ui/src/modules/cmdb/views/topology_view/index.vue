@@ -1185,7 +1185,23 @@ export default {
             if (!res.result.length) {
               this.handleNullNodeTips(this.$t('cmdb.topo.noInstancePerm'))
             } else {
-              this.currentNodeValues = res.result[0]
+              const currentNodeValues = res.result[0]
+              Object.keys(currentNodeValues).forEach((key) => {
+                const attr = this.currentNodeAttributes.find((attr) => attr.name === key)
+                if (attr?.choice_value?.length) {
+                  if (Array.isArray(currentNodeValues[key])) {
+                    currentNodeValues[key] = currentNodeValues[key].map((value) => {
+                      const choice = attr.choice_value.find((choice) => value === choice?.[0])
+                      return choice?.[1]?.label || value
+                    })
+                  } else {
+                    const choice = attr.choice_value.find((choice) => currentNodeValues[key] === choice?.[0])
+                    currentNodeValues[key] = choice?.[1]?.label || currentNodeValues[key]
+                  }
+                }
+              })
+
+              this.currentNodeValues = currentNodeValues
             }
           }).catch(error => {
             this.handleNullNodeTips(((error.response || {}).data || {}).message)

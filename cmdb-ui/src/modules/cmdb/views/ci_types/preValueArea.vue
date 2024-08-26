@@ -7,33 +7,22 @@
     :tabBarStyle="{ borderBottom: 'none' }"
   >
     <a-tab-pane key="define" :disabled="disabled">
-      <span style="font-size:12px;" slot="tab">{{ $t('define') }}</span>
-      <PreValueTag type="add" :item="[]" @add="addNewValue" :disabled="disabled">
-        <template #default>
-          <a-button
-            :style="{ marginBottom: '10px', fontSize: '12px', padding: '1px 7px' }"
-            type="primary"
-            ghost
-            :disabled="disabled"
-            size="small"
-          >
-            <a-icon type="plus" />{{ $t('add') }}</a-button
-          >
-        </template>
-      </PreValueTag>
-      <draggable :list="valueList" handle=".handle" :disabled="disabled">
-        <PreValueTag
-          :disabled="disabled"
-          v-for="(item, index) in valueList"
-          :key="`${item[0]}_${index}`"
-          :item="item"
-          @deleteValue="deleteValue"
-          @editValue="editValue"
-        />
-      </draggable>
+      <span style="font-size:14px;" slot="tab">{{ $t('cmdb.ciType.enum') }}</span>
+      <PreValueDefine
+        v-model="valueList"
+        :disabled="disabled"
+        :enumValueType="enumValueType"
+      />
+    </a-tab-pane>
+    <a-tab-pane key="builtin" :disabled="disabled">
+      <div class="tab-builtin" slot="tab">
+        <span class="tab-builtin-title">{{ $t('cmdb.ciType.builtin') }}</span>
+        <span v-if="isOpenSource" class="tab-builtin-tag">Pro</span>
+      </div>
+      <PreValueBuiltIn ref="builtInRef" />
     </a-tab-pane>
     <a-tab-pane key="webhook" :disabled="disabled">
-      <span style="font-size:12px;" slot="tab">Webhook</span>
+      <span style="font-size:14px;" slot="tab">Webhook</span>
       <Webhook ref="webhook" style="margin-top:10px" />
       <a-form-model :model="form">
         <a-col :span="24">
@@ -59,7 +48,7 @@
       </a-form-model>
     </a-tab-pane>
     <a-tab-pane key="choice_other" :disabled="disabled">
-      <span style="font-size:12px;" slot="tab">{{ $t('cmdb.ciType.choiceOther') }}</span>
+      <span style="font-size:14px;" slot="tab">{{ $t('cmdb.ciType.choiceOther') }}</span>
       <a-row :gutter="[24, 24]">
         <a-col :span="24">
           <a-form-item
@@ -179,11 +168,11 @@
       </a-row>
     </a-tab-pane>
     <a-tab-pane key="script" :disabled="disabled || !canDefineScript">
-      <span style="font-size:12px;" slot="tab">{{ $t('cmdb.ciType.code') }}</span>
+      <span style="font-size:14px;" slot="tab">{{ $t('cmdb.ciType.code') }}</span>
       <a-form-item
         :style="{ marginBottom: '5px' }"
         :label="$t('cmdb.ciType.cascadeAttr')"
-        :label-col="{ span: 3 }"
+        :label-col="{ span: $i18n.locale === 'en' ? 3 : 2 }"
         :wrapper-col="{ span: 19 }"
         :extra="scriptCodeExtraText"
         labelAlign="left"
@@ -191,7 +180,7 @@
         <a-select
           mode="multiple"
           style="width: 100%"
-          placeholder="Please select"
+          :placeholder="$t('placeholder2')"
           optionFilterProp="title"
           v-model="cascade_attributes"
         >
@@ -211,9 +200,11 @@
         <div>2. {{ $t('cmdb.ciType.computedAttrTip2') }}</div>
       </div>
 
-      <a-button size="small" @click="showAllPropDrawer">
-        {{ $t('cmdb.ciType.viewAllAttr') }}
-      </a-button>
+      <div class="all-attr-btn">
+        <a-button size="small" @click="showAllPropDrawer">
+          {{ $t('cmdb.ciType.viewAllAttr') }}
+        </a-button>
+      </div>
       <AllAttrDrawer ref="allAttrDrawer" />
 
       <CustomCodeMirror
@@ -237,6 +228,9 @@ import { getCITypeGroups } from '../../api/ciTypeGroup'
 import { getCITypeCommonAttributesByTypeIds, getCITypeAttributesById } from '../../api/CITypeAttr'
 import AttrFilter from './preValueAttr/attrFilter/index.vue'
 import AllAttrDrawer from './allAttrDrawer.vue'
+import PreValueDefine from './preValueAttr/define/index.vue'
+import PreValueBuiltIn from './preValueAttr/builtin/index.vue'
+import { ENUM_VALUE_TYPE } from './preValueAttr/constants.js'
 
 import CustomCodeMirror from '@/components/CustomCodeMirror'
 import 'codemirror/lib/codemirror.css'
@@ -245,7 +239,7 @@ require('codemirror/mode/python/python.js')
 
 export default {
   name: 'PreValueArea',
-  components: { draggable, PreValueTag, ColorPicker, Webhook, AttrFilter, CustomCodeMirror, AllAttrDrawer },
+  components: { draggable, PreValueTag, ColorPicker, Webhook, AttrFilter, CustomCodeMirror, AllAttrDrawer, PreValueDefine, PreValueBuiltIn },
   props: {
     disabled: {
       type: Boolean,
@@ -259,12 +253,26 @@ export default {
       type: Number,
       default: null,
     },
+    // eslint-disable-next-line vue/require-default-prop
+    enumValueType: {
+      type: String,
+      defualt: ENUM_VALUE_TYPE.INPUT
+    }
   },
   data() {
     return {
       defautValueColor,
       activeKey: 'define', // define webhook
-      valueList: [],
+      valueList: [
+        [
+          '',
+          {
+            style: {},
+            icon: {},
+            label: ''
+          }
+        ]
+      ],
       form: {
         ret_key: '',
       },
@@ -331,6 +339,10 @@ export default {
   },
   methods: {
     async getCITypeAttributesById() {
+      if (!this.CITypeId) {
+        this.curModelAttrList = []
+        return
+      }
       const res = await getCITypeAttributesById(this.CITypeId)
       let curModelAttrList = []
       if (res?.attributes?.length) {
@@ -339,47 +351,36 @@ export default {
       this.curModelAttrList = curModelAttrList
     },
 
-    addNewValue(newValue, newStyle, newIcon) {
-      if (newValue) {
-        const idx = this.valueList.findIndex((v) => v[0] === newValue)
-        if (idx > -1) {
-          this.$message.warning(this.$t('cmdb.ciType.valueExisted'))
-        } else {
-          this.valueList.push([newValue, { style: newStyle, icon: { ...newIcon } }])
-        }
-      }
-    },
-    deleteValue(item) {
-      const _valueList = _.cloneDeep(this.valueList)
-      const idx = _valueList.findIndex((v) => v[0] === item[0])
-      if (idx > -1) {
-        _valueList.splice(idx, 1)
-        this.valueList = _valueList
-      }
-    },
-    editValue(item, newValue, newStyle, newIcon) {
-      const _valueList = _.cloneDeep(this.valueList)
-      const idx = _valueList.findIndex((v) => v[0] === item[0])
-      if (idx > -1) {
-        _valueList[idx] = [newValue, { style: newStyle, icon: { ...newIcon } }]
-        this.valueList = _valueList
-      }
-    },
     getData() {
-      if (this.activeKey === 'define') {
+      if (this.activeKey === 'builtin') {
         return {
           choice_value: this.valueList,
           choice_web_hook: null,
           choice_other: null,
+          choice_builtin: null,
+        }
+      } else if (this.activeKey === 'define') {
+        if (this.validateDefine()) {
+          return {
+            isError: true
+          }
+        }
+
+        return {
+          choice_value: this.valueList.filter((item) => item?.[0]),
+          choice_web_hook: null,
+          choice_other: null,
+          choice_builtin: null
         }
       } else if (this.activeKey === 'webhook') {
         const choice_web_hook = this.$refs.webhook.getParams()
         choice_web_hook.ret_key = this.form.ret_key
-        return { choice_value: [], choice_web_hook, choice_other: null }
+        return { choice_value: [], choice_web_hook, choice_other: null, choice_builtin: null }
       } else if (this.activeKey === 'script') {
         return {
           choice_value: [],
           choice_web_hook: null,
+          choice_builtin: null,
           choice_other: {
             script: this.script,
             cascade_attributes: this.cascade_attributes,
@@ -395,9 +396,22 @@ export default {
           choice_value: [],
           choice_web_hook: null,
           choice_other,
+          choice_builtin: null,
         }
       }
     },
+
+    validateDefine() {
+      const valueList = this.valueList.filter((item) => item?.[0])
+      const isRepeat = _.uniq(valueList.map(item => item?.[0] || '')).length !== valueList.length
+      if (isRepeat) {
+        this.$message.warning(this.$t('cmdb.ciType.enumValueTip2'))
+        return true
+      }
+
+      return false
+    },
+
     setData({ choice_value, choice_web_hook, choice_other }) {
       if (choice_web_hook) {
         this.activeKey = 'webhook'
@@ -425,7 +439,26 @@ export default {
           }
         }
       } else {
-        this.valueList = choice_value
+        let valueList = [[
+          '',
+          {
+            style: {},
+            icon: {},
+            label: ''
+          }
+        ]]
+        if (choice_value?.length) {
+          valueList = choice_value.map((item) => {
+            return [
+              item[0],
+              {
+                ...item[1],
+                label: item?.[1]?.['label'] || item[0]
+              }
+            ]
+          })
+        }
+        this.valueList = valueList
         this.activeKey = 'define'
       }
       const dom = document.querySelector('#preValueArea .ant-tabs-ink-bar')
@@ -436,6 +469,56 @@ export default {
         dom.style.backgroundColor = '#2f54eb'
       }
     },
+
+    resetData() {
+      this.activeKey = 'define'
+      this.$set(this, 'valueList', [
+        [
+          '',
+          {
+            style: {},
+            icon: {},
+            label: ''
+          }
+        ]
+      ])
+
+      this.$nextTick(() => {
+        if (this.$refs.builtInRef) {
+          this.$refs.builtInRef.setData({})
+        }
+
+        if (this.$refs.webhook) {
+          this.$refs.webhook.setParams({})
+        }
+        this.form.ret_key = ''
+
+        this.script = ''
+        this.cascade_attributes = []
+        if (this.$refs.codemirror) {
+          this.$refs.codemirror.initCodeMirror('')
+        }
+
+        this.choice_other = {
+          type_ids: undefined,
+          attr_id: undefined
+        }
+        if (this.$refs.attrFilter) {
+          this.$refs.attrFilter.init(true, false)
+        }
+      })
+    },
+
+    initEnumValue() {
+      if (this.valueList) {
+        const valueList = _.cloneDeep(this.valueList)
+        valueList.forEach((item) => {
+          item[0] = ''
+        })
+        this.$set(this, 'valueList', valueList)
+      }
+    },
+
     setExpFromFilter(filterExp) {
       if (filterExp) {
         this.filterExp = `${filterExp}`
@@ -462,6 +545,24 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.tab-builtin {
+  display: flex;
+  align-items: center;
+
+  &-title {
+    font-size: 14px;
+  }
+
+  &-tag {
+    background-color: #E1EFFF;
+    color: #2F54EB;
+    font-size: 10px;
+    font-weight: 400;
+    padding: 0 3px;
+    margin-left: 3px;
+  }
+}
+
 .pre-value-edit-color {
   display: flex;
   flex-direction: row;
@@ -480,6 +581,12 @@ export default {
   font-size: 12px;
   line-height: 22px;
   color: #a5a9bc;
+}
+
+.all-attr-btn {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 </style>
 

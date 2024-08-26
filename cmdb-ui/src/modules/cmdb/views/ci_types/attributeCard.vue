@@ -74,7 +74,8 @@
                 !property.is_password &&
                 !property.is_list &&
                 !property.is_reference &&
-                !property.is_bool
+                !property.is_bool &&
+                !(Array.isArray(property.choice_value) ? property.choice_value.length > 0 : false)
             "
             :title="$t(isShowId ? 'cmdb.ciType.cancelSetAsShow' : 'cmdb.ciType.setAsShow')"
           >

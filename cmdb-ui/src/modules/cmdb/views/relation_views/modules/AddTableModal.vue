@@ -63,6 +63,14 @@
                 {{ id }}
               </a>
             </template>
+            <template #default="{row}" v-else-if="col.is_choice">
+              <span
+                v-for="value in (col.is_list ? row[col.field] : [row[col.field]])"
+                :key="value"
+              >
+                {{ getChoiceValueLabel(col, value) || value }}
+              </span>
+            </template>
             <template #default="{row}" v-else-if="col.value_type == '6'">
               <span v-if="col.value_type == '6' && row[col.field]">{{ JSON.stringify(row[col.field]) }}</span>
             </template>
@@ -252,6 +260,14 @@ export default {
     handleChangePage(page, pageSize) {
       this.currentPage = page
       this.fetchData()
+    },
+
+    getChoiceValueLabel(col, colValue) {
+      const _find = col.filters.find((item) => String(item[0]) === String(colValue))
+      if (_find) {
+        return _find[1]?.label || ''
+      }
+      return ''
     },
   },
 }

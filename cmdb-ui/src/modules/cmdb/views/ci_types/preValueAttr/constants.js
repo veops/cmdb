@@ -39,3 +39,10 @@ export const compareTypeList = [
   { value: '3', label: '<' },
   { value: '4', label: '<=' },
 ]
+
+export const ENUM_VALUE_TYPE = {
+  INPUT: 'input',
+  DATE: 'date',
+  DATE_TIME: 'dateTIme',
+  NUMBER: 'number'
+}
