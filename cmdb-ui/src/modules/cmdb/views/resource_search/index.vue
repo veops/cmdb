@@ -599,7 +599,7 @@ export default {
 
       preferenceAttrList.forEach((attr) => {
         if (Array.isArray(attr?.children) && attr?.children?.length) {
-          attr.children = attr.filter((child) => {
+          attr.children = attr.children.filter((child) => {
             return !child?.is_reference
           })
         }

@@ -187,7 +187,6 @@
                 <a-icon
                   style="position:absolute;top:2px;left:-17px;color:#2f54eb;"
                   type="question-circle"
-                  theme="filled"
                   @click="
                     (e) => {
                       e.stopPropagation()
