@@ -1399,6 +1399,10 @@ class CITypeTemplateManager(object):
                 payload = dict(group_id=group_id_map.get(group['id'], group['id']),
                                type_id=type_id_map.get(ci_type['id'], ci_type['id']),
                                order=order)
+                for i in CITypeGroupItem.get_by(type_id=payload['type_id'], to_dict=False):
+                    if i.group_id != payload['group_id']:
+                        i.soft_delete(flush=True)
+
                 existed = CITypeGroupItem.get_by(group_id=payload['group_id'], type_id=payload['type_id'],
                                                  first=True, to_dict=False)
                 if existed is None:
