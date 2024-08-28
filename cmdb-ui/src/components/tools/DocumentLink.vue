@@ -31,7 +31,7 @@ export default {
   text-align: center;
   border-radius: 4px;
   &:hover {
-    background: linear-gradient(0deg, rgba(0, 80, 201, 0.2) 0%, rgba(174, 207, 255, 0.06) 86.76%);
+    // background: linear-gradient(0deg, rgba(0, 80, 201, 0.2) 0%, rgba(174, 207, 255, 0.06) 86.76%);
     color: @layout-header-font-selected-color;
   }
 }

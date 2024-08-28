@@ -62,7 +62,7 @@ const cmdb_en = {
         desc: 'Reverse order',
         uniqueKey: 'Unique Identifies',
         uniqueKeySelect: 'Please select a unique identifier',
-        uniqueKeyTips: 'json/password/computed/choice can not be unique identifies',
+        uniqueKeyTips: 'json/password/computed/selectList can not be unique identifies',
         notfound: 'Can\'t find what you want?',
         cannotDeleteGroupTips: 'There is data under this group and cannot be deleted!',
         confirmDeleteGroup: 'Are you sure you want to delete group [{groupName}]?',
@@ -142,7 +142,7 @@ const cmdb_en = {
         selectCIType: 'Please select a CMDB CIType',
         selectCITypeAttributes: 'Please select CIType attributes',
         selectAttributes: 'Please select attributes',
-        choiceScriptDemo: 'class ChoiceValue(object):\n    @staticmethod\n    def values():\n        """\n        Execution entry, returns predefined value\n        :return: Returns a list, the type of the value is the same as the type of the attribute\n        For example:\n        return ["online", "offline"]\n        """\n        return []',
+        choiceScriptDemo: 'class ChoiceValue(object):\n    @staticmethod\n    def values():\n        """\n        Execution entry, returns select list\n        :return: Returns a list, the type of the value is the same as the type of the attribute\n        For example:\n        return ["online", "offline"]\n        """\n        return []',
         valueExisted: 'The current value already exists!',
         addRelation: 'Add Relation',
         sourceCIType: 'Source CIType',
@@ -306,6 +306,7 @@ const cmdb_en = {
         departmentCascadeDisplay: 'Cascade Display',
         filterUsers: 'Filter Users',
         enum: 'Enum',
+        ciGrantTip: `Filter conditions can be changed dynamically using {{}} referenced variables, currently user variables are supported, such as {{user.uid}},{{user.username}},{{user.email}},{{user.nickname}}`,
     },
     components: {
         unselectAttributes: 'Unselected',
@@ -391,7 +392,7 @@ const cmdb_en = {
         tips2: '1. Click to download the template, and users can customize the header of the template file, including model properties and model associations',
         // eslint-disable-next-line no-template-curly-in-string
         tips3: '2. The red color in the template file represents the model relationship, such as the $Product. Product Name (${Model Name}. {Attribute Name}) column, which establishes the relationship with the product.',
-        tips4: '3. In the download template Excel file, the predefined values of attributes will be set as dropdown options. Please note that due to the limitations of Excel itself, a single dropdown box is limited to a maximum of 255 characters. If it exceeds 255 characters, we will not set the dropdown options for this attribute',
+        tips4: `3. The download template excel file will have the property's drop-down list enumeration configured as a drop-down option. Please note that due to the limitations of Excel itself, a single dropdown box is limited to a maximum of 255 characters. If it exceeds 255 characters, we will not set the dropdown options for this attribute`,
         tips5: '4. When using Excel templates, please ensure that a single file does not exceed 5000 lines.',
     },
     preference: {
@@ -650,7 +651,7 @@ if __name__ == "__main__":
         tips4: 'At least one field must be selected',
         tips5: 'Search name | alias',
         tips6: 'Speed ​​up retrieval, full-text search possible, no need to use conditional filtering\n\n json/link/password currently does not support indexing \n\nText characters longer than 190 cannot be indexed',
-        tips7: 'The form of expression is a drop-down box, and the value must be in the predefined value',
+        tips7: 'Whether to configure a select list',
         tips8: 'Multiple values, such as intranet IP',
         tips9: 'For front-end only',
         tips10: 'Other attributes of the CIType are computed using expressions\n\nA code snippet computes the returned value.',

@@ -1,13 +1,15 @@
 <template>
   <div class="ci-types-triggers">
-    <div style="margin-bottom: 10px">
+    <div class="ci-types-triggers-add">
       <a-button
         type="primary"
         @click="handleAddTrigger"
-        size="small"
-        icon="plus"
-      >{{ $t('cmdb.ciType.newTrigger') }}</a-button
+        ghost
+        class="ops-button-ghost"
       >
+        <ops-icon type="veops-increase" />
+        {{ $t('create') }}
+      </a-button>
     </div>
     <ops-table
       stripe
@@ -134,5 +136,11 @@ export default {
 <style lang="less" scoped>
 .ci-types-triggers {
   padding: 0 20px 20px;
+
+  &-add {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: flex-end;
+  }
 }
 </style>

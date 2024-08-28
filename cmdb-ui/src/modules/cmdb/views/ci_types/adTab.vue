@@ -92,6 +92,10 @@ export default {
     font-size: 14px;
     font-weight: 400;
 
+    &:hover {
+      color: @primary-color;
+    }
+
     &:not(:first-child) {
       border-left: solid 1px @border-color-base;
     }
@@ -99,6 +103,10 @@ export default {
     &_active {
       background-color: @primary-color;
       color: #FFFFFF;
+
+      &:hover {
+        color: #FFFFFF;
+      }
     }
   }
 }

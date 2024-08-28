@@ -344,6 +344,10 @@ export default {
       cursor: pointer;
       flex-shrink: 0;
 
+      &:hover {
+        color: @primary-color;
+      }
+
       &_active {
         background-color: @primary-color_3;
         color: @primary-color;

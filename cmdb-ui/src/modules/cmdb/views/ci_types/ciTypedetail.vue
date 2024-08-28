@@ -107,4 +107,12 @@ export default {
 .grant-config-wrap {
   overflow: auto;
 }
+
+.ops-tab.ant-tabs {
+  /deep/ .ant-tabs-bar {
+    .ant-tabs-tab:hover {
+      color: @primary-color;
+    }
+  }
+}
 </style>
