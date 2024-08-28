@@ -65,9 +65,7 @@
               <a><a-icon type="question-circle"/></a>
             </a-tooltip>
           </a-input>
-          <a-tooltip :title="$t('reset')">
-            <a-button @click="reset">{{ $t('reset') }}</a-button>
-          </a-tooltip>
+          <a-button @click="reset">{{ $t('reset') }}</a-button>
           <FilterComp
             ref="filterComp"
             :canSearchPreferenceAttrList="canSearchPreferenceAttrList"
@@ -310,6 +308,11 @@ export default {
   height: 32px;
   .search-form-bar-filter {
     .ops_display_wrapper(transparent);
+
+    &:hover {
+      color: @primary-color;
+    }
+
     .search-form-bar-filter-icon {
       color: @primary-color;
       font-size: 12px;

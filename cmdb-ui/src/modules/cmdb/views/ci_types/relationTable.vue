@@ -1,14 +1,16 @@
 <template>
   <div class="relation-table" :style="{ padding: '0 20px 20px' }">
-    <a-button
-      v-if="!isInGrantComp"
-      style="margin-bottom: 10px"
-      @click="handleCreate"
-      type="primary"
-      size="small"
-      icon="plus"
-    >{{ $t('cmdb.ciType.addRelation') }}</a-button
-    >
+    <div v-if="!isInGrantComp" class="relation-table-add">
+      <a-button
+        type="primary"
+        @click="handleCreate"
+        ghost
+        class="ops-button-ghost"
+      >
+        <ops-icon type="veops-increase" />
+        {{ $t('create') }}
+      </a-button>
+    </div>
     <vxe-table
       ref="xTable"
       stripe
@@ -652,6 +654,12 @@ export default {
 .relation-table {
   /deep/ .vxe-cell {
     max-height: max-content !important;
+  }
+
+  &-add {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: flex-end;
   }
 }
 .table-attribute-row {
