@@ -62,7 +62,7 @@ const cmdb_zh = {
         desc: '倒序',
         uniqueKey: '唯一标识',
         uniqueKeySelect: '请选择唯一标识',
-        uniqueKeyTips: 'json、密码、计算属性、预定义值属性不能作为唯一标识',
+        uniqueKeyTips: 'json、密码、计算属性、下拉列表属性不能作为唯一标识',
         notfound: '找不到想要的?',
         cannotDeleteGroupTips: '该分组下有数据, 不能删除!',
         confirmDeleteGroup: '确定要删除分组 【{groupName}】 吗？',
@@ -142,7 +142,7 @@ const cmdb_zh = {
         selectCIType: '请选择CMDB模型',
         selectCITypeAttributes: '请选择模型属性',
         selectAttributes: '请选择属性',
-        choiceScriptDemo: 'class ChoiceValue(object):\n    @staticmethod\n    def values():\n        """\n        执行入口, 返回预定义值\n        :return: 返回一个列表, 值的类型同属性的类型\n        例如:\n        return ["在线", "下线"]\n        """\n        return []',
+        choiceScriptDemo: 'class ChoiceValue(object):\n    @staticmethod\n    def values():\n        """\n        执行入口, 返回下拉列表\n        :return: 返回一个列表, 值的类型同属性的类型\n        例如:\n        return ["在线", "下线"]\n        """\n        return []',
         valueExisted: '当前值已存在！',
         addRelation: '新增关系',
         sourceCIType: '源模型',
@@ -306,6 +306,7 @@ const cmdb_zh = {
         departmentCascadeDisplay: '部门级联显示',
         filterUsers: '筛选用户',
         enum: '枚举',
+        ciGrantTip: `筛选条件可使用{{}}引用变量实现动态变化，目前支持用户变量，如{{user.uid}},{{user.username}},{{user.email}},{{user.nickname}}`,
     },
     components: {
         unselectAttributes: '未选属性',
@@ -390,7 +391,7 @@ const cmdb_zh = {
         tips2: '1. 点击下载模板，用户可以自定义模板文件的表头，包括模型属性、模型关联',
         // eslint-disable-next-line no-template-curly-in-string
         tips3: '2. 模板文件中红色为模型关系，如$产品.产品名(${模型名}.{属性名})这一列就可建立和产品之间的关系',
-        tips4: '3. 下载模板excel文件中会将属性的预定义值置为下拉选项，请注意，受excel本身的限制，单个下拉框限制了最多255个字符，如果超过255个字符，我们不会设置该属性的下拉选项',
+        tips4: '3. 下载模板excel文件中会将属性的下拉列表枚举配置置为下拉选项，请注意，受excel本身的限制，单个下拉框限制了最多255个字符，如果超过255个字符，我们不会设置该属性的下拉选项',
         tips5: '4. 在使用excel模板时，请确保单个文件不超过5000行',
     },
     preference: {
@@ -649,7 +650,7 @@ if __name__ == "__main__":
         tips4: '必须至少选择一个字段',
         tips5: '搜索 名称 | 别名',
         tips6: '加快检索, 可以全文搜索, 无需使用条件过滤\n\n json、链接、密码目前不支持建索引 \n\n文本字符长度超过190不能建索引',
-        tips7: '表现形式是下拉框, 值必须在预定义值里',
+        tips7: '是否配置下拉列表',
         tips8: '多值, 比如内网IP',
         tips9: '仅针对前端',
         tips10: '模型的其他属性通过表达式的方式计算出来\n\n一个代码片段计算返回的值',

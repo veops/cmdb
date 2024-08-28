@@ -5,7 +5,6 @@
       v-for="route in defaultShowRoutes"
       :key="route.name"
       @click="() => handleClick(route)"
-      :title="$t(route.meta.title)"
     >
       {{ route.meta.title }}
     </span>
@@ -119,7 +118,9 @@ export default {
     line-height: @layout-header-line-height;
     display: inline-block;
   }
-  > span:hover,
+  > span:hover {
+    background-color: #f0f2f5;
+  }
   .top-menu-selected {
     font-weight: bold;
     color: @layout-header-font-selected-color;

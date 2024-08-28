@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1724653006782') format('woff2'),
-       url('iconfont.woff?t=1724653006782') format('woff'),
-       url('iconfont.ttf?t=1724653006782') format('truetype');
+  src: url('iconfont.woff2?t=1724834571283') format('woff2'),
+       url('iconfont.woff?t=1724834571283') format('woff'),
+       url('iconfont.ttf?t=1724834571283') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,74 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.caise-middleware:before {
+  content: "\e9a9";
+}
+
+.caise-database:before {
+  content: "\e9a7";
+}
+
+.caise-business:before {
+  content: "\e9a8";
+}
+
+.a-caise-virtualization:before {
+  content: "\e9a6";
+}
+
+.caise-storage_pool:before {
+  content: "\e9a4";
+}
+
+.a-caise-storage_volume1:before {
+  content: "\e9a5";
+}
+
+.ciase-aix:before {
+  content: "\e9a3";
+}
+
+.caise_pool:before {
+  content: "\e99b";
+}
+
+.caise-ip_address:before {
+  content: "\e99c";
+}
+
+.caise-computer_room:before {
+  content: "\e99d";
+}
+
+.caise-rack:before {
+  content: "\e99e";
+}
+
+.caise-pc:before {
+  content: "\e99f";
+}
+
+.caise-bandwidth_line:before {
+  content: "\e9a0";
+}
+
+.caise-fiber:before {
+  content: "\e9a1";
+}
+
+.caise-disk_array:before {
+  content: "\e9a2";
+}
+
+.veops-group:before {
+  content: "\e99a";
+}
+
+.veops-inheritance:before {
+  content: "\e999";
 }
 
 .veops-department:before {
