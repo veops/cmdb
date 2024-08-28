@@ -450,8 +450,9 @@ export default {
             return [
               item[0],
               {
-                ...item[1],
-                label: item?.[1]?.['label'] || item[0]
+                icon: item?.[1]?.['icon'] || {},
+                style: item?.[1]?.['style'] || {},
+                label: item?.[1]?.['label'] || item?.[0] || ''
               }
             ]
           })
