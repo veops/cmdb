@@ -134,7 +134,7 @@
                     :type="choice[1].icon.name"
                   />
                 </template>
-                {{ choice[1].label || choice[0] }}
+                {{ choice[1] ? choice[1].label || choice[0] : choice[0] }}
               </span>
             </a-select-option>
           </a-select>

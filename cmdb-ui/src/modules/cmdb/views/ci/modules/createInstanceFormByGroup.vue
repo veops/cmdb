@@ -72,8 +72,8 @@
                     :type="choice[1].icon.name"
                   />
                 </template>
-                <a-tooltip placement="topLeft" :title="choice[1].label || choice[0]">
-                  {{ choice[1].label || choice[0] }}
+                <a-tooltip placement="topLeft" :title="choice[1] ? choice[1].label || choice[0] : choice[0]">
+                  {{ choice[1] ? choice[1].label || choice[0] : choice[0] }}
                 </a-tooltip>
               </span>
             </a-select-option>
