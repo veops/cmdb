@@ -10,10 +10,25 @@
         <ops-icon class="common-settings-btn-icon" type="veops-setting" />
         <span class="common-settings-btn-text">{{ $t('settings') }}</span>
       </span>
-      <span class="locale" @click="changeLang">{{ locale === 'zh' ? '简中' : 'EN' }}</span>
       <a-popover
-        trigger="click"
-        :overlayStyle="{ width: '150px' }"
+        overlayClassName="lang-popover-wrap"
+        placement="bottomRight"
+        :getPopupContainer="(trigger) => trigger.parentNode"
+      >
+        <span class="locale">{{ languageList.find((lang) => lang.key === locale).title }}</span>
+        <div class="lang-menu" slot="content">
+          <a
+            v-for="(lang) in languageList"
+            :key="lang.key"
+            :class="['lang-menu-item', lang.key === locale ? 'lang-menu-item_active' : '']"
+            @click="changeLang(lang.key)"
+          >
+            {{ lang.title }}
+          </a>
+        </div>
+      </a-popover>
+      <a-popover
+        :overlayStyle="{ width: '130px' }"
         placement="bottomRight"
         overlayClassName="custom-user"
       >
@@ -29,7 +44,7 @@
             <span>{{ $t('topMenu.logout') }}</span>
           </div>
         </template>
-        <span class="action ant-dropdown-link user-dropdown-menu">
+        <span class="action ant-dropdown-link user-dropdown-menu user-info-wrap">
           <a-avatar
             v-if="avatar()"
             class="avatar"
@@ -53,6 +68,20 @@ export default {
   name: 'UserMenu',
   components: {
     DocumentLink,
+  },
+  data() {
+    return {
+      languageList: [
+        {
+          title: '简中',
+          key: 'zh'
+        },
+        {
+          title: 'EN',
+          key: 'en'
+        },
+      ]
+    }
   },
   computed: {
     ...mapState(['user', 'locale']),
@@ -81,14 +110,9 @@ export default {
     handleClick() {
       this.$router.push('/setting')
     },
-    changeLang() {
-      if (this.locale === 'zh') {
-        this.SET_LOCALE('en')
-        this.$i18n.locale = 'en'
-      } else {
-        this.SET_LOCALE('zh')
-        this.$i18n.locale = 'zh'
-      }
+    changeLang(lang) {
+      this.SET_LOCALE(lang)
+      this.$i18n.locale = lang
       this.$nextTick(() => {
         setDocumentTitle(`${this.$t(this.$route.meta.title)} - ${domTitle}`)
       })
@@ -124,6 +148,15 @@ export default {
     color: @primary-color;
   }
 }
+
+.lang-popover-wrap {
+  width: 70px;
+  padding: 0px;
+
+  .ant-popover-inner-content {
+    padding: 0px;
+  }
+}
 </style>
 
 <style lang="less" scoped>
@@ -149,6 +182,47 @@ export default {
       font-size: 12px;
       font-weight: 400;
       color: #4E5969;
+    }
+
+    &:hover {
+      .commen-settings-btn-text {
+        color: #2F54EB;
+      }
+    }
+  }
+
+  .lang-menu {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    &-item {
+      width: 100%;
+      padding: 5px 10px;
+      cursor: pointer;
+      color: #4E5969;
+
+      &_active {
+        color: #2F54EB;
+        background-color: #f0f5ff;
+      }
+
+      &:hover {
+        color: #2F54EB;
+      }
+    }
+  }
+
+  .user-info-wrap {
+    .avatar {
+      transition: all 0.2s;
+      border: solid 1px transparent;
+    }
+
+    &:hover {
+      .avatar {
+        border-color: #2F54EB;
+      }
     }
   }
 }

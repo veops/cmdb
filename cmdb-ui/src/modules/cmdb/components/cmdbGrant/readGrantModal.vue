@@ -53,6 +53,7 @@
             @setExpFromFilter="setExpFromFilter"
             :expression="expression"
           />
+          <div class="read-ci-tip">{{ $t('cmdb.ciType.ciGrantTip') }}</div>
         </a-form-model>
       </template>
     </CustomRadio>
@@ -209,4 +210,10 @@ export default {
 }
 </script>
 
-<style></style>
+<style lang="less" scoped>
+.read-ci-tip {
+  font-size: 12px;
+  line-height: 22px;
+  color: #a5a9bc;
+}
+</style>
