@@ -22,6 +22,7 @@ from api.models.cmdb import CITypeHistory
 from api.models.cmdb import CITypeTrigger
 from api.models.cmdb import CITypeUniqueConstraint
 from api.models.cmdb import OperationRecord
+from api.lib.cmdb.utils import ValueTypeMap
 
 
 class AttributeHistoryManger(object):
@@ -59,8 +60,23 @@ class AttributeHistoryManger(object):
         total = len(records)
 
         res = {}
+        unique_set = {}
+        from api.lib.cmdb.ci import CIManager
         for record in records:
             record_id = record.OperationRecord.id
+            ci_id = record.AttributeHistory.ci_id
+            if ci_id not in unique_set:
+                ci = CIManager.get_by_id(ci_id)
+                if ci and hasattr(ci, 'ci_type') and ci.ci_type:
+                    unique_id = ci.ci_type.unique_id
+                    unique_ci_type = AttributeCache.get(unique_id).value_type
+                    value_table_name = ValueTypeMap.table_name.get(f"index_{unique_ci_type}")
+                    value_table_list = getattr(ci, f"{value_table_name}.ci_id", None)
+                    matched_items = [item for item in value_table_list if item.attr_id == unique_id] if value_table_list else []
+                    if matched_items:
+                        unique_set[ci_id] = matched_items[0].value
+                else:
+                    unique_set[ci_id] = None
             attr_hist = record.AttributeHistory.to_dict()
             attr_hist['attr'] = AttributeCache.get(attr_hist['attr_id'])
             if attr_hist['attr']:
@@ -76,6 +92,7 @@ class AttributeHistoryManger(object):
 
             if record_id not in res:
                 record_dict = record.OperationRecord.to_dict()
+                record_dict['unique_value'] = unique_set.get(ci_id)
                 record_dict["user"] = UserCache.get(record_dict.get("uid"))
                 if record_dict["user"]:
                     record_dict['user'] = record_dict['user'].nickname
