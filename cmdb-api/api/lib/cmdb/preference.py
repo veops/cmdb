@@ -384,14 +384,22 @@ class PreferenceManager(object):
     def add_search_option(**kwargs):
         kwargs['uid'] = current_user.uid
 
-        existed = PreferenceSearchOption.get_by(uid=current_user.uid,
-                                                name=kwargs.get('name'),
-                                                prv_id=kwargs.get('prv_id'),
-                                                ptv_id=kwargs.get('ptv_id'),
-                                                type_id=kwargs.get('type_id'),
-                                                )
-        if existed:
-            return abort(400, ErrFormat.preference_search_option_exists)
+        if kwargs['name'] in ('__recent__', '__favor__'):
+            if kwargs['name'] == '__recent__':
+                for i in PreferenceSearchOption.get_by(
+                        only_query=True, name=kwargs['name'], uid=current_user.uid).order_by(
+                    PreferenceSearchOption.id.desc()).offset(20):
+                    i.delete()
+
+        else:
+            existed = PreferenceSearchOption.get_by(uid=current_user.uid,
+                                                    name=kwargs.get('name'),
+                                                    prv_id=kwargs.get('prv_id'),
+                                                    ptv_id=kwargs.get('ptv_id'),
+                                                    type_id=kwargs.get('type_id'),
+                                                    )
+            if existed:
+                return abort(400, ErrFormat.preference_search_option_exists)
 
         return PreferenceSearchOption.create(**kwargs)
 

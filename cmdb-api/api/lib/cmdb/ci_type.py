@@ -524,7 +524,14 @@ class CITypeAttributeManager(object):
         for _type_id in parent_ids + [type_id]:
             result.extend(CITypeAttributesCache.get2(_type_id))
 
-        return result
+        attr_ids = set()
+        result2 = []
+        for i in result:
+            if i[1].id not in attr_ids:
+                result2.append(i)
+                attr_ids.add(i[1].id)
+
+        return result2
 
     @classmethod
     def get_attr_names_by_type_id(cls, type_id):
