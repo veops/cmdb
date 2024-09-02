@@ -108,7 +108,8 @@ class AttributeManager(object):
             return []
         choice_values = choice_table.get_by(fl=["value", "option"], attr_id=attr_id)
 
-        return [[ValueTypeMap.serialize[value_type](choice_value['value']), choice_value['option']]
+        return [[ValueTypeMap.serialize[value_type](choice_value['value']), choice_value['option'] or
+                 {"label": ValueTypeMap.serialize[value_type](choice_value['value'])}]
                 for choice_value in choice_values]
 
     @staticmethod
@@ -140,7 +141,7 @@ class AttributeManager(object):
         attr = AttributeCache.get(_attr_id) if _attr_id else _attr
         if attr and attr.is_choice:
             choice_values = cls.get_choice_values(attr.id, attr.value_type, None, None)
-            return {i[0]: i[1]['label'] for i in choice_values if i[1].get('label')}
+            return {i[0]: i[1]['label'] for i in choice_values if i[1] and i[1].get('label')}
 
         return {}
 
