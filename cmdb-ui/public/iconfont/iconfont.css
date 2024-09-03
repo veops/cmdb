@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1724834571283') format('woff2'),
-       url('iconfont.woff?t=1724834571283') format('woff'),
-       url('iconfont.ttf?t=1724834571283') format('truetype');
+  src: url('iconfont.woff2?t=1725331691589') format('woff2'),
+       url('iconfont.woff?t=1725331691589') format('woff'),
+       url('iconfont.ttf?t=1725331691589') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,58 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.veops-expand:before {
+  content: "\e9b6";
+}
+
+.caise-public_cloud:before {
+  content: "\e9b1";
+}
+
+.caise-system:before {
+  content: "\e9b2";
+}
+
+.caise-IPAM:before {
+  content: "\e9b3";
+}
+
+.caise-hyperV:before {
+  content: "\e9b4";
+}
+
+.caise-data_center2:before {
+  content: "\e9b5";
+}
+
+.caise-hardware:before {
+  content: "\e9ad";
+}
+
+.caise-computer:before {
+  content: "\e9ae";
+}
+
+.caise-network_devices:before {
+  content: "\e9af";
+}
+
+.caise-storage_device:before {
+  content: "\e9b0";
+}
+
+.caise-load_balancing:before {
+  content: "\e9ab";
+}
+
+.caise-message_queue:before {
+  content: "\e9ac";
+}
+
+.caise-websever:before {
+  content: "\e9aa";
 }
 
 .caise-middleware:before {
@@ -25,7 +77,7 @@
   content: "\e9a8";
 }
 
-.a-caise-virtualization:before {
+.caise-virtualization:before {
   content: "\e9a6";
 }
 
@@ -33,7 +85,7 @@
   content: "\e9a4";
 }
 
-.a-caise-storage_volume1:before {
+.caise-storage_volume1:before {
   content: "\e9a5";
 }
 

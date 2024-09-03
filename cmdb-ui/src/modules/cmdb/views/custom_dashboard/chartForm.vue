@@ -407,7 +407,7 @@ export default {
       this.visible = true
       this.type = type
       this.item = item
-      const { category = 0, name, type_id, attr_id, level } = item
+      const { category = 0, name, type_id, level } = item
       const chartType = (item.options || {}).chartType || 'count'
       const fontColor = (item.options || {}).fontColor || '#ffffff'
       const bgColor = (item.options || {}).bgColor || ['#6ABFFE', '#5375EB']

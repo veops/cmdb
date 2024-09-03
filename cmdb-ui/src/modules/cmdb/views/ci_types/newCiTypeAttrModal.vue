@@ -103,7 +103,7 @@ export default {
           await this.handleLinkAttrToCiType({ attr_id: this.targetKeys.map((i) => Number(i)) })
           if (this.currentGroup) {
             await this.updateCurrentGroup()
-            const { id, name, order, attributes } = this.currentGroup
+            const { name, order, attributes } = this.currentGroup
             const attrIds = attributes.filter((i) => !i.inherited).map((i) => i.id)
             this.targetKeys.forEach((key) => {
               attrIds.push(Number(key))
@@ -141,7 +141,7 @@ export default {
       })
       if (this.currentGroup) {
         await this.updateCurrentGroup()
-        const { id, name, order, attributes } = this.currentGroup
+        const { name, order, attributes } = this.currentGroup
         const attrIds = attributes.filter((i) => !i.inherited).map((i) => i.id)
         attrIds.push(newAttrId)
         await createCITypeGroupById(this.CITypeId, { name, order, attributes: attrIds })

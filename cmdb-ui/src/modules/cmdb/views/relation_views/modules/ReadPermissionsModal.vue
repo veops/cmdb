@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import { ciTypeFilterPermissions, getCIType } from '../../../api/CIType'
+import { ciTypeFilterPermissions } from '../../../api/CIType'
 import FilterComp from '@/components/CMDBFilterComp'
 import { searchRole } from '@/modules/acl/api/role'
 
