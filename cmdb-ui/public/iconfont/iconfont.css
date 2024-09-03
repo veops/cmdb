@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1725331691589') format('woff2'),
-       url('iconfont.woff?t=1725331691589') format('woff'),
-       url('iconfont.ttf?t=1725331691589') format('truetype');
+  src: url('iconfont.woff2?t=1725351982733') format('woff2'),
+       url('iconfont.woff?t=1725351982733') format('woff'),
+       url('iconfont.ttf?t=1725351982733') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,54 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.caise-websphere:before {
+  content: "\e9c2";
+}
+
+.caise-vps:before {
+  content: "\e9c1";
+}
+
+.caise-F5:before {
+  content: "\e9c0";
+}
+
+.caise-HAProxy:before {
+  content: "\e9bf";
+}
+
+.caise-JBoss:before {
+  content: "\e9be";
+}
+
+.caise-dongfangtong:before {
+  content: "\e9bd";
+}
+
+.caise-kafka:before {
+  content: "\e9b7";
+}
+
+.caise-weblogic:before {
+  content: "\e9b8";
+}
+
+.caise-TDSQL:before {
+  content: "\e9b9";
+}
+
+.caise-kingbase:before {
+  content: "\e9ba";
+}
+
+.caise-dameng:before {
+  content: "\e9bb";
+}
+
+.caise-TIDB:before {
+  content: "\e9bc";
 }
 
 .veops-expand:before {

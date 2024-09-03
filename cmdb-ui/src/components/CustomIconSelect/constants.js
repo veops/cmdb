@@ -177,7 +177,7 @@ export const linearIconList = [
     }]
   }, {
     value: 'icon-xianxing-application',
-    label: '应用',
+    label: '常用组件',
     list: [{
       value: 'icon-xianxing-yilianjie',
       label: '已连接'
@@ -517,7 +517,7 @@ export const fillIconList = [
     }]
   }, {
     value: 'icon-shidi-application',
-    label: '应用',
+    label: '常用组件',
     list: [{
       value: 'icon-shidi-yilianjie',
       label: '已连接'
@@ -729,6 +729,18 @@ export const multicolorIconList = [
     value: 'database',
     label: '数据库',
     list: [{
+      value: 'caise-TIDB',
+      label: 'TIDB'
+    }, {
+      value: 'caise-dameng',
+      label: '达梦'
+    }, {
+      value: 'caise-kingbase',
+      label: 'KingBase'
+    }, {
+      value: 'caise-TDSQL',
+      label: 'TDSQL'
+    }, {
       value: 'caise-DB2',
       label: 'DB2'
     }, {
@@ -809,6 +821,9 @@ export const multicolorIconList = [
     value: 'system',
     label: '操作系统',
     list: [{
+      value: 'ciase-aix',
+      label: 'aix'
+    }, {
       value: 'caise-Windows',
       label: 'Windows'
     }, {
@@ -903,8 +918,38 @@ export const multicolorIconList = [
     }]
   }, {
     value: 'caise-application',
-    label: '应用',
+    label: '常用组件',
     list: [{
+      value: 'caise-websphere',
+      label: 'WebSphere'
+    }, {
+      value: 'caise-vps',
+      label: 'VPS'
+    }, {
+      value: 'caise-F5',
+      label: 'F5'
+    }, {
+      value: 'caise-HAProxy',
+      label: 'HAProxy'
+    }, {
+      value: 'caise-kafka',
+      label: 'kafka'
+    }, {
+      value: 'caise-dongfangtong',
+      label: '东方通'
+    }, {
+      value: 'cmdb-vcenter',
+      label: 'VCenter'
+    }, {
+      value: 'ops-KVM',
+      label: 'KVM'
+    }, {
+      value: 'caise-JBoss',
+      label: 'JBoss'
+    }, {
+      value: 'caise-weblogic',
+      label: 'WebLogic'
+    }, {
       value: 'caise-disk_array',
       label: '磁盘阵列'
     }, {
@@ -928,9 +973,6 @@ export const multicolorIconList = [
     }, {
       value: 'caise_pool',
       label: 'ip池'
-    }, {
-      value: 'ciase-aix',
-      label: 'aix'
     }, {
       value: 'caise-storage_volume1',
       label: '存储卷'

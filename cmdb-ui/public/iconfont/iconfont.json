@@ -6,6 +6,90 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "41724497",
+      "name": "caise-websphere",
+      "font_class": "caise-websphere",
+      "unicode": "e9c2",
+      "unicode_decimal": 59842
+    },
+    {
+      "icon_id": "41724575",
+      "name": "caise-vps",
+      "font_class": "caise-vps",
+      "unicode": "e9c1",
+      "unicode_decimal": 59841
+    },
+    {
+      "icon_id": "41724631",
+      "name": "caise-F5",
+      "font_class": "caise-F5",
+      "unicode": "e9c0",
+      "unicode_decimal": 59840
+    },
+    {
+      "icon_id": "41724653",
+      "name": "caise-HAProxy",
+      "font_class": "caise-HAProxy",
+      "unicode": "e9bf",
+      "unicode_decimal": 59839
+    },
+    {
+      "icon_id": "41722953",
+      "name": "caise-JBoss",
+      "font_class": "caise-JBoss",
+      "unicode": "e9be",
+      "unicode_decimal": 59838
+    },
+    {
+      "icon_id": "41722960",
+      "name": "caise-dongfangtong",
+      "font_class": "caise-dongfangtong",
+      "unicode": "e9bd",
+      "unicode_decimal": 59837
+    },
+    {
+      "icon_id": "41722681",
+      "name": "caise-kafka",
+      "font_class": "caise-kafka",
+      "unicode": "e9b7",
+      "unicode_decimal": 59831
+    },
+    {
+      "icon_id": "41722680",
+      "name": "caise-weblogic",
+      "font_class": "caise-weblogic",
+      "unicode": "e9b8",
+      "unicode_decimal": 59832
+    },
+    {
+      "icon_id": "41722679",
+      "name": "caise-TDSQL",
+      "font_class": "caise-TDSQL",
+      "unicode": "e9b9",
+      "unicode_decimal": 59833
+    },
+    {
+      "icon_id": "41722678",
+      "name": "caise-kingbase",
+      "font_class": "caise-kingbase",
+      "unicode": "e9ba",
+      "unicode_decimal": 59834
+    },
+    {
+      "icon_id": "41722677",
+      "name": "达梦",
+      "font_class": "caise-dameng",
+      "unicode": "e9bb",
+      "unicode_decimal": 59835
+    },
+    {
+      "icon_id": "41722675",
+      "name": "caise-TIDB",
+      "font_class": "caise-TIDB",
+      "unicode": "e9bc",
+      "unicode_decimal": 59836
+    },
+    {
       "icon_id": "41681675",
       "name": "veops-expand",
       "font_class": "veops-expand",
