@@ -588,7 +588,7 @@ export default {
           this.calcColumns()
         }
         if (refreshType === 'refreshNumber') {
-          const promises = this.treeKeys.map((key, index) => {
+          this.treeKeys.map((key, index) => {
             let ancestor_ids
             if (
               Object.keys(this.level2constraint).some(
@@ -1432,7 +1432,7 @@ export default {
         content: (h) => <div>{that.$t('confirmDelete')}</div>,
         async onOk() {
           for (let i = 0; i < that.batchTreeKey.length; i++) {
-            const { splitTreeKey, firstCIObj, firstCIId, _tempTree, ancestor_ids } = that.calculateParamsFromTreeKey(
+            const { splitTreeKey, _tempTree, ancestor_ids } = that.calculateParamsFromTreeKey(
               that.batchTreeKey[i],
               'delete'
             )
