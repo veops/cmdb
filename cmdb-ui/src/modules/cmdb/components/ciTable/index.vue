@@ -179,7 +179,7 @@
             <a @click="openDetail(row.ci_id || row._id)">
               <a-icon type="unordered-list" />
             </a>
-            <a-tooltip :title="$t('cmdb.ci.addRelation')">
+            <a-tooltip :title="$t('cmdb.ci.viewRelation')">
               <a @click="openDetail(row.ci_id || row._id, 'tab_2', '2')">
                 <a-icon type="retweet" />
               </a>
@@ -375,7 +375,7 @@ export default {
     },
 
     jsonEditorOk(row, column, jsonData) {
-      this.$attrs.data.forEach((item) => {
+      this.data.forEach((item) => {
         if (item._id === row._id) {
           item[column.property] = JSON.stringify(jsonData)
         }

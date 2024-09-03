@@ -61,12 +61,12 @@ export default {
     )
 
     // 注册富文本自定义元素
-    const resume = {
-      type: 'attachment',
-      attachmentLabel: '',
-      attachmentValue: '',
-      children: [{ text: '' }], // void 元素必须有一个 children ，其中只有一个空字符串，重要！！！
-    }
+    // const resume = {
+    //   type: 'attachment',
+    //   attachmentLabel: '',
+    //   attachmentValue: '',
+    //   children: [{ text: '' }], // void 元素必须有一个 children ，其中只有一个空字符串，重要！！！
+    // }
 
     function withAttachment(editor) {
       // JS 语法

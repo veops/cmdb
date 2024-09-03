@@ -148,7 +148,6 @@
 </template>
 
 <script>
-import _ from 'lodash'
 import moment from 'moment'
 import JsonEditor from '../../../components/JsonEditor/jsonEditor.vue'
 import CIReferenceAttr from '@/components/ciReferenceAttr/index.vue'

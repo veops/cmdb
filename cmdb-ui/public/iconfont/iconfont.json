@@ -6,106 +6,197 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "41681675",
+      "name": "veops-expand",
+      "font_class": "veops-expand",
+      "unicode": "e9b6",
+      "unicode_decimal": 59830
+    },
+    {
+      "icon_id": "41672951",
+      "name": "公有云",
+      "font_class": "caise-public_cloud",
+      "unicode": "e9b1",
+      "unicode_decimal": 59825
+    },
+    {
+      "icon_id": "41672952",
+      "name": "操作系统",
+      "font_class": "caise-system",
+      "unicode": "e9b2",
+      "unicode_decimal": 59826
+    },
+    {
+      "icon_id": "41673309",
+      "name": "IPAM",
+      "font_class": "caise-IPAM",
+      "unicode": "e9b3",
+      "unicode_decimal": 59827
+    },
+    {
+      "icon_id": "41673312",
+      "name": "hyperV",
+      "font_class": "caise-hyperV",
+      "unicode": "e9b4",
+      "unicode_decimal": 59828
+    },
+    {
+      "icon_id": "41673320",
+      "name": "数据中心",
+      "font_class": "caise-data_center2",
+      "unicode": "e9b5",
+      "unicode_decimal": 59829
+    },
+    {
+      "icon_id": "41669141",
+      "name": "硬件设备",
+      "font_class": "caise-hardware",
+      "unicode": "e9ad",
+      "unicode_decimal": 59821
+    },
+    {
+      "icon_id": "41669249",
+      "name": "计算机",
+      "font_class": "caise-computer",
+      "unicode": "e9ae",
+      "unicode_decimal": 59822
+    },
+    {
+      "icon_id": "41669250",
+      "name": "网络设备",
+      "font_class": "caise-network_devices",
+      "unicode": "e9af",
+      "unicode_decimal": 59823
+    },
+    {
+      "icon_id": "41669278",
+      "name": "存储设备",
+      "font_class": "caise-storage_device",
+      "unicode": "e9b0",
+      "unicode_decimal": 59824
+    },
+    {
+      "icon_id": "41659452",
+      "name": "负载均衡",
+      "font_class": "caise-load_balancing",
+      "unicode": "e9ab",
+      "unicode_decimal": 59819
+    },
+    {
+      "icon_id": "41659446",
+      "name": "消息队列",
+      "font_class": "caise-message_queue",
+      "unicode": "e9ac",
+      "unicode_decimal": 59820
+    },
+    {
+      "icon_id": "41659424",
+      "name": "websever",
+      "font_class": "caise-websever",
+      "unicode": "e9aa",
+      "unicode_decimal": 59818
+    },
+    {
       "icon_id": "41655608",
-      "name": "caise-middleware",
+      "name": "中间件",
       "font_class": "caise-middleware",
       "unicode": "e9a9",
       "unicode_decimal": 59817
     },
     {
       "icon_id": "41655599",
-      "name": "caise-database",
+      "name": "数据库",
       "font_class": "caise-database",
       "unicode": "e9a7",
       "unicode_decimal": 59815
     },
     {
       "icon_id": "41655591",
-      "name": "caise-business",
+      "name": "业务",
       "font_class": "caise-business",
       "unicode": "e9a8",
       "unicode_decimal": 59816
     },
     {
       "icon_id": "41655550",
-      "name": "caise- virtualization",
-      "font_class": "a-caise-virtualization",
+      "name": "虚拟化",
+      "font_class": "caise-virtualization",
       "unicode": "e9a6",
       "unicode_decimal": 59814
     },
     {
       "icon_id": "41654680",
-      "name": "caise-storage_pool",
+      "name": "存储池",
       "font_class": "caise-storage_pool",
       "unicode": "e9a4",
       "unicode_decimal": 59812
     },
     {
       "icon_id": "41654676",
-      "name": "caise-storage_volume",
-      "font_class": "a-caise-storage_volume1",
+      "name": "存储卷",
+      "font_class": "caise-storage_volume1",
       "unicode": "e9a5",
       "unicode_decimal": 59813
     },
     {
       "icon_id": "41654608",
-      "name": "ciase-aix",
+      "name": "aix",
       "font_class": "ciase-aix",
       "unicode": "e9a3",
       "unicode_decimal": 59811
     },
     {
       "icon_id": "41654233",
-      "name": "caise_pool",
+      "name": "ip池",
       "font_class": "caise_pool",
       "unicode": "e99b",
       "unicode_decimal": 59803
     },
     {
       "icon_id": "41654237",
-      "name": "caise-ip_address",
+      "name": "ip地址",
       "font_class": "caise-ip_address",
       "unicode": "e99c",
       "unicode_decimal": 59804
     },
     {
       "icon_id": "41654249",
-      "name": "caise-computer_room",
+      "name": "机房",
       "font_class": "caise-computer_room",
       "unicode": "e99d",
       "unicode_decimal": 59805
     },
     {
       "icon_id": "41654271",
-      "name": "caise-rack",
+      "name": "机柜",
       "font_class": "caise-rack",
       "unicode": "e99e",
       "unicode_decimal": 59806
     },
     {
       "icon_id": "41654276",
-      "name": "caise-pc",
+      "name": "PC",
       "font_class": "caise-pc",
       "unicode": "e99f",
       "unicode_decimal": 59807
     },
     {
       "icon_id": "41654305",
-      "name": "caise-bandwidth_line",
+      "name": "带宽线路",
       "font_class": "caise-bandwidth_line",
       "unicode": "e9a0",
       "unicode_decimal": 59808
     },
     {
       "icon_id": "41654323",
-      "name": "caise-fiber",
+      "name": "光纤交换机",
       "font_class": "caise-fiber",
       "unicode": "e9a1",
       "unicode_decimal": 59809
     },
     {
       "icon_id": "41654369",
-      "name": "caise-disk_array",
+      "name": "磁盘阵列",
       "font_class": "caise-disk_array",
       "unicode": "e9a2",
       "unicode_decimal": 59810
