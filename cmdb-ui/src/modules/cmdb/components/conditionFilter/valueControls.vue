@@ -27,17 +27,7 @@
       class="input-group"
       v-else-if="isChoiceByProperty(rule.property) && (rule.exp === 'is' || rule.exp === '~is')"
     >
-      <CIBuiltInAttr
-        v-if="getAttr(rule.property).choice_builtin"
-        :choice_builtin="getAttr(rule.property).choice_builtin"
-        class="select-filter"
-        :treeselectCustomStyle="{ width: '136px', '--custom-height': '36px' }"
-        :value="rule.value"
-        @change="(value) => handleChange('value', value)"
-      />
-
       <a-select
-        v-else
         class="select-filter"
         :style="{ width: '175px' }"
         showSearch
@@ -153,13 +143,11 @@
 <script>
 import { compareTypeList } from './constants.js'
 import CIReferenceAttr from '@/components/ciReferenceAttr/index.vue'
-import CIBuiltInAttr from '@/components/ciBuiltInAttr/index.vue'
 
 export default {
   name: 'ValueControls',
   components: {
     CIReferenceAttr,
-    CIBuiltInAttr
   },
   props: {
     rule: {
