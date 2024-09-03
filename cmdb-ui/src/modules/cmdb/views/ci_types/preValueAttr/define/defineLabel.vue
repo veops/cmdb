@@ -121,7 +121,6 @@
 </template>
 
 <script>
-import _ from 'lodash'
 import { ColorPicker } from 'element-ui'
 import CustomIconSelect from '@/components/CustomIconSelect'
 import { defautValueColor, defaultBGColors } from '@/modules/cmdb/utils/const.js'
