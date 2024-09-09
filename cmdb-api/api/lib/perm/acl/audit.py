@@ -376,7 +376,7 @@ class AuditCRUD(object):
                                origin=origin, current=current, extra=extra, source=source.value)
 
     @classmethod
-    def add_login_log(cls, username, is_ok, description, _id=None, logout_at=None):
+    def add_login_log(cls, username, is_ok, description, _id=None, logout_at=None, ip=None, browser=None):
         if _id is not None:
             existed = AuditLoginLog.get_by_id(_id)
             if existed is not None:
@@ -387,8 +387,8 @@ class AuditCRUD(object):
                        is_ok=is_ok,
                        description=description,
                        logout_at=logout_at,
-                       ip=request.headers.get('X-Real-IP') or request.remote_addr,
-                       browser=request.headers.get('User-Agent'),
+                       ip=ip or request.headers.get('X-Real-IP') or request.remote_addr,
+                       browser=browser or request.headers.get('User-Agent'),
                        channel=request.values.get('channel', 'web'),
                        )
 
