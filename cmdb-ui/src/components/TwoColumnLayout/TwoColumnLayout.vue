@@ -6,7 +6,8 @@
       :paneLengthPixel.sync="paneLengthPixel"
       :appName="appName"
       :triggerColor="triggerColor"
-      :triggerLength="18"
+      :triggerLength="triggerLength"
+      :calcBasedParent="calcBasedParent"
     >
       <template #one>
         <div class="two-column-layout-sidebar">
@@ -37,6 +38,14 @@ export default {
       type: String,
       default: '#f7f8fa',
     },
+    triggerLength: {
+      type: Number,
+      default: 18
+    },
+    calcBasedParent: {
+      type: Boolean,
+      defualt: false
+    }
   },
   data() {
     return {

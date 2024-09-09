@@ -66,6 +66,10 @@ export default {
       type: String,
       default: '#f7f8fa',
     },
+    calcBasedParent: {
+      type: Boolean,
+      defualt: false
+    }
   },
   data() {
     return {
@@ -95,7 +99,7 @@ export default {
     },
 
     paneLengthPercent() {
-      const clientRectWidth = this.parentContainer
+      const clientRectWidth = this.parentContainer && this.calcBasedParent
         ? this.parentContainer.clientWidth
         : document.documentElement.getBoundingClientRect().width
       return (this.paneLengthPixel / clientRectWidth) * 100

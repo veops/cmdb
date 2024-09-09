@@ -1,5 +1,5 @@
 <template>
-  <TwoColumnLayout appName="cmdb-adc">
+  <TwoColumnLayout appName="cmdb-adc" calcBasedParent>
     <template #one>
       <div class="cmdb-adc-group" v-for="group in ci_types_list" :key="group.id">
         <p>
