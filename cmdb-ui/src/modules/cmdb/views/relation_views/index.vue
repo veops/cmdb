@@ -7,6 +7,7 @@
         :paneLengthPixel.sync="paneLengthPixel"
         :appName="`cmdb-relation-views-${viewId}`"
         :triggerLength="18"
+        calcBasedParent
       >
         <template #one>
           <div class="relation-views-left" :style="{ height: `${windowHeight - 64}px` }">

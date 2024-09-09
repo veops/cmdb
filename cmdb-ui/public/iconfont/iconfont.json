@@ -6,6 +6,48 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "41735717",
+      "name": "oneterm-connect",
+      "font_class": "oneterm-connect1",
+      "unicode": "e9c6",
+      "unicode_decimal": 59846
+    },
+    {
+      "icon_id": "41735716",
+      "name": "oneterm-session",
+      "font_class": "oneterm-session1",
+      "unicode": "e9c7",
+      "unicode_decimal": 59847
+    },
+    {
+      "icon_id": "41735703",
+      "name": "oneterm-assets",
+      "font_class": "oneterm-assets",
+      "unicode": "e9c8",
+      "unicode_decimal": 59848
+    },
+    {
+      "icon_id": "41725683",
+      "name": "oneterm-RDP",
+      "font_class": "a-oneterm-ssh1",
+      "unicode": "e9c3",
+      "unicode_decimal": 59843
+    },
+    {
+      "icon_id": "41725684",
+      "name": "oneterm-SSH",
+      "font_class": "a-oneterm-ssh2",
+      "unicode": "e9c4",
+      "unicode_decimal": 59844
+    },
+    {
+      "icon_id": "41725685",
+      "name": "oneterm-VNC",
+      "font_class": "oneterm-rdp",
+      "unicode": "e9c5",
+      "unicode_decimal": 59845
+    },
+    {
       "icon_id": "41724497",
       "name": "caise-websphere",
       "font_class": "caise-websphere",

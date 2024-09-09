@@ -10,6 +10,7 @@
         :paneLengthPixel.sync="paneLengthPixel"
         appName="cmdb-tree-views"
         :triggerLength="18"
+        calcBasedParent
       >
         <template #one>
           <div class="tree-views-left" :style="{ height: `${windowHeight - 64}px` }">
