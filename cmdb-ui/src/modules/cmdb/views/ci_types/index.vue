@@ -13,6 +13,7 @@
       :paneLengthPixel.sync="paneLengthPixel"
       appName="cmdb-ci-types"
       :triggerLength="18"
+      calcBasedParent
     >
       <template #one>
         <div class="ci-types-left">
