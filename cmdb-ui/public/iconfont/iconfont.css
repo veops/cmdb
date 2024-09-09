@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1725351982733') format('woff2'),
-       url('iconfont.woff?t=1725351982733') format('woff'),
-       url('iconfont.ttf?t=1725351982733') format('truetype');
+  src: url('iconfont.woff2?t=1725846934130') format('woff2'),
+       url('iconfont.woff?t=1725846934130') format('woff'),
+       url('iconfont.ttf?t=1725846934130') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,30 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.oneterm-connect1:before {
+  content: "\e9c6";
+}
+
+.oneterm-session1:before {
+  content: "\e9c7";
+}
+
+.oneterm-assets:before {
+  content: "\e9c8";
+}
+
+.a-oneterm-ssh1:before {
+  content: "\e9c3";
+}
+
+.a-oneterm-ssh2:before {
+  content: "\e9c4";
+}
+
+.oneterm-rdp:before {
+  content: "\e9c5";
 }
 
 .caise-websphere:before {

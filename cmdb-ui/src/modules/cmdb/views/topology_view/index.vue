@@ -15,6 +15,7 @@
       :paneLengthPixel.sync="paneLengthPixel"
       appName="cmdb-topo-views"
       :triggerLength="18"
+      calcBasedParent
     >
       <template #one>
         <a-input
