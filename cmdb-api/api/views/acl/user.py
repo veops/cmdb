@@ -11,6 +11,7 @@ from flask_login import current_user
 from api.lib.decorator import args_required
 from api.lib.decorator import args_validate
 from api.lib.perm.acl.acl import ACLManager
+from api.lib.perm.acl.acl import AuditCRUD
 from api.lib.perm.acl.acl import role_required
 from api.lib.perm.acl.cache import AppCache
 from api.lib.perm.acl.cache import UserCache
@@ -47,6 +48,13 @@ class GetUserInfoView(APIView):
                       rid=user_info.get('rid'),
                       role=dict(permissions=user_info.get('parents')),
                       avatar=user_info.get('avatar'))
+
+        if request.values.get('channel'):
+            _id = AuditCRUD.add_login_log(name, True, ErrFormat.login_succeed,
+                                          ip=request.values.get('ip'),
+                                          browser=request.values.get('browser'))
+            session['LOGIN_ID'] = _id
+            result['LOGIN_ID'] = _id
 
         current_app.logger.info("get user info for3: {}".format(result))
         return self.jsonify(result=result)

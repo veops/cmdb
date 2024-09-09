@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 
 import datetime
-
 import jwt
 import six
 from flask import abort
@@ -17,10 +16,12 @@ from api.lib.decorator import args_required
 from api.lib.decorator import args_validate
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.audit import AuditCRUD
+from api.lib.perm.acl.cache import AppCache
 from api.lib.perm.acl.cache import RoleCache
 from api.lib.perm.acl.cache import User
 from api.lib.perm.acl.cache import UserCache
 from api.lib.perm.acl.resp_format import ErrFormat
+from api.lib.perm.acl.role import RoleRelationCRUD
 from api.lib.perm.auth import auth_abandoned
 from api.lib.perm.auth import auth_with_app_token
 from api.models.acl import Role
@@ -124,10 +125,17 @@ class AuthWithKeyView(APIView):
         if not user.get('username'):
             user['username'] = user.get('name')
 
-        return self.jsonify(user=user,
-                            authenticated=authenticated,
-                            rid=role and role.id,
-                            can_proxy=can_proxy)
+        result = dict(user=user,
+                      authenticated=authenticated,
+                      rid=role and role.id,
+                      can_proxy=can_proxy)
+
+        if request.values.get('need_parentRoles') in current_app.config.get('BOOL_TRUE'):
+            app_id = AppCache.get(request.values.get('app_id'))
+            parent_ids = RoleRelationCRUD.recursive_parent_ids(role and role.id, app_id and app_id.id)
+            result['user']['parentRoles'] = [RoleCache.get(rid).name for rid in set(parent_ids) if RoleCache.get(rid)]
+
+        return self.jsonify(result)
 
 
 class AuthWithTokenView(APIView):
@@ -184,6 +192,8 @@ class LogoutView(APIView):
     def post(self):
         logout_user()
 
-        AuditCRUD.add_login_log(None, None, None, _id=session.get('LOGIN_ID'), logout_at=datetime.datetime.now())
+        AuditCRUD.add_login_log(None, None, None,
+                                _id=session.get('LOGIN_ID') or request.values.get('LOGIN_ID'),
+                                logout_at=datetime.datetime.now())
 
         self.jsonify(code=200)
