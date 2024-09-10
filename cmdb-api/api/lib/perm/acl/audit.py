@@ -387,7 +387,8 @@ class AuditCRUD(object):
                        is_ok=is_ok,
                        description=description,
                        logout_at=logout_at,
-                       ip=ip or request.headers.get('X-Real-IP') or request.remote_addr,
+                       ip=(ip or request.headers.get('X-Forwarded-For') or
+                           request.headers.get('X-Real-IP') or request.remote_addr or '').split(',')[0],
                        browser=browser or request.headers.get('User-Agent'),
                        channel=request.values.get('channel', 'web'),
                        )
