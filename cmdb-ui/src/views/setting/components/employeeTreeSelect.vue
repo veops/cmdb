@@ -21,8 +21,10 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import Treeselect from '@riophae/vue-treeselect'
 import { formatOption } from '@/utils/util'
+
 export default {
   name: 'EmployeeTreeSelect',
   components: {
@@ -69,6 +71,11 @@ export default {
       type: Boolean,
       default: false,
     },
+    // eslint-disable-next-line vue/require-default-prop
+    otherOptions: {
+      type: Array,
+      defualt: () => [],
+    }
   },
   data() {
     return {}
@@ -96,7 +103,16 @@ export default {
       return this.provide_allTreeDepAndEmp()
     },
     employeeTreeSelectOption() {
-      return formatOption(this.allTreeDepAndEmp, this.idType, false, this.departmentKey, this.employeeKey)
+      return formatOption(
+        [
+          ..._.cloneDeep(this.allTreeDepAndEmp),
+          ..._.cloneDeep(this.otherOptions)
+        ],
+        this.idType,
+        false,
+        this.departmentKey,
+        this.employeeKey
+      )
     },
   },
   methods: {},
