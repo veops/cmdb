@@ -45,7 +45,7 @@
         </template>
       </vxe-column>
       <vxe-column field="type_id" width="100px" :title="$t('cmdb.ciType.ciType')"></vxe-column>
-      <vxe-column field="unique_value" width="100px" :title="$t('cmdb.ciType.uniqueKey')"></vxe-column>
+      <vxe-column field="show_attr_value" width="100px" :title="$t('cmdb.ciType.show')"></vxe-column>
       <vxe-column field="operate_type" width="89px" :title="$t('operation')">
         <template #header="{ column }">
           <span>{{ column.title }}</span>
@@ -315,7 +315,7 @@ export default {
       }
     },
     mergeRowMethod({ row, _rowIndex, column, visibleData }) {
-      const fields = ['created_at', 'user', 'type_id', 'unique_value']
+      const fields = ['created_at', 'user', 'type_id', 'show_attr_value']
       const cellValue = row[column.property]
       const created_at = row['created_at']
       if (column.property === 'created_at') {
@@ -366,7 +366,7 @@ export default {
             }
           }
         }
-      } else if (column.property === 'unique_value') {
+      } else if (column.property === 'show_attr_value') {
         if (cellValue && fields.includes(column.property)) {
           const prevRow = visibleData[_rowIndex - 1]
           let nextRow = visibleData[_rowIndex + 1]
