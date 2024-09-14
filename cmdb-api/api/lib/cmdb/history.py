@@ -10,6 +10,7 @@ from api.extensions import db
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import RelationTypeCache
 from api.lib.cmdb.const import OperateType
+from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.perm.acl.cache import UserCache
@@ -22,6 +23,7 @@ from api.models.cmdb import CITypeHistory
 from api.models.cmdb import CITypeTrigger
 from api.models.cmdb import CITypeUniqueConstraint
 from api.models.cmdb import OperationRecord
+from api.lib.cmdb.utils import TableMap
 
 
 class AttributeHistoryManger(object):
@@ -59,8 +61,23 @@ class AttributeHistoryManger(object):
         total = len(records)
 
         res = {}
+        show_attr_set = {}
+        show_attr_cache = {}
         for record in records:
             record_id = record.OperationRecord.id
+            type_id = record.OperationRecord.type_id
+            ci_id = record.AttributeHistory.ci_id
+            show_attr_set[ci_id] = None
+            show_attr = show_attr_cache.setdefault(
+                type_id, 
+                AttributeCache.get(
+                    CITypeCache.get(type_id).show_id or CITypeCache.get(type_id).unique_id) if CITypeCache.get(type_id) else None
+            )
+            if show_attr:
+                attr_table = TableMap(attr=show_attr).table
+                attr_record = attr_table.get_by(attr_id=show_attr.id, ci_id=ci_id, first=True, to_dict=False)
+                show_attr_set[ci_id] = attr_record.value if attr_record else None
+    
             attr_hist = record.AttributeHistory.to_dict()
             attr_hist['attr'] = AttributeCache.get(attr_hist['attr_id'])
             if attr_hist['attr']:
@@ -76,6 +93,7 @@ class AttributeHistoryManger(object):
 
             if record_id not in res:
                 record_dict = record.OperationRecord.to_dict()
+                record_dict['show_attr_value'] = show_attr_set.get(ci_id)
                 record_dict["user"] = UserCache.get(record_dict.get("uid"))
                 if record_dict["user"]:
                     record_dict['user'] = record_dict['user'].nickname
