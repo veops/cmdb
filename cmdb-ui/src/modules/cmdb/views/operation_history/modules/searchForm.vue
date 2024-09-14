@@ -85,7 +85,7 @@
                 @change="onChange"
                 format="YYYY-MM-DD HH:mm"
                 :placeholder="[$t('cmdb.history.startTime'), $t('cmdb.history.endTime')]"
-                v-else-if="attr.value_type === '3'"
+                v-else-if="valueTypeMap[item.value_type] == 'date' || valueTypeMap[item.value_type] == 'datetime'"
                 :show-time="{
                   hideDisabledOptions: true,
                   defaultValue: [moment('00:00:00', 'HH:mm:ss'), moment('23:59:59', 'HH:mm:ss')],

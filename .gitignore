@@ -78,3 +78,4 @@ cmdb-ui/npm-debug.log*
 cmdb-ui/yarn-debug.log*
 cmdb-ui/yarn-error.log*
 cmdb-ui/package-lock.json
+start.sh
