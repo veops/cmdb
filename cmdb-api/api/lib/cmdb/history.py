@@ -68,14 +68,16 @@ class AttributeHistoryManger(object):
             type_id = record.OperationRecord.type_id
             ci_id = record.AttributeHistory.ci_id
             show_attr_set[ci_id] = None
-            
-            ci_type = CITypeCache.get(type_id)
-            if ci_type:
-                show_attr = show_attr_cache.setdefault(type_id, AttributeCache.get(ci_type.show_id or ci_type.unique_id))
+            show_attr = show_attr_cache.setdefault(
+                type_id, 
+                AttributeCache.get(
+                    CITypeCache.get(type_id).show_id or CITypeCache.get(type_id).unique_id) if CITypeCache.get(type_id) else None
+            )
+            if show_attr:
                 attr_table = TableMap(attr=show_attr).table
                 attr_record = attr_table.get_by(attr_id=show_attr.id, ci_id=ci_id, first=True, to_dict=False)
                 show_attr_set[ci_id] = attr_record.value if attr_record else None
-                
+    
             attr_hist = record.AttributeHistory.to_dict()
             attr_hist['attr'] = AttributeCache.get(attr_hist['attr_id'])
             if attr_hist['attr']:
