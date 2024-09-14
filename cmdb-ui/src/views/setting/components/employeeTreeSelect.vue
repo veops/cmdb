@@ -71,10 +71,9 @@ export default {
       type: Boolean,
       default: false,
     },
-    // eslint-disable-next-line vue/require-default-prop
     otherOptions: {
       type: Array,
-      defualt: () => [],
+      default: () => [],
     }
   },
   data() {
@@ -105,8 +104,8 @@ export default {
     employeeTreeSelectOption() {
       return formatOption(
         [
-          ..._.cloneDeep(this.allTreeDepAndEmp),
-          ..._.cloneDeep(this.otherOptions)
+          ..._.cloneDeep((Array.isArray(this.allTreeDepAndEmp) ? this.allTreeDepAndEmp : [])),
+          ..._.cloneDeep((Array.isArray(this.otherOptions) ? this.otherOptions : []))
         ],
         this.idType,
         false,
