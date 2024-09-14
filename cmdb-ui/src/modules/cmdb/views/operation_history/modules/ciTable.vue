@@ -45,7 +45,7 @@
         </template>
       </vxe-column>
       <vxe-column field="type_id" width="100px" :title="$t('cmdb.ciType.ciType')"></vxe-column>
-      <vxe-column field="show_attr_value" width="100px" :title="$t('cmdb.ciType.show')"></vxe-column>
+      <vxe-column field="show_attr_value" width="100px" :title="$t('cmdb.ci.instance')"></vxe-column>
       <vxe-column field="operate_type" width="89px" :title="$t('operation')">
         <template #header="{ column }">
           <span>{{ column.title }}</span>
