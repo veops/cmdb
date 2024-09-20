@@ -286,6 +286,7 @@ const cmdb_zh = {
         attrCode: '属性代码',
         computedAttrTip1: '引用属性遵循jinja2语法',
         computedAttrTip2: `多值属性(列表)默认呈现包括[ ], 如果要去掉, 引用方法为: """{{ attr_name | join(',') }}"""  其中逗号为分隔符`,
+        computedAttrTip3: `不能引用其他计算属性`,
         example: '例如',
         attrFilterTip: '第三列值可选择本模型的属性，来实现级联属性的功能',
         rule: '规则',

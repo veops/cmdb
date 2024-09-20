@@ -286,6 +286,7 @@ const cmdb_en = {
         attrCode: 'Attr Code',
         computedAttrTip1: 'Reference attributes follow jinja2 syntax',
         computedAttrTip2: `Multi-valued attributes (lists) are rendered with [ ] included by default, if you want to remove it, the reference method is: """{{ attr_name | join(',') }}""" where commas are separators`,
+        computedAttrTip3: `Cannot refer to other computed attributes`,
         example: 'Example',
         attrFilterTip: `The third column of values allows you to select attributes of this model to cascade attributes`,
         rule: 'Rule',

@@ -391,6 +391,7 @@
           <div v-show="isShowComputedArea" class="computed-attr-tip">
             <div>1. {{ $t('cmdb.ciType.computedAttrTip1') }}</div>
             <div>2. {{ $t('cmdb.ciType.computedAttrTip2') }}</div>
+            <div>3. {{ $t('cmdb.ciType.computedAttrTip3') }}</div>
           </div>
           <ComputedArea ref="computedArea" v-if="isShowComputedArea" :canDefineComputed="canDefineComputed" />
         </a-form-item>
