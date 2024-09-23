@@ -709,13 +709,18 @@ class CIManager(object):
             elif fields:
                 _res = []
                 for d in res:
+                    if isinstance(fields, dict) and d.get("_type") not in fields:
+                        _res.append(d)
+                        continue
+
                     _d = dict()
                     _d["_id"], _d["_type"] = d.get("_id"), d.get("_type")
                     _d["ci_type"] = d.get("ci_type")
                     if unique_required:
                         _d[d.get('unique')] = d.get(d.get('unique'))
 
-                    for field in fields + ['ci_type_alias', 'unique', 'unique_alias']:
+                    _fields = list(fields.get(_d['_type']) or []) if isinstance(fields, dict) else fields
+                    for field in _fields + ['ci_type_alias', 'unique', 'unique_alias']:
                         _d[field] = d.get(field)
                     _res.append(_d)
                 return _res
@@ -732,9 +737,8 @@ class CIManager(object):
         from api.lib.cmdb.search.ci.db.query_sql import QUERY_CIS_BY_IDS
         from api.lib.cmdb.search.ci.db.query_sql import QUERY_CIS_BY_VALUE_TABLE
 
-        if not fields:
-            filter_fields_sql = ""
-        else:
+        filter_fields_sql = ""
+        if fields and isinstance(fields, list):
             _fields = list()
             for field in fields:
                 attr = AttributeCache.get(field)
@@ -776,6 +780,10 @@ class CIManager(object):
                 ci_set.add(ci_id)
                 res[ci2pos[ci_id]] = ci_dict
 
+            if isinstance(fields, dict) and fields.get(type_id):
+                if attr_name not in fields[type_id]:
+                    continue
+
             if ret_key == RetKey.NAME:
                 attr_key = attr_name
             elif ret_key == RetKey.ALIAS:
@@ -813,7 +821,7 @@ class CIManager(object):
         if not ci_ids:
             return []
 
-        fields = [] if fields is None or not isinstance(fields, list) else fields
+        fields = [] if not fields else fields
 
         ci_id_tuple = tuple(map(int, ci_ids))
         res = cls._get_cis_from_cache(ci_id_tuple, ret_key, fields, unique_required, excludes=excludes)
