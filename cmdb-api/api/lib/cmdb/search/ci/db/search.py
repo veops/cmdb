@@ -106,10 +106,11 @@ class Search(object):
 
     def _type_query_handler(self, v, queries):
         new_v = v[1:-1].split(";") if v.startswith("(") and v.endswith(")") else [v]
+        type_num = len(new_v)
         for _v in new_v:
             ci_type = CITypeCache.get(_v)
 
-            if len(new_v) == 1 and not self.sort and ci_type and ci_type.default_order_attr:
+            if type_num == 1 and not self.sort and ci_type and ci_type.default_order_attr:
                 self.sort = ci_type.default_order_attr
 
             if ci_type is not None:
@@ -129,10 +130,15 @@ class Search(object):
                                 queries.append(dict(operator="&", queries=sub))
 
                         if self.type2filter_perms[ci_type.id].get('attr_filter'):
-                            if not self.fl:
-                                self.fl = set(self.type2filter_perms[ci_type.id]['attr_filter'])
+                            if type_num == 1:
+                                if not self.fl:
+                                    self.fl = set(self.type2filter_perms[ci_type.id]['attr_filter'])
+                                else:
+                                    self.fl = set(self.fl) & set(self.type2filter_perms[ci_type.id]['attr_filter'])
                             else:
-                                self.fl = set(self.fl) & set(self.type2filter_perms[ci_type.id]['attr_filter'])
+                                self.fl = self.fl or {}
+                                if not self.fl or isinstance(self.fl, dict):
+                                    self.fl[ci_type.id] = set(self.type2filter_perms[ci_type.id]['attr_filter'])
 
                         if self.type2filter_perms[ci_type.id].get('id_filter') and self.use_id_filter:
 
@@ -585,13 +591,15 @@ class Search(object):
         return facet_result
 
     def _fl_build(self):
-        _fl = list()
-        for f in self.fl:
-            k, _, _, _ = self._attr_name_proc(f)
-            if k:
-                _fl.append(k)
-
-        return _fl
+        if isinstance(self.fl, list):
+            _fl = list()
+            for f in self.fl:
+                k, _, _, _ = self._attr_name_proc(f)
+                if k:
+                    _fl.append(k)
+            return _fl
+        else:
+            return self.fl
 
     def search(self):
         numfound, ci_ids = self._query_build_raw()
