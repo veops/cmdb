@@ -719,7 +719,7 @@ class CIManager(object):
                     if unique_required:
                         _d[d.get('unique')] = d.get(d.get('unique'))
 
-                    _fields = list(fields.get(_d['_type']) or []) if isinstance(fields, dict) else fields
+                    _fields = list(fields.get(_d['_type']) or [] if isinstance(fields, dict) else fields)
                     for field in _fields + ['ci_type_alias', 'unique', 'unique_alias']:
                         _d[field] = d.get(field)
                     _res.append(_d)
