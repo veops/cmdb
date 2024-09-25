@@ -97,6 +97,8 @@ class AttributeValueManager(object):
         deserialize = ValueTypeMap.deserialize[value_type]
         try:
             v = deserialize(value)
+            if value_type in (ValueTypeEnum.DATE, ValueTypeEnum.DATETIME):
+                return str(v)
             return v
         except ValueDeserializeError as e:
             return abort(400, ErrFormat.attribute_value_invalid2.format(alias, e))
