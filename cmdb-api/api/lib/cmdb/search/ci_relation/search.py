@@ -433,6 +433,13 @@ class Search(object):
         return SearchFromDB(q, use_ci_filter=True, only_ids=True, count=100000).search()
 
     @staticmethod
+    def _filter_target_ids(target_ids, type_ids, q):
+        if not q.startswith('_type:'):
+            q = "_type:({}),{}".format(";".join(map(str, type_ids)), q)
+
+        return SearchFromDB(q, ci_ids=target_ids, use_ci_filter=False, only_ids=True, count=100000).search()
+
+    @staticmethod
     def _path2level(src_type_id, target_type_ids, path):
         if not src_type_id or not target_type_ids:
             return abort(400, ErrFormat.relation_path_search_src_target_required)
@@ -502,6 +509,7 @@ class Search(object):
         ci_ids = [j for i in paths for j in i]
 
         response, _, _, _, _, _ = SearchFromDB("_type:({})".format(";".join(map(str, types))),
+                                               use_ci_filter=False,
                                                ci_ids=list(map(int, ci_ids)),
                                                count=1000000).search()
         id2ci = {str(i.get('_id')): i for i in response}
@@ -539,6 +547,8 @@ class Search(object):
         source_ids = self._get_src_ids(source)
 
         graph, target_ids = self._build_graph(source_ids, level2type, target['type_ids'], acl)
+        if target.get('q'):
+            target_ids = self._filter_target_ids(target_ids, target['type_ids'], target['q'])
 
         paths = self._find_paths(graph, source_ids, set(target_ids))
         del graph
