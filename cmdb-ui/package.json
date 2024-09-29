@@ -20,7 +20,7 @@
     "@wangeditor/editor": "^5.1.23",
     "@wangeditor/editor-for-vue": "^1.0.0",
     "ant-design-vue": "^1.6.5",
-    "axios": "0.18.0",
+    "axios": "1.6.0",
     "babel-eslint": "^8.2.2",
     "butterfly-dag": "^4.3.26",
     "codemirror": "^5.65.13",
