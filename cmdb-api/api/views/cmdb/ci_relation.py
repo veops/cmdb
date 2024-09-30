@@ -2,7 +2,6 @@
 
 
 import time
-
 from flask import abort
 from flask import current_app
 from flask import request
@@ -63,6 +62,39 @@ class CIRelationSearchView(APIView):
                             facet=facet,
                             counter=counter,
                             result=response)
+
+
+class CIRelationSearchPathView(APIView):
+    url_prefix = ("/ci_relations/path/s", "/ci_relations/path/search")
+
+    @args_required("source", "target", "path")
+    def post(self):
+        """@params: page: page number
+                    page_size | count: page size
+                    source: source CIType, e.g. {type_id: 1, q: `search expr`}
+                    target: target CIType, e.g. {type_ids: [2], q: `search expr`}
+                    path: Path from the Source CIType to the Target CIType, e.g. {source_id: [target_id]}
+        """
+
+        page = get_page(request.values.get("page", 1))
+        count = get_page_size(request.values.get("count") or request.values.get("page_size"))
+
+        source = request.values.get("source")
+        target = request.values.get("target")
+        path = request.values.get("path")
+
+        s = Search(page=page, count=count)
+        try:
+            response, counter, total, page, numfound, id2ci = s.search_by_path(source, target, path)
+        except SearchError as e:
+            return abort(400, str(e))
+
+        return self.jsonify(numfound=numfound,
+                            total=total,
+                            page=page,
+                            counter=counter,
+                            paths=response,
+                            id2ci=id2ci)
 
 
 class CIRelationStatisticsView(APIView):

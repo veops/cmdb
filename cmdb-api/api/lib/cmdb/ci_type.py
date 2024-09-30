@@ -3,6 +3,7 @@
 from collections import defaultdict
 
 import copy
+import networkx as nx
 import toposort
 from flask import abort
 from flask import current_app
@@ -844,6 +845,29 @@ class CITypeRelationManager(object):
             ids = [i.parent_id for i in query.filter(CITypeRelation.child_id.in_(ids))]
 
         return ids
+
+    @staticmethod
+    def find_path(source_type_id, target_type_ids):
+        source_type_id = int(source_type_id)
+        target_type_ids = map(int, target_type_ids)
+
+        graph = nx.DiGraph()
+
+        def get_children(_id):
+            children = CITypeRelation.get_by(parent_id=_id, to_dict=False)
+
+            for i in children:
+                if i.child_id != _id:
+                    graph.add_edge(i.parent_id, i.child_id)
+                    get_children(i.child_id)
+
+        get_children(source_type_id)
+
+        paths = list(nx.all_simple_paths(graph, source_type_id, target_type_ids))
+
+        del graph
+
+        return paths
 
     @staticmethod
     def _wrap_relation_type_dict(type_id, relation_inst):
