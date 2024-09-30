@@ -8,7 +8,6 @@ from api.lib.cmdb.ci_type import CITypeManager
 from api.lib.cmdb.ci_type import CITypeRelationManager
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
-from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.preference import PreferenceManager
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.common_setting.decorator import perms_role_required
@@ -17,7 +16,7 @@ from api.lib.decorator import args_required
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import has_perm_from_args
 from api.lib.perm.acl.acl import is_app_admin
-from api.lib.perm.acl.acl import role_required
+from api.lib.utils import handle_arg_list
 from api.resource import APIView
 
 app_cli = CMDBApp()
@@ -40,6 +39,19 @@ class GetParentsView(APIView):
 
     def get(self, child_id):
         return self.jsonify(parents=CITypeRelationManager.get_parents(child_id))
+
+
+class CITypeRelationPathView(APIView):
+    url_prefix = ("/ci_type_relations/path",)
+
+    @args_required("source_type_id", "target_type_ids")
+    def get(self):
+        source_type_id = request.values.get("source_type_id")
+        target_type_ids = handle_arg_list(request.values.get("target_type_ids"))
+
+        paths = CITypeRelationManager.find_path(source_type_id, target_type_ids)
+
+        return self.jsonify(paths=paths)
 
 
 class CITypeRelationView(APIView):
