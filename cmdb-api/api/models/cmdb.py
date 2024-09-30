@@ -666,3 +666,25 @@ class InnerKV(Model):
 
     key = db.Column(db.String(128), index=True)
     value = db.Column(db.Text)
+
+
+class SubnetScan(Model):
+    __tablename__ = "c_ipam_subnet_scans"
+
+    ci_id = db.Column(db.Integer, index=True, nullable=False)
+    enabled = db.Column(db.Boolean, default=True)
+
+    # scan rules
+    agent_id = db.Column(db.String(8), index=True)
+    cron = db.Column(db.String(128))
+
+
+class SubnetScanHistory(Model2):
+    __tablename__ = "c_ipam_subnet_scan_histories"
+
+    subnet_id = db.Column(db.Integer, db.ForeignKey('c_ipam_subnets.id'), nullable=False)
+    start_at = db.Column(db.DateTime)
+    end_at = db.Column(db.DateTime)
+    status = db.Column(db.Integer, default=0)
+    ip_num = db.Column(db.Integer)
+    ips = db.Column(db.JSON)  # keep only the last 10 records

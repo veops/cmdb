@@ -154,3 +154,11 @@ class ErrFormat(CommonErrFormat):
     topology_group_exists = _l("Topology group {} already exists")  # 拓扑视图分组 {} 已经存在
     # 因为该分组下定义了拓扑视图，不能删除
     topo_view_exists_cannot_delete_group = _l("The group cannot be deleted because the topology view already exists")
+
+    # # IPAM
+    ipam_subnet_model_not_found = _l("The subnet model {} does not exist")
+    ipam_cidr_invalid_notation = _l("CIDR {} is an invalid notation")
+    ipam_cidr_invalid_subnet = _l("Invalid CIDR: {}, available subnets: {}")
+    ipam_subnet_prefix_length_invalid = _l("Invalid subnet prefix length: {}")
+    ipam_parent_subnet_node_cidr_cannot_empty = _l("parent node cidr must be required")
+    ipam_subnet_overlapped = _l("{} and {} overlap")

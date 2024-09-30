@@ -110,9 +110,16 @@ class ExecuteStatusEnum(BaseEnum):
     FAILED = '1'
     RUNNING = '2'
 
+
 class RelationSourceEnum(BaseEnum):
     ATTRIBUTE_VALUES = "0"
     AUTO_DISCOVERY = "1"
+
+
+class BuiltinModelEnum(BaseEnum):
+    IPAM_SUBNET = "ipam_subnet"
+    IPAM_ADDRESS = "ipam_address"
+    IPAM_SCOPE = "ipam_scope"
 
 
 CMDB_QUEUE = "one_cmdb_async"
