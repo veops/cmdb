@@ -155,6 +155,8 @@ class ErrFormat(CommonErrFormat):
     # 因为该分组下定义了拓扑视图，不能删除
     topo_view_exists_cannot_delete_group = _l("The group cannot be deleted because the topology view already exists")
 
+    relation_path_search_src_target_required = _l("Both the source model and the target model must be selected")
+
     # # IPAM
     ipam_subnet_model_not_found = _l("The subnet model {} does not exist")
     ipam_cidr_invalid_notation = _l("CIDR {} is an invalid notation")

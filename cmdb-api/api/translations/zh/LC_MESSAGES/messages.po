@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-08-20 13:47+0800\n"
+"POT-Creation-Date: 2024-09-26 17:57+0800\n"
 "PO-Revision-Date: 2023-12-25 20:21+0800\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -491,6 +491,10 @@ msgstr "拓扑视图分组 {} 已经存在"
 #: api/lib/cmdb/resp_format.py:156
 msgid "The group cannot be deleted because the topology view already exists"
 msgstr "因为该分组下定义了拓扑视图，不能删除"
+
+#: api/lib/cmdb/resp_format.py:158
+msgid "Both the source model and the target model must be selected"
+msgstr "源模型和目标模型不能为空!"
 
 #: api/lib/common_setting/resp_format.py:8
 msgid "Company info already existed"

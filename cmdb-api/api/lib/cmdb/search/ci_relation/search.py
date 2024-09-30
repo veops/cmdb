@@ -1,8 +1,11 @@
 # -*- coding:utf-8 -*-
-import json
-import sys
 from collections import Counter
+from collections import defaultdict
 
+import copy
+import json
+import networkx as nx
+import sys
 from flask import abort
 from flask import current_app
 from flask_login import current_user
@@ -13,6 +16,7 @@ from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci import CIRelationManager
 from api.lib.cmdb.ci_type import CITypeRelationManager
 from api.lib.cmdb.const import ConstraintEnum
+from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION2
 from api.lib.cmdb.const import ResourceTypeEnum
@@ -28,7 +32,7 @@ from api.models.cmdb import CI
 
 
 class Search(object):
-    def __init__(self, root_id,
+    def __init__(self, root_id=None,
                  level=None,
                  query=None,
                  fl=None,
@@ -419,3 +423,139 @@ class Search(object):
             level_ids = _level_ids
 
         return result
+
+    @staticmethod
+    def _get_src_ids(src):
+        q = src.get('q') or ''
+        if not q.startswith('_type:'):
+            q = "_type:{},{}".format(src['type_id'], q)
+
+        return SearchFromDB(q, use_ci_filter=True, only_ids=True, count=100000).search()
+
+    @staticmethod
+    def _filter_target_ids(target_ids, type_ids, q):
+        if not q.startswith('_type:'):
+            q = "_type:({}),{}".format(";".join(map(str, type_ids)), q)
+
+        return SearchFromDB(q, ci_ids=target_ids, use_ci_filter=False, only_ids=True, count=100000).search()
+
+    @staticmethod
+    def _path2level(src_type_id, target_type_ids, path):
+        if not src_type_id or not target_type_ids:
+            return abort(400, ErrFormat.relation_path_search_src_target_required)
+
+        graph = nx.DiGraph()
+        graph.add_edges_from([(int(s), d) for s in path for d in path[s]])
+
+        level2type = defaultdict(set)
+        for target_type_id in target_type_ids:
+            paths = list(nx.all_simple_paths(graph, source=src_type_id, target=target_type_id))
+            for _path in paths:
+                for idx, node in enumerate(_path[1:]):
+                    level2type[idx + 1].add(node)
+        nodes = graph.nodes()
+
+        del graph
+
+        return level2type, list(nodes)
+
+    def _build_graph(self, source_ids, level2type, target_type_ids, acl):
+        type2filter_perms = dict()
+        if not self.is_app_admin:
+            res2 = acl.get_resources(ResourceTypeEnum.CI_FILTER)
+            if res2:
+                type2filter_perms = CIFilterPermsCRUD().get_by_ids(list(map(int, [i['name'] for i in res2])))
+
+        target_type_ids = set(target_type_ids)
+        graph = nx.DiGraph()
+        target_ids = []
+        key = list(map(str, source_ids))
+        for level in level2type:
+            filter_type_ids = level2type[level]
+            id_filter_limit = dict()
+            for _type_id in filter_type_ids:
+                if type2filter_perms.get(_type_id):
+                    _id_filter_limit, _ = self._get_ci_filter(type2filter_perms[_type_id])
+                    id_filter_limit.update(_id_filter_limit)
+
+            has_target = filter_type_ids & target_type_ids
+
+            res = [json.loads(x).items() for x in [i or '{}' for i in rd.get(key, REDIS_PREFIX_CI_RELATION) or []]]
+            _key = []
+            for idx, _id in enumerate(key):
+                valid_targets = [i[0] for i in res[idx] if i[1] in filter_type_ids and
+                                 (not id_filter_limit or int(i[0]) in id_filter_limit)]
+                _key.extend(valid_targets)
+                graph.add_edges_from(zip([_id] * len(valid_targets), valid_targets))
+
+            if has_target:
+                target_ids.extend([j[0] for i in res for j in i if j[1] in target_type_ids])
+
+            key = copy.deepcopy(_key)
+
+        return graph, target_ids
+
+    @staticmethod
+    def _find_paths(graph, source_ids, target_ids, max_depth=6):
+        paths = []
+        for source_id in source_ids:
+            _paths = nx.all_simple_paths(graph, source=source_id, target=target_ids, cutoff=max_depth)
+            paths.extend(_paths)
+
+        return paths
+
+    @staticmethod
+    def _wrap_path_result(paths, types):
+        ci_ids = [j for i in paths for j in i]
+
+        response, _, _, _, _, _ = SearchFromDB("_type:({})".format(";".join(map(str, types))),
+                                               use_ci_filter=False,
+                                               ci_ids=list(map(int, ci_ids)),
+                                               count=1000000).search()
+        id2ci = {str(i.get('_id')): i for i in response}
+
+        result = defaultdict(list)
+        counter = defaultdict(int)
+
+        for path in paths:
+            key = "-".join([id2ci.get(i, {}).get('ci_type_alias') or '' for i in path])
+            counter[key] += 1
+            result[key].append(path)
+
+        return result, counter, id2ci
+
+    def search_by_path(self, source, target, path):
+        """
+
+        :param source: {type_id: id, q: expr}
+        :param target: {type_ids: [id], q: expr}
+        :param path: {parent_id: [child_id]}, use type id
+        :return:
+        """
+        acl = ACLManager('cmdb')
+        if not self.is_app_admin:
+            res = {i['name'] for i in acl.get_resources(ResourceTypeEnum.CI_TYPE)}
+            for type_id in (source.get('type_id') or []) + (target.get('type_ids') or []):
+                _type = CITypeCache.get(type_id)
+                if _type and _type.name not in res:
+                    return abort(403, ErrFormat.no_permission.format(_type.alias, PermEnum.READ))
+
+        level2type, types = self._path2level(source.get('type_id'), target.get('type_ids'), path)
+        if not level2type:
+            return [], {}, 0, self.page, 0, {}
+
+        source_ids = self._get_src_ids(source)
+
+        graph, target_ids = self._build_graph(source_ids, level2type, target['type_ids'], acl)
+        if target.get('q'):
+            target_ids = self._filter_target_ids(target_ids, target['type_ids'], target['q'])
+
+        paths = self._find_paths(graph, source_ids, set(target_ids))
+        del graph
+
+        numfound = len(target_ids)
+        paths = paths[(self.page - 1) * self.count:self.page * self.count]
+
+        response, counter, id2ci = self._wrap_path_result(paths, types)
+
+        return response, counter, len(paths), self.page, numfound, id2ci
