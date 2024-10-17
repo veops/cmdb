@@ -108,6 +108,7 @@ export default {
     visual: '虚拟',
     default: '默认',
     tip: '提示',
+    cmdbSearch: '搜索一下',
     pagination: {
         total: '当前展示 {range0}-{range1} 条数据， 共 {total} 条'
     },

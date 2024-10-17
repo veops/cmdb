@@ -53,6 +53,7 @@ const genCmdbRoutes = async () => {
       {
         path: '/cmdb/resourcesearch',
         name: 'cmdb_resource_search',
+        hidden: true,
         meta: { title: 'cmdb.menu.ciSearch', icon: 'ops-cmdb-search', selectedIcon: 'ops-cmdb-search', keepAlive: false },
         component: () => import('../views/resource_search_2/index.vue')
       },

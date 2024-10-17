@@ -9,6 +9,8 @@ import {
 import { searchResourceType } from '@/modules/acl/api/resource'
 import { roleHasPermissionToGrant } from '@/modules/acl/api/permission'
 import CMDBGrant from '@/modules/cmdb/components/cmdbGrant'
+import styles from './index.module.less'
+import { mapActions } from 'vuex'
 
 const { Item, SubMenu } = Menu
 
@@ -40,7 +42,8 @@ export default {
       openKeys: [],
       selectedKeys: [],
       cachedOpenKeys: [],
-      resource_type: {}
+      resource_type: {},
+      currentAppRoute: ''
     }
   },
   computed: {
@@ -64,6 +67,7 @@ export default {
     searchResourceType({ page_size: 9999, app_id: 'cmdb' }).then(res => {
       this.resource_type = { groups: res.groups, id2perms: res.id2perms }
     })
+    this.currentAppRoute = this.$route?.matched?.[0]?.name || ''
     this.updateMenu()
   },
   watch: {
@@ -75,12 +79,14 @@ export default {
         this.openKeys = this.cachedOpenKeys
       }
     },
-    $route: function () {
+    $route: function (route) {
+      this.currentAppRoute = route?.matched?.[0]?.name
       this.updateMenu()
     },
   },
   inject: ['reload'],
   methods: {
+    ...mapActions(['UpdateCMDBSEarchValue']),
     cancelAttributes(e, menu) {
       const that = this
       e.preventDefault()
@@ -286,6 +292,47 @@ export default {
           this.$message.error(this.$t('noPermission'))
         }
       })
+    },
+
+    jumpCMDBSearch(value) {
+      this.UpdateCMDBSEarchValue(value)
+
+      if (this.$route.name !== 'cmdb_resource_search') {
+        this.$router.push({
+          name: 'cmdb_resource_search',
+        })
+      }
+    },
+
+    renderCMDBSearch() {
+      if (this.currentAppRoute !== 'cmdb' || this.collapsed) {
+        return null
+      }
+
+      return (
+        <Item class={styles['cmdb-side-menu-search']}>
+          <a-input
+            ref="cmdbSideMenuSearchInputRef"
+            class={styles['cmdb-side-menu-search-input']}
+            style={{
+              border: this.$route.name === 'cmdb_resource_search' ? 'solid 1px #B1C9FF' : ''
+            }}
+            placeholder={this.$t('cmdbSearch')}
+            onPressEnter={(e) => {
+              this.jumpCMDBSearch(e.target.value)
+            }}
+          >
+            <ops-icon
+              slot="suffix"
+              type="veops-search1"
+              onClick={() => {
+                const value = this.$refs?.cmdbSideMenuSearchInputRef?.$refs?.input?.value || ''
+                this.jumpCMDBSearch(value)
+              }}
+            />
+          </a-input>
+        </Item>
+      )
     }
   },
 
@@ -313,6 +360,7 @@ export default {
     // {...{ props, on: on }}
     return (
       <Menu class="ops-side-bar" selectedKeys={this.selectedKeys} {...{ props, on: on }}>
+        {this.renderCMDBSearch()}
         {menuTree}
       </Menu>
     )

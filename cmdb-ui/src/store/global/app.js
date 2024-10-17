@@ -25,7 +25,7 @@ const app = {
     color: null,
     weak: false,
     multiTab: false,
-
+    cmdbSearchValue: '',
   },
   mutations: {
     SET_SIDEBAR_TYPE: (state, type) => {
@@ -76,7 +76,9 @@ const app = {
       Vue.ls.set(DEFAULT_MULTI_TAB, bool)
       state.multiTab = bool
     },
-
+    UPDATE_CMDB_SEARCH_VALUE: (state, value) => {
+      state.cmdbSearchValue = value
+    }
   },
   actions: {
     setSidebar({ commit }, type) {
@@ -118,6 +120,9 @@ const app = {
     ToggleMultiTab({ commit }, bool) {
       commit('TOGGLE_MULTI_TAB', bool)
     },
+    UpdateCMDBSEarchValue({ commit }, value) {
+      commit('UPDATE_CMDB_SEARCH_VALUE', value)
+    }
   }
 }
 
