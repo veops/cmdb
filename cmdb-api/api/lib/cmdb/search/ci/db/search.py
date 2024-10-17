@@ -66,6 +66,7 @@ class Search(object):
         self.use_id_filter = use_id_filter
         self.use_ci_filter = use_ci_filter
         self.only_ids = only_ids
+        self.multi_type_has_ci_filter = False
 
         self.valid_type_names = []
         self.type2filter_perms = dict()
@@ -140,9 +141,10 @@ class Search(object):
                                         self.type_id_list.remove(str(ci_type.id))
                                     type_id_list.remove(str(ci_type.id))
                                     sub.extend([i for i in queries[1:] if isinstance(i, six.string_types)])
+
                                     sub.insert(0, "_type:{}".format(ci_type.id))
                                     queries.append(dict(operator="|", queries=sub))
-
+                                    self.multi_type_has_ci_filter = True
                         if self.type2filter_perms[ci_type.id].get('attr_filter'):
                             if type_num == 1:
                                 if not self.fl:
@@ -172,9 +174,9 @@ class Search(object):
         if type_id_list:
             type_ids = ",".join(type_id_list)
             _query_sql = QUERY_CI_BY_TYPE.format(type_ids)
-            if self.only_type_query:
+            if self.only_type_query or self.multi_type_has_ci_filter:
                 return _query_sql
-        elif type_num > 1:
+        elif type_num > 1:  # there must be instance-level access control
             return "select c_cis.id as ci_id from c_cis where c_cis.id=0"
 
         return ""
@@ -253,7 +255,7 @@ class Search(object):
             return ret_sql.format(query_sql, "ORDER BY B.ci_id {1} LIMIT {0:d}, {2};".format(
                 (self.page - 1) * self.count, sort_type, self.count))
 
-        elif self.type_id_list:
+        elif self.type_id_list and not self.multi_type_has_ci_filter:
             self.query_sql = "SELECT B.ci_id FROM ({0}) AS B {1}".format(
                 query_sql,
                 "INNER JOIN c_cis on c_cis.id=B.ci_id WHERE c_cis.type_id IN ({0}) ".format(
@@ -278,7 +280,7 @@ class Search(object):
     def __sort_by_type(self, sort_type, query_sql):
         ret_sql = "SELECT SQL_CALC_FOUND_ROWS DISTINCT B.ci_id FROM ({0}) AS B {1}"
 
-        if self.type_id_list:
+        if self.type_id_list and not self.multi_type_has_ci_filter:
             self.query_sql = "SELECT B.ci_id FROM ({0}) AS B {1}".format(
                 query_sql,
                 "INNER JOIN c_cis on c_cis.id=B.ci_id WHERE c_cis.type_id IN ({0}) ".format(
@@ -311,7 +313,7 @@ class Search(object):
                           WHERE {1}.attr_id = {3}""".format("ALIAS", table_name, query_sql, attr_id)
         new_table = _v_query_sql
 
-        if self.only_type_query or not self.type_id_list:
+        if self.only_type_query or not self.type_id_list or self.multi_type_has_ci_filter:
             return ("SELECT SQL_CALC_FOUND_ROWS DISTINCT C.ci_id FROM ({0}) AS C ORDER BY C.value {2} "
                     "LIMIT {1:d}, {3};".format(new_table, (self.page - 1) * self.count, sort_type, self.count))
 
@@ -518,8 +520,8 @@ class Search(object):
             _query_sql = ""
             if isinstance(q, dict):
                 alias, _query_sql, operator = self.__query_build_by_field(q['queries'], True, True, alias, is_sub=True)
-                current_app.logger.info(_query_sql)
-                current_app.logger.info((operator, is_first, alias))
+                # current_app.logger.info(_query_sql)
+                # current_app.logger.info((operator, is_first, alias))
                 operator = q['operator']
 
             elif ":" in q and not q.startswith("*"):
@@ -617,6 +619,7 @@ class Search(object):
                 k, _, _, _ = self._attr_name_proc(f)
                 if k:
                     _fl.append(k)
+
             return _fl
         else:
             return self.fl
@@ -638,6 +641,8 @@ class Search(object):
         if ci_ids:
             response = CIManager.get_cis_by_ids(ci_ids, ret_key=self.ret_key, fields=_fl, excludes=self.excludes)
         for res in response:
+            if not res:
+                continue
             ci_type = res.get("ci_type")
             if ci_type not in counter.keys():
                 counter[ci_type] = 0
