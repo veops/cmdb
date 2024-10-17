@@ -13,7 +13,10 @@
           v-decorator="['filename', { rules: [{ required: true, message: $t('cmdb.components.filenameInputTips') }] }]"
         />
       </a-form-item>
-      <a-form-item :label="$t('cmdb.components.saveType')">
+      <a-form-item
+        v-if="showFileTypeSelect"
+        :label="$t('cmdb.components.saveType')"
+      >
         <a-select
           :placeholder="$t('cmdb.components.saveTypeTips')"
           v-decorator="[
@@ -83,6 +86,10 @@ export default {
       type: String,
       default: 'default',
     },
+    showFileTypeSelect: {
+      type: Boolean,
+      default: true
+    }
   },
   data() {
     return {

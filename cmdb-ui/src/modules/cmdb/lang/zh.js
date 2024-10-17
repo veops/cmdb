@@ -740,5 +740,22 @@ if __name__ == "__main__":
         topoViewSearchPlaceholder: '请输入节点名字',
         moreBtn: '展示更多({count})'
     },
+    relationSearch: {
+        relationSearch: '关系搜索',
+        sourceCIType: '源模型',
+        sourceCITypeTip: '请输入或选择',
+        sourceCITYpeInput: '请输入关键词',
+        targetCIType: '目标模型',
+        targetCITypeTip: '请输入或选择，可多选',
+        pathSelect: '路径选择',
+        pathSelectTip: '请先选择源模型和目标模型',
+        saveCondition: '保存条件',
+        conditionFilter: '条件过滤',
+        level: '层级',
+        returnPath: '返回路径',
+        conditionName: '条件命名',
+        path: '路径',
+        expandCondition: '展开条件',
+    }
 }
 export default cmdb_zh

@@ -108,6 +108,7 @@ export default {
     visual: 'Visual',
     default: 'default',
     tip: 'Tip',
+    cmdbSearch: 'Search',
     pagination: {
         total: '{range0}-{range1} of {total} items'
     },
