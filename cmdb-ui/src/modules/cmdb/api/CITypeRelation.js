@@ -74,3 +74,11 @@ export function getCanEditByParentIdChildId(parent_id, child_id) {
     method: 'GET'
   })
 }
+
+export function getCITypeRelationPath(params) {
+  return axios({
+    url: `/v0.1/ci_type_relations/path`,
+    method: 'GET',
+    params
+  })
+}

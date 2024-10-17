@@ -1113,7 +1113,7 @@ export default {
     }
 
     .ci-types-left-content {
-      max-height: calc(100% - 45px);
+      height: calc(100% - 45px);
       overflow: hidden;
       margin-top: 10px;
 
