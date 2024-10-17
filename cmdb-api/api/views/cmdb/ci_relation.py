@@ -73,7 +73,7 @@ class CIRelationSearchPathView(APIView):
                     page_size | count: page size
                     source: source CIType, e.g. {type_id: 1, q: `search expr`}
                     target: target CIType, e.g. {type_ids: [2], q: `search expr`}
-                    path: Path from the Source CIType to the Target CIType, e.g. {source_id: [target_id]}
+                    path: Path from the Source CIType to the Target CIType, e.g. [1, ..., 2]
         """
 
         page = get_page(request.values.get("page", 1))
@@ -85,7 +85,8 @@ class CIRelationSearchPathView(APIView):
 
         s = Search(page=page, count=count)
         try:
-            response, counter, total, page, numfound, id2ci = s.search_by_path(source, target, path)
+            (response, counter, total, page, numfound, id2ci,
+             relation_types, type2show_key) = s.search_by_path(source, target, path)
         except SearchError as e:
             return abort(400, str(e))
 
@@ -94,7 +95,9 @@ class CIRelationSearchPathView(APIView):
                             page=page,
                             counter=counter,
                             paths=response,
-                            id2ci=id2ci)
+                            id2ci=id2ci,
+                            relation_types=relation_types,
+                            type2show_key=type2show_key)
 
 
 class CIRelationStatisticsView(APIView):
