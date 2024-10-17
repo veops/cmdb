@@ -741,5 +741,22 @@ if __name__ == "__main__":
         topoViewSearchPlaceholder: 'Please enter the node name.',
         moreBtn: 'Show more({count})'
     },
+    relationSearch: {
+        relationSearch: 'Relation Search',
+        sourceCIType: 'Source CIType',
+        sourceCITypeTip: 'Please input or select',
+        sourceCITYpeInput: 'Please input keywords',
+        targetCIType: 'Target CIType',
+        targetCITypeTip: 'Please input or select, multiple choices available',
+        pathSelect: 'Path Select',
+        pathSelectTip: 'Please select source CIType and target CIType first',
+        saveCondition: 'Save Condition',
+        conditionFilter: 'Condition Filter',
+        level: 'Level',
+        returnPath: 'Return Path',
+        conditionName: 'Condition Name',
+        path: 'Path',
+        expandCondition: 'Expand Condition',
+    }
 }
 export default cmdb_en

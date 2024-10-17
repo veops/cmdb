@@ -81,3 +81,11 @@ export function searchCIRelationFull(params) {
     params,
   })
 }
+
+export function searchCIRelationPath(data) {
+  return axios({
+    url: `/v0.1/ci_relations/path/s`,
+    method: 'POST',
+    data,
+  })
+}

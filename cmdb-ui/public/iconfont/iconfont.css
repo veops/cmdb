@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1725846934130') format('woff2'),
-       url('iconfont.woff?t=1725846934130') format('woff'),
-       url('iconfont.ttf?t=1725846934130') format('truetype');
+  src: url('iconfont.woff2?t=1729157759723') format('woff2'),
+       url('iconfont.woff?t=1729157759723') format('woff'),
+       url('iconfont.ttf?t=1729157759723') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,134 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.oneterm-mysql:before {
+  content: "\e9e8";
+}
+
+.oneterm-redis:before {
+  content: "\e9e7";
+}
+
+.veops-sign_out:before {
+  content: "\e9e6";
+}
+
+.veops-company:before {
+  content: "\e9e5";
+}
+
+.veops-emails:before {
+  content: "\e9e4";
+}
+
+.veops-switch:before {
+  content: "\e9e3";
+}
+
+.qiyeweixin:before {
+  content: "\e9e2";
+}
+
+.veops-progress:before {
+  content: "\e9e1";
+}
+
+.veops-completed:before {
+  content: "\e9e0";
+}
+
+.itsm-ticketTime:before {
+  content: "\e9df";
+}
+
+.veops-notification:before {
+  content: "\e9dc";
+}
+
+.a-veops-account1:before {
+  content: "\e9dd";
+}
+
+.veops-personal:before {
+  content: "\e9de";
+}
+
+.itsm-customer_satisfaction2:before {
+  content: "\e9da";
+}
+
+.itsm-over2:before {
+  content: "\e9db";
+}
+
+.veops-search1:before {
+  content: "\e9d9";
+}
+
+.itsm-customer_satisfaction:before {
+  content: "\e9d8";
+}
+
+.itsm-over:before {
+  content: "\e9d7";
+}
+
+.itsm-request:before {
+  content: "\e9d6";
+}
+
+.itsm-release:before {
+  content: "\e9d5";
+}
+
+.veops-link:before {
+  content: "\e9d4";
+}
+
+.oneterm-command_record:before {
+  content: "\e9d3";
+}
+
+.ai-question:before {
+  content: "\e9d2";
+}
+
+.ai-sending:before {
+  content: "\e9d1";
+}
+
+.ai-dialogue:before {
+  content: "\e9d0";
+}
+
+.ai-report2:before {
+  content: "\e9cf";
+}
+
+.ai-delete:before {
+  content: "\e9cd";
+}
+
+.caise-knowledge:before {
+  content: "\e9ce";
+}
+
+.ai-article:before {
+  content: "\e9cc";
+}
+
+.ai-model_setup1:before {
+  content: "\e9cb";
+}
+
+.ai-report:before {
+  content: "\e9ca";
+}
+
+.ai-customer_service:before {
+  content: "\e9c9";
 }
 
 .oneterm-connect1:before {

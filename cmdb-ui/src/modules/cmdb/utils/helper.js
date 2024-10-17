@@ -11,7 +11,7 @@ export function sum(arr) {
     })
 }
 
-const strLength = (fData) => {
+export const strLength = (fData) => {
 
     if (!fData) {
         return 0
