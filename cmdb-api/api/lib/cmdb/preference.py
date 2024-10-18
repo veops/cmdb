@@ -1,6 +1,5 @@
 # -*- coding:utf-8 -*-
 
-
 from collections import defaultdict
 
 import copy
@@ -384,7 +383,7 @@ class PreferenceManager(object):
     def add_search_option(**kwargs):
         kwargs['uid'] = current_user.uid
 
-        if kwargs['name'] in ('__recent__', '__favor__'):
+        if kwargs['name'] in ('__recent__', '__favor__', '__relation_favor__'):
             if kwargs['name'] == '__recent__':
                 for i in PreferenceSearchOption.get_by(
                         only_query=True, name=kwargs['name'], uid=current_user.uid).order_by(
