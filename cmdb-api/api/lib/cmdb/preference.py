@@ -16,6 +16,7 @@ from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.cache import CMDBCounterCache
 from api.lib.cmdb.ci_type import CITypeAttributeManager
+from api.lib.cmdb.const import BUILTIN_ATTRIBUTES
 from api.lib.cmdb.const import ConstraintEnum
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
@@ -24,7 +25,6 @@ from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.exception import AbortException
 from api.lib.perm.acl.acl import ACLManager
-from api.models.cmdb import CITypeAttribute
 from api.models.cmdb import CITypeGroup
 from api.models.cmdb import CITypeGroupItem
 from api.models.cmdb import CITypeRelation
@@ -136,17 +136,24 @@ class PreferenceManager(object):
             _type = CITypeCache.get(type_id)
             type_id = _type and _type.id
 
-        attrs = db.session.query(PreferenceShowAttributes, CITypeAttribute.order).join(
-            CITypeAttribute, CITypeAttribute.attr_id == PreferenceShowAttributes.attr_id).filter(
-            PreferenceShowAttributes.uid == current_user.uid).filter(
-            PreferenceShowAttributes.type_id == type_id).filter(
-            PreferenceShowAttributes.deleted.is_(False)).filter(CITypeAttribute.deleted.is_(False)).group_by(
-            CITypeAttribute.attr_id).all()
+        # attrs = db.session.query(PreferenceShowAttributes, CITypeAttribute.order).join(
+        #     CITypeAttribute, CITypeAttribute.attr_id == PreferenceShowAttributes.attr_id).filter(
+        #     PreferenceShowAttributes.uid == current_user.uid).filter(
+        #     PreferenceShowAttributes.type_id == type_id).filter(
+        #     PreferenceShowAttributes.deleted.is_(False)).filter(CITypeAttribute.deleted.is_(False)).group_by(
+        #     CITypeAttribute.attr_id).all()
+
+        attrs = PreferenceShowAttributes.get_by(uid=current_user.uid, type_id=type_id, to_dict=False)
 
         result = []
-        for i in sorted(attrs, key=lambda x: x.PreferenceShowAttributes.order):
-            item = i.PreferenceShowAttributes.attr.to_dict()
-            item.update(dict(is_fixed=i.PreferenceShowAttributes.is_fixed))
+        for i in sorted(attrs, key=lambda x: x.order):
+            if i.attr_id:
+                item = i.attr.to_dict()
+            elif i.builtin_attr:
+                item = dict(name=i.builtin_attr, alias=BUILTIN_ATTRIBUTES[i.builtin_attr])
+            else:
+                item = dict(name="", alias="")
+            item.update(dict(is_fixed=i.is_fixed))
             result.append(item)
 
         is_subscribed = True
@@ -155,10 +162,14 @@ class PreferenceManager(object):
                                                                       choice_web_hook_parse=False,
                                                                       choice_other_parse=False)
             result = [i for i in result if i['default_show']]
+
+            for i in BUILTIN_ATTRIBUTES:
+                result.append(dict(name=i, alias=BUILTIN_ATTRIBUTES[i]))
+
             is_subscribed = False
 
         for i in result:
-            if i["is_choice"]:
+            if i.get("is_choice"):
                 i.update(dict(choice_value=AttributeManager.get_choice_values(
                     i["id"], i["value_type"], i.get("choice_web_hook"), i.get("choice_other"))))
 
@@ -172,24 +183,34 @@ class PreferenceManager(object):
                 _attr, is_fixed = x
             else:
                 _attr, is_fixed = x, False
-            attr = AttributeCache.get(_attr) or abort(404, ErrFormat.attribute_not_found.format("id={}".format(_attr)))
+
+            if _attr in BUILTIN_ATTRIBUTES:
+                attr = None
+                builtin_attr = _attr
+            else:
+                attr = AttributeCache.get(_attr) or abort(
+                    404, ErrFormat.attribute_not_found.format("id={}".format(_attr)))
+                builtin_attr = None
             existed = PreferenceShowAttributes.get_by(type_id=type_id,
                                                       uid=current_user.uid,
-                                                      attr_id=attr.id,
+                                                      attr_id=attr and attr.id,
+                                                      builtin_attr=builtin_attr,
                                                       first=True,
                                                       to_dict=False)
             if existed is None:
                 PreferenceShowAttributes.create(type_id=type_id,
                                                 uid=current_user.uid,
-                                                attr_id=attr.id,
+                                                attr_id=attr and attr.id,
+                                                builtin_attr=builtin_attr,
                                                 order=order,
                                                 is_fixed=is_fixed)
             else:
                 existed.update(order=order, is_fixed=is_fixed)
 
-        attr_dict = {int(i[0]) if isinstance(i, list) else int(i): j for i, j in attr_order}
+        attr_dict = {(int(i[0]) if i[0].isdigit() else i[0]) if isinstance(i, list) else
+                     (int(i) if i.isdigit() else i): j for i, j in attr_order}
         for i in existed_all:
-            if i.attr_id not in attr_dict:
+            if (i.attr_id and i.attr_id not in attr_dict) or (i.builtin_attr and i.builtin_attr not in attr_dict):
                 i.soft_delete()
 
         if not existed_all and attr_order:

@@ -15,6 +15,7 @@ from api.extensions import db
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci import CIManager
+from api.lib.cmdb.const import BUILTIN_ATTRIBUTES
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RetKey
@@ -304,14 +305,21 @@ class Search(object):
                     (self.page - 1) * self.count, sort_type, self.count))
 
     def __sort_by_field(self, field, sort_type, query_sql):
-        attr = AttributeCache.get(field)
-        attr_id = attr.id
+        if field not in BUILTIN_ATTRIBUTES:
 
-        table_name = TableMap(attr=attr).table_name
-        _v_query_sql = """SELECT {0}.ci_id, {1}.value
-                          FROM ({2}) AS {0} INNER JOIN {1} ON {1}.ci_id = {0}.ci_id
-                          WHERE {1}.attr_id = {3}""".format("ALIAS", table_name, query_sql, attr_id)
-        new_table = _v_query_sql
+            attr = AttributeCache.get(field)
+            attr_id = attr.id
+
+            table_name = TableMap(attr=attr).table_name
+            _v_query_sql = """SELECT ALIAS.ci_id, {0}.value
+                              FROM ({1}) AS ALIAS INNER JOIN {0} ON {0}.ci_id = ALIAS.ci_id
+                              WHERE {0}.attr_id = {2}""".format(table_name, query_sql, attr_id)
+            new_table = _v_query_sql
+        else:
+            _v_query_sql = """SELECT c_cis.id AS ci_id, c_cis.{0} AS value
+                                          FROM c_cis  INNER JOIN ({1}) AS ALIAS ON ALIAS.ci_id = c_cis.id""".format(
+                field[1:], query_sql)
+            new_table = _v_query_sql
 
         if self.only_type_query or not self.type_id_list or self.multi_type_has_ci_filter:
             return ("SELECT SQL_CALC_FOUND_ROWS DISTINCT C.ci_id FROM ({0}) AS C ORDER BY C.value {2} "

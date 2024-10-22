@@ -253,6 +253,7 @@ class CI(Model):
     status = db.Column(db.Enum(*CIStatusEnum.all(), name="status"))
     heartbeat = db.Column(db.DateTime, default=lambda: datetime.datetime.now())
     is_auto_discovery = db.Column('a', db.Boolean, default=False)
+    updated_by = db.Column(db.String(64))
 
     ci_type = db.relationship("CIType", backref="c_cis.type_id")
 
@@ -534,6 +535,7 @@ class CustomDashboard(Model):
 
     type_id = db.Column(db.Integer, db.ForeignKey('c_ci_types.id'))
     attr_id = db.Column(db.Integer, db.ForeignKey('c_attributes.id'))
+    builtin_attr = db.Column(db.String(256), nullable=True)
     level = db.Column(db.Integer)
 
     options = db.Column(db.JSON)
