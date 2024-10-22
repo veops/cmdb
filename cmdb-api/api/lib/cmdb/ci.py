@@ -45,6 +45,7 @@ from api.lib.notify import notify_send
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import is_app_admin
 from api.lib.perm.acl.acl import validate_permission
+from api.lib.perm.acl.cache import UserCache
 from api.lib.secrets.inner import InnerCrypt
 from api.lib.secrets.vault import VaultClient
 from api.lib.utils import handle_arg_list
@@ -206,6 +207,8 @@ class CIManager(object):
         res['_type'] = ci_type.id
         res['ci_type_alias'] = ci_type.alias
         res['_id'] = ci_id
+        res['_updated_at'] = str(ci.updated_at)
+        res['_updated_by'] = ci.updated_by
 
         return res
 
@@ -580,6 +583,9 @@ class CIManager(object):
                 ci_relation_add.apply_async(args=(ref_ci_dict, ci.id), queue=CMDB_QUEUE)
             else:
                 ci_relation_add(ref_ci_dict, ci.id)
+
+        u = UserCache.get(current_user.uid)
+        ci.update(updated_at=now, updated_by=u and u.nickname)
 
     @staticmethod
     def update_unique_value(ci_id, unique_name, unique_value):
