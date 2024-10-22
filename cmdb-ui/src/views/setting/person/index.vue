@@ -2,27 +2,13 @@
   <div class="setting-person">
     <div class="setting-person-left">
       <div
-        @click="
-          () => {
-            $refs.personForm.clearValidate()
-            $nextTick(() => {
-              current = '1'
-            })
-          }
-        "
+        @click="clickSideItem('1')"
         :class="{ 'setting-person-left-item': true, 'setting-person-left-item-selected': current === '1' }"
       >
         <ops-icon type="icon-shidi-yonghu" />{{ $t('cs.person.spanTitle') }}
       </div>
       <div
-        @click="
-          () => {
-            $refs.personForm.clearValidate()
-            $nextTick(() => {
-              current = '2'
-            })
-          }
-        "
+        @click="clickSideItem('2')"
         :class="{ 'setting-person-left-item': true, 'setting-person-left-item-selected': current === '2' }"
       >
         <a-icon type="unlock" theme="filled" />{{ $t('cs.person.accountAndPassword') }}
@@ -240,7 +226,14 @@ export default {
       }
     },
   },
+  beforeDestroy() {
+    this.$bus.$off('changeSettingPersonCurrent', this.clickSideItemv)
+  },
   mounted() {
+    this.$bus.$on('changeSettingPersonCurrent', this.clickSideItem)
+    if (this.$route?.query?.current) {
+      this.current = this.$route.query.current
+    }
     this.getAllFlatEmployees()
     this.getAllFlatDepartment()
     this.getEmployeeByUid()
@@ -249,6 +242,12 @@ export default {
     ...mapActions(['GetInfo']),
     getDepartmentName,
     getDirectorName,
+    clickSideItem(type) {
+      this.$refs.personForm.clearValidate()
+      this.$nextTick(() => {
+        this.current = type
+      })
+    },
     getEmployeeByUid() {
       getEmployeeByUid(this.uid).then((res) => {
         this.form = { ...res }
