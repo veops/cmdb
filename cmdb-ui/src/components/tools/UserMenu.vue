@@ -11,38 +11,12 @@
         <span class="common-settings-btn-text">{{ $t('settings') }}</span>
       </span>
       <a-popover
-        overlayClassName="lang-popover-wrap"
-        placement="bottomRight"
-        :getPopupContainer="(trigger) => trigger.parentNode"
-      >
-        <span class="locale">{{ languageList.find((lang) => lang.key === locale).title }}</span>
-        <div class="lang-menu" slot="content">
-          <a
-            v-for="(lang) in languageList"
-            :key="lang.key"
-            :class="['lang-menu-item', lang.key === locale ? 'lang-menu-item_active' : '']"
-            @click="changeLang(lang.key)"
-          >
-            {{ lang.title }}
-          </a>
-        </div>
-      </a-popover>
-      <a-popover
         :overlayStyle="{ width: '130px' }"
         placement="bottomRight"
         overlayClassName="custom-user"
       >
         <template slot="content">
-          <router-link :to="{ name: 'setting_person' }" :style="{ color: '#000000a6' }">
-            <div class="custom-user-item">
-              <a-icon type="user" :style="{ marginRight: '10px' }" />
-              <span>{{ $t('topMenu.personalCenter') }}</span>
-            </div>
-          </router-link>
-          <div @click="handleLogout" class="custom-user-item">
-            <a-icon type="logout" :style="{ marginRight: '10px' }" />
-            <span>{{ $t('topMenu.logout') }}</span>
-          </div>
+          <UserPanel />
         </template>
         <span class="action ant-dropdown-link user-dropdown-menu user-info-wrap">
           <a-avatar
@@ -63,11 +37,13 @@
 import { mapState, mapActions, mapGetters, mapMutations } from 'vuex'
 import DocumentLink from './DocumentLink.vue'
 import { setDocumentTitle, domTitle } from '@/utils/domUtil'
+import UserPanel from './userPanel.vue'
 
 export default {
   name: 'UserMenu',
   components: {
     DocumentLink,
+    UserPanel
   },
   data() {
     return {

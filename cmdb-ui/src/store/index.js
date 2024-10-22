@@ -7,6 +7,7 @@ import user from './global/user'
 import routes from './global/routes'
 import notice from './global/notice'
 import getters from './global/getters'
+import company from './global/company'
 import appConfig from '@/config/app'
 
 Vue.use(Vuex)
@@ -16,7 +17,8 @@ const store = new Vuex.Store({
     app,
     user,
     routes,
-    notice
+    notice,
+    company
   },
   state: {
     windowWidth: 800,

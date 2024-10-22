@@ -46,7 +46,8 @@ const user = {
     sex: '',
     position_name: '',
     direct_supervisor_id: null,
-    auth_enable: {}
+    auth_enable: {},
+    notice_info: {}
   },
 
   mutations: {
@@ -54,7 +55,7 @@ const user = {
       state.token = token
     },
 
-    SET_USER_INFO: (state, { name, welcome, avatar, roles, info, uid, rid, username, mobile, department_id, employee_id, email, nickname, sex, position_name, direct_supervisor_id, annual_leave }) => {
+    SET_USER_INFO: (state, { name, welcome, avatar, roles, info, uid, rid, username, mobile, department_id, employee_id, email, nickname, sex, position_name, direct_supervisor_id, annual_leave, notice_info }) => {
       state.name = name
       state.welcome = welcome
       state.avatar = avatar
@@ -73,6 +74,7 @@ const user = {
       state.position_name = position_name
       state.direct_supervisor_id = direct_supervisor_id
       state.annual_leave = annual_leave
+      state.notice_info = notice_info
     },
 
     LOAD_ALL_USERS: (state, users) => {
@@ -160,7 +162,8 @@ const user = {
               sex: res.sex,
               position_name: res.position_name,
               direct_supervisor_id: res.direct_supervisor_id,
-              annual_leave: res.annual_leave
+              annual_leave: res.annual_leave,
+              notice_info: res.notice_info
             })
           })
         }).catch(error => {
