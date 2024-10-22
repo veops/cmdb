@@ -11,7 +11,6 @@
         <span class="common-settings-btn-text">{{ $t('settings') }}</span>
       </span>
       <a-popover
-        :overlayStyle="{ width: '130px' }"
         placement="bottomRight"
         overlayClassName="custom-user"
       >
