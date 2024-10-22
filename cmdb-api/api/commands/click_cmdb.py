@@ -1,14 +1,13 @@
 # -*- coding:utf-8 -*-
 
 
+import click
 import copy
 import datetime
 import json
+import requests
 import time
 import uuid
-
-import click
-import requests
 from flask import current_app
 from flask.cli import with_appcontext
 from flask_login import login_user
@@ -37,11 +36,14 @@ from api.lib.secrets.secrets import InnerKVManger
 from api.models.acl import App
 from api.models.acl import ResourceType
 from api.models.cmdb import Attribute
+from api.models.cmdb import AttributeHistory
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
 from api.models.cmdb import CIType
 from api.models.cmdb import CITypeTrigger
+from api.models.cmdb import OperationRecord
 from api.models.cmdb import PreferenceRelationView
+from api.tasks.cmdb import batch_ci_cache
 
 
 @click.command()
@@ -557,5 +559,20 @@ def cmdb_patch(version):
                         existed.update(option=option, commit=False)
 
             db.session.commit()
+
+        if version >= "2.4.14":  # update ci columns: updated_at and updated_by
+            ci_ids = []
+            for i in CI.get_by(only_query=True).filter(CI.updated_at.is_(None)):
+                hist = AttributeHistory.get_by(ci_id=i.id, only_query=True).order_by(AttributeHistory.id.desc()).first()
+                if hist is not None:
+                    record = OperationRecord.get_by_id(hist.record_id)
+                    if record is not None:
+                        u = UserCache.get(record.uid)
+                        i.update(updated_at=record.created_at, updated_by=u and u.nickname, flush=True)
+                        ci_ids.append(i.id)
+
+            db.session.commit()
+
+            batch_ci_cache.apply_async(args=(ci_ids,))
     except Exception as e:
         print("cmdb patch failed: {}".format(e))

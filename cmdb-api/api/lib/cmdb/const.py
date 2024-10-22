@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*- 
 
 
+from flask_babel import lazy_gettext as _l
+
 from api.lib.utils import BaseEnum
 
 
@@ -110,17 +112,23 @@ class ExecuteStatusEnum(BaseEnum):
     FAILED = '1'
     RUNNING = '2'
 
+
 class RelationSourceEnum(BaseEnum):
     ATTRIBUTE_VALUES = "0"
     AUTO_DISCOVERY = "1"
 
+
+BUILTIN_ATTRIBUTES = {
+    "_updated_at": _l("Update Time"),
+    "_updated_by": _l("Updated By"),
+}
 
 CMDB_QUEUE = "one_cmdb_async"
 REDIS_PREFIX_CI = "ONE_CMDB"
 REDIS_PREFIX_CI_RELATION = "CMDB_CI_RELATION"
 REDIS_PREFIX_CI_RELATION2 = "CMDB_CI_RELATION2"
 
-BUILTIN_KEYWORDS = {'id', '_id', 'ci_id', 'type', '_type', 'ci_type', 'ticket_id'}
+BUILTIN_KEYWORDS = {'id', '_id', 'ci_id', 'type', '_type', 'ci_type', 'ticket_id', *BUILTIN_ATTRIBUTES.keys()}
 
 L_TYPE = None
 L_CI = None
