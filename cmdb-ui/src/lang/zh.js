@@ -168,6 +168,15 @@ export default {
         monetaryAmount: '货币金额',
         custom: '自定义',
     },
+    userPanel: {
+      myProfile: '个人中心',
+      accountPassword: '账号密码',
+      notice: '通知中心',
+      switchLanguage: '切换语言',
+      bindAccount: '绑定账号',
+      switchAccount: '切换账号',
+      logout: '退出账号'
+    },
     cmdb: cmdb_zh,
     cs: cs_zh,
     acl: acl_zh,
