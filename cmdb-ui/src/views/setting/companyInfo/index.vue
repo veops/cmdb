@@ -47,6 +47,7 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
 import { getCompanyInfo, postCompanyInfo, putCompanyInfo } from '@/api/company'
 import SpanTitle from '../components/spanTitle.vue'
 import { mixinPermissions } from '@/utils/mixin'
@@ -82,6 +83,7 @@ export default {
     } else {
       this.infoData = res.info
       this.getId = res.id
+      this.SET_COMPANY_NAME(res?.info?.name || '')
     }
   },
   computed: {
@@ -122,6 +124,7 @@ export default {
     },
   },
   methods: {
+    ...mapMutations(['SET_COMPANY_NAME']),
     async onSubmit() {
       this.$refs.infoData.validate(async (valid) => {
         if (valid) {
@@ -130,6 +133,7 @@ export default {
           } else {
             await putCompanyInfo(this.getId, this.infoData)
           }
+          this.SET_COMPANY_NAME(this.infoData.name || '')
           this.$message.success(this.$t('saveSuccess'))
         } else {
           this.$message.warning(this.$t('cs.companyInfo.checkInputCorrect'))
