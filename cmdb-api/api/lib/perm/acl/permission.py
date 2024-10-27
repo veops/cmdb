@@ -71,7 +71,7 @@ class PermissionCRUD(object):
 
     @classmethod
     def get_all2(cls, resource_name, resource_type_name, app_id):
-        rt = ResourceType.get_by(name=resource_type_name, first=True, to_dict=False)
+        rt = ResourceType.get_by(name=resource_type_name, app_id=app_id, first=True, to_dict=False)
         rt or abort(404, ErrFormat.resource_type_not_found.format(resource_type_name))
 
         r = Resource.get_by(name=resource_name, resource_type_id=rt.id, app_id=app_id, first=True, to_dict=False)
