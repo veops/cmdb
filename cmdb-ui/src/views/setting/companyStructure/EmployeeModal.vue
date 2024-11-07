@@ -10,10 +10,22 @@
     :body-style="{ height: `${windowHeight - 320}px`, overflow: 'hidden', overflowY: 'scroll' }"
   >
     <a-form-model ref="employeeFormData" :model="employeeFormData" :rules="rules" :colon="false">
-      <a-form-model-item ref="email" :label="$t('cs.companyStructure.email')" prop="email" :style="formModalItemStyle" v-if="attributes.findIndex(v=>v=='email')!==-1">
-        <a-input v-model="employeeFormData.email" :placeholder="$t('cs.companyStructure.emailPlaceholder')"/>
+      <a-form-model-item
+        ref="email"
+        :label="$t('cs.companyStructure.email')"
+        prop="email"
+        :style="formModalItemStyle"
+        v-if="attributes.findIndex((v) => v == 'email') !== -1"
+      >
+        <a-input v-model="employeeFormData.email" :placeholder="$t('cs.companyStructure.emailPlaceholder')" />
       </a-form-model-item>
-      <a-form-model-item ref="username" :label="$t('cs.companyStructure.username')" prop="username" :style="formModalItemStyle" v-if="attributes.findIndex(v=>v=='username')!==-1">
+      <a-form-model-item
+        ref="username"
+        :label="$t('cs.companyStructure.username')"
+        prop="username"
+        :style="formModalItemStyle"
+        v-if="attributes.findIndex((v) => v == 'username') !== -1"
+      >
         <a-input v-model="employeeFormData.username" :placeholder="$t('cs.companyStructure.usernamePlaceholder')" />
       </a-form-model-item>
       <a-form-model-item
@@ -23,31 +35,82 @@
         prop="password"
         :style="formModalItemStyle"
       >
-        <a-input-password v-model="employeeFormData.password" :placeholder="$t('cs.companyStructure.passwordPlaceholder')" />
+        <a-input-password
+          v-model="employeeFormData.password"
+          :placeholder="$t('cs.companyStructure.passwordPlaceholder')"
+        />
       </a-form-model-item>
-      <a-form-model-item ref="nickname" :label="$t('cs.companyStructure.nickname')" prop="nickname" :style="formModalItemStyle" v-if="attributes.findIndex(v=>v=='nickname')!==-1">
+      <a-form-model-item
+        ref="nickname"
+        :label="$t('cs.companyStructure.nickname')"
+        prop="nickname"
+        :style="formModalItemStyle"
+        v-if="attributes.findIndex((v) => v == 'nickname') !== -1"
+      >
         <a-input v-model="employeeFormData.nickname" :placeholder="$t('cs.companyStructure.nicknamePlaceholder')" />
       </a-form-model-item>
-      <a-form-model-item :label="$t('cs.companyStructure.sex')" prop="sex" :style="formModalItemStyle" v-if="attributes.findIndex(v=>v=='sex')!==-1">
+      <a-form-model-item
+        :label="$t('cs.companyStructure.sex')"
+        prop="sex"
+        :style="formModalItemStyle"
+        v-if="attributes.findIndex((v) => v == 'sex') !== -1"
+      >
         <a-select v-model="employeeFormData.sex" :placeholder="$t('cs.companyStructure.sexPlaceholder')">
           <a-select-option value="男"> {{ $t('cs.companyStructure.male') }} </a-select-option>
           <a-select-option value="女"> {{ $t('cs.companyStructure.female') }} </a-select-option>
         </a-select>
       </a-form-model-item>
-      <a-form-model-item ref="mobile" :label="$t('cs.companyStructure.mobile')" prop="mobile" :style="formModalItemStyle" v-if="attributes.findIndex(v=>v=='mobile')!==-1">
+      <a-form-model-item
+        ref="mobile"
+        :label="$t('cs.companyStructure.mobile')"
+        prop="mobile"
+        :style="formModalItemStyle"
+        v-if="attributes.findIndex((v) => v == 'mobile') !== -1"
+      >
         <a-input v-model="employeeFormData.mobile" :placeholder="$t('cs.companyStructure.mobilePlaceholder')" />
       </a-form-model-item>
-      <div :style="{ width: '361px', display: 'inline-block', margin: '0 7px' }" v-if="attributes.findIndex(v=>v=='department_id')!==-1">
-        <div :style="{ height: '41px', lineHeight: '40px' }">{{ $t('cs.companyStructure.departmentName') }}</div>
-        <DepartmentTreeSelect v-model="employeeFormData.department_id" />
-      </div>
-      <a-form-model-item ref="position_name" :label="$t('cs.companyStructure.positionName')" prop="position_name" :style="formModalItemStyle" v-if="attributes.findIndex(v=>v=='position_name')!==-1">
-        <a-input v-model="employeeFormData.position_name" :placeholder="$t('cs.companyStructure.positionNamePlaceholder')" />
+      <a-form-model-item
+        ref="department_id"
+        :label="$t('cs.companyStructure.departmentName')"
+        prop="department_id"
+        :style="formModalItemStyle"
+        v-if="attributes.findIndex((v) => v == 'department_id') !== -1"
+      >
+        <DepartmentTreeSelect style="margin-top: 4px" v-model="employeeFormData.department_id" />
       </a-form-model-item>
-      <div :style="{ width: '361px', display: 'inline-block', margin: '0 7px' }" v-if="attributes.findIndex(v=>v=='direct_supervisor_id')!==-1">
-        <div :style="{ height: '41px', lineHeight: '40px' }">{{ $t('cs.companyStructure.selectDirectSupervisor') }}</div>
-        <EmployeeTreeSelect v-model="employeeFormData.direct_supervisor_id" />
-      </div>
+      <a-form-model-item
+        ref="position_name"
+        :label="$t('cs.companyStructure.positionName')"
+        prop="position_name"
+        :style="formModalItemStyle"
+        v-if="attributes.findIndex((v) => v == 'position_name') !== -1"
+      >
+        <a-input
+          v-model="employeeFormData.position_name"
+          :placeholder="$t('cs.companyStructure.positionNamePlaceholder')"
+        />
+      </a-form-model-item>
+      <a-form-model-item
+        ref="direct_supervisor_id"
+        :label="$t('cs.companyStructure.selectDirectSupervisor')"
+        prop="direct_supervisor_id"
+        :style="formModalItemStyle"
+        v-if="attributes.findIndex((v) => v == 'direct_supervisor_id') !== -1"
+      >
+        <EmployeeTreeSelect style="margin-top: 4px" v-model="employeeFormData.direct_supervisor_id" />
+      </a-form-model-item>
+      <a-form-model-item
+        ref="work_region"
+        :label="$t('cs.companyStructure.work_region')"
+        prop="work_region"
+        :style="formModalItemStyle"
+        v-if="attributes.findIndex((v) => v == 'work_region') !== -1"
+      >
+        <a-select v-model="employeeFormData.work_region" :placeholder="$t('cs.companyStructure.workRegionPlaceholder')">
+          <a-select-option value="china_mainland"> {{ $t('cs.companyStructure.china_mainland') }} </a-select-option>
+          <a-select-option value="china_hk"> {{ $t('cs.companyStructure.china_hk') }} </a-select-option>
+        </a-select>
+      </a-form-model-item>
     </a-form-model>
     <template slot="footer">
       <a-button key="back" @click="close"> {{ $t('cancel') }} </a-button>
@@ -75,7 +138,7 @@ export default {
       educational_experience: [],
       children_information: [],
       file_is_show: true,
-      attributes: []
+      attributes: [],
     }
   },
   created() {
@@ -85,7 +148,7 @@ export default {
   },
   inject: ['provide_allTreeDepartment', 'provide_allFlatEmployees'],
   computed: {
-        ...mapState({
+    ...mapState({
       windowHeight: (state) => state.windowHeight,
     }),
     departemntTreeSelectOption() {
@@ -103,7 +166,12 @@ export default {
     rules() {
       return {
         email: [
-          { required: true, whitespace: true, message: this.$t('cs.companyStructure.emailPlaceholder'), trigger: 'blur' },
+          {
+            required: true,
+            whitespace: true,
+            message: this.$t('cs.companyStructure.emailPlaceholder'),
+            trigger: 'blur',
+          },
           {
             pattern: /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/,
             message: this.$t('cs.companyStructure.emailFormatErr'),
@@ -112,12 +180,29 @@ export default {
           { max: 50, message: this.$t('cs.person.inputStrCountLimit', { limit: 50 }) },
         ],
         username: [
-          { required: true, whitespace: true, message: this.$t('cs.companyStructure.usernamePlaceholder'), trigger: 'blur' },
+          {
+            required: true,
+            whitespace: true,
+            message: this.$t('cs.companyStructure.usernamePlaceholder'),
+            trigger: 'blur',
+          },
           { max: 20, message: this.$t('cs.person.inputStrCountLimit', { limit: 20 }) },
         ],
-        password: [{ required: true, whitespace: true, message: this.$t('cs.companyStructure.passwordPlaceholder'), trigger: 'blur' }],
+        password: [
+          {
+            required: true,
+            whitespace: true,
+            message: this.$t('cs.companyStructure.passwordPlaceholder'),
+            trigger: 'blur',
+          },
+        ],
         nickname: [
-          { required: true, whitespace: true, message: this.$t('cs.companyStructure.nicknamePlaceholder'), trigger: 'blur' },
+          {
+            required: true,
+            whitespace: true,
+            message: this.$t('cs.companyStructure.nicknamePlaceholder'),
+            trigger: 'blur',
+          },
           { max: 20, message: this.$t('cs.person.inputStrCountLimit', { limit: 20 }) },
         ],
         mobile: [
@@ -128,7 +213,7 @@ export default {
           },
         ],
       }
-    }
+    },
   },
   beforeDestroy() {
     Bus.$off('getAttributes')
@@ -136,7 +221,8 @@ export default {
   methods: {
     async open(getData, type) {
       // 提交时去掉school, major, education, graduation_year, name, gender, birthday, parental_leave_left
-      const { school, major, education, graduation_year, name, gender, birthday, parental_leave_left, ...newGetData } = getData
+      const { school, major, education, graduation_year, name, gender, birthday, parental_leave_left, ...newGetData } =
+        getData
       const _getData = _.cloneDeep(newGetData)
       const { direct_supervisor_id } = newGetData
       if (direct_supervisor_id) {
@@ -149,46 +235,54 @@ export default {
       // if (type !== 'add' && this.employeeFormData.educational_experience.length !== 0) {
       //   this.educational_experience = this.employeeFormData.educational_experience
       // }
-      this.children_information = this.formatChildrenInformationList() || [{
-        id: uuidv4(),
-        name: '',
-        gender: undefined,
-        birthday: null,
-        parental_leave_left: 0
-      }]
-      this.educational_experience = this.formatEducationalExperienceList() || [{
-        id: uuidv4(),
-        school: '',
-        major: '',
-        education: undefined,
-        graduation_year: null
-      }]
+      this.children_information = this.formatChildrenInformationList() || [
+        {
+          id: uuidv4(),
+          name: '',
+          gender: undefined,
+          birthday: null,
+          parental_leave_left: 0,
+        },
+      ]
+      this.educational_experience = this.formatEducationalExperienceList() || [
+        {
+          id: uuidv4(),
+          school: '',
+          major: '',
+          education: undefined,
+          graduation_year: null,
+        },
+      ]
 
       this.type = type
       this.visible = true
     },
     close() {
       this.$refs.employeeFormData.resetFields()
-      this.educational_experience = [{
-        school: '',
-        major: '',
-        education: undefined,
-        graduation_year: null
-      }]
-      this.children_information = [{
-        id: uuidv4(),
-        name: '',
-        gender: undefined,
-        birthday: null,
-        parental_leave_left: 0
-      }]
+      this.educational_experience = [
+        {
+          school: '',
+          major: '',
+          education: undefined,
+          graduation_year: null,
+        },
+      ]
+      this.children_information = [
+        {
+          id: uuidv4(),
+          name: '',
+          gender: undefined,
+          birthday: null,
+          parental_leave_left: 0,
+        },
+      ]
       this.visible = false
     },
     formatChildrenInformationList() {
       let arr = []
       arr = this.employeeFormData.children_information ? this.employeeFormData.children_information : undefined
       if (arr && arr.length) {
-        arr.forEach(item => {
+        arr.forEach((item) => {
           item.id = uuidv4()
         })
         return arr
@@ -199,7 +293,7 @@ export default {
       let arr = []
       arr = this.employeeFormData.educational_experience ? this.employeeFormData.educational_experience : undefined
       if (arr && arr.length) {
-        arr.forEach(item => {
+        arr.forEach((item) => {
           item.id = uuidv4()
         })
         return arr
@@ -212,12 +306,12 @@ export default {
         school: '',
         major: '',
         education: undefined,
-        graduation_year: null
+        graduation_year: null,
       }
       this.educational_experience.push(newEducational_experience)
     },
     removeEducation(removeId) {
-      const _idx = this.educational_experience.findIndex(item => item.id === removeId)
+      const _idx = this.educational_experience.findIndex((item) => item.id === removeId)
       if (_idx !== -1) {
         this.educational_experience.splice(_idx, 1)
       }
@@ -228,12 +322,12 @@ export default {
         name: '',
         gender: undefined,
         birthday: null,
-        parental_leave_left: 0
+        parental_leave_left: 0,
       }
       this.children_information.push(newChildrenInfo)
     },
     removeChildren(removeId) {
-      const _idx = this.children_information.findIndex(item => item.id === removeId)
+      const _idx = this.children_information.findIndex((item) => item.id === removeId)
       if (_idx !== -1) {
         this.children_information.splice(_idx, 1)
       }
@@ -254,10 +348,10 @@ export default {
       // }
       if (date !== null) {
         if (param === 'graduation_year') {
-          const _idx = this.educational_experience.findIndex(item => item.id === id)
+          const _idx = this.educational_experience.findIndex((item) => item.id === id)
           this.educational_experience[_idx].graduation_year = moment(date).format('YYYY-MM')
         } else if (param === 'birthday') {
-          const _idx = this.children_information.findIndex(item => item.id === id)
+          const _idx = this.children_information.findIndex((item) => item.id === id)
           this.children_information[_idx].birthday = moment(date).format('YYYY-MM-DD')
         } else {
           this.employeeFormData[param] = moment(date).format('YYYY-MM-DD')
@@ -303,7 +397,7 @@ export default {
 </script>
 <style lang="less" scoped>
 .el-date-picker {
-    width: 100%;
-    height: 36px;
+  width: 100%;
+  height: 36px;
 }
 </style>
