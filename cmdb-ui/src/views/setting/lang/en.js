@@ -19,7 +19,7 @@ const cs_en = {
     app: 'APP Authority',
     basic: 'Basic Settings',
     theme: 'Theme Settings',
-    security: 'Security Settings'
+    security: 'Security Settings',
   },
   companyInfo: {
     spanCompany: 'Description',
@@ -201,7 +201,11 @@ const cs_en = {
     createEmployee: 'Create Employee',
     editEmployee: 'Edit Employee',
     role: 'Role',
-    selectDisplayColumn: 'Please select columns to display'
+    selectDisplayColumn: 'Please select columns to display',
+    work_region: 'Work Region',
+    workRegionPlaceholder: 'Please select work region',
+    china_mainland: 'Chinese Mainland',
+    china_hk: 'HK China',
   },
   auth: {
     basic: 'Basic',
@@ -220,7 +224,7 @@ const cs_en = {
       user: 'User',
       username: 'Username',
       userPlaceholder: 'Please enter username',
-      userHelp: 'User DN: cn={},ou=users,dc=xxx,dc=com   {} will be replaced by username'
+      userHelp: 'User DN: cn={},ou=users,dc=xxx,dc=com   {} will be replaced by username',
     },
     cas: {
       server: 'Server Address',
@@ -237,10 +241,11 @@ const cs_en = {
       validateRoutePlaceholder: 'Please enter validate route',
       afterLoginRoute: 'Redirect Route',
       afterLoginRoutePlaceholder: 'Please enter redirect route',
-      userMap: 'User Attribute Mapping'
+      userMap: 'User Attribute Mapping',
     },
     autoRedirectLogin: 'Auto Redirect to Third-party Login Page',
-    autoRedirectLoginHelp: 'If disabled, a confirmation will be displayed to redirect to third-party login page. Click the Cancel button will go to the built-in login page',
+    autoRedirectLoginHelp:
+      'If disabled, a confirmation will be displayed to redirect to third-party login page. Click the Cancel button will go to the built-in login page',
     usernameOrEmail: 'Username/Email',
     usernameOrEmailPlaceholder: 'Please enter username/email',
     password: 'Password',
@@ -257,7 +262,7 @@ const cs_en = {
       userInfo: 'User Info',
       scopes: 'Scopes',
       scopesPlaceholder: 'Please enter scopes',
-    }
+    },
   },
   duty: {
     basicSetting: 'Basic Settings',
@@ -274,13 +279,13 @@ const cs_en = {
     mainDutyPeople: 'Main Duty Person',
     deputyDutyPeople: 'Deputy Duty Person',
     dutyRule: 'Duty Rule',
-    '一': 'Mon',
-    '二': 'Tue',
-    '三': 'Wed',
-    '四': 'Thu',
-    '五': 'Fri',
-    '六': 'Sat',
-    '日': 'Sun',
+    一: 'Mon',
+    二: 'Tue',
+    三: 'Wed',
+    四: 'Thu',
+    五: 'Fri',
+    六: 'Sat',
+    日: 'Sun',
     searchPlaceholder: 'Please search',
     dutyTable: 'Duty Schedule',
     dutyMember: 'Duty Member',
@@ -304,7 +309,7 @@ const cs_en = {
     offDutyReceiverPlaceholder: 'Please select off-duty receiver',
     titleLimit: 'Please enter title (20 characters)',
     remarkLimit: 'Remark 150 characters max',
-    frequencyLimit: 'Please enter duty frequency (positive integer)'
+    frequencyLimit: 'Please enter duty frequency (positive integer)',
   },
   group: {
     groupName: 'User Group',
@@ -329,7 +334,7 @@ const cs_en = {
     moreThan: 'More Than',
     lessThan: 'Less Than',
     operatorInPlaceholder: 'Separate by ;',
-    selectEmployee: 'Select Employee'
+    selectEmployee: 'Select Employee',
   },
   notice: {
     corpid: 'Corp ID',
@@ -368,7 +373,8 @@ const cs_en = {
     disableCreationOfRequestsViaEmail: 'Disable Creation of Requests Via Email',
     specifyAllowedEmails: 'Specify Allowed Emails/Domains, Separate Multiple Values By Comma',
     specifyAllowedEmailsExample: 'E.g. user@domain.com,*@domain.com',
-    specifyAllowedEmailsLimit: 'Limit cannot apply to requests already in sessions, it will aggregate to its parent ticket',
+    specifyAllowedEmailsLimit:
+      'Limit cannot apply to requests already in sessions, it will aggregate to its parent ticket',
     messageConfig: 'Message Settings',
     moveWrongMessagesToFolder: 'Move Messages to Wrong Folder',
     knowMore: 'Learn More',
@@ -438,7 +444,7 @@ const cs_en = {
     myDepartmentAndSubordinateDepartments: 'My Department And Subordinate Departments',
     test: 'Test',
     selectApp: 'Select App',
-  }
+  },
 }
 
 export default cs_en

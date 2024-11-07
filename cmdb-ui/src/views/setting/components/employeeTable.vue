@@ -92,7 +92,7 @@
           <span>{{ $t('cs.companyStructure.sex') }}</span>
         </span>
       </template>
-      <template #default="{row}">
+      <template #default="{ row }">
         <span v-if="row.sex === '男'">{{ $t('cs.companyStructure.male') }}</span>
         <span v-if="row.sex === '女'">{{ $t('cs.companyStructure.female') }}</span>
       </template>
@@ -176,6 +176,26 @@
       </template>
     </vxe-column>
     <vxe-column
+      field="work_region"
+      v-if="
+        checkedCols.findIndex((v) => v == 'work_region') !== -1 &&
+          attributes.findIndex((v) => v == 'work_region') !== -1
+      "
+      :title="$t('cs.companyStructure.work_region')"
+      min-width="120px"
+      key="work_region"
+    >
+      <template #header>
+        <span class="vxe-handle">
+          <OpsMoveIcon class="move-icon" />
+          <span>{{ $t('cs.companyStructure.work_region') }}</span>
+        </span>
+      </template>
+      <template #default="{ row }">
+        {{ $t(`cs.companyStructure.${row.work_region}`) }}
+      </template>
+    </vxe-column>
+    <vxe-column
       field="control"
       width="100px"
       align="center"
@@ -197,7 +217,7 @@
           >
             <template slot="content">
               <div :style="{ maxHeight: `${windowHeight - 320}px`, overflowY: 'auto', width: '160px' }">
-                <a-checkbox-group v-model="unsbmitCheckedCols" :options="options" style="display: grid;">
+                <a-checkbox-group v-model="unsbmitCheckedCols" :options="options" style="display: grid">
                 </a-checkbox-group>
               </div>
               <div
@@ -209,22 +229,24 @@
                   justifyContent: 'flex-end',
                 }"
               >
-                <a-button :style="{ marginRight: '10px' }" size="small" @click="handleCancel">{{ $t('cancel') }}</a-button>
+                <a-button :style="{ marginRight: '10px' }" size="small" @click="handleCancel">{{
+                  $t('cancel')
+                }}</a-button>
                 <a-button size="small" @click="handleSubmit" type="primary">{{ $t('confirm') }}</a-button>
               </div>
             </template>
-            <a-icon type="control" style="cursor: pointer;" />
+            <a-icon type="control" style="cursor: pointer" />
           </a-popover>
         </template>
       </template>
       <template #default="{ row }">
         <a-space v-if="tableType === 'structure'">
-          <a><a-icon type="edit" @click="openEmployeeModal(row, 'edit')"/></a>
+          <a><a-icon type="edit" @click="openEmployeeModal(row, 'edit')" /></a>
           <a-tooltip>
             <template slot="title">
               {{ $t('cs.companyStructure.resetPassword') }}
             </template>
-            <a><a-icon type="reload" @click="openBatchModal('password', row)"/></a>
+            <a><a-icon type="reload" @click="openBatchModal('password', row)" /></a>
           </a-tooltip>
           <a-tooltip v-if="!row.block">
             <template slot="title">
@@ -305,6 +327,7 @@ export default {
       { label: this.$t('cs.companyStructure.departmentName'), value: 'department_name' },
       { label: this.$t('cs.companyStructure.positionName'), value: 'position_name' },
       { label: this.$t('cs.companyStructure.supervisor'), value: 'direct_supervisor_id' },
+      { label: this.$t('cs.companyStructure.work_region'), value: 'work_region' },
     ]
     const checkedCols = JSON.parse(localStorage.getItem('setting-table-CheckedCols')) || [
       'nickname',
@@ -315,6 +338,7 @@ export default {
       'department_name',
       'position_name',
       'direct_supervisor_id',
+      'work_region',
     ]
     return {
       filterRoleList: [],
@@ -442,7 +466,7 @@ export default {
         }
       }
       Bus.$emit('getAttributes', this.attributes)
-      this.$emit('tranferAttributes', this.attributes)
+      this.$emit('transferAttributes', this.attributes)
     },
     getIsInterInship(is_internship) {
       return this.internMap.filter((item) => item.id === is_internship)[0]['label']
@@ -541,7 +565,7 @@ export default {
         useStyle: true, // 是否导出样式
         isFooter: false, // 是否导出表尾（比如合计）
         // 过滤那个字段导出
-        columnFilterMethod: function(column, $columnIndex) {
+        columnFilterMethod: function (column, $columnIndex) {
           return !(column.$columnIndex === 0)
           // 0是复选框 不导出
         },
