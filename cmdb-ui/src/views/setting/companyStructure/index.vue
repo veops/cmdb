@@ -16,17 +16,17 @@
             :key="group.id"
           >
             <div
-              class="ops-setting-structure-sidebar-group-header"
-              :class="{ 'group-selected': groupIndex === activeGroupIndex }"
+              :class="{
+                'ops-setting-structure-sidebar-group-header': true,
+                'group-selected': groupIndex === activeGroupIndex,
+              }"
             >
               <div class="ops-setting-structure-sidebar-group-header-avatar">
-                <a-icon :type="group.icon"/>
+                <a-icon :type="group.icon" />
               </div>
               <span
                 class="ops-setting-structure-sidebar-group-header-title"
-                @click="
-                  clickSelectGroup(groupIndex)
-                "
+                @click="clickSelectGroup(groupIndex)"
                 :id="[group.id === 0 ? 'employee' : 'department']"
               >
                 {{ group.title }}
@@ -100,7 +100,7 @@
                   />
                 </div>
                 <!-- 筛选框 -->
-                <div class="Screening-box" v-if="activeGroupIndex === 1" style="background-color: rgb(240, 245, 255) ;">
+                <div class="Screening-box" v-if="activeGroupIndex === 1" style="background-color: rgb(240, 245, 255)">
                   <a-popover
                     @visibleChange="visibleChange"
                     trigger="click"
@@ -122,16 +122,17 @@
                       </div>
                     </template>
                     <span :style="{ whiteSpace: 'nowrap' }">
-                      <a-icon class="screening-box-scene-icon" type="filter"/>
+                      <a-icon class="screening-box-scene-icon" type="filter" />
                       {{ getCurrentSceneLabel() }}
-                      <a-icon class="screening-box-scene-icon" :type="displayTimeIcon"/>
+                      <a-icon class="screening-box-scene-icon" :type="displayTimeIcon" />
                     </span>
                   </a-popover>
                 </div>
                 <SearchForm
                   ref="search"
                   :canSearchPreferenceAttrList="canSearchPreferenceAttrList"
-                  @refresh="handleSearch"/>
+                  @refresh="handleSearch"
+                />
               </div>
               <div>
                 <a-space v-if="isEditable">
@@ -168,23 +169,24 @@
               <div>
                 <div :style="{ marginTop: '8px' }" class="ops-list-batch-action" v-show="!!selectedRowKeys.length">
                   <span @click="downloadEmployeeAll">{{ $t('cs.companyStructure.downloadAll') }}</span>
-                  <a-divider type="vertical"/>
+                  <a-divider type="vertical" />
                   <span @click="exportSelectEvent">{{ $t('cs.companyStructure.downloadSelected') }}</span>
-                  <a-divider type="vertical"/>
+                  <a-divider type="vertical" />
                   <span @click="openBatchModal('department_id')">{{ $t('cs.companyStructure.editDepartment') }}</span>
-                  <a-divider type="vertical"/>
-                  <span
-                    @click="openBatchModal('direct_supervisor_id')">{{ $t('cs.companyStructure.editDirectSupervisor') }}</span>
-                  <a-divider type="vertical"/>
+                  <a-divider type="vertical" />
+                  <span @click="openBatchModal('direct_supervisor_id')">{{
+                    $t('cs.companyStructure.editDirectSupervisor')
+                  }}</span>
+                  <a-divider type="vertical" />
                   <span @click="openBatchModal('position_name')">{{ $t('cs.companyStructure.editPosition') }}</span>
-                  <a-divider type="vertical"/>
+                  <a-divider type="vertical" />
                   <span @click="openBatchModal('password')">{{ $t('cs.companyStructure.resetPassword') }}</span>
-                  <a-divider type="vertical"/>
+                  <a-divider type="vertical" />
                   <span @click="openBatchModal('block', null, 1)">{{ $t('cs.companyStructure.block') }}</span>
-                  <a-divider type="vertical"/>
+                  <a-divider type="vertical" />
                   <span @click="openBatchModal('block', null, 0)">{{ $t('cs.companyStructure.recover') }}</span>
-                  <a-divider type="vertical"/>
-                  <span>{{ $t('selectRows', {rows: selectedRowKeys.length}) }}</span>
+                  <a-divider type="vertical" />
+                  <span>{{ $t('selectRows', { rows: selectedRowKeys.length }) }}</span>
                 </div>
               </div>
               <!-- <div>
@@ -195,11 +197,11 @@
             </div>
           </div>
           <!-- 批量操作对话框 -->
-          <BatchModal ref="BatchModal" @refresh="updateAll"/>
+          <BatchModal ref="BatchModal" @refresh="updateAll" />
           <!-- 部门表单对话框 -->
-          <DepartmentModal ref="DepartmentModal" @refresh="clickSelectGroup(1)"/>
+          <DepartmentModal ref="DepartmentModal" @refresh="clickSelectGroup(1)" />
           <!-- 员工表单对话框 -->
-          <EmployeeModal ref="EmployeeModal" @refresh="updateAll"/>
+          <EmployeeModal ref="EmployeeModal" @refresh="updateAll" />
 
           <!-- 表格展示 -->
           <EmployeeTable
@@ -211,7 +213,7 @@
             @onSelectChange="onSelectChange"
             @openEmployeeModal="openEmployeeModal"
             @openBatchModal="openBatchModal"
-            @tranferAttributes="getAttributes"
+            @transferAttributes="getAttributes"
             :isEditable="isEditable"
             :loading="loading"
           >
@@ -225,7 +227,9 @@
               :page-size-options="pageSizeOptions"
               :current="tablePage.currentPage"
               :total="tablePage.totalResult"
-              :show-total="(total, range) => $t('pagination.total', { range0: range[0], range1: range[1], total:total })"
+              :show-total="
+                (total, range) => $t('pagination.total', { range0: range[0], range1: range[1], total: total })
+              "
               :page-size="tablePage.pageSize"
               :default-current="1"
               @change="pageOrSizeChange"
@@ -252,6 +256,9 @@
           clickSelectGroup(1)
         }
       "
+      @downloadTemplate="downloadTemplate"
+      @customRequest="customRequest"
+      @import="importEmployee"
     />
   </div>
 </template>
@@ -262,15 +269,22 @@ import SplitPane from '@/components/SplitPane'
 import CollapseTransition from '@/components/CollapseTransition'
 import Bus from './eventBus/bus'
 import CategroyTree from './CategoryTree'
-import BatchUpload from './BatchUpload'
+import BatchUpload from '../components/BatchUpload.vue'
 import BatchModal from './BatchModal.vue'
 import EmployeeModal from './EmployeeModal.vue'
 import DepartmentModal from './DepartmentModal.vue'
 import EmployeeTable from '../components/employeeTable.vue'
 import { getDepartmentList, deleteDepartmentById, getAllDepartmentList, getAllDepAndEmployee } from '@/api/company'
-import { getEmployeeList, getEmployeeCount, downloadAllEmployee, getEmployeeListByFilter } from '@/api/employee'
+import {
+  getEmployeeList,
+  getEmployeeCount,
+  downloadAllEmployee,
+  getEmployeeListByFilter,
+  importEmployee,
+} from '@/api/employee'
 import { mixinPermissions } from '@/utils/mixin'
 import SearchForm from '../components/SearchForm.vue'
+import { downloadExcel, excel2Array } from '@/utils/download'
 
 export default {
   name: 'CompanyStructure',
@@ -284,10 +298,22 @@ export default {
     EmployeeModal,
     DepartmentModal,
     EmployeeTable,
-    SearchForm
+    SearchForm,
   },
   data() {
+    const common_importParamsList = [
+      'email',
+      'username',
+      'nickname',
+      'password',
+      'sex',
+      'mobile',
+      'position_name',
+      'department_name',
+      'work_region',
+    ]
     return {
+      common_importParamsList,
       isActive: '',
       visible: true,
       localStorageKey: 'itsm-company-strcutre',
@@ -322,7 +348,7 @@ export default {
       attributes: [],
       pageSizeOptions: ['50', '100', '200', '9999'],
       expression: [],
-      loading: false
+      loading: false,
     }
   },
   // created() {
@@ -363,16 +389,26 @@ export default {
           value: 'sex',
           is_choice: true,
           choice_value: [
-              { label: this.$t('cs.companyStructure.male'), value: '男' },
-            { label: this.$t('cs.companyStructure.female'), value: '女' }]
+            { label: this.$t('cs.companyStructure.male'), value: '男' },
+            { label: this.$t('cs.companyStructure.female'), value: '女' },
+          ],
         },
         { label: this.$t('cs.companyStructure.mobile'), value: 'mobile' },
         { label: this.$t('cs.companyStructure.departmentName'), value: 'department_name' },
         { label: this.$t('cs.companyStructure.positionName'), value: 'position_name' },
         { label: this.$t('cs.companyStructure.supervisor'), value: 'direct_supervisor_id' },
+        {
+          label: this.$t('cs.companyStructure.work_region'),
+          value: 'work_region',
+          is_choice: true,
+          choice_value: [
+            { label: this.$t('cs.companyStructure.china_mainland'), value: 'china_mainland' },
+            { label: this.$t('cs.companyStructure.china_hk'), value: 'china_hk' },
+          ],
+        },
       ]
     },
-    sceneList () {
+    sceneList() {
       return [
         {
           label: this.$t('all'),
@@ -388,7 +424,7 @@ export default {
         },
       ]
     },
-    groupData () {
+    groupData() {
       return [
         {
           id: 0,
@@ -396,7 +432,7 @@ export default {
           icon: 'user',
         },
       ]
-    }
+    },
   },
   provide() {
     return {
@@ -426,11 +462,8 @@ export default {
     } else {
       this.currentScene = 0
     }
-    // console.log(this.currentScene)
-    // this.init()
-    this.clickSelectGroup(0).then(val => {
-      this.clickSelectItem(0)
-    })
+    this.updateCount()
+    this.clickSelectItem(0)
     Bus.$on('updataAllIncludeEmployees', () => {
       this.getAllFlatEmployees()
       this.getAllDepAndEmployee()
@@ -492,7 +525,7 @@ export default {
     setSearchPreferenceAttrList() {
       this.canSearchPreferenceAttrList.forEach((item) => {
         if (!this.attributes.includes(item.value)) {
-          this.canSearchPreferenceAttrList = this.canSearchPreferenceAttrList.filter(v => v.value !== item.value)
+          this.canSearchPreferenceAttrList = this.canSearchPreferenceAttrList.filter((v) => v.value !== item.value)
         }
       })
     },
@@ -504,9 +537,6 @@ export default {
         this.$refs.ScreeningBoxScenePopover.$refs.tooltip.onVisibleChange(false)
       }
       document.getElementById('department').click()
-      // this.currentPage = 1
-      // this.updateTableData(1)
-      // this.departmentList = this.reqDepartmentList(-1)
     },
     clickHandler(event) {
       this.isActive = event.target.innerText
@@ -543,37 +573,6 @@ export default {
       ])
       this.activeEmployeeCount = res1.employee_count
       this.deactiveEmployeeCount = res2.employee_count
-    },
-    async updateTableData(currentPage = 1, pageSize = this.tablePage.pageSize) {
-      this.selectedRowKeys = []
-      let reqEmployeeData = null
-      if (this.activeGroupIndex === 0) {
-        reqEmployeeData = await getEmployeeList({
-          ...this.tableFilterData,
-          block_status: this.block_status,
-          page: currentPage,
-          page_size: pageSize,
-          search: this.filterName,
-          order: this.tableSortData || 'direct_supervisor_id',
-        })
-      } else if (this.activeGroupIndex === 1) {
-        reqEmployeeData = await getEmployeeList({
-          ...this.tableFilterData,
-          block_status: this.currentScene,
-          department_id: this.selectDepartment.id,
-          page: currentPage,
-          page_size: pageSize,
-          search: this.filterName,
-          order: this.tableSortData || 'direct_supervisor_id',
-        })
-      }
-      this.tableData = this.FilterTableData(reqEmployeeData)
-      this.tablePage = {
-        ...this.tablePage,
-        currentPage: reqEmployeeData.page,
-        pageSize: reqEmployeeData.page_size,
-        totalResult: reqEmployeeData.total,
-      }
     },
     async updateTableDataByFilter(currentPage = 1, pageSize = this.tablePage.pageSize) {
       this.loading = true
@@ -623,7 +622,8 @@ export default {
                 let max_index = 0
                 educational_experience.forEach((item, index) => {
                   if (index < educational_experience.length - 1) {
-                    max_index = item.graduation_year > educational_experience[index + 1].graduation_year ? index : index + 1
+                    max_index =
+                      item.graduation_year > educational_experience[index + 1].graduation_year ? index : index + 1
                   }
                 })
                 tableData[index].school = educational_experience[max_index].school
@@ -708,7 +708,7 @@ export default {
       } else {
         block_status = this.currentScene
       }
-      downloadAllEmployee({ block_status: block_status }).then(res => {
+      downloadAllEmployee({ block_status: block_status }).then((res) => {
         const content = res
         const blob = new Blob([content], { type: 'application/vnd.ms-excel' })
         const url = window.URL.createObjectURL(blob)
@@ -787,7 +787,8 @@ export default {
     },
     // 请求部门数据
     async reqDepartmentList(departmentId) {
-      const res = (await getDepartmentList({ department_parent_id: departmentId, block: this.currentScene })).departments
+      const res = (await getDepartmentList({ department_parent_id: departmentId, block: this.currentScene }))
+        .departments
       return this.transformDepartmentData(res)
     },
     openDepartmentModal(type) {
@@ -828,10 +829,10 @@ export default {
     },
     sortChangeEvent({ sortList }) {
       this.tableSortData = sortList
-          .map((item) => {
-            return `${item.order === 'asc' ? '' : '-'}${item.property}`
-          })
-          .join(',')
+        .map((item) => {
+          return `${item.order === 'asc' ? '' : '-'}${item.property}`
+        })
+        .join(',')
       this.updateTableDataByFilter()
     },
     filterChangeEvent({ column, property, values, datas, filterList, $event }) {
@@ -851,6 +852,137 @@ export default {
     },
     exportSelectEvent() {
       Bus.$emit('reqExportSelectEvent')
+    },
+    downloadTemplate() {
+      const data = [
+        [
+          {
+            v: '1、表头标“*”的红色字体为必填项\n2、邮箱、用户名不允许重复\n3、登录密码：密码由6-20位字母、数字组成\n4、部门：上下级部门间用"/"隔开，且从最上级部门开始，例如“深圳分公司/IT部/IT二部”。如出现相同的部门，则默认导入组织架构中顺序靠前的部门',
+            t: 's',
+            s: {
+              alignment: {
+                wrapText: true,
+                vertical: 'center',
+              },
+            },
+          },
+        ],
+        [
+          {
+            v: '*邮箱',
+            t: 's',
+            s: {
+              font: {
+                color: {
+                  rgb: 'FF0000',
+                },
+              },
+            },
+          },
+          {
+            v: '*用户名',
+            t: 's',
+            s: {
+              font: {
+                color: {
+                  rgb: 'FF0000',
+                },
+              },
+            },
+          },
+          {
+            v: '*姓名',
+            t: 's',
+            s: {
+              font: {
+                color: {
+                  rgb: 'FF0000',
+                },
+              },
+            },
+          },
+          {
+            v: '*密码',
+            t: 's',
+            s: {
+              font: {
+                color: {
+                  rgb: 'FF0000',
+                },
+              },
+            },
+          },
+          {
+            v: '性别',
+            t: 's',
+          },
+          {
+            v: '手机号',
+            t: 's',
+          },
+          {
+            v: '部门',
+            t: 's',
+          },
+          {
+            v: '岗位',
+            t: 's',
+          },
+          {
+            v: '工作地区',
+            t: 's',
+          },
+        ],
+      ]
+      downloadExcel(data, this.$t('cs.companyStructure.downloadTemplateName'))
+    },
+    customRequest({ data }, callback) {
+      excel2Array(data.file).then((res) => {
+        res = res.filter((item) => item.length)
+        callback(
+          res.slice(2).map((item) => {
+            const obj = {}
+            item.forEach((ele, index) => {
+              obj[this.common_importParamsList[index]] = ele
+            })
+            return obj
+          })
+        )
+      })
+    },
+    async importEmployee({ importData }, callback) {
+      this.allCount = importData.length
+      const _importData = importData.map((item) => {
+        const { _X_ROW_KEY, ...rest } = item
+        const keyArr = Object.keys(rest)
+        keyArr.forEach((key) => {
+          if (rest[key]) {
+            rest[key] = rest[key] + ''
+          }
+        })
+        rest.educational_experience = [
+          {
+            school: rest.school,
+            major: rest.major,
+            education: rest.education,
+            graduation_year: rest.graduation_year,
+          },
+        ]
+        delete rest.school
+        delete rest.major
+        delete rest.education
+        delete rest.graduation_year
+        const regionMap = {
+          中国大陆: 'china_mainland',
+          中国香港: 'china_hk',
+          'Chinese Mainland': 'china_mainland',
+          'HK China': 'china_hk',
+        }
+        rest.work_region = regionMap[rest.work_region] ?? res.work_region
+        return rest
+      })
+      const res = await importEmployee({ employee_list: _importData })
+      callback(res)
     },
   },
 }
@@ -1051,7 +1183,6 @@ export default {
               color: @primary-color;
               font-size: 12px;
             }
-
           }
         }
       }
@@ -1068,7 +1199,6 @@ export default {
           }
         }
       }
-
     }
     .ops-setting-structure-main-pagination {
       width: 100%;

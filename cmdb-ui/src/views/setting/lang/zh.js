@@ -19,7 +19,7 @@ const cs_zh = {
     app: '应用权限',
     basic: '基础设置',
     theme: '主题配置',
-    security: '安全配置'
+    security: '安全配置',
   },
   companyInfo: {
     spanCompany: '公司描述',
@@ -201,7 +201,11 @@ const cs_zh = {
     createEmployee: '新建员工',
     editEmployee: '编辑员工',
     role: '角色',
-    selectDisplayColumn: '请选择需要展示的列'
+    selectDisplayColumn: '请选择需要展示的列',
+    work_region: '工作地区',
+    workRegionPlaceholder: '请选择工作地区',
+    china_mainland: '中国大陆',
+    china_hk: '中国香港',
   },
   auth: {
     basic: '基本',
@@ -220,7 +224,7 @@ const cs_zh = {
       user: '用户',
       username: '用户名称',
       userPlaceholder: '请输入用户名称',
-      userHelp: '用户dn: cn={},ou=users,dc=xxx,dc=com   {}会替换成用户名'
+      userHelp: '用户dn: cn={},ou=users,dc=xxx,dc=com   {}会替换成用户名',
     },
     cas: {
       server: '服务端地址',
@@ -237,7 +241,7 @@ const cs_zh = {
       validateRoutePlaceholder: '请输入验证路由',
       afterLoginRoute: '重定向路由',
       afterLoginRoutePlaceholder: '请输入重定向路由',
-      userMap: '用户属性映射'
+      userMap: '用户属性映射',
     },
     autoRedirectLogin: '自动跳转到第三方登录页',
     autoRedirectLoginHelp: '如果关闭，则会弹出跳转到第三方登录页的确认，点取消按钮会进入系统内置的登录页',
@@ -257,7 +261,7 @@ const cs_zh = {
       userInfo: '用户信息',
       scopes: '授权范围',
       scopesPlaceholder: '请输入授权范围',
-    }
+    },
   },
   duty: {
     basicSetting: '基础设置',
@@ -274,13 +278,13 @@ const cs_zh = {
     mainDutyPeople: '主值班人',
     deputyDutyPeople: '副值班人',
     dutyRule: '排班规则',
-    '一': '一',
-    '二': '二',
-    '三': '三',
-    '四': '四',
-    '五': '五',
-    '六': '六',
-    '日': '日',
+    一: '一',
+    二: '二',
+    三: '三',
+    四: '四',
+    五: '五',
+    六: '六',
+    日: '日',
     searchPlaceholder: '请查找',
     dutyTable: '值班表',
     dutyMember: '值班人员',
@@ -304,7 +308,7 @@ const cs_zh = {
     offDutyReceiverPlaceholder: '请选择非值班时间接收人',
     titleLimit: '请输入标题（20个字符）',
     remarkLimit: '备注150个字符以内',
-    frequencyLimit: '请输入值班频次（正整数）'
+    frequencyLimit: '请输入值班频次（正整数）',
   },
   group: {
     groupName: '用户分组',
@@ -329,7 +333,7 @@ const cs_zh = {
     moreThan: '大于',
     lessThan: '小于',
     operatorInPlaceholder: '以 ; 分隔',
-    selectEmployee: '选择员工'
+    selectEmployee: '选择员工',
   },
   notice: {
     corpid: '企业ID',
@@ -438,6 +442,6 @@ const cs_zh = {
     myDepartmentAndSubordinateDepartments: '本部门及下属部门',
     test: '测试',
     selectApp: '选择应用',
-  }
+  },
 }
 export default cs_zh
