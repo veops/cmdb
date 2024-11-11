@@ -16,7 +16,7 @@ Flask-Cors==4.0.0
 Flask-Login>=0.6.2
 Flask-Migrate==2.5.2
 Flask-RESTful==0.3.10
-Flask-SQLAlchemy==2.5.0
+Flask-SQLAlchemy==3.0.5
 future==0.18.3
 gunicorn==21.0.1
 hvac==2.0.0
@@ -57,3 +57,4 @@ lz4>=4.3.2
 python-magic==0.4.27
 jsonpath==0.82.2
 networkx>=3.1
+ipaddress>=1.0.23

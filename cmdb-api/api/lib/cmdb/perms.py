@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 import copy
 import functools
-
 import redis_lock
 from flask import abort
 from flask import current_app
@@ -10,6 +9,7 @@ from flask_login import current_user
 
 from api.extensions import db
 from api.extensions import rd
+from api.lib.cmdb.const import BUILTIN_ATTRIBUTES
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.mixin import DBMixin
@@ -27,7 +27,7 @@ class CIFilterPermsCRUD(DBMixin):
         result = {}
         for i in res:
             if i['attr_filter']:
-                i['attr_filter'] = i['attr_filter'].split(',')
+                i['attr_filter'] = i['attr_filter'].split(',') + list(BUILTIN_ATTRIBUTES.keys())
 
             if i['rid'] not in result:
                 result[i['rid']] = i
@@ -62,7 +62,7 @@ class CIFilterPermsCRUD(DBMixin):
         result = {}
         for i in res:
             if i['attr_filter']:
-                i['attr_filter'] = i['attr_filter'].split(',')
+                i['attr_filter'] = i['attr_filter'].split(',') + list(BUILTIN_ATTRIBUTES.keys())
 
             if i['type_id'] not in result:
                 result[i['type_id']] = i

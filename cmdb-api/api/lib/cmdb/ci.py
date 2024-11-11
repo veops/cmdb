@@ -207,7 +207,7 @@ class CIManager(object):
         res['_type'] = ci_type.id
         res['ci_type_alias'] = ci_type.alias
         res['_id'] = ci_id
-        res['_updated_at'] = str(ci.updated_at)
+        res['_updated_at'] = str(ci.updated_at or '')
         res['_updated_by'] = ci.updated_by
 
         return res
@@ -570,6 +570,9 @@ class CIManager(object):
         if password_dict:
             for attr_id in password_dict:
                 record_id = self.save_password(ci.id, attr_id, password_dict[attr_id], record_id, ci.type_id)
+
+        u = UserCache.get(current_user.uid)
+        ci.update(updated_at=now, updated_by=u and u.nickname)
 
         if record_id or has_dynamic:  # has changed
             if not _sync:

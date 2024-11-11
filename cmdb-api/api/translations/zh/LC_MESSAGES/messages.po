@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-09-26 17:57+0800\n"
+"POT-Creation-Date: 2024-11-11 17:40+0800\n"
 "PO-Revision-Date: 2023-12-25 20:21+0800\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -91,6 +91,14 @@ msgstr "您没有操作权限!"
 #: api/lib/resp_format.py:34
 msgid "Only the creator or administrator has permission!"
 msgstr "只有创建人或者管理员才有权限!"
+
+#: api/lib/cmdb/const.py:128
+msgid "Update Time"
+msgstr "更新时间"
+
+#: api/lib/cmdb/const.py:129
+msgid "Updated By"
+msgstr "更新人"
 
 #: api/lib/cmdb/resp_format.py:9
 msgid "CI Model"
@@ -474,11 +482,11 @@ msgstr "{}格式错误，应该为：%Y-%m-%d %H:%M:%S"
 
 #: api/lib/cmdb/resp_format.py:150
 msgid "CMDB data reconciliation results"
-msgstr ""
+msgstr "CMDB数据合规检查结果"
 
 #: api/lib/cmdb/resp_format.py:151
 msgid "Number of {} illegal: {}"
-msgstr ""
+msgstr "{} 不合规数: {}"
 
 #: api/lib/cmdb/resp_format.py:153
 msgid "Topology view {} already exists"
@@ -495,6 +503,46 @@ msgstr "因为该分组下定义了拓扑视图，不能删除"
 #: api/lib/cmdb/resp_format.py:158
 msgid "Both the source model and the target model must be selected"
 msgstr "源模型和目标模型不能为空!"
+
+#: api/lib/cmdb/resp_format.py:160
+msgid "The names of built-in models cannot be changed"
+msgstr "内置模型的名字不能修改"
+
+#: api/lib/cmdb/resp_format.py:162
+msgid "The subnet model {} does not exist"
+msgstr "子网模型 {} 不存在!"
+
+#: api/lib/cmdb/resp_format.py:163
+msgid "The IP Address model {} does not exist"
+msgstr "IP地址模型 {} 不存在!"
+
+#: api/lib/cmdb/resp_format.py:164
+msgid "CIDR {} is an invalid notation"
+msgstr "CIDR {} 写法不正确!"
+
+#: api/lib/cmdb/resp_format.py:165
+msgid "Invalid CIDR: {}, available subnets: {}"
+msgstr "无效的CIDR: {}, 可用的子网: {}"
+
+#: api/lib/cmdb/resp_format.py:166
+msgid "Invalid subnet prefix length: {}"
+msgstr "无效的子网前缀长度: {}"
+
+#: api/lib/cmdb/resp_format.py:167
+msgid "parent node cidr must be required"
+msgstr "必须要有父节点"
+
+#: api/lib/cmdb/resp_format.py:168
+msgid "{} and {} overlap"
+msgstr "{} 和 {} 有重叠"
+
+#: api/lib/cmdb/resp_format.py:169 api/lib/cmdb/resp_format.py:171
+msgid "Cannot delete because child nodes exist"
+msgstr "因为子节点已经存在，不能删除"
+
+#: api/lib/cmdb/resp_format.py:170
+msgid "Subnet is not found"
+msgstr "子网不存在"
 
 #: api/lib/common_setting/resp_format.py:8
 msgid "Company info already existed"
