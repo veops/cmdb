@@ -17,12 +17,14 @@ from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeAttributeCache
 from api.lib.cmdb.cache import CITypeAttributesCache
 from api.lib.cmdb.cache import CITypeCache
+from api.lib.cmdb.const import BuiltinModelEnum
 from api.lib.cmdb.const import CITypeOperateType
 from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.const import ConstraintEnum
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RoleEnum
+from api.lib.cmdb.const import SysComputedAttributes
 from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.cmdb.history import CITypeHistoryManager
 from api.lib.cmdb.perms import CIFilterPermsCRUD
@@ -64,6 +66,7 @@ class CITypeManager(object):
     """
     manage CIType
     """
+
     cls = CIType
 
     def __init__(self):
@@ -185,6 +188,9 @@ class CITypeManager(object):
     def update(cls, type_id, **kwargs):
 
         ci_type = cls.check_is_existed(type_id)
+
+        if ci_type.name in BuiltinModelEnum.all() and kwargs.get('name', ci_type.name) != ci_type.name:
+            return abort(400, ErrFormat.builtin_type_cannot_update_name)
 
         cls._validate_unique(type_id=type_id, name=kwargs.get('name'))
         # cls._validate_unique(type_id=type_id, alias=kwargs.get('alias') or kwargs.get('name'))
@@ -1095,6 +1101,7 @@ class CITypeAttributeGroupManager(object):
 
     @staticmethod
     def get_by_type_id(type_id, need_other=False):
+        _type = CITypeCache.get(type_id) or abort(404, ErrFormat.ci_type_not_found)
         parent_ids = CITypeInheritanceManager.base(type_id)
 
         groups = []
@@ -1143,6 +1150,12 @@ class CITypeAttributeGroupManager(object):
 
                 if i.attr_id in attr2pos:
                     result[attr2pos[i.attr_id][0]]['attributes'].remove(attr2pos[i.attr_id][1])
+
+                if (_type.name in SysComputedAttributes.type2attr and
+                        attr['name'] in SysComputedAttributes.type2attr[_type.name]):
+                    attr['sys_computed'] = True
+                else:
+                    attr['sys_computed'] = False
 
                 attr2pos[i.attr_id] = [group_pos, attr]
 

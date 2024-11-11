@@ -118,6 +118,12 @@ class RelationSourceEnum(BaseEnum):
     AUTO_DISCOVERY = "1"
 
 
+class BuiltinModelEnum(BaseEnum):
+    IPAM_SUBNET = "ipam_subnet"
+    IPAM_ADDRESS = "ipam_address"
+    IPAM_SCOPE = "ipam_scope"
+
+
 BUILTIN_ATTRIBUTES = {
     "_updated_at": _l("Update Time"),
     "_updated_by": _l("Updated By"),
@@ -129,6 +135,19 @@ REDIS_PREFIX_CI_RELATION = "CMDB_CI_RELATION"
 REDIS_PREFIX_CI_RELATION2 = "CMDB_CI_RELATION2"
 
 BUILTIN_KEYWORDS = {'id', '_id', 'ci_id', 'type', '_type', 'ci_type', 'ticket_id', *BUILTIN_ATTRIBUTES.keys()}
+
+
+class SysComputedAttributes(object):
+    from api.lib.cmdb.ipam.const import SubnetBuiltinAttributes
+    type2attr = {
+        BuiltinModelEnum.IPAM_SUBNET: {
+            SubnetBuiltinAttributes.HOSTS_COUNT,
+            SubnetBuiltinAttributes.ASSIGN_COUNT,
+            SubnetBuiltinAttributes.USED_COUNT,
+            SubnetBuiltinAttributes.FREE_COUNT
+        }
+    }
+
 
 L_TYPE = None
 L_CI = None

@@ -5,6 +5,7 @@ import datetime
 import json
 import redis_lock
 from flask import current_app
+from flask import has_request_context
 from flask_login import login_user
 
 import api.lib.cmdb.ci
@@ -53,8 +54,9 @@ def ci_cache(ci_id, operate_type, record_id):
     current_app.logger.info("{0} flush..........".format(ci_id))
 
     if operate_type:
-        current_app.test_request_context().push()
-        login_user(UserCache.get('worker'))
+        if not has_request_context():
+            current_app.test_request_context().push()
+            login_user(UserCache.get('worker'))
 
         _, enum_map = CITypeAttributeManager.get_attr_names_label_enum(ci_dict.get('_type'))
         payload = dict()
@@ -184,8 +186,9 @@ def ci_relation_add(parent_dict, child_id, uid):
     from api.lib.cmdb.search import SearchError
     from api.lib.cmdb.search.ci import search
 
-    current_app.test_request_context().push()
-    login_user(UserCache.get(uid))
+    if not has_request_context():
+        current_app.test_request_context().push()
+        login_user(UserCache.get(uid))
 
     for parent in parent_dict:
         parent_ci_type_name, _attr_name = parent.strip()[1:].split('.', 1)
@@ -272,8 +275,9 @@ def ci_type_attribute_order_rebuild(type_id, uid):
 def calc_computed_attribute(attr_id, uid):
     from api.lib.cmdb.ci import CIManager
 
-    current_app.test_request_context().push()
-    login_user(UserCache.get(uid))
+    if not has_request_context():
+        current_app.test_request_context().push()
+        login_user(UserCache.get(uid))
 
     cim = CIManager()
     for i in CITypeAttribute.get_by(attr_id=attr_id, to_dict=False):
