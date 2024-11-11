@@ -22,7 +22,7 @@
           <draggable :value="targetKeys" animation="300" @end="dragEnd" :disabled="!isSortable">
             <div
               @dblclick="changeSingleItem(item)"
-              v-for="item in filteredItems"
+              v-for="item in filterDefaultAttr(filteredItems)"
               :key="item.key"
               :style="{ height: '38px' }"
             >
@@ -54,11 +54,44 @@
               </li>
             </div>
           </draggable>
+
+          <div
+            v-if="rightDefaultAttrList.length"
+            class="default-attr"
+          >
+            <a-divider>
+              <span class="default-attr-divider">
+                {{ $t('cmdb.components.default') }}
+              </span>
+            </a-divider>
+
+            <div
+              v-for="(item) in rightDefaultAttrList"
+              :key="item.key"
+              :class="['default-attr-item', selectedKeys.includes(item.key) ? 'default-attr-item-selected' : '']"
+              @click="setSelectedKeys(item)"
+              @dblclick="changeSingleItem(item)"
+            >
+              <div
+                class="default-attr-arrow"
+                style="left: 17px"
+                @click.stop="changeSingleItem(item)"
+              >
+                <a-icon type="left" />
+              </div>
+              <div class="default-attr-title">
+                {{ $t(item.title) }}
+              </div>
+              <div class="default-attr-name">
+                {{ item.name }}
+              </div>
+            </div>
+          </div>
         </div>
         <div v-if="direction === 'left'" class="ant-transfer-list-content">
           <div
             @dblclick="changeSingleItem(item)"
-            v-for="item in filteredItems"
+            v-for="item in filterDefaultAttr(filteredItems)"
             :key="item.key"
             :style="{ height: '38px' }"
           >
@@ -82,6 +115,39 @@
               </div>
             </li>
           </div>
+
+          <div
+            v-if="leftDefaultAttrList.length"
+            class="default-attr"
+          >
+            <a-divider>
+              <span class="default-attr-divider">
+                {{ $t('cmdb.components.default') }}
+              </span>
+            </a-divider>
+
+            <div
+              v-for="(item) in leftDefaultAttrList"
+              :key="item.key"
+              :class="['default-attr-item', selectedKeys.includes(item.key) ? 'default-attr-item-selected' : '']"
+              @click="setSelectedKeys(item)"
+              @dblclick="changeSingleItem(item)"
+            >
+              <div
+                class="default-attr-arrow"
+                style="left: 2px"
+                @click.stop="changeSingleItem(item)"
+              >
+                <a-icon type="right" />
+              </div>
+              <div class="default-attr-title">
+                {{ $t(item.title) }}
+              </div>
+              <div class="default-attr-name">
+                {{ item.name }}
+              </div>
+            </div>
+          </div>
         </div>
       </template>
     </a-transfer>
@@ -95,6 +161,7 @@
 import _ from 'lodash'
 import draggable from 'vuedraggable'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
+import { CI_DEFAULT_ATTR } from '@/modules/cmdb/utils/const.js'
 
 export default {
   name: 'AttributesTransfer',
@@ -130,10 +197,41 @@ export default {
       type: Number,
       default: 400,
     },
+    showDefaultAttr: {
+      type: Boolean,
+      default: false,
+    }
   },
   data() {
     return {
       selectedKeys: [],
+      defaultAttrList: [
+        {
+          title: 'cmdb.components.updater',
+          name: 'updater',
+          key: CI_DEFAULT_ATTR.UPDATE_USER
+        },
+        {
+          title: 'cmdb.components.updateTime',
+          name: 'update time',
+          key: CI_DEFAULT_ATTR.UPDATE_TIME
+        }
+      ]
+    }
+  },
+  computed: {
+    rightDefaultAttrList() {
+      if (!this.showDefaultAttr) {
+        return []
+      }
+      return this.defaultAttrList.filter((item) => this.targetKeys.includes(item.key))
+    },
+
+    leftDefaultAttrList() {
+      if (!this.showDefaultAttr) {
+        return []
+      }
+      return this.defaultAttrList.filter((item) => !this.targetKeys.includes(item.key))
     }
   },
   methods: {
@@ -216,6 +314,10 @@ export default {
       }
       this.$emit('setFixedList', _fixedList)
     },
+
+    filterDefaultAttr(list) {
+      return this.showDefaultAttr ? list.filter((item) => ![CI_DEFAULT_ATTR.UPDATE_USER, CI_DEFAULT_ATTR.UPDATE_TIME].includes(item.key)) : list
+    }
   },
 }
 </script>
@@ -293,6 +395,68 @@ export default {
       .ant-transfer-list-content-item-selected {
         background-color: @primary-color_5;
         border-color: @primary-color;
+      }
+    }
+  }
+
+  .default-attr {
+    .ant-divider {
+      margin: 7px 0;
+      padding: 0 15px;
+
+      .ant-divider-inner-text {
+        padding: 0 6px;
+      }
+    }
+
+    &-divider {
+      font-size: 12px;
+      color: #86909C;
+    }
+
+    &-title {
+      font-size: 14px;
+      line-height: 14px;
+      font-weight: 400;
+    }
+
+    &-name {
+      font-size: 11px;
+      line-height: 12px;
+      color: rgb(163, 163, 163);
+    }
+
+    &-arrow {
+      position: absolute;
+      top: 9px;
+      display: none;
+      cursor: pointer;
+      font-size: 12px;
+      background-color: #fff;
+      color: @primary-color;
+      border-radius: 4px;
+      width: 12px;
+    }
+
+    &-item {
+      padding-left: 34px;
+      padding-top: 4px;
+      padding-bottom: 4px;
+      position: relative;
+      border-left: solid 2px transparent;
+      margin-bottom: 6px;
+
+      &-selected {
+        background-color: #f0f5ff;
+        border-color: #2f54eb;
+      }
+
+      &:hover {
+        background-color: #f0f5ff;
+
+        .default-attr-arrow {
+          display: inline;
+        }
       }
     }
   }

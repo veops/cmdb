@@ -38,6 +38,9 @@
       :column-config="{ resizable: true }"
       :resizable-config="{ minWidth: 60 }"
       class="checkbox-hover-table"
+      @checkbox-change="onSelectChange"
+      @checkbox-all="onSelectChange"
+      @checkbox-range-end="onSelectChange"
     >
       <vxe-table-column
         v-if="tableData.ciList && tableData.ciList.length"
@@ -137,7 +140,6 @@
 
 <script>
 import _ from 'lodash'
-import moment from 'moment'
 import { mapState } from 'vuex'
 import ExcelJS from 'exceljs'
 import FileSaver from 'file-saver'
@@ -266,8 +268,7 @@ export default {
         ciTypeName: this.tabActive || '',
       })
     },
-    batchDownload({ checkedKeys }) {
-      const excel_name = `cmdb-${this.tabActive}-${moment().format('YYYYMMDDHHmmss')}.xlsx`
+    batchDownload({ checkedKeys, filename }) {
       const wb = new ExcelJS.Workbook()
 
       const tableRef = this.$refs.xTable.getVxetableRef()
@@ -341,12 +342,16 @@ export default {
         const file = new Blob([buffer], {
           type: 'application/octet-stream',
         })
-        FileSaver.saveAs(file, excel_name)
+        FileSaver.saveAs(file, `${filename}.xlsx`)
       })
 
       this.$refs.xTable.getVxetableRef().clearCheckboxRow()
       this.$refs.xTable.getVxetableRef().clearCheckboxReserve()
-    }
+    },
+
+    onSelectChange() {
+      console.log('onSelectChange')
+    },
   }
 }
 </script>

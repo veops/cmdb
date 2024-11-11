@@ -2,6 +2,9 @@
 import _ from 'lodash'
 import XLSX from 'xlsx'
 import XLSXS from 'xlsx-js-style'
+import { CI_DEFAULT_ATTR } from './const.js'
+import i18n from '@/lang'
+
 export function sum(arr) {
     if (!arr.length) {
         return 0
@@ -49,7 +52,10 @@ export function getCITableColumns(data, attrList, width = 1600, height) {
     const _attrList = _.orderBy(attrList, ['is_fixed'], ['desc'])
     const columns = []
     for (let attr of _attrList) {
-        const editRender = { name: 'input' }
+        const editRender = {
+          name: 'input',
+          enabled: !attr.is_computed && !attr.sys_computed
+        }
         switch (attr.value_type) {
             case '0':
                 editRender['props'] = { 'type': 'float' }
@@ -83,13 +89,35 @@ export function getCITableColumns(data, attrList, width = 1600, height) {
             delete editRender.props
 
         }
+
+        let title = attr.alias || attr.name
+        let sortable = !!attr.is_sortable
+        let attr_id = attr.id
+
+        if ([CI_DEFAULT_ATTR.UPDATE_TIME, CI_DEFAULT_ATTR.UPDATE_USER].includes(attr.name)) {
+            editRender.enabled = false
+            attr_id = attr.name
+
+            switch (attr.name) {
+                case CI_DEFAULT_ATTR.UPDATE_USER:
+                    title = i18n.t('cmdb.components.updater')
+                    break;
+                case CI_DEFAULT_ATTR.UPDATE_TIME:
+                    title = i18n.t('cmdb.components.updateTime')
+                    sortable = true
+                    break;
+                default:
+                    break;
+            }
+        }
+
         columns.push({
-            attr_id: attr.id,
+            attr_id,
             editRender,
-            title: attr.alias || attr.name,
+            title,
             field: attr.name,
             value_type: attr.value_type,
-            sortable: !!attr.is_sortable,
+            sortable,
             filters: attr.is_choice ? attr.choice_value : null,
             choice_builtin: null,
             width: Math.min(Math.max(100, ...data.map(item => strLength(item[attr.name]))), 350),
