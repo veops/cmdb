@@ -53,6 +53,7 @@ class CMDBApp(BaseApp):
          "perms": ["read", "create_topology_group", "update_topology_group", "delete_topology_group",
                    "create_topology_view"],
          },
+        {"page": "IPAM", "page_cn": "IPAM", "perms": ["read"]},
     ]
 
     def __init__(self):

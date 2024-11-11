@@ -24,6 +24,7 @@ from api.lib.cmdb.auto_discovery.const import PRIVILEGED_USERS
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
+from api.lib.cmdb.ipam.subnet import SubnetManager
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.cmdb.search import SearchError
 from api.lib.cmdb.search.ci import search as ci_search
@@ -293,9 +294,13 @@ class AutoDiscoveryRuleSyncView(APIView):
 
                 return self.jsonify(rules=rules, last_update_at=last_update_at)
 
-        rules, last_update_at = AutoDiscoveryCITypeCRUD.get(None, oneagent_id, oneagent_name, last_update_at)
+        rules, last_update_at1 = AutoDiscoveryCITypeCRUD.get(None, oneagent_id, oneagent_name, last_update_at)
 
-        return self.jsonify(rules=rules, last_update_at=last_update_at)
+        subnet_scan_rules, last_update_at2 = SubnetManager().scan_rules(oneagent_id, last_update_at)
+
+        return self.jsonify(rules=rules,
+                            subnet_scan_rules=subnet_scan_rules,
+                            last_update_at=max(last_update_at1 or "", last_update_at2 or ""))
 
 
 class AutoDiscoveryRuleSyncHistoryView(APIView):

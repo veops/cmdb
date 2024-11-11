@@ -668,3 +668,40 @@ class InnerKV(Model):
 
     key = db.Column(db.String(128), index=True)
     value = db.Column(db.Text)
+
+
+class IPAMSubnetScan(Model):
+    __tablename__ = "c_ipam_subnet_scans"
+
+    ci_id = db.Column(db.Integer, index=True, nullable=False)
+    scan_enabled = db.Column(db.Boolean, default=True)
+    last_scan_time = db.Column(db.DateTime)
+
+    # scan rules
+    agent_id = db.Column(db.String(8), index=True)
+    cron = db.Column(db.String(128))
+
+
+class IPAMSubnetScanHistory(Model2):
+    __tablename__ = "c_ipam_subnet_scan_histories"
+
+    subnet_scan_id = db.Column(db.Integer, index=True)
+    exec_id = db.Column(db.String(64), index=True)
+    cidr = db.Column(db.String(18), index=True)
+    start_at = db.Column(db.DateTime)
+    end_at = db.Column(db.DateTime)
+    status = db.Column(db.Integer, default=0)  # 0 is ok
+    stdout = db.Column(db.Text)
+    ip_num = db.Column(db.Integer)
+    ips = db.Column(db.JSON)  # keep only the last 10 records
+
+
+class IPAMOperationHistory(Model2):
+    __tablename__ = "c_ipam_operation_histories"
+
+    from api.lib.cmdb.ipam.const import OperateTypeEnum
+
+    uid = db.Column(db.Integer, index=True)
+    cidr = db.Column(db.String(18), index=True)
+    operate_type = db.Column(db.Enum(*OperateTypeEnum.all()))
+    description = db.Column(db.Text)

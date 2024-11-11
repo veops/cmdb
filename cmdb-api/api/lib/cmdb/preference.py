@@ -21,6 +21,7 @@ from api.lib.cmdb.const import ConstraintEnum
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RoleEnum
+from api.lib.cmdb.const import SysComputedAttributes
 from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.exception import AbortException
@@ -48,7 +49,7 @@ class PreferenceManager(object):
         type2group = {}
         for i in db.session.query(CITypeGroupItem, CITypeGroup).join(
                 CITypeGroup, CITypeGroup.id == CITypeGroupItem.group_id).filter(
-            CITypeGroup.deleted.is_(False)).filter(CITypeGroupItem.deleted.is_(False)):
+                CITypeGroup.deleted.is_(False)).filter(CITypeGroupItem.deleted.is_(False)):
             type2group[i.CITypeGroupItem.type_id] = i.CITypeGroup.to_dict()
 
         types = db.session.query(PreferenceShowAttributes.type_id).filter(
@@ -132,16 +133,12 @@ class PreferenceManager(object):
 
     @staticmethod
     def get_show_attributes(type_id):
+        _type = CITypeCache.get(type_id) or abort(404, ErrFormat.ci_type_not_found)
+        type_id = _type and _type.id
+
         if not isinstance(type_id, six.integer_types):
             _type = CITypeCache.get(type_id)
             type_id = _type and _type.id
-
-        # attrs = db.session.query(PreferenceShowAttributes, CITypeAttribute.order).join(
-        #     CITypeAttribute, CITypeAttribute.attr_id == PreferenceShowAttributes.attr_id).filter(
-        #     PreferenceShowAttributes.uid == current_user.uid).filter(
-        #     PreferenceShowAttributes.type_id == type_id).filter(
-        #     PreferenceShowAttributes.deleted.is_(False)).filter(CITypeAttribute.deleted.is_(False)).group_by(
-        #     CITypeAttribute.attr_id).all()
 
         attrs = PreferenceShowAttributes.get_by(uid=current_user.uid, type_id=type_id, to_dict=False)
 
@@ -172,6 +169,12 @@ class PreferenceManager(object):
             if i.get("is_choice"):
                 i.update(dict(choice_value=AttributeManager.get_choice_values(
                     i["id"], i["value_type"], i.get("choice_web_hook"), i.get("choice_other"))))
+
+                if (_type.name in SysComputedAttributes.type2attr and
+                        i['name'] in SysComputedAttributes.type2attr[_type.name]):
+                    i['sys_computed'] = True
+                else:
+                    i['sys_computed'] = False
 
         return is_subscribed, result
 
