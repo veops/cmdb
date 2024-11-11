@@ -476,6 +476,7 @@ class PreferenceShowAttributes(Model):
     uid = db.Column(db.Integer, index=True, nullable=False)
     type_id = db.Column(db.Integer, db.ForeignKey("c_ci_types.id"), nullable=False)
     attr_id = db.Column(db.Integer, db.ForeignKey("c_attributes.id"))
+    builtin_attr = db.Column(db.String(256), nullable=True)
     order = db.Column(db.SmallInteger, default=0)
     is_fixed = db.Column(db.Boolean, default=False)
 

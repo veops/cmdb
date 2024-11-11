@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 
 
+from flask import current_app
 from sqlalchemy import func
 
 from api.extensions import db
@@ -32,11 +33,21 @@ class DBMixin(object):
 
         for k in kwargs:
             if hasattr(cls.cls, k):
-                query = query.filter(getattr(cls.cls, k) == kwargs[k])
-                if count_query:
-                    _query = _query.filter(getattr(cls.cls, k) == kwargs[k])
+                if isinstance(kwargs[k], list):
+                    query = query.filter(getattr(cls.cls, k).in_(kwargs[k]))
+                    if count_query:
+                        _query = _query.filter(getattr(cls.cls, k).in_(kwargs[k]))
+                else:
+                    if "*" in str(kwargs[k]):
+                        query = query.filter(getattr(cls.cls, k).ilike(kwargs[k].replace('*', '%')))
+                        if count_query:
+                            _query = _query.filter(getattr(cls.cls, k).ilike(kwargs[k].replace('*', '%')))
+                    else:
+                        query = query.filter(getattr(cls.cls, k) == kwargs[k])
+                        if count_query:
+                            _query = _query.filter(getattr(cls.cls, k) == kwargs[k])
 
-        if reverse:
+        if reverse in current_app.config.get('BOOL_TRUE'):
             query = query.order_by(cls.cls.id.desc())
 
         if only_query and not count_query:

@@ -265,9 +265,9 @@ class SubnetManager(object):
 
         return _id
 
-    def delete(self, _id):
-        if CIRelation.get_by(only_query=True).join(CI, CI.id == CIRelation.second_ci_id).filter(
-                CIRelation.first_ci_id == _id).filter(CI.type_id == self.type_id).first():
+    @classmethod
+    def delete(cls, _id):
+        if CIRelation.get_by(only_query=True).filter(CIRelation.first_ci_id == _id).first():
             return abort(400, ErrFormat.ipam_subnet_cannot_delete)
 
         existed = IPAMSubnetScan.get_by(ci_id=_id, first=True, to_dict=False)
