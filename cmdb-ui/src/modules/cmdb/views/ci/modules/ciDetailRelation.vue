@@ -18,7 +18,7 @@
               :disabled="!canEdit[parent.id]"
               @click="
                 () => {
-                  $refs.addTableModal.openModal({ [`${ci.unique}`]: ci[ci.unique] }, ci._id, parent.id, 'parents')
+                  $refs.addTableModal.openModal({ [`${ci.unique}`]: ci[ci.unique] }, ci._id, parent, 'parents')
                 }
               "
             ><a-icon
@@ -76,7 +76,7 @@
               :disabled="!canEdit[child.id]"
               @click="
                 () => {
-                  $refs.addTableModal.openModal({ [`${ci.unique}`]: ci[ci.unique] }, ci._id, child.id, 'children')
+                  $refs.addTableModal.openModal({ [`${ci.unique}`]: ci[ci.unique] }, ci._id, child, 'children')
                 }
               "
             ><a-icon

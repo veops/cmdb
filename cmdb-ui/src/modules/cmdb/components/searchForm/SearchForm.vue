@@ -129,6 +129,8 @@ import Treeselect from '@riophae/vue-treeselect'
 import MetadataDrawer from '../../views/ci/modules/MetadataDrawer.vue'
 import FilterComp from '@/components/CMDBFilterComp'
 import { getCITypeGroups } from '../../api/ciTypeGroup'
+import { CI_DEFAULT_ATTR } from '@/modules/cmdb/utils/const.js'
+
 export default {
   name: 'SearchForm',
   components: { MetadataDrawer, FilterComp, Treeselect },
@@ -176,7 +178,9 @@ export default {
       return '200px'
     },
     canSearchPreferenceAttrList() {
-      return this.preferenceAttrList.filter((item) => item.value_type !== '6')
+      return this.preferenceAttrList.filter((item) => {
+        return item.value_type !== '6' && ![CI_DEFAULT_ATTR.UPDATE_USER, CI_DEFAULT_ATTR.UPDATE_TIME].includes(item.name)
+      })
     },
   },
   watch: {

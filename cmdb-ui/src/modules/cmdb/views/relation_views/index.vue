@@ -984,7 +984,28 @@ export default {
           this.batchTreeKey = []
         } else {
           const childTypeId = menuKey
-          this.$refs.addTableModal.openModal(firstCIObj, firstCIId, childTypeId, 'children', ancestor_ids)
+
+          let typeName = ''
+          if (this?.relationViews?.id2type?.[childTypeId]) {
+            typeName = this.relationViews.id2type[childTypeId]?.name || ''
+          } else {
+            const node2show_types = this?.relationViews?.views?.[this.viewName]?.node2show_types
+            const typeId = _tempTree?.[1]
+            if (node2show_types?.[typeId]?.length) {
+              const findType = node2show_types[typeId].find((item) => item.id === childTypeId)
+              typeName = findType?.name || ''
+            }
+          }
+          this.$refs.addTableModal.openModal(
+            firstCIObj,
+            firstCIId,
+            {
+              id: childTypeId,
+              name: typeName
+            },
+            'children',
+            ancestor_ids
+          )
         }
       }
     },

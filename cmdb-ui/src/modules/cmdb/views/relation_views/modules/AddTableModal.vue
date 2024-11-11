@@ -18,6 +18,7 @@
           @refresh="handleSearch"
         >
           <a-button
+            v-if="showCreateBtn"
             @click="
               () => {
                 $refs.createInstanceForm.handleOpen(true, 'create')
@@ -116,6 +117,7 @@ import { getCITableColumns } from '../../../utils/helper'
 import SearchForm from '../../../components/searchForm/SearchForm.vue'
 import CreateInstanceForm from '../../ci/modules/CreateInstanceForm.vue'
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
+import { SUB_NET_CITYPE_NAME, SCOPE_CITYPE_NAME, ADDRESS_CITYPE_NAME } from '@/modules/cmdb/views/ipam/constants.js'
 
 export default {
   name: 'AddTableModal',
@@ -137,6 +139,7 @@ export default {
       preferenceAttrList: [],
       ancestor_ids: undefined,
       attrList1: [],
+      showCreateBtn: true, // 是否展示新增按钮
     }
   },
   computed: {
@@ -159,18 +162,20 @@ export default {
   },
   watch: {},
   methods: {
-    async openModal(ciObj, ciId, addTypeId, type, ancestor_ids = undefined) {
-      console.log(ciObj, ciId, addTypeId, type)
+    async openModal(ciObj, ciId, addType, type, ancestor_ids = undefined) {
+      console.log(ciObj, ciId, addType, type)
       this.visible = true
       this.ciObj = ciObj
       this.ciId = ciId
-      this.addTypeId = addTypeId
+      this.addTypeId = addType.id
       this.type = type
       this.ancestor_ids = ancestor_ids
-      await getSubscribeAttributes(addTypeId).then((res) => {
+      this.showCreateBtn = ![SUB_NET_CITYPE_NAME, SCOPE_CITYPE_NAME, ADDRESS_CITYPE_NAME].includes(addType.name)
+
+      await getSubscribeAttributes(this.addTypeId).then((res) => {
         this.preferenceAttrList = res.attributes // 已经订阅的全部列
       })
-      getCITypeAttributesById(addTypeId).then((res) => {
+      getCITypeAttributesById(this.addTypeId).then((res) => {
         this.attrList = res.attributes
       })
       this.getTableData(true)
@@ -232,6 +237,7 @@ export default {
       this.expression = ''
       this.isFocusExpression = false
       this.visible = false
+      this.showCreateBtn = true
     },
     async handleOk() {
       const selectRecordsCurrent = this.$refs.xTable.getCheckboxRecords()

@@ -178,7 +178,7 @@
         </a-form-item>
       </a-form>
     </template>
-    <a v-if="!isEdit && !attr.is_computed" @click="handleEdit" :style="{ opacity: 0 }"><a-icon type="edit"/></a>
+    <a v-if="!isEdit && !attr.is_computed && !attr.sys_computed" @click="handleEdit" :style="{ opacity: 0 }"><a-icon type="edit"/></a>
     <JsonEditor ref="jsonEditor" @jsonEditorOk="jsonEditorOk" />
   </span>
 </template>
@@ -267,7 +267,7 @@ export default {
     async handleCloseEdit() {
       const newData = this.form.getFieldValue(this.attr.name)
       if (!_.isEqual(this.ci[this.attr.name], newData)) {
-        await updateCI(this.ci._id, { [`${this.attr.name}`]: newData })
+        await updateCI(this.ci._id, { [`${this.attr.name}`]: newData ?? null })
           .then(() => {
             this.$message.success(this.$t('updateSuccess'))
             this.$emit('updateCIByself', { [`${this.attr.name}`]: newData }, this.attr.name)
