@@ -259,7 +259,7 @@ export default {
       this.attributeList = _attrList.sort((x, y) => y.is_required - x.is_required)
       await getCITypeGroupById(this.typeId).then((res1) => {
         const _attributesByGroup = res1.map((g) => {
-          g.attributes = g.attributes.filter((attr) => !attr.is_computed)
+          g.attributes = g.attributes.filter((attr) => !attr.is_computed && !attr.sys_computed)
           return g
         })
         const attrHasGroupIds = []
@@ -268,7 +268,7 @@ export default {
           attrHasGroupIds.push(...id)
         })
         const otherGroupAttr = this.attributeList.filter(
-          (attr) => !attrHasGroupIds.includes(attr.id) && !attr.is_computed
+          (attr) => !attrHasGroupIds.includes(attr.id) && !attr.is_computed && !attr.sys_computed
         )
         if (otherGroupAttr.length) {
           _attributesByGroup.push({ id: -1, name: this.$t('other'), attributes: otherGroupAttr })

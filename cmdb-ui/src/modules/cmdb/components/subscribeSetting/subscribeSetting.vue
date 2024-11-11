@@ -29,6 +29,7 @@
               :fixedList="fixedList"
               @setFixedList="setFixedList"
               :height="windowHeight - 170"
+              :showDefaultAttr="true"
             />
             <div class="custom-drawer-bottom-action">
               <a-button @click="subInstanceSubmit" type="primary">{{ $t('cmdb.preference.sub') }}</a-button>
@@ -64,7 +65,7 @@
             </div>
           </div>
           <div class="cmdb-subscribe-drawer-tree-main" :style="{ maxHeight: `${((windowHeight - 170) * 2) / 3}px` }">
-            <div @click="changeTreeViews(attr)" v-for="attr in attrList" :key="attr.name">
+            <div @click="changeTreeViews(attr)" v-for="attr in treeViewAttrList" :key="attr.name">
               <a-checkbox :checked="treeViews.includes(attr.name)" />
               {{ attr.title }}
             </div>
@@ -90,6 +91,8 @@ import {
 } from '@/modules/cmdb/api/preference'
 import { getCITypeAttributesByName } from '@/modules/cmdb/api/CITypeAttr'
 import AttributesTransfer from '../attributesTransfer'
+import { CI_DEFAULT_ATTR } from '@/modules/cmdb/utils/const.js'
+
 export default {
   name: 'SubscribeSetting',
   components: { AttributesTransfer },
@@ -110,16 +113,32 @@ export default {
     ...mapState({
       windowHeight: (state) => state.windowHeight,
     }),
+    treeViewAttrList() {
+      return this.attrList.filter((item) => ![CI_DEFAULT_ATTR.UPDATE_USER, CI_DEFAULT_ATTR.UPDATE_TIME].includes(item.name))
+    }
   },
   methods: {
     open(ciType = {}, activeKey = '1') {
       this.ciType = ciType
       this.activeKey = activeKey
+      const updatedByKey = CI_DEFAULT_ATTR.UPDATE_USER
+      const updatedAtKey = CI_DEFAULT_ATTR.UPDATE_TIME
+
       getCITypeAttributesByName(ciType.type_id).then((res) => {
-        const attributes = res.attributes
+        const attributes = res.attributes.filter((item) => ![updatedByKey, updatedAtKey].includes(item.name))
+
+        ;[updatedByKey, updatedAtKey].map((key) => {
+          attributes.push({
+            alias: key,
+            name: key,
+            id: key
+          })
+        })
+
         getSubscribeAttributes(ciType.type_id).then((_res) => {
           this.instanceSubscribed = _res.is_subscribed
           const selectedAttrList = _res.attributes.map((item) => item.id.toString())
+
           const attrList = attributes.map((item) => {
             return {
               key: item.id.toString(),
@@ -188,9 +207,20 @@ export default {
       })
     },
     subInstanceSubmit() {
+      const customAttr = []
+      const defaultAttr = []
+      this.selectedAttrList.map((attr) => {
+        if ([CI_DEFAULT_ATTR.UPDATE_USER, CI_DEFAULT_ATTR.UPDATE_TIME].includes(attr)) {
+          defaultAttr.push(attr)
+        } else {
+          customAttr.push(attr)
+        }
+      })
+      const selectedAttrList = [...customAttr, ...defaultAttr]
+
       subscribeCIType(
         this.ciType.type_id,
-        this.selectedAttrList.map((item) => {
+        selectedAttrList.map((item) => {
           return [item, !!this.fixedList.includes(item)]
         })
       ).then((res) => {

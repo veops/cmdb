@@ -233,6 +233,7 @@ import CollapseTransition from '@/components/CollapseTransition'
 import SubscribeSetting from '../../components/subscribeSetting/subscribeSetting'
 import { getCIAdcStatistics } from '../../api/ci'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
+import { SUB_NET_CITYPE_NAME, SCOPE_CITYPE_NAME, ADDRESS_CITYPE_NAME } from '../ipam/constants.js'
 
 export default {
   name: 'Preference',
@@ -282,8 +283,16 @@ export default {
         getPreference2(true, true),
         getCIAdcStatistics(),
       ])
+
+      const IPAM_CI = [
+        SUB_NET_CITYPE_NAME,
+        SCOPE_CITYPE_NAME,
+        ADDRESS_CITYPE_NAME
+      ]
+
       ciTypeGroup.forEach((group) => {
         if (group.ci_types && group.ci_types.length) {
+          group.ci_types = group.ci_types.filter((type) => !IPAM_CI.includes(type.name))
           group.ci_types.forEach((type) => {
             const idx = pref.type_ids.findIndex((p) => p === type.id)
             if (idx > -1) {
@@ -304,10 +313,17 @@ export default {
       const { self, type_id2users } = pref2
       this.self = self
       this.type_id2users = type_id2users
+
+      const prefGroupTypes = pref.group_types.filter((group) => {
+        group.ci_types = group?.ci_types?.filter((type) => !IPAM_CI.includes(type?.name)) || []
+        return group?.ci_types?.length
+      })
+      const prefTreeTypes = pref?.tree_types?.filter((type) => !IPAM_CI.includes(type?.name)) || []
+
       const _myPreferences = [
         {
           name: this.$t('cmdb.menu.ciTable'),
-          groups: pref.group_types,
+          groups: prefGroupTypes,
           icon: 'cmdb-ci',
           type: 'ci',
         },
@@ -315,7 +331,7 @@ export default {
           name: this.$t('cmdb.menu.ciTree'),
           groups: [
             {
-              ci_types: pref.tree_types,
+              ci_types: prefTreeTypes,
               name: null,
             }
           ],
@@ -382,11 +398,13 @@ export default {
       })
     },
     resetRoute() {
-      resetRouter()
       const roles = store.getters.roles
       store.dispatch('GenerateRoutes', { roles }, { root: true }).then(() => {
-        router.addRoutes(store.getters.appRoutes)
-        this.getCITypes()
+        resetRouter()
+        this.$nextTick(() => {
+          router.addRoutes(store.getters.appRoutes)
+          this.getCITypes()
+        })
       })
     },
 

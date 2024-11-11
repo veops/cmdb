@@ -71,6 +71,17 @@ const genCmdbRoutes = async () => {
         component: () => import('../views/ci/ciDetailPage.vue')
       },
       {
+        path: '/cmdb/disabled4',
+        name: 'cmdb_disabled4',
+        meta: { title: 'cmdb.menu.scene', appName: 'cmdb', disabled: true, permission: ['admin', 'cmdb_admin'] },
+      },
+      {
+        path: '/cmdb/ipam',
+        component: () => import('../views/ipam'),
+        name: 'cmdb_ipam',
+        meta: { title: 'IPAM', appName: 'cmdb', icon: 'veops-ipam', selectedIcon: 'veops-ipam', keepAlive: false, permission: ['admin', 'cmdb_admin'] }
+      },
+      {
         path: '/cmdb/disabled2',
         name: 'cmdb_disabled2',
         meta: { title: 'cmdb.menu.config', disabled: true, },

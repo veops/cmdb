@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1729157759723') format('woff2'),
-       url('iconfont.woff?t=1729157759723') format('woff'),
-       url('iconfont.ttf?t=1729157759723') format('truetype');
+  src: url('iconfont.woff2?t=1731312848138') format('woff2'),
+       url('iconfont.woff?t=1731312848138') format('woff'),
+       url('iconfont.ttf?t=1731312848138') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,74 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.ops-setting-holidays:before {
+  content: "\e9fa";
+}
+
+.ops-itsm-logs:before {
+  content: "\e9f8";
+}
+
+.ops-setting-workday:before {
+  content: "\e9f6";
+}
+
+.ops-setting-holiday:before {
+  content: "\e9f7";
+}
+
+.ops-setting-festival:before {
+  content: "\e9f5";
+}
+
+.itsm-calc:before {
+  content: "\e9f4";
+}
+
+.itsm-reports_4:before {
+  content: "\e9f3";
+}
+
+.veops-folder:before {
+  content: "\e9f2";
+}
+
+.veops-entire_network_:before {
+  content: "\e9f1";
+}
+
+.veops-subnet:before {
+  content: "\e9f0";
+}
+
+.veops-map_view:before {
+  content: "\e9ef";
+}
+
+.veops-recycle:before {
+  content: "\e9ee";
+}
+
+.veops-catalog:before {
+  content: "\e9ed";
+}
+
+.veops-ipam:before {
+  content: "\e9ec";
+}
+
+.cmdb-calc:before {
+  content: "\e9eb";
+}
+
+.ai-users:before {
+  content: "\e9ea";
+}
+
+.ai-tokens:before {
+  content: "\e9e9";
 }
 
 .oneterm-mysql:before {
@@ -961,11 +1029,11 @@
   content: "\e914";
 }
 
-.itsm-duration:before {
+.itsm-reports_3:before {
   content: "\e913";
 }
 
-.itsm-workload:before {
+.itsm-reports_2:before {
   content: "\e912";
 }
 

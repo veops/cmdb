@@ -6,6 +6,125 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "42337844",
+      "name": "ops-setting-holiday_management-copy",
+      "font_class": "ops-setting-holidays",
+      "unicode": "e9fa",
+      "unicode_decimal": 59898
+    },
+    {
+      "icon_id": "42335414",
+      "name": "itsm-system_log",
+      "font_class": "ops-itsm-logs",
+      "unicode": "e9f8",
+      "unicode_decimal": 59896
+    },
+    {
+      "icon_id": "42334782",
+      "name": "ops-setting-adjustday",
+      "font_class": "ops-setting-workday",
+      "unicode": "e9f6",
+      "unicode_decimal": 59894
+    },
+    {
+      "icon_id": "42334768",
+      "name": "ops-setting-holiday",
+      "font_class": "ops-setting-holiday",
+      "unicode": "e9f7",
+      "unicode_decimal": 59895
+    },
+    {
+      "icon_id": "42334734",
+      "name": "ops-setting-festival",
+      "font_class": "ops-setting-festival",
+      "unicode": "e9f5",
+      "unicode_decimal": 59893
+    },
+    {
+      "icon_id": "42281202",
+      "name": "itsm-count",
+      "font_class": "itsm-calc",
+      "unicode": "e9f4",
+      "unicode_decimal": 59892
+    },
+    {
+      "icon_id": "42270632",
+      "name": "itsm-satisfaction",
+      "font_class": "itsm-reports_4",
+      "unicode": "e9f3",
+      "unicode_decimal": 59891
+    },
+    {
+      "icon_id": "42205149",
+      "name": "veops-folder",
+      "font_class": "veops-folder",
+      "unicode": "e9f2",
+      "unicode_decimal": 59890
+    },
+    {
+      "icon_id": "42205128",
+      "name": "veops-entire_network_",
+      "font_class": "veops-entire_network_",
+      "unicode": "e9f1",
+      "unicode_decimal": 59889
+    },
+    {
+      "icon_id": "42205094",
+      "name": "veops-subnet",
+      "font_class": "veops-subnet",
+      "unicode": "e9f0",
+      "unicode_decimal": 59888
+    },
+    {
+      "icon_id": "42201912",
+      "name": "veops-map_view",
+      "font_class": "veops-map_view",
+      "unicode": "e9ef",
+      "unicode_decimal": 59887
+    },
+    {
+      "icon_id": "42201676",
+      "name": "veops-recycle",
+      "font_class": "veops-recycle",
+      "unicode": "e9ee",
+      "unicode_decimal": 59886
+    },
+    {
+      "icon_id": "42201586",
+      "name": "veops-catalog",
+      "font_class": "veops-catalog",
+      "unicode": "e9ed",
+      "unicode_decimal": 59885
+    },
+    {
+      "icon_id": "42201534",
+      "name": "veops-ipam",
+      "font_class": "veops-ipam",
+      "unicode": "e9ec",
+      "unicode_decimal": 59884
+    },
+    {
+      "icon_id": "42179262",
+      "name": "cmdb-calc",
+      "font_class": "cmdb-calc",
+      "unicode": "e9eb",
+      "unicode_decimal": 59883
+    },
+    {
+      "icon_id": "42161413",
+      "name": "ai-users",
+      "font_class": "ai-users",
+      "unicode": "e9ea",
+      "unicode_decimal": 59882
+    },
+    {
+      "icon_id": "42161417",
+      "name": "ai-tokens",
+      "font_class": "ai-tokens",
+      "unicode": "e9e9",
+      "unicode_decimal": 59881
+    },
+    {
       "icon_id": "42155223",
       "name": "oneterm-mysql",
       "font_class": "oneterm-mysql",
@@ -1667,14 +1786,14 @@
     {
       "icon_id": "39926816",
       "name": "itsm-duration",
-      "font_class": "itsm-duration",
+      "font_class": "itsm-reports_3",
       "unicode": "e913",
       "unicode_decimal": 59667
     },
     {
       "icon_id": "39926833",
       "name": "itsm-workload (1)",
-      "font_class": "itsm-workload",
+      "font_class": "itsm-reports_2",
       "unicode": "e912",
       "unicode_decimal": 59666
     },

@@ -33,3 +33,8 @@ export const defautValueColor = [
 ]
 
 export const defaultBGColors = ['#ffccc7', '#ffd8bf', '#ffe7ba', '#fff1b8', '#d9f7be', '#b5f5ec', '#bae7ff', '#d6e4ff', '#efdbff', '#ffd6e7']
+
+export const CI_DEFAULT_ATTR = {
+  UPDATE_USER: '_updated_by',
+  UPDATE_TIME: '_updated_at'
+}

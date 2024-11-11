@@ -4,6 +4,7 @@
       <AttributesTransfer
         :dataSource="attrList"
         :targetKeys="selectedAttrList"
+        :showDefaultAttr="true"
         @setTargetKeys="setTargetKeys"
         @changeSingleItem="changeSingleItem"
         @handleSubmit="handleSubmit"
@@ -23,6 +24,8 @@
 import AttributesTransfer from '../../../components/attributesTransfer'
 import { subscribeCIType, getSubscribeAttributes } from '@/modules/cmdb/api/preference'
 import { getCITypeAttributesByName } from '@/modules/cmdb/api/CITypeAttr'
+import { CI_DEFAULT_ATTR } from '@/modules/cmdb/utils/const.js'
+
 export default {
   name: 'EditAttrsPopover',
   components: { AttributesTransfer },
@@ -48,8 +51,19 @@ export default {
       }
     },
     getAttrs() {
+      const updatedByKey = CI_DEFAULT_ATTR.UPDATE_USER
+      const updatedAtKey = CI_DEFAULT_ATTR.UPDATE_TIME
+
       getCITypeAttributesByName(this.typeId).then((res) => {
-        const attributes = res.attributes
+        const attributes = res.attributes.filter((item) => ![updatedByKey, updatedAtKey].includes(item.name))
+        ;[updatedByKey, updatedAtKey].map((key) => {
+          attributes.push({
+            alias: key,
+            name: key,
+            id: key
+          })
+        })
+
         getSubscribeAttributes(this.typeId).then((_res) => {
           const selectedAttrList = _res.attributes.map((item) => item.id.toString())
 
@@ -71,12 +85,23 @@ export default {
 
     handleSubmit() {
       if (this.selectedAttrList.length) {
+        const customAttr = []
+        const defaultAttr = []
+        this.selectedAttrList.map((attr) => {
+          if ([CI_DEFAULT_ATTR.UPDATE_USER, CI_DEFAULT_ATTR.UPDATE_TIME].includes(attr)) {
+            defaultAttr.push(attr)
+          } else {
+            customAttr.push(attr)
+          }
+        })
+        const selectedAttrList = [...customAttr, ...defaultAttr]
+
         subscribeCIType(
           this.typeId,
-          this.selectedAttrList.map((item) => {
+          selectedAttrList.map((item) => {
             return [item, !!this.fixedList.includes(item)]
           })
-        ).then((res) => {
+        ).then(() => {
           this.$message.success(this.$t('cmdb.components.subSuccess'))
           this.visible = false
           this.$emit('refresh')
