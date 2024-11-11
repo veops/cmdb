@@ -106,8 +106,8 @@ class IpAddressManager(object):
                     ci_id = ip2ci[ip]['_id']
                     CIManager().update(ci_id, _sync=True, **kwargs)
                     if IPAddressBuiltinAttributes.ASSIGN_STATUS in kwargs and (
-                            kwargs[IPAddressBuiltinAttributes.ASSIGN_STATUS] !=
-                            ip2ci[ip].get(IPAddressBuiltinAttributes.ASSIGN_STATUS)):
+                            (kwargs[IPAddressBuiltinAttributes.ASSIGN_STATUS] or 2) !=
+                            (ip2ci[ip].get(IPAddressBuiltinAttributes.ASSIGN_STATUS) or 2)):
                         status_change_num += 1
                 ci_ids.append(ci_id)
 
