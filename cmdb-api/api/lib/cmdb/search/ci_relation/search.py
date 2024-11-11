@@ -391,9 +391,10 @@ class Search(object):
             id2children[str(i)] = item['children']
 
         for lv in range(1, self.level):
+            type_id = type_ids[lv]
 
-            if len(type_ids or []) >= lv and type2filter_perms.get(type_ids[lv]):
-                id_filter_limit, _ = self._get_ci_filter(type2filter_perms[type_ids[lv]])
+            if len(type_ids or []) >= lv and type2filter_perms.get(type_id):
+                id_filter_limit, _ = self._get_ci_filter(type2filter_perms[type_id])
             else:
                 id_filter_limit = {}
 
@@ -401,12 +402,12 @@ class Search(object):
                 key, prefix = [i for i in level_ids], REDIS_PREFIX_CI_RELATION2
             else:
                 key, prefix = [i.split(',')[-1] for i in level_ids], REDIS_PREFIX_CI_RELATION
+            
             res = [json.loads(x).items() for x in [i or '{}' for i in rd.get(key, prefix) or []]]
-            res = [[i for i in x if (not id_filter_limit or (key[idx] not in id_filter_limit or
+            res = [[i for i in x if i[1] == type_id and (not id_filter_limit or (key[idx] not in id_filter_limit or
                                                              int(i[0]) in id_filter_limit[key[idx]]) or
                                      int(i[0]) in id_filter_limit)] for idx, x in enumerate(res)]
             _level_ids = []
-            type_id = type_ids[lv]
             id2name = _get_id2name(type_id)
             for idx, node_path in enumerate(level_ids):
                 for child_id, _ in (res[idx] or []):
