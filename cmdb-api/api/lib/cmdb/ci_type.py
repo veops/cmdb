@@ -24,6 +24,7 @@ from api.lib.cmdb.const import ConstraintEnum
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RoleEnum
+from api.lib.cmdb.const import SysComputedAttributes
 from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.cmdb.history import CITypeHistoryManager
 from api.lib.cmdb.perms import CIFilterPermsCRUD
@@ -188,7 +189,7 @@ class CITypeManager(object):
 
         ci_type = cls.check_is_existed(type_id)
 
-        if ci_type.name in BuiltinModelEnum.all() and kwargs.get('name') != ci_type.name:
+        if ci_type.name in BuiltinModelEnum.all() and kwargs.get('name', ci_type.name) != ci_type.name:
             return abort(400, ErrFormat.builtin_type_cannot_update_name)
 
         cls._validate_unique(type_id=type_id, name=kwargs.get('name'))

@@ -114,7 +114,8 @@ class CIManager(object):
         ci_type = CITypeCache.get(ci.type_id)
         res["ci_type"] = ci_type.name
 
-        res.update(cls.get_cis_by_ids([str(ci_id)], fields=fields, ret_key=ret_key))
+        ci_list = cls.get_cis_by_ids([str(ci_id)], fields=fields, ret_key=ret_key)
+        ci_list and res.update(ci_list[0])
 
         res['_type'] = ci_type.id
         res['_id'] = ci_id

@@ -21,6 +21,7 @@ from api.lib.cmdb.const import ConstraintEnum
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RoleEnum
+from api.lib.cmdb.const import SysComputedAttributes
 from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.cmdb.resp_format import ErrFormat
 from api.lib.exception import AbortException
@@ -48,7 +49,7 @@ class PreferenceManager(object):
         type2group = {}
         for i in db.session.query(CITypeGroupItem, CITypeGroup).join(
                 CITypeGroup, CITypeGroup.id == CITypeGroupItem.group_id).filter(
-            CITypeGroup.deleted.is_(False)).filter(CITypeGroupItem.deleted.is_(False)):
+                CITypeGroup.deleted.is_(False)).filter(CITypeGroupItem.deleted.is_(False)):
             type2group[i.CITypeGroupItem.type_id] = i.CITypeGroup.to_dict()
 
         types = db.session.query(PreferenceShowAttributes.type_id).filter(

@@ -9,7 +9,7 @@ from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci import CIManager
 from api.lib.cmdb.ci import CIRelationManager
-from api.lib.cmdb.const import BuiltinModelEnum
+from api.lib.cmdb.const import BuiltinModelEnum, BUILTIN_ATTRIBUTES
 from api.lib.cmdb.ipam.const import OperateTypeEnum
 from api.lib.cmdb.ipam.const import SubnetBuiltinAttributes
 from api.lib.cmdb.ipam.history import OperateHistoryManager
@@ -111,7 +111,7 @@ class SubnetManager(object):
         response, _, _, _, _, _ = SearchFromDB("_type:({})".format(";".join(map(str, ci_types))),
                                                ci_ids=list(ids),
                                                count=1000000,
-                                               fl=fl,
+                                               fl=list(set(fl + [SubnetBuiltinAttributes.CIDR])),
                                                parent_node_perm_passed=True).search()
         id2ci = {i['_id']: i for i in response}
 
