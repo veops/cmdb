@@ -1,4 +1,6 @@
 import { axios } from '@/utils/request'
+import { CI_DEFAULT_ATTR } from '@/modules/cmdb/utils/const.js'
+import i18n from '@/lang'
 
 export function getPreference(instance = true, tree = null) {
   return axios({
@@ -16,10 +18,34 @@ export function getPreference2(instance = true, tree = null) {
   })
 }
 
-export function getSubscribeAttributes(ciTypeId) {
-  return axios({
-    url: `/v0.1/preference/ci_types/${ciTypeId}/attributes`,
-    method: 'GET'
+export function getSubscribeAttributes(ciTypeId, formatDefaultAttr = true) {
+  return new Promise(async (resolve) => {
+    const res = await axios({
+      url: `/v0.1/preference/ci_types/${ciTypeId}/attributes`,
+      method: 'GET'
+    })
+
+    if (
+      formatDefaultAttr &&
+      res?.attributes?.length
+    ) {
+      res.attributes.forEach((item) => {
+        switch (item.name) {
+          case CI_DEFAULT_ATTR.UPDATE_USER:
+            item.id = item.name
+            item.alias = i18n.t('cmdb.components.updater')
+            break
+          case CI_DEFAULT_ATTR.UPDATE_TIME:
+            item.id = item.name
+            item.alias = i18n.t('cmdb.components.updateTime')
+            break
+          default:
+            break
+        }
+      })
+    }
+
+    resolve(res)
   })
 }
 
