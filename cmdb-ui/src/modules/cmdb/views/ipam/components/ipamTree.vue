@@ -9,6 +9,7 @@
     <div class="ipam-tree-main">
       <a-tree
         v-if="treeData.length"
+        autoExpandParent
         :treeData="filterTreeData"
         :selectedKeys="treeKey ? [treeKey] : []"
         :defaultExpandedKeys="treeKey ? [treeKey] : []"
@@ -238,7 +239,7 @@ export default {
         }
       }
 
-      & > li:first-child {
+      .ipam-tree-node-all {
         .ant-tree-switcher {
           display: none;
         }
