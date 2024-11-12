@@ -139,9 +139,9 @@
         :normalizer="
           (node) => {
             return {
-              id: String(node[0] || ''),
-              label: node[1] ? node[1].label || node[0] : node[0],
-              children: node.children && node.children.length ? node.children : undefined,
+              id: node.id,
+              label: node.label,
+              children: node.children,
             }
           }
         "
@@ -352,8 +352,12 @@ export default {
     },
     getChoiceValueByProperty(property) {
       const _find = this.canSearchPreferenceAttrList.find((item) => item.name === property)
-      if (_find) {
-        return _find.choice_value
+      if (_find?.choice_value?.length) {
+        return _find.choice_value.map((node) => ({
+          id: String(node?.[0] ?? ''),
+          label: node?.[1]?.label || node?.[0] || '',
+          children: node?.children?.length ? node.children : undefined
+        }))
       }
       return []
     },
