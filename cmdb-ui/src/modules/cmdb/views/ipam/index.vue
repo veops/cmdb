@@ -185,6 +185,7 @@ export default {
         showCatalogBtn: rootShowCatalogBtn,
         showSubnetBtn: rootShowSubnetBtn,
         parentId: '',
+        class: 'ipam-tree-node-all'
       })
 
       this.treeData = treeData
