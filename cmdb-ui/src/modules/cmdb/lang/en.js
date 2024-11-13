@@ -837,7 +837,13 @@ if __name__ == "__main__":
         onlineRatio: 'Online Ratio',
         scanEnable: 'Scan Enable',
         lastScanTime: 'Last Scan Time',
-        isSuccess: 'Is Success'
+        isSuccess: 'Is Success',
+        batchAssign: 'Batch Assign',
+        batchAssignInProgress: 'Assign in batches, {total} in total, {successNum} successful, {errorNum} failed',
+        batchAssignCompleted: 'Batch Assign Completed',
+        batchRecycle: 'Batch Recycle',
+        batchRecycleInProgress: 'Recycle in batches, {total} in total, {successNum} successful, {errorNum} failed',
+        batchRecycleCompleted: 'Batch Recycle Completed',
     }
 }
 export default cmdb_en
