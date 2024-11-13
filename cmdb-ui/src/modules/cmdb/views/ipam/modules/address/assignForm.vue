@@ -3,6 +3,7 @@
     :visible="visible"
     :width="700"
     :title="$t('cmdb.ipam.addressAssign')"
+    :confirmLoading="confirmLoading"
     @ok="handleOk"
     @cancel="handleCancel"
   >
@@ -17,7 +18,7 @@
       <a-form-model-item
         label="IP"
       >
-        {{ ipData.ip }}
+        <span class="assign-form-ip" >{{ ipList.join(', ') }}</span>
       </a-form-model-item>
       <a-form-model-item
         v-for="(item) in formList"
@@ -80,37 +81,29 @@ export default {
     attrList: {
       type: Array,
       default: () => []
-    },
-    subnetData: {
-      type: Object,
-      default: () => {}
     }
   },
   data() {
     return {
       visible: false,
       ipData: {},
+      ipList: [],
       nodeId: -1,
       formList: [],
       form: {},
       formRules: {},
-      statusSelectOption: [
-        {
-          value: 0,
-          label: 'cmdb.ipam.assigned'
-        },
-        {
-          value: 2,
-          label: 'cmdb.ipam.reserved'
-        }
-      ]
+      confirmLoading: false,
+      isBatch: false
     }
   },
   methods: {
     async open({
-      ipData,
+      ipList = [],
+      ipData = null,
       nodeId,
     }) {
+      this.isBatch = ipList.length !== 0
+      this.ipList = ipList.length ? _.cloneDeep(ipList) : [ipData?.ip ?? '']
       this.ipData = ipData || {}
       this.nodeId = nodeId || -1
       this.visible = true
@@ -237,7 +230,8 @@ export default {
       this.form = {}
       this.formRules = {}
       this.formList = []
-      this.visible = false
+      this.confirmLoading = false
+      this.isBatch = false
 
       this.$refs.assignFormRef.clearValidate()
     },
@@ -248,16 +242,35 @@ export default {
           return
         }
 
-        await postIPAMAddress({
-          ips: [this.ipData.ip],
-          parent_id: this.nodeId,
-          ...this.form,
-          subnet_mask: this?.ipData?.subnet_mask ?? undefined,
-          gateway: this?.ipData?.gateway ?? undefined
-        })
+        this.confirmLoading = true
 
-        this.$emit('ok')
+        if (!this.isBatch) {
+          await postIPAMAddress({
+            ips: this.ipList,
+            parent_id: this.nodeId,
+            ...this.form,
+            subnet_mask: this?.ipData?.subnet_mask ?? undefined,
+            gateway: this?.ipData?.gateway ?? undefined
+          })
+
+          this.$emit('ok')
+        } else {
+          const ipChunk = _.chunk(this.ipList, 5)
+          const paramsList = ipChunk.map((ips) => ({
+            ips,
+            parent_id: this.nodeId,
+            ...this.form,
+            subnet_mask: this?.ipData?.subnet_mask ?? undefined,
+            gateway: this?.ipData?.gateway ?? undefined
+          }))
+          this.$emit('batchAssign', {
+            paramsList,
+            ipList: this.ipList
+          })
+        }
+
         this.handleCancel()
+        this.confirmLoading = false
       })
     },
 
@@ -280,5 +293,12 @@ export default {
   max-height: 400px;
   overflow-y: auto;
   overflow-x: hidden;
+
+  &-ip {
+    max-height: 100px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: block;
+  }
 }
 </style>

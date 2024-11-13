@@ -836,7 +836,13 @@ if __name__ == "__main__":
         onlineRatio: '在线率',
         scanEnable: '是否扫描',
         lastScanTime: '最后扫描时间',
-        isSuccess: '是否成功'
+        isSuccess: '是否成功',
+        batchAssign: '批量分配',
+        batchAssignInProgress: '正在批量分配，共{total}个，成功{successNum}个，失败{errorNum}个',
+        batchAssignCompleted: '批量分配已完成',
+        batchRecycle: '批量回收',
+        batchRecycleInProgress: '正在批量回收，共{total}个，成功{successNum}个，失败{errorNum}个',
+        batchRecycleCompleted: '批量回收已完成',
     }
 }
 export default cmdb_zh
