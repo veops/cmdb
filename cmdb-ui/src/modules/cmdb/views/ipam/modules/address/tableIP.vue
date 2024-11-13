@@ -14,7 +14,7 @@
       class="ops-unstripe-table checkbox-hover-table"
       @checkbox-change="onSelectChange"
       @checkbox-all="onSelectChange"
-      @checkbox-range-end="onSelectChange"
+      @checkbox-range-end="onSelectRangeEnd"
     >
       <vxe-table-column
         align="center"
@@ -241,11 +241,18 @@ export default {
       }
 
       if (clearCheckbox) {
-        tableRef.clearCheckboxRow()
-        tableRef.clearCheckboxReserve()
+        this.clearCheckbox()
       }
 
       return tableData
+    },
+
+    clearCheckbox() {
+      const tableRef = this.$refs?.xTable?.getVxetableRef?.()
+      if (tableRef) {
+        tableRef.clearCheckboxRow()
+        tableRef.clearCheckboxReserve()
+      }
     },
 
     getReferenceAttrValue(id, col) {
@@ -267,7 +274,15 @@ export default {
     },
 
     onSelectChange() {
-      console.log('onSelectChange')
+      const xTable = this.$refs.xTable.getVxetableRef()
+      const records = [...xTable.getCheckboxRecords(), ...xTable.getCheckboxReserveRecords()]
+      const ips = records.map((item) => item.ip)
+      this.$emit('selectChange', ips)
+    },
+
+    onSelectRangeEnd({ records }) {
+      const ips = records?.map?.((item) => item.ip) || []
+      this.$emit('selectChange', ips)
     },
   }
 }
