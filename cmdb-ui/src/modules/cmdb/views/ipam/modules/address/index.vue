@@ -9,12 +9,11 @@
       <div class="address-null-tip2">{{ $t(addressNullTip) }}</div>
     </div>
 
-    <div v-else-if="loading" class="address-loading">
-      <a-icon type="loading" class="address-loading-icon" />
-      <span class="address-loading-text">{{ $t('loading') }}</span>
-    </div>
-
-    <template v-else>
+    <a-spin
+      v-else
+      :tip="loadTip"
+      :spinning="loading"
+    >
       <div class="address-header">
         <div class="address-header-left">
           <a-input-search
@@ -53,6 +52,15 @@
             </a-select-option>
           </a-select>
 
+          <div v-if="selectedIPList.length" class="ops-list-batch-action">
+            <span @click="clickBatchAssign">{{ $t('cmdb.ipam.batchAssign') }}</span>
+            <a-divider type="vertical" />
+            <span @click="clickBatchRecycle">{{ $t('cmdb.ipam.batchRecycle') }}</span>
+            <a-divider type="vertical" />
+            <span @click="handleExport">{{ $t('export') }}</span>
+            <span>{{ $t('cmdb.ci.selectRows', { rows: selectedIPList.length }) }}</span>
+          </div>
+
           <div
             v-if="currentLayout === 'grid'"
             class="address-header-status"
@@ -85,22 +93,12 @@
         </div>
 
         <div class="address-header-right">
-          <a-button
-            type="primary"
-            class="ops-button-ghost"
-            ghost
-            @click="handleExport"
-          >
-            <ops-icon type="veops-export" />
-            {{ $t('export') }}
-          </a-button>
-
           <div class="address-header-layout">
             <div
               v-for="(item) in layoutList"
               :key="item.value"
               :class="['address-header-layout-item', currentLayout === item.value ?'address-header-layout-item-active' : '']"
-              @click="currentLayout = item.value"
+              @click="handleChangeLayout(item.value)"
             >
               <ops-icon :type="item.icon" />
             </div>
@@ -119,6 +117,7 @@
           :columnWidth="columnWidth"
           @openAssign="openAssign"
           @recycle="handleRecycle"
+          @selectChange="handleTableSelectChange"
         />
 
         <GridIP
@@ -131,13 +130,13 @@
           @recycle="handleRecycle"
         />
       </div>
-    </template>
+    </a-spin>
 
     <AssignForm
       ref="assignFormRef"
       :attrList="attrList"
-      :subnetData="subnetData"
       @ok="getIPList"
+      @batchAssign="batchAssign"
     />
   </div>
 </template>
@@ -188,6 +187,8 @@ export default {
       referenceCIIdMap: {},
       columnWidth: {},
       loading: false,
+      selectedIPList: [],
+      loadTip: this.$t('loading'),
 
       currentStatus: 'all',
       filterOption: [
@@ -298,6 +299,7 @@ export default {
   },
   methods: {
     async initData() {
+      this.loadTip = this.$t('loading')
       this.loading = true
       try {
         await this.getColumns()
@@ -497,6 +499,7 @@ export default {
       let tableData = []
       if (this.currentLayout === 'table') {
         tableData = this.$refs.tableIPRef.getCheckedTableData()
+        this.selectedIPList = []
       } else {
         tableData = this.filterIPList
       }
@@ -561,6 +564,143 @@ export default {
           })
         },
       })
+    },
+
+    handleChangeLayout(value) {
+      if (this.currentLayout !== value) {
+        if (value === 'grid') {
+          this.selectedIPList = []
+        }
+        this.currentLayout = value
+      }
+    },
+
+    handleTableSelectChange(ips) {
+      this.selectedIPList = ips
+    },
+
+    clickBatchAssign() {
+      this.$refs.assignFormRef.open({
+        nodeId: this?.nodeData?._id,
+        ipData: {
+          subnet_mask: this?.subnetData?.subnet_mask ?? undefined,
+          gateway: this?.subnetData?.gateway ?? undefined
+        },
+        ipList: this.selectedIPList
+      })
+    },
+
+    async batchAssign({
+      paramsList,
+      ipList
+    }) {
+      let successNum = 0
+      let errorNum = 0
+
+      try {
+        this.loading = true
+
+        this.loadTip = this.$t('cmdb.ipam.batchAssignInProgress', {
+          total: ipList.length,
+          successNum: successNum,
+          errorNum: errorNum,
+        })
+
+        await _.reduce(
+          paramsList,
+          (promiseChain, params) => {
+            const ipCount = params?.ips?.length ?? 0
+
+            return promiseChain.then(() => {
+              return postIPAMAddress(params).then(() => {
+                successNum += ipCount
+              }).catch(() => {
+                errorNum += ipCount
+              }).finally(() => {
+                this.loadTip = this.$t('cmdb.ipam.batchAssignInProgress', {
+                  total: ipList.length,
+                  successNum: successNum,
+                  errorNum: errorNum,
+                })
+              })
+            })
+          },
+          Promise.resolve()
+        )
+
+        if (this.$refs.tableIPRef) {
+          this.$refs.tableIPRef.clearCheckbox()
+          this.selectedIPList = []
+        }
+        this.$message.success(this.$t('cmdb.ipam.batchAssignCompleted'))
+        this.loading = false
+        this.getIPList()
+      } catch (error) {
+        console.log('error', error)
+      }
+    },
+
+    clickBatchRecycle() {
+      this.$confirm({
+        title: this.$t('warning'),
+        content: this.$t('cmdb.ipam.recycleTip'),
+        onOk: () => {
+          this.handleBatchRecycle()
+        },
+      })
+    },
+
+    async handleBatchRecycle() {
+      let successNum = 0
+      let errorNum = 0
+
+      try {
+        this.loading = true
+
+        this.loadTip = this.$t('cmdb.ipam.batchRecycleInProgress', {
+          total: this.selectedIPList.length,
+          successNum: successNum,
+          errorNum: errorNum,
+        })
+
+        const ipChunk = _.chunk(this.selectedIPList, 5)
+
+        await _.reduce(
+          ipChunk,
+          (promiseChain, ips) => {
+            const ipCount = ips.length
+            console.log('ipCount', ipCount, successNum, errorNum)
+            return promiseChain.then(() => {
+              return postIPAMAddress({
+                ips,
+                parent_id: this.nodeData._id,
+                assign_status: 1
+              }).then(() => {
+                successNum += ipCount
+              }).catch(() => {
+                errorNum += ipCount
+              }).finally(() => {
+                this.loadTip = this.$t('cmdb.ipam.batchRecycleInProgress', {
+                  total: this.selectedIPList.length,
+                  successNum: successNum,
+                  errorNum: errorNum,
+                })
+              })
+            })
+          },
+          Promise.resolve()
+        )
+
+        if (this.$refs.tableIPRef) {
+          this.$refs.tableIPRef.clearCheckbox()
+          this.selectedIPList = []
+        }
+        this.$message.success(this.$t('cmdb.ipam.batchRecycleCompleted'))
+        this.loading = false
+        this.getIPList()
+      } catch (error) {
+        console.log('error', error)
+      }
     }
   }
 }
@@ -570,7 +710,6 @@ export default {
 .address {
   width: 100%;
   height: fit-content;
-  position: relative;
 
   &-header {
     width: 100%;
@@ -693,28 +832,6 @@ export default {
       font-size: 14px;
       font-weight: 400;
       color: #2F54EB;
-    }
-  }
-
-  &-loading {
-    width: 100%;
-    height: 300px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    color: #000000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-
-    &-icon {
-      font-size: 28px;
-    }
-
-    &-text {
-      margin-top: 12px;
     }
   }
 }
