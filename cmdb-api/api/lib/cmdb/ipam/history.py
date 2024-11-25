@@ -50,6 +50,10 @@ class ScanHistoryManager(DBMixin):
             if scan_rule is not None:
                 scan_rule.update(last_scan_time=kwargs.get('start_at'))
 
+        for i in self.cls.get_by(subnet_scan_id=kwargs.get('subnet_scan_id'), only_query=True).order_by(
+                self.cls.id.desc()).offset(100):
+            i.delete()
+
     def _can_update(self, **kwargs):
         pass
 

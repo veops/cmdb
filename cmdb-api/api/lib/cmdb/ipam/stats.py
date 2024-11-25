@@ -18,15 +18,13 @@ from api.models.cmdb import IPAMSubnetScan
 
 class Stats(object):
     def __init__(self):
-        self.address_type = CITypeCache.get(BuiltinModelEnum.IPAM_ADDRESS)
-        not self.address_type and abort(400, ErrFormat.ipam_address_model_not_found.format(
-            BuiltinModelEnum.IPAM_ADDRESS))
+        self.address_type = CITypeCache.get(BuiltinModelEnum.IPAM_ADDRESS) or abort(
+            404, ErrFormat.ipam_address_model_not_found.format(BuiltinModelEnum.IPAM_ADDRESS))
 
         self.address_type_id = self.address_type.id
 
-        self.subnet_type = CITypeCache.get(BuiltinModelEnum.IPAM_SUBNET)
-        not self.subnet_type and abort(400, ErrFormat.ipam_address_model_not_found.format(
-            BuiltinModelEnum.IPAM_ADDRESS))
+        self.subnet_type = CITypeCache.get(BuiltinModelEnum.IPAM_SUBNET) or abort(
+            404, ErrFormat.ipam_address_model_not_found.format(BuiltinModelEnum.IPAM_ADDRESS))
 
         self.subnet_type_id = self.subnet_type.id
 
@@ -40,8 +38,10 @@ class Stats(object):
             return list(set(ci_ids) - set(has_children_ci_ids))
 
         else:
-            type_id = CIManager().get_by_id(parent_id).type_id
-            key = [(str(parent_id), type_id)]
+            _type = CIManager().get_by_id(parent_id)
+            if not _type:
+                return abort(404, ErrFormat.ipam_subnet_not_found)
+            key = [(str(parent_id), _type.type_id)]
             result = []
             while True:
                 res = [json.loads(x).items() for x in [i or '{}' for i in rd.get(

@@ -3,7 +3,6 @@
 import redis_lock
 from flask import abort
 
-from api.extensions import db
 from api.extensions import rd
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci import CIManager
@@ -21,9 +20,8 @@ from api.lib.cmdb.search.ci_relation.search import Search as RelationSearch
 
 class IpAddressManager(object):
     def __init__(self):
-        self.ci_type = CITypeCache.get(BuiltinModelEnum.IPAM_ADDRESS)
-        not self.ci_type and abort(400, ErrFormat.ipam_address_model_not_found.format(
-            BuiltinModelEnum.IPAM_ADDRESS))
+        self.ci_type = CITypeCache.get(BuiltinModelEnum.IPAM_ADDRESS) or abort(
+            404, ErrFormat.ipam_address_model_not_found.format(BuiltinModelEnum.IPAM_ADDRESS))
 
         self.type_id = self.ci_type.id
 
@@ -48,25 +46,28 @@ class IpAddressManager(object):
         CIRelationManager().add(parent_id, child_id, valid=False, apply_async=False)
 
     @staticmethod
-    def calc_free_count(subnet_id):
-        db.session.commit()
+    def calc_used_count(subnet_id):
         q = "{}:(0;2),-{}:true".format(IPAddressBuiltinAttributes.ASSIGN_STATUS, IPAddressBuiltinAttributes.IS_USED)
 
-        return len(set(RelationSearch([subnet_id], level=[1], query=q).search(only_ids=True) or []))
+        return len(set(RelationSearch([subnet_id], level=[1], query=q, count=1000000).search(only_ids=True) or []))
 
-    def _update_subnet_count(self, subnet_id, assign_count, used_count=None):
+    @staticmethod
+    def _calc_assign_count(subnet_id):
+        q = "{}:(0;2)".format(IPAddressBuiltinAttributes.ASSIGN_STATUS)
+
+        return len(set(RelationSearch([subnet_id], level=[1], query=q, count=1000000).search(only_ids=True) or []))
+
+    def _update_subnet_count(self, subnet_id, assign_count_computed, used_count=None):
         payload = {}
 
         cur = CIManager.get_ci_by_id(subnet_id, need_children=False)
-        if assign_count is not None:
-            payload[SubnetBuiltinAttributes.ASSIGN_COUNT] = (cur.get(
-                SubnetBuiltinAttributes.ASSIGN_COUNT) or 0) + assign_count
-
+        if assign_count_computed:
+            payload[SubnetBuiltinAttributes.ASSIGN_COUNT] = self._calc_assign_count(subnet_id)
         if used_count is not None:
             payload[SubnetBuiltinAttributes.USED_COUNT] = used_count
 
         payload[SubnetBuiltinAttributes.FREE_COUNT] = (cur[SubnetBuiltinAttributes.HOSTS_COUNT] -
-                                                       self.calc_free_count(subnet_id))
+                                                       self.calc_used_count(subnet_id))
         CIManager().update(subnet_id, **payload)
 
     def assign_ips(self, ips, subnet_id, cidr, **kwargs):
@@ -95,35 +96,28 @@ class IpAddressManager(object):
             ip2ci = {ci[IPAddressBuiltinAttributes.IP]: ci for ci in cis}
 
             ci_ids = []
-            status_change_num = 0
             for ip in ips:
                 kwargs['name'] = ip
                 kwargs[IPAddressBuiltinAttributes.IP] = ip
                 if ip not in ip2ci:
                     ci_id = CIManager.add(self.type_id, _sync=True, **kwargs)
-                    status_change_num += 1
                 else:
                     ci_id = ip2ci[ip]['_id']
                     CIManager().update(ci_id, _sync=True, **kwargs)
-                    if IPAddressBuiltinAttributes.ASSIGN_STATUS in kwargs and (
-                            (kwargs[IPAddressBuiltinAttributes.ASSIGN_STATUS] or 2) !=
-                            (ip2ci[ip].get(IPAddressBuiltinAttributes.ASSIGN_STATUS) or 2)):
-                        status_change_num += 1
                 ci_ids.append(ci_id)
 
                 self._add_relation(subnet_id, ci_id)
 
             if ips and IPAddressBuiltinAttributes.ASSIGN_STATUS in kwargs:
-                self._update_subnet_count(subnet_id, -status_change_num if kwargs.get(
-                    IPAddressBuiltinAttributes.ASSIGN_STATUS) == IPAddressAssignStatus.UNASSIGNED else status_change_num)
+                self._update_subnet_count(subnet_id, True)
 
             if ips and IPAddressBuiltinAttributes.IS_USED in kwargs:
                 q = "{}:true".format(IPAddressBuiltinAttributes.IS_USED)
                 cur_used_ids = RelationSearch([subnet_id], level=[1], query=q).search(only_ids=True)
                 for _id in set(cur_used_ids) - set(ci_ids):
-                    CIManager().update(_id, _sync=True, **{IPAddressBuiltinAttributes.IS_USED: False})
+                    CIManager().update(_id, **{IPAddressBuiltinAttributes.IS_USED: False})
 
-                self._update_subnet_count(subnet_id, None, used_count=len(ips))
+                self._update_subnet_count(subnet_id, False, used_count=len(ips))
 
         if kwargs.get(IPAddressBuiltinAttributes.ASSIGN_STATUS) in (
                 IPAddressAssignStatus.ASSIGNED, IPAddressAssignStatus.RESERVED):

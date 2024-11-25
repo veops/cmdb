@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 
+import datetime
 import ipaddress
 from flask import abort
 
@@ -9,7 +10,7 @@ from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeCache
 from api.lib.cmdb.ci import CIManager
 from api.lib.cmdb.ci import CIRelationManager
-from api.lib.cmdb.const import BuiltinModelEnum, BUILTIN_ATTRIBUTES
+from api.lib.cmdb.const import BuiltinModelEnum
 from api.lib.cmdb.ipam.const import OperateTypeEnum
 from api.lib.cmdb.ipam.const import SubnetBuiltinAttributes
 from api.lib.cmdb.ipam.history import OperateHistoryManager
@@ -22,9 +23,8 @@ from api.models.cmdb import IPAMSubnetScan
 
 class SubnetManager(object):
     def __init__(self):
-        self.ci_type = CITypeCache.get(BuiltinModelEnum.IPAM_SUBNET)
-        not self.ci_type and abort(400, ErrFormat.ipam_subnet_model_not_found.format(
-            BuiltinModelEnum.IPAM_SUBNET))
+        self.ci_type = CITypeCache.get(BuiltinModelEnum.IPAM_SUBNET) or abort(
+            404, ErrFormat.ipam_subnet_model_not_found.format(BuiltinModelEnum.IPAM_SUBNET))
 
         self.type_id = self.ci_type.id
 
@@ -47,7 +47,7 @@ class SubnetManager(object):
 
         new_last_update_at = ""
         for i in result:
-            __last_update_at = max([i['updated_at'] or "", i['created_at'] or ""])
+            __last_update_at = max([i['rule_updated_at'] or "", i['created_at'] or ""])
             if new_last_update_at < __last_update_at:
                 new_last_update_at = __last_update_at
 
@@ -131,7 +131,11 @@ class SubnetManager(object):
     @staticmethod
     def _is_valid_cidr(cidr):
         try:
-            return str(ipaddress.ip_network(cidr))
+            cidr = ipaddress.ip_network(cidr)
+            if not (8 <= cidr.prefixlen <= 31):
+                raise ValueError
+
+            return str(cidr)
         except ValueError:
             return abort(400, ErrFormat.ipam_cidr_invalid_notation.format(cidr))
 
@@ -143,6 +147,7 @@ class SubnetManager(object):
         root_nodes = set(all_nodes) - set(none_root_nodes) - set(_id and [_id] or [])
         response, _, _, _, _, _ = SearchFromDB("_type:{}".format(self.type_id),
                                                ci_ids=list(root_nodes),
+                                               count=1000000,
                                                parent_node_perm_passed=True).search()
 
         cur_subnet = ipaddress.ip_network(cidr)
@@ -163,6 +168,7 @@ class SubnetManager(object):
 
         response, _, _, _, _, _ = SearchFromDB("_type:{}".format(self.type_id),
                                                ci_ids=list(child_nodes),
+                                               count=1000000,
                                                parent_node_perm_passed=True).search()
 
         cur_subnet = ipaddress.ip_network(cidr)
@@ -240,7 +246,8 @@ class SubnetManager(object):
     def _update_scan_rule(ci_id, agent_id, cron, scan_enabled=True):
         existed = IPAMSubnetScan.get_by(ci_id=ci_id, first=True, to_dict=False)
         if existed is not None:
-            existed.update(ci_id=ci_id, agent_id=agent_id, cron=cron, scan_enabled=scan_enabled)
+            existed.update(ci_id=ci_id, agent_id=agent_id, cron=cron, scan_enabled=scan_enabled,
+                           rule_updated_at=datetime.datetime.now())
         else:
             IPAMSubnetScan.create(ci_id=ci_id, agent_id=agent_id, cron=cron, scan_enabled=scan_enabled)
 
@@ -273,7 +280,9 @@ class SubnetManager(object):
         existed = IPAMSubnetScan.get_by(ci_id=_id, first=True, to_dict=False)
         existed and existed.delete()
 
+        delete_ci_ids = []
         for i in CIRelation.get_by(first_ci_id=_id, to_dict=False):
+            delete_ci_ids.append(i.second_ci_id)
             i.delete()
 
         cur = CIManager.get_ci_by_id(_id, need_children=False)
@@ -283,6 +292,8 @@ class SubnetManager(object):
         OperateHistoryManager().add(operate_type=OperateTypeEnum.DELETE_SUBNET,
                                     cidr=cur.get(SubnetBuiltinAttributes.CIDR),
                                     description=cur.get(SubnetBuiltinAttributes.CIDR))
+
+        # batch_delete_ci.apply_async(args=(delete_ci_ids,))
 
         return _id
 

@@ -676,6 +676,7 @@ class IPAMSubnetScan(Model):
 
     ci_id = db.Column(db.Integer, index=True, nullable=False)
     scan_enabled = db.Column(db.Boolean, default=True)
+    rule_updated_at = db.Column(db.DateTime)
     last_scan_time = db.Column(db.DateTime)
 
     # scan rules
