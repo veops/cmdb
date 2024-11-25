@@ -512,7 +512,7 @@ class CMDBCounterCache(object):
                 result[i.type_id]['rule_count'] = len(adts) + AutoDiscoveryCITypeRelation.get_by(
                     ad_type_id=i.type_id, only_query=True).count()
                 result[i.type_id]['exec_target_count'] = len(
-                    set([i.oneagent_id for adt in adts for i in db.session.query(
+                    set([j.oneagent_id for adt in adts for j in db.session.query(
                         AutoDiscoveryRuleSyncHistory.oneagent_id).filter(
                         AutoDiscoveryRuleSyncHistory.adt_id == adt.id)]))
 

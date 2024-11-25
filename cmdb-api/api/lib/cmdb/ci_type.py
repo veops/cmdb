@@ -879,6 +879,8 @@ class CITypeRelationManager(object):
     def _wrap_relation_type_dict(type_id, relation_inst):
         ci_type_dict = CITypeCache.get(type_id).to_dict()
         ci_type_dict["ctr_id"] = relation_inst.id
+        show_key = AttributeCache.get(ci_type_dict.get('show_id') or ci_type_dict['unique_id'])
+        ci_type_dict["show_key"] = show_key and show_key.name
         ci_type_dict["attributes"] = CITypeAttributeManager.get_attributes_by_type_id(ci_type_dict["id"])
         attr_filter = CIFilterPermsCRUD.get_attr_filter(type_id)
         if attr_filter:
@@ -1551,7 +1553,10 @@ class CITypeTemplateManager(object):
                 if existed is None:
                     _group['type_id'] = type_id_map.get(_group['type_id'], _group['type_id'])
 
-                    existed = CITypeAttributeGroup.create(flush=True, **_group)
+                    try:
+                        existed = CITypeAttributeGroup.create(flush=True, **_group)
+                    except:
+                        continue
 
                 for order, attr in enumerate(group['attributes'] or []):
                     item_existed = CITypeAttributeGroupItem.get_by(group_id=existed.id,

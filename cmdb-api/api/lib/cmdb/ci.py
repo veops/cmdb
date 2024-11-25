@@ -357,6 +357,7 @@ class CIManager(object):
             is_auto_discovery=False,
             _is_admin=False,
             ticket_id=None,
+            _sync=False,
             **ci_dict):
         """
         add ci
@@ -366,6 +367,7 @@ class CIManager(object):
         :param is_auto_discovery: default is False
         :param _is_admin: default is False
         :param ticket_id:
+        :param _sync:
         :param ci_dict:
         :return:
         """
@@ -496,10 +498,16 @@ class CIManager(object):
                 record_id = cls.save_password(ci.id, attr_id, password_dict[attr_id], record_id, ci_type.id)
 
         if record_id or has_dynamic:  # has changed
-            ci_cache.apply_async(args=(ci.id, operate_type, record_id), queue=CMDB_QUEUE)
+            if not _sync:
+                ci_cache.apply_async(args=(ci.id, operate_type, record_id), queue=CMDB_QUEUE)
+            else:
+                ci_cache(ci.id, operate_type, record_id)
 
         if ref_ci_dict:  # add relations
-            ci_relation_add.apply_async(args=(ref_ci_dict, ci.id, current_user.uid), queue=CMDB_QUEUE)
+            if not _sync:
+                ci_relation_add.apply_async(args=(ref_ci_dict, ci.id, current_user.uid), queue=CMDB_QUEUE)
+            else:
+                ci_relation_add(ref_ci_dict, ci.id, current_user.uid)
 
         return ci.id
 
