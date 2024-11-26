@@ -23,6 +23,7 @@ from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION2
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.const import ValueTypeEnum
+from api.lib.cmdb.dcim.rack import RackManager
 from api.lib.exception import AbortException
 from api.lib.perm.acl.acl import ACLManager
 from api.lib.perm.acl.acl import UserCache
@@ -195,7 +196,7 @@ def cmdb_counter():
     today = datetime.date.today()
     while True:
         try:
-            db.session.remove()
+            db.session.commit()
 
             CMDBCounterCache.reset()
 
@@ -208,6 +209,8 @@ def cmdb_counter():
                 today = datetime.date.today()
 
             CMDBCounterCache.flush_sub_counter()
+
+            RackManager().check_u_slot()
 
             i += 1
         except:
