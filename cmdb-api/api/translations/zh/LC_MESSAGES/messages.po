@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-11 17:40+0800\n"
+"POT-Creation-Date: 2024-11-26 18:54+0800\n"
 "PO-Revision-Date: 2023-12-25 20:21+0800\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: zh\n"
@@ -92,11 +92,11 @@ msgstr "您没有操作权限!"
 msgid "Only the creator or administrator has permission!"
 msgstr "只有创建人或者管理员才有权限!"
 
-#: api/lib/cmdb/const.py:128
+#: api/lib/cmdb/const.py:133
 msgid "Update Time"
 msgstr "更新时间"
 
-#: api/lib/cmdb/const.py:129
+#: api/lib/cmdb/const.py:134
 msgid "Updated By"
 msgstr "更新人"
 
@@ -543,6 +543,18 @@ msgstr "因为子节点已经存在，不能删除"
 #: api/lib/cmdb/resp_format.py:170
 msgid "Subnet is not found"
 msgstr "子网不存在"
+
+#: api/lib/cmdb/resp_format.py:174
+msgid "The dcim model {} does not exist"
+msgstr "DCIM模型 {} 不存在!"
+
+#: api/lib/cmdb/resp_format.py:175
+msgid "Irregularities in Rack Units"
+msgstr "机架U位异常!"
+
+#: api/lib/cmdb/resp_format.py:176
+msgid "The device's position is greater than the rack unit height"
+msgstr "有设备的位置大于机柜的U数!"
 
 #: api/lib/common_setting/resp_format.py:8
 msgid "Company info already existed"
