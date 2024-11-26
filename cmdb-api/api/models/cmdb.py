@@ -707,3 +707,14 @@ class IPAMOperationHistory(Model2):
     cidr = db.Column(db.String(18), index=True)
     operate_type = db.Column(db.Enum(*OperateTypeEnum.all()))
     description = db.Column(db.Text)
+
+
+class DCIMOperationHistory(Model2):
+    __tablename__ = "c_dcim_operation_histories"
+
+    from api.lib.cmdb.dcim.const import OperateTypeEnum
+
+    uid = db.Column(db.Integer, index=True)
+    rack_id = db.Column(db.Integer, index=True)
+    ci_id = db.Column(db.Integer, index=True)
+    operate_type = db.Column(db.Enum(*OperateTypeEnum.all()))

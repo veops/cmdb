@@ -123,6 +123,11 @@ class BuiltinModelEnum(BaseEnum):
     IPAM_ADDRESS = "ipam_address"
     IPAM_SCOPE = "ipam_scope"
 
+    DCIM_REGION = "dcim_region"
+    DCIM_IDC = "dcim_idc"
+    DCIM_SERVER_ROOM = "dcim_server_room"
+    DCIM_RACK = "dcim_rack"
+
 
 BUILTIN_ATTRIBUTES = {
     "_updated_at": _l("Update Time"),

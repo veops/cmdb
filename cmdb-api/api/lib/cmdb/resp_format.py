@@ -169,3 +169,8 @@ class ErrFormat(CommonErrFormat):
     ipam_subnet_cannot_delete = _l("Cannot delete because child nodes exist")
     ipam_subnet_not_found = _l("Subnet is not found")
     ipam_scope_cannot_delete = _l("Cannot delete because child nodes exist")
+
+    # # DCIM
+    dcim_builtin_model_not_found = _l("The dcim model {} does not exist")
+    dcim_rack_u_slot_invalid = _l("Irregularities in Rack Units")
+    dcim_rack_u_count_invalid = _l("The device's position is greater than the rack unit height")

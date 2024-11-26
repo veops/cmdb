@@ -54,6 +54,7 @@ class CMDBApp(BaseApp):
                    "create_topology_view"],
          },
         {"page": "IPAM", "page_cn": "IPAM", "perms": ["read"]},
+        {"page": "DCIM", "page_cn": "数据中心", "perms": ["read"]},
     ]
 
     def __init__(self):

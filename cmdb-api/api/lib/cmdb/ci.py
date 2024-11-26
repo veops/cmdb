@@ -1289,10 +1289,10 @@ class CIRelationManager(object):
         return existed.id
 
     @staticmethod
-    def delete(cr_id, apply_async=True):
+    def delete(cr_id, apply_async=True, valid=True):
         cr = CIRelation.get_by_id(cr_id) or abort(404, ErrFormat.relation_not_found.format("id={}".format(cr_id)))
 
-        if current_app.config.get('USE_ACL') and current_user.username != 'worker':
+        if current_app.config.get('USE_ACL') and current_user.username != 'worker' and valid:
             resource_name = CITypeRelationManager.acl_resource_name(cr.first_ci.ci_type.name, cr.second_ci.ci_type.name)
             if not ACLManager().has_permission(
                     resource_name,
@@ -1331,7 +1331,7 @@ class CIRelationManager(object):
         return cr
 
     @classmethod
-    def delete_3(cls, first_ci_id, second_ci_id, apply_async=True):
+    def delete_3(cls, first_ci_id, second_ci_id, apply_async=True, valid=True):
         cr = CIRelation.get_by(first_ci_id=first_ci_id,
                                second_ci_id=second_ci_id,
                                to_dict=False,
@@ -1341,7 +1341,7 @@ class CIRelationManager(object):
             # ci_relation_delete.apply_async(args=(first_ci_id, second_ci_id, cr.ancestor_ids), queue=CMDB_QUEUE)
             # delete_id_filter.apply_async(args=(second_ci_id,), queue=CMDB_QUEUE)
 
-            cls.delete(cr.id, apply_async=apply_async)
+            cls.delete(cr.id, apply_async=apply_async, valid=valid)
 
         return cr
 
