@@ -688,19 +688,19 @@ export default {
   font-size: 12px;
   color: #A5A9BC;
 }
-</style>
 
-<style lang="less">
-.ops-stripe-table .vxe-body--row.row--stripe.relation-table-divider {
-  background-color: #b1b8d3 !important;
-}
-.ops-stripe-table .vxe-body--row.relation-table-parent {
-  background-color: #f5f8ff !important;
-}
-.relation-table-divider {
-  td {
-    height: 1px !important;
-    line-height: 1px !important;
+.ops-stripe-table {
+  /deep/ .relation-table-divider {
+    background-color: #b1b8d3 !important;
+
+    td {
+      height: 2px !important;
+      line-height: 2px !important;
+    }
+  }
+
+  /deep/ .relation-table-parent {
+    background-color: #f5f8ff !important;
   }
 }
 </style>
