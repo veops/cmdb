@@ -112,11 +112,14 @@ class RackManager(DCIMBase):
                     u_slot_sets.append(set(range(u_start, u_start + u_count)))
 
             if len(u_slot_sets) > 1:
+                u_slot_abnormal = False
                 for a, b in itertools.combinations(u_slot_sets, 2):
-                    u_slot_abnormal = bool(a.intersection(b))
-                    if u_slot_abnormal != rack.get(RackBuiltinAttributes.U_SLOT_ABNORMAL):
-                        payload = {RackBuiltinAttributes.U_SLOT_ABNORMAL: u_slot_abnormal}
-                        CIManager().update(rack['_id'], **payload)
+                    if a.intersection(b):
+                        u_slot_abnormal = True
+                        break
+                if u_slot_abnormal != rack.get(RackBuiltinAttributes.U_SLOT_ABNORMAL):
+                    payload = {RackBuiltinAttributes.U_SLOT_ABNORMAL: u_slot_abnormal}
+                    CIManager().update(rack['_id'], **payload)
 
     def add_device(self, rack_id, device_id, u_start, u_count=None):
         with (redis_lock.Lock(rd.r, "DCIM_RACK_OPERATE_{}".format(rack_id))):
@@ -177,3 +180,4 @@ class RackManager(DCIMBase):
 
         OperateHistoryManager().add(operate_type=OperateTypeEnum.REMOVE_DEVICE, rack_id=rack_id, ci_id=device_id)
         OperateHistoryManager().add(operate_type=OperateTypeEnum.ADD_DEVICE, rack_id=to_rack_id, ci_id=device_id)
+
