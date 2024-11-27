@@ -178,7 +178,7 @@
         </a-form-item>
       </a-form>
     </template>
-    <a v-if="!isEdit && !attr.is_computed && !attr.sys_computed" @click="handleEdit" :style="{ opacity: 0 }"><a-icon type="edit"/></a>
+    <a v-if="!isEdit && !attr.is_computed && !attr.sys_computed && showEdit" @click="handleEdit" :style="{ opacity: 0 }"><a-icon type="edit"/></a>
     <JsonEditor ref="jsonEditor" @jsonEditorOk="jsonEditorOk" />
   </span>
 </template>
@@ -204,6 +204,10 @@ export default {
       type: Object,
       default: () => {},
     },
+    showEdit: {
+      type: Boolean,
+      default: true
+    }
   },
   data() {
     return {

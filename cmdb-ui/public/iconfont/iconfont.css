@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1731312848138') format('woff2'),
-       url('iconfont.woff?t=1731312848138') format('woff'),
-       url('iconfont.ttf?t=1731312848138') format('truetype');
+  src: url('iconfont.woff2?t=1732673294759') format('woff2'),
+       url('iconfont.woff?t=1732673294759') format('woff'),
+       url('iconfont.ttf?t=1732673294759') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,46 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.veops-rear:before {
+  content: "\ea02";
+}
+
+.veops-front:before {
+  content: "\ea03";
+}
+
+.veops-xianggang:before {
+  content: "\ea01";
+}
+
+.a-veops-device2:before {
+  content: "\ea00";
+}
+
+.a-veops-room1:before {
+  content: "\e9ff";
+}
+
+.veops-IDC:before {
+  content: "\e9fe";
+}
+
+.veops-region:before {
+  content: "\e9fd";
+}
+
+.veops-device:before {
+  content: "\e9fb";
+}
+
+.veops-cabinet:before {
+  content: "\e9fc";
+}
+
+.veops-data_center:before {
+  content: "\e9f9";
 }
 
 .ops-setting-holidays:before {

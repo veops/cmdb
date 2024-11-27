@@ -6,6 +6,76 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "42510712",
+      "name": "veops-rear",
+      "font_class": "veops-rear",
+      "unicode": "ea02",
+      "unicode_decimal": 59906
+    },
+    {
+      "icon_id": "42510708",
+      "name": "veops-front",
+      "font_class": "veops-front",
+      "unicode": "ea03",
+      "unicode_decimal": 59907
+    },
+    {
+      "icon_id": "42497603",
+      "name": "veops-xianggang",
+      "font_class": "veops-xianggang",
+      "unicode": "ea01",
+      "unicode_decimal": 59905
+    },
+    {
+      "icon_id": "42485038",
+      "name": "veops-device (2)",
+      "font_class": "a-veops-device2",
+      "unicode": "ea00",
+      "unicode_decimal": 59904
+    },
+    {
+      "icon_id": "42455620",
+      "name": "veops-room (1)",
+      "font_class": "a-veops-room1",
+      "unicode": "e9ff",
+      "unicode_decimal": 59903
+    },
+    {
+      "icon_id": "42455607",
+      "name": "veops-IDC",
+      "font_class": "veops-IDC",
+      "unicode": "e9fe",
+      "unicode_decimal": 59902
+    },
+    {
+      "icon_id": "42455609",
+      "name": "veops-region",
+      "font_class": "veops-region",
+      "unicode": "e9fd",
+      "unicode_decimal": 59901
+    },
+    {
+      "icon_id": "42448953",
+      "name": "veops-device",
+      "font_class": "veops-device",
+      "unicode": "e9fb",
+      "unicode_decimal": 59899
+    },
+    {
+      "icon_id": "42448948",
+      "name": "veops-cabinet",
+      "font_class": "veops-cabinet",
+      "unicode": "e9fc",
+      "unicode_decimal": 59900
+    },
+    {
+      "icon_id": "42433324",
+      "name": "veops-data_center",
+      "font_class": "veops-data_center",
+      "unicode": "e9f9",
+      "unicode_decimal": 59897
+    },
+    {
       "icon_id": "42337844",
       "name": "ops-setting-holiday_management-copy",
       "font_class": "ops-setting-holidays",
