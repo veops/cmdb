@@ -19,6 +19,7 @@
 
           <a-select
             class="dcim-main-row-select"
+            :getPopupContainer="(trigger) => trigger.parentElement"
             v-model="currentRackType"
           >
             <a-icon slot="suffixIcon" type="caret-down" />
@@ -26,6 +27,7 @@
               v-for="(item) in rackTypeSelectOption"
               :key="item.value"
               :value="item.value"
+              :class="item.value === 'unitAbnormal' ? 'dcim-main-row-select-unitAbnormal' : ''"
             >
               {{ item.label }}
             </a-select-option>
@@ -142,7 +144,7 @@ export default {
           value: 'table',
           icon: 'monitor-list_view'
         }
-      ],
+      ]
     }
   },
   computed: {
@@ -164,6 +166,11 @@ export default {
         })
       }
 
+      selectOption.push({
+        value: 'unitAbnormal',
+        label: this.$t('cmdb.dcim.unitAbnormal')
+      })
+
       return selectOption
     },
     filterRackList() {
@@ -174,7 +181,11 @@ export default {
       }
 
       if (this.currentRackType !== 'all') {
-        rackList = rackList.filter((item) => item.rack_type === this.currentRackType)
+        if (this.currentRackType === 'unitAbnormal') {
+          rackList = rackList.filter((item) => item.u_slot_abnormal)
+        } else {
+          rackList = rackList.filter((item) => item.rack_type === this.currentRackType)
+        }
       }
 
       return rackList
@@ -312,6 +323,10 @@ export default {
       width: 120px;
       margin-left: 22px;
       flex-shrink: 0;
+
+      /deep/ &-unitAbnormal {
+        border-top: dashed 1px #e8e8e8;
+      }
     }
 
     &-right {
