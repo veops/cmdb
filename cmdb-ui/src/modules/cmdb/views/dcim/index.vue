@@ -198,7 +198,7 @@ export default {
     },
 
     async getRackData() {
-      await this.getAttrList(DCIM_CITYPE_NAME.RACK, DCIM_CITYPE_NAME.RACK)
+      await this.getAttrList(DCIM_CITYPE_NAME.RACK, DCIM_TYPE.RACK)
 
       const CITypeRes = await getCIType(DCIM_CITYPE_NAME.RACK)
       this.rackCITYpe = CITypeRes?.ci_types?.[0] || {}
