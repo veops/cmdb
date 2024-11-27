@@ -15,7 +15,7 @@
       highlight-hover-row
       :checkbox-config="{ reserve: true, highlight: true, range: true }"
       :edit-config="{ trigger: 'dblclick', mode: 'row', showIcon: false }"
-      :sort-config="{ remote: true, trigger: 'cell' }"
+      :sort-config="sortConfig"
       :row-key="true"
       :column-key="true"
       :cell-style="getCellStyle"
@@ -170,7 +170,7 @@
           </template>
         </template>
       </vxe-table-column>
-      <vxe-column align="left" field="operate" fixed="right" width="80">
+      <vxe-column v-if="showOperation" align="left" field="operate" fixed="right" width="80">
         <template #header>
           <span>{{ $t('operation') }}</span>
         </template>
@@ -272,6 +272,18 @@ export default {
     data: {
       type: Array,
       default: () => []
+    },
+    sortConfig: {
+      type: Object,
+      default: () => ({
+        remote: true,
+        trigger: 'cell'
+      })
+    },
+    // 是否展示操作列
+    showOperation: {
+      type: Boolean,
+      default: true
     }
   },
 
