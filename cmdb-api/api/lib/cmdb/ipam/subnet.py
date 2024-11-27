@@ -205,7 +205,7 @@ class SubnetManager(object):
         return cidr
 
     def _add_subnet(self, cidr, **kwargs):
-        kwargs[SubnetBuiltinAttributes.HOSTS_COUNT] = ipaddress.ip_network(cidr).num_addresses - 2
+        kwargs[SubnetBuiltinAttributes.HOSTS_COUNT] = len(list(ipaddress.ip_network(cidr).hosts()))
         kwargs[SubnetBuiltinAttributes.USED_COUNT] = 0
         kwargs[SubnetBuiltinAttributes.ASSIGN_COUNT] = 0
         kwargs[SubnetBuiltinAttributes.FREE_COUNT] = kwargs[SubnetBuiltinAttributes.HOSTS_COUNT]
