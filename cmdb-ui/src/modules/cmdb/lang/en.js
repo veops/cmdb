@@ -894,7 +894,11 @@ if __name__ == "__main__":
         deviceName: 'Device Name',
         removeDevice: 'Remove Device',
         moveDevice: 'Move Device',
-        rackDetail: 'Rack Detail'
+        rackDetail: 'Rack Detail',
+        calcUnitFreeCount: 'Calculate Rack Free Unit Count',
+        calcUnitFreeCountTip: 'Calculating in the background, refresh the page later to see the result',
+        calcUnitFreeCountTip1: 'Calculate Trigger Success, refresh the page later to see the result',
+        calcUnitFreeCountTip2: `Confirm that you want to calculate the number of free Units for all rack?`
     }
 }
 export default cmdb_en

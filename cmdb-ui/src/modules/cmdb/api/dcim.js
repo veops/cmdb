@@ -84,3 +84,10 @@ export function getDCIMHistoryOperate(params) {
     params
   })
 }
+
+export function calcUnitFreeCount() {
+  return axios({
+    url: `/v0.1/dcim/rack/calc_u_free_count`,
+    method: 'POST'
+  })
+}
