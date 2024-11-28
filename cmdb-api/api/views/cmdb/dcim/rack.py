@@ -2,12 +2,14 @@
 
 from flask import request
 
+from api.lib.cmdb.const import CMDB_QUEUE
 from api.lib.cmdb.dcim.const import RackBuiltinAttributes
 from api.lib.cmdb.dcim.rack import RackManager
 from api.lib.common_setting.decorator import perms_role_required
 from api.lib.common_setting.role_perm_base import CMDBApp
 from api.lib.decorator import args_required
 from api.resource import APIView
+from api.tasks.cmdb import dcim_calc_u_free_count
 
 app_cli = CMDBApp()
 
@@ -87,3 +89,14 @@ class RackDeviceMigrateView(APIView):
                             device_id=device_id,
                             to_u_start=to_u_start,
                             to_rack_id=to_rack_id)
+
+
+class RackCalcUFreeCountView(APIView):
+    url_prefix = ("/dcim/rack/calc_u_free_count",)
+
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.DCIM,
+                         app_cli.op.read, app_cli.admin_name)
+    def post(self):
+        dcim_calc_u_free_count.apply_async(queue=CMDB_QUEUE)
+
+        return self.jsonify(code=200)

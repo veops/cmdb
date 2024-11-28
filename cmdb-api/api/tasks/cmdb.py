@@ -1,4 +1,4 @@
-# -*- coding:utf-8 -*- 
+# -*- coding:utf-8 -*-
 
 
 import datetime
@@ -374,3 +374,25 @@ def build_relations_for_ad_accept(adc, ci_id, ad_key2attr):
                                               source=RelationSourceEnum.AUTO_DISCOVERY)
                     except:
                         pass
+
+
+@celery.task(name="cmdb.dcim_calc_u_free_count", queue=CMDB_QUEUE)
+@reconnect_db
+def dcim_calc_u_free_count():
+    from api.lib.cmdb.ci import CIManager
+    from api.lib.cmdb.dcim.rack import RackManager
+    from api.lib.cmdb.dcim.const import RackBuiltinAttributes
+
+    if not has_request_context():
+        current_app.test_request_context().push()
+        login_user(UserCache.get('worker'))
+
+    try:
+        rack_m = RackManager()
+    except Exception:
+        return
+
+    racks = CI.get_by(type_id=rack_m.type_id, to_dict=False)
+    for rack in racks:
+        payload = {RackBuiltinAttributes.FREE_U_COUNT: rack_m.calc_u_free_count(rack.id)}
+        CIManager().update(rack.id, **payload)
