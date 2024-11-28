@@ -64,7 +64,7 @@ class Search(object):
 
         self.ancestor_ids = ancestor_ids
         self.descendant_ids = descendant_ids
-        self.root_parent_path = root_parent_path
+        self.root_parent_path = root_parent_path or []
         self.has_m2m = has_m2m or False
         if not self.has_m2m:
             if self.ancestor_ids:
