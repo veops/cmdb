@@ -893,7 +893,11 @@ if __name__ == "__main__":
         deviceName: '设备名',
         removeDevice: '删除设备',
         moveDevice: '移动设备',
-        rackDetail: '机柜详情'
+        rackDetail: '机柜详情',
+        calcUnitFreeCount: '计算机柜空闲U数',
+        calcUnitFreeCountTip: '后台计算中，稍后刷新页面查看结果',
+        calcUnitFreeCountTip1: '计算触发成功，稍后刷新页面查看结果',
+        calcUnitFreeCountTip2: '确认要计算所有机柜的空闲U数？'
     }
 }
 export default cmdb_zh

@@ -21,9 +21,22 @@
             <a>
               <a-icon
                 type="plus-circle"
-                class="dcim-tree-header-add-icon"
+                class="dcim-tree-header-menu-icon"
               />
               {{ $t(addActionTitle[type]) }}
+            </a>
+          </a-menu-item>
+
+          <a-menu-item
+            class="dcim-tree-header-calc"
+            @click="calcUnitFreeCount"
+          >
+            <a>
+              <ops-icon
+                type="veops-refresh"
+                class="dcim-tree-header-menu-icon"
+              />
+              {{ $t('cmdb.dcim.calcUnitFreeCount') }}
             </a>
           </a-menu-item>
         </a-menu>
@@ -121,7 +134,7 @@
 <script>
 import _ from 'lodash'
 import { DCIM_TYPE, DCIM_TYPE_NAME_MAP } from '../constants.js'
-import { deleteDCIM } from '@/modules/cmdb/api/dcim.js'
+import { deleteDCIM, calcUnitFreeCount } from '@/modules/cmdb/api/dcim.js'
 import CIDetailDrawer from '@/modules/cmdb/views/ci/modules/ciDetailDrawer.vue'
 
 export default {
@@ -153,7 +166,9 @@ export default {
       ],
 
       viewDetailCITypeId: 0,
-      viewDetailAttrObj: {}
+      viewDetailAttrObj: {},
+
+      calculatedFreeUnitCount: false,
     }
   },
   computed: {
@@ -259,6 +274,23 @@ export default {
           this.$refs.CIdetailRef.create(node._id)
         })
       })
+    },
+
+    calcUnitFreeCount() {
+      if (this.calculatedFreeUnitCount) {
+        this.$message.info(this.$t('cmdb.dcim.calcUnitFreeCountTip'))
+      } else {
+        this.$confirm({
+          title: this.$t('tip'),
+          content: this.$t('cmdb.dcim.calcUnitFreeCountTip2'),
+          onOk: () => {
+            calcUnitFreeCount().then(() => {
+              this.calculatedFreeUnitCount = true
+              this.$message.success(this.$t('cmdb.dcim.calcUnitFreeCountTip1'))
+            })
+          }
+        })
+      }
     }
   }
 }
@@ -281,7 +313,11 @@ export default {
       padding: 0px;
     }
 
-    &-add-icon {
+    &-calc {
+      border-top: dashed 1px #e8e8e8;
+    }
+
+    &-menu-icon {
       margin-right: 6px;
     }
   }
