@@ -207,6 +207,13 @@ export function deleteTrigger(type_id, id) {
   })
 }
 
+export function testTrigger(type_id, id) {
+  return axios({
+    url: `/v0.1/ci_types/${type_id}/triggers/${id}/test_notify`,
+    method: 'post',
+  })
+}
+
 // CMDB的模型和实例的授权接口
 export function grantCiType(type_id, rid, data) {
   return axios({

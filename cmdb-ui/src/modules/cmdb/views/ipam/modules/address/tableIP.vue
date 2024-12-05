@@ -111,6 +111,12 @@
             <a-tooltip v-else :title="$t('cmdb.ipam.assign')">
               <a @click="assignAddress(row)"><ops-icon type="monitor-add2" /></a>
             </a-tooltip>
+
+            <a-tooltip v-if="row._ip_status !== ADDRESS_STATUS.OFFLINE_UNASSIGNED" :title="$t('cmdb.ci.viewRelation')">
+              <a @click="openRelation(row)">
+                <a-icon type="retweet" />
+              </a>
+            </a-tooltip>
           </div>
         </template>
       </vxe-table-column>
@@ -141,6 +147,8 @@
         </template>
       </a-pagination>
     </div>
+
+    <CIDetailDrawer ref="detail" :typeId="addressCITypeId" />
   </div>
 </template>
 
@@ -149,8 +157,13 @@ import _ from 'lodash'
 import { mapState } from 'vuex'
 import { STATUS_COLOR, STATUS_LABEL, ADDRESS_STATUS } from './constants.js'
 
+import CIDetailDrawer from '@/modules/cmdb/views/ci/modules/ciDetailDrawer.vue'
+
 export default {
   name: 'TableIP',
+  components: {
+    CIDetailDrawer
+  },
   props: {
     columns: {
       type: Array,
@@ -171,6 +184,10 @@ export default {
     columnWidth: {
       type: Object,
       default: () => {}
+    },
+    addressCITypeId: {
+      type: Number,
+      default: 0
     }
   },
   data() {
@@ -284,6 +301,12 @@ export default {
       const ips = records?.map?.((item) => item.ip) || []
       this.$emit('selectChange', ips)
     },
+
+    openRelation(row) {
+      if (row._id) {
+        this.$refs.detail.create(row._id, 'tab_2', '2')
+      }
+    }
   }
 }
 </script>

@@ -242,6 +242,18 @@
             </a-col>
           </a-row>
         </a-checkbox-group>
+
+        <a-row v-if="category === 2">
+          <a-button
+            @click="clickTestSend"
+            :disabled="!dateForm.attr_id"
+            type="primary"
+            ghost
+            class="ops-button-ghost"
+          >
+            {{ $t('cmdb.ciType.testSend') }}
+          </a-button>
+        </a-row>
       </a-form-model-item>
     </a-form-model>
     <div class="auto-complete-wrapper" v-if="triggerAction === '3'">
@@ -273,7 +285,7 @@
 
 <script>
 import _ from 'lodash'
-import { addTrigger, updateTrigger, deleteTrigger } from '../../api/CIType'
+import { addTrigger, updateTrigger, deleteTrigger, testTrigger } from '../../api/CIType'
 import FilterComp from '@/components/CMDBFilterComp'
 import EmployeeTreeSelect from '@/views/setting/components/employeeTreeSelect.vue'
 import Webhook from '../../components/webhook'
@@ -569,10 +581,13 @@ export default {
           }
           if (this.triggerId) {
             await updateTrigger(this.CITypeId, this.triggerId, params)
+            this.$message.success(this.$t('editSuccess'))
           } else {
-            await addTrigger(this.CITypeId, params)
+            const res = await addTrigger(this.CITypeId, params)
+            this.triggerId = res.id
+            this.$message.success(this.$t('createSuccess'))
           }
-          this.handleCancel()
+
           if (this.refresh) {
             this.refresh()
           }
@@ -614,6 +629,15 @@ export default {
       this.searchValue = item.label
       this.dag_id = item.id
     },
+    async clickTestSend() {
+      if (!this.triggerId) {
+        this.$message.warning(this.$t('cmdb.ciType.testSendTip'))
+        return
+      }
+
+      await testTrigger(this.CITypeId, this.triggerId)
+      this.$message.success(this.$t('cmdb.ciType.testSendSuccess'))
+    }
   },
 }
 </script>
