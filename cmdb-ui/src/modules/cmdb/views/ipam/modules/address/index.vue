@@ -115,6 +115,7 @@
           :referenceShowAttrNameMap="referenceShowAttrNameMap"
           :referenceCIIdMap="referenceCIIdMap"
           :columnWidth="columnWidth"
+          :addressCITypeId="addressCITypeId"
           @openAssign="openAssign"
           @recycle="handleRecycle"
           @selectChange="handleTableSelectChange"
@@ -182,6 +183,7 @@ export default {
       currentSelectScope: '',
       columns: [],
       attrList: [],
+      attributes: {},
       subnetData: {},
       referenceShowAttrNameMap: {},
       referenceCIIdMap: {},
@@ -210,6 +212,17 @@ export default {
           icon: 'veops-map_view'
         }
       ],
+    }
+  },
+  provide() {
+    return {
+      handleSearch: this.getIPList,
+      attrList: () => {
+        return this.attrList
+      },
+      attributes: () => {
+        return this.attributes
+      }
     }
   },
   computed: {
@@ -314,8 +327,10 @@ export default {
 
     async getColumns() {
       const getAttrRes = await getCITypeAttributesById(this.addressCITypeId)
+      this.attributes = _.cloneDeep(getAttrRes)
+      this.attrList = _.cloneDeep(getAttrRes.attributes)
+
       const attrList = getAttrRes.attributes
-      this.attrList = _.cloneDeep(attrList)
 
       const filterAttrList = _.remove(attrList, (item) => {
         return ['ip', 'subnet_mask', 'assign_status', 'is_used', '_updated_by', '_updated_at'].includes(item.name)
@@ -489,9 +504,14 @@ export default {
       const totalWidth = Object.values(columnWidth).reduce((acc, cur) => acc + cur, 0)
 
       if (totalWidth < wrapWidth) {
-        this.columnWidth = {}
+        this.columnWidth = {
+          ip: 130
+        }
       } else {
-        this.columnWidth = columnWidth
+        this.columnWidth = {
+          ...columnWidth,
+          ip: 130
+        }
       }
     },
 
