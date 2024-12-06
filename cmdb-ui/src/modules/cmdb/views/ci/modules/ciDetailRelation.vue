@@ -45,7 +45,7 @@
                 :href="`/cmdb/cidetail/${column.params.attr.reference_type_id}/${id}`"
                 target="_blank"
               >
-                {{ id }}
+                {{ getReferenceName(id, column) }}
               </a>
             </template>
             <template #operation_default="{ row }">
@@ -102,7 +102,7 @@
                 :href="`/cmdb/cidetail/${column.params.attr.reference_type_id}/${id}`"
                 target="_blank"
               >
-                {{ id }}
+                {{ getReferenceName(id, column) }}
               </a>
             </template>
             <template #operation_default="{ row }">
@@ -133,9 +133,11 @@
 import _ from 'lodash'
 import { getCITypeChildren, getCITypeParent, getCanEditByParentIdChildId } from '@/modules/cmdb/api/CITypeRelation'
 import { searchCIRelation, deleteCIRelationView } from '@/modules/cmdb/api/CIRelation'
+import { searchCI } from '@/modules/cmdb/api/ci'
 import CiDetailRelationTopo from './ciDetailRelationTopo/index.vue'
 import Node from './ciDetailRelationTopo/node.js'
 import AddTableModal from '../../relation_views/modules/AddTableModal.vue'
+
 export default {
   name: 'CiDetailRelation',
   components: { CiDetailRelationTopo, AddTableModal },
@@ -172,7 +174,8 @@ export default {
       topoData: {
         nodes: {},
         edges: []
-      }
+      },
+      referenceCINameMap: {}
     }
   },
   computed: {
@@ -211,9 +214,14 @@ export default {
   },
   methods: {
     async init(isFirst) {
+      const ci_types_list = this.ci_types()
+      const _findCiType = ci_types_list.find((item) => item.id === this.typeId)
+      if (!_findCiType) {
+        return
+      }
+
       await Promise.all([this.getParentCITypes(), this.getChildCITypes()])
       Promise.all([this.getFirstCIs(), this.getSecondCIs()]).then(() => {
-        const ci_types_list = this.ci_types()
         this.handleTopoData()
         if (
           isFirst &&
@@ -223,6 +231,8 @@ export default {
           this.$refs.ciDetailRelationTopo.exsited_ci = this.exsited_ci
           this.$refs.ciDetailRelationTopo.setTopoData(this.topoData)
         }
+
+        this.handleReferenceCINameMap()
       })
     },
     async getFirstCIs() {
@@ -394,6 +404,98 @@ export default {
       this.secondCIColumns = secondCIColumns
       this.secondCIJsonAttr = secondCIJsonAttr
     },
+
+    async handleReferenceCINameMap() {
+      const CITypes = _.unionBy(
+        [
+          ...this.parentCITypes,
+          ...this.childCITypes
+        ],
+        'id'
+      )
+      const CIList = _.unionBy(
+        _.flatten(
+          [
+            ...Object.values(this.firstCIs),
+            ...Object.values(this.secondCIs)
+          ]
+        ),
+        '_id'
+      )
+
+      const CIMap = {}
+      CIList.forEach((ci) => {
+        if (!CIMap[ci._type]) {
+          CIMap[ci._type] = []
+        }
+        CIMap[ci._type].push(ci)
+      })
+
+      const referenceCINameMap = {}
+      CITypes.forEach((CIType) => {
+        CIType.attributes.forEach((attr) => {
+          if (attr?.is_reference && attr?.reference_type_id) {
+            const currentCIList = CIMap[CIType.id]
+            if (currentCIList?.length) {
+              currentCIList.forEach((ci) => {
+                const ids = Array.isArray(ci[attr.name]) ? ci[attr.name] : ci[attr.name] ? [ci[attr.name]] : []
+
+                if (ids.length) {
+                  if (!referenceCINameMap?.[attr.reference_type_id]) {
+                    referenceCINameMap[attr.reference_type_id] = {}
+                  }
+                  ids.forEach((id) => {
+                    referenceCINameMap[attr.reference_type_id][id] = ''
+                  })
+                }
+              })
+            }
+          }
+        })
+      })
+
+      if (!Object.keys(referenceCINameMap).length) {
+        return
+      }
+
+      const allRes = await Promise.all(
+        Object.keys(referenceCINameMap).map((key) => {
+          return searchCI({
+            q: `_type:${key},_id:(${Object.keys(referenceCINameMap[key]).join(';')})`,
+            count: 9999
+          })
+        })
+      )
+      const CITypeList = this.ci_types()
+      const showNameMap = {}
+
+      Object.keys(referenceCINameMap).forEach((id) => {
+        const CIType = CITypeList.find((CIType) => Number(CIType.id) === Number(id))
+
+        showNameMap[id] = {
+          show_name: CIType?.show_name,
+          unique_key: CIType?.unique_key
+        }
+      })
+
+      allRes.forEach((res) => {
+        res.result.forEach((item) => {
+          if (referenceCINameMap?.[item._type]?.[item._id] === '') {
+            const showName = showNameMap?.[item._type]
+
+            referenceCINameMap[item._type][item._id] = item?.[showName?.show_name] ?? item?.[showName?.unique_key] ?? ''
+          }
+        })
+      })
+
+      this.referenceCINameMap = referenceCINameMap
+    },
+
+    getReferenceName(id, column) {
+      const typeId = column?.params?.attr?.reference_type_id
+      return this.referenceCINameMap?.[typeId]?.[id] || id
+    },
+
     reload() {
       this.init()
     },
