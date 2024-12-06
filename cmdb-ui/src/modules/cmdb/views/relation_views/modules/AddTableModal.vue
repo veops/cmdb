@@ -61,7 +61,7 @@
                 :href="`/cmdb/cidetail/${col.reference_type_id}/${id}`"
                 target="_blank"
               >
-                {{ id }}
+                {{ getReferenceAttrValue(id, col) }}
               </a>
             </template>
             <template #default="{row}" v-else-if="col.is_choice">
@@ -118,6 +118,7 @@ import SearchForm from '../../../components/searchForm/SearchForm.vue'
 import CreateInstanceForm from '../../ci/modules/CreateInstanceForm.vue'
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
 import { SUB_NET_CITYPE_NAME, SCOPE_CITYPE_NAME, ADDRESS_CITYPE_NAME } from '@/modules/cmdb/views/ipam/constants.js'
+import { getCITypes } from '@/modules/cmdb/api/CIType'
 
 export default {
   name: 'AddTableModal',
@@ -140,6 +141,9 @@ export default {
       ancestor_ids: undefined,
       attrList1: [],
       showCreateBtn: true, // 是否展示新增按钮
+
+      referenceShowAttrNameMap: {},
+      referenceCIIdMap: {}
     }
   },
   computed: {
@@ -174,6 +178,7 @@ export default {
 
       await getSubscribeAttributes(this.addTypeId).then((res) => {
         this.preferenceAttrList = res.attributes // 已经订阅的全部列
+        this.handleReferenceShowAttrName()
       })
       getCITypeAttributesById(this.addTypeId).then((res) => {
         this.attrList = res.attributes
@@ -217,6 +222,8 @@ export default {
             }
             this.loading = false
           })
+
+          this.handleReferenceCIIdMap()
         })
         .catch(() => {
           this.loading = false
@@ -230,6 +237,83 @@ export default {
       }
       return []
     },
+
+    async handleReferenceShowAttrName() {
+      const needRequiredCITypeIds = this.preferenceAttrList?.filter((attr) => attr?.is_reference && attr?.reference_type_id).map((attr) => attr.reference_type_id) || []
+      if (!needRequiredCITypeIds.length) {
+        this.referenceShowAttrNameMap = {}
+        return
+      }
+
+      const res = await getCITypes({
+        type_ids: needRequiredCITypeIds.join(',')
+      })
+
+      const map = {}
+      res.ci_types.forEach((ciType) => {
+        map[ciType.id] = ciType?.show_name || ciType?.unique_name || ''
+      })
+
+      this.referenceShowAttrNameMap = map
+    },
+
+    async handleReferenceCIIdMap() {
+      const referenceTypeCol = this.preferenceAttrList.filter((attr) => attr?.is_reference && attr?.reference_type_id) || []
+      if (!this.tableData?.length || !referenceTypeCol?.length) {
+        this.referenceCIIdMap = {}
+        return
+      }
+
+      const map = {}
+      this.tableData.forEach((row) => {
+        referenceTypeCol.forEach((col) => {
+          const ids = Array.isArray(row[col.name]) ? row[col.name] : row[col.name] ? [row[col.name]] : []
+          if (ids.length) {
+            if (!map?.[col.reference_type_id]) {
+              map[col.reference_type_id] = {}
+            }
+            ids.forEach((id) => {
+              map[col.reference_type_id][id] = {}
+            })
+          }
+        })
+      })
+
+      if (!Object.keys(map).length) {
+        this.referenceCIIdMap = {}
+        return
+      }
+
+      const allRes = await Promise.all(
+        Object.keys(map).map((key) => {
+          return searchCI({
+            q: `_type:${key},_id:(${Object.keys(map[key]).join(';')})`,
+            count: 9999
+          })
+        })
+      )
+
+      allRes.forEach((res) => {
+        res.result.forEach((item) => {
+          if (map?.[item._type]?.[item._id]) {
+            map[item._type][item._id] = item
+          }
+        })
+      })
+
+      this.referenceCIIdMap = map
+    },
+
+    getReferenceAttrValue(id, col) {
+      const ci = this?.referenceCIIdMap?.[col?.reference_type_id]?.[id]
+      if (!ci) {
+        return id
+      }
+
+      const attrName = this.referenceShowAttrNameMap?.[col.reference_type_id]
+      return ci?.[attrName] || id
+    },
+
     onSelectChange() {},
     handleClose() {
       this.$refs.xTable.clearCheckboxRow()
