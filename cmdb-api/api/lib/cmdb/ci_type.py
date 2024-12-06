@@ -421,7 +421,10 @@ class CITypeGroupManager(object):
         group_types = set()
         for group in groups:
             for t in sorted(CITypeGroupItem.get_by(group_id=group['id']), key=lambda x: x['order'] or 0):
-                ci_type = CITypeCache.get(t['type_id']).to_dict()
+                ci_type = CITypeCache.get(t['type_id'])
+                if ci_type is None:
+                    continue
+                ci_type = ci_type.to_dict()
                 if type_ids is not None and ci_type['id'] not in type_ids:
                     continue
                 if resources is None or (ci_type and ci_type['name'] in resources):

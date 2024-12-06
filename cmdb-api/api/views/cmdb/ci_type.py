@@ -2,14 +2,14 @@
 
 
 import json
-from io import BytesIO
-
 from flask import abort
 from flask import current_app
 from flask import request
+from io import BytesIO
 
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import CITypeCache
+from api.lib.cmdb.ci import CITriggerManager
 from api.lib.cmdb.ci_type import CITypeAttributeGroupManager
 from api.lib.cmdb.ci_type import CITypeAttributeManager
 from api.lib.cmdb.ci_type import CITypeGroupManager
@@ -493,6 +493,16 @@ class CITypeTriggerView(APIView):
         assert type_id is not None
 
         CITypeTriggerManager().delete(_id)
+
+        return self.jsonify(code=200)
+
+
+class CITypeTriggerTestView(APIView):
+    url_prefix = ("/ci_types/<int:type_id>/triggers/<int:_id>/test_notify",)
+
+    @has_perm_from_args("type_id", ResourceTypeEnum.CI, PermEnum.CONFIG, CITypeManager.get_name_by_id)
+    def post(self, type_id, _id):
+        CITriggerManager().trigger_notify_test(type_id, _id)
 
         return self.jsonify(code=200)
 
