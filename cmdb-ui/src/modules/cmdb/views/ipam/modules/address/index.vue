@@ -333,7 +333,7 @@ export default {
       const attrList = getAttrRes.attributes
 
       const filterAttrList = _.remove(attrList, (item) => {
-        return ['ip', 'subnet_mask', 'assign_status', 'is_used', '_updated_by', '_updated_at'].includes(item.name)
+        return ['ip', 'subnet_mask', 'assign_status', 'is_used', '_updated_by', '_updated_at', 'ipam_address_id'].includes(item.name)
       })
 
       const columns = []
