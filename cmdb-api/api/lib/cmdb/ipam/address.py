@@ -31,10 +31,11 @@ class IpAddressManager(object):
 
         return numfound, result
 
-    def _get_cis(self, ips):
-        response, _, _, _, _, _ = SearchFromDB(
-            "_type:{},{}:({})".format(self.type_id, IPAddressBuiltinAttributes.IP, ";".join(ips or [])),
-            count=10000000, parent_node_perm_passed=True).search()
+    def _get_cis(self, subnet_id, ips):
+
+        q = "_type:{},{}:({})".format(self.type_id, IPAddressBuiltinAttributes.IP, ";".join(ips or []))
+
+        response, _, _, _, _, _ = RelationSearch([subnet_id], level=[1], query=q, count=1000000).search()
 
         return response
 
@@ -92,7 +93,7 @@ class IpAddressManager(object):
                 return abort(400, ErrFormat.ipam_address_model_not_found)
 
         with (redis_lock.Lock(rd.r, "IPAM_ASSIGN_ADDRESS_{}".format(subnet_id))):
-            cis = self._get_cis(ips)
+            cis = self._get_cis(subnet_id, ips)
             ip2ci = {ci[IPAddressBuiltinAttributes.IP]: ci for ci in cis}
 
             ci_ids = []

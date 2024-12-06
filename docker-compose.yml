@@ -41,7 +41,7 @@ services:
           - redis
 
   cmdb-api:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.4.15
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.4.16
     container_name: cmdb-api
     env_file:
       - .env
@@ -64,14 +64,14 @@ services:
         gunicorn --workers=4 autoapp:app -b 0.0.0.0:5000 -D
         
         celery -A celery_worker.celery worker -E -Q one_cmdb_async --autoscale=4,1 --logfile=one_cmdb_async.log -D
-        celery -A celery_worker.celery worker -E -Q acl_async --logfile=one_acl_async.log --autoscale=2,1 -D
+        celery -A celery_worker.celery worker -E -Q acl_async --logfile=one_acl_async.log --autoscale=4,1 -D
         
         nohup flask cmdb-trigger > trigger.log 2>&1 &
         flask cmdb-init-cache
         flask cmdb-init-acl
         flask init-import-user-from-acl
         flask init-department
-        nohup flask cmdb-patch -v 2.4.15 &
+        nohup flask cmdb-patch -v 2.4.16 &
         flask cmdb-counter > counter.log 2>&1
     networks:
       new:
@@ -84,7 +84,7 @@ services:
       test: "ps aux|grep -v grep|grep -v '1 root'|grep gunicorn || exit 1"
 
   cmdb-ui:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.4.15
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.4.16
     container_name: cmdb-ui
     depends_on:
       cmdb-api:
