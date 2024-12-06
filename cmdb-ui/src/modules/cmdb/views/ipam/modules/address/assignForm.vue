@@ -120,7 +120,7 @@ export default {
 
       if (attrList.length) {
         _.remove(attrList, (item) => {
-          return ['subnet_mask', 'gateway', 'name', 'mac_address', 'is_used', 'ip'].includes(item.name)
+          return ['subnet_mask', 'gateway', 'name', 'mac_address', 'is_used', 'ip', 'ipam_address_id'].includes(item.name)
         })
 
         const assingStatusIndex = attrList.findIndex((attr) => attr.name === 'assign_status')
