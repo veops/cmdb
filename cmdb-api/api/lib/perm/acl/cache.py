@@ -138,14 +138,14 @@ class HasResourceRoleCache(object):
 
     @classmethod
     def add(cls, rid, app_id):
-        with redis_lock.Lock(rd.r, 'HasResourceRoleCache'):
+        with redis_lock.Lock(rd.r, 'HasResourceRoleCache', expire=10):
             c = cls.get(app_id)
             c[rid] = 1
             cache.set(cls.PREFIX_KEY.format(app_id), c, timeout=0)
 
     @classmethod
     def remove(cls, rid, app_id):
-        with redis_lock.Lock(rd.r, 'HasResourceRoleCache'):
+        with redis_lock.Lock(rd.r, 'HasResourceRoleCache', expire=10):
             c = cls.get(app_id)
             c.pop(rid, None)
             cache.set(cls.PREFIX_KEY.format(app_id), c, timeout=0)

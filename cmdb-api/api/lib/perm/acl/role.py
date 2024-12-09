@@ -145,7 +145,7 @@ class RoleRelationCRUD(object):
 
     @classmethod
     def add(cls, role, parent_id, child_ids, app_id):
-        with redis_lock.Lock(rd.r, "ROLE_RELATION_ADD"):
+        with redis_lock.Lock(rd.r, "ROLE_RELATION_ADD", expire=10):
             db.session.commit()
 
             result = []

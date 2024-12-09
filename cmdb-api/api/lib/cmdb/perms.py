@@ -163,7 +163,7 @@ class CIFilterPermsCRUD(DBMixin):
 
     def add(self, **kwargs):
         kwargs = self._can_add(**kwargs) or kwargs
-        with redis_lock.Lock(rd.r, 'CMDB_FILTER_{}_{}'.format(kwargs['type_id'], kwargs['rid'])):
+        with redis_lock.Lock(rd.r, 'CMDB_FILTER_{}_{}'.format(kwargs['type_id'], kwargs['rid']), expire=10):
             request_id_filter = {}
             if kwargs.get('id_filter'):
                 obj = self.cls.get_by(type_id=kwargs.get('type_id'),
@@ -232,7 +232,7 @@ class CIFilterPermsCRUD(DBMixin):
         pass
 
     def delete(self, **kwargs):
-        with redis_lock.Lock(rd.r, 'CMDB_FILTER_{}_{}'.format(kwargs['type_id'], kwargs['rid'])):
+        with redis_lock.Lock(rd.r, 'CMDB_FILTER_{}_{}'.format(kwargs['type_id'], kwargs['rid']), expire=10):
             obj = self.cls.get_by(type_id=kwargs.get('type_id'),
                                   rid=kwargs.get('rid'),
                                   id_filter=None,
@@ -249,7 +249,7 @@ class CIFilterPermsCRUD(DBMixin):
 
     def delete2(self, **kwargs):
 
-        with redis_lock.Lock(rd.r, 'CMDB_FILTER_{}_{}'.format(kwargs['type_id'], kwargs['rid'])):
+        with redis_lock.Lock(rd.r, 'CMDB_FILTER_{}_{}'.format(kwargs['type_id'], kwargs['rid']), expire=10):
             obj = self.cls.get_by(type_id=kwargs.get('type_id'),
                                   rid=kwargs.get('rid'),
                                   ci_filter=None,

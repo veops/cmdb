@@ -295,7 +295,7 @@ class CIManager(object):
         db.session.commit()
 
         value_table = TableMap(attr_name=attr.name).table
-        with redis_lock.Lock(rd.r, "auto_inc_id_{}".format(attr.name)):
+        with redis_lock.Lock(rd.r, "auto_inc_id_{}".format(attr.name), expire=10):
             max_v = value_table.get_by(attr_id=attr.id, only_query=True).order_by(
                 getattr(value_table, 'value').desc()).first()
             if max_v is not None:
@@ -393,7 +393,7 @@ class CIManager(object):
         ci = None
         record_id = None
         password_dict = {}
-        with redis_lock.Lock(rd.r, ci_type.name):
+        with redis_lock.Lock(rd.r, ci_type.name, expire=10):
             db.session.commit()
 
             if (unique_key.default and unique_key.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID and
@@ -550,7 +550,7 @@ class CIManager(object):
         limit_attrs = self._valid_ci_for_no_read(ci) if not _is_admin else {}
 
         record_id = None
-        with redis_lock.Lock(rd.r, ci_type.name):
+        with redis_lock.Lock(rd.r, ci_type.name, expire=10):
             db.session.commit()
 
             self._valid_unique_constraint(ci.type_id, ci_dict, ci_id)
@@ -1268,7 +1268,9 @@ class CIRelationManager(object):
             else:
                 type_relation = CITypeRelation.get_by_id(relation_type_id)
 
-            with redis_lock.Lock(rd.r, "ci_relation_add_{}_{}".format(first_ci.type_id, second_ci.type_id)):
+            with redis_lock.Lock(rd.r,
+                                 "ci_relation_add_{}_{}".format(first_ci.type_id, second_ci.type_id),
+                                 expire=10):
 
                 cls._check_constraint(first_ci_id, first_ci.type_id, second_ci_id, second_ci.type_id, type_relation)
 

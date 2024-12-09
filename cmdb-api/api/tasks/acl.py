@@ -32,7 +32,7 @@ from api.models.acl import Trigger
 def role_rebuild(rids, app_id):
     rids = rids if isinstance(rids, list) else [rids]
     for rid in rids:
-        with redis_lock.Lock(rd.r, "ROLE_REBUILD_{}_{}".format(rid, app_id)):
+        with redis_lock.Lock(rd.r, "ROLE_REBUILD_{}_{}".format(rid, app_id), expire=10):
             RoleRelationCache.rebuild(rid, app_id)
 
     current_app.logger.info("Role {0} App {1} rebuild..........".format(rids, app_id))

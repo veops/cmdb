@@ -145,7 +145,7 @@ def ci_delete_trigger(trigger, operate_type, ci_dict):
 @flush_db
 @reconnect_db
 def ci_relation_cache(parent_id, child_id, ancestor_ids):
-    with redis_lock.Lock(rd.r, "CIRelation_{}".format(parent_id)):
+    with redis_lock.Lock(rd.r, "CIRelation_{}".format(parent_id), expire=10):
         children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
         children = json.loads(children) if children is not None else {}
 
@@ -223,7 +223,7 @@ def ci_relation_add(parent_dict, child_id, uid):
 @celery.task(name="cmdb.ci_relation_delete", queue=CMDB_QUEUE)
 @reconnect_db
 def ci_relation_delete(parent_id, child_id, ancestor_ids):
-    with redis_lock.Lock(rd.r, "CIRelation_{}".format(parent_id)):
+    with redis_lock.Lock(rd.r, "CIRelation_{}".format(parent_id), expire=10):
         children = rd.get([parent_id], REDIS_PREFIX_CI_RELATION)[0]
         children = json.loads(children) if children is not None else {}
 
