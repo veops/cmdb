@@ -135,9 +135,15 @@ export default {
     border: 1px solid #f3f4f6;
   }
   .authorization-input {
-    border: none;
+    border: 1px solid transparent;
+
     &:focus {
       box-shadow: none;
+      border-color: @primary-color;
+    }
+
+    &:hover {
+      border-color: @primary-color;
     }
   }
 }

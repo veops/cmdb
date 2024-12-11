@@ -25,18 +25,24 @@
           :fileList="[]"
           :beforeUpload="beforeUpload"
         >
-          <a class="setting-discovery-header-action-btn">
+          <a-button
+            type="primary"
+            class="ops-button-ghost"
+            ghost
+          >
             <a-icon type="upload" />
             {{ $t('cmdb.ad.upload') }}
-          </a>
+          </a-button>
         </a-upload>
-        <a
+        <a-button
+          type="primary"
+          class="ops-button-ghost"
+          ghost
           @click="download"
-          class="setting-discovery-header-action-btn"
         >
           <a-icon type="download" />
           {{ $t('cmdb.ad.download') }}
-        </a>
+        </a-button>
       </div>
     </div>
     <div

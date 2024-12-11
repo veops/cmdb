@@ -352,7 +352,6 @@ export default {
 </style>
 
 <style lang="less">
-
 .cmdb-grant {
   .grant-button {
     padding: 6px 8px;
@@ -363,9 +362,9 @@ export default {
     margin: 15px 0;
     display: inline-block;
     transition: all 0.3s;
-    &:hover {
-      box-shadow: 2px 3px 4px @primary-color_5;
-    }
+    z-index: 1;
+
+    .btn-wave-hover(@primary-color_4, -1);
   }
 }
 </style>

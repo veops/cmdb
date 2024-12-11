@@ -23,7 +23,7 @@
         <tr v-for="(item, index) in parameters" :key="item.id">
           <td><a-input class="parameters-input" v-model="item.key" :placeholder="$t('cmdb.components.param', { param: `${index + 1}` })" /></td>
           <td><a-input class="parameters-input" v-model="item.value" :placeholder="$t('cmdb.components.value', { value: `${index + 1}` })" /></td>
-          <td>
+          <td class="parameters-delete">
             <a style="color:red">
               <ops-icon type="icon-xianxing-delete" @click="deleteParam(index)" />
             </a>
@@ -91,10 +91,20 @@ export default {
     border: 1px solid #f3f4f6;
   }
   .parameters-input {
-    border: none;
+    border: 1px solid transparent;
+
     &:focus {
       box-shadow: none;
+      border-color: @primary-color;
     }
+
+    &:hover {
+      border-color: @primary-color;
+    }
+  }
+
+  .parameters-delete {
+    text-align: center;
   }
 }
 </style>

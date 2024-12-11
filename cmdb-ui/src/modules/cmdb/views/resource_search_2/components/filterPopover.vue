@@ -19,13 +19,11 @@
           >
             <treeselect
               :value="selectCITypeIds"
-              class="custom-treeselect custom-treeselect-bgcAndBorder filter-content-ciTypes"
+              class="custom-treeselect custom-treeselect-white filter-content-ciTypes"
               :style="{
                 width: '400px',
                 zIndex: '1000',
                 '--custom-height': '32px',
-                '--custom-bg-color': '#FFF',
-                '--custom-border': '1px solid #d9d9d9',
                 '--custom-multiple-lineHeight': '32px',
               }"
               :multiple="true"

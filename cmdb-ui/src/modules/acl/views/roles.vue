@@ -291,11 +291,11 @@ export default {
   background-color: #fff;
   height: calc(100vh - 64px);
   margin-bottom: -24px;
-  padding: 24px;
+  padding: 20px;
   .acl-roles-header {
     width: 100%;
     display: inline-flex;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     align-items: center;
     .ant-checkbox-wrapper {
       margin-left: auto;

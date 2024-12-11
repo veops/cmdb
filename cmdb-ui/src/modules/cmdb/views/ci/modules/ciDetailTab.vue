@@ -33,8 +33,8 @@
       </a-tab-pane>
       <a-tab-pane key="tab_3">
         <span slot="tab"><a-icon type="clock-circle" />{{ $t('cmdb.ci.history') }}</span>
-        <div :style="{ padding: '24px', height: '100%' }">
-          <a-space :style="{ 'margin-bottom': '10px', display: 'flex' }">
+        <div :style="{ padding: '16px 24px 24px', height: '100%' }">
+          <a-space :style="{ marginBottom: '16px', display: 'flex' }">
             <a-button type="primary" class="ops-button-ghost" ghost @click="handleRollbackCI()">
               <ops-icon type="shishizhuangtai" />{{ $t('cmdb.ci.rollback') }}
             </a-button>
@@ -180,7 +180,7 @@ export default {
       ci_types: [],
       hasPermission: true,
       itsmInstalled: true,
-      tableHeight: this.attributeHistoryTableHeight || (this.$store.state.windowHeight - 120),
+      tableHeight: this.attributeHistoryTableHeight || (this.$store.state.windowHeight - 130),
       initQueryLoading: true,
     }
   },

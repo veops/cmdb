@@ -11,10 +11,19 @@
 
     .ant-input {
       box-shadow: none;
-      border: none;
-      background-color: #F7F8FA;
       height: 30px;
       line-height: 30px;
+      border-radius: 30px;
+
+      &:focus {
+        border: solid 1px #B1C9FF;
+      }
+    }
+
+    .cmdb-side-menu-search-focused {
+      .ant-input {
+        border: solid 1px #B1C9FF;
+      }
     }
 
     .ant-input-suffix {

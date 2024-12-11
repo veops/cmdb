@@ -104,6 +104,16 @@ export default {
     .cmdb-batch-upload-tips {
       color: @primary-color;
     }
+
+    &:hover {
+      background: linear-gradient(90deg, @primary-color_2 50%, transparent 0) repeat-x,
+      linear-gradient(90deg, @primary-color_2 50%, transparent 0) repeat-x,
+      linear-gradient(0deg, @primary-color_2 50%, transparent 0) repeat-y,
+      linear-gradient(0deg, @primary-color_2 50%, transparent 0) repeat-y;
+      background-size: 15px 1px, 15px 1px, 1px 15px, 1px 15px;
+      background-position: 0 0, 0 100%, 0 0, 100% 0;
+      background-color: @primary-color_7;
+    }
   }
   .ant-upload.ant-upload-drag .ant-upload-drag-container {
     vertical-align: baseline;

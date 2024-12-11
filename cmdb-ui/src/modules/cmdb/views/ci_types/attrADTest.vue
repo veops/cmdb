@@ -3,12 +3,14 @@
     <div class="attr-ad-header attr-ad-header-margin">{{ $t('cmdb.ciType.configCheckTitle') }}</div>
     <div class="attr-ad-content">
       <div class="ad-test-title-info">{{ $t('cmdb.ciType.checkTestTip') }}</div>
-      <div
-        class="ad-test-btn"
+      <a-button
+        type="primary"
+        class="ops-button-ghost ad-test-btn"
+        ghost
         @click="showCheckModal"
       >
         {{ $t('cmdb.ciType.checkTestBtn') }}
-      </div>
+      </a-button>
       <div class="ad-test-btn-info">{{ $t('cmdb.ciType.checkTestTip2') }}</div>
       <!-- <div
         class="ad-test-btn"
@@ -140,15 +142,6 @@ export default {
 
   .ad-test-btn {
     margin-top: 30px;
-    padding: 5px 12px;
-    background-color: #F4F9FF;
-    border: solid 1px @primary-color_8;
-    display: inline-block;
-    cursor: pointer;
-
-    color: @link-color;
-    font-size: 12px;
-    font-weight: 400;
   }
 
   .ad-test-btn-info {

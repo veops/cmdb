@@ -3,12 +3,10 @@
     <a-form-model :model="form" :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
       <a-form-model-item :label="$t('user')">
         <EmployeeTreeSelect
-          class="custom-treeselect custom-treeselect-bgcAndBorder"
+          class="custom-treeselect custom-treeselect-white"
           :style="{
             '--custom-height': '32px',
             lineHeight: '32px',
-            '--custom-bg-color': '#fff',
-            '--custom-border': '1px solid #d9d9d9',
             '--custom-multiple-lineHeight': '18px',
           }"
           :multiple="true"
@@ -24,12 +22,10 @@
           v-model="form.roles"
           :multiple="true"
           :options="filterAllRoles"
-          class="custom-treeselect custom-treeselect-bgcAndBorder"
+          class="custom-treeselect custom-treeselect-white"
           :style="{
             '--custom-height': '32px',
             lineHeight: '32px',
-            '--custom-bg-color': '#fff',
-            '--custom-border': '1px solid #d9d9d9',
             '--custom-multiple-lineHeight': '18px',
           }"
           :limit="10"

@@ -3,12 +3,10 @@
     <a-input-group compact>
       <treeselect
         :disable-branch-nodes="true"
-        class="custom-treeselect custom-treeselect-bgcAndBorder"
+        class="custom-treeselect custom-treeselect-white"
         :style="{
           '--custom-height': '30px',
           lineHeight: '30px',
-          '--custom-bg-color': '#fff',
-          '--custom-border': '1px solid #d9d9d9',
           display: 'inline-block',
           width: '100px',
         }"

@@ -5,13 +5,11 @@
         <a-space>
           <treeselect
             v-if="type === 'resourceSearch'"
-            class="custom-treeselect custom-treeselect-bgcAndBorder"
+            class="custom-treeselect"
             :style="{
               width: '200px',
               marginRight: '10px',
               '--custom-height': '32px',
-              '--custom-bg-color': '#fff',
-              '--custom-border': '1px solid #d9d9d9',
               '--custom-multiple-lineHeight': '16px',
             }"
             v-model="currenCiType"

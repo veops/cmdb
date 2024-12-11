@@ -29,7 +29,7 @@
         <tr v-for="(item, index) in headers" :key="item.id">
           <td><a-input class="headers-input" v-model="item.key" :placeholder="$t('cmdb.components.param', { param: `${index + 1}` })" /></td>
           <td><a-input class="headers-input" v-model="item.value" :placeholder="$t('cmdb.components.value', { value: `${index + 1}` })" /></td>
-          <td>
+          <td class="headers-delete">
             <a style="color:red">
               <ops-icon type="icon-xianxing-delete" @click="deleteParam(index)" />
             </a>
@@ -92,10 +92,20 @@ export default {
     border: 1px solid #f3f4f6;
   }
   .headers-input {
-    border: none;
+    border: 1px solid transparent;
+
     &:focus {
       box-shadow: none;
+      border-color: @primary-color;
     }
+
+    &:hover {
+      border-color: @primary-color;
+    }
+  }
+
+  .headers-delete {
+    text-align: center;
   }
 }
 </style>

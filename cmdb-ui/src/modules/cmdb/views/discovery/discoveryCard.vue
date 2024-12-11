@@ -170,6 +170,7 @@ export default {
   position: relative;
   margin-bottom: 40px;
   margin-right: 40px;
+  cursor: pointer;
 
   &-inner {
     position: absolute;
@@ -294,6 +295,12 @@ export default {
     }
   }
 
+  &, &.discovery-card-small {
+    &:hover {
+      box-shadow: 0px 6px 20px 0px rgba(122, 140, 204, 0.30);
+    }
+  }
+
   &-http {
     width: 263px;
     height: 142px;
@@ -305,6 +312,10 @@ export default {
         max-width: 30px !important;
       }
     }
+
+    &:hover {
+      box-shadow: 0px 6px 28px 0px rgba(122, 140, 204, 0.30);
+    }
   }
 }
 .discovery-card-small {
@@ -312,7 +323,7 @@ export default {
   height: 80px;
   cursor: pointer;
 }
-.discovery-card-small:hover,
+
 .discovery-card-small-selected {
   .discovery-top {
     background-color: #f0f1f5;

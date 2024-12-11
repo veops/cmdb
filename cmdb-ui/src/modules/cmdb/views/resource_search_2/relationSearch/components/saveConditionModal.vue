@@ -78,21 +78,3 @@ export default {
   }
 }
 </script>
-
-<style lang="less" scoped>
-.save-condition-modal {
-  /deep/ .ant-modal-close-x {
-    width: 48px;
-    height: 48px;
-    line-height: 48px;
-  }
-
-  /deep/ .ant-modal-body {
-    padding: 24px 18px;
-  }
-
-  /deep/ .ant-modal-footer {
-    padding: 10px 18px 18px;
-  }
-}
-</style>

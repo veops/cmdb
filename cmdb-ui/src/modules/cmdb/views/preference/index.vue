@@ -114,7 +114,11 @@
         :placeholder="$t('cmdb.preference.searchPlaceholder')"
       />
       <div v-for="group in filterCiTypeData" :key="group.id">
-        <p @click="changeGroupExpand(group)" :style="{ display: 'inline-block', cursor: 'pointer' }">
+        <p
+          @click="changeGroupExpand(group)"
+          :style="{ display: 'inline-block', cursor: 'pointer' }"
+          class="cmdb-preference-right-group-title"
+        >
           <a-icon :type="expandKeys.includes(group.id) ? 'caret-down' : 'caret-right'" />{{ group.name }}({{
             group.ci_types ? group.ci_types.length : 0
           }})
@@ -624,6 +628,16 @@ export default {
     flex: 1;
     height: 100%;
     padding-top: 24px;
+
+    &-group-title {
+      width: 300px;
+      margin-bottom: 20px;
+
+      &:hover {
+        color: @primary-color;
+      }
+    }
+
     .cmdb-preference-content {
       display: flex;
       flex-direction: row;

@@ -116,6 +116,10 @@ body {
     display: inline-flex;
     align-items: center;
     margin-right: 10px;
+
+    &:hover {
+      color: @primary-color;
+    }
   }
 
   .topmenu {
@@ -560,7 +564,7 @@ body {
       top: 10px;
       border-radius: 5px;
       &:hover {
-        background: #c1bfbf;
+        color: @primary-color;
       }
       .anticon {
         margin-right: 0;
@@ -661,7 +665,7 @@ body {
         margin-right: 5px !important;
       }
       &:hover {
-        background-color: #e7e7e7;
+        background-color: @primary-color_5;
       }
     }
   }
@@ -869,6 +873,10 @@ body {
       align-items: center;
       height: 30px;
     }
+
+    &:hover {
+      border-color: #597ef7 !important;
+    }
   }
   .vue-treeselect__placeholder,
   .vue-treeselect__single-value {
@@ -885,15 +893,46 @@ body {
     border-radius: 2px !important;
     border-color: #e4e7ed;
   }
+
+  &:hover {
+    border-color: #597ef7 !important;
+  }
 }
 
-.custom-vue-treeselect__control(@bgColor:@primary-color_7,@border:none) {
-  background-color: @bgColor;
-  border: @border;
-}
-.custom-treeselect {
+.custom-vue-treeselect__control(
+  @bgColor: @primary-color_7,
+  @border: none,
+  @hoverBgColor: none,
+  @hoverBorderColor: none,
+) {
   .vue-treeselect__control {
-    .custom-vue-treeselect__control();
+    background-color: @bgColor;
+    border: @border;
+  }
+
+  .mixin(@borderColor) when (iscolor(@borderColor)) {
+    border-color: @borderColor !important;
+  }
+
+  &:not(.vue-treeselect--disabled):not(.vue-treeselect--focused) {
+    .vue-treeselect__control {
+      &:hover {
+        background-color: if(iscolor(@hoverBgColor), @hoverBgColor, @bgColor);
+        .mixin(@hoverBorderColor)
+      }
+    }
+  }
+}
+
+.custom-treeselect {
+  .custom-vue-treeselect__control(
+    @primary-color_7,
+    none,
+    @primary-color_5,
+    none
+  );
+
+  .vue-treeselect__control {
     height: var(--custom-height) !important;
     border-radius: 2px !important;
   }
@@ -909,12 +948,34 @@ body {
   .vue-treeselect__limit-tip-text {
     margin: 0;
   }
+
+  &.vue-treeselect--focused {
+    .vue-treeselect__control {
+      border: 1px solid @primary-color;
+    }
+  }
 }
 
 // 自定义背景颜色和border
-.custom-treeselect-bgcAndBorder .vue-treeselect__control {
-  .custom-vue-treeselect__control(var(--custom-bg-color), var(--custom-border));
+.custom-treeselect-bgcAndBorder {
+  .custom-vue-treeselect__control(
+    var(--custom-bg-color),
+    var(--custom-border),
+    var(--custom-hover-bg-color),
+    var(--custom-hover-border-color)
+  );
 }
+
+// 白色背景
+.custom-treeselect-white {
+  .custom-vue-treeselect__control(
+    #fff,
+    1px solid #d9d9d9,
+    none,
+    @primary-color
+  );
+}
+
 // 自定义背景颜色和border
 .custom-treeselect.vue-treeselect--multi {
   .vue-treeselect__multi-value,
@@ -1024,6 +1085,20 @@ body {
   .ant-time-picker-input {
     background-color: @primary-color_7;
     border: none;
+  }
+
+  &,
+  .ant-input,
+  .ant-time-picker-input {
+    &:not([disabled]) {
+      &:hover {
+        background-color: @primary-color_5;
+      }
+  
+      &:focus {
+        background-color: @primary-color_7;
+      }
+    }
   }
 }
 .ops-input.ant-input {
@@ -1163,13 +1238,31 @@ body {
 }
 
 // button
-.ops-button-ghost.ant-btn-background-ghost.ant-btn-primary {
-  background-color: @primary-color_5!important;
-  border-color: @primary-color_8;
+.ops-button-ghost {
+  position: relative;
+  overflow: hidden;
+
+  &.ant-btn-background-ghost.ant-btn-primary {
+    border-color: @primary-color_8;
+    background-color: @primary-color_5 !important;
+    box-shadow: none;
+
+    .btn-wave-hover(@primary-color_4);
+
+    &[disabled] {
+      border-color: #d9d9d9;
+      background-color: @primary-color_7!important;
+    }
+  
+    &:not([disabled]):hover {
+      color: #3F75FF;
+      border-color: transparent;
+    }
+  }
 }
-.ops-button-ghost.ant-btn-background-ghost.ant-btn-primary[disabled] {
-  border-color: #d9d9d9;
-  background-color: @primary-color_7!important;
+
+.ant-btn-primary:not(.ant-btn-background-ghost) {
+  .btn-wave-hover(#3F75FF);
 }
 
 // button
@@ -1214,15 +1307,25 @@ body {
 
 //modal
 .ant-modal-content {
+  .ant-modal-close-x {
+    width: 56px;
+    height: 56px;
+    line-height: 56px;
+  }
+
   .ant-modal-header {
     border-bottom: none;
+    padding: 22px 22px;
+
     .ant-modal-title {
       padding-left: 10px;
       border-left: 4px solid @primary-color;
     }
   }
+
   .ant-modal-footer {
     border-top: none;
+    padding: 16px 22px 22px;
   }
 }
 

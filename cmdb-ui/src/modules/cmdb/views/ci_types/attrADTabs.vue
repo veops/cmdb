@@ -154,6 +154,17 @@ export default {
       margin-left: 6px;
     }
 
+    &:hover {
+      background-color: @primary-color_5;
+
+      .attr-ad-tab-edit {
+        display: inline-block;
+      }
+      .attr-ad-tab-delete {
+        display: inline-block;
+      }
+    }
+
     &_active {
       border: solid 1px @primary-color_8;
       background-color: @primary-color_6;
@@ -161,14 +172,9 @@ export default {
       .attr-ad-tab-name {
         color: @primary-color;
       }
-    }
 
-    &:hover {
-      .attr-ad-tab-edit {
-        display: inline-block;
-      }
-      .attr-ad-tab-delete {
-        display: inline-block;
+      &:hover {
+        background-color: @primary-color_6;
       }
     }
   }
@@ -178,6 +184,11 @@ export default {
     background-color: @primary-color_7;
     font-size: 12px;
     color: @text-color_4;
+
+    &:hover {
+      background-color: @primary-color_5;
+      color: @primary-color;
+    }
   }
 }
 </style>

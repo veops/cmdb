@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="operation-history">
     <a-card :bordered="false">
       <a-tabs default-active-key="1">
         <a-tab-pane key="1" :tab="$t('cmdb.history.ciChange')">
@@ -40,4 +40,10 @@ export default {
 }
 </script>
 
-<style></style>
+<style lang="less" scoped>
+.operation-history {
+  /deep/ .ant-tabs-tab {
+    padding-top: 0px;
+  }
+}
+</style>

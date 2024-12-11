@@ -1697,6 +1697,10 @@ export default {
     background-color: #fff;
     padding: 20px;
     border-radius: @border-radius-box;
+
+    .ant-tabs-tab {
+      padding-top: 0px;
+    }
   }
 }
 </style>

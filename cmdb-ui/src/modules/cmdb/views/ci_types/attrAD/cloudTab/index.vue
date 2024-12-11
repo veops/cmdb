@@ -61,16 +61,20 @@ export default {
     justify-content: center;
     font-size: 12px;
     font-weight: 400;
-    color: #4E5969;
-    background-color: #F7F8FA;
+    color: @text-color_2;
+    background-color: @primary-color_7;
     width: 105px;
     height: 32px;
     cursor: pointer;
 
     &-active {
-      border: solid 1px #B1C9FF;
-      background-color: #E1EFFF;
-      color: #2F54EB;
+      border: solid 1px @primary-color_8;
+      background-color: @primary-color_4;
+      color: @primary-color;
+    }
+
+    &:hover {
+      color: @primary-color;
     }
   }
 }

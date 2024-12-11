@@ -61,13 +61,11 @@
               :disable-branch-nodes="true"
               :class="{
                 'custom-treeselect': true,
-                'custom-treeselect-bgcAndBorder': true,
+                'custom-treeselect-white': true,
               }"
               :style="{
                 '--custom-height': '32px',
                 lineHeight: '32px',
-                '--custom-bg-color': '#fff',
-                '--custom-border': '1px solid #d9d9d9',
                 '--custom-multiple-lineHeight': '14px',
               }"
               v-model="choice_other.type_ids"

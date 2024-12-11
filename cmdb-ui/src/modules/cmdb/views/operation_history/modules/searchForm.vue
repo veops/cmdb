@@ -1,6 +1,11 @@
 <template>
   <div>
-    <a-form :colon="false">
+    <a-form
+      :colon="false"
+      :labelCol="{ span:4 }"
+      :wrapperCol="{ span:20 }"
+      labelAlign="left"
+    >
       <a-row :gutter="24">
         <a-col
           :sm="24"
@@ -10,12 +15,7 @@
           v-for="attr in attrList.slice(0,3)"
           :key="attr.name"
         >
-          <a-form-item
-            :label="attr.alias || attr.name "
-            :labelCol="{span:4}"
-            :wrapperCol="{span:20}"
-            labelAlign="right"
-          >
+          <a-form-item :label="attr.alias || attr.name">
             <a-select
               v-model="queryParams[attr.name]"
               :placeholder="$t('cmdb.history.pleaseSelect')"
@@ -57,12 +57,7 @@
             :key="'expand_' + item.name"
             v-for="item in attrList.slice(3)"
           >
-            <a-form-item
-              :label="item.alias || item.name"
-              :label-col="{ span: 4 }"
-              :wrapper-col="{ span: 20 }"
-              labelAlign="right"
-            >
+            <a-form-item :label="item.alias || item.name">
               <a-select
                 v-model="queryParams[item.name]"
                 :placeholder="$t('cmdb.history.pleaseSelect')"
@@ -97,7 +92,7 @@
         </template>
       </a-row>
       <a-row>
-        <a-col :span="24" :style="{ textAlign: 'right' , marginBottom: '10px' }">
+        <a-col :span="24" :style="{ textAlign: 'right', marginBottom: '20px', marginTop: '-4px'}">
           <a-button type="primary" html-type="submit" @click="handleSearch">
             {{ $t('query') }}
           </a-button>
