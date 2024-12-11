@@ -512,15 +512,31 @@ export default {
       padding: 14px 18px;
       width: 500px;
     }
+
+    /deep/ .filter-content-ciTypes {
+      &:not(.vue-treeselect--disabled):not(.vue-treeselect--focused) {
+        .vue-treeselect__control {
+          border: solid 1px transparent;
+
+          &:hover {
+            border-color: @primary-color;
+          }
+        }
+      }
+    }
   }
 
   &-input {
     width: 100%;
 
     /deep/ .ant-input {
-      border: none;
+      border: solid 1px transparent;
       box-shadow: none;
       cursor: pointer;
+
+      &:hover {
+        border-color: @primary-color;
+      }
     }
 
     &-suffix {
@@ -532,8 +548,12 @@ export default {
     width: 100%;
 
     /deep/ .ant-select-selection {
-      border: none;
+      border: solid 1px transparent;
       box-shadow: none;
+
+      &:hover {
+        border-color: @primary-color;
+      }
     }
   }
 

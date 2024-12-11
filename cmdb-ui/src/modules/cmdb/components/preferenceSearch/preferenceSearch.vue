@@ -35,8 +35,8 @@
         :key="`${item.id}_${index}`"
         class="preference-search-tag"
         :style="{
-          backgroundColor: item.id === currentPreferenceSearch ? '#2f54eb' : '#fafafa',
-          color: item.id === currentPreferenceSearch ? '#fff' : '#000000a6',
+          backgroundColor: item.id === currentPreferenceSearch ? '#2f54eb' : '',
+          color: item.id === currentPreferenceSearch ? '#fff' : '',
         }"
       >
         <span @click="clickPreferenceSearch(item)">{{ item.name }}</span>
@@ -188,6 +188,10 @@ export default {
   }
   > i {
     font-size: 12px;
+  }
+
+  &:hover {
+    color: @primary-color;
   }
 }
 .preference-search-delete {

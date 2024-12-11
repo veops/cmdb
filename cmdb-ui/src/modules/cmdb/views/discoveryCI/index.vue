@@ -46,10 +46,15 @@
             <span @click="batchDelete">{{ $t('delete') }}</span>
             <span>{{ $t('cmdb.ci.selectRows', { rows: selectedCount }) }}</span>
           </span>
-          <div @click="clickLog" class="discovery-ci-log">
+          <a-button
+            type="primary"
+            ghost
+            class="ops-button-ghost discovery-ci-log"
+            @click="clickLog"
+          >
             <ops-icon type="a-cmdb-log1" />
             <span>{{ $t('cmdb.ad.log') }}</span>
-          </div>
+          </a-button>
         </div>
         <ops-table
           show-overflow
@@ -458,16 +463,7 @@ export default {
   }
 
   .discovery-ci-log {
-    cursor: pointer;
-    background-color: #F4F9FF;
-    border: solid 1px @primary-color_8;
-    color: @primary-color;
-    font-size: 12px;
-    padding: 5px 12px;
     margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 6px;
   }
 
   .checkbox-hover-table {

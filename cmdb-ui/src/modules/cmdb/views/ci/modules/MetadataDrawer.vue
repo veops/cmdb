@@ -9,22 +9,18 @@
     "
     :title="$t('cmdb.ci.attributeDesc')"
     width="72%"
-    :bodyStyle="{ height: '100vh' }"
+    :bodyStyle="{ height: '100vh', paddingTop: '16px' }"
   >
-    <vxe-toolbar>
-      <template #buttons>
-        <a-input
-          v-model="searchKey"
-          :style="{ display: 'inline-block', width: '244px' }"
-          class="ops-input ops-input-radius"
-          type="search"
-          :placeholder="$t('cmdb.ci.tips5')"
-          @keyup="searchAttributes"
-        >
-          <a-icon type="search" slot="suffix" />
-        </a-input>
-      </template>
-    </vxe-toolbar>
+    <a-input
+      v-model="searchKey"
+      :style="{ display: 'inline-block', width: '244px', marginBottom: '16px' }"
+      class="ops-input ops-input-radius"
+      type="search"
+      :placeholder="$t('cmdb.ci.tips5')"
+      @keyup="searchAttributes"
+    >
+      <a-icon type="search" slot="suffix" />
+    </a-input>
 
     <a-spin :spinning="loading">
       <vxe-table

@@ -70,3 +70,46 @@
   background-color: @primary-color_3;
   color: @primary-color;
 }
+
+.btn-wave-hover(
+  @hoverBgColor,
+  @bgZIndex: 0
+) {
+  position: relative;
+  overflow: hidden;
+
+  & > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  &:not([disabled])::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: @bgZIndex;
+    width: 100%;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+
+    background-color: @hoverBgColor;
+    -webkit-transform: scale(0) translate(-50%, -50%);
+    -ms-transform: scale(0) translate(-50%, -50%);
+    transform: scale(0) translate(-50%, -50%);
+    transform-origin: left top;
+
+    -webkit-transition: -webkit-transform 0.3s ease-out;
+    transition: -webkit-transform 0.3s ease-out;
+    transition: transform 0.3s ease-out;
+    transition: transform 0.3s ease-out, -webkit-transform 0.3s ease-out;
+  }
+
+  &:not([disabled]):hover {
+    &::after {
+      -webkit-transform: scale(2) translate(-50%, -50%);
+      -ms-transform: scale(2) translate(-50%, -50%);
+      transform: scale(2) translate(-50%, -50%);
+    }
+  }
+}

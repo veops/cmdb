@@ -3,12 +3,10 @@
     :disabled="disabled"
     ref="cmdb_type_select"
     :disable-branch-nodes="true"
-    class="custom-treeselect custom-treeselect-bgcAndBorder"
+    class="custom-treeselect custom-treeselect-white"
     :style="{
       '--custom-height': '30px',
-      lineHeight: '30px',
-      '--custom-bg-color': '#fff',
-      '--custom-border': '1px solid #d9d9d9',
+      lineHeight: '30px'
     }"
     v-model="currenCiType"
     :multiple="multiple"

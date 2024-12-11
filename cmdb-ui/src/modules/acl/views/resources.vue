@@ -358,11 +358,11 @@ export default {
   background-color: #fff;
   height: calc(100vh - 64px);
   margin-bottom: -24px;
-  padding: 12px 24px 24px 24px;
+  padding: 8px 20px 20px 20px;
   .acl-resources-header {
     width: 100%;
     display: inline-flex;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     align-items: center;
     justify-content: space-between;
     .ant-switch {

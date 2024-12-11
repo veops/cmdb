@@ -4,7 +4,7 @@
     <template #empty>
       <slot name="empty">
         <div :style="{ paddingTop: '10px' }">
-          <img :style="{ width: '140px', height: '90px' }" :src="require('@/assets/data_empty.png')" />
+          <img :style="{ width: '140px', height: '120px' }" :src="require('@/assets/data_empty.png')" />
           <div>{{ $t('noData') }}</div>
         </div>
       </slot>

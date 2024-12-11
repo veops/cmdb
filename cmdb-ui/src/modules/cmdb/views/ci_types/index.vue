@@ -1194,7 +1194,7 @@ export default {
     .selected {
       background-color: @primary-color_3;
       .ci-types-left-detail-title {
-        font-weight: 700;
+        color: @primary-color;
       }
     }
   }

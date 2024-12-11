@@ -92,7 +92,7 @@ export default {
       e.preventDefault()
       e.stopPropagation()
       this.$confirm({
-        title: this.$t('alert'),
+        title: this.$t('warning'),
         content: this.$t('cmdb.preference.confirmcancelSub2', { name: menu.meta.title }),
         onOk() {
           const citypeId = menu.meta.typeId
@@ -313,10 +313,7 @@ export default {
         <Item class={styles['cmdb-side-menu-search']}>
           <a-input
             ref="cmdbSideMenuSearchInputRef"
-            class={styles['cmdb-side-menu-search-input']}
-            style={{
-              border: this.$route.name === 'cmdb_resource_search' ? 'solid 1px #B1C9FF' : ''
-            }}
+            class={`ops-input ${this.$route.name === 'cmdb_resource_search' ? 'cmdb-side-menu-search-focused' : ''}`}
             placeholder={this.$t('cmdbSearch')}
             onPressEnter={(e) => {
               this.jumpCMDBSearch(e.target.value)

@@ -164,8 +164,12 @@ export default {
     /deep/ & > input {
       height: 100%;
       margin-left: 10px;
-      border: none;
+      border: solid 1px transparent;
       box-shadow: none;
+
+      &:focus {
+        border-color: @primary-color;
+      }
     }
   }
 
