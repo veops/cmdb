@@ -256,10 +256,10 @@ def cmdb_trigger():
                         trigger2cis[trigger.id] = (trigger, ready_cis)
                     else:
                         cur = trigger2cis[trigger.id]
-                        cur_ci_ids = {i.ci_id for i in cur[1]}
+                        cur_ci_ids = {_ci.ci_id for _ci in cur[1]}
                         trigger2cis[trigger.id] = (
-                            trigger, cur[1] + [i for i in ready_cis if i.ci_id not in cur_ci_ids
-                                               and i.ci_id not in trigger2completed.get(trigger.id, {})])
+                            trigger, cur[1] + [_ci for _ci in ready_cis if _ci.ci_id not in cur_ci_ids
+                                               and _ci.ci_id not in trigger2completed.get(trigger.id, {})])
 
             for tid in trigger2cis:
                 trigger, cis = trigger2cis[tid]
