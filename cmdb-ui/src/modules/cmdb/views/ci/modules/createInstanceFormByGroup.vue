@@ -95,7 +95,7 @@
               attr.name,
               {
                 rules: [{ required: attr.is_required, message: $t('placeholder1') + `${attr.alias || attr.name}` }],
-                initialValue: attr.default && attr.default.default ? attr.default.default : null,
+                initialValue: attr.default && attr.default.default !== undefined && attr.default.default !== null ? attr.default.default : null,
               },
             ]"
             style="width: 100%"
@@ -148,6 +148,7 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import moment from 'moment'
 import JsonEditor from '../../../components/JsonEditor/jsonEditor.vue'
 import CIReferenceAttr from '@/components/ciReferenceAttr/index.vue'
@@ -210,7 +211,7 @@ export default {
     },
 
     getChoiceDefault(attr) {
-      if (!attr?.default?.default) {
+      if (_.isNil(attr?.default?.default)) {
         return attr.is_list ? [] : null
       }
 
