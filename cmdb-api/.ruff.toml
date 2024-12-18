@@ -1,0 +1,79 @@
+line-length = 120
+cache-dir = ".ruff_cache"
+target-version = "py310"
+unsafe-fixes = true
+show-fixes = true
+
+[lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "TCH",
+    # W
+    "W505",
+    # PT
+    "PT018",
+    # SIM
+    "SIM101",
+    "SIM114",
+    # PGH
+    "PGH004",
+    # PL
+    "PLE1142",
+    # RUF
+    "RUF100",
+    # UP
+    "UP007"
+]
+preview = true
+ignore = ["FURB101"]
+
+[lint.flake8-pytest-style]
+mark-parentheses = false
+parametrize-names-type = "list"
+parametrize-values-row-type = "list"
+parametrize-values-type = "tuple"
+
+[lint.flake8-unused-arguments]
+ignore-variadic-names = true
+
+[lint.isort]
+lines-between-types = 1
+order-by-type = true
+
+[lint.per-file-ignores]
+"**/api/v1/*.py" = ["TCH"]
+"**/model/*.py" = ["TCH003"]
+"**/models/__init__.py" = ["F401", "F403"]
+"**/tests/*.py" = ["E402"]
+"celery_worker.py" = ["F401"]
+"api/views/entry.py" = ["I001"]
+"migrations/*.py" = ["I001", "E402"]
+"*.py" = ["I001"]
+"api/views/common_setting/department.py" = ["F841"]
+"api/lib/common_setting/upload_file.py" = ["F841"]
+"api/lib/common_setting/acl.py" = ["F841"]
+"**/__init__.py" = ["F822"]
+"api/tasks/*.py" = ["E722"]
+"api/views/cmdb/*.py" = ["E722"]
+"api/views/acl/*.py" = ["E722"]
+"api/lib/secrets/*.py" = ["E722", "F841"]
+"api/lib/utils.py" = ["E722", "E731"]
+"api/lib/perm/authentication/cas/*" = ["E113", "F841"]
+"api/lib/perm/acl/*" = ["E722"]
+"api/lib/*" = ["E721", "F722"]
+"api/lib/cmdb/*" = ["F722", "E722"]
+"api/lib/cmdb/search/ci/es/search.py" = ["F841", "SIM114"]
+"api/lib/cmdb/search/ci/db/search.py" = ["F841"]
+"api/lib/cmdb/value.py" = ["F841"]
+"api/lib/cmdb/history.py" = ["E501"]
+"api/commands/common.py" = ["E722"]
+"api/commands/click_cmdb.py" = ["E722"]
+"api/lib/perm/auth.py" = ["SIM114"]
+
+[format]
+preview = true
+quote-style = "single"
+docstring-code-format = true
+skip-magic-trailing-comma = false

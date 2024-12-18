@@ -16,8 +16,9 @@ class ErrFormat(CommonErrFormat):
     argument_file_not_found = _l("The file doesn't seem to be uploaded")  # 文件似乎并未上传
 
     attribute_not_found = _l("Attribute {} does not exist!")  # 属性 {} 不存在!
+    # 该属性是模型的唯一标识，不能被删除!
     attribute_is_unique_id = _l(
-        "This attribute is the unique identifier of the model and cannot be deleted!")  # 该属性是模型的唯一标识，不能被删除!
+        "This attribute is the unique identifier of the model and cannot be deleted!")  
     attribute_is_ref_by_type = _l(
         "This attribute is referenced by model {} and cannot be deleted!")  # 该属性被模型 {} 引用, 不能删除!
     attribute_value_type_cannot_change = _l(
@@ -129,7 +130,8 @@ class ErrFormat(CommonErrFormat):
     adr_default_ref_once = _l("The default auto-discovery rule is already referenced by model {}!")
     # unique_key方法必须返回非空字符串!
     adr_unique_key_required = _l("The unique_key method must return a non-empty string!")
-    adr_plugin_attributes_list_required = _l("The attributes method must return a list")  # attributes方法必须返回的是list
+    # attributes方法必须返回的是list
+    adr_plugin_attributes_list_required = _l("The attributes method must return a list")  
     # attributes方法返回的list不能为空!
     adr_plugin_attributes_list_no_empty = _l("The list returned by the attributes method cannot be empty!")
     # 只有管理员才可以定义执行机器为: 所有节点!

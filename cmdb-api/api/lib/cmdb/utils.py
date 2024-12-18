@@ -55,7 +55,6 @@ def str2datetime(x):
     return datetime.datetime.strptime(x, "%Y-%m-%d %H:%M")
 
 
-
 class ValueTypeMap(object):
     deserialize = {
         ValueTypeEnum.INT: string2int,

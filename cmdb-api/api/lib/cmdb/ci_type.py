@@ -862,7 +862,7 @@ class CITypeRelationManager(object):
 
         graph = nx.DiGraph()
 
-        def get_children(_id):
+        def get_children(_id, graph):
             children = CITypeRelation.get_by(parent_id=_id, to_dict=False)
 
             for i in children:
@@ -870,7 +870,7 @@ class CITypeRelationManager(object):
                     graph.add_edge(i.parent_id, i.child_id)
                     get_children(i.child_id)
 
-        get_children(source_type_id)
+        get_children(source_type_id, graph)
 
         paths = list(nx.all_simple_paths(graph, source_type_id, target_type_ids))
 
