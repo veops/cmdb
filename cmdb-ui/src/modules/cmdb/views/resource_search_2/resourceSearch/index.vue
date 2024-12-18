@@ -15,9 +15,11 @@
         :searchValue="searchValue"
         :selectCITypeIds="selectCITypeIds"
         :expression="expression"
+        :isColumnSearch="currentSearchType === 'column'"
         @changeFilter="changeFilter"
         @updateAllAttributesList="updateAllAttributesList"
         @saveCondition="saveCondition"
+        @toggleSearchMode="handleToggleSearchMode"
       />
       <HistoryList
         :recentList="recentList"
@@ -46,9 +48,11 @@
           :searchValue="searchValue"
           :selectCITypeIds="selectCITypeIds"
           :expression="expression"
+          :isColumnSearch="currentSearchType === 'column'"
           @changeFilter="changeFilter"
           @updateAllAttributesList="updateAllAttributesList"
           @saveCondition="saveCondition"
+          @toggleSearchMode="handleToggleSearchMode"
         />
         <HistoryList
           :recentList="recentList"
@@ -172,6 +176,7 @@ export default {
       showInstanceDetail: false,
       detailCIId: -1,
       detailCITypeId: -1,
+      currentSearchType: 'normal',
     }
   },
   computed: {
@@ -240,7 +245,9 @@ export default {
       }
     },
 
-    async saveCondition(isSubmit) {
+    async saveCondition(isSubmit, searchType = 'normal') {
+      this.currentSearchType = searchType
+
       if (
         this.searchValue ||
         this.expression ||
@@ -253,7 +260,8 @@ export default {
           if (
             option.searchValue === this.searchValue &&
             option.expression === this.expression &&
-            _.isEqual(option.ciTypeIds, this.selectCITypeIds)
+            _.isEqual(option.ciTypeIds, this.selectCITypeIds) &&
+            option.searchType === this.currentSearchType
           ) {
             needDeleteList.push(item.id)
           } else {
@@ -279,7 +287,8 @@ export default {
             searchValue: this.searchValue,
             expression: this.expression,
             ciTypeIds: this.selectCITypeIds,
-            ciTypeNames
+            ciTypeNames,
+            searchType: this.currentSearchType
           },
           name: '__recent__'
         })
@@ -290,7 +299,7 @@ export default {
         this.isSearch = true
         this.currentPage = 1
         this.hideDetail()
-        this.loadInstance()
+        this.loadInstance(this.currentSearchType)
       }
     },
 
@@ -307,10 +316,18 @@ export default {
       this.getRecentList()
     },
 
-    async loadInstance() {
-      const { selectCITypeIds, expression, searchValue } = this
+    async loadInstance(searchType = 'normal') {
+      const { selectCITypeIds, expression } = this
+      let { searchValue } = this
       const regQ = /(?<=q=).+(?=&)|(?<=q=).+$/g
       const exp = expression.match(regQ) ? expression.match(regQ)[0] : null
+
+      if (searchType === 'column' && searchValue) {
+        const values = searchValue.split('\n').filter(v => v.trim())
+        if (values.length) {
+          searchValue = `(${values.join(';')})`
+        }
+      }
 
       const ciTypeIds = [...selectCITypeIds]
       if (!ciTypeIds.length) {
@@ -322,7 +339,7 @@ export default {
 
       const res = await searchCI({
         q: `${ciTypeIds?.length ? `_type:(${ciTypeIds.join(';')})` : ''}${exp ? `,${exp}` : ''}${
-          searchValue ? `,*${searchValue}*` : ''
+          searchValue ? `,${searchType === 'normal' ? '*' : ''}${searchValue}${searchType === 'normal' ? '*' : ''}` : ''
         }`,
         count: this.pageSize,
         page: this.currentPage,
@@ -389,7 +406,6 @@ export default {
       }
       this.ciTabList = ciTabList
 
-      // 处理引用属性
       const allAttr = []
       subscribedRes.map((item) => {
         allAttr.push(...item.attributes)
@@ -477,20 +493,21 @@ export default {
       this.searchValue = data?.searchValue || ''
       this.expression = data?.expression || ''
       this.selectCITypeIds = data?.ciTypeIds || []
+      this.currentSearchType = data?.searchType || 'normal'
 
       this.hideDetail()
-      this.loadInstance()
+      this.loadInstance(this.currentSearchType)
     },
 
     handlePageSizeChange(_, pageSize) {
       this.pageSize = pageSize
       this.currentPage = 1
-      this.loadInstance()
+      this.loadInstance(this.currentSearchType)
     },
 
     changePage(page) {
       this.currentPage = page
-      this.loadInstance()
+      this.loadInstance(this.currentSearchType)
     },
 
     changeFilter(data) {
@@ -533,6 +550,10 @@ export default {
     clickFavor(data) {
       this.isSearch = true
       this.showDetail(data)
+    },
+
+    handleToggleSearchMode(isColumn) {
+      this.currentSearchType = isColumn ? 'column' : 'normal'
     }
   }
 }
