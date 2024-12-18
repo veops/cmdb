@@ -27,6 +27,7 @@ from api.lib.cmdb.search.ci.db.query_sql import FACET_QUERY
 from api.lib.cmdb.search.ci.db.query_sql import QUERY_CI_BY_ATTR_NAME
 from api.lib.cmdb.search.ci.db.query_sql import QUERY_CI_BY_ID
 from api.lib.cmdb.search.ci.db.query_sql import QUERY_CI_BY_NO_ATTR
+from api.lib.cmdb.search.ci.db.query_sql import QUERY_CI_BY_NO_ATTR_IN
 from api.lib.cmdb.search.ci.db.query_sql import QUERY_CI_BY_TYPE
 from api.lib.cmdb.search.ci.db.query_sql import QUERY_UNION_CI_ATTRIBUTE_IS_NULL
 from api.lib.cmdb.utils import TableMap
@@ -527,10 +528,15 @@ class Search(object):
         for q in queries:
             _query_sql = ""
             if isinstance(q, dict):
-                alias, _query_sql, operator = self.__query_build_by_field(q['queries'], True, True, alias, is_sub=True)
-                # current_app.logger.info(_query_sql)
-                # current_app.logger.info((operator, is_first, alias))
-                operator = q['operator']
+                current_app.logger.debug("Dict query content: queries=%s, operator=%s", q['queries'], q['operator'])
+                if len(q['queries']) == 1 and ";" in q['queries'][0]:
+                    values = q['queries'][0].split(";")
+                    in_values = ",".join("'{0}'".format(v) for v in values)
+                    _query_sql = QUERY_CI_BY_NO_ATTR_IN.format(in_values, alias)
+                    operator = q['operator']
+                else:
+                    alias, _query_sql, operator = self.__query_build_by_field(q['queries'], True, True, alias, is_sub=True)
+                    operator = q['operator']
 
             elif ":" in q and not q.startswith("*"):
                 alias, _query_sql, operator = self.__query_by_attr(q, queries, alias, is_sub)
