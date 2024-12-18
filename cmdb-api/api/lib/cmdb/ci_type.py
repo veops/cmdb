@@ -862,13 +862,13 @@ class CITypeRelationManager(object):
 
         graph = nx.DiGraph()
 
-        def get_children(_id, graph):
+        def get_children(_id, _graph):
             children = CITypeRelation.get_by(parent_id=_id, to_dict=False)
 
             for i in children:
                 if i.child_id != _id:
-                    graph.add_edge(i.parent_id, i.child_id)
-                    get_children(i.child_id)
+                    _graph.add_edge(i.parent_id, i.child_id)
+                    get_children(i.child_id, _graph)
 
         get_children(source_type_id, graph)
 
