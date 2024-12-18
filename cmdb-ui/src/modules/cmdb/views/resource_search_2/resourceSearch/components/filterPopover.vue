@@ -180,7 +180,7 @@ export default {
     saveCondition(isSubmit) {
       this.$refs.conditionFilterRef.handleSubmit()
       this.$nextTick(() => {
-        this.$emit('saveCondition', isSubmit)
+        this.$emit('saveCondition', isSubmit, this.$parent.isColumnSearch ? 'column' : 'normal')
         this.visible = false
       })
     },
