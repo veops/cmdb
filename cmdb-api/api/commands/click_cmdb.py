@@ -346,7 +346,7 @@ def cmdb_inner_secrets_init(address):
     if valid_address(address):
         token = current_app.config.get("INNER_TRIGGER_TOKEN", "") if not token else token
         if not token:
-            token = click.prompt(f'Enter root token', hide_input=True, confirmation_prompt=False)
+            token = click.prompt('Enter root token', hide_input=True, confirmation_prompt=False)
         assert token is not None
         resp = requests.post("{}/api/v0.1/secrets/auto_seal".format(address.strip("/")),
                              headers={"Inner-Token": token})

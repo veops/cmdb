@@ -131,7 +131,7 @@ class EmployeeChangePasswordWithACLID(APIView):
         if not password:
             abort(400, ErrFormat.password_is_required)
 
-        data = EmployeeCRUD.change_password_by_uid(_uid, password)
+        EmployeeCRUD.change_password_by_uid(_uid, password)
         return self.jsonify(200)
 
 
