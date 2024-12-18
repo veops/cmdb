@@ -737,7 +737,7 @@ class CITypeAttributeManager(object):
                     item = CITypeTrigger.get_by(type_id=_type_id, attr_id=attr_id, to_dict=False, first=True)
                     item and item.soft_delete(commit=False)
 
-                    for item in PreferenceShowAttributes.get_by(type_id=type_id, attr_id=attr_id, to_dict=False):
+                    for item in PreferenceShowAttributes.get_by(type_id=_type_id, attr_id=attr_id, to_dict=False):
                         item.soft_delete(commit=False)
                     
                 for item in (CITypeRelation.get_by(parent_id=type_id, to_dict=False) +
