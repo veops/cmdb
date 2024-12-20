@@ -722,9 +722,6 @@ class CITypeAttributeManager(object):
 
                     ci_cache.apply_async(args=(ci.id, None, None), queue=CMDB_QUEUE)
 
-                for item in PreferenceShowAttributes.get_by(type_id=type_id, attr_id=attr_id, to_dict=False):
-                    item.soft_delete(commit=False)
-
                 child_ids = CITypeInheritanceManager.recursive_children(type_id)
                 for _type_id in [type_id] + child_ids:
                     for item in CITypeUniqueConstraint.get_by(type_id=_type_id, to_dict=False):
@@ -740,6 +737,9 @@ class CITypeAttributeManager(object):
                     item = CITypeTrigger.get_by(type_id=_type_id, attr_id=attr_id, to_dict=False, first=True)
                     item and item.soft_delete(commit=False)
 
+                    for item in PreferenceShowAttributes.get_by(type_id=_type_id, attr_id=attr_id, to_dict=False):
+                        item.soft_delete(commit=False)
+                    
                 for item in (CITypeRelation.get_by(parent_id=type_id, to_dict=False) +
                              CITypeRelation.get_by(child_id=type_id, to_dict=False)):
                     if item.parent_id == type_id and attr_id in (item.parent_attr_ids or []):
