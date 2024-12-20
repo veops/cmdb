@@ -4,7 +4,7 @@ import traceback
 from datetime import datetime
 
 import requests
-from flask import abort
+from flask import abort, current_app
 from flask_login import current_user
 from sqlalchemy import or_, literal_column, func, not_, and_
 from werkzeug.datastructures import MultiDict
@@ -478,7 +478,7 @@ class EmployeeCRUD(object):
             Employee.deleted == 0,
             Employee.block == block,
         ]
-        if type(department_id) == list:
+        if isinstance(department_id, list):
             if len(department_id) == 0:
                 return []
             else:
@@ -702,6 +702,7 @@ class EmployeeCRUD(object):
             try:
                 last_login = datetime.strptime(last_login, '%Y-%m-%d %H:%M:%S')
             except Exception as e:
+                current_app.logger.error(f"strptime {last_login} err: {e}")
                 last_login = datetime.now()
         else:
             last_login = datetime.now()
@@ -712,6 +713,7 @@ class EmployeeCRUD(object):
             )
             return last_login
         except Exception as e:
+            current_app.logger.error(f"update last_login err: {e}")
             return
 
 

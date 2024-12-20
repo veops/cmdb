@@ -476,7 +476,7 @@ class EditDepartmentInACL(object):
         for employee in e_list:
             employee_acl_rid = employee.get('e_acl_rid')
             if employee_acl_rid == 0:
-                result.append(f"employee_acl_rid == 0")
+                result.append("employee_acl_rid == 0")
                 continue
             cls.remove_single_employee_from_old_department(acl, employee, result)
 
@@ -501,8 +501,8 @@ class EditDepartmentInACL(object):
             acl.remove_user_from_role(employee.get('e_acl_rid'), payload)
             current_app.logger.info(f"remove {employee.get('e_acl_rid')} from {d_acl_rid}")
         except Exception as e:
-            result.append(
-                f"remove_user_from_role employee_acl_rid: {employee.get('e_acl_rid')}, parent_id: {d_acl_rid}, err: {e}")
+            err = f"remove_user_from_role e_acl_rid: {employee.get('e_acl_rid')}, parent_id: {d_acl_rid}, err: {e}"
+            result.append(err)
 
         return True
 
@@ -548,7 +548,7 @@ class EditDepartmentInACL(object):
         for employee in e_list:
             employee_acl_rid = employee.get('e_acl_rid')
             if employee_acl_rid == 0:
-                result.append(f"employee_acl_rid == 0")
+                result.append("employee_acl_rid == 0")
                 continue
 
             cls.remove_single_employee_from_old_department(acl, employee, result)

@@ -6,7 +6,7 @@ from functools import wraps
 from flask import abort
 from flask import request
 
-from api.lib.perm.acl.cache import AppCache, AppAccessTokenCache
+from api.lib.perm.acl.cache import AppCache
 from api.lib.perm.acl.resp_format import ErrFormat
 
 

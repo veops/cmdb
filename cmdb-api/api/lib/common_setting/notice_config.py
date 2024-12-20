@@ -2,7 +2,7 @@ import requests
 
 from api.lib.common_setting.const import BotNameMap
 from api.lib.common_setting.resp_format import ErrFormat
-from api.models.common_setting import CompanyInfo, NoticeConfig
+from api.models.common_setting import NoticeConfig
 from wtforms import Form
 from wtforms import StringField
 from wtforms import validators

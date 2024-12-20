@@ -107,3 +107,12 @@ FROM
     WHERE c_value_index_datetime.value LIKE "{0}") AS {1}
 GROUP BY  {1}.ci_id
 """
+
+QUERY_CI_BY_NO_ATTR_IN = """
+SELECT *
+FROM 
+    (SELECT c_value_index_texts.ci_id
+    FROM c_value_index_texts
+    WHERE c_value_index_texts.value in ({0})) AS {1}
+GROUP BY {1}.ci_id
+"""

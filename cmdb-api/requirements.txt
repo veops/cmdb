@@ -58,3 +58,4 @@ python-magic==0.4.27
 jsonpath==0.82.2
 networkx>=3.1
 ipaddress>=1.0.23
+ruff==0.8.3

@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*- 
 
 import base64
-from typing import Set
 
 import elasticsearch
 import redis

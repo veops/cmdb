@@ -415,7 +415,7 @@ class AttributeManager(object):
             db.session.rollback()
             current_app.logger.error("update attribute error, {0}".format(str(e)))
 
-            return abort(400, ErrFormat.update_attribute_failed.format(("id=".format(_id))))
+            return abort(400, ErrFormat.update_attribute_failed.format(("id={}".format(_id))))
 
         new = attr.to_dict()
         if not new['choice_web_hook'] and new['is_choice']:

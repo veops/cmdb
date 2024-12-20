@@ -1,8 +1,5 @@
 # -*- coding:utf-8 -*-
 
-
-import time
-
 import redis_lock
 import six
 from flask import abort

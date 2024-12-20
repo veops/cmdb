@@ -659,7 +659,7 @@ export default {
             } else {
               this.$nextTick(() => {
                 this.form.setFieldsValue({
-                  default_value: _record.default && _record.default.default ? _record.default.default : null,
+                  default_value: _record?.default?.default ?? null,
                 })
               })
             }
