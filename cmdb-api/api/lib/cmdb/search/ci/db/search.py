@@ -142,7 +142,7 @@ class Search(object):
                                     if str(ci_type.id) in self.type_id_list:
                                         self.type_id_list.remove(str(ci_type.id))
                                     type_id_list.remove(str(ci_type.id))
-                                    sub.extend([i for i in queries[1:] if isinstance(i, six.string_types)])
+                                    sub.extend([i for i in queries[1:] if isinstance(i, (six.string_types, list))])
 
                                     sub.insert(0, "_type:{}".format(ci_type.id))
                                     queries.append(dict(operator="|", queries=sub))
@@ -434,11 +434,14 @@ class Search(object):
                 if not q.startswith("("):
                     raise SearchError(ErrFormat.ci_search_Parentheses_invalid)
 
-                operator, q = self._operator_proc(q)
-                if q.endswith(")"):
-                    result.append(dict(operator=operator, queries=[q[1:-1]]))
+                if ":" not in q:  # multi-line search
+                    result.append(q[1:-1].split(';'))
+                else:
+                    operator, q = self._operator_proc(q)
+                    if q.endswith(")"):
+                        result.append(dict(operator=operator, queries=[q[1:-1]]))
 
-                sub = dict(operator=operator, queries=[q[1:]])
+                    sub = dict(operator=operator, queries=[q[1:]])
             elif q.endswith(")") and sub:
                 sub['queries'].append(q[:-1])
                 result.append(copy.deepcopy(sub))
@@ -526,16 +529,17 @@ class Search(object):
         query_sql = ""
 
         for q in queries:
+            # current_app.logger.debug(q)
             _query_sql = ""
             if isinstance(q, dict):
-                current_app.logger.debug("Dict query content: queries=%s, operator=%s", q['queries'], q['operator'])
                 if len(q['queries']) == 1 and ";" in q['queries'][0]:
                     values = q['queries'][0].split(";")
                     in_values = ",".join("'{0}'".format(v) for v in values)
                     _query_sql = QUERY_CI_BY_NO_ATTR_IN.format(in_values, alias)
                     operator = q['operator']
                 else:
-                    alias, _query_sql, operator = self.__query_build_by_field(q['queries'], True, True, alias, is_sub=True)
+                    alias, _query_sql, operator = self.__query_build_by_field(q['queries'], True, True, alias,
+                                                                              is_sub=True)
                     operator = q['operator']
 
             elif ":" in q and not q.startswith("*"):
@@ -543,10 +547,13 @@ class Search(object):
             elif q == "*":
                 continue
             elif q:
-                q = q.replace("'", "\\'")
-                q = q.replace('"', '\\"')
-                q = q.replace("*", "%").replace('\\n', '%')
-                _query_sql = QUERY_CI_BY_NO_ATTR.format(q, alias)
+                if not isinstance(q, list):
+                    q = q.replace("'", "\\'")
+                    q = q.replace('"', '\\"')
+                    q = q.replace("*", "%").replace('\\n', '%')
+                    _query_sql = QUERY_CI_BY_NO_ATTR.format(q, alias)
+                else:
+                    _query_sql = QUERY_CI_BY_NO_ATTR_IN.format(",".join("'{0}'".format(v) for v in q), alias)
 
             if is_first and _query_sql and not self.only_type_query:
                 query_sql = "SELECT * FROM ({0}) AS {1}".format(_query_sql, alias)

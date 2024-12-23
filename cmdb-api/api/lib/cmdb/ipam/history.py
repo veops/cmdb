@@ -43,7 +43,7 @@ class ScanHistoryManager(DBMixin):
 
         if kwargs.get('ips'):
             from api.lib.cmdb.ipam.address import IpAddressManager
-            IpAddressManager().assign_ips(kwargs['ips'], None, kwargs.get('cidr'),
+            IpAddressManager().assign_ips(kwargs['ips'], ci_id, kwargs.get('cidr'),
                                           **{IPAddressBuiltinAttributes.IS_USED: 1})
 
             scan_rule = IPAMSubnetScan.get_by(ci_id=ci_id, first=True, to_dict=False)

@@ -1145,13 +1145,14 @@ class CITypeAttributeGroupManager(object):
             else:
                 group_pos = group2pos[group['name']]
 
-            attr = None
             for i in items:
                 if i.attr_id in id2attr:
                     attr = id2attr[i.attr_id]
                     attr['inherited'] = group['inherited']
                     attr['inherited_from'] = group.get('inherited_from')
                     result[group_pos]['attributes'].append(attr)
+                else:
+                    continue
 
                 if i.attr_id in attr2pos:
                     result[attr2pos[i.attr_id][0]]['attributes'].remove(attr2pos[i.attr_id][1])
