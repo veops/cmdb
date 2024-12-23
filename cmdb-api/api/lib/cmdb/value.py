@@ -136,7 +136,7 @@ class AttributeValueManager(object):
         if not re.compile(expr).match(str(value)):
             return abort(400, ErrFormat.attribute_value_invalid2.format(alias, value))
 
-    def _validate(self, attr, value, value_table, ci=None, type_id=None, ci_id=None, type_attr=None):
+    def _validate(self, attr, value, value_table, ci=None, type_id=None, ci_id=None, type_attr=None, unique_name=None):
         if not attr.is_reference:
             ci = ci or {}
             v = self._deserialize_value(attr.alias, attr.value_type, value)
@@ -146,7 +146,7 @@ class AttributeValueManager(object):
         else:
             v = value or None
 
-        attr.is_unique and self._check_is_unique(
+        (attr.is_unique or attr.name == unique_name) and self._check_is_unique(
             value_table, attr, ci and ci.id or ci_id, ci and ci.type_id or type_id, v)
         self._check_is_required(ci and ci.type_id or type_id, attr, v, type_attr=type_attr)
         if attr.is_reference:
@@ -237,7 +237,10 @@ class AttributeValueManager(object):
             if computed_value is not None:
                 ci_dict[attr['name']] = computed_value
 
-    def valid_attr_value(self, ci_dict, type_id, ci_id, name2attr, alias2attr=None, ci_attr2type_attr=None):
+    def valid_attr_value(self, ci_dict, type_id, ci_id, name2attr,
+                         alias2attr=None,
+                         ci_attr2type_attr=None,
+                         unique_name=None):
         key2attr = dict()
         alias2attr = alias2attr or {}
         ci_attr2type_attr = ci_attr2type_attr or {}
@@ -268,7 +271,8 @@ class AttributeValueManager(object):
 
                 else:
                     value = self._validate(attr, value, value_table, ci=None, type_id=type_id, ci_id=ci_id,
-                                           type_attr=ci_attr2type_attr.get(attr.id))
+                                           type_attr=ci_attr2type_attr.get(attr.id),
+                                           unique_name=unique_name)
                     ci_dict[key] = value
             except BadRequest as e:
                 raise

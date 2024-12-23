@@ -524,9 +524,13 @@ class CIManager(object):
         raw_dict = copy.deepcopy(ci_dict)
 
         ci_attr2type_attr = {type_attr.attr_id: type_attr for type_attr, _ in attrs}
+        unique_name = None
         for _, attr in attrs:
             if attr.default and attr.default.get('default') == AttributeDefaultValueEnum.UPDATED_AT:
                 ci_dict[attr.name] = now
+
+            if attr.id == ci_type.unique_id:
+                unique_name = attr.name
 
         value_manager = AttributeValueManager()
 
@@ -557,7 +561,8 @@ class CIManager(object):
 
             ci_dict = {k: v for k, v in ci_dict.items() if k in ci_type_attrs_name}
             key2attr = value_manager.valid_attr_value(ci_dict, ci.type_id, ci.id, ci_type_attrs_name,
-                                                      ci_attr2type_attr=ci_attr2type_attr)
+                                                      ci_attr2type_attr=ci_attr2type_attr,
+                                                      unique_name=unique_name)
 
             if computed_attrs:
                 value_manager.handle_ci_compute_attributes(ci_dict, computed_attrs, ci)
