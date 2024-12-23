@@ -228,6 +228,12 @@ def cmdb_trigger():
     """
     from api.lib.cmdb.ci import CITriggerManager
 
+    current_app.test_request_context().push()
+    if not UserCache.get('worker'):
+        from api.lib.perm.acl.user import UserCRUD
+        UserCRUD.add(username='worker', password=uuid.uuid4().hex, email='worker@xxx.com')
+    login_user(UserCache.get('worker'))
+
     current_day = datetime.datetime.today().strftime("%Y-%m-%d")
     trigger2cis = dict()
     trigger2completed = dict()
