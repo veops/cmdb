@@ -824,6 +824,10 @@ body {
   color: @primary-color !important;
 }
 
+.el-select-dropdown__item.hover {
+  background-color: @primary-color_5;
+}
+
 .ant-tabs-nav .ant-tabs-tab {
   margin-right: 16px;
 }
@@ -969,7 +973,7 @@ body {
 // 白色背景
 .custom-treeselect-white {
   .custom-vue-treeselect__control(
-    #fff,
+    ~'#fff !important',
     1px solid #d9d9d9,
     none,
     @primary-color
@@ -1064,7 +1068,7 @@ body {
   // }
   .vxe-body--row {
     &.row--stripe {
-      background-color: rgba(240, 245, 255, 0.4) !important;
+      background-color: @primary-color_6 !important;
       border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
       border-radius: 5px !important;
       > td {
@@ -1097,6 +1101,7 @@ body {
   
       &:focus {
         background-color: @primary-color_7;
+        border: solid 1px @primary-color;
       }
     }
   }
@@ -1110,15 +1115,24 @@ body {
   color: #333;
   cursor: default;
 }
+.ant-input:focus,
+.ant-input-number:focus,
+.ant-input-number-focused {
+  box-shadow: none;
+}
+
+.ant-pagination-options-quick-jumper input:focus {
+  box-shadow: none;
+}
 
 // vxe-table checkbox 选中 highlight
 .vxe-table--render-default .vxe-body--row.row--checked,
 .vxe-table--render-default .vxe-body--row.row--radio {
-  background: aliceblue !important;
+  background: @primary-color_5 !important;
 }
 .vxe-table--render-default .vxe-body--row.row--hover.row--checked,
 .vxe-table--render-default .vxe-body--row.row--hover.row--radio {
-  background: lightskyblue !important;
+  background: @primary-color_4 !important;
 }
 
 // vxe-table 颜色
@@ -1177,6 +1191,15 @@ body {
 .vxe-select.is--active:not(.is--filter) > .vxe-input .vxe-input--inner,
 .vxe-input:not(.is--disabled).is--active .vxe-input--inner {
   border-color: @primary-color !important;
+}
+
+.vxe-table--render-default .vxe-body--row.row--hover,
+.vxe-table--render-default .vxe-body--row.row--hover.row--stripe {
+  background-color: @primary-color_7;
+}
+
+.vxe-select-option:not(.is--disabled).is--hover {
+  background-color: @primary-color_5;
 }
 
 //批量操作
@@ -1262,7 +1285,7 @@ body {
 }
 
 .ant-btn-primary:not(.ant-btn-background-ghost) {
-  .btn-wave-hover(#3F75FF);
+  .btn-wave-hover(@primary-color_9);
 }
 
 // button
@@ -1296,6 +1319,35 @@ body {
   }
 }
 
+.ops-select-bg {
+  .ant-select-selection {
+    background-color: @primary-color_7;
+  }
+
+  &:hover {
+    .ant-select-selection {
+      background-color: @primary-color_5;
+    }
+  }
+
+  .ant-select-focused {
+    .ant-select-selection {
+      background-color: @primary-color_7;
+      border: solid 1px @primary-color;
+    }
+  }
+}
+
+.ant-select-selection {
+  box-shadow: none !important;
+}
+
+// date picker
+.ant-calendar-today .ant-calendar-date {
+  color: @primary-color;
+  border-color: @primary-color;
+}
+
 //dropdown
 .ops-dropdown {
   .ant-dropdown-menu-item:hover,
@@ -1303,6 +1355,11 @@ body {
     background-color: @primary-color_5;
     color: @primary-color;
   }
+}
+
+// radio
+.ant-radio-input:focus + .ant-radio-inner {
+  box-shadow: none;
 }
 
 //modal
@@ -1396,6 +1453,14 @@ body {
   .el-input-number--small .el-input-number__decrease,
   .el-input-number--small .el-input-number__increase {
     width: 28px;
+
+    &:hover {
+      color: @primary-color; 
+
+      &:not(.is-disabled)~.el-input .el-input__inner:not(.is-disabled) {
+        border-color: @primary-color;
+      }
+    }
   }
 
   .el-input-number--small {
@@ -1465,4 +1530,17 @@ body {
 
 .ant-form-explain{
   font-size: 12px;
+}
+
+.ant-message-info .anticon,
+.ant-message-loading .anticon {
+  color: @primary-color_9;
+}
+
+.primary-color {
+  color: @primary-color !important;
+}
+
+.primary-bg-color {
+  background-color: @primary-color;
 }

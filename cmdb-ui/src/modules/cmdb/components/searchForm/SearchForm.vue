@@ -53,7 +53,7 @@
             <a-icon
               type="search"
               slot="suffix"
-              :style="{ color: fuzzySearch ? '#2f54eb' : '#d9d9d9', cursor: 'pointer' }"
+              :class="['search-form-bar-input-icon', fuzzySearch ? 'search-form-bar-input-icon-focus' : '']"
               @click="emitRefresh"
             />
             <a-tooltip slot="prefix" placement="bottom" :overlayStyle="{ maxWidth: '550px', whiteSpace: 'pre-line' }">
@@ -308,6 +308,16 @@ export default {
   justify-content: space-between;
   align-items: center;
   height: 32px;
+
+  &-input-icon {
+    cursor: pointer;
+    color: #d9d9d9;
+
+    &-focus {
+      color: @primary-color;
+    }
+  }
+
   .search-form-bar-filter {
     .ops_display_wrapper(transparent);
 

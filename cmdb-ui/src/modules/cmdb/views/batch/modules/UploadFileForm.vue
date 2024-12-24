@@ -14,7 +14,7 @@
       <p v-html="$t('cmdb.batch.drawTips1')"></p>
       <p v-html="$t('cmdb.batch.drawTips2')"></p>
       <div v-for="item in fileList" :key="item.name" class="cmdb-batch-upload-dragger-file">
-        <span><a-icon type="file" :style="{ color: '#2F54EB', marginRight: '5px' }" />{{ item.name }}</span>
+        <span><a-icon type="file" class="cmdb-batch-upload-dragger-file-icon"/>{{ item.name }}</span>
         <a-progress :status="progressStatus" :percent="percent" />
       </div>
     </a-upload-dragger>
@@ -92,12 +92,7 @@ export default {
   }
   .ant-upload.ant-upload-drag {
     border: none;
-    background: linear-gradient(90deg, @text-color_5 50%, transparent 0) repeat-x,
-      linear-gradient(90deg, @text-color_5 50%, transparent 0) repeat-x,
-      linear-gradient(0deg, @text-color_5 50%, transparent 0) repeat-y,
-      linear-gradient(0deg, @text-color_5 50%, transparent 0) repeat-y;
-    background-size: 15px 1px, 15px 1px, 1px 15px, 1px 15px;
-    background-position: 0 0, 0 100%, 0 0, 100% 0;
+    background: ~'linear-gradient(90deg, @{text-color_5} 50%, transparent 0) repeat-x 0 0 / 15px 1px, linear-gradient(90deg, @{text-color_5} 50%, transparent 0) repeat-x 0 100% / 15px 1px, linear-gradient(0deg, @{text-color_5} 50%, transparent 0) repeat-y 0 0 / 1px 15px, linear-gradient(0deg, @{text-color_5} 50%, transparent 0) repeat-y 100% 0 / 1px 15px';
     .ant-upload-drag-container > i {
       font-size: 60px;
     }
@@ -106,13 +101,7 @@ export default {
     }
 
     &:hover {
-      background: linear-gradient(90deg, @primary-color_2 50%, transparent 0) repeat-x,
-      linear-gradient(90deg, @primary-color_2 50%, transparent 0) repeat-x,
-      linear-gradient(0deg, @primary-color_2 50%, transparent 0) repeat-y,
-      linear-gradient(0deg, @primary-color_2 50%, transparent 0) repeat-y;
-      background-size: 15px 1px, 15px 1px, 1px 15px, 1px 15px;
-      background-position: 0 0, 0 100%, 0 0, 100% 0;
-      background-color: @primary-color_7;
+      background: ~'linear-gradient(90deg, @{primary-color_2} 50%, transparent 0) repeat-x 0 0 / 15px 1px, linear-gradient(90deg, @{primary-color_2} 50%, transparent 0) repeat-x 0 100% / 15px 1px, linear-gradient(0deg, @{primary-color_2} 50%, transparent 0) repeat-y 0 0 / 1px 15px, linear-gradient(0deg, @{primary-color_2} 50%, transparent 0) repeat-y 100% 0 / 1px 15px, @{primary-color_7}';
     }
   }
   .ant-upload.ant-upload-drag .ant-upload-drag-container {
@@ -138,6 +127,11 @@ export default {
     > span {
       white-space: nowrap;
       margin-right: 10px;
+    }
+
+    &-icon {
+      color: @primary-color;
+      margin-right: 5px;
     }
   }
   .cmdb-batch-upload-tips {

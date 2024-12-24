@@ -341,7 +341,7 @@ export default {
   },
 }
 </script>
-<style scoped>
+<style lang="less" scoped>
 .pop_btn {
   text-align: right;
   margin-top: 24px;

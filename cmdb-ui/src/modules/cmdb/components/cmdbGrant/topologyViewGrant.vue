@@ -8,7 +8,7 @@
       :data="tableData"
       :max-height="`${tableHeight}px`"
       :scroll-y="{enabled: true}"
-      :row-style="(params) => getCurrentRowStyle(params, addedRids)"
+      :row-class-name="(params) => getCurrentRowClass(params, addedRids)"
     >
       <vxe-column field="name"></vxe-column>
       <vxe-column v-for="col in columns" :key="col" :field="col" :title="permMap[col]">
@@ -27,7 +27,7 @@
 <script>
 import { permMap } from './constants.js'
 import { grantTopologyView, revokeTopologyView } from '@/modules/cmdb/api/topology.js'
-import { getCurrentRowStyle } from './utils'
+import { getCurrentRowClass } from './utils'
 export default {
   name: 'TopologyViewGrant',
   inject: ['loading', 'isModal'],
@@ -73,7 +73,7 @@ export default {
     }
   },
   methods: {
-    getCurrentRowStyle,
+    getCurrentRowClass,
     grantDepart() {
       this.$emit('grantDepart', this.grantType)
     },

@@ -26,7 +26,7 @@
           <span>{{ column.title }}</span>
           <a-popover trigger="click" placement="bottom">
             <a-icon class="filter" type="filter" theme="filled" />
-            <a slot="content">
+            <a class="filter-content" slot="content">
               <a-select
                 v-model="queryParams.operate_type"
                 :placeholder="$t('cmdb.history.filterOperate')"
@@ -562,5 +562,11 @@ export default {
 }
 p {
   margin-bottom: 0;
+}
+
+.filter-content {
+  display: flex;
+  align-items: center;
+  column-gap: 8px;
 }
 </style>

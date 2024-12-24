@@ -363,7 +363,7 @@ export default {
         width: 12px;
         height: 12px;
         background-color: @primary-color;
-        border: solid 3px #E2E7FC;
+        border: solid 3px @primary-color_4;
         border-radius: 50%
       }
 

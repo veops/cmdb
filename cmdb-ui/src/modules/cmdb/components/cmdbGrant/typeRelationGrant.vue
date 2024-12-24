@@ -7,7 +7,7 @@
       class="ops-stripe-table"
       :data="tableData"
       :max-height="`${tableHeight}px`"
-      :row-style="(params) => getCurrentRowStyle(params, addedRids)"
+      :row-class-name="(params) => getCurrentRowClass(params, addedRids)"
     >
       <vxe-column field="name"></vxe-column>
       <vxe-column v-for="col in columns" :key="col" :field="col" :title="permMap[col]">
@@ -26,7 +26,7 @@
 <script>
 import { permMap } from './constants.js'
 import { grantTypeRelation, revokeTypeRelation } from '../../api/CITypeRelation.js'
-import { getCurrentRowStyle } from './utils'
+import { getCurrentRowClass } from './utils'
 
 export default {
   name: 'TypeRelationGrant',
@@ -69,7 +69,7 @@ export default {
     }
   },
   methods: {
-    getCurrentRowStyle,
+    getCurrentRowClass,
     grantDepart() {
       this.$emit('grantDepart', this.grantType)
     },

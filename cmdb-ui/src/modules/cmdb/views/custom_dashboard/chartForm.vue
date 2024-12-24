@@ -148,7 +148,7 @@
                       :type="ciType.icon.split('$$')[0]"
                     />
                   </template>
-                  <span :style="{ color: '#2f54eb' }" v-else>{{ ciType.name[0].toUpperCase() }}</span>
+                  <span class="primary-color" v-else>{{ ciType.name[0].toUpperCase() }}</span>
                 </template>
                 <span :style="{ color: '#000' }"> {{ form.name }}</span>
               </div>
@@ -800,7 +800,7 @@ export default {
         }
       }
       .chart-right-type-box-selected {
-        background-color: #e5f1ff;
+        background-color: @primary-color_3;
       }
     }
     .chart-width {

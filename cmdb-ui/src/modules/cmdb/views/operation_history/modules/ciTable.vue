@@ -30,7 +30,7 @@
           <span>{{ column.title }}</span>
           <a-popover trigger="click" placement="bottom">
             <a-icon class="filter" type="filter" theme="filled" />
-            <a slot="content">
+            <a class="filter-content" slot="content">
               <a-input
                 :placeholder="$t('cmdb.history.userTips')"
                 size="small"
@@ -452,5 +452,11 @@ export default {
   &:hover {
     color: #606266;
   }
+}
+
+.filter-content {
+  display: flex;
+  align-items: center;
+  column-gap: 8px;
 }
 </style>

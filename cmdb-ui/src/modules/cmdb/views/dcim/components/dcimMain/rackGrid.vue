@@ -268,18 +268,18 @@ export default {
         margin-right: 2px;
         font-size: 12px;
         font-weight: 400;
-        color: #3F75FF;
+        color: #2F54EB;
       }
 
       &-icon {
         font-size: 12px;
-        color: #3F75FF;
+        color: #2F54EB;
       }
     }
 
     &:hover {
       background-color: #FFFFFF;
-      box-shadow: 0px 22px 33px 0px rgba(41, 65, 126, 0.25);
+      box-shadow: ~'0px 22px 33px 0px @{primary-color}15';
       z-index: 2;
 
       .rack-grid-item-name {

@@ -48,7 +48,7 @@
                         :type="ciType.icon.split('$$')[0]"
                       />
                     </template>
-                    <span :style="{ color: '#2f54eb' }" v-else>{{ ciType.name[0].toUpperCase() }}</span>
+                    <span class="primary-color" v-else>{{ ciType.name[0].toUpperCase() }}</span>
                   </span>
                   <span class="tree-views-left-header-name">{{ ciType.alias || ciType.name }}</span>
                   <div class="actions">

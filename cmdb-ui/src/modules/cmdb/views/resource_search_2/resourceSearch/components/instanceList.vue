@@ -431,7 +431,7 @@ export default {
       }
 
       &:hover {
-        box-shadow: 0px 2px 12px 0px rgba(147, 168, 223, 0.20);
+        box-shadow: ~'0px 2px 12px 0px @{primary-color}15';
 
         .list-card-collect {
           display: inline-block;

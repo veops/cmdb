@@ -31,7 +31,7 @@
       <vxe-column field="source_ci_type_name" :title="$t('cmdb.ciType.sourceCIType')"></vxe-column>
       <vxe-column field="relation_type" :title="$t('cmdb.ciType.relationType')">
         <template #default="{row}">
-          <span style="color:#2f54eb" v-if="row.isParent">{{ $t('cmdb.ciType.isParent') }}</span>
+          <span class="primary-color" v-if="row.isParent">{{ $t('cmdb.ciType.isParent') }}</span>
           {{ row.relation_type }}
         </template>
       </vxe-column>
@@ -700,7 +700,7 @@ export default {
   }
 
   /deep/ .relation-table-parent {
-    background-color: #f5f8ff !important;
+    background-color: @primary-color_5 !important;
   }
 }
 </style>

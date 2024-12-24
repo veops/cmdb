@@ -58,15 +58,11 @@
           >
             <ops-icon
               :type="treeNodeData.icon"
-              class="dcim-tree-node-icon"
-              :style="{ color: treeNodeData.iconColor }"
+              :class="['dcim-tree-node-icon', treeNodeData.dcimType === DCIM_TYPE.REGION ? 'primary-color' : '']"
             />
             <a-tooltip :title="treeNodeData.title">
               <span
-                class="dcim-tree-node-title"
-                :style="{
-                  color: treeKey === treeNodeData.key ? '#2F54EB' : ''
-                }"
+                :class="['dcim-tree-node-title', treeKey === treeNodeData.key ? 'primary-color' : '']"
               >
                 {{ treeNodeData.title }}
               </span>
@@ -164,6 +160,7 @@ export default {
         DCIM_TYPE.REGION,
         DCIM_TYPE.IDC
       ],
+      DCIM_TYPE,
 
       viewDetailCITypeId: 0,
       viewDetailAttrObj: {},
@@ -365,6 +362,7 @@ export default {
     &-icon {
       font-size: 12px;
       flex-shrink: 0;
+      color: #A5A9BC;
     }
 
     &-title {

@@ -226,16 +226,16 @@ export default {
     right: 4px;
     display: none;
     &:hover {
-      color: #1f78d1;
+      color: @primary-color;
     }
   }
   &:hover .ant-transfer-list-icon {
     display: inline;
-    background-color: #c0eaff;
+    background-color: @primary-color_4;
     border-radius: 4px;
   }
 }
 .ant-transfer-list-content-item-selected {
-  background-color: #f0faff;
+  background-color: ~'@{primary-color_8}35';
 }
 </style>

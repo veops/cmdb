@@ -366,5 +366,9 @@ export default {
 
     .btn-wave-hover(@primary-color_4, -1);
   }
+
+  .grant-table-row-focus {
+    background-color: @primary-color_8;
+  }
 }
 </style>

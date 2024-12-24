@@ -654,11 +654,11 @@ export default {
         height: 155px;
         border-radius: @border-radius-box;
         background-color: #fff;
-        box-shadow: 0px 2px 8px rgba(149, 160, 208, 0.25);
+        box-shadow: ~'0px 2px 8px @{primary-color}15';
         margin: 0 20px 20px 0;
         padding: 12px;
         &:hover {
-          box-shadow: 4px 25px 30px rgba(50, 89, 134, 0.25);
+          box-shadow: ~'4px 25px 30px @{primary-color}15';
           transform: scale(1.1);
         }
         .cmdb-preference-header {
@@ -733,10 +733,10 @@ export default {
             align-items: center;
             gap: 3px;
             font-size: 12px;
-            color: rgba(0, 0, 0, 0.76);
+            color: @text-color_1;
 
             &:hover {
-              color: #1890ff;
+              color: @primary-color;
             }
           }
 

@@ -35,7 +35,7 @@
                   :title="$t('cmdb.ciType.choiceWebhookTips')"
                 >
                   <a-icon
-                    style="position:absolute;top:3px;left:-17px;color:#2f54eb;"
+                    class="tab-webhook-filter-icon"
                     type="question-circle"
                     theme="filled"
                   />
@@ -553,7 +553,7 @@ export default {
 
   &-tag {
     background-color: #E1EFFF;
-    color: #2F54EB;
+    color: @primary-color;
     font-size: 10px;
     font-weight: 400;
     padding: 0 3px;
@@ -573,6 +573,13 @@ export default {
     height: 20px;
     margin: 5px;
   }
+}
+
+.tab-webhook-filter-icon {
+  position: absolute;
+  top: 3px;
+  left: -17px;
+  color: @primary-color;
 }
 
 .script-tip {

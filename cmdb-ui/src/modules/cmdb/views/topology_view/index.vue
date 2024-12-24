@@ -109,7 +109,7 @@
                           :type="topo.icon.split('$$')[0]"
                         />
                       </template>
-                      <span :style="{ color: '#2f54eb' }" v-else>{{ topo.name[0].toUpperCase() }}</span>
+                      <span class="primary-color" v-else>{{ topo.name[0].toUpperCase() }}</span>
                     </span>
                   </div>
                   <span class="topo-left-detail-title">{{ topo.alias || topo.name }}</span>

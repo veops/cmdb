@@ -20,7 +20,7 @@
       <vxe-column
         field="relation_type_id"
         :title="$t('cmdb.custom_dashboard.relation')"
-        :filters="[{ data: '' }]"
+        :filters="relationTypeList"
         :filter-multiple="false"
       >
         <template #default="{ row }">
@@ -144,7 +144,7 @@ export default {
     return {
       drawerVisible: false,
       tableData: [],
-      relationTypeList: null,
+      relationTypeList: [],
       type2attributes: {},
       tableAttrList: [],
     }
@@ -201,13 +201,6 @@ export default {
     async getRelationTypes() {
       const res = await getRelationTypes()
       this.relationTypeList = res.map((item) => ({ value: item.id, label: item.name }))
-      const $table = this.$refs.xTable
-      if ($table) {
-        const nameColumn = $table.getColumnByField('relation_type_id')
-        if (nameColumn) {
-          $table.setFilter(nameColumn, this.relationTypeList)
-        }
-      }
     },
     // 转换关联关系
     handleConstraint(constraintId) {
@@ -358,6 +351,10 @@ export default {
 
   &-action {
     margin-left: 5px;
+  }
+
+  /deep/ .ant-select-selection {
+    box-shadow: none;
   }
 }
 </style>

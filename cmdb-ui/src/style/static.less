@@ -10,6 +10,7 @@
 @primary-color_6: #f9fbff;
 @primary-color_7: #f7f8fa;
 @primary-color_8: #b1c9ff;
+@primary-color_9: #3F75FF;
 
 @link-color: @primary-color;
 
@@ -73,7 +74,8 @@
 
 .btn-wave-hover(
   @hoverBgColor,
-  @bgZIndex: 0
+  @bgZIndex: 0,
+  @duration: 0.3s
 ) {
   position: relative;
   overflow: hidden;
@@ -99,10 +101,10 @@
     transform: scale(0) translate(-50%, -50%);
     transform-origin: left top;
 
-    -webkit-transition: -webkit-transform 0.3s ease-out;
-    transition: -webkit-transform 0.3s ease-out;
-    transition: transform 0.3s ease-out;
-    transition: transform 0.3s ease-out, -webkit-transform 0.3s ease-out;
+    -webkit-transition: -webkit-transform @duration ease-out;
+    transition: -webkit-transform @duration ease-out;
+    transition: transform @duration ease-out;
+    transition: transform @duration ease-out, -webkit-transform @duration ease-out;
   }
 
   &:not([disabled]):hover {
