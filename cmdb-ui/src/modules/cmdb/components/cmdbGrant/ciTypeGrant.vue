@@ -7,7 +7,7 @@
       class="ops-stripe-table"
       :data="filterTableData"
       :max-height="`${tableHeight}px`"
-      :row-style="(params) => getCurrentRowStyle(params, addedRids)"
+      :row-class-name="(params) => getCurrentRowClass(params, addedRids)"
     >
       <vxe-column field="name"></vxe-column>
       <vxe-column v-for="col in columns" :key="col" :field="col" :title="permMap[col]">
@@ -24,7 +24,7 @@
         </template>
       </vxe-column>
       <template #empty>
-        <div v-if="loading()" style="height: 200px; line-height: 200px;color:#2F54EB">
+        <div v-if="loading()" class="ci-type-grant-loading">
           <a-icon type="loading" /> {{ $t('loading') }}
         </div>
         <div v-else>
@@ -45,7 +45,7 @@ import _ from 'lodash'
 import { permMap } from './constants.js'
 import { grantCiType, revokeCiType } from '../../api/CIType'
 import ReadCheckbox from './readCheckbox.vue'
-import { getCurrentRowStyle } from './utils'
+import { getCurrentRowClass } from './utils'
 
 export default {
   name: 'CiTypeGrant',
@@ -100,7 +100,7 @@ export default {
     }
   },
   methods: {
-    getCurrentRowStyle,
+    getCurrentRowClass,
     async handleChange(e, col, row) {
       if (e.target.checked) {
         await grantCiType(this.CITypeId, row.rid, { perms: [col] }).catch(() => {
@@ -146,5 +146,11 @@ export default {
 <style lang="less" scoped>
 .ci-type-grant {
   padding: 10px 0;
+
+  &-loading {
+    height: 200px;
+    line-height: 200px;
+    color: @primary-color;
+  }
 }
 </style>

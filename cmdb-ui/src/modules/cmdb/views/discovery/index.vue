@@ -70,7 +70,7 @@
                 class="setting-discovery-add"
                 @click="handleOpenEditDrawer(null, 'add', DISCOVERY_CATEGORY_TYPE.PLUGIN)"
               >
-                <a-icon type="plus-circle" theme="twoTone" />
+                <a-icon class="setting-discovery-add-icon" type="plus-circle" />
                 <span class="setting-discovery-add-text">
                   {{ $t('cmdb.ad.addPlugin') }}
                 </span>
@@ -379,6 +379,10 @@ export default {
       align-items: center;
       justify-content: center;
       cursor: pointer;
+
+      &-icon {
+        color: @primary-color_9;
+      }
 
       &-text {
         color: @text-color_3;

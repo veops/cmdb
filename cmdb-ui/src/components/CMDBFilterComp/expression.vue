@@ -106,7 +106,7 @@
       <CIReferenceAttr
         v-if="getAttr(item.property).is_reference && (item.exp === 'is' || item.exp === '~is')"
         :style="{ width: '175px' }"
-        class="select-filter-component"
+        class="select-filter-component ops-select-bg"
         :referenceTypeId="getAttr(item.property).reference_type_id"
         :disabled="disabled"
         v-model="item.value"
@@ -114,7 +114,7 @@
       <a-select
         v-else-if="getAttr(item.property).is_bool && (item.exp === 'is' || item.exp === '~is')"
         v-model="item.value"
-        class="select-filter-component"
+        class="select-filter-component ops-select-bg"
         :style="{ width: '175px' }"
         :disabled="disabled"
         :placeholder="$t('placeholder2')"
@@ -398,7 +398,6 @@ export default {
 
   /deep/ .ant-select-selection {
     height: 24px;
-    background: #f7f8fa;
     line-height: 24px;
     border: none;
 

@@ -117,8 +117,8 @@
               }"
               @click="addDevice(index)"
             >
-              <ops-icon
-                type="monitor-add"
+              <a-icon
+                type="plus-circle"
                 class="rack-container-main-list-gap-icon"
               />
               <span
@@ -492,12 +492,13 @@ export default {
         &-icon {
           font-size: 12px;
           display: none;
+          color: @primary-color;
         }
 
         &-text {
           font-size: 12px;
           font-weight: 400;
-          color: rgba(0, 87, 255, 0.80);
+          color: @primary-color;
           margin-left: 6px;
           display: none;
         }
@@ -508,7 +509,7 @@ export default {
         }
 
         &:hover {
-          background-color: #D5DDEE;
+          background-color: @primary-color_4;
 
           .rack-container-main-list-gap-icon {
             display: inline-block;

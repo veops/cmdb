@@ -63,7 +63,7 @@
                   :type="getCiType(item).icon.split('$$')[0]"
                 />
               </template>
-              <span :style="{ color: '#2f54eb' }" v-else>{{ getCiType(item).name[0].toUpperCase() }}</span>
+              <span class="primary-color" v-else>{{ getCiType(item).name[0].toUpperCase() }}</span>
             </template>
             <span :style="{ color: item.options.chartType === 'count' ? item.options.fontColor : '#000' }">{{
               item.options.name

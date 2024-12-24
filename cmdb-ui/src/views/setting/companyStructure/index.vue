@@ -100,7 +100,7 @@
                   />
                 </div>
                 <!-- 筛选框 -->
-                <div class="Screening-box" v-if="activeGroupIndex === 1" style="background-color: rgb(240, 245, 255)">
+                <div class="Screening-box" v-if="activeGroupIndex === 1">
                   <a-popover
                     @visibleChange="visibleChange"
                     trigger="click"
@@ -1166,7 +1166,7 @@ export default {
           .Screening-box {
             margin-left: 10px;
             display: inline-block;
-            .ops_display_wrapper(#fff);
+            .ops_display_wrapper(@primary-color_5);
             .screening-box-scene-icon {
               color: @primary-color;
               font-size: 12px;

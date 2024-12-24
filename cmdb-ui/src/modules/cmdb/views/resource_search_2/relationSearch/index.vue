@@ -656,15 +656,15 @@ export default {
 
       &:hover {
         .relation-search-expand-handle {
-          background-color: #D9E4FA;
+          background-color: @primary-color_4;
         }
 
         .relation-search-expand-icon {
-          color: #2F54EB;
+          color: @primary-color;
         }
 
         .relation-search-expand-text {
-          color: #2F54EB;
+          color: @primary-color;
         }
       }
     }

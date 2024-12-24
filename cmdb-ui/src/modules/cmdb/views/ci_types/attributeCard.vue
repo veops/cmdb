@@ -47,8 +47,8 @@
             <a-descriptions layout="horizontal" bordered size="small" :column="2">
               <a-descriptions-item v-for="item in propertyList" :key="item.property" :label="item.label">
                 <ops-icon
-                  :style="{ color: property[item.property] ? '#7f97fa' : '', fontSize: '10px' }"
                   :type="`ops-${item.property}-disabled`"
+                  :class="['attribute-card-footer-icon', property[item.property] ? 'attribute-card-footer-icon-mark' : '']"
                 />
               </a-descriptions-item>
               <a-descriptions-item label></a-descriptions-item>
@@ -58,7 +58,7 @@
             <ops-icon
               v-for="item in propertyList.filter((p) => property[p.property])"
               :key="item.property"
-              :style="{ color: '#7f97fa', fontSize: '10px' }"
+              class="attribute-card-footer-icon attribute-card-footer-icon-mark"
               :type="`ops-${item.property}-disabled`"
             />
           </a-space>
@@ -247,13 +247,13 @@ export default {
 .attribute-card {
   width: 172px;
   height: 75px;
-  background: @primary-color_6;
+  background-color: @primary-color_6;
   border-radius: 2px;
   position: relative;
   margin-bottom: 16px;
   transition: all 0.3s;
   &:hover {
-    box-shadow: 0 4px 12px #4e5ea066;
+    box-shadow: 0 4px 12px @primary-color_8;
     .attribute-card-operation {
       visibility: visible !important;
     }
@@ -342,6 +342,15 @@ export default {
     padding: 2px 0 2px 5px;
   }
 }
+
+.attribute-card-footer-icon {
+  font-size: 10px;
+
+  &-mark {
+    color: @primary-color_2;
+  }
+}
+
 .attribute-card-inherited {
   background: @primary-color_7;
   .attribute-card-footer {
@@ -356,10 +365,10 @@ export default {
   justify-content: center;
   cursor: pointer;
   position: relative;
-  background-color: inherit;
+  background-color: inherit !important;
   &:hover {
-    box-shadow: none;
-    background-color: @primary-color_6;
+    box-shadow: none !important;
+    background-color: @primary-color_6 !important;
   }
   &:after {
     content: '';

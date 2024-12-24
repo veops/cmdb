@@ -165,7 +165,7 @@ export default {
   display: inline-block;
   width: 180px;
   height: 105px;
-  box-shadow: 0px 2px 8px rgba(122, 140, 204, 0.25);
+  box-shadow: 0px 2px 8px @primary-color_3;
   border-radius: 4px;
   position: relative;
   margin-bottom: 40px;
@@ -297,7 +297,7 @@ export default {
 
   &, &.discovery-card-small {
     &:hover {
-      box-shadow: 0px 6px 20px 0px rgba(122, 140, 204, 0.30);
+      box-shadow: 0px 6px 20px 0px @primary-color_3;
     }
   }
 
@@ -314,7 +314,7 @@ export default {
     }
 
     &:hover {
-      box-shadow: 0px 6px 28px 0px rgba(122, 140, 204, 0.30);
+      box-shadow: 0px 6px 28px 0px @primary-color_3;
     }
   }
 }

@@ -1,36 +1,48 @@
 <template>
-  <div :class="['search-input', classType ? 'search-input-' + classType : '', { 'column-search-mode': isColumnSearch }]">
+  <div :class="['search-input', classType ? 'search-input-' + classType : '']">
     <div class="search-area">
-      <div v-show="!isColumnSearch" class="input-wrapper">
-        <a-input
-          :value="searchValue"
-          class="search-input-component"
-          :placeholder="$t('cmdb.ciType.searchInputTip')"
-          @change="handleChangeSearchValue"
-          @pressEnter="saveCondition(true, 'normal')"
-        />
+      <a-input
+        v-show="searchMode === SEARCH_MODE.NORMAL"
+        :value="searchValue"
+        class="search-input-component"
+        :placeholder="$t('cmdb.ciType.searchInputTip')"
+        @change="handleChangeSearchValue"
+        @pressEnter="saveCondition(true)"
+      >
         <a-icon
           class="search-icon"
+          slot="prefix"
           type="search"
-          @click="saveCondition(true, 'normal')"
+          @click="saveCondition(true)"
         />
-      </div>
+      </a-input>
 
-      <div v-show="isColumnSearch" class="textarea-wrapper">
-        <div class="textarea-container">
-          <a-textarea
-            :value="searchValue"
-            class="column-search-component"
-            :rows="4"
-            :placeholder="$t('cmdb.ciType.columnSearchInputTip')"
-            @change="handleChangeColumnSearchValue"
-            @pressEnter="handlePressEnter"
-          />
+      <div
+        v-show="searchMode === SEARCH_MODE.COLUMN"
+        class="search-textarea-component"
+      >
+        <a-textarea
+          :value="searchValue"
+          :autosize="{
+            minRows: 3,
+            maxRows: 3,
+          }"
+          :placeholder="$t('cmdb.ciType.columnSearchInputTip')"
+          @change="handleChangeSearchValue"
+        />
+        <div class="search-textarea-icon-wrap">
           <a-icon
             class="search-icon"
             type="search"
-            @click="saveCondition(true, 'column')"
+            @click="saveCondition(true)"
           />
+
+          <a-tooltip :title="$t('cmdb.ciType.columnSearchTip')">
+            <a-icon
+              type="info-circle"
+              class="search-icon"
+            />
+          </a-tooltip>
         </div>
       </div>
 
@@ -46,11 +58,26 @@
           @saveCondition="saveCondition"
         />
 
-        <div class="column-search-btn" @click="toggleColumnSearch">
-          <a-icon class="column-search-btn-icon" type="menu" />
-          <span class="column-search-btn-title">
-            {{ isColumnSearch ? $t('cmdb.ciType.rowSearchMode') : $t('cmdb.ciType.columnSearchMode') }}
+        <div class="search-mode-switch">
+          <span
+            v-for="(item) in searchModeList"
+            :key="item.value"
+            :class="['search-mode-switch-item', searchMode === item.value ? 'search-mode-switch-item-active' : '']"
+            :style="{
+              width: isZh ? '40px' : '65px'
+            }"
+            @click="updateSearchMode(item.value)"
+          >
+            {{ $t(item.label) }}
           </span>
+
+          <span
+            class="search-mode-switch-slide"
+            :style="{
+              left: searchMode === SEARCH_MODE.COLUMN ? (isZh ? '44px' : '69px') : '4px',
+              width: isZh ? '40px' : '65px'
+            }"
+          ></span>
         </div>
       </div>
     </div>
@@ -68,6 +95,7 @@
 </template>
 
 <script>
+import { SEARCH_MODE } from '../constants.js'
 import FilterPopover from './filterPopover.vue'
 
 export default {
@@ -100,12 +128,31 @@ export default {
       type: String,
       default: ''
     },
-    isColumnSearch: {
-      type: Boolean,
-      default: false
+    searchMode: {
+      type: String,
+      default: SEARCH_MODE.NORMAL
+    }
+  },
+  data() {
+    return {
+      SEARCH_MODE,
+      searchModeList: [
+        {
+          value: SEARCH_MODE.NORMAL,
+          label: 'cmdb.ciType.rowSearchMode'
+        },
+        {
+          value: SEARCH_MODE.COLUMN,
+          label: 'cmdb.ciType.columnSearchMode'
+        },
+      ]
     }
   },
   computed: {
+    isZh() {
+      return this.$i18n.locale === 'zh'
+    },
+
     // 复制文字展示，与实际文本复制内容区别在于，未选择模型时不展示所有模型拼接数据
     copyText() {
       const regQ = /(?<=q=).+(?=&)|(?<=q=).+$/g
@@ -119,14 +166,15 @@ export default {
         textArray.push(exp)
       }
       if (this.searchValue) {
-        let processedValue = this.searchValue
-        if (this.isColumnSearch) {
+        if (
+          this.searchMode === SEARCH_MODE.COLUMN &&
+          this.searchValue.includes('\n')
+        ) {
           const values = this.searchValue.split('\n').filter(v => v.trim())
-          if (values.length) {
-            processedValue = `(${values.join(';')})`
-          }
+          textArray.push(`(${values.join(';')})`)
+        } else {
+          textArray.push(`*${this.searchValue}*`)
         }
-        textArray.push(`${!this.isColumnSearch ? '*' : ''}${processedValue}${!this.isColumnSearch ? '*' : ''}`)
       }
 
       return textArray.length ? `q=${textArray.join(',')}` : ''
@@ -136,8 +184,8 @@ export default {
     updateAllAttributesList(value) {
       this.$emit('updateAllAttributesList', value)
     },
-    saveCondition(isSubmit, searchType = 'normal') {
-      this.$emit('saveCondition', isSubmit, searchType)
+    saveCondition(isSubmit) {
+      this.$emit('saveCondition', isSubmit)
     },
     handleChangeSearchValue(e) {
       const value = e.target.value
@@ -163,9 +211,21 @@ export default {
           ciTypeIds.push(...ids)
         })
       }
-      const copyText = `${ciTypeIds?.length ? `_type:(${ciTypeIds.join(';')})` : ''}${exp ? `,${exp}` : ''}${
-        searchValue ? `,${!this.isColumnSearch ? '*' : ''}${searchValue}${!this.isColumnSearch ? '*' : ''}` : ''
-      }`
+
+      let copySearchValue = ''
+      if (searchValue) {
+        if (
+          this.searchMode === SEARCH_MODE.COLUMN &&
+          this.searchValue.includes('\n')
+        ) {
+          const values = searchValue.split('\n').filter(v => v.trim())
+          copySearchValue = `,(${values.join(';')})`
+        } else {
+          copySearchValue = `,*${searchValue}*`
+        }
+      }
+
+      const copyText = `${ciTypeIds?.length ? `_type:(${ciTypeIds.join(';')})` : ''}${exp ? `,${exp}` : ''}${copySearchValue}`
 
       this.$copyText(copyText)
         .then(() => {
@@ -176,33 +236,8 @@ export default {
         })
     },
 
-    toggleColumnSearch() {
-      this.$emit('toggleSearchMode', !this.isColumnSearch)
-      this.saveCondition(false, !this.isColumnSearch ? 'column' : 'normal')
-    },
-
-    handleChangeColumnSearchValue(e) {
-      const value = e.target.value
-      this.changeFilter({
-        name: 'searchValue',
-        value
-      })
-    },
-
-    handlePressEnter(e) {
-      if (this.isColumnSearch) {
-        // 列搜索模式下，按下 Enter 键时阻止默认行为并插入换行符
-        e.preventDefault()
-        const value = this.searchValue || ''
-        const cursorPosition = e.target.selectionStart
-        const newValue = value.slice(0, cursorPosition) + '\n' + value.slice(cursorPosition)
-        this.changeFilter({
-          name: 'searchValue',
-          value: newValue
-        })
-      } else {
-        this.saveCondition(true, 'normal')
-      }
+    updateSearchMode(mode) {
+      this.$emit('updateSearchMode', mode)
     }
   }
 }
@@ -211,115 +246,132 @@ export default {
 <style lang="less" scoped>
 .search-input {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
   margin-bottom: 16px;
 
   .search-area {
-    display: flex;
-    align-items: flex-start;
-    min-height: 48px;
     width: 100%;
-  }
-
-  .input-wrapper {
     position: relative;
-    flex-grow: 1;
 
     .search-input-component {
       height: 48px;
+      line-height: 48px;
+      border-radius: 48px;
       width: 100%;
       background-color: #FFFFFF;
-      border: 1px solid #d9d9d9;
       font-size: 14px;
-      border-radius: 8px;
 
-      /deep/ input {
-        height: 100%;
-        padding-right: 40px;
+      &:hover {
+        /deep/ .ant-input {
+          background-color: @primary-color_5;
+        }
+      }
+
+      /deep/ .ant-input {
+        border: none;
+        height: 48px;
+        line-height: 48px;
+        border-radius: 48px;
+
+        &:focus {
+          border: solid 1px @primary-color;
+          background-color: #FFFFFF !important;
+        }
+      }
+    }
+
+    .search-textarea-component {
+      position: relative;
+
+      .search-textarea-icon-wrap {
+        position: absolute;
+        top: 10px;
+        left: 12px;
+        display: flex;
+        flex-direction: column;
+        row-gap: 6px;
+      }
+
+      &:hover {
+        /deep/ .ant-input {
+          background-color: @primary-color_5;
+        }
+      }
+
+      /deep/ .ant-input {
+        border: none;
+        padding-left: 36px;
+        resize: none;
+
+        &:focus {
+          border: solid 1px @primary-color;
+          background-color: #FFFFFF !important;
+        }
       }
     }
 
     .search-icon {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #2F54EB;
+      color: @primary-color;
       font-size: 14px;
       cursor: pointer;
     }
   }
 
-  .textarea-wrapper {
-    flex-grow: 1;
+  .operation-area {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    right: 0px;
+    top: 0px;
+    height: 48px;
+    transform: translateX(100%);
 
-    .textarea-container {
+    .search-mode-switch {
+      display: flex;
+      align-items: center;
+      height: 32px;
+      background-color: @primary-color_3;
+      border-radius: 32px;
       position: relative;
-      width: 100%;
-      max-height: 200px;
+      padding: 0 4px;
+      margin-left: 14px;
+      cursor: pointer;
 
-      .column-search-component {
-        width: 100%;
-        max-height: 200px;
-        background-color: #FFFFFF;
-        border: 1px solid #d9d9d9;
-        font-size: 14px;
-        border-radius: 8px;
-        padding-right: 35px;
-        resize: none;
-        transition: all 0.3s;
+      &-item {
+        height: 24px;
+        width: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 400;
+        color: @text-color_2;
+        z-index: 1;
+        position: relative;
 
-        &:hover, &:focus {
-          border-color: #40a9ff;
-          box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        &-active {
+          color: @primary-color;
         }
       }
 
-      .search-icon {
+      &-slide {
         position: absolute;
-        right: 12px;
-        top: 12px;
-        color: #2F54EB;
-        font-size: 14px;
-        cursor: pointer;
+        transition: left 0.2s;
+        border-radius: 24px;
+        background-color: #FFFFFF;
+        height: 24px;
+        top: 4px;
+        width: 40px;
+        z-index: 0;
       }
-    }
-  }
-
-  .operation-area {
-    display: flex;
-    align-items: center;
-    height: 48px;
-    margin-left: 10px;
-  }
-
-  .column-search-btn {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    margin-left: 13px;
-    cursor: pointer;
-
-    &-icon {
-      color: #2F54EB;
-      font-size: 12px;
-    }
-
-    &-title {
-      font-size: 14px;
-      font-weight: 400;
-      color: #2F54EB;
-      margin-left: 3px;
     }
   }
 
   .expression-display {
     display: flex;
     align-items: center;
-    margin-left: 20px;
-    max-width: 30%;
+    max-width: 100%;
+    width: fit-content;
+    margin-top: 8px;
 
     &-text {
       width: 100%;
@@ -335,16 +387,9 @@ export default {
     }
   }
 
-  .search-input-component,
-  .column-search-component {
-    &:hover {
-      border-color: #40a9ff;
-    }
-
-    &:focus {
-      border-color: #40a9ff;
-      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
-      outline: none;
+  &-after {
+    .search-area {
+      max-width: 420px;
     }
   }
 }

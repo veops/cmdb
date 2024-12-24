@@ -24,7 +24,7 @@
       <vxe-column field="attr_ids" :title="$t('cmdb.ciType.attributes')" :edit-render="{}">
         <template #default="{ row }">
           <template v-for="(attr, index) in row.attr_ids">
-            <span :key="attr" :style="{ color: '#2f54eb' }">{{ getDisplayName(attr) }}</span>
+            <span :key="attr" class="primary-color">{{ getDisplayName(attr) }}</span>
             <span :key="`_${attr}`" v-if="index !== row.attr_ids.length - 1"> + </span>
           </template>
         </template>

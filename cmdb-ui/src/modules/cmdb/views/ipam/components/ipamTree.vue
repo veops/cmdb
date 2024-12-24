@@ -26,10 +26,7 @@
             />
             <a-tooltip :title="treeNodeData.title">
               <span
-                class="ipam-tree-node-title"
-                :style="{
-                  color: treeKey === treeNodeData.key ? '#2F54EB' : ''
-                }"
+                :class="['ipam-tree-node-title', treeKey === treeNodeData.key ? 'primary-color' : '']"
               >
                 {{ treeNodeData.title }}
               </span>

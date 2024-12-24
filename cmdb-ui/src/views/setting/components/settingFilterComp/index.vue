@@ -340,7 +340,7 @@ export default {
     & > a {
       padding: 2px 8px;
       &:hover {
-        background-color: #f0faff;
+        background-color: @primary-color_5;
         border-radius: 5px;
       }
     }

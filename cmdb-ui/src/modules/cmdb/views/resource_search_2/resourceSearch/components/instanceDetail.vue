@@ -327,7 +327,7 @@ export default {
   &-header {
     width: 100%;
     height: 75px;
-    background-color: #EBF0F9;
+    background-color: @primary-color_3;
     overflow: hidden;
     position: relative;
     display: flex;
@@ -342,7 +342,7 @@ export default {
       right: -20px;
       top: 0px;
       transform: rotate(40deg);
-      background: rgba(248, 249, 253, 0.60);
+      background-color: @primary-color_5;
     }
 
     &-line-2 {
@@ -352,7 +352,7 @@ export default {
       right: -110px;
       top: 0px;
       transform: rotate(40deg);
-      background: rgba(248, 249, 253, 0.60);
+      background-color: @primary-color_5;
     }
 
     &-row {

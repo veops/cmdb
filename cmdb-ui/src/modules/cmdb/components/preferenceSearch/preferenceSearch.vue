@@ -16,12 +16,8 @@
     <template v-for="(item, index) in preferenceSearchList.slice(0, 3)">
       <span
         v-if="item.name.length > 6"
-        class="preference-search-tag"
+        :class="['preference-search-tag', item.id === currentPreferenceSearch ? 'preference-search-tag-focus' : '']"
         :key="`${item.id}_${index}`"
-        :style="{
-          backgroundColor: item.id === currentPreferenceSearch ? '#2f54eb' : '',
-          color: item.id === currentPreferenceSearch ? '#fff' : '',
-        }"
       >
         <a-tooltip :title="item.name">
           <span @click="clickPreferenceSearch(item)">{{ `${item.name.slice(0, 6)}...` }}</span>
@@ -33,11 +29,7 @@
       <span
         v-else
         :key="`${item.id}_${index}`"
-        class="preference-search-tag"
-        :style="{
-          backgroundColor: item.id === currentPreferenceSearch ? '#2f54eb' : '',
-          color: item.id === currentPreferenceSearch ? '#fff' : '',
-        }"
+        :class="['preference-search-tag', item.id === currentPreferenceSearch ? 'preference-search-tag-focus' : '']"
       >
         <span @click="clickPreferenceSearch(item)">{{ item.name }}</span>
         <a-popconfirm :title="$t('cmdb.ciType.confirmDelete2')" @confirm="deletePreferenceSearch(item)">
@@ -192,6 +184,11 @@ export default {
 
   &:hover {
     color: @primary-color;
+  }
+
+  &-focus {
+    background-color: @primary-color;
+    color: #FFFFFF !important;
   }
 }
 .preference-search-delete {

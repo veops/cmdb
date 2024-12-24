@@ -13,12 +13,11 @@
       <div class="search-condition-control">
         <treeselect
           :value="sourceCIType"
-          class="custom-treeselect custom-treeselect-bgcAndBorder filter-content-ciTypes"
+          class="custom-treeselect custom-treeselect-white filter-content-ciTypes"
           :style="{
             width: '100%',
             zIndex: '1000',
             '--custom-height': '32px',
-            '--custom-bg-color': '#FFF',
             '--custom-multiple-lineHeight': '32px',
           }"
           :multiple="false"
@@ -699,14 +698,14 @@ export default {
       cursor: pointer;
 
       &:hover {
-        background-color: #D9E4FA;
+        background-color: @primary-color_4;
 
         .search-condition-favor-name {
-          color: #2F54EB;
+          color: @primary-color;
         }
 
         .search-condition-favor-close {
-          color: #2F54EB;
+          color: @primary-color;
         }
       }
     }
@@ -737,10 +736,10 @@ export default {
     }
 
     &:hover {
-      background-color: #D9E4FA;
+      background-color: @primary-color_4;
 
       .search-condition-hide-icon {
-        color: #2F54EB;
+        color: @primary-color_4;
       }
     }
   }
