@@ -11,7 +11,48 @@
       >
         <template #one>
           <div class="relation-views-left" :style="{ height: `${windowHeight - 64}px` }">
-            <div class="relation-views-left-header" :title="$route.meta.name">{{ $route.meta.name }}</div>
+            <div class="relation-views-left-header">
+              <div class="relation-views-left-header-icon">
+                <ops-icon type="ops-cmdb-relation" />
+              </div>
+
+              <div class="relation-views-left-header-name relation-views-text-scroll">
+                <span>
+                  {{ viewName }}
+                </span>
+              </div>
+
+              <a-dropdown
+                overlayClassName="relation-views-left-header-dropdown"
+              >
+                <div class="relation-views-left-header-down">
+                  <ops-icon type="veops-switch1" />
+                </div>
+
+                <a-menu
+                  slot="overlay"
+                  :selectedKeys="[viewId]"
+                  class="relation-views-left-header-menu"
+                >
+                  <a-menu-item
+                    v-for="(item) in relationViewMenu"
+                    :key="item.id"
+                    @click="clickRelationViewMenu(item.id)"
+                  >
+                    <a class="relation-views-left-header-menu-item">
+                      <div class="relation-views-left-header-menu-name relation-views-text-scroll">
+                        <span>{{ item.name }}</span>
+                      </div>
+                      <a-icon
+                        class="relation-views-left-header-menu-grant"
+                        type="user-add"
+                        @click.stop="handlePerm(item.name)"
+                      />
+                    </a>
+                  </a-menu-item>
+                </a-menu>
+              </a-dropdown>
+            </div>
             <a-input
               :placeholder="$t('cmdb.serviceTree.searchTips')"
               class="relation-views-left-input"
@@ -214,7 +255,7 @@
       </SplitPane>
     </div>
     <a-alert
-      :message="$t('cmdb.serviceTreealert1')"
+      :message="$t('noData')"
       banner
       v-else-if="relationViews.name2id && !relationViews.name2id.length"
     ></a-alert>
@@ -270,6 +311,8 @@ import { getAttrPassword } from '../../api/CITypeAttr'
 import ReadPermissionsModal from './modules/ReadPermissionsModal.vue'
 import RevokeModal from '../../components/cmdbGrant/revokeModal.vue'
 import CITable from '@/modules/cmdb/components/ciTable/index.vue'
+
+const relationViewKeyStorage = 'cmdb_relation_view_menu_key'
 
 export default {
   name: 'RelationViews',
@@ -370,7 +413,7 @@ export default {
       return !!this.selectedRowKeys.length
     },
     topo_flatten() {
-      return this.relationViews?.views[this.$route.meta.name]?.topo_flatten ?? []
+      return this.relationViews?.views[this.viewName]?.topo_flatten ?? []
     },
     descendant_ids() {
       return this.topo_flatten.slice(this.treeKeys.length).join(',')
@@ -393,6 +436,15 @@ export default {
     leaf_tree_sort() {
       return this.viewOption?.sort ?? 1
     },
+    relationViewMenu() {
+      const name2id = this?.relationViews?.name2id || []
+      return name2id.map((item) => {
+        return {
+          id: item?.[1] || -1,
+          name: item?.[0] || ''
+        }
+      })
+    }
   },
   provide() {
     return {
@@ -429,10 +481,6 @@ export default {
   },
   inject: ['reload'],
   watch: {
-    '$route.path': function(newPath, oldPath) {
-      this.viewId = this.$route.params.viewId
-      this.reload()
-    },
     pageNo: function(newPage, oldPage) {
       this.loadData({ parameter: { pageNo: newPage }, refreshType: undefined, sortByTable: this.sortByTable })
     },
@@ -869,33 +917,43 @@ export default {
           this.relationViews = res
         }
         if ((Object.keys(this.relationViews.views) || []).length) {
-          this.viewId =
-            parseInt(this.$route.path.split('/')[this.$route.path.split('/').length - 1]) ||
-            this.relationViews.name2id[0][1]
-          this.relationViews.name2id.forEach((item) => {
-            if (item[1] === this.viewId) {
-              this.viewName = item[0]
-            }
-          })
-          this.levels = this.relationViews.views[this.viewName].topo
-          this.origShowTypes = this.relationViews.views[this.viewName].show_types
-          const showTypeIds = []
-          this.origShowTypes.forEach((item) => {
-            showTypeIds.push(item.id)
-          })
-          this.origShowTypeIds = showTypeIds
-          this.leaf2showTypes = this.relationViews.views[this.viewName].leaf2show_types
-          this.node2ShowTypes = this.relationViews.views[this.viewName].node2show_types
-          this.level2constraint = this.relationViews.views[this.viewName].level2constraint
-          this.leaf = this.relationViews.views[this.viewName].leaf
-          this.currentView = `${this.viewId}`
-          this.typeId = this.levels[0][0]
-          this.viewOption = this.relationViews.views[this.viewName].option ?? {}
+          let viewId = parseInt(localStorage.getItem(relationViewKeyStorage)) || parseInt(this.$route.params.viewId) || this.relationViews.name2id[0][1]
+          let viewName = null
 
-          this.$nextTick(() => {
-            this.refreshTable()
-          })
+          const currentView = this.relationViews.name2id.find((item) => item?.[1] === viewId)
+          if (currentView) {
+            viewName = currentView[0]
+          } else {
+            viewId = this.relationViews.name2id[0][1]
+            viewName = this.relationViews.name2id[0][0]
+          }
+
+          localStorage.setItem(relationViewKeyStorage, viewId)
+          this.viewId = viewId
+          this.viewName = viewName
+          this.refreshData()
         }
+      })
+    },
+
+    refreshData() {
+      this.levels = this.relationViews.views[this.viewName].topo
+      this.origShowTypes = this.relationViews.views[this.viewName].show_types
+      const showTypeIds = []
+      this.origShowTypes.forEach((item) => {
+        showTypeIds.push(item.id)
+      })
+      this.origShowTypeIds = showTypeIds
+      this.leaf2showTypes = this.relationViews.views[this.viewName].leaf2show_types
+      this.node2ShowTypes = this.relationViews.views[this.viewName].node2show_types
+      this.level2constraint = this.relationViews.views[this.viewName].level2constraint
+      this.leaf = this.relationViews.views[this.viewName].leaf
+      this.currentView = `${this.viewId}`
+      this.typeId = this.levels[0][0]
+      this.viewOption = this.relationViews.views[this.viewName].option ?? {}
+
+      this.$nextTick(() => {
+        this.refreshTable()
       })
     },
 
@@ -954,7 +1012,7 @@ export default {
           const that = this
           this.$confirm({
             title: that.$t('warning'),
-            content: (h) => <div>{that.$t('confirmDelete2', { name: Object.values(firstCIObj)[0] })}</div>,
+            content: that.$t('confirmDelete2', { name: Object.values(firstCIObj)[0] }),
             onOk() {
               deleteCIRelationView(_tempTreeParent[0], _tempTree[0], { ancestor_ids }).then((res) => {
                 that.$message.success(that.$t('deleteSuccess'))
@@ -1063,18 +1121,20 @@ export default {
         })
       }
     },
-    handlePerm() {
+    handlePerm(resourceName) {
+      const _resource_name = resourceName ?? this.viewName
+
       roleHasPermissionToGrant({
         app_id: 'cmdb',
         resource_type_name: 'RelationView',
         perm: 'grant',
-        resource_name: this.$route.meta.title,
+        resource_name: _resource_name,
       }).then((res) => {
         if (res.result) {
           searchResourceType({ page_size: 9999, app_id: 'cmdb' }).then((res) => {
             this.resource_type = { groups: res.groups, id2perms: res.id2perms }
             this.$nextTick(() => {
-              this.$refs.cmdbGrant.open({ name: this.$route.meta.title, cmdbGrantType: 'relation_view' })
+              this.$refs.cmdbGrant.open({ name: _resource_name, cmdbGrantType: 'relation_view' })
             })
           })
         } else {
@@ -1100,7 +1160,7 @@ export default {
     },
     columnDrop() {
       this.$nextTick(() => {
-        const xTable = this.$refs.xTable.getVxetableRef()
+        const xTable = this.$refs?.xTable?.getVxetableRef?.()
         this.sortable = Sortable.create(
           xTable.$el.querySelector('.body--wrapper>.vxe-table--header .vxe-header--row'),
           {
@@ -1282,7 +1342,7 @@ export default {
     async openBatchDownload() {
       this.$refs.batchDownload.open({
         preferenceAttrList: this.preferenceAttrList.filter((attr) => !attr?.is_reference),
-        ciTypeName: this.$route.meta.name,
+        ciTypeName: this.viewName,
       })
     },
     batchDownload({ filename, type, checkedKeys }) {
@@ -1629,6 +1689,13 @@ export default {
 
     openDetail(id, activeTabKey, ciDetailRelationKey) {
       this.$refs.detail.create(id, activeTabKey, ciDetailRelationKey)
+    },
+
+    clickRelationViewMenu(id) {
+      if (id) {
+        localStorage.setItem(relationViewKeyStorage, id)
+        this.reload()
+      }
     }
   },
 }
@@ -1649,17 +1716,61 @@ export default {
       overflow: auto;
     }
     .relation-views-left-header {
-      border-left: 4px solid @primary-color;
-      height: 32px;
-      line-height: 32px;
-      padding-left: 12px;
-      margin-bottom: 12px;
-      color: @text-color_1;
-      font-weight: bold;
+      display: flex;
+      align-items: center;
+      max-width: 100%;
       overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      cursor: default;
+      padding-bottom: 12px;
+      border-bottom: @border-color-base;
+      margin-bottom: 14px;
+
+      &-icon {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 22px;
+        background-color: @primary-color;
+
+        i {
+          font-size: 12px;
+          color: #FFFFFF;
+        }
+      }
+
+      &-name {
+        margin-left: 9px;
+
+        span {
+          font-size: 17px;
+          font-weight: 700;
+          color: @primary-color;
+        }
+      }
+
+      &-down {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 1px;
+        background-color: @primary-color_3;
+        cursor: pointer;
+        margin-left: auto;
+
+        i {
+          font-size: 18px;
+          color: @primary-color;
+        }
+
+        &:hover {
+          background-color: @primary-color_4;
+        }
+      }
     }
     .ant-tree li {
       padding: 2px 0;
@@ -1680,14 +1791,14 @@ export default {
     }
     .relation-views-left-input {
       margin-bottom: 12px;
-      input {
-        background-color: transparent;
-        border-top: none;
-        border-right: none;
-        border-left: none;
-      }
-      .ant-input:focus {
-        box-shadow: none;
+
+      .ant-input {
+        background-color: #FFFFFF;
+        border: solid 1px transparent;
+
+        &:hover, &:focus {
+          border-color: @primary-color;
+        }
       }
     }
   }
@@ -1700,6 +1811,77 @@ export default {
 
     .ant-tabs-tab {
       padding-top: 0px;
+    }
+  }
+}
+
+.relation-views-left-header-dropdown {
+  background-color: #FFFFFF;
+
+  .relation-views-left-header-menu {
+    box-shadow: none;
+    max-height: 400px;
+    min-height: 150px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    &-item {
+      width: 150px;
+      overflow: hidden;
+      display: flex !important;
+      align-items: center;
+
+      &:hover {
+        .relation-views-left-header-menu-grant {
+          display: inline-block;
+        }
+      }
+    }
+
+    &-name {
+      margin-right: 8px;
+    }
+
+    &-grant {
+      margin-left: 8px;
+      flex-shrink: 0;
+      font-size: 12px;
+      display: none;
+      margin-left: auto;
+      color: @text-color_4;
+
+      &:hover {
+        color: @primary-color;
+      }
+    }
+  }
+}
+
+.relation-views-text-scroll {
+  max-width: 100%;
+  overflow: hidden;
+
+  & > span {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+  }
+
+  &:hover {
+    & > span {
+      overflow: visible;
+      animation: scroll-left 3s linear infinite;
+    }
+  }
+
+  @keyframes scroll-left {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-100%);
     }
   }
 }

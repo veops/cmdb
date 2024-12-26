@@ -6,6 +6,62 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "42930714",
+      "name": "veops-servicetree",
+      "font_class": "veops-servicetree",
+      "unicode": "ea0b",
+      "unicode_decimal": 59915
+    },
+    {
+      "icon_id": "42921461",
+      "name": "veops-switch (1)",
+      "font_class": "veops-switch1",
+      "unicode": "ea0a",
+      "unicode_decimal": 59914
+    },
+    {
+      "icon_id": "42857659",
+      "name": "veops-label",
+      "font_class": "veops-label",
+      "unicode": "ea09",
+      "unicode_decimal": 59913
+    },
+    {
+      "icon_id": "42790685",
+      "name": "top_acl",
+      "font_class": "top_acl",
+      "unicode": "ea08",
+      "unicode_decimal": 59912
+    },
+    {
+      "icon_id": "42790687",
+      "name": "top_ticket",
+      "font_class": "top_ticket",
+      "unicode": "ea06",
+      "unicode_decimal": 59910
+    },
+    {
+      "icon_id": "42790686",
+      "name": "top_agent",
+      "font_class": "top_agent",
+      "unicode": "ea07",
+      "unicode_decimal": 59911
+    },
+    {
+      "icon_id": "42732510",
+      "name": "itsm-table_download",
+      "font_class": "itsm-table_download",
+      "unicode": "ea05",
+      "unicode_decimal": 59909
+    },
+    {
+      "icon_id": "42732515",
+      "name": "itsm-image_download",
+      "font_class": "itsm-image_download",
+      "unicode": "ea04",
+      "unicode_decimal": 59908
+    },
+    {
       "icon_id": "42510712",
       "name": "veops-rear",
       "font_class": "veops-rear",

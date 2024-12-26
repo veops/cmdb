@@ -171,7 +171,6 @@ export default {
     },
     renderMenuItem(menu) {
       const isShowDot = menu.path.substr(0, 22) === '/cmdb/instances/types/'
-      const isShowGrant = menu.path.substr(0, 20) === '/cmdb/relationviews/'
       const target = menu.meta.target || null
       const tag = target && 'a' || 'router-link'
       const props = { to: { name: menu.name } }
@@ -205,11 +204,9 @@ export default {
                   <a-icon type="menu" ref="extraEllipsis" class="custom-menu-extra-ellipsis"></a-icon>
                 </a-popover>
               }
-              {isShowGrant && <a-icon class="custom-menu-extra-ellipsis" onClick={e => this.handlePerm(e, menu, 'RelationView')} type="user-add" />}
             </span>
           </tag>
           {isShowDot && <CMDBGrant ref="cmdbGrantCIType" resourceType="CIType" app_id="cmdb" />}
-          {isShowGrant && <CMDBGrant ref="cmdbGrantRelationView" resourceType="RelationView" app_id="cmdb" />}
         </Item>
       )
     },

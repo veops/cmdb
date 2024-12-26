@@ -88,6 +88,7 @@ import ReadGrantModal from './readGrantModal'
 import RelationViewGrant from './relationViewGrant.vue'
 import TopologyViewGrant from './topologyViewGrant.vue'
 import { getCITypeGroupById, ciTypeFilterPermissions } from '../../api/CIType'
+import { CI_DEFAULT_ATTR } from '@/modules/cmdb/utils/const.js'
 
 export default {
   name: 'GrantComp',
@@ -186,6 +187,13 @@ export default {
     },
     getFilterPermissions() {
       ciTypeFilterPermissions(this.CITypeId).then((res) => {
+        Object.keys(res).forEach((key) => {
+          const attr_filter = res?.[key]?.attr_filter
+          if (attr_filter?.length) {
+            res[key].attr_filter = attr_filter.filter((item) => ![CI_DEFAULT_ATTR.UPDATE_USER, CI_DEFAULT_ATTR.UPDATE_TIME].includes(item))
+          }
+        })
+
         this.filerPerimissions = res
       })
     },
