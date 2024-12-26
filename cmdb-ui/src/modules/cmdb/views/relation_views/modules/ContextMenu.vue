@@ -187,9 +187,9 @@ export default {
         ]
       } else {
         // 叶子节点
-        _menuList = this.currentViews.node2show_types[this._tempTree[1]].map((item) => {
+        _menuList = this.currentViews?.node2show_types?.[this._tempTree?.[1]]?.map?.((item) => {
           return { id: item.id, alias: item.alias || item.name }
-        })
+        }) || []
       }
       return _menuList
     },

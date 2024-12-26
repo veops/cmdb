@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1732673294759') format('woff2'),
-       url('iconfont.woff?t=1732673294759') format('woff'),
-       url('iconfont.ttf?t=1732673294759') format('truetype');
+  src: url('iconfont.woff2?t=1735191938771') format('woff2'),
+       url('iconfont.woff?t=1735191938771') format('woff'),
+       url('iconfont.ttf?t=1735191938771') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,38 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.veops-servicetree:before {
+  content: "\ea0b";
+}
+
+.veops-switch1:before {
+  content: "\ea0a";
+}
+
+.veops-label:before {
+  content: "\ea09";
+}
+
+.top_acl:before {
+  content: "\ea08";
+}
+
+.top_ticket:before {
+  content: "\ea06";
+}
+
+.top_agent:before {
+  content: "\ea07";
+}
+
+.itsm-table_download:before {
+  content: "\ea05";
+}
+
+.itsm-image_download:before {
+  content: "\ea04";
 }
 
 .veops-rear:before {

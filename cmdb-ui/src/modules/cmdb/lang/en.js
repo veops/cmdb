@@ -26,7 +26,8 @@ const cmdb_en = {
         ad: 'AutoDiscovery',
         cidetail: 'CI Detail',
         scene: 'Scene',
-        dcim: 'DCIM'
+        dcim: 'DCIM',
+        serviceTree: 'Service Tree'
     },
     ciType: {
         ciType: 'CIType',

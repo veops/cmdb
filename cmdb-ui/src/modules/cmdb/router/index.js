@@ -28,6 +28,17 @@ const genCmdbRoutes = async () => {
         meta: { title: 'cmdb.menu.resources', disabled: true },
       },
       {
+        path: '/cmdb/relationviews/:viewId?',
+        name: 'cmdb_relation_views',
+        component: () => import('../views/relation_views/index'),
+        meta: {
+          title: 'cmdb.menu.serviceTree',
+          appName: 'cmdb',
+          icon: 'veops-servicetree',
+          keepAlive: false
+        },
+      },
+      {
         path: '/cmdb/resourceviews',
         name: 'cmdb_resource_views',
         component: RouteView,
@@ -194,15 +205,14 @@ const genCmdbRoutes = async () => {
   } else {
     routes.redirect = '/cmdb/dashboard'
   }
-  const relationViews = relation.name2id.map(item => {
-    return {
-      path: `/cmdb/relationviews/${item[1]}`,
-      name: `cmdb_relation_views_${item[1]}`,
-      component: () => import('../views/relation_views/index'),
-      meta: { title: item[0], icon: 'ops-cmdb-relation', selectedIcon: 'ops-cmdb-relation', keepAlive: false, name: item[0] },
+
+  if (relation?.name2id?.length === 0) {
+    const relationViewRouteIndex = routes.children?.findIndex?.((route) => route.name === 'cmdb_relation_views')
+    if (relationViewRouteIndex >= 0) {
+      routes.children.splice(relationViewRouteIndex, 1)
     }
-  })
-  routes.children.splice(resourceViewsIndex, 0, ...relationViews)
+  }
+
   return routes
 }
 

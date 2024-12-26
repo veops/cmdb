@@ -26,7 +26,8 @@ const cmdb_zh = {
         ad: '自动发现',
         cidetail: 'CI 详情',
         scene: '场景',
-        dcim: '数据中心'
+        dcim: '数据中心',
+        serviceTree: '服务树'
     },
     ciType: {
         ciType: '模型',
