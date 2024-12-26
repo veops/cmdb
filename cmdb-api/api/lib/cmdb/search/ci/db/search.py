@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import copy
 import six
 import time
+from flask import abort
 from flask import current_app
 from flask_login import current_user
 from jinja2 import Template
@@ -152,7 +153,9 @@ class Search(object):
                                 if not self.fl:
                                     self.fl = set(self.type2filter_perms[ci_type.id]['attr_filter'])
                                 else:
-                                    self.fl = set(self.fl) & set(self.type2filter_perms[ci_type.id]['attr_filter'])
+                                    fl = set(self.fl) & set(self.type2filter_perms[ci_type.id]['attr_filter'])
+                                    not fl and abort(400, ErrFormat.ci_filter_perm_attr_no_permission.format(self.fl))
+                                    self.fl = fl
                             else:
                                 self.fl = self.fl or {}
                                 if not self.fl or isinstance(self.fl, dict):
