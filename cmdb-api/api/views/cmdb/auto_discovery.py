@@ -30,6 +30,7 @@ from api.lib.cmdb.search import SearchError
 from api.lib.cmdb.search.ci import search as ci_search
 from api.lib.decorator import args_required
 from api.lib.decorator import args_validate
+from api.lib.exception import AbortException
 from api.lib.perm.acl.acl import has_perm_from_args
 from api.lib.utils import AESCrypto
 from api.lib.utils import get_page
@@ -296,7 +297,10 @@ class AutoDiscoveryRuleSyncView(APIView):
 
         rules, last_update_at1 = AutoDiscoveryCITypeCRUD.get(None, oneagent_id, oneagent_name, last_update_at)
 
-        subnet_scan_rules, last_update_at2 = SubnetManager().scan_rules(oneagent_id, last_update_at)
+        try:
+            subnet_scan_rules, last_update_at2 = SubnetManager().scan_rules(oneagent_id, last_update_at)
+        except AbortException:
+            subnet_scan_rules, last_update_at2 = [], ""
 
         return self.jsonify(rules=rules,
                             subnet_scan_rules=subnet_scan_rules,
