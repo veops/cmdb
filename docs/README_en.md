@@ -1,15 +1,17 @@
+<p align="center">
+  <a href="https://veops.cn">
+    <img src="https://github.com/user-attachments/assets/c5cfb272-899b-418d-9e69-8e1dd07db0f6" alt="VE CMDB"/>
+  </a>
+</p>
 
-<h2 align="center">Simple, lightweight, and versatile operational CMDB</h2>
+<h4 align="center">Simple, lightweight, and versatile operational CMDB</h4>
 <p align="center">
   <a href="https://github.com/veops/cmdb/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-AGPLv3-brightgreen" alt="License: GPLv3"></a>
-  <a href="https:https://github.com/sendya/ant-design-pro-vue"><img src="https://img.shields.io/badge/UI-Ant%20Design%20Pro%20Vue-brightgreen" alt="UI"></a>
-  <a href="https://github.com/pallets/flask"><img src="https://img.shields.io/badge/API-Flask-brightgreen" alt="API"></a>
-  <a href="https://github.com/veops/cmdb/stargazers">
-    <img src="https://img.shields.io/github/stars/veops/cmdb" alt="Stars Badge"/>
-  </a>
-  <a href="https://github.com/veops/cmdb">
-    <img src="https://img.shields.io/github/forks/veops/cmdb" alt="Forks Badge"/>
-  </a>
+  <a href="https://github.com/veops/cmdb/releases"><img alt="the latest release version" src="https://img.shields.io/github/v/release/veops/cmdb?color=75C1C4&include_prereleases&label=Release&logo=github&logoColor=white"></a>
+  <a href="https:https://github.com/sendya/ant-design-pro-vue"><img src="https://img.shields.io/badge/UI-Ant%20Design%20Pro%20Vue-green" alt="UI"></a>
+  <a href="https://github.com/pallets/flask"><img src="https://img.shields.io/badge/API-Flask-bright" alt="API"></a>
+  <a href="https://github.com/veops/cmdb/stargazers"><img src="https://img.shields.io/github/stars/veops/cmdb" alt="Stars Badge"/></a>
+  <a href="https://github.com/veops/cmdb"><img src="https://img.shields.io/github/forks/veops/cmdb" alt="Forks Badge"/></a>
 </p>
 
 <p align="center">
@@ -36,7 +38,7 @@ VE CMDB is a simple, lightweight and highly customizable operations and maintena
 
 For more detailed features, please visit the [official website](https://veops.cn).
 
-### System Characteristics
+### System Advantage
 
 - Flexibility
   + No need to specify fixed operation and maintenance scenarios, supports free configuration and built-in multiple templates.
@@ -58,22 +60,22 @@ For more detailed features, please visit the [official website](https://veops.cn
 
 ### Overview
 
-<table style="border-collapse: collapse; border: 1px solid black;">
+<table style="border-collapse: collapse;">
   <tr>
     <td style="padding: 5px;background-color:#fff;">
-      <img width="400" src="./images/cmdb-screenshot-1.png"/>
+      <img width="400" src="https://github.com/user-attachments/assets/6d2df835-ae93-4d91-9bd9-213c270eca7a"/>
     </td>
     <td style="padding: 5px;background-color:#fff;">
-      <img width="400" src="./images/cmdb-screenshot-2.png"/>
+      <img width="400" src="https://github.com/user-attachments/assets/cb8b598a-a1f9-4c74-adf1-6e59aea2c9b3"/>
     </td>
   </tr>
 
   <tr>
     <td style="padding: 5px;background-color:#fff;">
-      <img width="400" src="./images/cmdb-screenshot-3.png"/>
+      <img width="400" src="https://github.com/user-attachments/assets/b440224f-53c3-4b7f-a9be-285d7a4b848f"/>
     </td>
     <td style="padding: 5px;background-color:#fff;">
-      <img width="400" src="./images/cmdb-screenshot-4.png"/>
+      <img width="400" src="https://github.com/user-attachments/assets/f457d5a0-b60b-4949-b94e-020f4c61444b"/>
     </td>
   </tr>
 </table>
@@ -107,16 +109,11 @@ We welcome all developers to contribute code to improve and extend this project.
   <img src="https://contrib.rocks/image?repo=veops/cmdb" />
 </a>
 
-## Enterprise Edition
-
-Compared to the Community Edition, VE Enterprise Edition provides a large number of enhancements and technical support services for enterprises. Enhancements include data compliance, data cascading, auto-discovery extensions, large screen customization, and more. [Enterprise Edition Details](https://veops.cn/cmdb)
-
-## VE Technology's other open source projects
+## More Open Source
 
 - [OneTerm](https://github.com/veops/oneterm): Provide secure access and control over all infrastructure.
 - [messenger](https://github.com/veops/messenger): A simple and lightweight message sending service.
 - [ACL](https://github.com/veops/acl): A general permission control management system.
-- [ops-tools](https://github.com/veops/ops-tools): Common practices and code for operations and maintenance.
 
 ## Contact me
 

@@ -1,19 +1,19 @@
 
 <p align="center">
-  <a href="https://veops.cn"><img src="docs/images/logo.png" alt="维易CMDB" width="300"/></a>
+  <a href="https://veops.cn">
+    <img src="https://github.com/user-attachments/assets/c5cfb272-899b-418d-9e69-8e1dd07db0f6" alt="维易CMDB"/>
+  </a>
 </p>
+
 <h4 align="center">简单、轻量、通用的运维配置管理数据库</h4>
 
 <p align="center">
   <a href="https://github.com/veops/cmdb/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-AGPLv3-brightgreen" alt="License: GPLv3"></a>
-  <a href="https:https://github.com/sendya/ant-design-pro-vue"><img src="https://img.shields.io/badge/UI-Ant%20Design%20Pro%20Vue-brightgreen" alt="UI"></a>
-  <a href="https://github.com/pallets/flask"><img src="https://img.shields.io/badge/API-Flask-brightgreen" alt="API"></a>
-  <a href="https://github.com/veops/cmdb/stargazers">
-    <img src="https://img.shields.io/github/stars/veops/cmdb" alt="Stars Badge"/>
-  </a>
-  <a href="https://github.com/veops/cmdb">
-    <img src="https://img.shields.io/github/forks/veops/cmdb" alt="Forks Badge"/>
-  </a>
+  <a href="https://github.com/veops/cmdb/releases"><img alt="the latest release version" src="https://img.shields.io/github/v/release/veops/cmdb?color=75C1C4&include_prereleases&label=Release&logo=github&logoColor=white"></a>
+  <a href="https:https://github.com/sendya/ant-design-pro-vue"><img src="https://img.shields.io/badge/UI-Ant%20Design%20Pro%20Vue-green" alt="UI"></a>
+  <a href="https://github.com/pallets/flask"><img src="https://img.shields.io/badge/API-Flask-bright" alt="API"></a>
+  <a href="https://github.com/veops/cmdb/stargazers"><img src="https://img.shields.io/github/stars/veops/cmdb" alt="Stars Badge"/></a>
+  <a href="https://github.com/veops/cmdb"><img src="https://img.shields.io/github/forks/veops/cmdb" alt="Forks Badge"/></a>
 </p>
 <p align="center">
   中文(简体) · <a href="docs/README_en.md">English</a>
@@ -40,7 +40,7 @@
 
 更多详细功能，请移步 [维易科技官网](https://veops.cn) 进行了解。
 
-### 系统特点
+### 系统优势
 
 - 灵活性
   + 无需指定固定运维场景，支持自由配置并内置多种模板
@@ -62,22 +62,22 @@
 
 ### 系统概览
 
-<table style="border-collapse: collapse; border: 1px solid black;">
+<table style="border-collapse: collapse;">
   <tr>
     <td style="padding: 5px;background-color:#fff;">
-      <img width="400" src="docs/images/cmdb-screenshot-1.png"/>
+      <img width="400" src="https://github.com/user-attachments/assets/6d2df835-ae93-4d91-9bd9-213c270eca7a"/>
     </td>
     <td style="padding: 5px;background-color:#fff;">
-      <img width="400" src="docs/images/cmdb-screenshot-2.png"/>
+      <img width="400" src="https://github.com/user-attachments/assets/cb8b598a-a1f9-4c74-adf1-6e59aea2c9b3"/>
     </td>
   </tr>
 
   <tr>
     <td style="padding: 5px;background-color:#fff;">
-      <img width="400" src="docs/images/cmdb-screenshot-3.png"/>
+      <img width="400" src="https://github.com/user-attachments/assets/b440224f-53c3-4b7f-a9be-285d7a4b848f"/>
     </td>
     <td style="padding: 5px;background-color:#fff;">
-      <img width="400" src="docs/images/cmdb-screenshot-4.png"/>
+      <img width="400" src="https://github.com/user-attachments/assets/f457d5a0-b60b-4949-b94e-020f4c61444b"/>
     </td>
   </tr>
 </table>
@@ -112,15 +112,11 @@
   <img src="https://contrib.rocks/image?repo=veops/cmdb" />
 </a>
 
-## 企业版
-相比于社区版，维易企业版为企业提供了大量增强功能及技术支持服务，增强功能包括数据合规、数据级联、自动发现扩展、大屏定制等。[企业版详细介绍](https://veops.cn/cmdb)
-
-## 维易科技的其他开源项目
+## 更多开源
 
 - [OneTerm](https://github.com/veops/oneterm): 一款简单、轻量、灵活的堡垒机服务。
 - [messenger](https://github.com/veops/messenger): 一个简单轻量的消息发送服务。
 - [ACL](https://github.com/veops/acl): 一个简单通用的权限管理系统设计与实践。
-- [ops-tools](https://github.com/veops/ops-tools): 运维的一些常用实践和代码。
 
 ## 相关文章
 
