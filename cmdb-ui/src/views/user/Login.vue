@@ -1,7 +1,7 @@
 <template>
   <div class="ops-login">
     <div class="ops-login-left">
-      <span>维易科技<br />让运维更简单</span>
+      <span>维易科技 &nbsp;&nbsp; 让运维变简单</span>
     </div>
     <div class="ops-login-right">
       <img src="../../assets/logo_VECMDB.png" />
@@ -216,12 +216,12 @@ export default {
       transform: translate(-50%, -50%);
     }
     > span {
-      color: white;
+      color: @text-color_2;
       position: absolute;
-      top: 10%;
+      bottom: 10%;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 1.75vw;
+      font-size: 26px;
     }
   }
   .ops-login-right {
