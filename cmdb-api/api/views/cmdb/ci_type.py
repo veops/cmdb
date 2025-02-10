@@ -64,9 +64,13 @@ class CITypeView(APIView):
                 ci_type['unique_name'] = ci_type['unique_id'] and AttributeCache.get(ci_type['unique_id']).name
                 ci_types.append(ci_type)
         elif type_name is not None:
-            ci_type = CITypeCache.get(type_name).to_dict()
-            ci_type['parent_ids'] = CITypeInheritanceManager.get_parents(ci_type['id'])
-            ci_types = [ci_type]
+            ci_type = CITypeCache.get(type_name)
+            if ci_type is not None:
+                ci_type = ci_type.to_dict()
+                ci_type['parent_ids'] = CITypeInheritanceManager.get_parents(ci_type['id'])
+                ci_types = [ci_type]
+            else:
+                ci_types = []
         else:
             ci_types = CITypeManager().get_ci_types(q)
         count = len(ci_types)
