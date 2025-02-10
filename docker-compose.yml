@@ -41,7 +41,7 @@ services:
           - redis
 
   cmdb-api:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.4.17
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.5.1
     container_name: cmdb-api
     env_file:
       - .env
@@ -84,7 +84,7 @@ services:
       test: "ps aux|grep -v grep|grep -v '1 root'|grep gunicorn || exit 1"
 
   cmdb-ui:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.4.17
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.5.1
     container_name: cmdb-ui
     depends_on:
       cmdb-api:
