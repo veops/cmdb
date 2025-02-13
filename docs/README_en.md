@@ -80,6 +80,12 @@ For more detailed features, please visit the [official website](https://veops.cn
   </tr>
 </table>
 
+## Getting started & staying tuned with us
+
+Star us, and you will receive all releases notifications from GitHub without any delay!
+
+![star us](https://github.com/user-attachments/assets/f9056d5a-171c-4f53-9fec-d40c9e5ff94d)
+
 ## Quick Start
 
 ### 1. Set up
