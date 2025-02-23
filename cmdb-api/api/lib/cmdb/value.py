@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import imp
+import importlib.util
 
 import copy
 import jinja2
@@ -198,11 +198,11 @@ class AttributeValueManager(object):
 
         try:
             path = script_f.name
-            dir_name, name = os.path.dirname(path), os.path.basename(path)[:-3]
+            name = os.path.basename(path)[:-3]
 
-            fp, path, desc = imp.find_module(name, [dir_name])
-
-            mod = imp.load_module(name, fp, path, desc)
+            spec = importlib.util.spec_from_file_location(name, path)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
 
             if hasattr(mod, 'computed'):
                 return mod.computed()
