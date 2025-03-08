@@ -125,6 +125,10 @@ class Attribute(Model):
 
     option = db.Column(db.JSON)
 
+    is_upload_file = db.Column(db.Boolean, default=False)  # Pa2de
+    is_image = db.Column(db.Boolean, default=False)  # Pa2de
+    is_review = db.Column(db.Boolean, default=False)  # P36eb
+
     def _get_webhook(self):
         if self._choice_web_hook:
             if self._choice_web_hook.get('headers') and "Cookie" in self._choice_web_hook['headers']:

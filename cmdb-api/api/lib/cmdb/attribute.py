@@ -28,6 +28,7 @@ from api.models.cmdb import CIType
 from api.models.cmdb import CITypeAttribute
 from api.models.cmdb import CITypeAttributeGroupItem
 from api.models.cmdb import PreferenceShowAttributes
+from api.lib.common_setting.upload_file import CommonFileCRUD
 
 
 class AttributeManager(object):
@@ -462,3 +463,20 @@ class AttributeManager(object):
         db.session.commit()
 
         return name
+
+    @staticmethod
+    def review_attribute(attr_id):
+        attr = Attribute.get_by_id(attr_id) or abort(404, ErrFormat.attribute_not_found.format("id={}".format(attr_id)))
+
+        if not attr.is_review:
+            return abort(400, ErrFormat.attribute_not_reviewable)
+
+        if attr.is_upload_file:
+            file_data = CommonFileCRUD.get_file(attr.name)
+            return file_data
+
+        if attr.is_image:
+            image_data = CommonFileCRUD.get_file(attr.name)
+            return image_data
+
+        return abort(400, ErrFormat.attribute_not_reviewable)

@@ -13,6 +13,7 @@ from api.lib.utils import get_page
 from api.lib.utils import get_page_size
 from api.lib.utils import handle_arg_list
 from api.resource import APIView
+from api.lib.common_setting.upload_file import CommonFileCRUD  # Pb14e
 
 
 class AttributeSearchView(APIView):
