@@ -26,6 +26,8 @@ server {
         application/rss+xml
         image/svg+xml;
 
+    client_max_body_size 100m;
+
     root  /etc/nginx/html;
     location / {
       root   /etc/nginx/html;
