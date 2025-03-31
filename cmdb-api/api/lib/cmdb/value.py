@@ -10,6 +10,7 @@ import jinja2
 import os
 import re
 import tempfile
+import ast
 from flask import abort
 from flask import current_app
 from jinja2schema import infer
@@ -180,13 +181,14 @@ class AttributeValueManager(object):
 
     @staticmethod
     def _compute_attr_value_from_expr(expr, ci_dict):
-        t = jinja2.Template(expr).render(ci_dict)
-
+        result = jinja2.Template(expr).render(ci_dict)
         try:
-            return eval(t)
+            return ast.literal_eval(result)
         except Exception as e:
-            current_app.logger.warning(str(e))
-            return t
+            current_app.logger.warning(
+                f"Expression evaluation error - Expression: '{expr}', Rendered result: '{result}', "
+                f"Input parameters: {ci_dict}, Error type: {type(e).__name__}, Error message: {str(e)}"
+            )
 
     @staticmethod
     def _compute_attr_value_from_script(script, ci_dict):
