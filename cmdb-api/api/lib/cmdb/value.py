@@ -180,14 +180,15 @@ class AttributeValueManager(object):
 
     @staticmethod
     def _compute_attr_value_from_expr(expr, ci_dict):
-        t = jinja2.Template(expr).render(ci_dict)
-
         try:
-            return eval(t)
+            result = jinja2.Template(expr).render(ci_dict)
+            return result
         except Exception as e:
-            current_app.logger.warning(str(e))
-            return t
-
+            current_app.logger.warning(
+                f"Expression evaluation error - Expression: '{expr}'"
+                f"Input parameters: {ci_dict}, Error type: {type(e).__name__}, Error message: {str(e)}"
+            )
+            return None
     @staticmethod
     def _compute_attr_value_from_script(script, ci_dict):
         script = jinja2.Template(script).render(ci_dict)
