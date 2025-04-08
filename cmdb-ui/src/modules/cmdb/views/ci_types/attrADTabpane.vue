@@ -54,11 +54,38 @@
       />
     </div>
     <template v-if="adrType === DISCOVERY_CATEGORY_TYPE.SNMP">
-      <div class="attr-ad-header">{{ $t('cmdb.ciType.nodeConfig') }}</div>
-      <a-form :form="nodeSettingForm" layout="inline" class="attr-ad-snmp-form">
-        <NodeSetting ref="nodeSetting" :initNodes="nodes" />
-        <CIDRTags v-model="cidrList" />
-      </a-form>
+      <div class="attr-ad-header">{{ $t('cmdb.ciType.scanningParameter') }}</div>
+      <div class="attr-ad-form attr-ad-snmp-form">
+        <div class="attr-ad-snmp-form-title">
+          {{ $t('cmdb.ciType.SNMPConfiguration') }}
+          <a-tooltip
+            :title="$t('cmdb.ciType.snmpFormTip1')"
+            :overlayStyle="{
+              whiteSpace: 'pre',
+              textWrap: 'wrap'
+            }"
+          >
+            <a-icon type="question-circle" />
+          </a-tooltip>
+        </div>
+        <NodeSetting ref="nodeSetting" />
+        <SNMPConfig v-model="SNMPScanningConfigForm" />
+
+        <div class="attr-ad-snmp-form-title">
+          {{ $t('cmdb.ciType.scanningConfiguration') }}
+          <a-tooltip
+            :title="$t('cmdb.ciType.snmpFormTip2')"
+            :overlayStyle="{
+              whiteSpace: 'pre',
+              textWrap: 'wrap'
+            }"
+          >
+            <a-icon type="question-circle" />
+          </a-tooltip>
+        </div>
+        <SNMPScanningConfig v-model="SNMPScanningConfigForm" />
+        <CIDRTags v-model="SNMPScanningConfigForm.cidr" />
+      </div>
     </template>
     <div class="attr-ad-header">{{ $t('cmdb.ciType.adExecConfig') }}</div>
     <a-form-model
@@ -177,13 +204,15 @@ import { TAB_KEY } from './attrAD/constants.js'
 import HttpSnmpAD from '../../components/httpSnmpAD'
 import AttrMapTable from '@/modules/cmdb/components/attrMapTable/index.vue'
 import CMDBExprDrawer from '@/components/CMDBExprDrawer'
-import NodeSetting from '@/modules/cmdb/components/nodeSetting/index.vue'
+import NodeSetting from './attrAD/nodeSetting/index.vue'
 import AttrADTest from './attrADTest.vue'
 import { Popover } from 'element-ui'
 import VcenterForm from './attrAD/privateCloud/vcenterForm.vue'
 import PublicCloud from './attrAD/publicCloud/index.vue'
 import PortScanConfig from './attrAD/portScanConfig/index.vue'
 import CIDRTags from './attrAD/cidrTags/index.vue'
+import SNMPScanningConfig from './attrAD/SNMPScanningConfig/index.vue'
+import SNMPConfig from './attrAD/SNMPConfig/index.vue'
 
 export default {
   name: 'AttrADTabpane',
@@ -198,7 +227,9 @@ export default {
     VcenterForm,
     PublicCloud,
     PortScanConfig,
-    CIDRTags
+    CIDRTags,
+    SNMPScanningConfig,
+    SNMPConfig
   },
   props: {
     adr_id: {
@@ -263,14 +294,6 @@ export default {
       cronVisible: false,
       intervalValue: 3,
       agent_type: 'agent_id',
-      nodes: [
-        {
-          id: uuidv4(),
-          ip: '',
-          community: 'public',
-          version: '',
-        },
-      ],
       nodeSettingForm: this.$form.createForm(this, { name: 'snmp_form' }),
       uniqueKey: '',
       isPrivateCloud: false,
@@ -278,7 +301,16 @@ export default {
       PRIVATE_CLOUD_NAME,
       DISCOVERY_CATEGORY_TYPE,
       isClient: false, // 是否前端新增临时数据
-      cidrList: [],
+      SNMPScanningConfigForm: {
+        version: '2c',
+        community: 'public',
+        timeout: 5,
+        retries: 3,
+        initial_node: '',
+        recursive_scan: true,
+        max_depth: 5,
+        cidr: []
+      }, // snmp scanning parameter form data
     }
   },
   provide() {
@@ -323,13 +355,13 @@ export default {
       const isEn = this.$i18n.locale === 'en'
       return {
         xl: {
-          span: isEn ? 4 : 2
+          span: isEn ? 4 : 3
         },
         lg: {
-          span: isEn ? 5 : 3
+          span: isEn ? 5 : 4
         },
         sm: {
-          span: isEn ? 6 : 4
+          span: isEn ? 6 : 5
         }
       }
     }
@@ -404,7 +436,13 @@ export default {
       }
 
       if (this.adrType === DISCOVERY_CATEGORY_TYPE.SNMP) {
-        const nodes = _findADT?.extra_option?.nodes?.length ? _findADT?.extra_option?.nodes : [
+        const extra_option = _findADT?.extra_option ?? {}
+        const {
+          nodes,
+          cidr = []
+        } = extra_option
+
+        const InitializeNodes = nodes?.length ? nodes : [
           {
             id: uuidv4(),
             ip: '',
@@ -412,13 +450,11 @@ export default {
             version: '',
           },
         ]
-        this.nodes = nodes
         this.$nextTick(() => {
-          this.$refs.nodeSetting.initNodesFunc()
+          this.$refs.nodeSetting.initNodesFunc(InitializeNodes)
         })
 
         let cidrList = []
-        const cidr = _findADT?.extra_option?.cidr
         if (Array.isArray(cidr) && cidr?.length) {
           cidrList = cidr.map((v) => {
             return {
@@ -427,7 +463,16 @@ export default {
             }
           })
         }
-        this.cidrList = cidrList
+        this.SNMPScanningConfigForm = {
+          version: extra_option?.version ?? '2c',
+          community: extra_option?.community ?? 'public',
+          timeout: extra_option?.timeout ?? 5,
+          retries: extra_option?.retries ?? 3,
+          initial_node: extra_option?.initial_node ?? '',
+          recursive_scan: extra_option?.recursive_scan ?? true,
+          max_depth: extra_option?.max_depth ?? 5,
+          cidr: cidrList
+        }
       }
       if (this.adrType === DISCOVERY_CATEGORY_TYPE.AGENT) {
         this.tableData = (_find?.attributes || []).map((item) => {
@@ -501,11 +546,26 @@ export default {
       }
 
       if (this.adrType === DISCOVERY_CATEGORY_TYPE.SNMP) {
+        const {
+          cidr,
+          ...otherConfigForm
+        } = this.SNMPScanningConfigForm
+        const nodes = this.$refs.nodeSetting?.getNodeValue() ?? []
+
         params = {
           extra_option: {
-            nodes: this.$refs.nodeSetting?.getNodeValue() ?? [],
-            cidr: this?.cidrList?.map((item) => item.value) || []
+            ...otherConfigForm,
+            nodes,
+            cidr: cidr?.map((item) => item.value) || []
           },
+        }
+
+        if (
+          !otherConfigForm?.recursive_scan &&
+          nodes?.some((item) => !item?.ip)
+        ) {
+          this.$message.error(this.$t('cmdb.ciType.recursiveTip'))
+          return
         }
       }
       if (this.adrType === DISCOVERY_CATEGORY_TYPE.AGENT) {
@@ -761,8 +821,18 @@ export default {
   }
 }
 .attr-ad-snmp-form {
-  .ant-form-item {
-    margin-bottom: 0;
+  &-title {
+    font-size: 16px;
+    color: #000000;
+    margin-bottom: 12px;
+
+    & > i {
+      font-size: 14px;
+    }
+  }
+
+  /deep/ .ant-input-number {
+    width: 100%;
   }
 }
 </style>

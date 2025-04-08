@@ -1,40 +1,34 @@
 <template>
-  <a-row class="attr-ad-form">
-    <a-col :span="24">
-      <a-form-item
-        label="CIDR"
-        :labelCol="labelCol"
-        :wrapperCol="{ span: 18 }"
-        labelAlign="right"
-        style="width: 100%; margin-top: 20px"
+  <a-form-item
+    label="CIDR"
+    :labelCol="labelCol"
+    :wrapperCol="{ span: 18 }"
+  >
+    <div class="cidr-tag">
+      <div
+        v-for="(item) in list"
+        :key="item.id"
+        class="cidr-tag-item"
       >
-        <div class="cidr-tag">
-          <div
-            v-for="(item) in list"
-            :key="item.id"
-            class="cidr-tag-item"
-          >
-            <a-tooltip :title="item.value">
-              <span class="cidr-tag-text">{{ item.value }}</span>
-            </a-tooltip>
-            <a-icon
-              class="cidrv-tag-close"
-              type="close"
-              @click.stop="clickClose(item.id)"
-            />
-          </div>
-          <a-input
-            v-if="showAddInput"
-            class="cidr-tag-input"
-            autofocus
-            @blur="addPreValue"
-            @pressEnter="showAddInput = false"
-          ></a-input>
-          <a v-else class="cidr-tag-add" @click="showAddInput = true">+ {{ $t('new') }}</a>
-        </div>
-      </a-form-item>
-    </a-col>
-  </a-row>
+        <a-tooltip :title="item.value">
+          <span class="cidr-tag-text">{{ item.value }}</span>
+        </a-tooltip>
+        <a-icon
+          class="cidrv-tag-close"
+          type="close"
+          @click.stop="clickClose(item.id)"
+        />
+      </div>
+      <a-input
+        v-if="showAddInput"
+        class="cidr-tag-input"
+        autofocus
+        @blur="addPreValue"
+        @pressEnter="showAddInput = false"
+      ></a-input>
+      <a v-else class="cidr-tag-add" @click="showAddInput = true">+ {{ $t('new') }}</a>
+    </div>
+  </a-form-item>
 </template>
 
 <script>
