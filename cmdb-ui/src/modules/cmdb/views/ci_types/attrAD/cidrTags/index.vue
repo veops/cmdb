@@ -2,7 +2,8 @@
   <a-form-item
     label="CIDR"
     :labelCol="labelCol"
-    :wrapperCol="{ span: 18 }"
+    :wrapperCol="{ span: 6 }"
+    :extra="$t('cmdb.ciType.snmpFormTip7')"
   >
     <div class="cidr-tag">
       <div

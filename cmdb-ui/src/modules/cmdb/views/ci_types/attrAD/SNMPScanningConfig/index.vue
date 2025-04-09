@@ -1,13 +1,13 @@
 <template>
   <a-form-model
     :model="formData"
-    labelAlign="right"
     :labelCol="labelCol"
     :wrapperCol="{ span: 6 }"
     class="attr-ad-form"
   >
     <a-form-model-item
       :label="$t('cmdb.ciType.initialNode')"
+      :extra="$t('cmdb.ciType.snmpFormTip4')"
     >
       <a-input
         v-model="formData.initial_node"
@@ -17,12 +17,14 @@
 
     <a-form-model-item
       :label="$t('cmdb.ciType.recursiveOrNot')"
+      :extra="$t('cmdb.ciType.snmpFormTip5')"
     >
       <a-switch v-model="formData.recursive_scan" />
     </a-form-model-item>
 
     <a-form-model-item
       :label="$t('cmdb.ciType.maximumDepth')"
+      :extra="$t('cmdb.ciType.snmpFormTip6')"
     >
       <a-input-number
         v-model="formData.max_depth"
