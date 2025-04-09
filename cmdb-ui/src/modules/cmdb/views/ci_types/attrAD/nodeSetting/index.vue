@@ -1,9 +1,14 @@
 <template>
   <a-form-item
-    :label="$t('cmdb.ciType.nodeList')"
     :labelCol="labelCol"
     :wrapperCol="{ span: 18 }"
   >
+    <span slot="label">
+      {{ $t('cmdb.ciType.nodeList') }}
+      <a-tooltip :title="$t('cmdb.ciType.snmpFormTip1')">
+        <a-icon type="question-circle" />
+      </a-tooltip>
+    </span>
     <div class="node-setting-wrap">
       <ops-table
         :data="nodes"

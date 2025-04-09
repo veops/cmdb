@@ -132,6 +132,7 @@ export default {
       /deep/ .ant-select-selection {
         height: 28px;
         line-height: 28px;
+        border: none;
 
         .ant-select-selection__rendered {
           height: 28px;

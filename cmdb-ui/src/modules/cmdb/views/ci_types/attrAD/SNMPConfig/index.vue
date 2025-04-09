@@ -1,7 +1,6 @@
 <template>
   <a-form-model
     :model="formData"
-    labelAlign="right"
     :labelCol="labelCol"
     :wrapperCol="{ span: 6 }"
     class="attr-ad-form"
@@ -30,6 +29,7 @@
 
     <a-form-model-item
       :label="$t('cmdb.ciType.timeout')"
+      :extra="$t('cmdb.ciType.snmpFormTip2')"
     >
       <a-input-number
         v-model="formData.timeout"
@@ -40,6 +40,7 @@
 
     <a-form-model-item
       :label="$t('cmdb.ciType.retryCount')"
+      :extra="$t('cmdb.ciType.snmpFormTip3')"
     >
       <a-input-number
         v-model="formData.retries"

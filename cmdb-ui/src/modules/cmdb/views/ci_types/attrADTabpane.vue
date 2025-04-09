@@ -58,30 +58,12 @@
       <div class="attr-ad-form attr-ad-snmp-form">
         <div class="attr-ad-snmp-form-title">
           {{ $t('cmdb.ciType.SNMPConfiguration') }}
-          <a-tooltip
-            :title="$t('cmdb.ciType.snmpFormTip1')"
-            :overlayStyle="{
-              whiteSpace: 'pre',
-              textWrap: 'wrap'
-            }"
-          >
-            <a-icon type="question-circle" />
-          </a-tooltip>
         </div>
         <NodeSetting ref="nodeSetting" />
         <SNMPConfig v-model="SNMPScanningConfigForm" />
 
         <div class="attr-ad-snmp-form-title">
           {{ $t('cmdb.ciType.scanningConfiguration') }}
-          <a-tooltip
-            :title="$t('cmdb.ciType.snmpFormTip2')"
-            :overlayStyle="{
-              whiteSpace: 'pre',
-              textWrap: 'wrap'
-            }"
-          >
-            <a-icon type="question-circle" />
-          </a-tooltip>
         </div>
         <SNMPScanningConfig v-model="SNMPScanningConfigForm" />
         <CIDRTags v-model="SNMPScanningConfigForm.cidr" />
@@ -310,7 +292,7 @@ export default {
         recursive_scan: true,
         max_depth: 5,
         cidr: []
-      }, // snmp scanning parameter form data
+      }, // snmp scanning config form data
     }
   },
   provide() {
@@ -442,7 +424,7 @@ export default {
           cidr = []
         } = extra_option
 
-        const InitializeNodes = nodes?.length ? nodes : [
+        const initializeNodes = nodes?.length ? nodes : [
           {
             id: uuidv4(),
             ip: '',
@@ -451,7 +433,7 @@ export default {
           },
         ]
         this.$nextTick(() => {
-          this.$refs.nodeSetting.initNodesFunc(InitializeNodes)
+          this.$refs.nodeSetting.initNodesFunc(initializeNodes)
         })
 
         let cidrList = []
@@ -825,14 +807,14 @@ export default {
     font-size: 16px;
     color: #000000;
     margin-bottom: 12px;
-
-    & > i {
-      font-size: 14px;
-    }
   }
 
   /deep/ .ant-input-number {
     width: 100%;
+  }
+
+  /deep/ .ant-form-extra {
+    font-size: 12px;
   }
 }
 </style>
