@@ -2,7 +2,7 @@
   <div
     id="ci-detail-relation-topo"
     class="ci-detail-relation-topo"
-    :style="{ width: '100%', marginTop: '20px', height: 'calc(100% - 44px)' }"
+    :style="{ width: '100%', height: '100%' }"
   ></div>
 </template>
 
@@ -25,7 +25,6 @@ export default {
     }
   },
   inject: ['ci_types'],
-  mounted() {},
   methods: {
     init() {
       const root = document.getElementById('ci-detail-relation-topo')

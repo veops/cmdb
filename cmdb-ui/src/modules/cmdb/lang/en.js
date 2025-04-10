@@ -721,6 +721,7 @@ if __name__ == "__main__":
         batchRollbacking: 'Deleting {total} items in total, {successNum} items successful, {errorNum} items failed',
         baselineTips: 'Changes at this point in time will also be rollbacked, Unique ID, password and dynamic attributes do not support',
         cover: 'Cover',
+        detail: 'Detail'
     },
     serviceTree: {
         remove: 'Remove',
