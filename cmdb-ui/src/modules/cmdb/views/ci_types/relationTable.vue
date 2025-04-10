@@ -179,7 +179,11 @@
             :filterOption="filterOption"
             @change="changeChild"
           >
-            <a-select-option :value="CIType.id" :key="CIType.id" v-for="CIType in CITypes">
+            <a-select-option
+              :value="CIType.id"
+              :key="CIType.id"
+              v-for="CIType in CITypes"
+            >
               {{ CIType.alias || CIType.name }}
               <span class="model-select-name">({{ CIType.name }})</span>
             </a-select-option>
@@ -510,7 +514,11 @@ export default {
       })
     },
     filterOption(input, option) {
-      return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
+      const inputValue = input.toLowerCase()
+      const alias = option.componentOptions.children[0].text.toLowerCase()
+      const name = option.componentOptions.children[1]?.elm?.innerHTML?.toLowerCase?.() ?? ''
+
+      return alias.indexOf(inputValue) >= 0 || name.indexOf(inputValue) >= 0
     },
     rowClass({ row }) {
       if (row.isDivider) return 'relation-table-divider'
