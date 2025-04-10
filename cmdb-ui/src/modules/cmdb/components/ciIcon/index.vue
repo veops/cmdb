@@ -21,7 +21,7 @@
     </template>
     <span
       class="ci-icon-letter"
-      v-else
+      v-else-if="title"
     >
       <span>
         {{ title[0].toUpperCase() }}

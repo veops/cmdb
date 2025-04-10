@@ -720,6 +720,7 @@ if __name__ == "__main__":
         batchRollbacking: '正在回滚，共{total}个，成功{successNum}个，失败{errorNum}个',
         baselineTips: '该时间点的变更也会被回滚, 唯一标识、密码属性、动态属性不支持回滚',
         cover: '覆盖',
+        detail: '详情'
     },
     serviceTree: {
         remove: '移除',

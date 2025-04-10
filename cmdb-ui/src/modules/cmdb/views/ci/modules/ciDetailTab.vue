@@ -6,29 +6,79 @@
         {{ $t('cmdb.ci.share') }}
       </a>
       <a-tab-pane key="tab_1">
-        <span slot="tab"><a-icon type="book" />{{ $t('cmdb.attribute') }}</span>
-        <div class="ci-detail-attr">
-          <el-descriptions
-            :title="group.name || $t('other')"
-            :key="group.name"
-            v-for="group in attributeGroups"
-            border
-            :column="3"
-          >
-            <el-descriptions-item
-              :label="`${attr.alias || attr.name}`"
-              :key="attr.name"
-              v-for="attr in group.attributes"
-            >
-              <ci-detail-attr-content :ci="ci" :attr="attr" @refresh="refresh" @updateCIByself="updateCIByself" @refreshReferenceAttr="handleReferenceAttr" />
-            </el-descriptions-item>
-          </el-descriptions>
+        <span slot="tab"><a-icon type="book" />{{ $t('cmdb.ci.detail') }}</span>
+
+        <div class="ci-detail-table">
+          <CIDetailTitle :ci="ci" :ci_types="ci_types" />
+
+          <div class="ci-detail-table-attr">
+            <CIDetailTableTitle :title="$t('cmdb.attribute')" />
+
+            <div class="ci-detail-table-attr-wrap">
+              <div
+                v-for="group in attributeGroups"
+                :key="group.name"
+                class="ci-detail-table-attr-group"
+              >
+                <div class="ci-detail-table-attr-group-name">
+                  {{ group.name || $t('other') }}
+                </div>
+
+                <a-row :gutter="[18, 14]">
+                  <a-col
+                    v-for="attr in group.attributes"
+                    :key="attr.name"
+                    :span="8"
+                  >
+                    <a-row :gutter="[8, 0]">
+                      <a-col :span="8">
+                        <span class="ci-detail-table-attr-label">
+                          <a-tooltip :title="attr.alias || attr.name">
+                            <span class="ci-detail-table-attr-label-text">{{ attr.alias || attr.name }}</span>
+                          </a-tooltip>
+                          <span class="ci-detail-table-attr-label-colon">:</span>
+                        </span>
+                      </a-col>
+
+                      <a-col
+                        :span="16"
+                        class="ci-detail-table-attr-content"
+                      >
+                        <CIDetailAttrContent
+                          :ci="ci"
+                          :attr="attr"
+                          :attributeGroups="attributeGroups"
+                          @updateChoiceValue="updateChoiceValue"
+                          @refresh="refresh"
+                          @updateCIByself="updateCIByself"
+                          @refreshReferenceAttr="handleReferenceAttr"
+                        />
+                      </a-col>
+                    </a-row>
+                  </a-col>
+                </a-row>
+              </div>
+            </div>
+          </div>
+
+          <CIRelationTable
+            :ciId="ciId"
+            :typeId="typeId"
+            :ci="ci"
+            :relationData="relationData"
+            @refreshRelationCI="refreshRelationCI(ciId)"
+          />
         </div>
       </a-tab-pane>
       <a-tab-pane key="tab_2">
-        <span slot="tab"><a-icon type="branches" />{{ $t('cmdb.relation') }}</span>
+        <span slot="tab"><a-icon type="branches" />{{ $t('cmdb.ci.topo') }}</span>
         <div :style="{ height: '100%', padding: '24px', overflow: 'auto' }">
-          <ci-detail-relation ref="ciDetailRelation" :ciId="ciId" :typeId="typeId" :ci="ci" :initQueryLoading="initQueryLoading" />
+          <CIDetailRelation
+            :ciId="ciId"
+            :typeId="typeId"
+            :ci="ci"
+            :relationData="relationData"
+          />
         </div>
       </a-tab-pane>
       <a-tab-pane key="tab_3">
@@ -42,7 +92,7 @@
               <ops-icon type="veops-export" />{{ $t('export') }}
             </a-button>
           </a-space>
-          <ci-rollback-form ref="ciRollbackForm" :ciIds="[ciId]" @getCIHistory="getCIHistory" />
+          <CIRollbackForm ref="ciRollbackForm" :ciIds="[ciId]" @getCIHistory="getCIHistory" />
           <vxe-table
             ref="xTable"
             show-overflow
@@ -134,25 +184,33 @@
 
 <script>
 import _ from 'lodash'
-import { Descriptions, DescriptionsItem } from 'element-ui'
 import { getCITypeGroupById, getCITypes } from '@/modules/cmdb/api/CIType'
 import { getCIHistory, judgeItsmInstalled } from '@/modules/cmdb/api/history'
 import { getCIById, searchCI } from '@/modules/cmdb/api/ci'
-import CiDetailAttrContent from './ciDetailAttrContent.vue'
-import CiDetailRelation from './ciDetailRelation.vue'
+
+import RelationMixin from './ciDetailMixin/relationMixin.js'
+
+import CIDetailTitle from './ciDetailComponent/ciDetailTitle.vue'
+import CIDetailTableTitle from './ciDetailComponent/ciDetailTableTitle.vue'
+import CIDetailAttrContent from './ciDetailAttrContent.vue'
+import CIRelationTable from './ciDetailComponent/ciRelationTable.vue'
+import CIDetailRelation from './ciDetailRelation.vue'
 import TriggerTable from '../../operation_history/modules/triggerTable.vue'
 import RelatedItsmTable from './ciDetailRelatedItsmTable.vue'
-import CiRollbackForm from './ciRollbackForm.vue'
+import CIRollbackForm from './ciRollbackForm.vue'
+
 export default {
   name: 'CiDetailTab',
+  mixins: [RelationMixin],
   components: {
-    ElDescriptions: Descriptions,
-    ElDescriptionsItem: DescriptionsItem,
-    CiDetailAttrContent,
-    CiDetailRelation,
+    CIDetailAttrContent,
+    CIDetailRelation,
     TriggerTable,
     RelatedItsmTable,
-    CiRollbackForm,
+    CIRollbackForm,
+    CIDetailTitle,
+    CIDetailTableTitle,
+    CIRelationTable
   },
   props: {
     typeId: {
@@ -218,15 +276,11 @@ export default {
     },
   },
   methods: {
-    async create(ciId, activeTabKey = 'tab_1', ciDetailRelationKey = '1') {
+    async create(ciId, activeTabKey = 'tab_1') {
       this.initQueryLoading = true
       this.activeTabKey = activeTabKey
-      if (activeTabKey === 'tab_2') {
-        this.$nextTick(() => {
-          this.$refs.ciDetailRelation.activeKey = ciDetailRelationKey
-        })
-      }
       this.ciId = ciId
+
       await this.getCI()
       await this.judgeItsmInstalled()
       if (this.hasPermission) {
@@ -234,9 +288,8 @@ export default {
         this.getCIHistory()
         const ciTypeRes = await getCITypes()
         this.ci_types = ciTypeRes.ci_types
-        if (this.activeTabKey === 'tab_2') {
-          this.$refs.ciDetailRelation.init(true)
-        }
+
+        this.initRelationData(this.typeId, this.ciId)
       }
       this.initQueryLoading = false
     },
@@ -509,23 +562,68 @@ export default {
   .ant-tabs-extra-content {
     line-height: 44px;
   }
-  .ci-detail-attr {
+  .ci-detail-table {
     height: 100%;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     padding: 24px;
-    .el-descriptions-item__content {
-      cursor: default;
-      &:hover a {
-        opacity: 1 !important;
+
+    &-attr {
+      width: 100%;
+      margin-top: 14px;
+
+      &-wrap {
+        padding: 13px;
+        width: 100%;
+        border: solid 1px #E4E7ED;
+        border-top: none;
+      }
+
+      &-group {
+        &:not(:last-child) {
+          margin-bottom: 16px;
+        }
+
+        &-name {
+          font-size: 14px;
+          font-weight: 700;
+          color: @text-color_1;
+          margin-bottom: 7.5px;
+          width: 100%;
+          text-align: left;
+          display: flex;
+          justify-content: flex-start;
+        }
+      }
+
+      &-label {
+        font-size: 14px;
+        font-weight: 400;
+        color: @text-color_3;
+        display: inline-flex;
+        max-width: 100%;
+
+        &-text {
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          text-wrap: nowrap;
+        }
+
+        &-colon {
+          flex-shrink: 0;
+        }
+      }
+
+      &-content {
+        overflow-wrap: break-word;
+
+        &:hover a {
+          opacity: 1 !important;
+        }
       }
     }
-    .el-descriptions:first-child > .el-descriptions__header {
-      margin-top: 0;
-    }
-    .el-descriptions__header {
-      margin-bottom: 5px;
-      margin-top: 20px;
-    }
+
     .ant-form-item {
       margin-bottom: 0;
     }
