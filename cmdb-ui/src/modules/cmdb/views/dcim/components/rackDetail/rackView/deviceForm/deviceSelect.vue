@@ -112,11 +112,18 @@ export default {
       })
       let CIList = res?.result || []
 
+      const {
+        show_key = '',
+        unique_id = '',
+        attributes = []
+      } = this?.currentCITYpe || {}
+      const unique_key = attributes?.find((attr) => attr?.id === unique_id)?.name || ''
+
       if (CIList.length) {
         CIList = CIList.map((item) => {
           return {
             value: item?._id,
-            name: item?.[this?.currentCITYpe?.show_key] || item?._id || '',
+            name: item?.[show_key] || item?.[unique_key] || item?._id || '',
             unitCount: item?.u_count ?? 0
           }
         })
