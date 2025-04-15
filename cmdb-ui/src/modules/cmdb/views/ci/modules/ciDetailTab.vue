@@ -296,7 +296,7 @@ export default {
     getAttributes() {
       getCITypeGroupById(this.typeId, { need_other: 1 })
         .then((res) => {
-          this.attributeGroups = res
+          this.attributeGroups = (res || []).filter((group) => group?.attributes?.length)
 
           this.handleReferenceAttr()
         })
