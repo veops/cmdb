@@ -20,6 +20,7 @@
       <a-tooltip
         v-else-if="attr.value_type === '6'"
         :title="JSON.stringify(ci[attr.name] || {})"
+        overlayClassName="ci-detail-attr-json-tooltip"
       >
         <span class="ci-detail-attr-json">
           {{ JSON.stringify(ci[attr.name] || {}) }}
@@ -362,5 +363,15 @@ export default {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+}
+</style>
+
+<style lang="less">
+.ci-detail-attr-json-tooltip {
+
+  .ant-tooltip-content {
+    max-height: 300px;
+    overflow-y: auto;
+  }
 }
 </style>
