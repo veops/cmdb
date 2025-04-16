@@ -100,6 +100,7 @@ import _ from 'lodash'
 import { getCanEditByParentIdChildId } from '@/modules/cmdb/api/CITypeRelation'
 import { deleteCIRelationView } from '@/modules/cmdb/api/CIRelation'
 import { searchCI } from '@/modules/cmdb/api/ci'
+import { getSubscribeAttributes } from '@/modules/cmdb/api/preference'
 
 import CIDetailTableTitle from './ciDetailTableTitle.vue'
 import AddTableModal from '@/modules/cmdb/views/relation_views/modules/AddTableModal.vue'
@@ -194,28 +195,22 @@ export default {
 
       const cloneRelationData = _.cloneDeep(relationData)
 
-      const [
-        {
-          ciTypes: parentCITypes,
-          columns: parentColumns,
-          jsonAttr: parentJSONAttr,
-          canEdit: parentCanEdit
-        },
-        {
-          ciTypes: childCITypes,
-          columns: childColumns,
-          jsonAttr: childJSONAttr,
-          canEdit: childCanEdit
-        },
-      ] = await Promise.all([
-        this.getParentCITypes(cloneRelationData.parentCITypeList),
-        this.getChildCITypes(cloneRelationData.childCITypeList)
-      ])
-
-      this.allCITypes = [
-        ...parentCITypes,
-        ...childCITypes
+      const allCITypes = [
+        ...cloneRelationData.parentCITypeList,
+        ...cloneRelationData.childCITypeList
       ]
+      await this.handleSubscribeAttributes(allCITypes)
+
+      const {
+        columns: parentColumns,
+        jsonAttr: parentJSONAttr,
+      } = this.handleCITypeList(cloneRelationData.parentCITypeList, true)
+      const {
+        columns: childColumns,
+        jsonAttr: childJSONAttr,
+      } = this.handleCITypeList(cloneRelationData.childCITypeList, false)
+
+      this.allCITypes = allCITypes
       this.allColumns = {
         ...parentColumns,
         ...childColumns
@@ -224,14 +219,12 @@ export default {
         ...parentJSONAttr,
         ...childJSONAttr
       }
-      this.allCanEdit = {
-        ...parentCanEdit,
-        ...childCanEdit
-      }
+
+      await this.getCanEditList(this.allCITypes)
 
       const [parentCIs, childCIs] = await Promise.all([
-        this.getParentCIs(cloneRelationData.parentCIList),
-        this.getChildCIs(cloneRelationData.childCIList)
+        this.handleCIList(cloneRelationData.parentCIList, true),
+        this.handleCIList(cloneRelationData.childCIList, false)
       ])
       this.allCIList = {
         ...parentCIs,
@@ -257,50 +250,15 @@ export default {
       this.handleReferenceCINameMap()
     },
 
-    async getParentCITypes(ciTypes) {
-      const canEdit = {}
-      for (let i = 0; i < ciTypes.length; i++) {
-        ciTypes[i].isParent = true
-        await getCanEditByParentIdChildId(ciTypes[i].id, this.typeId).then((p_res) => {
-          canEdit[ciTypes[i].id] = p_res.result
-        })
-      }
-
-      const { columns, jsonAttr } = this.handleCITypeList(ciTypes || [])
-
-      return {
-        ciTypes,
-        columns,
-        jsonAttr,
-        canEdit
-      }
-    },
-
-    async getChildCITypes(ciTypes) {
-      const canEdit = {}
-      for (let i = 0; i < ciTypes.length; i++) {
-        ciTypes[i].isParent = false
-        await getCanEditByParentIdChildId(this.typeId, ciTypes[i].id).then((c_res) => {
-          canEdit[ciTypes[i].id] = c_res.result
-        })
-      }
-
-      const { columns, jsonAttr } = this.handleCITypeList(ciTypes)
-      return {
-        ciTypes,
-        columns,
-        jsonAttr,
-        canEdit
-      }
-    },
-
-    handleCITypeList(list) {
+    handleCITypeList(list, isParent) {
       const CIColumns = {}
       const CIJSONAttr = {}
 
       list.forEach((item) => {
         const columns = []
         const jsonAttr = []
+
+        item.isParent = isParent
         item.attributes.forEach((attr) => {
           const column = {
             key: 'p_' + attr.id,
@@ -343,33 +301,67 @@ export default {
       }
     },
 
-    async getParentCIs(ciList) {
-      const cis = {}
-      ciList.forEach((item) => {
-        this.allJSONAttr[item._type].forEach((attr) => {
-          item[`${attr}`] = item[`${attr}`] ? JSON.stringify(item[`${attr}`]) : ''
-        })
-        this.formatCI(item)
-        item.isParent = true
+    async getCanEditList(allCITypes) {
+      const promises = allCITypes.map((ciType) => {
+        let parentId = ciType.id
+        let childId = this.typeId
 
-        if (item._type in cis) {
-          cis[item._type].push(item)
-        } else {
-          cis[item._type] = [item]
+        if (!ciType.isParent) {
+          parentId = this.typeId
+          childId = ciType.id
         }
+
+        return getCanEditByParentIdChildId(parentId, childId).then((res) => {
+          return { id: ciType.id, canEdit: res.result }
+        })
       })
 
-      return cis
+      const allCanEdit = {}
+
+      const res = await Promise.all(promises)
+      if (res?.length) {
+        res.map((item) => {
+          allCanEdit[item.id] = item.canEdit
+        })
+      }
+
+      this.allCanEdit = allCanEdit
     },
 
-    async getChildCIs(ciList) {
+    async handleSubscribeAttributes(allCITypes) {
+      const promises = allCITypes.map((ciType, index) => {
+        return getSubscribeAttributes(ciType.id).then((res) => {
+          return {
+            ...(res || {}),
+            id: ciType.id,
+            indexInAll: index
+          }
+        })
+      })
+      const res = await Promise.all(promises)
+
+      if (res?.length) {
+        res.forEach((item) => {
+          if (
+            allCITypes?.[item.indexInAll]?.attributes &&
+            item?.is_subscribed
+          ) {
+            allCITypes[item.indexInAll].attributes = item.attributes
+          }
+        })
+      }
+
+      return allCITypes
+    },
+
+    async handleCIList(ciList, isParent) {
       const cis = {}
       ciList.forEach((item) => {
         this.allJSONAttr[item._type].forEach((attr) => {
           item[`${attr}`] = item[`${attr}`] ? JSON.stringify(item[`${attr}`]) : ''
         })
         this.formatCI(item)
-        item.isParent = false
+        item.isParent = isParent
 
         if (item._type in cis) {
           cis[item._type].push(item)
@@ -590,6 +582,7 @@ export default {
     width: 100%;
     padding: 15px 17px;
     overflow: hidden;
+    min-height: 300px;
   }
 
   &-item {
