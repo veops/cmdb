@@ -12,6 +12,7 @@ from sqlalchemy import func
 from api.extensions import db
 from api.lib.cmdb.auto_discovery.const import CLOUD_MAP
 from api.lib.cmdb.auto_discovery.const import DEFAULT_INNER
+from api.lib.cmdb.auto_discovery.const import NET_DEVICE_NAMES
 from api.lib.cmdb.auto_discovery.const import PRIVILEGED_USERS
 from api.lib.cmdb.cache import AttributeCache
 from api.lib.cmdb.cache import AutoDiscoveryMappingCache
@@ -252,6 +253,7 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
         :return:
         """
         result = []
+        db.session.commit()
         rules = cls.cls.get_by(to_dict=True)
 
         for rule in rules:
@@ -718,6 +720,12 @@ class AutoDiscoveryCICRUD(DBMixin):
 
         build_relations_for_ad_accept.apply_async(args=(adc.to_dict(), ci_id, ad_key2attr), queue=CMDB_QUEUE)
 
+        ci_type = CITypeCache.get(adc.type_id)
+        if ci_type and ci_type.name in NET_DEVICE_NAMES and 'ports' in adc.instance:
+            from api.tasks.cmdb import add_net_device_ports
+            add_net_device_ports.apply_async(args=(ci_id, adc.instance['ports']),
+                                             queue=CMDB_QUEUE)
+            
         adc.update(is_accept=True,
                    accept_by=nickname or current_user.nickname,
                    accept_time=datetime.datetime.now(),

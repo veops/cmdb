@@ -376,6 +376,29 @@ def build_relations_for_ad_accept(adc, ci_id, ad_key2attr):
                         pass
 
 
+@celery.task(name="cmdb.add_net_device_ports", queue=CMDB_QUEUE)
+@reconnect_db
+def add_net_device_ports(ci_id, ports):
+    from api.lib.cmdb.ci import CIRelationManager
+    from api.lib.cmdb.ci import CIManager
+    from api.lib.cmdb.cache import CITypeCache
+
+    port_type = CITypeCache.get("net_port")
+    if not port_type:
+        current_app.logger.warning("CIType net port is not found")
+        return
+
+    for port in ports:
+        try:
+            port_id = CIManager.add(port_type.id, is_auto_discovery=True, _is_admin=True, **port)
+
+            CIRelationManager.add(ci_id, port_id,
+                                  valid=False,
+                                  source=RelationSourceEnum.AUTO_DISCOVERY)
+        except Exception as e:
+            current_app.logger.warning("add_net_device_ports failed: {}".format(e))
+            
+            
 @celery.task(name="cmdb.dcim_calc_u_free_count", queue=CMDB_QUEUE)
 @reconnect_db
 def dcim_calc_u_free_count():

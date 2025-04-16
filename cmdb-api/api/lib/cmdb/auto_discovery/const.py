@@ -4,6 +4,8 @@ from api.lib.cmdb.const import AutoDiscoveryType
 
 PRIVILEGED_USERS = ("cmdb_agent", "worker", "admin")
 
+NET_DEVICE_NAMES = {"switch", 'router', 'firewall', 'printer'}
+
 DEFAULT_INNER = [
     dict(name="阿里云", en="aliyun", type=AutoDiscoveryType.HTTP, is_inner=True, is_plugin=False,
          option={'icon': {'name': 'caise-aliyun'}, "en": "aliyun"}),
@@ -41,8 +43,12 @@ DEFAULT_INNER = [
          option={'icon': {'name': 'caise-luyouqi'}}),
     dict(name="防火墙", type=AutoDiscoveryType.SNMP, is_inner=True, is_plugin=False,
          option={'icon': {'name': 'caise-fanghuoqiang'}}),
-    dict(name="打印机", type=AutoDiscoveryType.SNMP, is_inner=True, is_plugin=False,
-         option={'icon': {'name': 'caise-dayinji'}}),
+    # dict(name="打印机", type=AutoDiscoveryType.SNMP, is_inner=True, is_plugin=False,
+    #      option={'icon': {'name': 'caise-dayinji'}}),
+    dict(name="光纤交换机", type=AutoDiscoveryType.SNMP, is_inner=True, is_plugin=False,
+         option={'icon': {'name': 'caise-fiber'}}),
+    dict(name="F5", type=AutoDiscoveryType.SNMP, is_inner=True, is_plugin=False,
+         option={'icon': {'name': 'caise-F5'}}),
 ]
 
 CLOUD_MAP = {
