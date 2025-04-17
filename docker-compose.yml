@@ -1,6 +1,6 @@
 services:
   cmdb-db:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-db:2.3
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-db:2.5
     container_name: cmdb-db
     env_file:
       - .env
@@ -24,7 +24,7 @@ services:
       - '23306:3306'
 
   cmdb-cache:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-cache:2.3
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-cache:2.5
     container_name: cmdb-cache
     environment:
       TZ: Asia/Shanghai
@@ -41,7 +41,7 @@ services:
           - redis
 
   cmdb-api:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.5.1
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.5.2
     container_name: cmdb-api
     env_file:
       - .env
@@ -84,7 +84,7 @@ services:
       test: "ps aux|grep -v grep|grep -v '1 root'|grep gunicorn || exit 1"
 
   cmdb-ui:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.5.1
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.5.2
     container_name: cmdb-ui
     depends_on:
       cmdb-api:

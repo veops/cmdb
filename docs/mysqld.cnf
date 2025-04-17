@@ -48,7 +48,7 @@ max_connections=1000
 slow_query_log = ON
 slow_query_log_file = /tmp/mysql_slow.log
 long_query_time = 1
-sql_mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION"
+sql_mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
 #log-error	= /var/log/mysql/error.log
 # By default we only accept connections from localhost
 #bind-address	= 127.0.0.1
