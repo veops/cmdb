@@ -54,10 +54,11 @@
           >登录</a-button
           >
           <a-checkbox
-            v-if="enable_list && enable_list.length === 1 && enable_list[0].auth_type === 'LDAP'"
+            v-if="hasLDAP"
             v-model="auth_with_ldap"
-          >LDAP</a-checkbox
           >
+            LDAP
+          </a-checkbox>
         </a-form-item>
       </a-form>
       <template v-if="_enable_list && _enable_list.length >= 1">
@@ -104,21 +105,20 @@ export default {
   computed: {
     ...mapState({ auth_enable: (state) => state?.user?.auth_enable ?? {} }),
     enable_list() {
-      return this.auth_enable.enable_list ?? []
+      return this.auth_enable?.enable_list ?? []
+    },
+    hasLDAP() {
+      return this.enable_list.some((en) => en.auth_type === 'LDAP')
     },
     _enable_list() {
       return this.enable_list.filter((en) => en.auth_type !== 'LDAP')
     },
   },
   watch: {
-    enable_list: {
+    hasLDAP: {
       immediate: true,
       handler(newVal) {
-        if (newVal && newVal.length === 1 && newVal[0].auth_type === 'LDAP') {
-          this.auth_with_ldap = true
-        } else {
-          this.auth_with_ldap = false
-        }
+        this.auth_with_ldap = newVal
       },
     },
   },
@@ -142,7 +142,7 @@ export default {
     handleSubmit(e) {
       e.preventDefault()
       const {
-        enable_list,
+        hasLDAP,
         form: { validateFields },
         state,
         customActiveKey,
@@ -160,10 +160,7 @@ export default {
           delete loginParams.username
           loginParams.username = values.username
           loginParams.password = appConfig.useEncryption ? md5(values.password) : values.password
-          loginParams.auth_with_ldap =
-            enable_list && enable_list.length === 1 && enable_list[0].auth_type === 'LDAP'
-              ? Number(auth_with_ldap)
-              : undefined
+          loginParams.auth_with_ldap = hasLDAP ? Number(auth_with_ldap) : undefined
 
           localStorage.setItem('ops_auth_type', '')
           Login({ userInfo: loginParams })
