@@ -195,10 +195,13 @@ export default {
 
       const cloneRelationData = _.cloneDeep(relationData)
 
-      const allCITypes = [
-        ...cloneRelationData.parentCITypeList,
-        ...cloneRelationData.childCITypeList
-      ]
+      const allCITypes = _.uniqBy(
+        [
+          ...cloneRelationData.parentCITypeList,
+          ...cloneRelationData.childCITypeList
+        ],
+        'id'
+      )
       await this.handleSubscribeAttributes(allCITypes)
 
       const {
