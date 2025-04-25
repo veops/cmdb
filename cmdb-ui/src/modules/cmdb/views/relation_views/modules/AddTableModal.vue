@@ -30,13 +30,13 @@
           >新增</a-button
           >
         </SearchForm>
-        <vxe-table
+        <ops-table
           ref="xTable"
           row-id="_id"
           :data="tableData"
           :height="tableHeight"
           highlight-hover-row
-          :checkbox-config="{ reserve: true }"
+          :checkbox-config="{ reserve: true, highlight: true, range: true }"
           @checkbox-change="onSelectChange"
           @checkbox-all="onSelectChange"
           show-overflow="tooltip"
@@ -76,7 +76,7 @@
               <span v-if="col.value_type == '6' && row[col.field]">{{ JSON.stringify(row[col.field]) }}</span>
             </template>
           </vxe-table-column>
-        </vxe-table>
+        </ops-table>
         <a-pagination
           v-model="currentPage"
           size="small"
@@ -216,7 +216,7 @@ export default {
           this.totalNumber = res.numfound
           this.columns = this.getColumns(res.result, this.preferenceAttrList)
           this.$nextTick(() => {
-            const _table = this.$refs.xTable
+            const _table = this.$refs.xTable?.getVxetableRef?.()
             if (_table) {
               _table.refreshColumn()
             }
@@ -316,7 +316,11 @@ export default {
 
     onSelectChange() {},
     handleClose() {
-      this.$refs.xTable.clearCheckboxRow()
+      const _table = this.$refs.xTable?.getVxetableRef?.()
+      if (_table) {
+        _table.clearCheckboxRow()
+      }
+
       this.currentPage = 1
       this.expression = ''
       this.isFocusExpression = false
@@ -324,8 +328,10 @@ export default {
       this.showCreateBtn = true
     },
     async handleOk() {
-      const selectRecordsCurrent = this.$refs.xTable.getCheckboxRecords()
-      const selectRecordsReserved = this.$refs.xTable.getCheckboxReserveRecords()
+      const _table = this.$refs.xTable?.getVxetableRef?.()
+      const selectRecordsCurrent = _table?.getCheckboxRecords?.() || []
+      const selectRecordsReserved = _table?.getCheckboxReserveRecords?.() || []
+
       const ciIds = [...selectRecordsCurrent, ...selectRecordsReserved].map((record) => record._id)
       if (ciIds.length) {
         if (this.type === 'children') {
