@@ -23,15 +23,25 @@ export default {
       default: () => []
     }
   },
+  data() {
+    return {
+      icon: '',
+      title: ''
+    }
+  },
   computed: {
     findCIType() {
-      return this.ci_types?.find?.((item) => item?.id === this.ci?._type)
-    },
-    icon() {
-      return this?.findCiType?.icon || ''
-    },
-    title() {
-      return this?.ci?.[this.findCIType?.show_name] || this?.ci?.[this.findCIType?.unique_key] || ''
+      return this.ci_types?.find?.((item) => item?.id === this.ci?._type) || {}
+    }
+  },
+  watch: {
+    findCIType: {
+      deep: true,
+      immediate: true,
+      handler(val) {
+        this.icon = val?.icon || ''
+        this.title = this?.ci?.[val?.show_name] || this?.ci?.[val?.unique_key] || ''
+      },
     }
   }
 }
