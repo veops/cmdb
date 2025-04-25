@@ -1,79 +1,82 @@
 <template>
   <div ref="wrapRef">
-    <div class="table-header">
-      <SearchForm
-        ref="search"
-        :preferenceAttrList="preferenceAttrList"
-        :typeId="subnetCITypeId"
-        @copyExpression="copyExpression"
-        @refresh="handleSearch"
+    <a-spin :tip="loadTip" :spinning="loading" >
+      <div class="table-header">
+        <SearchForm
+          ref="search"
+          :preferenceAttrList="preferenceAttrList"
+          :typeId="subnetCITypeId"
+          :selectedRowKeys="selectedRowKeys"
+          @copyExpression="copyExpression"
+          @refresh="handleSearch"
+        >
+          <div class="ops-list-batch-action" v-show="!!selectedRowKeys.length">
+            <span @click="$refs.create.handleOpen(true, 'update')">{{ $t('update') }}</span>
+            <a-divider type="vertical" />
+            <span @click="openBatchDownload">{{ $t('download') }}</span>
+            <a-divider type="vertical" />
+            <span @click="batchDelete">{{ $t('delete') }}</span>
+            <span>{{ $t('cmdb.ci.selectRows', { rows: selectedRowKeys.length }) }}</span>
+          </div>
+        </SearchForm>
+
+        <div class="table-header-right">
+          <EditAttrsPopover
+            :typeId="subnetCITypeId"
+            @refresh="refreshAfterEditAttrs"
+          >
+            <a-button
+              type="primary"
+              ghost
+              class="ops-button-ghost"
+            >
+              <ops-icon type="veops-configuration_table" />
+              {{ $t('cmdb.configTable') }}
+            </a-button>
+          </EditAttrsPopover>
+        </div>
+      </div>
+
+      <CITable
+        ref="xTable"
+        :loading="loading"
+        :attrList="preferenceAttrList"
+        :columns="columns"
+        :data="instanceList"
+        :height="tableHeight"
+        @sort-change="handleSortCol"
+        @openDetail="openDetail"
+        @deleteCI="deleteCI"
+        @onSelectChange="onSelectChange"
       />
 
-      <div class="table-header-right">
-        <EditAttrsPopover
-          :typeId="subnetCITypeId"
-          @refresh="refreshAfterEditAttrs"
+      <div class="table-pagination">
+        <a-pagination
+          :showSizeChanger="true"
+          :current="page"
+          size="small"
+          :total="totalNumber"
+          show-quick-jumper
+          :page-size="pageSize"
+          :page-size-options="pageSizeOptions"
+          :show-total="
+            (total, range) =>
+              $t('pagination.total', {
+                range0: range[0],
+                range1: range[1],
+                total,
+              })
+          "
+          @change="handleChangePage"
+          @showSizeChange="onShowSizeChange"
         >
-          <a-button
-            type="primary"
-            ghost
-            class="ops-button-ghost"
-          >
-            <ops-icon type="veops-configuration_table" />
-            {{ $t('cmdb.configTable') }}
-          </a-button>
-        </EditAttrsPopover>
-        <a-button
-          v-if="instanceList && instanceList.length"
-          type="primary"
-          class="ops-button-ghost"
-          ghost
-          @click="handleExport"
-        >
-          <ops-icon type="veops-export" />
-          {{ $t('export') }}
-        </a-button>
+          <template slot="buildOptionText" slot-scope="props">
+            <span v-if="props.value !== '100000'">{{ props.value }}{{ $t('itemsPerPage') }}</span>
+            <span v-if="props.value === '100000'">{{ $t('cmdb.ci.all') }}</span>
+          </template>
+        </a-pagination>
       </div>
-    </div>
-
-    <CITable
-      ref="xTable"
-      :loading="loading"
-      :attrList="preferenceAttrList"
-      :columns="columns"
-      :data="instanceList"
-      :height="tableHeight"
-      @sort-change="handleSortCol"
-      @openDetail="openDetail"
-      @deleteCI="deleteCI"
-    />
-
-    <div class="table-pagination">
-      <a-pagination
-        :showSizeChanger="true"
-        :current="page"
-        size="small"
-        :total="totalNumber"
-        show-quick-jumper
-        :page-size="pageSize"
-        :page-size-options="pageSizeOptions"
-        :show-total="
-          (total, range) =>
-            $t('pagination.total', {
-              range0: range[0],
-              range1: range[1],
-              total,
-            })
-        "
-        @change="handleChangePage"
-        @showSizeChange="onShowSizeChange"
-      >
-        <template slot="buildOptionText" slot-scope="props">
-          <span v-if="props.value !== '100000'">{{ props.value }}{{ $t('itemsPerPage') }}</span>
-          <span v-if="props.value === '100000'">{{ $t('cmdb.ci.all') }}</span>
-        </template>
-      </a-pagination>
-    </div>
+    </a-spin>
 
     <BatchDownload
       ref="batchDownload"
@@ -82,6 +85,12 @@
     />
 
     <CIDetailDrawer ref="detail" :typeId="subnetCITypeId" />
+
+    <CreateInstanceForm
+      ref="create"
+      :typeIdFromRelation="subnetCITypeId"
+      @submit="batchUpdate"
+    />
   </div>
 </template>
 
@@ -90,7 +99,7 @@ import _ from 'lodash'
 import { mapState } from 'vuex'
 import ExcelJS from 'exceljs'
 import FileSaver from 'file-saver'
-import { searchCI, deleteCI } from '@/modules/cmdb/api/ci'
+import { searchCI, deleteCI, updateCI } from '@/modules/cmdb/api/ci'
 import { getSubscribeAttributes } from '@/modules/cmdb/api/preference'
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
 import { getCITableColumns } from '@/modules/cmdb/utils/helper'
@@ -100,6 +109,7 @@ import CITable from '@/modules/cmdb/components/ciTable/index.vue'
 import BatchDownload from '@/modules/cmdb/components/batchDownload/batchDownload.vue'
 import CIDetailDrawer from '@/modules/cmdb/views/ci/modules/ciDetailDrawer.vue'
 import EditAttrsPopover from '@/modules/cmdb/views/ci/modules/editAttrsPopover.vue'
+import CreateInstanceForm from '@/modules/cmdb/views/ci/modules/CreateInstanceForm'
 
 export default {
   name: 'SubnetList',
@@ -108,7 +118,8 @@ export default {
     CITable,
     BatchDownload,
     CIDetailDrawer,
-    EditAttrsPopover
+    EditAttrsPopover,
+    CreateInstanceForm
   },
   props: {
     subnetCIType: {
@@ -122,6 +133,7 @@ export default {
       pageSize: 50,
       pageSizeOptions: ['50', '100', '200'],
       loading: false,
+      loadTip: '',
       sortByTable: undefined,
 
       instanceList: [],
@@ -130,6 +142,7 @@ export default {
       preferenceAttrList: [],
       attrList: [],
       attributes: {},
+      selectedRowKeys: [],
     }
   },
   computed: {
@@ -275,7 +288,7 @@ export default {
       })
     },
 
-    handleExport() {
+    openBatchDownload() {
       this.$refs.batchDownload.open({
         preferenceAttrList: this.preferenceAttrList,
         ciTypeName: this.$t('cmdb.ipam.subnetList') || '',
@@ -336,6 +349,7 @@ export default {
         FileSaver.saveAs(file, `${filename}.xlsx`)
       })
 
+      this.selectedRowKeys = []
       this.$refs.xTable.getVxetableRef().clearCheckboxRow()
       this.$refs.xTable.getVxetableRef().clearCheckboxReserve()
     },
@@ -361,6 +375,120 @@ export default {
           })
         },
       })
+    },
+
+    onSelectChange(records) {
+      this.selectedRowKeys = records.map((i) => i.ci_id || i._id)
+    },
+
+    batchDelete() {
+      this.$confirm({
+        title: this.$t('warning'),
+        content: this.$t('confirmDelete'),
+        onOk: () => {
+          this.batchDeleteAsync()
+        },
+      })
+    },
+
+    async batchDeleteAsync() {
+      let successNum = 0
+      let errorNum = 0
+      this.loading = true
+      this.loadTip = this.$t('cmdb.ci.batchDeleting')
+
+      const floor = Math.ceil(this.selectedRowKeys.length / 6)
+      for (let i = 0; i < floor; i++) {
+        const itemList = this.selectedRowKeys.slice(6 * i, 6 * i + 6)
+        const promises = itemList.map((x) => deleteCI(x, false))
+        await Promise.allSettled(promises)
+          .then((res) => {
+            res.forEach((r) => {
+              if (r.status === 'fulfilled') {
+                successNum += 1
+              } else {
+                errorNum += 1
+              }
+            })
+          })
+          .finally(() => {
+            this.loadTip = this.$t('cmdb.ci.batchDeleting2', {
+              total: this.selectedRowKeys.length,
+              successNum: successNum,
+              errorNum: errorNum,
+            })
+          })
+      }
+
+      this.loading = false
+      this.loadTip = ''
+      this.selectedRowKeys = []
+      this.$refs.xTable.getVxetableRef().clearCheckboxRow()
+      this.$refs.xTable.getVxetableRef().clearCheckboxReserve()
+      this.$nextTick(() => {
+        this.page = 1
+        this.getTableData()
+      })
+    },
+
+    batchUpdate(values) {
+      this.$confirm({
+        title: this.$t('warning'),
+        content: this.$t('cmdb.ci.batchUpdateConfirm'),
+        onOk: () => {
+          this.batchUpdateAsync(values)
+        },
+      })
+    },
+
+    async batchUpdateAsync(values) {
+      let successNum = 0
+      let errorNum = 0
+      this.loading = true
+      this.loadTip = this.$t('cmdb.ci.batchUpdateInProgress') + '...'
+
+      const payload = {}
+      Object.keys(values).forEach((key) => {
+        if (values[key] === undefined || values[key] === null) {
+          payload[key] = null
+        } else {
+          payload[key] = values[key]
+        }
+      })
+      this.$refs.create.visible = false
+      const key = 'updatable'
+      let errorMsg = ''
+
+      for (let i = 0; i < this.selectedRowKeys.length; i++) {
+        await updateCI(this.selectedRowKeys[i], payload, false)
+          .then(() => {
+            successNum += 1
+          })
+          .catch((error) => {
+            errorMsg = errorMsg + '\n' + `${this.selectedRowKeys[i]}:${error.response?.data?.message ?? ''}`
+            this.$notification.warning({
+              key,
+              message: this.$t('warning'),
+              description: errorMsg,
+              duration: 0,
+              style: { whiteSpace: 'break-spaces', overflow: 'auto', maxHeight: this.windowHeight - 80 + 'px' },
+            })
+            errorNum += 1
+          })
+          .finally(() => {
+            this.loadTip = this.$t('cmdb.ci.batchUpdateInProgress2', {
+              total: this.selectedRowKeys.length,
+              successNum: successNum,
+              errorNum: errorNum,
+            })
+          })
+      }
+      this.loading = false
+      this.loadTip = ''
+      this.selectedRowKeys = []
+      this.$refs.xTable.getVxetableRef().clearCheckboxRow()
+      this.$refs.xTable.getVxetableRef().clearCheckboxReserve()
+      this.getTableData()
     },
   }
 }
