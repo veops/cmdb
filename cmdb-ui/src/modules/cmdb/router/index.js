@@ -71,7 +71,7 @@ const genCmdbRoutes = async () => {
       {
         path: '/cmdb/adc',
         name: 'cmdb_auto_discovery_ci',
-        meta: { title: 'cmdb.menu.adCIs', icon: 'ops-cmdb-adc', selectedIcon: 'ops-cmdb-adc', keepAlive: false },
+        meta: { title: 'cmdb.menu.adCIs', icon: 'ops-cmdb-adc', selectedIcon: 'ops-cmdb-adc', keepAlive: false, permission: ['admin', 'cmdb_admin'] },
         component: () => import('../views/discoveryCI/index.vue')
       },
       {
