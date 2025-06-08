@@ -6,6 +6,174 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "44501032",
+      "name": "onterm-symbolic_link",
+      "font_class": "onterm-symbolic_link",
+      "unicode": "ea23",
+      "unicode_decimal": 59939
+    },
+    {
+      "icon_id": "44497221",
+      "name": "oneterm-batch_execution",
+      "font_class": "oneterm-batch_execution",
+      "unicode": "ea20",
+      "unicode_decimal": 59936
+    },
+    {
+      "icon_id": "44497220",
+      "name": "oneterm-file_log-selected",
+      "font_class": "ops-oneterm-file_log-selected",
+      "unicode": "ea21",
+      "unicode_decimal": 59937
+    },
+    {
+      "icon_id": "44497219",
+      "name": "oneterm-file_log",
+      "font_class": "ops-oneterm-file_log",
+      "unicode": "ea22",
+      "unicode_decimal": 59938
+    },
+    {
+      "icon_id": "44455092",
+      "name": "file",
+      "font_class": "file",
+      "unicode": "ea1f",
+      "unicode_decimal": 59935
+    },
+    {
+      "icon_id": "44455100",
+      "name": "folder",
+      "font_class": "folder1",
+      "unicode": "ea1e",
+      "unicode_decimal": 59934
+    },
+    {
+      "icon_id": "44315758",
+      "name": "mongoDB (1)",
+      "font_class": "a-mongoDB1",
+      "unicode": "ea1b",
+      "unicode_decimal": 59931
+    },
+    {
+      "icon_id": "44315757",
+      "name": "postgreSQL (1)",
+      "font_class": "a-postgreSQL1",
+      "unicode": "ea1c",
+      "unicode_decimal": 59932
+    },
+    {
+      "icon_id": "44315755",
+      "name": "telnet (1)",
+      "font_class": "a-telnet1",
+      "unicode": "ea1d",
+      "unicode_decimal": 59933
+    },
+    {
+      "icon_id": "44276353",
+      "name": "command_interception (1)",
+      "font_class": "a-command_interception1",
+      "unicode": "ea17",
+      "unicode_decimal": 59927
+    },
+    {
+      "icon_id": "44276352",
+      "name": "quick_commands",
+      "font_class": "quick_commands",
+      "unicode": "ea18",
+      "unicode_decimal": 59928
+    },
+    {
+      "icon_id": "44276351",
+      "name": "terminal_settings",
+      "font_class": "terminal_settings",
+      "unicode": "ea19",
+      "unicode_decimal": 59929
+    },
+    {
+      "icon_id": "44276350",
+      "name": "basic_settings",
+      "font_class": "basic_settings",
+      "unicode": "ea1a",
+      "unicode_decimal": 59930
+    },
+    {
+      "icon_id": "44276278",
+      "name": "asset_management",
+      "font_class": "ops-oneterm-asset-management",
+      "unicode": "ea16",
+      "unicode_decimal": 59926
+    },
+    {
+      "icon_id": "43267802",
+      "name": "ai-seek",
+      "font_class": "ai-seek",
+      "unicode": "ea15",
+      "unicode_decimal": 59925
+    },
+    {
+      "icon_id": "43213714",
+      "name": "ai-hate1",
+      "font_class": "ai-hate1",
+      "unicode": "ea13",
+      "unicode_decimal": 59923
+    },
+    {
+      "icon_id": "43213712",
+      "name": "ai-like1",
+      "font_class": "ai-like1",
+      "unicode": "ea14",
+      "unicode_decimal": 59924
+    },
+    {
+      "icon_id": "43213717",
+      "name": "ai-like2",
+      "font_class": "ai-like2",
+      "unicode": "ea11",
+      "unicode_decimal": 59921
+    },
+    {
+      "icon_id": "43213716",
+      "name": "ai-hate2",
+      "font_class": "ai-hate2",
+      "unicode": "ea12",
+      "unicode_decimal": 59922
+    },
+    {
+      "icon_id": "43139007",
+      "name": "ai-top_up",
+      "font_class": "ai-top_up",
+      "unicode": "ea10",
+      "unicode_decimal": 59920
+    },
+    {
+      "icon_id": "43139017",
+      "name": "ai-top_down",
+      "font_class": "ai-top_down",
+      "unicode": "ea0f",
+      "unicode_decimal": 59919
+    },
+    {
+      "icon_id": "43029539",
+      "name": "autoflow-script",
+      "font_class": "autoflow-script",
+      "unicode": "ea0d",
+      "unicode_decimal": 59917
+    },
+    {
+      "icon_id": "43029538",
+      "name": "autoflow-dag",
+      "font_class": "autoflow-dag",
+      "unicode": "ea0e",
+      "unicode_decimal": 59918
+    },
+    {
+      "icon_id": "42960865",
+      "name": "itsm-default_line",
+      "font_class": "itsm-default_line",
+      "unicode": "ea0c",
+      "unicode_decimal": 59916
+    },
+    {
       "icon_id": "42930714",
       "name": "veops-servicetree",
       "font_class": "veops-servicetree",

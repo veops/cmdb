@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1735191938771') format('woff2'),
-       url('iconfont.woff?t=1735191938771') format('woff'),
-       url('iconfont.ttf?t=1735191938771') format('truetype');
+  src: url('iconfont.woff2?t=1749393321370') format('woff2'),
+       url('iconfont.woff?t=1749393321370') format('woff'),
+       url('iconfont.ttf?t=1749393321370') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,102 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.onterm-symbolic_link:before {
+  content: "\ea23";
+}
+
+.oneterm-batch_execution:before {
+  content: "\ea20";
+}
+
+.ops-oneterm-file_log-selected:before {
+  content: "\ea21";
+}
+
+.ops-oneterm-file_log:before {
+  content: "\ea22";
+}
+
+.file:before {
+  content: "\ea1f";
+}
+
+.folder1:before {
+  content: "\ea1e";
+}
+
+.a-mongoDB1:before {
+  content: "\ea1b";
+}
+
+.a-postgreSQL1:before {
+  content: "\ea1c";
+}
+
+.a-telnet1:before {
+  content: "\ea1d";
+}
+
+.a-command_interception1:before {
+  content: "\ea17";
+}
+
+.quick_commands:before {
+  content: "\ea18";
+}
+
+.terminal_settings:before {
+  content: "\ea19";
+}
+
+.basic_settings:before {
+  content: "\ea1a";
+}
+
+.ops-oneterm-asset-management:before {
+  content: "\ea16";
+}
+
+.ai-seek:before {
+  content: "\ea15";
+}
+
+.ai-hate1:before {
+  content: "\ea13";
+}
+
+.ai-like1:before {
+  content: "\ea14";
+}
+
+.ai-like2:before {
+  content: "\ea11";
+}
+
+.ai-hate2:before {
+  content: "\ea12";
+}
+
+.ai-top_up:before {
+  content: "\ea10";
+}
+
+.ai-top_down:before {
+  content: "\ea0f";
+}
+
+.autoflow-script:before {
+  content: "\ea0d";
+}
+
+.autoflow-dag:before {
+  content: "\ea0e";
+}
+
+.itsm-default_line:before {
+  content: "\ea0c";
 }
 
 .veops-servicetree:before {
