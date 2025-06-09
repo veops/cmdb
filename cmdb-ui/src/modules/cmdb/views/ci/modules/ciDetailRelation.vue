@@ -132,10 +132,11 @@ export default {
       }
 
       const _findCiType = ci_types_list.find((item) => item.id === this.typeId)
-      const unique_id = _findCiType.show_id || this.attributes().unique_id
-      const unique_name = _findCiType.show_name || this.attributes().unique
+      const unique_id = _findCiType.show_id || _findCiType.unique_id
       const _findUnique = this.attrList().find((attr) => attr.id === unique_id)
+      const unique_name = _findUnique?.name
       const unique_alias = _findUnique?.alias || _findUnique?.name || ''
+
       const nodes = {
         isRoot: true,
         id: `Root_${this.typeId}`,
