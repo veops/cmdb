@@ -12,6 +12,7 @@ import zhCN from 'ant-design-vue/lib/locale-provider/zh_CN'
 import enUS from 'ant-design-vue/lib/locale-provider/en_US'
 import { AppDeviceEnquire } from '@/utils/mixin'
 import { debounce } from './utils/util'
+import { getSystemLanguage } from '@/api/system.js'
 
 import { h } from 'snabbdom'
 import { DomEditor, Boot } from '@wangeditor/editor'
@@ -45,8 +46,7 @@ export default {
     },
   },
   created() {
-    this.SET_LOCALE(localStorage.getItem('ops_locale') || 'zh')
-    this.$i18n.locale = localStorage.getItem('ops_locale') || 'zh'
+    this.initLanguage()
     this.timer = setInterval(() => {
       this.setTime(new Date().getTime())
     }, 1000)
@@ -200,6 +200,28 @@ export default {
         this.alive = true
       })
     },
+    async initLanguage() {
+      let saveLocale = localStorage.getItem('ops_locale')
+      if (!saveLocale) {
+        let requestLanguage = ''
+        try {
+          const languageRes = await getSystemLanguage()
+          requestLanguage = languageRes?.language || ''
+        } catch (e) {
+          console.error('getSystemLanguage error:', e)
+        }
+
+        // request language variable || user local system language
+        const userLanguage = requestLanguage || navigator.language || navigator.userLanguage
+        if (userLanguage.includes('zh')) {
+          saveLocale = 'zh'
+        } else {
+          saveLocale = 'en'
+        }
+      }
+      this.SET_LOCALE(saveLocale)
+      this.$i18n.locale = saveLocale
+    }
   },
 }
 </script>
