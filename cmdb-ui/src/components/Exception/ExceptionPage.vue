@@ -6,9 +6,9 @@
     </div>
     <div class="content">
       <h1>{{ config[type].title }}</h1>
-      <div class="desc">{{ config[type].desc }}</div>
+      <div class="desc">{{ $t(config[type].desc) }}</div>
       <div class="actions">
-        <a-button type="primary" @click="handleToHome">返回首页</a-button>
+        <a-button type="primary" @click="handleToHome">{{ $t('exception.backToHome') }}</a-button>
       </div>
     </div>
   </div>

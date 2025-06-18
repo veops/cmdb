@@ -109,8 +109,24 @@ export default {
     default: '默认',
     tip: '提示',
     cmdbSearch: '搜索一下',
+    exception: {
+        backToHome: '返回首页',
+        desc1: '抱歉，你无权访问该页面',
+        desc2: '抱歉，你访问的页面不存在或仍在开发中',
+        desc3: '抱歉，服务器出错了'
+    },
     pagination: {
         total: '当前展示 {range0}-{range1} 条数据， 共 {total} 条'
+    },
+    components: {
+        colorTagSelectTip: '选择或输入（回车确定）标签',
+        database: '数据库',
+        system: '操作系统',
+        language: '语言',
+        status: '状态',
+        commonComponent: '常用组件',
+        data: '数据',
+        cloud: '云'
     },
     topMenu: {
         personalCenter: '个人中心',

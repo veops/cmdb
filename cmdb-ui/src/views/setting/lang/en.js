@@ -445,6 +445,27 @@ const cs_en = {
     test: 'Test',
     selectApp: 'Select App',
   },
+  login: {
+    loginText: 'OneOps making operations simple',
+    username: 'Username/Email',
+    usernameRequired: 'Please input Username/Email',
+    password: 'Password',
+    passwordRequired: 'Please input Password',
+    captcha: 'Captcha',
+    captchaRequired: 'Please input Captcha',
+    loginBtn: 'Login',
+    autoLogin: 'Auto Login',
+    otherLoginWay: 'Other Login',
+    welcomeMessage: 'Welcome',
+    welcomeDesc: '{name} Welcome Back',
+    welcomeTime1: 'Good Morning',
+    welcomeTime2: 'Good Morning',
+    welcomeTime3: 'Good Afternoon',
+    welcomeTime4: 'Good Afternoon',
+    welcomeTime5: 'Good Evening',
+    oneDeviceLogin: 'Login on one device only',
+    logoutSoon: 'Logging Out Soon...',
+  }
 }
 
 export default cs_en

@@ -109,8 +109,24 @@ export default {
     default: 'default',
     tip: 'Tip',
     cmdbSearch: 'Search',
+    exception: {
+        backToHome: 'Back to home page',
+        desc1: 'Sorry, you are not authorized to access this page',
+        desc2: 'Sorry, the page you are visiting does not exist or is still under development',
+        desc3: 'Sorry, server error'
+    },
     pagination: {
         total: '{range0}-{range1} of {total} items'
+    },
+    components: {
+        colorTagSelectTip: 'Enter or select tags',
+        database: 'Database',
+        system: 'System',
+        language: 'Language',
+        status: 'Status',
+        commonComponent: 'Common Component',
+        data: 'Data',
+        cloud: 'Cloud'
     },
     topMenu: {
         personalCenter: 'My Profile',

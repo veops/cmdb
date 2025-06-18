@@ -1,8 +1,10 @@
 import _ from 'lodash'
+import i18n from '@/lang'
+
 export function timeFix() {
   const time = new Date()
   const hour = time.getHours()
-  return hour < 9 ? '早上好' : hour <= 11 ? '上午好' : hour <= 13 ? '中午好' : hour < 20 ? '下午好' : '晚上好'
+  return hour < 9 ? i18n.t('cs.login.welcomeTime1') : hour <= 11 ? i18n.t('cs.login.welcomeTime2') : hour <= 13 ? i18n.t('cs.login.welcomeTime3') : hour < 20 ? i18n.t('cs.login.welcomeTime4') : i18n.t('cs.login.welcomeTime5')
 }
 
 export function welcome() {

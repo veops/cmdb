@@ -23,7 +23,7 @@
     <a-form-model-item :label="$t('cs.auth.oauth2.tokenUrl')" prop="token_url">
       <a-input v-model="form.token_url" :placeholder="$t('cs.auth.oauth2.tokenUrlPlaceholder')" />
     </a-form-model-item>
-    <SpanTitle>其他</SpanTitle>
+    <SpanTitle>{{ $t('cs.auth.other') }}</SpanTitle>
     <a-form-model-item :label="$t('cs.auth.oauth2.userInfo')" prop="user_info" :wrapper-col="{ span: 15 }">
       <vue-json-editor
         :style="{ '--custom-height': `${200}px` }"

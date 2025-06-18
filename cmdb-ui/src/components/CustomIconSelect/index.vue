@@ -33,7 +33,7 @@
         <template v-if="iconList && iconList.length">
           <template v-if="currentIconType !== '4'">
             <div v-for="category in iconList" :key="category.value">
-              <h4 class="category">{{ category.label }}</h4>
+              <h4 class="category">{{ $t(category.label) }}</h4>
               <div class="custom-icon-select-popover-content-wrapper">
                 <div
                   v-for="name in category.list"

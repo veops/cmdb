@@ -443,5 +443,26 @@ const cs_zh = {
     test: '测试',
     selectApp: '选择应用',
   },
+  login: {
+    loginText: '维易科技 让运维变简单',
+    username: '用户名/邮箱',
+    usernameRequired: '请输入用户名或邮箱',
+    password: '密码',
+    passwordRequired: '请输入密码',
+    captcha: '图片验证码',
+    captchaRequired: '请输入验证码',
+    loginBtn: '登录',
+    autoLogin: '自动登录',
+    otherLoginWay: '其他登录方式',
+    welcomeMessage: '欢迎',
+    welcomeDesc: '{name} 欢迎回来',
+    welcomeTime1: '早上好',
+    welcomeTime2: '上午好',
+    welcomeTime3: '中午好',
+    welcomeTime4: '下午好',
+    welcomeTime5: '晚上好',
+    oneDeviceLogin: '只能在一个设备上登录',
+    logoutSoon: '即将登出...',
+  }
 }
 export default cs_zh

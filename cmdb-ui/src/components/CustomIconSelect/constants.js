@@ -47,7 +47,7 @@ export const commonIconList = ['changyong-ubuntu',
 export const linearIconList = [
   {
     value: 'database',
-    label: '数据库',
+    label: 'components.database',
     list: [{
       value: 'icon-xianxing-DB2',
       label: 'DB2'
@@ -81,7 +81,7 @@ export const linearIconList = [
     }]
   }, {
     value: 'system',
-    label: '操作系统',
+    label: 'components.system',
     list: [{
       value: 'icon-xianxing-Windows',
       label: 'Windows'
@@ -106,7 +106,7 @@ export const linearIconList = [
     }]
   }, {
     value: 'language',
-    label: '语言',
+    label: 'components.language',
     list: [{
       value: 'icon-xianxing-python',
       label: 'python'
@@ -137,7 +137,7 @@ export const linearIconList = [
     }]
   }, {
     value: 'status',
-    label: '状态',
+    label: 'components.status',
     list: [{
       value: 'icon-xianxing-yiwen',
       label: '疑问'
@@ -177,7 +177,7 @@ export const linearIconList = [
     }]
   }, {
     value: 'icon-xianxing-application',
-    label: '常用组件',
+    label: 'components.commonComponent',
     list: [{
       value: 'icon-xianxing-yilianjie',
       label: '已连接'
@@ -310,7 +310,7 @@ export const linearIconList = [
     }]
   }, {
     value: 'data',
-    label: '数据',
+    label: 'components.data',
     list: [{
       value: 'icon-xianxing-bingzhuangtu',
       label: '饼状图'
@@ -387,7 +387,7 @@ export const linearIconList = [
 export const fillIconList = [
   {
     value: 'database',
-    label: '数据库',
+    label: 'components.database',
     list: [{
       value: 'icon-shidi-DB2',
       label: 'DB2'
@@ -421,7 +421,7 @@ export const fillIconList = [
     }]
   }, {
     value: 'system',
-    label: '操作系统',
+    label: 'components.system',
     list: [{
       value: 'icon-shidi-Windows',
       label: 'Windows'
@@ -446,7 +446,7 @@ export const fillIconList = [
     }]
   }, {
     value: 'language',
-    label: '语言',
+    label: 'components.language',
     list: [{
       value: 'icon-shidi-python',
       label: 'python'
@@ -477,7 +477,7 @@ export const fillIconList = [
     }]
   }, {
     value: 'status',
-    label: '状态',
+    label: 'components.status',
     list: [{
       value: 'icon-shidi-yiwen',
       label: '疑问'
@@ -517,7 +517,7 @@ export const fillIconList = [
     }]
   }, {
     value: 'icon-shidi-application',
-    label: '常用组件',
+    label: 'components.commonComponent',
     list: [{
       value: 'icon-shidi-yilianjie',
       label: '已连接'
@@ -650,7 +650,7 @@ export const fillIconList = [
     }]
   }, {
     value: 'data',
-    label: '数据',
+    label: 'components.data',
     list: [{
       value: 'icon-shidi-bingzhuangtu',
       label: '饼状图'
@@ -727,7 +727,7 @@ export const fillIconList = [
 export const multicolorIconList = [
   {
     value: 'database',
-    label: '数据库',
+    label: 'components.database',
     list: [{
       value: 'caise-TIDB',
       label: 'TIDB'
@@ -773,7 +773,7 @@ export const multicolorIconList = [
     }]
   }, {
     value: 'cloud',
-    label: '云',
+    label: 'components.cloud',
     list: [{
       value: 'AWS',
       label: 'AWS'
@@ -819,7 +819,7 @@ export const multicolorIconList = [
     }]
   }, {
     value: 'system',
-    label: '操作系统',
+    label: 'components.system',
     list: [{
       value: 'ciase-aix',
       label: 'aix'
@@ -847,7 +847,7 @@ export const multicolorIconList = [
     }]
   }, {
     value: 'language',
-    label: '语言',
+    label: 'components.language',
     list: [{
       value: 'caise-python',
       label: 'python'
@@ -878,7 +878,7 @@ export const multicolorIconList = [
     }]
   }, {
     value: 'status',
-    label: '状态',
+    label: 'components.status',
     list: [{
       value: 'caise-yiwen',
       label: '疑问'
@@ -918,7 +918,7 @@ export const multicolorIconList = [
     }]
   }, {
     value: 'caise-application',
-    label: '常用组件',
+    label: 'components.commonComponent',
     list: [{
       value: 'caise-websphere',
       label: 'WebSphere'
@@ -1180,7 +1180,7 @@ export const multicolorIconList = [
     }]
   }, {
     value: 'data',
-    label: '数据',
+    label: 'components.data',
     list: [{
       value: 'caise-bingzhuangtu',
       label: '饼状图'
