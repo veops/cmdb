@@ -5,29 +5,44 @@
     <div class="ci-relation-table-wrap">
       <div class="ci-relation-table-tab">
         <div
-          v-for="(item) in tabList"
-          :key="item.value"
-          :class="`tab-item ${item.value === currentTab ? 'tab-item-active' : ''}`"
-          @click="clickTab(item.value)"
+          v-for="(group) in tabList"
+          :key="group.key"
+          class="tab-group"
         >
-          <span class="tab-item-name">
-            <a-tooltip :title="item.name">
-              <span class="tab-item-name-text">{{ item.name }}</span>
-            </a-tooltip>
-            <span
-              v-if="item.count"
-              class="tab-item-name-count"
-            >
-              ({{ item.count }})
-            </span>
-          </span>
-          <span
-            v-if="item.value === currentTab && item.showAdd"
-            class="tab-item-add"
-            @click="openAddModal(item)"
+          <div
+            v-if="group.name"
+            class="tab-group-name"
           >
-            <a-icon type="plus" />
-          </span>
+            {{ group.name }}
+          </div>
+          <div
+            v-for="(item) in group.list"
+            :key="item.key"
+            :class="`tab-item ${item.key === currentTab ? 'tab-item-active' : ''}`"
+            :style="{
+              paddingLeft: item.key === 'all' ? '8px' : '16px'
+            }"
+            @click="clickTab(item.key)"
+          >
+            <span class="tab-item-name">
+              <a-tooltip :title="item.name">
+                <span class="tab-item-name-text">{{ item.name }}</span>
+              </a-tooltip>
+              <span
+                v-if="item.count"
+                class="tab-item-name-count"
+              >
+                ({{ item.count }})
+              </span>
+            </span>
+            <span
+              v-if="item.key === currentTab && item.showAdd"
+              class="tab-item-add"
+              @click="openAddModal(item)"
+            >
+              <a-icon type="plus" />
+            </span>
+          </div>
         </div>
       </div>
 
@@ -37,7 +52,7 @@
       >
         <div
           v-for="(item) in tableIDList"
-          :key="item.id"
+          :key="item.key"
           class="ci-relation-table-item"
         >
           <div
@@ -51,8 +66,8 @@
           <vxe-grid
             bordered
             size="mini"
-            :columns="allColumns[item.id]"
-            :data="allCIList[item.id]"
+            :columns="allColumns[item.value]"
+            :data="allCIList[item.key]"
             overflow
             showOverflow="tooltip"
             showHeaderOverflow="tooltip"
@@ -77,9 +92,9 @@
                 @confirm="deleteRelation(row)"
               >
                 <a
-                  :disabled="!allCanEdit[item.id]"
+                  :disabled="!allCanEdit[item.value]"
                   :style="{
-                    color: !allCanEdit[item.id] ? 'rgba(0, 0, 0, 0.25)' : 'red',
+                    color: !allCanEdit[item.value] ? 'rgba(0, 0, 0, 0.25)' : 'red',
                   }"
                 >
                   <a-icon type="delete" />
@@ -104,6 +119,9 @@ import { getSubscribeAttributes } from '@/modules/cmdb/api/preference'
 
 import CIDetailTableTitle from './ciDetailTableTitle.vue'
 import AddTableModal from '@/modules/cmdb/views/relation_views/modules/AddTableModal.vue'
+
+const PARENT_KEY = 'parents'
+const CHILDREN_KEY = 'children'
 
 export default {
   name: 'CIRelationTable',
@@ -151,24 +169,26 @@ export default {
   },
 
   computed: {
+    tabListFlat() {
+      return this.tabList.reduce((list, group) => list.concat(group.list), [])
+    },
     tableIDList() {
-      let baseIDs = []
+      const baseKeys = this.currentTab === 'all'
+        ? this.tabListFlat.filter(item => item.value !== 'all').map(item => item.key)
+        : [this.currentTab]
 
-      switch (this.currentTab) {
-        case 'all':
-          baseIDs = this.tabList.filter((item) => item.value !== 'all').map((item) => item.value)
-          break
-        default:
-          baseIDs = [this.currentTab]
-          break
-      }
+      return baseKeys.filter((key) => this.allCIList?.[key]?.length).map((key) => {
+        const findTab = this.tabListFlat.find((item) => item.key === key) || {}
 
-      return baseIDs.filter((id) => this.allCIList?.[id]?.length).map((id) => {
-        const findTab = this.tabList.find((item) => item.value === id) || {}
+        let name = findTab?.name || ''
+        if (name && findTab?.value === this.ci._type) {
+          name = `${findTab?.isParent ? this.$t('cmdb.ci.upstream') : this.$t('cmdb.ci.downstream')} - ${name}`
+        }
 
         return {
-          id,
-          name: findTab?.name || '',
+          key,
+          value: findTab?.value || '',
+          name,
           count: findTab?.count || ''
         }
       })
@@ -234,23 +254,46 @@ export default {
         ...childCIs
       }
 
-      const tabList = this.allCITypes.map((item) => {
-        return {
-          name: item?.alias ?? item?.name ?? '',
-          value: item.id,
-          count: this.allCIList?.[item.id]?.length || 0,
-          showAdd: this.allCanEdit?.[item.id] ?? false
-        }
-      })
-      tabList.unshift({
-        name: this.$t('all'),
-        value: 'all',
-        count: Object.values(this.allCIList).reduce((acc, cur) => acc + (cur?.length || 0), 0),
-        showAdd: false
-      })
+      const tabList = []
+
+      tabList[0] = {
+        name: '',
+        key: 'all',
+        list: [{
+          name: this.$t('all'),
+          key: 'all',
+          value: 'all',
+          count: Object.values(this.allCIList).reduce((acc, cur) => acc + (cur?.length || 0), 0),
+          showAdd: false
+        }]
+      }
+      tabList[1] = {
+        name: this.$t('cmdb.ci.upstream'),
+        key: PARENT_KEY,
+        list: this.buildTabList(cloneRelationData.parentCITypeList, PARENT_KEY, true)
+      }
+      tabList[2] = {
+        name: this.$t('cmdb.ci.downstream'),
+        key: CHILDREN_KEY,
+        list: this.buildTabList(cloneRelationData.childCITypeList, CHILDREN_KEY, false)
+      }
       this.tabList = tabList
 
       this.handleReferenceCINameMap()
+    },
+
+    buildTabList(list, keyPrefix, isParent) {
+      return list.map((item) => {
+        const key = `${keyPrefix}-${item.id}`
+        return {
+          name: item?.alias ?? item?.name ?? '',
+          key,
+          isParent,
+          value: item.id,
+          count: this.allCIList?.[key]?.length || 0,
+          showAdd: this.allCanEdit?.[item.id] ?? false
+        }
+      })
     },
 
     handleCITypeList(list, isParent) {
@@ -365,11 +408,12 @@ export default {
         })
         this.formatCI(item)
         item.isParent = isParent
+        const CIKey = `${isParent ? PARENT_KEY : CHILDREN_KEY}-${item._type}`
 
-        if (item._type in cis) {
-          cis[item._type].push(item)
+        if (CIKey in cis) {
+          cis[CIKey].push(item)
         } else {
-          cis[item._type] = [item]
+          cis[CIKey] = [item]
         }
       })
 
@@ -398,9 +442,11 @@ export default {
     async handleReferenceCINameMap() {
       const referenceCINameMap = {}
       this.allCITypes.forEach((CIType) => {
+        const CIKey = `${CIType.isParent ? PARENT_KEY : CHILDREN_KEY}-${CIType.id}`
+
         CIType.attributes.forEach((attr) => {
           if (attr?.is_reference && attr?.reference_type_id) {
-            const currentCIList = this.allCIList[CIType.id]
+            const currentCIList = this.allCIList[CIKey]
             if (currentCIList?.length) {
               currentCIList.forEach((ci) => {
                 const ids = Array.isArray(ci[attr.name]) ? ci[attr.name] : ci[attr.name] ? [ci[attr.name]] : []
@@ -461,8 +507,8 @@ export default {
       return this.referenceCINameMap?.[typeId]?.[id] || id
     },
 
-    clickTab(value) {
-      this.currentTab = value
+    clickTab(key) {
+      this.currentTab = key
     },
 
     deleteRelation(row) {
@@ -486,7 +532,7 @@ export default {
         },
         this.ciId,
         ciType,
-        ciType?.isParent ? 'parents' : 'children'
+        tabData?.isParent ? 'parents' : 'children'
       )
     },
 
@@ -512,11 +558,25 @@ export default {
   &-tab {
     flex-shrink: 0;
     width: 160px;
-    max-height: 300px;
+    min-height: 300px;
+    max-height: 600px;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 6px 0px;
     border-right: solid 1px #E4E7ED;
+
+    .tab-group {
+      width: 100%;
+
+      &-name {
+        padding-left: 8px;
+        height: 32px;
+        line-height: 32px;
+        width: 100%;
+        font-weight: 600;
+        color: rgba(0, 0, 0, .45);
+      }
+    }
 
     .tab-item {
       height: 32px;
@@ -586,6 +646,9 @@ export default {
     padding: 15px 17px;
     overflow: hidden;
     min-height: 300px;
+    max-height: 600px;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   &-item {
