@@ -7,6 +7,7 @@ import notification from 'ant-design-vue/es/notification'
 import { ACCESS_TOKEN } from '@/store/global/mutation-types'
 import router from '@/router'
 import store from '@/store'
+import i18n from '@/lang'
 
 // 创建 axios 实例
 const service = axios.create({
@@ -20,15 +21,16 @@ const err = (error) => {
   console.log(error)
   const reg = /5\d{2}/g
   if (error.response && reg.test(error.response.status)) {
-    const errorMsg = ((error.response || {}).data || {}).message || '服务端未知错误, 请联系管理员！'
+    const errorMsg = ((error.response || {}).data || {}).message || i18n.t('requestServiceError')
     message.error(errorMsg)
   } else if (error.response.status === 412) {
     let seconds = 5
     notification.warning({
       key: 'notification',
       message: 'WARNING',
-      description:
-        '修改已提交，请等待审核（5s）',
+      description: i18n.t('requestWait', {
+        time: 5,
+      }),
       duration: 5,
     })
     let interval = setInterval(() => {
@@ -41,14 +43,15 @@ const err = (error) => {
       notification.warning({
         key: 'notification',
         message: 'WARNING',
-        description:
-          `修改已提交，请等待审核（${seconds}s）`,
+        description: i18n.t('requestWait', {
+          time: seconds,
+        }),
         duration: seconds
       })
     }, 1000)
   } else if (error.config.url === '/api/v0.1/ci_types/can_define_computed' || error.config.isShowMessage === false) {
   } else {
-    const errorMsg = ((error.response || {}).data || {}).message || '出现错误，请稍后再试'
+    const errorMsg = ((error.response || {}).data || {}).message || i18n.t('requestError')
     message.error(`${errorMsg}`)
   }
   if (error.response) {

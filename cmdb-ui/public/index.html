@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-cmn-Hans">
   <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -12,17 +11,19 @@
     <% for (var i in htmlWebpackPlugin.options.cdn && htmlWebpackPlugin.options.cdn.css) { %>
     <link rel="stylesheet" href="<%= htmlWebpackPlugin.options.cdn.css[i] %>" />
     <% } %>
-     <script>
-
-      const userAgent = navigator.userAgent
+    <script>
+      const userAgent = navigator.userAgent
       const isEdge = userAgent.indexOf("Edge") > -1
-      const isChrome = userAgent.indexOf("Chrome") > -1 && userAgent.indexOf("Safari") > -1 && !isEdge
-      if (!isChrome) {
-        alert("推荐使用Chrome浏览器， 其他环境下未做严格测试！")
+      const isChrome = userAgent.indexOf("Chrome") > -1 && userAgent.indexOf("Safari") > -1 && !isEdge
+      const lang = (navigator.language || navigator.userLanguage || '').toLowerCase()
+      if (!isChrome) {
+        if (lang.startsWith('zh')) {
+          alert("推荐使用Chrome浏览器，其他环境下未做严格测试！");
+        } else {
+          alert("It is recommended to use Chrome browser. Other environments are not strictly tested!");
+        }
       }
-
     </script>
-
   </head>
   <body>
     <noscript>
@@ -30,10 +31,10 @@
     </noscript>
     <div id="app">
       <div id="loading-mask">
-          <div class="loading-wrapper">
-            <span class="loading-dot loading-dot-spin"><i></i><i></i><i></i><i></i></span>
-          </div>
+        <div class="loading-wrapper">
+          <span class="loading-dot loading-dot-spin"><i></i><i></i><i></i><i></i></span>
         </div>
+      </div>
     </div>
     <!-- require cdn assets js -->
     <% for (var i in htmlWebpackPlugin.options.cdn && htmlWebpackPlugin.options.cdn.js) { %>
