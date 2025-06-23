@@ -2,7 +2,7 @@ const ThemeColorReplacer = require('webpack-theme-color-replacer')
 const generate = require('@ant-design/colors/lib/generate').default
 
 const getAntdSerials = (color) => {
-  // 淡化（即less的tint）
+  // Lighten (similar to less's tint)
   const lightens = new Array(9).fill().map((t, i) => {
     return ThemeColorReplacer.varyColor.lighten(color, i / 10)
   })
@@ -13,8 +13,8 @@ const getAntdSerials = (color) => {
 
 const themePluginOption = {
   fileName: 'css/theme-colors-[contenthash:8].css',
-  matchColors: getAntdSerials('#2f54eb'), // 主色系列
-  // 改变样式选择器，解决样式覆盖问题
+  matchColors: getAntdSerials('#2f54eb'), // primary color series
+  // change style selectors to solve style override issues
   changeSelector (selector) {
     switch (selector) {
       case '.ant-calendar-today .ant-calendar-date':

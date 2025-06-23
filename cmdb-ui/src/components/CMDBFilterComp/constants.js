@@ -4,7 +4,6 @@ export const ruleTypeList = () => {
     return [
         { value: 'and', label: i18n.t('cmdbFilterComp.and') },
         { value: 'or', label: i18n.t('cmdbFilterComp.or') },
-        // { value: 'not', label: '非' },
     ]
 }
 
@@ -18,7 +17,7 @@ export const expList = () => {
         { value: '~start_with', label: i18n.t('cmdbFilterComp.~start_with') },
         { value: 'end_with', label: i18n.t('cmdbFilterComp.end_with') },
         { value: '~end_with', label: i18n.t('cmdbFilterComp.~end_with') },
-        { value: '~value', label: i18n.t('cmdbFilterComp.~value') }, // 为空的定义有点绕
+        { value: '~value', label: i18n.t('cmdbFilterComp.~value') },
         { value: 'value', label: i18n.t('cmdbFilterComp.value') },
     ]
 }

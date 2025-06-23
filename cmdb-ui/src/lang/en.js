@@ -109,6 +109,10 @@ export default {
     default: 'default',
     tip: 'Tip',
     cmdbSearch: 'Search',
+    requestError: 'An error occurred, please try again later',
+    requestServiceError: 'Unknown error on the server, please contact the administrator',
+    requestWait: 'The modification has been submitted, please wait for review ({time} seconds)',
+    documentCenter: 'Document Center',
     exception: {
         backToHome: 'Back to home page',
         desc1: 'Sorry, you are not authorized to access this page',

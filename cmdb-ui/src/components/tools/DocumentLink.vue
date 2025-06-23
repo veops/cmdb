@@ -1,6 +1,6 @@
 <template>
   <a-tooltip>
-    <template slot="title">文档中心</template>
+    <template slot="title">{{ $t('documentCenter') }}</template>
     <span class="document-link">
       <a-icon type="question-circle" @click="handleClick" />
     </span>

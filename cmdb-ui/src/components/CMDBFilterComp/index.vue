@@ -87,9 +87,11 @@ export default {
   },
 
   methods: {
+    /**
+     * @param isInitOne When the initialization exp is null, does the ruleList default to giving one
+     */
     visibleChange(open, isInitOne = true) {
-      // isInitOne  初始化exp为空时，ruleList是否默认给一条
-      //   const regQ = /(?<=q=).+(?=&)|(?<=q=).+$/g
+      // const regQ = /(?<=q=).+(?=&)|(?<=q=).+$/g
       const exp = this.expression.match(new RegExp(this.regQ, 'g'))
         ? this.expression.match(new RegExp(this.regQ, 'g'))[0]
         : null
@@ -204,7 +206,7 @@ export default {
     },
     handleSubmit() {
       if (this.ruleList && this.ruleList.length) {
-        this.ruleList[0].type = 'and' // 增删后，以防万一第一个不是and
+        this.ruleList[0].type = 'and' // after add/delete, just in case the first one is not 'and'
         this.filterExp = ''
         const expList = this.ruleList.map((rule) => {
           let singleRuleExp = ''

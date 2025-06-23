@@ -301,7 +301,7 @@ export default {
           return [
             { value: 'is', label: this.$t('cmdbFilterComp.is') },
             { value: '~is', label: this.$t('cmdbFilterComp.~is') },
-            { value: '~value', label: this.$t('cmdbFilterComp.~value') }, // 为空的定义有点绕
+            { value: '~value', label: this.$t('cmdbFilterComp.~value') },
             { value: 'value', label: this.$t('cmdbFilterComp.value') },
           ]
         }

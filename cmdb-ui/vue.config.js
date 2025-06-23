@@ -14,12 +14,11 @@ module.exports = {
     plugins: [
       // Ignore all locale files of moment.js
       new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-      // 生成仅包含颜色的替换样式（主题色等）
-      // TODO 需要增加根据环境不开启主题需求
+      // generate theme color replacement styles
       new ThemeColorReplacer({
         fileName: 'css/theme-colors-[contenthash:8].css',
-        matchColors: getAntdSerials('#2f54eb'), // 主色系列
-        // 改变样式选择器，解决样式覆盖问题
+        matchColors: getAntdSerials('#2f54eb'), // primary color series
+        // change style selectors to solve style override issues
         changeSelector(selector) {
           switch (selector) {
             case '.ant-calendar-today .ant-calendar-date':
@@ -63,29 +62,14 @@ module.exports = {
       .options({
         name: 'assets/[name].[hash:8].[ext]',
       })
-    /* svgRule.oneOf('inline')
-      .resourceQuery(/inline/)
-      .use('vue-svg-loader')
-      .loader('vue-svg-loader')
-      .end()
-      .end()
-      .oneOf('external')
-      .use('file-loader')
-      .loader('file-loader')
-      .options({
-        name: 'assets/[name].[hash:8].[ext]'
-      })
-    */
   },
 
   css: {
     loaderOptions: {
       less: {
         modifyVars: {
-          /* less 变量覆盖，用于自定义 ant design 主题 */
+          // override less variables for custom ant design theme
           'primary-color': '#2f54eb',
-          // 'link-color': '#F5222D',
-          // 'border-radius-base': '4px',
         },
         javascriptEnabled: true,
       },
@@ -119,7 +103,7 @@ module.exports = {
 }
 
 function getAntdSerials(color) {
-  // 淡化（即less的tint）
+  // Lighten (similar to less's tint)
   const lightens = new Array(9).fill().map((t, i) => {
     return ThemeColorReplacer.varyColor.lighten(color, i / 10)
   })

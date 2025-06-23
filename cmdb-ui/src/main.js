@@ -1,4 +1,3 @@
-/* eslint-disable */
 import '@babel/polyfill'
 import Vue from 'vue'
 import App from './App.vue'
@@ -14,10 +13,9 @@ import i18n from './lang'
 
 import iconFont from '../public/iconfont/iconfont'
 
-// 存在直接crash的风险 还未到
 const customIcon = Icon.createFromIconfontCN(iconFont)
 Vue.component('ops-icon', customIcon)
-var vue;
+var vue
 
 async function start() {
   const _vue = new Vue({

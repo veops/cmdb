@@ -109,6 +109,10 @@ export default {
     default: '默认',
     tip: '提示',
     cmdbSearch: '搜索一下',
+    requestError: '出现错误，请稍后再试',
+    requestServiceError: '服务端未知错误, 请联系管理员！',
+    requestWait: '修改已提交，请等待审核（{time}s）',
+    documentCenter: '文档中心',
     exception: {
         backToHome: '返回首页',
         desc1: '抱歉，你无权访问该页面',

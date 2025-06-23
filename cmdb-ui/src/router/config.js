@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { UserLayout, BasicLayout, RouteView } from '@/layouts'
 import appConfig from '@/config/app'
 import { getAppAclRouter } from './utils'
@@ -7,7 +6,7 @@ import store from '../store'
 export const generatorDynamicRouter = async () => {
   const packages = []
   const { apps = undefined } = store.getters.userInfo
-  for (let appName of appConfig.buildModules) {
+  for (const appName of appConfig.buildModules) {
     if (!apps || !apps.length || apps.includes(appName)) {
       const module = await import(`@/modules/${appName}/index.js`)
       const r = await module.default.route()
@@ -91,7 +90,7 @@ export const generatorDynamicRouter = async () => {
           component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/auth/index')
         },
       ]
-    },])
+    }, ])
   return routes
 }
 
