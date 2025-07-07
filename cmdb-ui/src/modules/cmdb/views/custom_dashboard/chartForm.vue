@@ -51,31 +51,21 @@
             :label="$t('cmdb.ciType.ciType')"
             prop="type_ids"
           >
-            <a-select
-              show-search
-              optionFilterProp="children"
-              @change="changeCIType"
+            <CMDBTypeSelectAntd
               v-model="form.type_ids"
-              :placeholder="$t('cmdb.ciType.selectCIType')"
               mode="multiple"
-            >
-              <a-select-option v-for="ci_type in ci_types" :key="ci_type.id" :value="ci_type.id">{{
-                ci_type.alias || ci_type.name
-              }}</a-select-option>
-            </a-select>
+              :CITypeGroup="CITypeGroup"
+              :placeholder="$t('cmdb.ciType.selectCIType')"
+              @change="changeCIType"
+            />
           </a-form-model-item>
           <a-form-model-item v-else :label="$t('cmdb.ciType.ciType')" prop="type_id">
-            <a-select
-              show-search
-              optionFilterProp="children"
-              @change="changeCIType"
+            <CMDBTypeSelectAntd
               v-model="form.type_id"
+              :CITypeGroup="CITypeGroup"
               :placeholder="$t('cmdb.ciType.selectCIType')"
-            >
-              <a-select-option v-for="ci_type in ci_types" :key="ci_type.id" :value="ci_type.id">{{
-                ci_type.alias || ci_type.name
-              }}</a-select-option>
-            </a-select>
+              @change="changeCIType"
+            />
           </a-form-model-item>
           <a-form-model-item
             :label="$t('cmdb.custom_dashboard.dimensions')"
@@ -309,17 +299,26 @@
 <script>
 import Chart from './chart.vue'
 import { dashboardCategory } from './constant'
-import { postCustomDashboard, putCustomDashboard, postCustomDashboardPreview } from '../../api/customDashboard'
-import { getCITypeAttributesByTypeIds, getCITypeCommonAttributesByTypeIds } from '../../api/CITypeAttr'
-import { getRecursive_level2children } from '../../api/CITypeRelation'
-import { getLastLayout } from '../../utils/helper'
+import { postCustomDashboard, putCustomDashboard, postCustomDashboardPreview } from '@/modules/cmdb/api/customDashboard'
+import { getCITypeAttributesByTypeIds, getCITypeCommonAttributesByTypeIds } from '@/modules/cmdb/api/CITypeAttr'
+import { getRecursive_level2children } from '@/modules/cmdb/api/CITypeRelation'
+import { getCITypeGroupsConfig } from '@/modules/cmdb/api/ciTypeGroup'
+import { getLastLayout } from '@/modules/cmdb/utils/helper'
+
 import FilterComp from '@/components/CMDBFilterComp'
 import ColorPicker from './colorPicker.vue'
 import ColorListPicker from './colorListPicker.vue'
+import CMDBTypeSelectAntd from '@/modules/cmdb/components/cmdbTypeSelect/cmdbTypeSelectAntd'
 
 export default {
   name: 'ChartForm',
-  components: { Chart, FilterComp, ColorPicker, ColorListPicker },
+  components: {
+    Chart,
+    FilterComp,
+    ColorPicker,
+    ColorListPicker,
+    CMDBTypeSelectAntd
+  },
   props: {
     ci_types: {
       type: Array,
@@ -365,6 +364,7 @@ export default {
       level2children: {},
       isShadow: false,
       changeCITypeRequestValue: null,
+      CITypeGroup: []
     }
   },
   computed: {
@@ -484,12 +484,16 @@ export default {
         showIcon,
         tableCategory: ret === 'cis' ? 2 : 1,
       }
+      this.getCITypeGroup()
     },
     handleclose() {
       this.attributes = []
       this.$refs.chartForm.clearValidate()
       this.isShowPreview = false
       this.visible = false
+    },
+    async getCITypeGroup() {
+      this.CITypeGroup = await getCITypeGroupsConfig({ need_other: true })
     },
     changeCIType(value) {
       this.form.attr_ids = []

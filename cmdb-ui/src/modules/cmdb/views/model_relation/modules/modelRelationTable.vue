@@ -15,7 +15,7 @@
       @edit-closed="handleEditClose"
       @edit-actived="handleEditActived"
     >
-      <vxe-column field="created_at" :title="$t('created_at')" sortable width="159px"></vxe-column>
+      <vxe-column field="created_at" :title="$t('created_at')" sortable width="170"></vxe-column>
       <vxe-column field="parent.alias" :title="$t('cmdb.ciType.sourceCIType')"></vxe-column>
       <vxe-column
         field="relation_type_id"

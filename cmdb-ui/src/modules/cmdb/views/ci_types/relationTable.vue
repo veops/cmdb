@@ -171,23 +171,12 @@
           </a-select>
         </a-form-item>
         <a-form-item :label="$t('cmdb.ciType.dstCIType')">
-          <a-select
-            showSearch
+          <CMDBTypeSelectAntd
+            v-decorator="['ci_type_id', { rules: [{ required: true, message: $t('cmdb.ciType.dstCITypeTips') }] }]"
             name="ci_type_id"
             :placeholder="$t('cmdb.ciType.dstCITypeTips')"
-            v-decorator="['ci_type_id', { rules: [{ required: true, message: $t('cmdb.ciType.dstCITypeTips') }] }]"
-            :filterOption="filterOption"
             @change="changeChild"
-          >
-            <a-select-option
-              :value="CIType.id"
-              :key="CIType.id"
-              v-for="CIType in CITypes"
-            >
-              {{ CIType.alias || CIType.name }}
-              <span class="model-select-name">({{ CIType.name }})</span>
-            </a-select-option>
-          </a-select>
+          />
         </a-form-item>
 
         <a-form-item :label="$t('cmdb.ciType.relationType')">
@@ -285,12 +274,14 @@ import { getCITypes } from '@/modules/cmdb/api/CIType'
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
 import { v4 as uuidv4 } from 'uuid'
 
-import CMDBGrant from '../../components/cmdbGrant'
+import CMDBGrant from '@/modules/cmdb/components/cmdbGrant'
+import CMDBTypeSelectAntd from '@/modules/cmdb/components/cmdbTypeSelect/cmdbTypeSelectAntd'
 
 export default {
   name: 'RelationTable',
   components: {
     CMDBGrant,
+    CMDBTypeSelectAntd
   },
   props: {
     CITypeId: {
@@ -513,13 +504,6 @@ export default {
         cmdbGrantType: 'type_relation',
       })
     },
-    filterOption(input, option) {
-      const inputValue = input.toLowerCase()
-      const alias = option.componentOptions.children[0].text.toLowerCase()
-      const name = option.componentOptions.children[1]?.elm?.innerHTML?.toLowerCase?.() ?? ''
-
-      return alias.indexOf(inputValue) >= 0 || name.indexOf(inputValue) >= 0
-    },
     rowClass({ row }) {
       if (row.isDivider) return 'relation-table-divider'
       if (row.isParent) return 'relation-table-parent'
@@ -604,9 +588,11 @@ export default {
       this.modalAttrList.forEach((item) => {
         item.childAttrId = undefined
       })
-      getCITypeAttributesById(value).then((res) => {
-        this.modalChildAttributes = res?.attributes ?? []
-      })
+      if (value) {
+        getCITypeAttributesById(value).then((res) => {
+          this.modalChildAttributes = res?.attributes ?? []
+        })
+      }
     },
     filterAttributes(attributes) {
       // filter password/json/is_list/longText/bool/reference

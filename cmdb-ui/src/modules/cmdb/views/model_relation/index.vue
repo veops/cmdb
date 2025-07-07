@@ -14,35 +14,26 @@
     >
       <a-form :form="form" @submit="handleSubmit" :label-col="{ span: 6 }" :wrapper-col="{ span: 14 }">
         <a-form-item :label="$t('cmdb.ciType.sourceCIType')">
-          <a-select
-            showSearch
-            name="source_ci_type_id"
+          <CMDBTypeSelectAntd
             v-decorator="[
               'source_ci_type_id',
               { rules: [{ required: true, message: $t('cmdb.ciType.sourceCITypeTips') }] },
             ]"
+            name="source_ci_type_id"
+            :CITypeGroup="CITypeGroups"
             @change="handleSourceTypeChange"
-            :filterOption="filterOption"
-          >
-            <a-select-option :value="CIType.id" :key="CIType.id" v-for="CIType in displayCITypes">
-              {{ CIType.alias || CIType.name }}
-              <span class="model-select-name">({{ CIType.name }})</span>
-            </a-select-option>
-          </a-select>
+          />
         </a-form-item>
         <a-form-item :label="$t('cmdb.ciType.dstCIType')">
-          <a-select
-            showSearch
+          <CMDBTypeSelectAntd
+            v-decorator="[
+              'ci_type_id',
+              { rules: [{ required: true, message: $t('cmdb.ciType.dstCITypeTips') }] },
+            ]"
             name="ci_type_id"
-            v-decorator="['ci_type_id', { rules: [{ required: true, message: $t('cmdb.ciType.dstCITypeTips') }] }]"
+            :CITypeGroup="CITypeGroups"
             @change="handleTargetTypeChange"
-            :filterOption="filterOption"
-          >
-            <a-select-option :value="CIType.id" :key="CIType.id" v-for="CIType in displayTargetCITypes">
-              {{ CIType.alias || CIType.name }}
-              <span class="model-select-name">({{ CIType.name }})</span>
-            </a-select-option>
-          </a-select>
+          />
         </a-form-item>
 
         <a-form-item :label="$t('cmdb.ciType.relationType')">
@@ -127,7 +118,6 @@
 </template>
 
 <script>
-import ModelRelationTable from './modules/modelRelationTable.vue'
 import { searchResourceType } from '@/modules/acl/api/resource'
 import { getCITypeGroupsConfig } from '@/modules/cmdb/api/ciTypeGroup'
 import { getCITypes } from '@/modules/cmdb/api/CIType'
@@ -135,10 +125,14 @@ import { createRelation, deleteRelation, getRelationTypes } from '@/modules/cmdb
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
 import { v4 as uuidv4 } from 'uuid'
 
+import ModelRelationTable from './modules/modelRelationTable.vue'
+import CMDBTypeSelectAntd from '@/modules/cmdb/components/cmdbTypeSelect/cmdbTypeSelectAntd'
+
 export default {
   name: 'Index',
   components: {
     ModelRelationTable,
+    CMDBTypeSelectAntd
   },
   data() {
     return {
@@ -361,9 +355,6 @@ export default {
       getCITypeAttributesById(value).then((res) => {
         this.modalChildAttributes = res?.attributes ?? []
       })
-    },
-    filterOption(input, option) {
-      return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     },
     filterAttributes(attributes) {
       // filter password/json/is_list/longText/bool/reference
