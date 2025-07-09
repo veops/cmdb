@@ -71,7 +71,7 @@ export default {
   watch: {
     CITypeGroup: {
       deep: true,
-      handler(newValue) {
+      handler() {
         this.handleSelectOptions()
       }
     }

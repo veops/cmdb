@@ -1,19 +1,14 @@
 <template>
   <div>
     <p class="cmdb-batch-upload-label"><span>*</span>1. {{ $t('cmdb.batch.selectCIType') }}</p>
-    <a-select
-      showSearch
-      :placeholder="$t('cmdb.batch.selectCITypeTips')"
-      @change="selectCiType"
-      :style="{ width: '50%', marginBottom: '1em' }"
-      class="ops-select"
-      :filter-option="filterOption"
+    <CMDBTypeSelectAntd
       v-model="selectNum"
-    >
-      <a-select-option v-for="ciType in ciTypeList" :key="ciType.name" :value="ciType.id">{{
-        ciType.alias
-      }}</a-select-option>
-    </a-select>
+      ref="CMDBTypeSelectAntd"
+      :placeholder="$t('cmdb.batch.selectCITypeTips')"
+      :style="{ width: '50%', marginBottom: '1em' }"
+      :CITypeGroup="CITypeGroup"
+      @change="selectCiType"
+    />
     <p class="cmdb-batch-upload-label">&nbsp;&nbsp;2. {{ $t('cmdb.batch.downloadTemplate') }}</p>
     <a-button
       :style="{ marginBottom: '1em' }"
@@ -99,16 +94,21 @@ import _ from 'lodash'
 import { mapState } from 'vuex'
 import ExcelJS from 'exceljs'
 import FileSaver from 'file-saver'
-import { getCITypes } from '@/modules/cmdb/api/CIType'
+import { getCITypeGroupsConfig } from '@/modules/cmdb/api/ciTypeGroup'
 import { getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
 import { getCITypeParent, getCanEditByParentIdChildId } from '@/modules/cmdb/api/CITypeRelation'
 import { searchPermResourceByRoleId } from '@/modules/acl/api/permission'
 
+import CMDBTypeSelectAntd from '@/modules/cmdb/components/cmdbTypeSelect/cmdbTypeSelectAntd'
+
 export default {
   name: 'CiTypeChoice',
+  components: {
+    CMDBTypeSelectAntd
+  },
   data() {
     return {
-      ciTypeList: [],
+      CITypeGroup: [],
       ciTypeName: '',
       selectNum: undefined,
       selectCiTypeAttrList: [],
@@ -132,11 +132,16 @@ export default {
       resource_type_id: 'CIType',
       app_id: 'cmdb',
     })
-    getCITypes().then((res) => {
-      this.ciTypeList = res.ci_types.filter((type) => {
-        const _findRe = resources.find((re) => re.name === type.name)
-        return _findRe?.permissions.includes('create') ?? false
+
+    getCITypeGroupsConfig({ need_other: true }).then((res) => {
+      const CITypeGroup = res || []
+      CITypeGroup.forEach((group) => {
+        group.ci_types = (group.ci_types || []).filter((type) => {
+          const _find = resources.find((resource) => resource.name === type.name)
+          return _find?.permissions?.includes?.('create') ?? false
+        })
       })
+      this.CITypeGroup = CITypeGroup.filter((group) => group?.ci_types?.length)
     })
   },
   watch: {
@@ -152,18 +157,27 @@ export default {
     },
   },
   methods: {
-    selectCiType(el) {
+    selectCiType(id) {
       // Callback function when a template type is selected
-      getCITypeAttributesById(el).then((res) => {
+      getCITypeAttributesById(id).then((res) => {
         this.$emit('getCiTypeAttr', res)
         this.selectCiTypeAttrList = res
       })
 
-      this.ciTypeList.forEach((item) => {
-        if (this.selectNum === item.id) {
-          this.ciTypeName = item.alias || item.name
-        }
-      })
+      const selectOptions = this.$refs?.CMDBTypeSelectAntd?.selectOptions
+      let ciTypeName = ''
+      if (selectOptions?.length) {
+        selectOptions.forEach((option) => {
+          if (option?.ci_types?.length) {
+            option.ci_types.forEach((type) => {
+              if (type?.id === id) {
+                ciTypeName = type.alias || type.name
+              }
+            })
+          }
+        })
+      }
+      this.ciTypeName = ciTypeName
     },
 
     openModal() {
@@ -187,9 +201,6 @@ export default {
         this.visible = true
         this.checkedAttrs = this.selectCiTypeAttrList.attributes.map((item) => item.alias || item.name)
       })
-    },
-    filterOption(input, option) {
-      return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     },
     handleCancel() {
       this.visible = false

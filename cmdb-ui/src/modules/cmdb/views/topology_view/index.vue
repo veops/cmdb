@@ -238,9 +238,11 @@
           />
         </a-form-item>
         <a-form-item :label="$t('cmdb.topo.centralNodeType')" prop="central_node_type">
-          <a-select @change="CITypeChange" v-decorator="['central_node_type', { rules: [{ required: true, message: $t('cmdb.topo.typeRequired') }]}]" :showSearch="true" optionFilterProp="label">
-            <a-select-option v-for="t in ciTypes" :key="t.id" :value="t.id" :label="t.alias">{{ t.alias }}</a-select-option>
-          </a-select>
+          <CMDBTypeSelectAntd
+            v-decorator="['central_node_type', { rules: [{ required: true, message: $t('cmdb.topo.typeRequired') }]}]"
+            :placeholder="$t('cmdb.ciType.selectModel')"
+            @change="CITypeChange"
+          />
         </a-form-item>
         <a-form-item :label="$t('cmdb.topo.filterInstances')" prop="central_node_instances">
           <a-input
@@ -325,7 +327,6 @@ import draggable from 'vuedraggable'
 import emptyImage from '@/assets/data_empty.png'
 import SplitPane from '@/components/SplitPane'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
-import { getCITypeGroups } from '@/modules/cmdb/api/ciTypeGroup'
 import { roleHasPermissionToGrant } from '@/modules/acl/api/permission'
 import { searchResourceType } from '@/modules/acl/api/resource'
 import SeeksRelationGraph from '@/modules/cmdb/3rd/relation-graph'
@@ -336,6 +337,7 @@ import { searchCI } from '@/modules/cmdb/api/ci'
 import { getTopoGroups, postTopoGroup, putTopoGroupByGId, putTopoGroupsOrder, deleteTopoGroup, getTopoView, addTopoView, updateTopoView, deleteTopoView, getRelationsByTypeId, previewTopoView, showTopoView } from '@/modules/cmdb/api/topology'
 import CMDBExprDrawer from '@/components/CMDBExprDrawer'
 import { v4 as uuidv4 } from 'uuid'
+import CMDBTypeSelectAntd from '@/modules/cmdb/components/cmdbTypeSelect/cmdbTypeSelectAntd'
 
 const currentTopoKey = 'ops_cmdb_topo_currentId'
 export default {
@@ -348,6 +350,7 @@ export default {
     SeeksRelationGraph,
     RelationGraph,
     CMDBGrant,
+    CMDBTypeSelectAntd
   },
   data() {
     const defaultOptions = {
@@ -421,7 +424,6 @@ export default {
       currentId: null,
       topoGroups: [],
       CITypeId: null,
-      ciTypes: [],
 
       startId: null,
       endId: null,
@@ -500,15 +502,6 @@ export default {
       this.currentId = _currentId
     }
     this.loadTopoViews(!_currentId)
-    let ciTypes = []
-    getCITypeGroups({ need_other: true }).then((res) => {
-      res.forEach((item) => {
-        if (item.ci_types && item.ci_types.length) {
-          ciTypes = ciTypes.concat(item.ci_types)
-        }
-      })
-      this.ciTypes = ciTypes
-    })
     this.showTopoView(this.currentId.split('%')[1])
   },
   computed: {
