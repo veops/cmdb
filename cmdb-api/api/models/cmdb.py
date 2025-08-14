@@ -525,6 +525,17 @@ class PreferenceCITypeOrder(Model):
     is_tree = db.Column(db.Boolean, default=False)  # True is tree view, False is resource view
 
 
+class PreferenceAutoSubscriptionConfig(Model):
+    __tablename__ = "c_pasc"
+
+    uid = db.Column(db.Integer, index=True, nullable=False, unique=True)
+    base_strategy = db.Column(db.Enum('all', 'none'), default='none', nullable=False)
+    group_ids = db.Column(db.JSON)
+    type_ids = db.Column(db.JSON)
+    enabled = db.Column(db.Boolean, default=True, nullable=False)
+    description = db.Column(db.Text)
+
+
 # custom
 class CustomDashboard(Model):
     __tablename__ = "c_c_d"

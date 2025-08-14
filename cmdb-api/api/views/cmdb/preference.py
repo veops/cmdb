@@ -211,3 +211,59 @@ class PreferenceCITypeOrderView(APIView):
         PreferenceManager.upsert_ci_type_order(type_ids, is_tree)
 
         return self.jsonify(type_ids=type_ids, is_tree=is_tree)
+
+
+class PreferenceAutoSubscriptionView(APIView):
+    url_prefix = "/preference/auto_subscription"
+
+    def get(self):
+        config = PreferenceManager.get_auto_subscription_config()
+        return self.jsonify(config or {})
+
+    @args_required("base_strategy")
+    def put(self):
+        base_strategy = request.values.get("base_strategy")
+        group_ids = request.values.get("group_ids")
+        type_ids = request.values.get("type_ids")
+        enabled = request.values.get("enabled", 1) in current_app.config.get('BOOL_TRUE')
+        description = request.values.get("description")
+
+        if base_strategy not in ['all', 'none']:
+            return abort(400, "base_strategy must be 'all' or 'none'")
+
+        if group_ids:
+            try:
+                group_ids = [int(x) for x in group_ids.split(',') if x.strip()]
+            except ValueError:
+                return abort(400, "Invalid group_ids format")
+
+        if type_ids:
+            try:
+                type_ids = [int(x) for x in type_ids.split(',') if x.strip()]
+            except ValueError:
+                return abort(400, "Invalid type_ids format")
+
+        result = PreferenceManager.create_or_update_auto_subscription_config(
+            base_strategy=base_strategy,
+            group_ids=group_ids,
+            type_ids=type_ids,
+            enabled=enabled,
+            description=description
+        )
+
+        return self.jsonify(result.to_dict())
+
+    def delete(self):
+        PreferenceManager.delete_auto_subscription_config()
+        return self.jsonify(message="Auto subscription config deleted")
+
+
+class PreferenceAutoSubscriptionToggleView(APIView):
+    url_prefix = "/preference/auto_subscription/toggle"
+
+    @args_required("enabled")
+    def patch(self):
+        enabled = request.values.get("enabled") in current_app.config.get('BOOL_TRUE')
+
+        result = PreferenceManager.toggle_auto_subscription_config(enabled)
+        return self.jsonify(result.to_dict())
