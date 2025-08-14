@@ -1,6 +1,8 @@
 import click
+from flask import current_app
 from flask.cli import with_appcontext
 
+from api.lib.exception import AbortException
 from api.lib.perm.acl.user import UserCRUD
 
 
@@ -46,11 +48,18 @@ def add_user():
     email = click.prompt('Enter email   ', confirmation_prompt=False)
     is_admin = click.prompt('Admin (Y/N)   ', confirmation_prompt=False, type=bool, default=False)
 
-    UserCRUD.add(username=username, password=password, email=email)
+    current_app.test_request_context().push()
 
-    if is_admin:
-        app = AppCache.get('acl') or App.create(name='acl')
-        acl_admin = RoleCache.get_by_name(app.id, 'acl_admin') or RoleCRUD.add_role('acl_admin', app.id, True)
-        rid = RoleCache.get_by_name(None, username).id
+    try:
 
-        RoleRelationCRUD.add(acl_admin, acl_admin.id, [rid], app.id)
+        UserCRUD.add(username=username, password=password, email=email)
+
+        if is_admin:
+            app = AppCache.get('acl') or App.create(name='acl')
+            acl_admin = RoleCache.get_by_name(None, 'acl_admin') or RoleCRUD.add_role('acl_admin', app.id, True)
+            rid = RoleCache.get_by_name(None, username).id
+
+            RoleRelationCRUD.add(acl_admin, acl_admin.id, [rid], app.id)
+
+    except AbortException as e:
+        print(f"Failed: {e}")
