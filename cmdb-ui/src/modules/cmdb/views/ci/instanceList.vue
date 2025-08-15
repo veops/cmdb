@@ -665,7 +665,11 @@ export default {
     },
     columnDrop() {
       this.$nextTick(() => {
-        const xTable = this.$refs.xTable.getVxetableRef()
+        const xTable = this.$refs?.xTable?.getVxetableRef?.()
+        if (!xTable) {
+          return
+        }
+
         this.sortable = Sortable.create(
           xTable.$el.querySelector('.body--wrapper>.vxe-table--header .vxe-header--row'),
           {

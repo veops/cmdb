@@ -1,6 +1,10 @@
 <template>
   <div>
-    <div v-if="preferenceGroup.length === 0">
+    <div v-if="pageLoading" class="page-loading">
+      <a-spin size="large" />
+    </div>
+
+    <div v-else-if="preferenceGroup.length === 0">
       <a-alert banner>
         <template #message>
           <span>{{ $t('cmdb.preference.tips1') }}</span>
@@ -110,8 +114,8 @@ export default {
       preferenceGroup: [],
       currentTypeId: Number(this.$route?.params?.typeId || localStorage.getItem('ops_ci_typeid') || ''),
       resource_type: {},
-      loading: false,
-      autoSub: {}
+      autoSub: {},
+      pageLoading: false
     }
   },
   computed: {
@@ -152,9 +156,14 @@ export default {
     }
   },
   created() {
-    this.getPreference()
-    this.getResourceType()
-    this.getAutoSubscription()
+    this.pageLoading = true
+    Promise.all([
+      this.getPreference(),
+      this.getResourceType(),
+      this.getAutoSubscription()
+    ]).then(() => {
+      this.pageLoading = false
+    })
   },
   methods: {
     async getPreference() {
@@ -191,8 +200,8 @@ export default {
       }
     },
 
-    getResourceType() {
-      searchResourceType({ page_size: 9999, app_id: 'cmdb' }).then(res => {
+    async getResourceType() {
+      await searchResourceType({ page_size: 9999, app_id: 'cmdb' }).then(res => {
         this.resource_type = { groups: res.groups, id2perms: res.id2perms }
       })
     },
@@ -247,6 +256,11 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.page-loading {
+  text-align: center;
+  padding-top: 150px;
+}
+
 .ci-left {
   height: calc(100vh - 90px);
   width: 100%;
