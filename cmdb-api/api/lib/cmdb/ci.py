@@ -360,16 +360,28 @@ class CIManager(object):
             _sync=False,
             **ci_dict):
         """
-        add ci
-        :param ci_type_name:
-        :param exist_policy: replace or reject or need
-        :param _no_attribute_policy: ignore or reject
-        :param is_auto_discovery: default is False
-        :param _is_admin: default is False
-        :param ticket_id:
-        :param _sync:
-        :param ci_dict:
-        :return:
+        Create a new Configuration Item (CI) or update existing based on unique constraints.
+
+        Handles complete CI creation workflow including validation, uniqueness checks,
+        password encryption, computed attributes, relationship creation, and caching.
+
+        Args:
+            ci_type_name (str): Name of the CI type to create
+            exist_policy (ExistPolicy): How to handle existing CIs (REPLACE/REJECT/NEED)
+            _no_attribute_policy (ExistPolicy): How to handle unknown attributes (IGNORE/REJECT)
+            is_auto_discovery (bool): Whether CI is created by auto-discovery process
+            _is_admin (bool): Whether to skip permission checks
+            ticket_id (int, optional): Associated ticket ID for audit trail
+            _sync (bool): Whether to execute cache/relation tasks synchronously
+            **ci_dict: CI attribute values as key-value pairs
+
+        Returns:
+            int: ID of the created or updated CI
+
+        Raises:
+            400: If unique constraints violated, required attributes missing, or validation fails
+            403: If user lacks permissions for restricted attributes
+            404: If CI type not found or referenced CI not exists
         """
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ci_type = CITypeManager.check_is_existed(ci_type_name)
@@ -512,6 +524,24 @@ class CIManager(object):
         return ci.id
 
     def update(self, ci_id, _is_admin=False, ticket_id=None, _sync=False, **ci_dict):
+        """
+        Update an existing Configuration Item with new attribute values.
+
+        Performs comprehensive CI update including validation, constraint checks,
+        password handling, computed attributes processing, and change tracking.
+
+        Args:
+            ci_id (int): ID of the CI to update
+            _is_admin (bool): Whether to skip permission checks
+            ticket_id (int, optional): Associated ticket ID for audit trail
+            _sync (bool): Whether to execute cache/relation tasks synchronously
+            **ci_dict: CI attribute values to update as key-value pairs
+
+        Raises:
+            400: If unique constraints violated or validation fails
+            403: If user lacks permissions for restricted attributes
+            404: If CI not found
+        """
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ci = self.confirm_ci_existed(ci_id)
         ci_type = ci.ci_type
@@ -1420,14 +1450,31 @@ class CIRelationManager(object):
                 parent_attr = AttributeCache.get(parent_attr_id)
                 child_attr = AttributeCache.get(child_attr_id)
                 attr_value = ci_dict.get(parent_attr.name)
+                if attr_value != 0 and not attr_value:
+                    continue
                 value_table = TableMap(attr=child_attr).table
-                for child in value_table.get_by(attr_id=child_attr.id, value=attr_value, only_query=True).join(
-                        CI, CI.id == value_table.ci_id).filter(CI.type_id == item.child_id):
-                    _relations.add((ci_dict['_id'], child.ci_id))
+                attr_value_list = [attr_value] if not isinstance(attr_value, list) else attr_value
+
+                matching_cis = value_table.get_by(
+                    attr_id=child_attr.id,
+                    only_query=True
+                ).join(
+                    CI, CI.id == value_table.ci_id
+                ).filter(
+                    CI.type_id == item.child_id,
+                    value_table.value.in_(attr_value_list)
+                ).all()
+
+                for ci in matching_cis:
+                    _relations.add((ci_dict['_id'], ci.ci_id))
+
                 if relations is None:
                     relations = _relations
                 else:
-                    relations &= _relations
+                    if item.constraint == ConstraintEnum.Many2Many:
+                        relations |= _relations
+                    else:
+                        relations &= _relations
 
             cls.delete_relations_by_source(RelationSourceEnum.ATTRIBUTE_VALUES,
                                            first_ci_id=ci_dict['_id'],
@@ -1447,14 +1494,31 @@ class CIRelationManager(object):
                 parent_attr = AttributeCache.get(parent_attr_id)
                 child_attr = AttributeCache.get(child_attr_id)
                 attr_value = ci_dict.get(child_attr.name)
+                if attr_value != 0 and not attr_value:
+                    continue
                 value_table = TableMap(attr=parent_attr).table
-                for parent in value_table.get_by(attr_id=parent_attr.id, value=attr_value, only_query=True).join(
-                        CI, CI.id == value_table.ci_id).filter(CI.type_id == item.parent_id):
-                    _relations.add((parent.ci_id, ci_dict['_id']))
+                attr_value_list = [attr_value] if not isinstance(attr_value, list) else attr_value
+
+                matching_cis = value_table.get_by(
+                    attr_id=parent_attr.id,
+                    only_query=True
+                ).join(
+                    CI, CI.id == value_table.ci_id
+                ).filter(
+                    CI.type_id == item.parent_id,
+                    value_table.value.in_(attr_value_list)
+                ).all()
+
+                for ci in matching_cis:
+                    _relations.add((ci.ci_id, ci_dict['_id']))
+
                 if relations is None:
                     relations = _relations
                 else:
-                    relations &= _relations
+                    if item.constraint == ConstraintEnum.Many2Many:
+                        relations |= _relations
+                    else:
+                        relations &= _relations
 
             cls.delete_relations_by_source(RelationSourceEnum.ATTRIBUTE_VALUES,
                                            second_ci_id=ci_dict['_id'],

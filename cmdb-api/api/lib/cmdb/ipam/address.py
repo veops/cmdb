@@ -92,7 +92,8 @@ class IpAddressManager(object):
             else:
                 return abort(400, ErrFormat.ipam_address_model_not_found)
 
-        with (redis_lock.Lock(rd.r, "IPAM_ASSIGN_ADDRESS_{}".format(subnet_id), expire=10)):
+        with (redis_lock.Lock(rd.r, "IPAM_ASSIGN_ADDRESS_{}".format(subnet_id),
+                              expire=60, auto_renewal=True)):
             cis = self._get_cis(subnet_id, ips)
             ip2ci = {ci[IPAddressBuiltinAttributes.IP]: ci for ci in cis}
 
