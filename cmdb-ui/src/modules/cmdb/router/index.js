@@ -1,5 +1,5 @@
 import { RouteView, BasicLayout } from '@/layouts'
-import { getPreference, getRelationView } from '@/modules/cmdb/api/preference'
+import { getRelationView } from '@/modules/cmdb/api/preference'
 
 const genCmdbRoutes = async () => {
   const routes = {
@@ -7,6 +7,7 @@ const genCmdbRoutes = async () => {
     name: 'cmdb',
     component: BasicLayout,
     meta: { title: 'CMDB', keepAlive: false },
+    redirect: '/cmdb/instances/types',
     children: [
       // preference
       // views
@@ -39,12 +40,10 @@ const genCmdbRoutes = async () => {
         },
       },
       {
-        path: '/cmdb/resourceviews',
+        path: '/cmdb/instances/types/:typeId?',
         name: 'cmdb_resource_views',
-        component: RouteView,
-        meta: { title: 'cmdb.menu.ciTable', icon: 'ops-cmdb-resource', selectedIcon: 'ops-cmdb-resource', keepAlive: true },
-        hideChildrenInMenu: false,
-        children: []
+        component: () => import(`../views/ci/index`),
+        meta: { title: 'cmdb.menu.ciTable', icon: 'ops-cmdb-resource', selectedIcon: 'ops-cmdb-resource', keepAlive: false }
       },
       {
         path: '/cmdb/tree_views',
@@ -176,35 +175,8 @@ const genCmdbRoutes = async () => {
       }
     ]
   }
-  // Dynamically add subscription items and business relationships
-  const [preference, relation] = await Promise.all([getPreference(), getRelationView()])
-  const resourceViewsIndex = routes.children.findIndex(item => item.name === 'cmdb_resource_views')
-  preference.group_types.forEach(group => {
-    if (preference.group_types.length > 1) {
-      routes.children[resourceViewsIndex].children.push({
-        path: `/cmdb/instances/types/group${group.id}`,
-        name: `cmdb_instances_group_${group.id}`,
-        meta: { title: group.name || 'other', disabled: true, style: 'margin-left: 12px' },
-      })
-    }
-    group.ci_types.forEach(item => {
-      routes.children[resourceViewsIndex].children.push({
-        path: `/cmdb/instances/types/${item.id}`,
-        component: () => import(`../views/ci/index`),
-        name: `cmdb_${item.id}`,
-        meta: { title: item.alias, keepAlive: false, typeId: item.id, name: item.name, customIcon: item.icon },
-        // hideChildrenInMenu: true // Force display of MenuItem instead of SubMenu
-      })
-    })
-  })
-  const lastTypeId = window.localStorage.getItem('ops_ci_typeid') || undefined
-  if (lastTypeId && preference.type_ids.some(item => item === Number(lastTypeId))) {
-    routes.redirect = `/cmdb/instances/types/${lastTypeId}`
-  } else if (routes.children[resourceViewsIndex]?.children?.length > 0) {
-    routes.redirect = routes.children[resourceViewsIndex].children.find(item => !item.hidden && !item.meta.disabled)?.path
-  } else {
-    routes.redirect = '/cmdb/dashboard'
-  }
+  // get service tree dynamic display menu
+  const relation = await getRelationView()
 
   if (relation?.name2id?.length === 0) {
     const relationViewRouteIndex = routes.children?.findIndex?.((route) => route.name === 'cmdb_relation_views')

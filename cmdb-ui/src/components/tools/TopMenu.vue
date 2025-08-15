@@ -38,7 +38,7 @@
 <script>
 import store from '@/store'
 import { gridSvg, top_agent, top_acl } from '@/core/icons'
-import { getPreference } from '@/modules/cmdb/api/preference'
+
 export default {
   name: 'TopMenu',
   components: { gridSvg, top_agent, top_acl },
@@ -77,18 +77,7 @@ export default {
     async handleClick(route) {
       this.visible = false
       if (route.name !== this.current) {
-        if (route.name === 'cmdb') {
-          const preference = await getPreference()
-          const lastTypeId = window.localStorage.getItem('ops_ci_typeid') || undefined
-          if (lastTypeId && preference.type_ids.some((item) => item === Number(lastTypeId))) {
-            this.$router.push(`/cmdb/instances/types/${lastTypeId}`)
-          } else {
-            this.$router.push('/cmdb/dashboard')
-          }
-        } else {
-          this.$router.push(route.redirect)
-        }
-        // this.current = route.name
+        this.$router.push(route.redirect)
       }
     },
   },

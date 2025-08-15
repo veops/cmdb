@@ -191,6 +191,10 @@ export default {
     CIReferenceAttr
   },
   props: {
+    typeIdFromProp: {
+      type: Number,
+      default: 0,
+    },
     typeIdFromRelation: {
       type: Number,
       default: 0,
@@ -235,7 +239,7 @@ export default {
       if (this.typeIdFromRelation) {
         return this.typeIdFromRelation
       }
-      return this.$router.currentRoute.meta.typeId
+      return this.typeIdFromProp
     },
     valueTypeMap() {
       return valueTypeMap()

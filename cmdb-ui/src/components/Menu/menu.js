@@ -1,14 +1,6 @@
-import router, { resetRouter } from '@/router'
 import Menu from 'ant-design-vue/es/menu'
 import Icon from 'ant-design-vue/es/icon'
-import store from '@/store'
-import {
-  subscribeCIType,
-  subscribeTreeView,
-} from '@/modules/cmdb/api/preference'
 import { searchResourceType } from '@/modules/acl/api/resource'
-import { roleHasPermissionToGrant } from '@/modules/acl/api/permission'
-import CMDBGrant from '@/modules/cmdb/components/cmdbGrant'
 import styles from './index.module.less'
 import { mapActions } from 'vuex'
 
@@ -87,40 +79,6 @@ export default {
   inject: ['reload'],
   methods: {
     ...mapActions(['UpdateCMDBSEarchValue']),
-    cancelAttributes(e, menu) {
-      const that = this
-      e.preventDefault()
-      e.stopPropagation()
-      this.$confirm({
-        title: this.$t('warning'),
-        content: this.$t('cmdb.preference.confirmcancelSub2', { name: menu.meta.title }),
-        onOk() {
-          const citypeId = menu.meta.typeId
-          const unsubCIType = subscribeCIType(citypeId, '')
-          const unsubTree = subscribeTreeView(citypeId, '')
-          Promise.all([unsubCIType, unsubTree]).then(() => {
-            that.$message.success(that.$t('cmdb.preference.cancelSubSuccess'))
-            const lastTypeId = window.localStorage.getItem('ops_ci_typeid') || undefined
-            if (Number(citypeId) === Number(lastTypeId)) {
-              localStorage.setItem('ops_ci_typeid', '')
-            }
-            const href = window.location.href
-            const hrefSplit = href.split('/')
-            if (Number(hrefSplit[hrefSplit.length - 1]) === Number(citypeId)) {
-              that.$router.push('/cmdb/preference')
-            }
-            const roles = store.getters.roles
-            resetRouter()
-            store.dispatch('GenerateRoutes', { roles }, { root: true }).then(() => {
-              router.addRoutes(store.getters.appRoutes)
-            })
-            if (hrefSplit[hrefSplit.length - 1] === 'preference') {
-              that.reload()
-            }
-          })
-        },
-      })
-    },
     // select menu item
     onOpenChange(openKeys) {
       if (this.mode === 'horizontal') {
@@ -170,7 +128,6 @@ export default {
       return this.$t(`${title}`)
     },
     renderMenuItem(menu) {
-      const isShowDot = menu.path.substr(0, 22) === '/cmdb/instances/types/'
       const target = menu.meta.target || null
       const tag = target && 'a' || 'router-link'
       const props = { to: { name: menu.name } }
@@ -187,26 +144,11 @@ export default {
           <tag {...{ props, attrs }}>
             {this.renderIcon({ icon: menu.meta.icon, customIcon: menu.meta.customIcon, name: menu.meta.name, typeId: menu.meta.typeId, routeName: menu.name, selectedIcon: menu.meta.selectedIcon, })}
             <span>
-              <span style={menu.meta.style} class={this.renderI18n(menu.meta.title).length > 10 ? 'scroll' : ''}>{this.renderI18n(menu.meta.title)}</span>
-              {isShowDot && !menu.meta.disabled &&
-                <a-popover
-                  overlayClassName="custom-menu-extra-submenu"
-                  placement="rightTop"
-                  arrowPointAtCenter
-                  autoAdjustOverflow={false}
-                  getPopupContainer={(trigger) => trigger}
-                  content={() =>
-                    <div>
-                      <div onClick={e => this.handlePerm(e, menu, 'CIType')} class="custom-menu-extra-submenu-item"><a-icon type="user-add" />{ this.renderI18n('grant') }</div>
-                      <div onClick={e => this.cancelAttributes(e, menu)} class="custom-menu-extra-submenu-item"><a-icon type="star" />{ this.renderI18n('cmdb.preference.cancelSub') }</div>
-                    </div>}
-                >
-                  <a-icon type="menu" ref="extraEllipsis" class="custom-menu-extra-ellipsis"></a-icon>
-                </a-popover>
-              }
+              <span style={menu.meta.style} class={this.renderI18n(menu.meta.title).length > 10 ? 'scroll' : ''}>
+                {this.renderI18n(menu.meta.title)}
+              </span>
             </span>
           </tag>
-          {isShowDot && <CMDBGrant ref="cmdbGrantCIType" resourceType="CIType" app_id="cmdb" />}
         </Item>
       )
     },
@@ -268,27 +210,6 @@ export default {
           <Icon {... { props }} />
         )
       }
-    },
-    handlePerm(e, menu, resource_type_name) {
-      e.stopPropagation()
-      e.preventDefault()
-      roleHasPermissionToGrant({
-        app_id: 'cmdb',
-        resource_type_name,
-        perm: 'grant',
-        resource_name: menu.meta.name,
-      }).then(res => {
-        if (res.result) {
-          console.log(menu)
-          if (resource_type_name === 'CIType') {
-            this.$refs.cmdbGrantCIType.open({ name: menu.meta.name, cmdbGrantType: 'ci', CITypeId: menu.meta?.typeId })
-          } else {
-            this.$refs.cmdbGrantRelationView.open({ name: menu.meta.name, cmdbGrantType: 'relation_view' })
-          }
-        } else {
-          this.$message.error(this.$t('noPermission'))
-        }
-      })
     },
 
     jumpCMDBSearch(value) {

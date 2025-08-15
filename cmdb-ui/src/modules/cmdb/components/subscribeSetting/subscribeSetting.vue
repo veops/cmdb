@@ -81,8 +81,6 @@
 
 <script>
 import { mapState } from 'vuex'
-import router, { resetRouter } from '@/router'
-import store from '@/store'
 import {
   subscribeCIType,
   getSubscribeAttributes,
@@ -223,9 +221,8 @@ export default {
         selectedAttrList.map((item) => {
           return [item, !!this.fixedList.includes(item)]
         })
-      ).then((res) => {
+      ).then(() => {
         this.$message.success(this.$t('cmdb.components.subSuccess'))
-        this.resetRoute()
         if (this.selectedAttrList.length > 0) {
           this.instanceSubscribed = true
         } else {
@@ -233,13 +230,7 @@ export default {
         }
       })
     },
-    resetRoute() {
-      resetRouter()
-      const roles = store.getters.roles
-      store.dispatch('GenerateRoutes', { roles }, { root: true }).then(() => {
-        router.addRoutes(store.getters.appRoutes)
-      })
-    },
+
     setTargetKeys(targetKeys) {
       this.selectedAttrList = targetKeys
     },
