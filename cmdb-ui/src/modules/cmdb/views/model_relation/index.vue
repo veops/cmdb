@@ -56,6 +56,7 @@
               'constraint',
               { rules: [{ required: true, message: $t('cmdb.ciType.relationConstraintTips') }] },
             ]"
+            @change="handleConstraintChange"
           >
             <a-select-option value="0">{{ $t('cmdb.ciType.one2Many') }}</a-select-option>
             <a-select-option value="1">{{ $t('cmdb.ciType.one2One') }}</a-select-option>
@@ -63,6 +64,10 @@
           </a-select>
         </a-form-item>
         <a-form-item :label="$t('cmdb.ciType.attributeAssociation')">
+          <template #extra>
+            <div>{{ $t('cmdb.ciType.attributeAssociationTip7') }}</div>
+            <div>{{ $t('cmdb.ciType.attributeAssociationTip8') }}</div>
+          </template>
           <a-row
             v-for="item in modalAttrList"
             :key="item.id"
@@ -74,7 +79,10 @@
                   allowClear
                   v-model="item.parentAttrId"
                 >
-                  <a-select-option v-for="attr in filterAttributes(modalParentAttributes)" :key="attr.id">
+                  <a-select-option
+                    v-for="attr in filterAttributes(modalParentAttributes, item.childAttrId, modalChildAttributes, 'parent')"
+                    :key="attr.id"
+                  >
                     {{ attr.alias || attr.name }}
                   </a-select-option>
                 </a-select>
@@ -90,7 +98,10 @@
                   allowClear
                   v-model="item.childAttrId"
                 >
-                  <a-select-option v-for="attr in filterAttributes(modalChildAttributes)" :key="attr.id">
+                  <a-select-option
+                    v-for="attr in filterAttributes(modalChildAttributes, item.parentAttrId, modalParentAttributes, 'child')"
+                    :key="attr.id"
+                  >
                     {{ attr.alias || attr.name }}
                   </a-select-option>
                 </a-select>
@@ -183,7 +194,7 @@ export default {
         '1': this.$t('cmdb.ciType.one2One'),
         '2': this.$t('cmdb.ciType.many2Many'),
       }
-    },
+    }
   },
   provide() {
     return {
@@ -356,15 +367,32 @@ export default {
         this.modalChildAttributes = res?.attributes ?? []
       })
     },
-    filterAttributes(attributes) {
-      // filter password/json/is_list/longText/bool/reference
-      return attributes.filter((attr) => {
+
+    filterAttributes(attributes, relationAttrId, relationAttrs, type) {
+      const relationAttr = relationAttrs.find((attr) => attr.id === relationAttrId)
+
+      // filter password/json/longText/bool/reference
+      let filterAttrs = attributes.filter((attr) => {
         if (attr.value_type === '2' && !attr.is_index) {
           return false
         }
 
-        return !attr.is_password && !attr.is_list && attr.value_type !== '6' && !attr.is_bool && !attr.is_reference
+        return !attr.is_password && attr.value_type !== '6' && !attr.is_bool && !attr.is_reference
       })
+
+      if (relationAttr) {
+        filterAttrs = filterAttrs.filter((attr) => attr.value_type === relationAttr?.value_type)
+      }
+
+      const constraintValue = Number(this.form.getFieldValue('constraint'))
+      if (
+        (constraintValue === 0 && type === 'child') ||
+        constraintValue === 1
+      ) {
+        return filterAttrs.filter((attr) => !attr.is_list)
+      }
+
+      return filterAttrs
     },
 
     addModalAttr() {
@@ -384,6 +412,13 @@ export default {
       if (index !== -1) {
         this.modalAttrList.splice(index, 1)
       }
+    },
+
+    handleConstraintChange() {
+      this.modalAttrList.forEach((item) => {
+        item.parentAttrId = undefined
+        item.childAttrId = undefined
+      })
     }
   },
 }

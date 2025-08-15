@@ -50,13 +50,18 @@
       <vxe-column :width="300" field="attributeAssociation" :edit-render="{}">
         <template #header>
           <span>
-            <a-tooltip :title="$t('cmdb.ciType.attributeAssociationTip1')">
+            <a-tooltip>
+              <template #title>
+                <div>{{ $t('cmdb.ciType.attributeAssociationTip1') }}</div>
+                <div>{{ $t('cmdb.ciType.attributeAssociationTip7') }}</div>
+                <div>{{ $t('cmdb.ciType.attributeAssociationTip8') }}</div>
+              </template>
               <a><a-icon type="question-circle"/></a>
             </a-tooltip>
             {{ $t('cmdb.ciType.attributeAssociation') }}
-            <span :style="{ fontSize: '10px', fontWeight: 'normal' }" class="text-color-4">{{
-              $t('cmdb.ciType.attributeAssociationTip2')
-            }}</span>
+            <span :style="{ fontSize: '10px', fontWeight: 'normal' }" class="text-color-4">
+              {{ $t('cmdb.ciType.attributeAssociationTip2') }}
+            </span>
           </span>
         </template>
         <template #default="{row}">
@@ -88,7 +93,13 @@
               optionFilterProp="title"
             >
               <a-select-option
-                v-for="attr in filterAttributes(row.isParent ? row.attributes : attributes)"
+                v-for="attr in filterAttributes(
+                  row.isParent ? row.attributes : attributes,
+                  item.childAttrId,
+                  row.isParent ? attributes : row.attributes,
+                  'parent',
+                  row.constraint
+                )"
                 :key="attr.id"
                 :value="attr.id"
                 :title="attr.alias || attr.name"
@@ -107,7 +118,13 @@
               optionFilterProp="title"
             >
               <a-select-option
-                v-for="attr in filterAttributes(row.isParent ? attributes : row.attributes)"
+                v-for="attr in filterAttributes(
+                  row.isParent ? attributes : row.attributes,
+                  item.parentAttrId,
+                  row.isParent ? row.attributes : attributes,
+                  'child',
+                  row.constraint
+                )"
                 :key="attr.id"
                 :value="attr.id"
                 :title="attr.alias || attr.name"
@@ -200,6 +217,7 @@
               'constraint',
               { rules: [{ required: true, message: $t('cmdb.ciType.relationConstraintTips') }] },
             ]"
+            @change="handleFormConstraintChange"
           >
             <a-select-option value="0">{{ $t('cmdb.ciType.one2Many') }}</a-select-option>
             <a-select-option value="1">{{ $t('cmdb.ciType.one2One') }}</a-select-option>
@@ -207,6 +225,10 @@
           </a-select>
         </a-form-item>
         <a-form-item :label="$t('cmdb.ciType.attributeAssociation')">
+          <template #extra>
+            <div>{{ $t('cmdb.ciType.attributeAssociationTip7') }}</div>
+            <div>{{ $t('cmdb.ciType.attributeAssociationTip8') }}</div>
+          </template>
           <a-row
             v-for="item in modalAttrList"
             :key="item.id"
@@ -218,7 +240,15 @@
                   allowClear
                   v-model="item.parentAttrId"
                 >
-                  <a-select-option v-for="attr in filterAttributes(attributes)" :key="attr.id">
+                  <a-select-option
+                    v-for="attr in filterAttributes(
+                      attributes,
+                      item.childAttrId,
+                      modalChildAttributes,
+                      'parent'
+                    )"
+                    :key="attr.id"
+                  >
                     {{ attr.alias || attr.name }}
                   </a-select-option>
                 </a-select>
@@ -234,7 +264,15 @@
                   allowClear
                   v-model="item.childAttrId"
                 >
-                  <a-select-option v-for="attr in filterAttributes(modalChildAttributes)" :key="attr.id">
+                  <a-select-option
+                    v-for="attr in filterAttributes(
+                      modalChildAttributes,
+                      item.parentAttrId,
+                      attributes,
+                      'child'
+                    )"
+                    :key="attr.id"
+                  >
                     {{ attr.alias || attr.name }}
                   </a-select-option>
                 </a-select>
@@ -594,16 +632,34 @@ export default {
         })
       }
     },
-    filterAttributes(attributes) {
-      // filter password/json/is_list/longText/bool/reference
-      return attributes.filter((attr) => {
+
+    filterAttributes(attributes, relationAttrId, relationAttrs, type, constraint) {
+      const relationAttr = relationAttrs.find((attr) => attr.id === relationAttrId)
+
+      // filter password/json/longText/bool/reference
+      let filterAttrs = attributes.filter((attr) => {
         if (attr.value_type === '2' && !attr.is_index) {
           return false
         }
 
-        return !attr.is_password && !attr.is_list && attr.value_type !== '6' && !attr.is_bool && !attr.is_reference
+        return !attr.is_password && attr.value_type !== '6' && !attr.is_bool && !attr.is_reference
       })
+
+      if (relationAttr) {
+        filterAttrs = filterAttrs.filter((attr) => attr.value_type === relationAttr?.value_type)
+      }
+
+      const constraintValue = Number(constraint ?? this.form.getFieldValue('constraint'))
+      if (
+        (constraintValue === 0 && type === 'child') ||
+        constraintValue === 1
+      ) {
+        return filterAttrs.filter((attr) => !attr.is_list)
+      }
+
+      return filterAttrs
     },
+
     addTableAttr() {
       this.tableAttrList.push({
         id: uuidv4(),
@@ -639,6 +695,13 @@ export default {
       if (index !== -1) {
         this.modalAttrList.splice(index, 1)
       }
+    },
+
+    handleFormConstraintChange() {
+      this.modalAttrList.forEach((item) => {
+        item.parentAttrId = undefined
+        item.childAttrId = undefined
+      })
     }
   },
 }

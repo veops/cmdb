@@ -38,7 +38,12 @@
       <vxe-column :width="300" field="attributeAssociation" :edit-render="{}">
         <template #header>
           <span>
-            <a-tooltip :title="$t('cmdb.ciType.attributeAssociationTip1')">
+            <a-tooltip>
+              <template #title>
+                <div>{{ $t('cmdb.ciType.attributeAssociationTip1') }}</div>
+                <div>{{ $t('cmdb.ciType.attributeAssociationTip7') }}</div>
+                <div>{{ $t('cmdb.ciType.attributeAssociationTip8') }}</div>
+              </template>
               <a><a-icon type="question-circle"/></a>
             </a-tooltip>
             {{ $t('cmdb.ciType.attributeAssociation') }}
@@ -76,7 +81,7 @@
               optionFilterProp="title"
             >
               <a-select-option
-                v-for="attr in filterAttributes(type2attributes[row.parent_id])"
+                v-for="attr in filterAttributes(row, item.childAttrId, 'parent')"
                 :key="attr.id"
                 :value="attr.id"
                 :title="attr.alias || attr.name"
@@ -95,7 +100,7 @@
               optionFilterProp="title"
             >
               <a-select-option
-                v-for="attr in filterAttributes(type2attributes[row.child_id])"
+                v-for="attr in filterAttributes(row, item.parentAttrId, 'child')"
                 :key="attr.id"
                 :value="attr.id"
                 :title="attr.alias || attr.name"
@@ -298,15 +303,36 @@ export default {
       const _find = attributes.find((attr) => attr.id === id)
       return _find?.alias ?? _find?.name ?? id
     },
-    filterAttributes(attributes) {
-      // filter password/json/is_list/longText/bool/reference
-      return attributes.filter((attr) => {
+
+    filterAttributes(row, relationAttrId, type) {
+      const { parent_id, child_id, constraint } = row
+      const currentAttrs = this.type2attributes?.[child_id] || []
+
+      const relationAttrs = this.type2attributes?.[parent_id] || []
+      const relationAttr = relationAttrs.find((attr) => attr.id === relationAttrId)
+
+      // filter password/json/longText/bool/reference
+      let filterAttrs = currentAttrs.filter((attr) => {
         if (attr.value_type === '2' && !attr.is_index) {
           return false
         }
 
-        return !attr.is_password && !attr.is_list && attr.value_type !== '6' && !attr.is_bool && !attr.is_reference
+        return !attr.is_password && attr.value_type !== '6' && !attr.is_bool && !attr.is_reference
       })
+
+      if (relationAttr) {
+        filterAttrs = filterAttrs.filter((attr) => attr.value_type === relationAttr?.value_type)
+      }
+
+      const constraintValue = Number(constraint)
+      if (
+        (constraintValue === 0 && type === 'child') ||
+        constraintValue === 1
+      ) {
+        return filterAttrs.filter((attr) => !attr.is_list)
+      }
+
+      return filterAttrs
     },
 
     addTableAttr() {
