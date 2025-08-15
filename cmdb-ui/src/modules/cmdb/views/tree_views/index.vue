@@ -1,7 +1,13 @@
 <template>
   <div :style="{ marginBottom: '-24px' }">
     <div v-if="!subscribeTreeViewCiTypesLoading && subscribeTreeViewCiTypes.length === 0">
-      <a-alert :message="$t('cmdb.tree.tips1')" banner></a-alert>
+      <a-alert banner>
+        <template #message>
+          <span>{{ $t('cmdb.preference.tips1') }}</span>
+          <router-link to="/cmdb/preference">{{ $t('cmdb.preference.tips2') }}</router-link>
+          <span>{{ $t('cmdb.preference.tips3') }}</span>
+        </template>
+      </a-alert>
     </div>
     <div class="tree-views" v-else>
       <SplitPane
