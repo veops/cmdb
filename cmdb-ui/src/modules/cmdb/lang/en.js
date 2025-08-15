@@ -230,6 +230,7 @@ const cmdb_en = {
         attributeAssociationTip6: 'Cannot be deleted again.',
         attributeAssociationTip7: '1. The attribute value types of the source model and target model must be consistent.',
         attributeAssociationTip8: '2. One To Many: Source model can select multiple value attributes',
+        attributeAssociationTip9: '3. Many To Many: Either the source model or the target model can be a multi-valued attribute.',
         show: 'show attribute',
         setAsShow: 'Set as show attribute',
         cancelSetAsShow: 'Cancel show attribute',

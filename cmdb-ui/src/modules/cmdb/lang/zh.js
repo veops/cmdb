@@ -230,6 +230,7 @@ const cmdb_zh = {
         attributeAssociationTip6: '不可再删除',
         attributeAssociationTip7: '1. 源模型和目标模型的属性值类型必须保持一致',
         attributeAssociationTip8: '2. 一对多：源模型可选多值属性',
+        attributeAssociationTip9: '3. 多对多：源模型和目标模型其中任何一个可为多值属性',
         show: '展示属性',
         setAsShow: '设置为展示属性',
         cancelSetAsShow: '取消设置为展示属性',

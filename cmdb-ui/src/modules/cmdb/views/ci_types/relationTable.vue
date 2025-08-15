@@ -55,6 +55,7 @@
                 <div>{{ $t('cmdb.ciType.attributeAssociationTip1') }}</div>
                 <div>{{ $t('cmdb.ciType.attributeAssociationTip7') }}</div>
                 <div>{{ $t('cmdb.ciType.attributeAssociationTip8') }}</div>
+                <div>{{ $t('cmdb.ciType.attributeAssociationTip9') }}</div>
               </template>
               <a><a-icon type="question-circle"/></a>
             </a-tooltip>
@@ -228,6 +229,7 @@
           <template #extra>
             <div>{{ $t('cmdb.ciType.attributeAssociationTip7') }}</div>
             <div>{{ $t('cmdb.ciType.attributeAssociationTip8') }}</div>
+            <div>{{ $t('cmdb.ciType.attributeAssociationTip9') }}</div>
           </template>
           <a-row
             v-for="item in modalAttrList"
@@ -652,7 +654,8 @@ export default {
       const constraintValue = Number(constraint ?? this.form.getFieldValue('constraint'))
       if (
         (constraintValue === 0 && type === 'child') ||
-        constraintValue === 1
+        constraintValue === 1 ||
+        (constraintValue === 2 && relationAttr?.is_list)
       ) {
         return filterAttrs.filter((attr) => !attr.is_list)
       }
