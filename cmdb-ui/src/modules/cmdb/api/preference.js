@@ -157,3 +157,18 @@ export function preferenceCitypeOrder(data) {
     data: data
   })
 }
+
+export function getAutoSubscription() {
+  return axios({
+    url: '/v0.1/preference/auto_subscription',
+    method: 'get',
+  })
+}
+
+export function putAutoSubscription(data) {
+  return axios({
+    url: '/v0.1/preference/auto_subscription',
+    method: 'put',
+    data
+  })
+}

@@ -86,13 +86,15 @@
                 </div>
                 <span class="cmdb-preference-group-content-title">{{ ciType.alias || ciType.name }}</span>
                 <span class="cmdb-preference-group-content-action">
-                  <a-tooltip :title="$t('cmdb.preference.cancelSub')">
-                    <span
-                      @click="unsubscribe(ciType, group.type)"
-                    ><ops-icon type="cmdb-preference-cancel-subscribe" />
-                    </span>
-                  </a-tooltip>
-                  <a-divider type="vertical" :style="{ margin: '0 3px' }" />
+                  <template v-if="!enableAutoSub || subType.type === 'tree'">
+                    <a-tooltip :title="$t('cmdb.preference.cancelSub')">
+                      <span
+                        @click="unsubscribe(ciType, group.type)"
+                      ><ops-icon type="cmdb-preference-cancel-subscribe" />
+                      </span>
+                    </a-tooltip>
+                    <a-divider type="vertical" :style="{ margin: '0 3px' }" />
+                  </template>
                   <a-tooltip :title="$t('cmdb.preference.editSub')">
                     <span
                       @click="openSubscribeSetting(ciType, `${index + 1}`)"
@@ -108,11 +110,23 @@
       </div>
     </div>
     <div class="cmdb-preference-right">
-      <a-input-search
-        v-model="searchValue"
-        :style="{ width: '300px', marginBottom: '20px' }"
-        :placeholder="$t('cmdb.preference.searchPlaceholder')"
-      />
+      <div class="cmdb-preference-right-header">
+        <a-input-search
+          v-model="searchValue"
+          class="cmdb-preference-right-header-search"
+          :placeholder="$t('cmdb.preference.searchPlaceholder')"
+        />
+        <div
+          :class="[
+            'cmdb-preference-right-header-auto',
+            enableAutoSub ? 'cmdb-preference-right-header-auto_enable' : ''
+          ]"
+          @click="openAutoSubModal"
+        >
+          <ops-icon type="auto" />
+          <span>{{ enableAutoSub ? $t('cmdb.preference.autoSub') : $t('cmdb.preference.autoSub2') }}</span>
+        </div>
+      </div>
       <div v-for="group in filterCiTypeData" :key="group.id">
         <p
           @click="changeGroupExpand(group)"
@@ -154,14 +168,6 @@
                   {{ item.alias || item.name }}</span
                 >
               </div>
-              <div class="cmdb-preference-colleague">
-                <span
-                  v-if="type_id2users[item.id] && type_id2users[item.id].length"
-                >{{ type_id2users[item.id].length > 99 ? '99+' : type_id2users[item.id].length
-                }}{{ $t('cmdb.preference.peopleSub') }}</span
-                >
-                <span v-else>{{ $t('cmdb.preference.noSub') }}</span>
-              </div>
               <div class="cmdb-preference-progress">
                 <div class="cmdb-preference-progress-info">
                   <span>{{ $t('cmdb.menu.ad') }}</span>
@@ -173,11 +179,20 @@
               </div>
               <a-divider :style="{ margin: '10px 0 3px 0' }" />
               <div class="cmdb-preference-footor-subscribed" v-if="item.is_subscribed">
-                <span><a-icon type="clock-circle" :style="{ marginRight: '3px' }" />{{ getsubscribedDays(item) }}</span>
+                <span
+                  :style="{
+                    opacity: enableAutoSub ? 0 : 1
+                  }"
+                >
+                  <a-icon type="clock-circle" :style="{ marginRight: '3px' }" />{{ getsubscribedDays(item) }}
+                </span>
                 <span>
-                  <a-tooltip :title="$t('cmdb.preference.cancelSub')">
-                    <span @click="unsubscribe(item)"><ops-icon type="cmdb-preference-cancel-subscribe" /> </span>
-                  </a-tooltip>
+                  <template v-if="!enableAutoSub">
+                    <a-tooltip :title="$t('cmdb.preference.cancelSub')">
+                      <span @click="unsubscribe(item)"><ops-icon type="cmdb-preference-cancel-subscribe" /> </span>
+                    </a-tooltip>
+                    <a-divider type="vertical" :style="{ margin: '0 3px' }" />
+                  </template>
                   <a-divider type="vertical" :style="{ margin: '0 3px' }" />
                   <a-tooltip :title="$t('cmdb.preference.editSub')">
                     <span @click="openSubscribeSetting(item)"><ops-icon type="cmdb-preference-subscribe"/></span>
@@ -185,13 +200,15 @@
                 </span>
               </div>
               <div v-else class="cmdb-preference-footor-unsubscribed">
-                <a
-                  @click="handleSubscribeCIType(item)"
-                  class="cmdb-preference-footor-unsubscribed-item"
-                >
-                  <ops-icon type="cmdb-ci" />{{ $t('cmdb.preference.subCITable') }}
-                </a>
-                <span class="cmdb-preference-footor-unsubscribed-gap"></span>
+                <template v-if="!enableAutoSub">
+                  <a
+                    @click="handleSubscribeCIType(item)"
+                    class="cmdb-preference-footor-unsubscribed-item"
+                  >
+                    <ops-icon type="cmdb-ci" />{{ $t('cmdb.preference.subCITable') }}
+                  </a>
+                  <span class="cmdb-preference-footor-unsubscribed-gap"></span>
+                </template>
                 <a
                   @click="openSubscribeSetting(item, '2')"
                   class="cmdb-preference-footor-unsubscribed-item"
@@ -209,17 +226,21 @@
       ref="subscribeSetting"
       @reload="
         () => {
-          resetRoute()
+          initData()
         }
       "
+    />
+    <AutoSubscribe
+      ref="autoSubRef"
+      :ciType="citypeData"
+      :autoSub="autoSub"
+      @ok="initData"
     />
   </div>
 </template>
 
 <script>
 import _ from 'lodash'
-import router, { resetRouter } from '@/router'
-import store from '@/store'
 import { mapState } from 'vuex'
 import moment from 'moment'
 import draggable from 'vuedraggable'
@@ -238,10 +259,12 @@ import SubscribeSetting from '../../components/subscribeSetting/subscribeSetting
 import { getCIAdcStatistics } from '../../api/ci'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
 import { SUB_NET_CITYPE_NAME, SCOPE_CITYPE_NAME, ADDRESS_CITYPE_NAME } from '../ipam/constants.js'
+import AutoSubscribe from './components/autoSubscribe.vue'
+import { getAutoSubscription } from '@/modules/cmdb/api/preference.js'
 
 export default {
   name: 'Preference',
-  components: { CollapseTransition, SubscribeSetting, draggable, OpsMoveIcon, Ellipsis },
+  components: { CollapseTransition, SubscribeSetting, draggable, OpsMoveIcon, Ellipsis, AutoSubscribe },
   data() {
     return {
       citypeData: [],
@@ -253,6 +276,7 @@ export default {
       type_id2users: {},
       myPreferences: [],
       searchValue: '',
+      autoSub: {}
     }
   },
   computed: {
@@ -275,11 +299,19 @@ export default {
       }
       return this.citypeData
     },
+    enableAutoSub() {
+      return this?.autoSub?.enabled ?? false
+    }
   },
   mounted() {
     this.getCITypes(true)
+    this.getAutoSubscription()
   },
   methods: {
+    initData() {
+      this.getCITypes()
+      this.getAutoSubscription()
+    },
     async getCITypes(isInit = false) {
       const [ciTypeGroup, pref, pref2, statistics] = await Promise.all([
         getCITypeGroups({ need_other: true }),
@@ -350,6 +382,12 @@ export default {
         }, 300)
       }
     },
+
+    async getAutoSubscription() {
+      const res = await getAutoSubscription()
+      this.autoSub = res || {}
+    },
+
     getsubscribedDays(item) {
       const subscribedTime = this.self.type_id2subs_time[item.id]
       moment.duration(moment().diff(moment(subscribedTime)))
@@ -396,19 +434,9 @@ export default {
               }
             }
             that.$message.success(that.$t('cmdb.preference.cancelSubSuccess'))
-            that.resetRoute()
+            that.initData()
           })
         },
-      })
-    },
-    resetRoute() {
-      const roles = store.getters.roles
-      store.dispatch('GenerateRoutes', { roles }, { root: true }).then(() => {
-        resetRouter()
-        this.$nextTick(() => {
-          router.addRoutes(store.getters.appRoutes)
-          this.getCITypes()
-        })
       })
     },
 
@@ -433,7 +461,7 @@ export default {
           subscribeList
         )
         this.$message.success(this.$t('cmdb.components.subSuccess'))
-        this.resetRoute()
+        this.initData()
       } catch (error) {
         console.error('handleSubscribeCIType failed', error)
         this.$message.success(this.$t('cmdb.components.subFailed'))
@@ -461,7 +489,7 @@ export default {
       })
       preferenceCitypeOrder({ type_ids: typeIds, is_tree: false })
         .then(() => {
-          this.resetRoute()
+          this.initData()
         })
         .catch(() => {
           this.getCITypes(false)
@@ -487,13 +515,17 @@ export default {
       preferenceCitypeOrder({ type_ids: typeIds, is_tree: isTree })
         .then(() => {
           if (!isTree) {
-            this.resetRoute()
+            this.initData()
           }
         })
         .catch(() => {
           this.getCITypes(false)
         })
     },
+
+    openAutoSubModal() {
+      this.$refs.autoSubRef.open()
+    }
   },
 }
 </script>
@@ -629,6 +661,45 @@ export default {
     height: 100%;
     padding-top: 24px;
 
+    &-header {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+
+      &-search {
+        width: 300px;
+        margin-right: 14px;
+      }
+
+      &-auto {
+        background: linear-gradient(90deg, #16D9E3 0%, #30C7EC 47%, #46AEF7 100%);
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        color: #FFFFFF;
+        cursor: pointer;
+        padding: 0 12px;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+
+        span {
+          margin-left: 4px;
+          font-size: 14px;
+          font-weight: 600;
+        }
+
+        &_enable {
+          opacity: 1;
+        }
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+
     &-group-title {
       width: 300px;
       margin-bottom: 20px;
@@ -651,7 +722,7 @@ export default {
       .cmdb-preference-type {
         display: inline-block;
         width: 195px;
-        height: 155px;
+        height: 127px;
         border-radius: @border-radius-box;
         background-color: #fff;
         box-shadow: ~'0px 2px 8px @{primary-color}15';
