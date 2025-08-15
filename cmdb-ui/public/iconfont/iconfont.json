@@ -6,6 +6,41 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "45254419",
+      "name": "auto",
+      "font_class": "auto",
+      "unicode": "ea28",
+      "unicode_decimal": 59944
+    },
+    {
+      "icon_id": "45069619",
+      "name": "oneterm-http",
+      "font_class": "oneterm-http",
+      "unicode": "ea26",
+      "unicode_decimal": 59942
+    },
+    {
+      "icon_id": "45069616",
+      "name": "oneterm-https",
+      "font_class": "oneterm-https",
+      "unicode": "ea27",
+      "unicode_decimal": 59943
+    },
+    {
+      "icon_id": "44939355",
+      "name": "access_period",
+      "font_class": "ops-oneterm-access_period",
+      "unicode": "ea25",
+      "unicode_decimal": 59941
+    },
+    {
+      "icon_id": "44939354",
+      "name": "authorization",
+      "font_class": "ops-oneterm-authorization",
+      "unicode": "ea24",
+      "unicode_decimal": 59940
+    },
+    {
       "icon_id": "44501032",
       "name": "onterm-symbolic_link",
       "font_class": "onterm-symbolic_link",
@@ -71,7 +106,7 @@
     {
       "icon_id": "44276353",
       "name": "command_interception (1)",
-      "font_class": "a-command_interception1",
+      "font_class": "ops-oneterm-command_interception1",
       "unicode": "ea17",
       "unicode_decimal": 59927
     },

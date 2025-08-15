@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3857903 */
-  src: url('iconfont.woff2?t=1749393321370') format('woff2'),
-       url('iconfont.woff?t=1749393321370') format('woff'),
-       url('iconfont.ttf?t=1749393321370') format('truetype');
+  src: url('iconfont.woff2?t=1755240492206') format('woff2'),
+       url('iconfont.woff?t=1755240492206') format('woff'),
+       url('iconfont.ttf?t=1755240492206') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,26 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.auto:before {
+  content: "\ea28";
+}
+
+.oneterm-http:before {
+  content: "\ea26";
+}
+
+.oneterm-https:before {
+  content: "\ea27";
+}
+
+.ops-oneterm-access_period:before {
+  content: "\ea25";
+}
+
+.ops-oneterm-authorization:before {
+  content: "\ea24";
 }
 
 .onterm-symbolic_link:before {
@@ -49,7 +69,7 @@
   content: "\ea1d";
 }
 
-.a-command_interception1:before {
+.ops-oneterm-command_interception1:before {
   content: "\ea17";
 }
 
