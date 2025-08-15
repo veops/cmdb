@@ -64,7 +64,13 @@ export default {
     await this.GetAuthDataEnable()
     this.loading = false
     if (!this._enable_list.length || this._enable_list.length > 1) {
-      this.$router.push('/user/login')
+      let loginURL = '/user/login'
+      const redirect = this.$route?.query?.redirect
+      if (redirect) {
+        loginURL += `?redirect=${redirect}`
+      }
+
+      this.$router.push(loginURL)
     }
     if (this.auth_auto_redirect) {
       this.time = 0

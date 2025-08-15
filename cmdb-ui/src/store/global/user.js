@@ -184,7 +184,16 @@ const user = {
         }).catch(() => {
           resolve()
         }).finally(() => {
-          window.location.href = '/user/logout'
+          let logoutURL = '/user/logout'
+          const fullPath = window.location.pathname + window.location.search
+          if (
+            fullPath &&
+            fullPath !== '/'
+          ) {
+            logoutURL += `?redirect=${fullPath}`
+          }
+
+          window.location.href = logoutURL
         })
       })
     },
