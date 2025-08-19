@@ -77,12 +77,15 @@
               <a-form-item>
                 <a-select
                   :placeholder="$t('cmdb.ciType.attributeAssociationTip4')"
+                  optionFilterProp="title"
+                  show-search
                   allowClear
                   v-model="item.parentAttrId"
                 >
                   <a-select-option
                     v-for="attr in filterAttributes(modalParentAttributes, item.childAttrId, modalChildAttributes, 'parent')"
                     :key="attr.id"
+                    :title="attr.alias || attr.name"
                   >
                     {{ attr.alias || attr.name }}
                   </a-select-option>
@@ -96,12 +99,15 @@
               <a-form-item>
                 <a-select
                   :placeholder="$t('cmdb.ciType.attributeAssociationTip5')"
+                  optionFilterProp="title"
+                  show-search
                   allowClear
                   v-model="item.childAttrId"
                 >
                   <a-select-option
                     v-for="attr in filterAttributes(modalChildAttributes, item.parentAttrId, modalParentAttributes, 'child')"
                     :key="attr.id"
+                    :title="attr.alias || attr.name"
                   >
                     {{ attr.alias || attr.name }}
                   </a-select-option>

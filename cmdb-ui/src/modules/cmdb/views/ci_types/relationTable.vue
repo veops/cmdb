@@ -239,6 +239,8 @@
               <a-form-item>
                 <a-select
                   :placeholder="$t('cmdb.ciType.attributeAssociationTip4')"
+                  optionFilterProp="title"
+                  show-search
                   allowClear
                   v-model="item.parentAttrId"
                 >
@@ -250,6 +252,7 @@
                       'parent'
                     )"
                     :key="attr.id"
+                    :title="attr.alias || attr.name"
                   >
                     {{ attr.alias || attr.name }}
                   </a-select-option>
@@ -263,6 +266,8 @@
               <a-form-item>
                 <a-select
                   :placeholder="$t('cmdb.ciType.attributeAssociationTip5')"
+                  optionFilterProp="title"
+                  show-search
                   allowClear
                   v-model="item.childAttrId"
                 >
@@ -274,6 +279,7 @@
                       'child'
                     )"
                     :key="attr.id"
+                    :title="attr.alias || attr.name"
                   >
                     {{ attr.alias || attr.name }}
                   </a-select-option>
