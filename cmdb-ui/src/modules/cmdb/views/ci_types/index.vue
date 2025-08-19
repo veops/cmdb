@@ -1,6 +1,10 @@
 <template>
   <div class="ci-types-wrap" :style="{ height: `${windowHeight - 96}px` }">
-    <div v-if="!CITypeGroups.length" class="ci-types-empty">
+    <div v-if="pageLoading" class="ci-types-loading">
+      <a-spin size="large" />
+    </div>
+
+    <div v-else-if="!CITypeGroups.length" class="ci-types-empty">
       <a-empty :image="emptyImage" description=""></a-empty>
       <a-button icon="plus" size="small" type="primary" @click="handleClickAddGroup">{{
         $t('cmdb.ciType.addGroup')
@@ -485,6 +489,7 @@ export default {
 
       searchValue: '',
       modelExportVisible: false,
+      pageLoading: false
     }
   },
   computed: {
@@ -578,7 +583,7 @@ export default {
       },
     }
   },
-  mounted() {
+  async mounted() {
     this.getAllDepAndEmployee()
     const _currentId = localStorage.getItem('ops_cityps_currentId')
     if (_currentId) {
@@ -587,7 +592,11 @@ export default {
     searchResourceType({ page_size: 9999, app_id: 'cmdb' }).then((res) => {
       this.resource_type = { groups: res.groups, id2perms: res.id2perms }
     })
-    this.loadCITypes(!_currentId, true)
+
+    this.pageLoading = true
+    await this.loadCITypes(!_currentId, true)
+    this.pageLoading = false
+
     this.getAttributes()
   },
   methods: {
@@ -1082,6 +1091,12 @@ export default {
 <style lang="less" scoped>
 .ci-types-wrap {
   margin: 0 0 -24px 0;
+
+  .ci-types-loading {
+    text-align: center;
+    padding-top: 150px;
+  }
+
   .ci-types-empty {
     position: absolute;
     text-align: center;
