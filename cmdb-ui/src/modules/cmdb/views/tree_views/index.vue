@@ -1,6 +1,9 @@
 <template>
   <div :style="{ marginBottom: '-24px' }">
-    <div v-if="!subscribeTreeViewCiTypesLoading && subscribeTreeViewCiTypes.length === 0">
+    <div v-if="subscribeTreeViewCiTypesLoading" class="page-loading">
+      <a-spin size="large" />
+    </div>
+    <div v-else-if="subscribeTreeViewCiTypes.length === 0">
       <a-alert banner>
         <template #message>
           <span>{{ $t('cmdb.preference.tips1') }}</span>
@@ -638,7 +641,11 @@ export default {
     },
     columnDrop() {
       this.$nextTick(() => {
-        const xTable = this.$refs.xTable.getVxetableRef()
+        const xTable = this.$refs?.xTable?.getVxetableRef?.()
+        if (!xTable) {
+          return
+        }
+
         this.sortable = Sortable.create(
           xTable.$el.querySelector('.body--wrapper>.vxe-table--header .vxe-header--row'),
           {
@@ -1015,6 +1022,11 @@ export default {
 
 <style lang="less">
 @import '../index.less';
+.page-loading {
+  text-align: center;
+  padding-top: 150px;
+}
+
 .tree-views {
   width: 100%;
   height: calc(100% - 32px);
