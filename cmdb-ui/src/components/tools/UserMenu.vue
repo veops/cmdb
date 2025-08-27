@@ -33,9 +33,9 @@
 </template>
 
 <script>
-import { mapState, mapActions, mapGetters, mapMutations } from 'vuex'
+import { domTitle, setDocumentTitle } from '@/utils/domUtil'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import DocumentLink from './DocumentLink.vue'
-import { setDocumentTitle, domTitle } from '@/utils/domUtil'
 import UserPanel from './userPanel.vue'
 
 export default {
@@ -54,6 +54,10 @@ export default {
         {
           title: 'EN',
           key: 'en'
+        },
+        {
+          title: 'VI',
+          key: 'vi'
         },
       ]
     }

@@ -9,7 +9,7 @@ services:
     volumes:
       - db-data:/var/lib/mysql
       - ./docs/mysqld.cnf:/etc/mysql/conf.d/mysqld.cnf
-      - ./docs/cmdb.sql:/docker-entrypoint-initdb.d/cmdb.sql
+      - ./docs/cmdb_en.sql:/docker-entrypoint-initdb.d/cmdb.sql
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-p$MYSQL_ROOT_PASSWORD"]
       interval: 10s
@@ -48,7 +48,7 @@ services:
     environment:
       TZ: Asia/Shanghai
       WAIT_HOSTS: cmdb-db:3306, cmdb-cache:6379
-      SYSTEM_DEFAULT_LANGUAGE:  # en-US, zh-CN
+      SYSTEM_DEFAULT_LANGUAGE: vi-VN  # en-US, zh-CN, vi-VN
     depends_on:
       cmdb-db:
         condition: service_healthy
@@ -83,6 +83,8 @@ services:
       interval: 5s
       retries: 10
       test: "ps aux|grep -v grep|grep -v '1 root'|grep gunicorn || exit 1"
+    ports:
+      - '5000:5000'
 
   cmdb-ui:
     image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.5.3
@@ -118,4 +120,3 @@ volumes:
 networks:
   new:
     driver: bridge
-    name: cmdb_network

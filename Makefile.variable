@@ -4,7 +4,8 @@ MYSQL_ROOT_PASSWORD ?= root
 MYSQL_PORT ?= 3306
 REDIS_PORT ?= 6379
 
-LATEST_TAG_DIFF:=$(shell git describe --tags --abbrev=8)
+LATEST_TAG_DIFF:=$(shell git describe --tags --abbrev=8 2>/dev/null || echo "")
+VERSION ?= 1.0.0
 LATEST_COMMIT:=$(VERSION)-dev-$(shell git rev-parse --short=8 HEAD)
 BUILD_ARCH ?= linux/amd64,linux/arm64
 

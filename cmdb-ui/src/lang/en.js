@@ -1,6 +1,8 @@
-import cmdb_en from '@/modules/cmdb/lang/en.js'
-import cs_en from '../views/setting/lang/en.js'
 import acl_en from '@/modules/acl/lang/en.js'
+import chartDemo_en from '@/modules/chart-demo/lang/en.js'
+import cmdb_en from '@/modules/cmdb/lang/en.js'
+
+import cs_en from '../views/setting/lang/en.js'
 
 export default {
     commonMenu: {
@@ -200,4 +202,5 @@ export default {
     cmdb: cmdb_en,
     cs: cs_en,
     acl: acl_en,
+    'chart-demo': chartDemo_en
 }

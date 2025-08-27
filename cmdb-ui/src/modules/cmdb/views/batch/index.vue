@@ -40,13 +40,13 @@
 </template>
 
 <script>
+import { filterNull } from '@/modules/cmdb/api/batch'
 import moment from 'moment'
 import { mapState } from 'vuex'
 import CiTypeChoice from './modules/CiTypeChoice'
 import CiUploadTable from './modules/CiUploadTable'
 import UploadFileForm from './modules/UploadFileForm'
 import UploadResult from './modules/UploadResult'
-import { filterNull } from '@/modules/cmdb/api/batch'
 
 export default {
   name: 'BatchUpload',

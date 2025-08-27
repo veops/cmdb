@@ -36,11 +36,11 @@
 </template>
 
 <script>
-import UserMenu from '../tools/UserMenu'
-import TopMenu from '../tools/TopMenu'
+import { mixin } from '@/utils/mixin'
 import SMenu from '../Menu/'
 import Logo from '../tools/Logo'
-import { mixin } from '@/utils/mixin'
+import TopMenu from '../tools/TopMenu'
+import UserMenu from '../tools/UserMenu'
 
 export default {
   name: 'GlobalHeader',

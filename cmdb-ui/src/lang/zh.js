@@ -1,6 +1,8 @@
-import cmdb_zh from '@/modules/cmdb/lang/zh.js'
-import cs_zh from '../views/setting/lang/zh.js'
 import acl_zh from '@/modules/acl/lang/zh.js'
+import chartDemo_zh from '@/modules/chart-demo/lang/zh.js'
+import cmdb_zh from '@/modules/cmdb/lang/zh.js'
+
+import cs_zh from '../views/setting/lang/zh.js'
 
 export default {
     commonMenu: {
@@ -200,4 +202,5 @@ export default {
     cmdb: cmdb_zh,
     cs: cs_zh,
     acl: acl_zh,
+    'chart-demo': chartDemo_zh
 }

@@ -7,15 +7,15 @@
 </template>
 
 <script>
-import { mapState, mapActions, mapMutations } from 'vuex'
-import zhCN from 'ant-design-vue/lib/locale-provider/zh_CN'
-import enUS from 'ant-design-vue/lib/locale-provider/en_US'
-import { AppDeviceEnquire } from '@/utils/mixin'
-import { debounce } from './utils/util'
 import { getSystemLanguage } from '@/api/system.js'
+import { AppDeviceEnquire } from '@/utils/mixin'
+import enUS from 'ant-design-vue/lib/locale-provider/en_US'
+import zhCN from 'ant-design-vue/lib/locale-provider/zh_CN'
+import { mapActions, mapMutations, mapState } from 'vuex'
+import { debounce } from './utils/util'
 
+import { Boot, DomEditor } from '@wangeditor/editor'
 import { h } from 'snabbdom'
-import { DomEditor, Boot } from '@wangeditor/editor'
 
 export default {
   mixins: [AppDeviceEnquire],
@@ -89,6 +89,8 @@ export default {
         const userLanguage = requestLanguage || navigator.language || navigator.userLanguage
         if (userLanguage.includes('zh')) {
           saveLocale = 'zh'
+        } else if (userLanguage.includes('vi')) {
+          saveLocale = 'vi'
         } else {
           saveLocale = 'en'
         }

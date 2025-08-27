@@ -99,13 +99,13 @@
 </template>
 
 <script>
-import { mapActions, mapState, mapMutations } from 'vuex'
-import { setDocumentTitle, domTitle } from '@/utils/domUtil'
-import {
-  bindPlatformByUid,
-  unbindPlatformByUid,
-} from '@/api/employee'
 import { getCompanyInfo } from '@/api/company'
+import {
+    bindPlatformByUid,
+    unbindPlatformByUid,
+} from '@/api/employee'
+import { domTitle, setDocumentTitle } from '@/utils/domUtil'
+import { mapActions, mapMutations, mapState } from 'vuex'
 
 export default {
   name: 'UserPanel',
@@ -131,6 +131,10 @@ export default {
         {
           title: 'EN',
           key: 'en'
+        },
+        {
+          title: 'VI',
+          key: 'vi'
         },
       ],
       bindList: [

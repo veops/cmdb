@@ -1,7 +1,7 @@
-import { UserLayout, BasicLayout, RouteView } from '@/layouts'
 import appConfig from '@/config/app'
-import { getAppAclRouter } from './utils'
+import { BasicLayout, RouteView, UserLayout } from '@/layouts'
 import store from '../store'
+import { getAppAclRouter } from './utils'
 
 export const generatorDynamicRouter = async () => {
   const packages = []
@@ -88,7 +88,7 @@ export const generatorDynamicRouter = async () => {
           name: 'company_auth',
           meta: { title: 'cs.menu.auth', appName: 'backend', icon: 'ops-setting-auth', selectedIcon: 'ops-setting-auth', permission: ['acl_admin'] },
           component: () => import(/* webpackChunkName: "setting" */ '@/views/setting/auth/index')
-        },
+        }
       ]
     }, ])
   return routes

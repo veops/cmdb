@@ -70,3 +70,28 @@ ui-docker-build:
     			--tag $(REGISTRY)/cmdb-ui:latest  \
     			-f docker/Dockerfile-UI \
     			.
+
+
+api-docker-build-local:
+	export DOCKER_CLI_EXPERIMENTAL=enabled ;\
+	! ( docker buildx ls | grep multi-platform-builder ) && docker buildx create --use --platform=linux/amd64 --name multi-platform-builder ;\
+	docker buildx build \
+    			--builder multi-platform-builder \
+    			--platform=linux/amd64 \
+    			--tag $(REGISTRY)/cmdb-api:$(CMDB_DOCKER_VERSION)  \
+    			--tag $(REGISTRY)/cmdb-api:latest  \
+    			--load \
+    			-f docker/Dockerfile-API \
+    			.
+
+ui-docker-build-local:
+	export DOCKER_CLI_EXPERIMENTAL=enabled ;\
+	! ( docker buildx ls | grep multi-platform-builder ) && docker buildx create --use --platform=linux/amd64 --name multi-platform-builder ;\
+	docker buildx build \
+    			--builder multi-platform-builder \
+    			--platform=linux/amd64 \
+    			--tag $(REGISTRY)/cmdb-ui:$(CMDB_DOCKER_VERSION)  \
+    			--tag $(REGISTRY)/cmdb-ui:latest  \
+    			--load \
+    			-f docker/Dockerfile-UI \
+    			.

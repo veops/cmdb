@@ -84,6 +84,9 @@ module.exports = {
   devServer: {
     disableHostCheck: true,
     port: process.env.DEV_PORT || 8000,
+    hot: true, // Enable hot reload
+    compress: true,
+    historyApiFallback: true,
     proxy: {
       '/api': {
         pathRewrite: {

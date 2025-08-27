@@ -31,6 +31,7 @@ class SystemLanguageView(APIView):
             "zh-CN": "中文(简体)",
             "zh-TW": "中文(繁体)",
             "en-US": "English",
+            "vi-VN": "Tiếng Việt",
             "ja-JP": "日本語",
             "ko-KR": "한국어",
         }

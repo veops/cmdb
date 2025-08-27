@@ -1,5 +1,5 @@
-import { generatorDynamicRouter, constantRouterMap } from '@/router/config'
 import { searchPermResourceByRoleId } from '@/modules/acl/api/permission'
+import { constantRouterMap, generatorDynamicRouter } from '@/router/config'
 import store from '@/store'
 import user from './user'
 /**

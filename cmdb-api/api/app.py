@@ -121,7 +121,7 @@ def register_extensions(app):
     """Register Flask extensions."""
 
     def get_locale():
-        accept_languages = app.config.get('ACCEPT_LANGUAGES', ['en', 'zh'])
+        accept_languages = app.config.get('ACCEPT_LANGUAGES', ['en', 'zh', 'vi'])
         return request.accept_languages.best_match(accept_languages)
 
     bcrypt.init_app(app)

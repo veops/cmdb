@@ -8,6 +8,12 @@
     >
       {{ route.meta.title }}
     </span>
+    <span
+      :class="current === 'chart-demo' ? 'top-menu-selected' : ''"
+      @click="() => handleClick({ name: 'chart-demo' })"
+    >
+      Topology
+    </span>
     <!-- <a-popover v-model="visible" placement="bottom" trigger="click" overlayClassName="top-menu-dropdown">
       <template slot="content">
         <div class="title">
@@ -36,12 +42,12 @@
 </template>
 
 <script>
-import store from '@/store'
-import { gridSvg, top_agent, top_acl } from '@/core/icons'
+import { gridSvg, top_acl, top_agent, topChartDemo } from '@/core/icons'
 import { getPreference } from '@/modules/cmdb/api/preference'
+import store from '@/store'
 export default {
   name: 'TopMenu',
-  components: { gridSvg, top_agent, top_acl },
+  components: { gridSvg, top_agent, top_acl, topChartDemo },
   data() {
     return {
       defaultShowRouteName: ['cmdb', 'acl'],
@@ -72,6 +78,9 @@ export default {
   },
   mounted() {
     this.current = this.$route.matched[0].name
+    console.log('TopMenu routes:', this.routes)
+    console.log('TopMenu defaultShowRoutes:', this.defaultShowRoutes)
+    console.log('TopMenu appRoutes:', store.getters.appRoutes)
   },
   methods: {
     async handleClick(route) {
@@ -85,6 +94,10 @@ export default {
           } else {
             this.$router.push('/cmdb/dashboard')
           }
+        } else if (route.name === 'chart-demo') {
+          this.$router.push('/chart-demo/gds')
+        } else if (route.name === 'xyz') {
+          this.$router.push('/xyz')
         } else {
           this.$router.push(route.redirect)
         }

@@ -6,14 +6,10 @@
  * 自定义图标加载表
  * 所有图标均从这里加载，方便管理
  */
-import gridSvg from '@/assets/icons/grid.svg?inline'
-import top_agent from '@/assets/icons/top_agent.svg?inline'
-import top_acl from '@/assets/icons/top_acl.svg?inline'
 import ops_move_icon from '@/assets/icons/ops-move-icon.svg?inline'
+import top_acl from '@/assets/icons/top_acl.svg?inline'
+import top_agent from '@/assets/icons/top_agent.svg?inline'
 
 export {
-    gridSvg,
-    top_agent,
-    top_acl,
-    ops_move_icon
+    ops_move_icon, top_acl, top_agent
 }
