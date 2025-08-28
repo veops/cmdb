@@ -1,17 +1,18 @@
 <template>
   <div>
-    <div style="margin-bottom: 10px; padding: 10px; background: #f0f0f0;">
-      <strong>Debug Info:</strong> Nodes: {{ topologyData.nodeDataArray.length }}, Links: {{ topologyData.linkDataArray.length }}
+    <div style="margin-bottom: 10px; padding: 10px; background: #f0f0f0">
+      <strong>Debug Info:</strong>
+      Nodes: {{ nodes.length }}, Links: {{ links.length }}
     </div>
 
     <!-- SVG Network Topology -->
-    <div style="border: 1px solid #ccc; padding: 20px; margin-bottom: 20px;">
+    <div style="border: 1px solid #ccc; padding: 20px; margin-bottom: 20px">
       <h3>SVG Network Topology</h3>
-      <svg ref="svgContainer" width="100%" height="600" style="border: 1px solid #ddd; background: white;">
+      <svg ref="svgContainer" width="100%" height="600" style="border: 1px solid #ddd; background: white">
         <!-- Grid -->
         <defs>
           <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1" />
           </pattern>
         </defs>
 
@@ -37,8 +38,7 @@
             font-family="Arial"
             font-size="14"
             font-weight="bold"
-            fill="#333"
-          >
+            fill="#333">
             {{ group.text }}
           </text>
         </g>
@@ -67,7 +67,7 @@
             stroke-width="2"
             @mouseover="highlightNode(node.key)"
             @mouseout="unhighlightNode(node.key)"
-            style="cursor: pointer;"
+            style="cursor: pointer"
           />
 
           <!-- SVG Icon -->
@@ -77,7 +77,7 @@
             width="40"
             height="40"
             :href="getNodeIcon(node.type)"
-            style="pointer-events: none;"
+            style="pointer-events: none"
           />
 
           <!-- Node label -->
@@ -99,7 +99,6 @@
 </template>
 
 <script>
-// Import SVG icons
 import cloudIcon from '@/assets/icons/cloud-svgrepo-com.svg'
 import firewallIcon from '@/assets/icons/firewalld2-svgrepo-com.svg'
 import pcIcon from '@/assets/icons/pc-svgrepo-com.svg'
@@ -109,91 +108,59 @@ import switchIcon from '@/assets/icons/switch-svgrepo-com.svg'
 
 export default {
   name: 'ExampleTopology',
+  props: {
+    topologyData: {
+      type: Object,
+      required: true
+    }
+  },
   data() {
     return {
-      topologyData: {
-        'class': 'go.GraphLinksModel',
-        'nodeDataArray': [
-          { 'key': 0, 'type': 'Cloud', 'loc': '0 0', 'text': 'Internet' },
-          { 'key': 1, 'type': 'Firewall', 'loc': '100 0' },
-          { 'key': 2, 'type': 'Router', 'loc': '200 0' },
-          { 'key': 3, 'type': 'Server', 'loc': '300 0' },
-          { 'key': 4, 'type': 'Switch', 'loc': '200 100' },
-          { 'key': 5, 'type': 'Firewall', 'loc': '25 100' },
-          { 'key': 6, 'type': 'Router', 'loc': '25 200' },
-          { 'key': 7, 'type': 'Switch', 'loc': '400 100' },
-
-          { 'key': 10, 'isGroup': true, 'text': 'Intranet 1' },
-          { 'key': 11, 'type': 'PC', 'loc': '150 220', 'group': 10 },
-          { 'key': 12, 'type': 'PC', 'loc': '250 220', 'group': 10 },
-          { 'key': 13, 'type': 'PC', 'loc': '150 270', 'group': 10 },
-          { 'key': 14, 'type': 'PC', 'loc': '250 270', 'group': 10 },
-
-          { 'key': 20, 'isGroup': true, 'text': 'Intranet 2' },
-          { 'key': 21, 'type': 'PC', 'loc': '350 220', 'group': 20 },
-          { 'key': 22, 'type': 'PC', 'loc': '450 220', 'group': 20 },
-          { 'key': 23, 'type': 'PC', 'loc': '350 270', 'group': 20 },
-          { 'key': 24, 'type': 'PC', 'loc': '450 270', 'group': 20 },
-
-          { 'key': 30, 'isGroup': true, 'text': 'Isolation test' },
-          { 'key': 31, 'type': 'PC', 'loc': '-100 172', 'group': 30 },
-          { 'key': 32, 'type': 'PC', 'loc': '-100 242', 'group': 30 }
-        ],
-        'linkDataArray': [
-          { 'from': 0, 'to': 1 },
-          { 'from': 1, 'to': 2 },
-          { 'from': 2, 'to': 3 },
-          { 'from': 2, 'to': 4 },
-          { 'from': 5, 'to': 4 },
-          { 'from': 5, 'to': 6 },
-          { 'from': 4, 'to': 7 },
-          { 'from': 4, 'to': 10 },
-          { 'from': 7, 'to': 20 },
-          { 'from': 6, 'to': 30 }
-        ]
-      },
-      // Icon mapping
       icons: {
-        'Cloud': cloudIcon,
-        'Firewall': firewallIcon,
-        'Router': routerIcon,
-        'Server': serverIcon,
-        'Switch': switchIcon,
-        'PC': pcIcon
+        Cloud: cloudIcon,
+        Firewall: firewallIcon,
+        Router: routerIcon,
+        Server: serverIcon,
+        Switch: switchIcon,
+        PC: pcIcon,
       }
     }
   },
   computed: {
     nodes() {
-      return this.topologyData.nodeDataArray.filter(node => !node.isGroup)
+      return this.topologyData.nodeDataArray.filter((node) => !node.isGroup)
     },
     groups() {
-      return this.topologyData.nodeDataArray.filter(node => node.isGroup).map(group => {
-        const groupNodes = this.topologyData.nodeDataArray.filter(node => node.group === group.key)
-        if (groupNodes.length === 0) return null
+      return this.topologyData.nodeDataArray
+        .filter((node) => node.isGroup)
+        .map((group) => {
+          const groupNodes = this.topologyData.nodeDataArray.filter((node) => node.group === group.key)
+          if (groupNodes.length === 0) return null
 
-        const positions = groupNodes.map(node => this.parseLocation(node.loc))
-        const minX = Math.min(...positions.map(p => p.x)) - 20
-        const maxX = Math.max(...positions.map(p => p.x)) + 20
-        const minY = Math.min(...positions.map(p => p.y)) - 20
-        const maxY = Math.max(...positions.map(p => p.y)) + 20
+          const positions = groupNodes.map((node) => this.parseLocation(node.loc))
+          const minX = Math.min(...positions.map((p) => p.x)) - 20
+          const maxX = Math.max(...positions.map((p) => p.x)) + 20
+          const minY = Math.min(...positions.map((p) => p.y)) - 20
+          const maxY = Math.max(...positions.map((p) => p.y)) + 20
 
-        return {
-          key: group.key,
-          text: group.text,
-          x: minX,
-          y: minY - 30,
-          width: maxX - minX,
-          height: maxY - minY + 30
-        }
-      }).filter(Boolean)
+          return {
+            key: group.key,
+            text: group.text,
+            x: minX,
+            y: minY - 30,
+            width: maxX - minX,
+            height: maxY - minY + 30,
+          }
+        })
+        .filter(Boolean)
     },
     links() {
-      return this.topologyData.linkDataArray
-    }
-  },
-  mounted() {
-    console.log('SVG Topology mounted with data:', this.topologyData)
+      return this.topologyData.linkDataArray.filter((link) => {
+        const fromNode = this.topologyData.nodeDataArray.find((n) => n.key === link.from && !n.isGroup)
+        const toNode = this.topologyData.nodeDataArray.find((n) => n.key === link.to && !n.isGroup)
+        return fromNode && toNode
+      })
+    },
   },
   methods: {
     parseLocation(loc) {
@@ -202,32 +169,31 @@ export default {
       return { x: x + 300, y: y + 100 } // Offset for better positioning
     },
     getNodePosition(key) {
-      const node = this.topologyData.nodeDataArray.find(n => n.key === key)
+      const node = this.topologyData.nodeDataArray.find((n) => n.key === key)
       return this.parseLocation(node?.loc)
     },
     getNodeColor(type) {
       const colors = {
-        'Cloud': '#e0f2fe',
-        'Firewall': '#fee2e2',
-        'Router': '#e0f2fe',
-        'Server': '#d1fae5',
-        'Switch': '#fef3c7',
-        'PC': '#f3e8ff'
+        Cloud: '#e0f2fe',
+        Firewall: '#fee2e2',
+        Router: '#e0f2fe',
+        Server: '#d1fae5',
+        Switch: '#fef3c7',
+        PC: '#f3e8ff',
       }
       return colors[type] || '#f0f0f0'
     },
     getNodeIcon(type) {
-      return this.icons[type] || pcIcon // Default to PC icon
+      return this.icons[type] || pcIcon
     },
     highlightNode(key) {
-      // Highlight connected links
-      const connectedLinks = this.links.filter(link => link.from === key || link.to === key)
+      const connectedLinks = this.links.filter((link) => link.from === key || link.to === key)
       console.log('Highlighting node:', key, 'Connected links:', connectedLinks)
     },
-         unhighlightNode(key) {
-       console.log('Unhighlighting node:', key)
-     }
-  }
+    unhighlightNode(key) {
+      console.log('Unhighlighting node:', key)
+    },
+  },
 }
 </script>
 

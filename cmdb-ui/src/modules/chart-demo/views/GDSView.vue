@@ -10,7 +10,8 @@
     <MX204EdgeTopology />
 
     <h2 style="margin-top: 40px">Example Topology</h2>
-    <ExampleTopology />
+    <!-- Truyền topologyData vào ExampleTopology -->
+    <ExampleTopology :topologyData="topologyData" />
   </div>
 </template>
 
@@ -30,6 +31,48 @@ export default {
   },
   data() {
     return {
+      topologyData: {
+        class: 'go.GraphLinksModel',
+        nodeDataArray: [
+          { key: 0, type: 'Cloud', loc: '0 0', text: 'Internet' },
+          { key: 1, type: 'Firewall', loc: '100 0' },
+          { key: 2, type: 'Router', loc: '200 0' },
+          { key: 3, type: 'Server', loc: '300 0' },
+          { key: 4, type: 'Switch', loc: '200 100' },
+          { key: 5, type: 'Firewall', loc: '25 100' },
+          { key: 6, type: 'Router', loc: '25 200' },
+          { key: 7, type: 'Switch', loc: '400 100' },
+
+          { key: 10, isGroup: true, text: 'Intranet 1' },
+          { key: 11, type: 'PC', loc: '150 220', group: 10 },
+          { key: 12, type: 'PC', loc: '250 220', group: 10 },
+          { key: 13, type: 'PC', loc: '150 270', group: 10 },
+          { key: 14, type: 'PC', loc: '250 270', group: 10 },
+
+          { key: 20, isGroup: true, text: 'Intranet 2' },
+          { key: 21, type: 'PC', loc: '350 220', group: 20 },
+          { key: 22, type: 'PC', loc: '450 220', group: 20 },
+          { key: 23, type: 'PC', loc: '350 270', group: 20 },
+          { key: 24, type: 'PC', loc: '450 270', group: 20 },
+
+          { key: 30, isGroup: true, text: 'Isolation test' },
+          { key: 31, type: 'PC', loc: '-100 172', group: 30 },
+          { key: 32, type: 'PC', loc: '-100 242', group: 30 },
+        ],
+        linkDataArray: [
+          { from: 0, to: 1 },
+          { from: 1, to: 2 },
+          { from: 2, to: 3 },
+          { from: 2, to: 4 },
+          { from: 5, to: 4 },
+          { from: 5, to: 6 },
+          { from: 4, to: 7 },
+          { from: 4, to: 10 },
+          { from: 7, to: 20 },
+          { from: 6, to: 30 },
+        ],
+      },
+
       diagramNodes: [
         // Groups
         { key: 'LEAF', isGroup: true, category: 'band', text: 'LEAF', loc: '0 120', size: '1180 90' },
@@ -95,10 +138,6 @@ export default {
         { from: 'LEAF', to: 'WAN' },
       ],
     }
-  },
+  }
 }
 </script>
-
-<style scoped>
-/* Styles can be removed since they're now in the NetworkDiagram component */
-</style>
