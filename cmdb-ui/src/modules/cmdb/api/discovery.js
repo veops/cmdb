@@ -138,6 +138,14 @@ export function getAdc(params) {
     })
 }
 
+export function getAdcById(id, params) {
+    return axios({
+        url: `v0.1/adc/${id}`,
+        method: 'GET',
+        params
+    })
+}
+
 export function deleteAdc(adc_id) {
     return axios({
         url: `v0.1/adc/${adc_id}`,

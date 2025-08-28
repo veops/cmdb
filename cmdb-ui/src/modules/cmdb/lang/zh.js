@@ -685,7 +685,8 @@ if __name__ == "__main__":
         tabCustom: '自定义',
         tabConfig: '已有配置',
         addConfig: '添加配置',
-        configErrTip: '请选择配置'
+        configErrTip: '请选择配置',
+        viewRawData: '查看原始数据'
     },
     ci: {
         attributeDesc: '查看属性配置',

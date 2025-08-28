@@ -92,15 +92,13 @@
             :width="col.width"
             :sortable="col.sortable"
           >
-            <template v-if="col.value_type === '6' || col.is_password" #default="{row}">
+            <template #default="{row}">
               <PasswordField
                 v-if="col.is_password"
                 :password="row[col.field]"
               />
-              <span
-                v-else-if="col.value_type === '6' && row[col.field]"
-              >
-                {{ row[col.field] }}
+              <span>
+                {{ typeof row[col.field] === 'object' ? JSON.stringify(row[col.field]) : row[col.field] }}
               </span>
             </template>
           </vxe-column>
@@ -137,7 +135,7 @@
           ></vxe-column>
           <vxe-column
             :title="$t('operation')"
-            v-bind="columns.length ? { width: '60px' } : { minWidth: '60px' }"
+            v-bind="columns.length ? { width: '100px' } : { minWidth: '100px' }"
             align="center"
             fixed="right"
           >
@@ -145,6 +143,9 @@
               <a-space>
                 <a-tooltip :title="$t('cmdb.ad.accept')">
                   <a v-if="!row.is_accept" @click="accept(row)"><ops-icon type="cmdb-manual_warehousing"/></a>
+                </a-tooltip>
+                <a-tooltip :title="$t('cmdb.ad.viewRawData')">
+                  <a @click="viewADC(row)"><a-icon type="eye"/></a>
                 </a-tooltip>
                 <a :style="{ color: 'red' }" @click="deleteADC(row)"><a-icon type="delete"/></a>
               </a-space>
@@ -175,6 +176,8 @@
           </p>
         </a-modal>
       </div>
+
+      <RawDataModal ref="rawDataModalRef" />
     </template>
   </TwoColumnLayout>
 </template>
@@ -185,6 +188,7 @@ import XEUtils from 'xe-utils'
 import TwoColumnLayout from '@/components/TwoColumnLayout'
 import AdcCounter from './components/adcCounter.vue'
 import PasswordField from './components/passwordField.vue'
+import RawDataModal from './components/rawDataModal.vue'
 
 import {
   getADCCiTypes,
@@ -192,7 +196,8 @@ import {
   updateADCAccept,
   getADCCiTypesAttrs,
   deleteAdc,
-  getAdcExecHistories
+  getAdcExecHistories,
+  getAdcById
 } from '../../api/discovery'
 import { getCITableColumns } from '../../utils/helper'
 
@@ -201,7 +206,8 @@ export default {
   components: {
     TwoColumnLayout,
     AdcCounter,
-    PasswordField
+    PasswordField,
+    RawDataModal
   },
   data() {
     return {
@@ -352,6 +358,12 @@ export default {
         onCancel() {},
       })
     },
+
+    async viewADC(row) {
+      const res = await getAdcById(row.id)
+      this.$refs.rawDataModalRef.open(res || {})
+    },
+
     async batchAccept() {
       for (let i = 0; i < this.selectedRowKeys.length; i++) {
         await updateADCAccept(this.selectedRowKeys[i])

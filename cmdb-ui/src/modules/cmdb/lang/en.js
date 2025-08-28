@@ -686,7 +686,8 @@ if __name__ == "__main__":
         tabCustom: 'Custom',
         tabConfig: 'Configured',
         addConfig: 'Add Config',
-        configErrTip: 'Please select config'
+        configErrTip: 'Please select config',
+        viewRawData: 'View Raw Data'
     },
     ci: {
         attributeDesc: 'Attribute Description',
