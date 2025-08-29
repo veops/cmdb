@@ -205,12 +205,14 @@ class AutoDiscoveryCITypeRelationView(APIView):
 class AutoDiscoveryCIView(APIView):
     url_prefix = ("/adc", "/adc/<int:adc_id>", "/adc/ci_types/<int:type_id>/attributes", "/adc/ci_types")
 
-    def get(self, type_id=None):
+    def get(self, type_id=None, adc_id=None):
         if "attributes" in request.url:
             return self.jsonify(AutoDiscoveryCICRUD.get_attributes_by_type_id(type_id))
-        elif "ci_types" in request.url:
+        if "ci_types" in request.url:
             need_other = request.values.get("need_other")
             return self.jsonify(AutoDiscoveryCICRUD.get_ci_types(need_other))
+        if adc_id is not None:
+            return self.jsonify(AutoDiscoveryCICRUD.get_instance_by_id(adc_id))
 
         page = get_page(request.values.pop('page', 1))
         page_size = get_page_size(request.values.pop('page_size', None))

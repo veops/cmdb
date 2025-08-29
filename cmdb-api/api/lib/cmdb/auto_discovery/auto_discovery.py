@@ -308,6 +308,8 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
             if new_last_update_at < __last_update_at:
                 new_last_update_at = __last_update_at
 
+        new_last_update_at = new_last_update_at or ad_rules_updated_at
+
         write_ad_rule_sync_history.apply_async(args=(result, oneagent_id, oneagent_name, datetime.datetime.now()),
                                                queue=CMDB_QUEUE)
         if not last_update_at or new_last_update_at > last_update_at:
@@ -694,6 +696,11 @@ class AutoDiscoveryCICRUD(DBMixin):
         # TODO: delete ci
 
     @classmethod
+    def get_instance_by_id(cls, adc_id):
+        adc = cls.cls.get_by_id(adc_id) or abort(404, ErrFormat.adc_not_found)
+        return adc.instance
+
+    @classmethod
     def accept(cls, adc, adc_id=None, nickname=None):
         if adc_id is not None:
             adc = cls.cls.get_by_id(adc_id) or abort(404, ErrFormat.adc_not_found)
@@ -725,7 +732,7 @@ class AutoDiscoveryCICRUD(DBMixin):
             from api.tasks.cmdb import add_net_device_ports
             add_net_device_ports.apply_async(args=(ci_id, adc.instance['ports']),
                                              queue=CMDB_QUEUE)
-            
+
         adc.update(is_accept=True,
                    accept_by=nickname or current_user.nickname,
                    accept_time=datetime.datetime.now(),
