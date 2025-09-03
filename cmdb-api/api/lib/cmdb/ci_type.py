@@ -1144,6 +1144,8 @@ class CITypeAttributeGroupManager(object):
                 group2pos[group['name']] = group_pos
             else:
                 group_pos = group2pos[group['name']]
+                if type_id == group['type_id']:
+                    result[group_pos]['type_id'] = type_id
 
             for i in items:
                 if i.attr_id in id2attr:
@@ -1564,6 +1566,8 @@ class CITypeTemplateManager(object):
                         continue
 
                 for order, attr in enumerate(group['attributes'] or []):
+                    if attr.get('inherited'):
+                        continue
                     item_existed = CITypeAttributeGroupItem.get_by(group_id=existed.id,
                                                                    attr_id=attr_id_map.get(attr['id'], attr['id']),
                                                                    first=True, to_dict=False)
