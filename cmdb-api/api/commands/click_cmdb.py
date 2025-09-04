@@ -255,7 +255,9 @@ def cmdb_trigger():
                     try:
                         ready_cis = CITriggerManager.waiting_cis(trigger)
                     except Exception as e:
-                        print(e)
+                        import traceback
+                        current_app.logger.error("cmdb trigger waiting_cis exception for trigger_id {}: {}".format(trigger.id, e))
+                        current_app.logger.error("traceback: {}".format(traceback.format_exc()))
                         continue
 
                     if trigger.id not in trigger2cis:

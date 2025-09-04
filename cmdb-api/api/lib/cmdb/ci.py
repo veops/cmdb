@@ -1618,7 +1618,8 @@ class CITriggerManager(object):
                     ci_id, need_children=False, use_master=False, enum_use_label=True)
 
             try:
-                response = webhook_request(webhook, ci_dict).text
+                response = webhook_request(webhook, ci_dict)
+                response.raise_for_status()
                 is_ok = True
             except Exception as e:
                 current_app.logger.warning("exec webhook failed: {}".format(e))
