@@ -38,6 +38,7 @@ const cmdb_zh = {
         attributeAD: '属性自动发现',
         relationAD: '关系自动发现',
         grant: '权限配置',
+        resourceViewTip: '暂未订阅, 请先到我的订阅页面完成订阅',
         addGroup: '新增分组',
         editGroup: '修改分组',
         group: '分组',

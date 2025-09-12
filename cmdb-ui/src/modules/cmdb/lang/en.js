@@ -38,6 +38,7 @@ const cmdb_en = {
         attributeAD: 'Attributes AutoDiscovery',
         relationAD: 'Relation AutoDiscovery',
         grant: 'Grant',
+        resourceViewTip: 'Not subscribed yet. Please go to the Preference page to complete your subscription.',
         addGroup: 'New Group',
         editGroup: 'Edit Group',
         group: 'Group',

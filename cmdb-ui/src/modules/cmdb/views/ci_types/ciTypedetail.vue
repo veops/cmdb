@@ -20,6 +20,18 @@
           <RelationTable isInGrantComp :CITypeId="CITypeId" :CITypeName="CITypeName"></RelationTable>
         </div>
       </a-tab-pane>
+
+      <a-button
+        slot="tabBarExtraContent"
+        type="primary"
+        ghost
+        size="small"
+        class="ops-button-ghost ops-tab-button"
+        @click="jumpResourceView"
+      >
+        <ops-icon type="ops-cmdb-resource" />
+        {{ $t('cmdb.menu.ciTable') }}
+      </a-button>
     </a-tabs>
   </a-card>
 </template>
@@ -52,6 +64,10 @@ export default {
       type: String,
       default: '',
     },
+    preferenceData: {
+      type: Object,
+      default: () => {}
+    }
   },
   data() {
     return {
@@ -91,6 +107,16 @@ export default {
             break
         }
       })
+    },
+    jumpResourceView() {
+      const isSub = this?.preferenceData?.type_ids?.includes(this.CITypeId)
+
+      if (!isSub) {
+        this.$message.error(this.$t('cmdb.ciType.resourceViewTip'))
+        return
+      }
+      localStorage.setItem('ops_ci_typeid', this.CITypeId)
+      window.open('/cmdb/instances/types', '_blank')
     }
   },
 }

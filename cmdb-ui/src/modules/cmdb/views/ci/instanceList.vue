@@ -47,6 +47,13 @@
                 <a-icon type="star" />
                 {{ $t('cmdb.preference.cancelSub') }}
               </a-menu-item>
+              <a-menu-item
+                key="citypeConfig"
+                @click="handleCITypeConfig"
+              >
+                <ops-icon type="ops-cmdb-citype" />
+                {{ $t('cmdb.menu.citypeManage') }}
+              </a-menu-item>
             </a-menu>
           </a-dropdown>
         </a-space>
@@ -782,6 +789,28 @@ export default {
         },
       })
     },
+
+    handleCITypeConfig() {
+      const { id, name } = this.CIType || {}
+      if (id && name) {
+        roleHasPermissionToGrant({
+          app_id: 'cmdb',
+          resource_type_name: 'CIType',
+          perm: 'config',
+          resource_name: name,
+        }).then((res) => {
+          if (res?.result) {
+            const storageId = `null%${id}%${name}`
+            localStorage.setItem('ops_cityps_currentId', storageId)
+            localStorage.setItem('ops_model_config_tab_key', '1')
+            window.open('/cmdb/ci_types', '_blank')
+          } else {
+            this.$message.error(this.$t('noPermission'))
+          }
+        })
+      }
+    },
+
     handlePerm() {
       roleHasPermissionToGrant({
         app_id: 'cmdb',

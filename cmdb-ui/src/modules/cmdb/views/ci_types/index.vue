@@ -182,7 +182,12 @@
       </template>
       <template #two>
         <div class="ci-types-right">
-          <CITypeDetail v-if="currentCId" :CITypeId="currentCId" :CITypeName="currentCName" />
+          <CITypeDetail
+            v-if="currentCId"
+            :CITypeId="currentCId"
+            :CITypeName="currentCName"
+            :preferenceData="preferenceData"
+          />
           <div v-else class="ci-types-right-empty">
             <a-empty :image="emptyImage" description=""></a-empty>
             <a-button icon="plus" size="small" type="primary" @click="handleCreateCiFromEmpty">{{
@@ -413,6 +418,7 @@ import {
   exportCITypeGroups
 } from '@/modules/cmdb/api/ciTypeGroup'
 import { searchAttributes, getCITypeAttributesById } from '@/modules/cmdb/api/CITypeAttr'
+import { getPreference } from '@/modules/cmdb/api/preference'
 import CreateNewAttribute from './ceateNewAttribute.vue'
 import CITypeDetail from './ciTypedetail.vue'
 import emptyImage from '@/assets/data_empty.png'
@@ -489,7 +495,9 @@ export default {
 
       searchValue: '',
       modelExportVisible: false,
-      pageLoading: false
+      pageLoading: false,
+
+      preferenceData: {}
     }
   },
   computed: {
@@ -510,14 +518,19 @@ export default {
     },
     currentGId() {
       if (this.currentId) {
-        return Number(this.currentId.split('%')[0])
+        const id = this?.currentId?.split?.('%')?.[0]
+        if (id !== 'null') {
+          return Number(id)
+        }
+        return null
       }
       return null
     },
     currentCId() {
       if (this.currentId) {
-        if (this.currentId.split('%')[1] !== 'null') {
-          return Number(this.currentId.split('%')[1])
+        const id = this?.currentId?.split?.('%')?.[1]
+        if (id !== 'null') {
+          return Number(id)
         }
         return null
       }
@@ -525,8 +538,9 @@ export default {
     },
     currentCName() {
       if (this.currentId) {
-        if (this.currentId.split('%')[2] !== 'null') {
-          return this.currentId.split('%')[2]
+        const name = this?.currentId?.split?.('%')?.[2]
+        if (name !== 'null') {
+          return name
         }
         return null
       }
@@ -598,6 +612,7 @@ export default {
     this.pageLoading = false
 
     this.getAttributes()
+    this.getPreference()
   },
   methods: {
     getAllDepAndEmployee() {
@@ -608,6 +623,13 @@ export default {
     handleSearch(e) {
       this.searchValue = e.target.value
     },
+
+    getPreference() {
+      getPreference().then((res) => {
+        this.preferenceData = res || {}
+      })
+    },
+
     async loadCITypes(isResetCurrentId = false, isInit = false) {
       const groups = await getCITypeGroupsConfig({ need_other: true })
       let alreadyReset = false
@@ -632,8 +654,10 @@ export default {
         if (isInit) {
           const isMatch = groups.some((g) => {
             const matchGroup = `${g?.id}%null%null` === this.currentId
-            const matchCITypes = g?.ci_types?.some((item) => `${g?.id}%${item?.id}%${item?.name}` === this.currentId)
-            return matchGroup || matchCITypes
+            const matchCIType = g?.ci_types?.some((item) => {
+              return `${g?.id}%${item?.id}%${item?.name}` === this.currentId || `null%${item?.id}%${item?.name}` === this.currentId
+            })
+            return matchGroup || matchCIType
           })
 
           if (!isMatch) {
