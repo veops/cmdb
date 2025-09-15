@@ -255,9 +255,14 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
         result = []
         db.session.commit()
         rules = cls.cls.get_by(to_dict=True)
-
+        
+        last_update_at = last_update_at or ""
+        new_last_update_at = ""
         for rule in rules:
             if not rule['enabled']:
+                if (rule['created_at'] or '') > last_update_at or (
+                    rule['updated_at'] or '') > last_update_at:
+                    new_last_update_at = max([rule['created_at'] or '', rule['updated_at'] or ''])
                 continue
 
             if isinstance(rule.get("extra_option"), dict):
@@ -299,7 +304,6 @@ class AutoDiscoveryCITypeCRUD(DBMixin):
                 result.append(rule)
 
         ad_rules_updated_at = (SystemConfigManager.get('ad_rules_updated_at') or {}).get('option', {}).get('v') or ""
-        new_last_update_at = ""
         for i in result:
             i['adr'] = AutoDiscoveryRule.get_by_id(i['adr_id']).to_dict()
             i['adr'].pop("attributes", None)
