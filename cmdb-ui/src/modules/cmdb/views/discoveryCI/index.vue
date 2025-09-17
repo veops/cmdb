@@ -36,7 +36,7 @@
         <div class="discovery-ci-header">
           <a-input-search
             :placeholder="$t('cmdb.components.pleaseSearch')"
-            :style="{ width: '200px', marginRight: '20px' }"
+            :style="{ width: '200px' }"
             @search="handleSearch"
             allowClear
           />
@@ -46,6 +46,15 @@
             <span @click="batchDelete">{{ $t('delete') }}</span>
             <span>{{ $t('cmdb.ci.selectRows', { rows: selectedCount }) }}</span>
           </span>
+          <a-button
+            type="primary"
+            class="ops-button-ghost"
+            ghost
+            @click="getAdc()"
+          >
+            <ops-icon type="veops-refresh" />
+            {{ $t('refresh') }}
+          </a-button>
           <a-button
             type="primary"
             ghost
@@ -68,6 +77,7 @@
           :height="tableHeight"
           :scroll-y="{ enabled: true, gt: 50 }"
           :scroll-x="{ enabled: true, gt: 0 }"
+          :loading="loading"
           @checkbox-change="onSelectChange"
           @checkbox-all="onSelectChange"
           @checkbox-range-end="onSelectChange"
@@ -222,6 +232,7 @@ export default {
       logTextArray: [],
       acceptByFilters: [],
       selectedCount: 0,
+      loading: false
     }
   },
   computed: {
@@ -289,6 +300,7 @@ export default {
       this.$refs.xTable.getVxetableRef().clearSort()
     },
     getAdc(isInit) {
+      this.loading = true
       getAdc({
         type_id: this.currentType,
         page_size: 100000,
@@ -319,6 +331,9 @@ export default {
           const xTable = this.$refs.xTable.getVxetableRef()
           xTable.refreshColumn()
         }
+      })
+      .finally(() => {
+        this.loading = false
       })
     },
     getColumns(data, attrList) {
@@ -470,6 +485,7 @@ export default {
   .discovery-ci-header {
     display: flex;
     align-items: center;
+    column-gap: 20px;
     padding-top: 18px;
     padding-bottom: 10px;
   }
