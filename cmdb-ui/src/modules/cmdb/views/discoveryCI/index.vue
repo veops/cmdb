@@ -33,141 +33,142 @@
     <template #two>
       <div id="discovery-ci">
         <AdcCounter :typeId="currentType" />
-        <div class="discovery-ci-header">
-          <a-input-search
-            :placeholder="$t('cmdb.components.pleaseSearch')"
-            :style="{ width: '200px' }"
-            @search="handleSearch"
-            allowClear
-          />
-          <span class="ops-list-batch-action" v-show="selectedCount">
-            <span @click="batchAccept">{{ $t('cmdb.ad.accept') }}</span>
-            <a-divider type="vertical" />
-            <span @click="batchDelete">{{ $t('delete') }}</span>
-            <span>{{ $t('cmdb.ci.selectRows', { rows: selectedCount }) }}</span>
-          </span>
-          <a-button
-            type="primary"
-            class="ops-button-ghost"
-            ghost
-            @click="getAdc()"
+        <a-spin :tip="loadTip" :spinning="loading">
+          <div class="discovery-ci-header">
+            <a-input-search
+              :placeholder="$t('cmdb.components.pleaseSearch')"
+              :style="{ width: '200px' }"
+              @search="handleSearch"
+              allowClear
+            />
+            <span class="ops-list-batch-action" v-show="selectedCount">
+              <span @click="batchAccept">{{ $t('cmdb.ad.accept') }}</span>
+              <a-divider type="vertical" />
+              <span @click="batchDelete">{{ $t('delete') }}</span>
+              <span>{{ $t('cmdb.ci.selectRows', { rows: selectedCount }) }}</span>
+            </span>
+            <a-button
+              type="primary"
+              class="ops-button-ghost"
+              ghost
+              @click="getAdc()"
+            >
+              <ops-icon type="veops-refresh" />
+              {{ $t('refresh') }}
+            </a-button>
+            <a-button
+              type="primary"
+              ghost
+              class="ops-button-ghost discovery-ci-log"
+              @click="clickLog"
+            >
+              <ops-icon type="a-cmdb-log1" />
+              <span>{{ $t('cmdb.ad.log') }}</span>
+            </a-button>
+          </div>
+          <ops-table
+            show-overflow
+            show-header-overflow
+            resizable
+            ref="xTable"
+            size="mini"
+            stripe
+            class="ops-stripe-table checkbox-hover-table"
+            :data="filterTableData"
+            :height="tableHeight"
+            :scroll-y="{ enabled: true, gt: 50 }"
+            :scroll-x="{ enabled: true, gt: 0 }"
+            :checkbox-config="{ reserve: true, highlight: true, range: true }"
+            :sort-config="{ remote: false, trigger: 'cell' }"
+            @checkbox-change="onSelectChange"
+            @checkbox-all="onSelectChange"
+            @checkbox-range-end="onSelectChange"
           >
-            <ops-icon type="veops-refresh" />
-            {{ $t('refresh') }}
-          </a-button>
-          <a-button
-            type="primary"
-            ghost
-            class="ops-button-ghost discovery-ci-log"
-            @click="clickLog"
-          >
-            <ops-icon type="a-cmdb-log1" />
-            <span>{{ $t('cmdb.ad.log') }}</span>
-          </a-button>
-        </div>
-        <ops-table
-          show-overflow
-          show-header-overflow
-          resizable
-          ref="xTable"
-          size="mini"
-          stripe
-          class="ops-stripe-table checkbox-hover-table"
-          :data="filterTableData"
-          :height="tableHeight"
-          :scroll-y="{ enabled: true, gt: 50 }"
-          :scroll-x="{ enabled: true, gt: 0 }"
-          :loading="loading"
-          @checkbox-change="onSelectChange"
-          @checkbox-all="onSelectChange"
-          @checkbox-range-end="onSelectChange"
-          :checkbox-config="{ reserve: true, highlight: true, range: true }"
-          :sort-config="{ remote: false, trigger: 'cell' }"
-        >
-          <vxe-column
-            align="center"
-            type="checkbox"
-            width="60"
-            fixed="left"
-          >
-            <template #default="{row}">
-              {{ getRowSeq(row) }}
+            <vxe-column
+              align="center"
+              type="checkbox"
+              width="60"
+              fixed="left"
+            >
+              <template #default="{row}">
+                {{ getRowSeq(row) }}
+              </template>
+            </vxe-column>
+            <vxe-column
+              v-for="(col, index) in columns"
+              :key="`${col.field}_${index}`"
+              :title="col.title"
+              :field="col.field"
+              :width="col.width"
+              :sortable="col.sortable"
+            >
+              <template #default="{row}">
+                <PasswordField
+                  v-if="col.is_password"
+                  :password="row[col.field]"
+                />
+                <span>
+                  {{ typeof row[col.field] === 'object' ? JSON.stringify(row[col.field]) : row[col.field] }}
+                </span>
+              </template>
+            </vxe-column>
+            <vxe-column
+              field="accept_by"
+              :title="$t('cmdb.ad.acceptBy')"
+              v-bind="columns.length ? { width: '80px' } : { minWidth: '80px' }"
+              :filters="acceptByFilters"
+            ></vxe-column>
+            <vxe-column
+              align="center"
+              field="is_accept"
+              :title="$t('cmdb.ad.isAccept')"
+              v-bind="columns.length ? { width: '80px' } : { minWidth: '80px' }"
+              :filters="[
+                { label: $t('yes'), value: true },
+                { label: $t('no'), value: false },
+              ]"
+              fixed="right"
+            >
+              <template #default="{row}">
+                <ops-icon
+                  :type="row.is_accept ? 'cmdb-warehousing' : 'cmdb-not_warehousing'"
+                  :style="{ color: row.is_accept ? '#00B42A' : '#A5A9BC' }"
+                />
+              </template>
+            </vxe-column>
+            <vxe-column
+              field="accept_time"
+              :title="$t('cmdb.ad.acceptTime')"
+              sortable
+              v-bind="columns.length ? { width: '150px' } : { minWidth: '150px' }"
+              fixed="right"
+            ></vxe-column>
+            <vxe-column
+              :title="$t('operation')"
+              v-bind="columns.length ? { width: '100px' } : { minWidth: '100px' }"
+              align="center"
+              fixed="right"
+            >
+              <template #default="{row}">
+                <a-space>
+                  <a-tooltip :title="$t('cmdb.ad.accept')">
+                    <a v-if="!row.is_accept" @click="accept(row)"><ops-icon type="cmdb-manual_warehousing"/></a>
+                  </a-tooltip>
+                  <a-tooltip :title="$t('cmdb.ad.viewRawData')">
+                    <a @click="viewADC(row)"><a-icon type="eye"/></a>
+                  </a-tooltip>
+                  <a :style="{ color: 'red' }" @click="deleteADC(row)"><a-icon type="delete"/></a>
+                </a-space>
+              </template>
+            </vxe-column>
+            <template #empty>
+              <div>
+                <img :style="{ width: '200px' }" :src="require('@/assets/data_empty.png')" />
+                <div>{{ $t('noData') }}</div>
+              </div>
             </template>
-          </vxe-column>
-          <vxe-column
-            v-for="(col, index) in columns"
-            :key="`${col.field}_${index}`"
-            :title="col.title"
-            :field="col.field"
-            :width="col.width"
-            :sortable="col.sortable"
-          >
-            <template #default="{row}">
-              <PasswordField
-                v-if="col.is_password"
-                :password="row[col.field]"
-              />
-              <span>
-                {{ typeof row[col.field] === 'object' ? JSON.stringify(row[col.field]) : row[col.field] }}
-              </span>
-            </template>
-          </vxe-column>
-          <vxe-column
-            field="accept_by"
-            :title="$t('cmdb.ad.acceptBy')"
-            v-bind="columns.length ? { width: '80px' } : { minWidth: '80px' }"
-            :filters="acceptByFilters"
-          ></vxe-column>
-          <vxe-column
-            align="center"
-            field="is_accept"
-            :title="$t('cmdb.ad.isAccept')"
-            v-bind="columns.length ? { width: '80px' } : { minWidth: '80px' }"
-            :filters="[
-              { label: $t('yes'), value: true },
-              { label: $t('no'), value: false },
-            ]"
-            fixed="right"
-          >
-            <template #default="{row}">
-              <ops-icon
-                :type="row.is_accept ? 'cmdb-warehousing' : 'cmdb-not_warehousing'"
-                :style="{ color: row.is_accept ? '#00B42A' : '#A5A9BC' }"
-              />
-            </template>
-          </vxe-column>
-          <vxe-column
-            field="accept_time"
-            :title="$t('cmdb.ad.acceptTime')"
-            sortable
-            v-bind="columns.length ? { width: '150px' } : { minWidth: '150px' }"
-            fixed="right"
-          ></vxe-column>
-          <vxe-column
-            :title="$t('operation')"
-            v-bind="columns.length ? { width: '100px' } : { minWidth: '100px' }"
-            align="center"
-            fixed="right"
-          >
-            <template #default="{row}">
-              <a-space>
-                <a-tooltip :title="$t('cmdb.ad.accept')">
-                  <a v-if="!row.is_accept" @click="accept(row)"><ops-icon type="cmdb-manual_warehousing"/></a>
-                </a-tooltip>
-                <a-tooltip :title="$t('cmdb.ad.viewRawData')">
-                  <a @click="viewADC(row)"><a-icon type="eye"/></a>
-                </a-tooltip>
-                <a :style="{ color: 'red' }" @click="deleteADC(row)"><a-icon type="delete"/></a>
-              </a-space>
-            </template>
-          </vxe-column>
-          <template #empty>
-            <div>
-              <img :style="{ width: '200px' }" :src="require('@/assets/data_empty.png')" />
-              <div>{{ $t('noData') }}</div>
-            </div>
-          </template>
-        </ops-table>
+          </ops-table>
+        </a-spin>
 
         <a-modal
           v-model="logModalVisible"
@@ -232,7 +233,8 @@ export default {
       logTextArray: [],
       acceptByFilters: [],
       selectedCount: 0,
-      loading: false
+      loading: false,
+      loadTip: ''
     }
   },
   computed: {
@@ -301,6 +303,8 @@ export default {
     },
     getAdc(isInit) {
       this.loading = true
+      this.loadTip = this.$t('loading')
+
       getAdc({
         type_id: this.currentType,
         page_size: 100000,
@@ -380,35 +384,73 @@ export default {
     },
 
     async batchAccept() {
+      let successNum = 0
+      let errorNum = 0
+      this.loading = true
+      this.loadTip = this.$t('cmdb.ad.batchAccept')
+
       for (let i = 0; i < this.selectedRowKeys.length; i++) {
-        await updateADCAccept(this.selectedRowKeys[i])
+        await updateADCAccept(this.selectedRowKeys[i]).then((res) => {
+          successNum += 1
+        }).catch(() => {
+          errorNum += 1
+        }).finally(() => {
+          this.loadTip = this.$t('cmdb.ad.batchAccept2', {
+            total: this.selectedRowKeys.length,
+            successNum: successNum,
+            errorNum: errorNum,
+          })
+        })
       }
-      this.$message.success(this.$t('cmdb.ad.acceptSuccess'))
-      this.getAdc(false)
+
+      this.loading = false
+      this.loadTip = ''
       this.selectedRowKeys = []
+      this.getAdc(false)
       this.$refs.xTable.getVxetableRef().clearCheckboxRow()
       this.$refs.xTable.getVxetableRef().clearCheckboxReserve()
       this.$refs.xTable.getVxetableRef().clearSort()
     },
+
     async batchDelete() {
-      const that = this
       this.$confirm({
-        title: that.$t('warning'),
-        content: that.$t('cmdb.ad.batchDelete'),
-        async onOk() {
-          for (let i = 0; i < that.selectedRowKeys.length; i++) {
-            await deleteAdc(that.selectedRowKeys[i])
-          }
-          that.$message.success(that.$t('deleteSuccess'))
-          that.getAdc(false)
-          that.selectedRowKeys = []
-          that.$refs.xTable.getVxetableRef().clearCheckboxRow()
-          that.$refs.xTable.getVxetableRef().clearCheckboxReserve()
-          that.$refs.xTable.getVxetableRef().clearSort()
-        },
-        onCancel() {},
+        title: this.$t('warning'),
+        content: this.$t('cmdb.ad.batchDelete'),
+        onOk: () => {
+          this.batchDeleteAsync()
+        }
       })
     },
+
+    async batchDeleteAsync() {
+      let successNum = 0
+      let errorNum = 0
+      this.loading = true
+      this.loadTip = this.$t('cmdb.ci.batchDeleting')
+
+      for (let i = 0; i < this.selectedRowKeys.length; i++) {
+        await deleteAdc(this.selectedRowKeys[i]).then((res) => {
+          successNum += 1
+        }).catch(() => {
+          errorNum += 1
+        }).finally(() => {
+          this.loadTip = this.$t('cmdb.ci.batchDeleting2', {
+            total: this.selectedRowKeys.length,
+            successNum: successNum,
+            errorNum: errorNum,
+          })
+        })
+      }
+
+      this.loading = false
+      this.loadTip = ''
+      this.selectedRowKeys = []
+      this.getAdc(false)
+      this.$refs.xTable.getVxetableRef().clearCheckboxRow()
+      this.$refs.xTable.getVxetableRef().clearCheckboxReserve()
+      this.$refs.xTable.getVxetableRef().clearSort()
+    },
+
     onSelectChange({ records, checked }) {
       this.selectedRowKeys = records.map((item) => item.id)
     },

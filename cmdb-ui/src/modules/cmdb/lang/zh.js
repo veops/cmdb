@@ -603,6 +603,8 @@ const cmdb_zh = {
         acceptTime: '入库时间',
         confirmAccept: '确认入库？',
         acceptSuccess: '入库成功',
+        batchAccept: '正在入库...',
+        batchAccept2: '正在入库，共{total}个，成功{successNum}个，失败{errorNum}个',
         isAccept: '入库',
         deleteADC: '确认删除该条数据？',
         batchDelete: '确认删除这些数据？',

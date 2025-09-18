@@ -603,6 +603,8 @@ const cmdb_en = {
         acceptTime: 'Accept Time',
         confirmAccept: 'Confirm Accept?',
         acceptSuccess: 'Accept successfully',
+        batchAccept: 'Currently being stored...',
+        batchAccept2: 'Currently being stored: {total} items, {successNum} successful, {errorNum} failed',
         isAccept: 'Accept',
         deleteADC: 'Confirm to delete this data?',
         batchDelete: 'Confirm to delete this data?',
