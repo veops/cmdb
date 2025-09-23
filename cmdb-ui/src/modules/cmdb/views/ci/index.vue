@@ -133,19 +133,23 @@ export default {
       return CIType
     },
     filterPreferenceGroup() {
+      if (!this?.preferenceGroup?.length) {
+        return []
+      }
+
       if (!this.searchValue) {
         return this.preferenceGroup
       }
 
       const preferenceGroup = _.cloneDeep(this.preferenceGroup)
       preferenceGroup.forEach((group) => {
-        if (group.name.indexOf(this.searchValue) !== -1) {
+        if (group?.name?.indexOf?.(this.searchValue) >= 0) {
           return
         }
 
-        group.children = group.children.filter((item) => item?.alias?.indexOf?.(this.searchValue) !== -1 || item?.name?.indexOf(this.searchValue) !== -1)
+        group.children = group?.children?.filter?.((item) => item?.alias?.indexOf?.(this.searchValue) >= 0 || item?.name?.indexOf?.(this.searchValue) >= 0) || []
       })
-      return preferenceGroup.filter((group) => group.children.length)
+      return preferenceGroup.filter((group) => group?.children?.length)
     },
   },
   provide() {
