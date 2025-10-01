@@ -772,15 +772,42 @@ class CIManager(object):
         ci2pos = {int(_id): _pos for _pos, _id in enumerate(ci_ids)}
         res = [None] * len(ci_ids)
 
-        ci_ids = ",".join(map(str, ci_ids))
+        validated_ci_ids = []
+        for ci_id in ci_ids:
+            try:
+                validated_ci_ids.append(int(ci_id))
+            except (ValueError, TypeError):
+                current_app.logger.warning(f"Invalid CI ID: {ci_id}")
+                continue
+        
+        if not validated_ci_ids:
+            return res
+            
+        from sqlalchemy import text
+        
         if value_tables is None:
             value_tables = ValueTypeMap.table_name.values()
 
-        value_sql = " UNION ".join([QUERY_CIS_BY_VALUE_TABLE.format(value_table, ci_ids)
-                                    for value_table in value_tables])
-        query_sql = QUERY_CIS_BY_IDS.format(filter_fields_sql, value_sql)
-        # current_app.logger.debug(query_sql)
-        cis = db.session.execute(query_sql).fetchall()
+        ci_id_placeholders = ",".join([f":ci_id_{i}" for i in range(len(validated_ci_ids))])
+        ci_id_params = {f"ci_id_{i}": ci_id for i, ci_id in enumerate(validated_ci_ids)}
+        
+        value_queries = []
+        for value_table in value_tables:
+            # Validate table name (whitelist approach)
+            if not value_table.startswith('c_value_'):
+                current_app.logger.warning(f"Invalid value table: {value_table}")
+                continue
+                
+            value_query = QUERY_CIS_BY_VALUE_TABLE.format(value_table, ci_id_placeholders)
+            value_queries.append(value_query)
+        
+        value_sql = " UNION ".join(value_queries)
+        
+        # Build final query
+        final_query = QUERY_CIS_BY_IDS.format(filter_fields_sql, value_sql)
+        
+        # Execute với parameters
+        cis = db.session.execute(text(final_query), ci_id_params).fetchall()
         ci_set = set()
         ci_dict = dict()
         unique_id2obj = dict()
@@ -1612,6 +1639,8 @@ class CITriggerManager(object):
     def ci_filter(ci_id, other_filter):
         from api.lib.cmdb.search import SearchError
         from api.lib.cmdb.search.ci import search
+        from api.lib.cmdb.query_sql import QUERY_CIS_BY_VALUE_TABLE
+        from api.lib.cmdb.query_sql import QUERY_CIS_BY_IDS
 
         query = "{},_id:{}".format(other_filter, ci_id)
 

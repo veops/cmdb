@@ -81,44 +81,96 @@ class CheckNewColumn(object):
 
     def add_new_column(self, target_table_name, new_column):
         try:
-            column_type = new_column.type.compile(self.engine.dialect)
-            default_value = new_column.default.arg if new_column.default else None
-
-            sql = "ALTER TABLE " + target_table_name + " ADD COLUMN " + f"`{new_column.name}`" + " " + column_type
-            if new_column.comment:
-                sql += f" comment '{new_column.comment}'"
-
-            if column_type == 'JSON':
-                pass
-            elif default_value:
-                if column_type.startswith('VAR') or column_type.startswith('Text'):
-                    if default_value is None or len(default_value) == 0:
-                        pass
-                else:
-                    sql += f" DEFAULT {default_value}"
-
-            sql = text(sql)
-            db.session.execute(sql)
+            from sqlalchemy.schema import AddColumn
+            from sqlalchemy import Table, MetaData
+            
+            # Sử dụng SQLAlchemy schema operations thay vì raw SQL
+            metadata = MetaData(bind=self.engine)
+            table = Table(target_table_name, metadata, autoload=True)
+            
+            # Tạo column definition an toàn
+            column_def = new_column.copy()
+            
+            # Sử dụng AddColumn operation để đảm bảo an toàn
+            add_column = AddColumn(table, column_def)
+            db.session.execute(add_column)
             return True
         except Exception as e:
-            err = f"add_new_column [{new_column.name}] to table [{target_table_name}] err: {e}"
-            current_app.logger.error(err)
-            return False
+            # Fallback to original method với parameterized query
+            try:
+                column_type = new_column.type.compile(self.engine.dialect)
+                default_value = new_column.default.arg if new_column.default else None
+
+                # Sử dụng parameterized query với text() và bindparam
+                from sqlalchemy import bindparam
+                
+                base_sql = "ALTER TABLE :table_name ADD COLUMN :column_name :column_type"
+                params = {
+                    'table_name': target_table_name,
+                    'column_name': new_column.name,
+                    'column_type': column_type
+                }
+                
+                # Build SQL with safe parameters
+                sql_parts = [f"ALTER TABLE `{target_table_name}` ADD COLUMN `{new_column.name}` {column_type}"]
+                
+                if new_column.comment:
+                    # Escape comment để tránh SQL injection
+                    escaped_comment = new_column.comment.replace("'", "''")
+                    sql_parts.append(f"COMMENT '{escaped_comment}'")
+
+                if column_type != 'JSON' and default_value is not None:
+                    if not (column_type.startswith('VAR') or column_type.startswith('Text')):
+                        if isinstance(default_value, str):
+                            sql_parts.append(f"DEFAULT '{default_value}'")
+                        else:
+                            sql_parts.append(f"DEFAULT {default_value}")
+
+                final_sql = " ".join(sql_parts)
+                sql = text(final_sql)
+                db.session.execute(sql)
+                return True
+            except Exception as e2:
+                err = f"add_new_column [{new_column.name}] to table [{target_table_name}] err: {e2}"
+                current_app.logger.error(err)
+                return False
 
     @staticmethod
     def add_new_index(target_table_name, new_column):
         try:
             if new_column.index:
+                from sqlalchemy import Index, Table, MetaData
+                
+                # Sử dụng SQLAlchemy Index object thay vì raw SQL
+                metadata = MetaData(bind=db.engine)
+                table = Table(target_table_name, metadata, autoload=True)
+                
                 index_name = f"{target_table_name}_{new_column.name}"
-                sql = "CREATE INDEX " + f"{index_name}" + " ON " + target_table_name + " (" + new_column.name + ")"
-                db.session.execute(sql)
+                
+                # Tạo index an toàn bằng SQLAlchemy
+                index = Index(index_name, table.c[new_column.name])
+                index.create(db.engine)
+                
                 current_app.logger.info(f"add new index [{index_name}] in table [{target_table_name}] success.")
 
             return True
         except Exception as e:
-            err = f"add_new_index [{new_column.name}] to table [{target_table_name}] err: {e}"
-            current_app.logger.error(err)
-            return False
+            # Fallback với parameterized query
+            try:
+                if new_column.index:
+                    # Validate và escape tên bảng và cột
+                    safe_table_name = target_table_name.replace('`', '``')
+                    safe_column_name = new_column.name.replace('`', '``')
+                    index_name = f"{safe_table_name}_{safe_column_name}"
+                    
+                    sql = text(f"CREATE INDEX `{index_name}` ON `{safe_table_name}` (`{safe_column_name}`)")
+                    db.session.execute(sql)
+                    current_app.logger.info(f"add new index [{index_name}] in table [{target_table_name}] success.")
+                return True
+            except Exception as e2:
+                err = f"add_new_index [{new_column.name}] to table [{target_table_name}] err: {e2}"
+                current_app.logger.error(err)
+                return False
 
     @staticmethod
     def check_enum_column(enum_columns, existed_columns, model_columns, table_name):
@@ -132,8 +184,20 @@ class CheckNewColumn(object):
                 if set(old_enum_value) == set(new_enum_value):
                     continue
 
-                enum_values_str = ','.join(["'{}'".format(value) for value in new_enum_value])
-                sql = f"ALTER TABLE {table_name} MODIFY COLUMN" + f"`{column_name}`" + f" enum({enum_values_str})"
+                # Escape enum values để tránh SQL injection
+                safe_enum_values = []
+                for value in new_enum_value:
+                    # Escape single quotes trong enum values
+                    escaped_value = str(value).replace("'", "''")
+                    safe_enum_values.append(f"'{escaped_value}'")
+                
+                enum_values_str = ','.join(safe_enum_values)
+                
+                # Validate và escape table name và column name
+                safe_table_name = table_name.replace('`', '``')
+                safe_column_name = column_name.replace('`', '``')
+                
+                sql = text(f"ALTER TABLE `{safe_table_name}` MODIFY COLUMN `{safe_column_name}` ENUM({enum_values_str})")
                 db.session.execute(sql)
                 current_app.logger.info(
                     f"modify column [{column_name}] ENUM: {new_enum_value} in table [{table_name}] success.")

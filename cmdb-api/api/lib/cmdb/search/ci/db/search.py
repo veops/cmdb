@@ -623,8 +623,25 @@ class Search(object):
             k, field_type, _, attr = self._attr_name_proc(f)
             if k:
                 table_name = TableMap(attr=attr).table_name
-                query_sql = FACET_QUERY.format(table_name, self.query_sql, attr.id)
-                result = db.session.execute(text(query_sql)).fetchall()
+                
+                if not table_name or not table_name.startswith('c_value_'):
+                    current_app.logger.warning(f"Invalid table name for facet: {table_name}")
+                    continue
+                
+                try:
+                    attr_id = int(attr.id)
+                except (ValueError, TypeError):
+                    current_app.logger.warning(f"Invalid attribute ID: {attr.id}")
+                    continue
+                
+                # Use the predefined FACET_QUERY template from constants
+                facet_query_template = FACET_QUERY.format(
+                    table_name,
+                    self.query_sql,
+                    attr_id
+                )
+                
+                result = db.session.execute(text(facet_query_template), {'attr_id': attr_id}).fetchall()
                 facet[k] = result
 
         facet_result = dict()
