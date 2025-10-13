@@ -3,7 +3,7 @@ const appConfig = {
   redirectTo: '/cmdb', // 首页的重定向路径
   buildAclToModules: true, // 是否在各个应用下 内联权限管理
   showDocs: false,
-  useEncryption: false,
+  useEncryption: true,
 }
 
 export default appConfig
