@@ -59,7 +59,7 @@
                     accept=".json"
                     :showUploadList="false"
                     style="display: inline-block"
-                    action="/api/v0.1/ci_types/template/import/file"
+                    :action="ciTypesUploadUrl"
                     @change="changeUploadFile"
                   >
                     <ops-icon type="veops-import"/>
@@ -497,7 +497,8 @@ export default {
       modelExportVisible: false,
       pageLoading: false,
 
-      preferenceData: {}
+      preferenceData: {},
+      ciTypesUploadUrl: `${process.env.VUE_APP_API_BASE_URL || '/api'}/v0.1/ci_types/template/import/file`,
     }
   },
   computed: {

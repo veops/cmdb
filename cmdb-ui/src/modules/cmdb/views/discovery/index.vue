@@ -256,7 +256,8 @@ export default {
     download() {
       const x = new XMLHttpRequest()
       const that = this
-      x.open('GET', `/api/v0.1/adr/template/export/file`, true)
+      const base_url = process.env.VUE_APP_API_BASE_URL || '/api'
+      x.open('GET', `${base_url}/v0.1/adr/template/export/file`, true)
       x.responseType = 'blob'
       x.onload = function(e) {
         const url = window.URL.createObjectURL(x.response)
@@ -272,7 +273,8 @@ export default {
       formData.append('file', file)
       const that = this
       var xhr = new XMLHttpRequest()
-      xhr.open('POST', `/api/v0.1/adr/template/import/file`)
+      const base_url = process.env.VUE_APP_API_BASE_URL || '/api'
+      xhr.open('POST', `${base_url}/v0.1/adr/template/import/file`)
       xhr.onreadystatechange = function() {
         const state = Number(xhr.readyState)
         if (state === 4) {
