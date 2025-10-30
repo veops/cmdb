@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="operation-history-table">
     <search-form
       :attrList="typeTableAttrList"
       @expandChange="handleExpandChange"
@@ -19,14 +19,19 @@
       stripe
       class="ops-stripe-table"
     >
-      <vxe-column field="created_at" width="159px" :title="$t('cmdb.history.opreateTime')"></vxe-column>
-      <vxe-column field="user" width="116px" :title="$t('cmdb.history.user')"></vxe-column>
-      <vxe-column field="operate_type" width="135px" :title="$t('operation')">
+      <vxe-column field="created_at" width="165" :title="$t('cmdb.history.opreateTime')"></vxe-column>
+      <vxe-column field="user" width="120" :title="$t('cmdb.history.user')"></vxe-column>
+      <vxe-column field="operate_type" width="140" :title="$t('operation')">
         <template #header="{ column }">
           <span>{{ column.title }}</span>
           <a-popover trigger="click" placement="bottom">
-            <a-icon class="filter" type="filter" theme="filled" />
-            <a class="filter-content" slot="content">
+            <a-icon
+              class="filter"
+              :class="{ active: queryParams.operate_type !== undefined }"
+              type="filter"
+              theme="filled"
+            />
+            <div class="filter-content" slot="content">
               <a-select
                 v-model="queryParams.operate_type"
                 :placeholder="$t('cmdb.history.filterOperate')"
@@ -43,46 +48,40 @@
                   {{ Object.keys(choice)[0] }}
                 </a-select-option>
               </a-select>
-              <a-button type="link" class="filterButton" @click="filterOperate">{{
-                $t('cmdb.history.filter')
-              }}</a-button>
-              <a-button type="link" class="filterResetButton" @click="filterOperateReset">{{ $t('reset') }}</a-button>
-            </a>
+              <a-button type="link" class="filterButton" @click="filterOperate">
+                {{ $t('cmdb.history.filter') }}
+              </a-button>
+              <a-button type="link" class="filterResetButton" @click="filterOperateReset">
+                {{ $t('reset') }}
+              </a-button>
+            </div>
           </a-popover>
         </template>
         <template #default="{ row }">
-          <a-tag color="green" v-if="row.operate_type.includes($t('new'))">
-            {{ row.operate_type }}
-          </a-tag>
-          <a-tag color="orange" v-else-if="row.operate_type.includes($t('update'))">
-            {{ row.operate_type }}
-          </a-tag>
-          <a-tag color="red" v-else>
-            {{ row.operate_type }}
-          </a-tag>
+          <operate-type-tag :operate-type="row.operate_type" />
         </template>
       </vxe-column>
-      <vxe-column field="type_id" :title="$t('cmdb.ciType.ciType')" width="150px">
+      <vxe-column field="type_id" :title="$t('cmdb.ciType.ciType')" width="150">
         <template #default="{ row }">
           {{ row.operate_type === $t('cmdb.history.deleteCIType') ? row.change.alias : row.type_id }}
         </template>
       </vxe-column>
-      <vxe-column field="changeDescription" :title="$t('desc')">
+      <vxe-column field="changeDescription" :title="$t('desc')" min-width="200">
         <template #default="{ row }">
-          <p style="color:rgba(0, 0, 0, 0.65);" v-if="row.changeDescription === $t('cmdb.history.noUpdate')">
+          <div v-if="row.changeDescription === $t('cmdb.history.noUpdate')" class="change-text">
             {{ row.changeDescription }}
-          </p>
+          </div>
           <template v-else-if="row.operate_type.includes($t('update'))">
-            <p :key="index" style="color:#fa8c16;" v-for="(tag, index) in row.changeArr">
+            <div :key="index" class="change-text update-text" v-for="(tag, index) in row.changeArr">
               {{ tag }}
-            </p>
+            </div>
           </template>
-          <p class="more-tag" style="color:#52c41a;" v-else-if="row.operate_type.includes($t('new'))">
+          <div class="change-text new-text" v-else-if="row.operate_type.includes($t('new'))">
             {{ row.changeDescription }}
-          </p>
-          <p style="color:#f5222d;" v-else-if="row.operate_type.includes($t('delete'))">
+          </div>
+          <div class="change-text delete-text" v-else-if="row.operate_type.includes($t('delete'))">
             {{ row.changeDescription }}
-          </p>
+          </div>
         </template>
       </vxe-column>
     </vxe-table>
@@ -106,15 +105,20 @@
 </template>
 
 <script>
-import _ from 'lodash'
 import { mapState } from 'vuex'
 import SearchForm from './searchForm'
+import OperateTypeTag from '../components/OperateTypeTag.vue'
 import { getCITypesTable, getUsers } from '@/modules/cmdb/api/history'
 import { getCITypes } from '@/modules/cmdb/api/CIType'
 import { getRelationTypes } from '@/modules/cmdb/api/relationType'
+import { deepCompare } from '@/modules/cmdb/utils/objectDiff'
+import { PAGINATION_CONFIG } from '../constants'
+import commonMixin from '../mixins/commonMixin'
+
 export default {
   name: 'TypeTable',
-  components: { SearchForm },
+  components: { SearchForm, OperateTypeTag },
+  mixins: [commonMixin],
   inject: ['reload'],
   data() {
     return {
@@ -122,7 +126,7 @@ export default {
       relationTypeList: null,
       typeList: null,
       userList: [],
-      pageSizeOptions: ['50', '100', '200', '500'],
+      pageSizeOptions: PAGINATION_CONFIG.PAGE_SIZE_OPTIONS.map(String),
       isExpand: false,
       current: 1,
       pageSize: 50,
@@ -131,17 +135,57 @@ export default {
       tableData: [],
       queryParams: {
         page: 1,
-        page_size: 50,
+        page_size: PAGINATION_CONFIG.DEFAULT_PAGE_SIZE,
         type_id: undefined,
         operate_type: undefined,
       },
-      typeTableAttrList: [
+      ciTypeChoices: [],
+    }
+  },
+  async created() {
+    await Promise.all([this.getRelationTypes(), this.getTypes(), this.getUserList()])
+    await this.getTable(this.queryParams)
+  },
+  updated() {
+    this.$refs.xTable.$el.querySelector('.vxe-table--body-wrapper').scrollTop = 0
+  },
+  computed: {
+    ...mapState(['locale']),
+    windowHeight() {
+      return this.$store.state.windowHeight
+    },
+    windowHeightMinus() {
+      return this.isExpand ? 446 : 381
+    },
+    operateTypeMap() {
+      return new Map([
+        ['0', this.$t('cmdb.history.addCIType')],
+        ['1', this.$t('cmdb.history.updateCIType')],
+        ['2', this.$t('cmdb.history.deleteCIType')],
+        ['3', this.$t('cmdb.history.addAttribute')],
+        ['4', this.$t('cmdb.history.updateAttribute')],
+        ['5', this.$t('cmdb.history.deleteAttribute')],
+        ['6', this.$t('cmdb.history.addTrigger')],
+        ['7', this.$t('cmdb.history.updateTrigger')],
+        ['8', this.$t('cmdb.history.deleteTrigger')],
+        ['9', this.$t('cmdb.history.addUniqueConstraint')],
+        ['10', this.$t('cmdb.history.updateUniqueConstraint')],
+        ['11', this.$t('cmdb.history.deleteUniqueConstraint')],
+        ['12', this.$t('cmdb.history.addRelation')],
+        ['13', this.$t('cmdb.history.deleteRelation')],
+        ['14', this.$t('cmdb.history.addReconciliation')],
+        ['15', this.$t('cmdb.history.updateReconciliation')],
+        ['16', this.$t('cmdb.history.deleteReconciliation')],
+      ])
+    },
+    typeTableAttrList() {
+      return [
         {
           alias: this.$t('cmdb.ciType.ciType'),
           is_choice: true,
           name: 'type_id',
           value_type: '2',
-          choice_value: [],
+          choice_value: this.ciTypeChoices,
         },
         {
           alias: this.$t('operation'),
@@ -168,44 +212,7 @@ export default {
             { [this.$t('cmdb.history.deleteReconciliation')]: 16 },
           ],
         },
-      ],
-    }
-  },
-  async created() {
-    await Promise.all([this.getRelationTypes(), this.getTypes(), this.getUserList()])
-    await this.getTable(this.queryParams)
-  },
-  updated() {
-    this.$refs.xTable.$el.querySelector('.vxe-table--body-wrapper').scrollTop = 0
-  },
-  computed: {
-    ...mapState(['locale']),
-    windowHeight() {
-      return this.$store.state.windowHeight
-    },
-    windowHeightMinus() {
-      return this.isExpand ? 396 : 335
-    },
-    operateTypeMap() {
-      return new Map([
-        ['0', this.$t('cmdb.history.addCIType')],
-        ['1', this.$t('cmdb.history.updateCIType')],
-        ['2', this.$t('cmdb.history.deleteCIType')],
-        ['3', this.$t('cmdb.history.addAttribute')],
-        ['4', this.$t('cmdb.history.updateAttribute')],
-        ['5', this.$t('cmdb.history.deleteAttribute')],
-        ['6', this.$t('cmdb.history.addTrigger')],
-        ['7', this.$t('cmdb.history.updateTrigger')],
-        ['8', this.$t('cmdb.history.deleteTrigger')],
-        ['9', this.$t('cmdb.history.addUniqueConstraint')],
-        ['10', this.$t('cmdb.history.updateUniqueConstraint')],
-        ['11', this.$t('cmdb.history.deleteUniqueConstraint')],
-        ['12', this.$t('cmdb.history.addRelation')],
-        ['13', this.$t('cmdb.history.deleteRelation')],
-        ['14', this.$t('cmdb.history.addReconciliation')],
-        ['15', this.$t('cmdb.history.updateReconciliation')],
-        ['16', this.$t('cmdb.history.deleteReconciliation')],
-      ])
+      ]
     },
   },
   watch: {
@@ -235,41 +242,50 @@ export default {
         this.current = res.page
         this.numfound = res.numfound
         this.total = res.total
-        console.log(this.tableData)
       } finally {
         this.loading = false
       }
     },
     async getTypes() {
-      const res = await getCITypes()
-      const typesArr = []
-      const typesMap = new Map()
-      res.ci_types.forEach((item) => {
-        const tempObj = {}
-        tempObj[item.alias] = item.id
-        if (item.alias) {
-          typesMap.set(item.id, item.alias)
-          typesArr.push(tempObj)
-        }
-      })
-      this.typeList = typesMap
-      this.typeTableAttrList[0].choice_value = typesArr
+      try {
+        const res = await getCITypes()
+        const typesArr = []
+        const typesMap = new Map()
+        res.ci_types.forEach((item) => {
+          if (item.alias) {
+            typesMap.set(item.id, item.alias)
+            typesArr.push({ [item.alias]: item.id })
+          }
+        })
+        this.typeList = typesMap
+        this.ciTypeChoices = typesArr
+      } catch (error) {
+        this.handleError(error, 'fetch CI types')
+      }
     },
     async getUserList() {
-      const res = await getUsers()
-      const userListMap = new Map()
-      res.forEach((item) => {
-        userListMap.set(item.uid, item.nickname)
-      })
-      this.userList = userListMap
+      try {
+        const res = await getUsers()
+        const userListMap = new Map()
+        res.forEach((item) => {
+          userListMap.set(item.uid, item.nickname)
+        })
+        this.userList = userListMap
+      } catch (error) {
+        this.handleError(error, 'fetch users')
+      }
     },
     async getRelationTypes() {
-      const res = await getRelationTypes()
-      const relationTypeMap = new Map()
-      res.forEach((item) => {
-        relationTypeMap.set(item.id, item.name)
-      })
-      this.relationTypeList = relationTypeMap
+      try {
+        const res = await getRelationTypes()
+        const relationTypeMap = new Map()
+        res.forEach((item) => {
+          relationTypeMap.set(item.id, item.name)
+        })
+        this.relationTypeList = relationTypeMap
+      } catch (error) {
+        this.handleError(error, 'fetch relation types')
+      }
     },
     onChange(current) {
       this.current = current
@@ -291,7 +307,7 @@ export default {
     searchFormReset() {
       this.queryParams = {
         page: 1,
-        page_size: 50,
+        page_size: PAGINATION_CONFIG.DEFAULT_PAGE_SIZE,
         type_id: undefined,
         operate_type: undefined,
       }
@@ -451,60 +467,15 @@ export default {
       }
     },
 
-    deepCompare({
-      obj1,
-      obj2,
-      directDeepKeys = [],
-      ignoreKeys = [],
-    }) {
-      const diffs = []
-
-      function compare(obj1, obj2, path = '') {
-        if (typeof obj1 !== 'object' || typeof obj2 !== 'object' || obj1 === null || obj2 === null) {
-          if (obj1 !== obj2) {
-            diffs.push({ path, value1: formatValue(obj1), value2: formatValue(obj2) })
-          }
-          return
-        }
-
-        const keys1 = new Set(Object.keys(obj1))
-        const keys2 = new Set(Object.keys(obj2))
-        const allKeys = new Set([...keys1, ...keys2])
-
-        allKeys.forEach(key => {
-          const newPath = path ? `${path}.${key}` : key
-          if (!ignoreKeys.includes(key)) {
-            if (directDeepKeys.includes(key) && !_.isEqual(obj1[key], obj2[key])) {
-              diffs.push({ path: newPath, value1: formatValue(obj1[key]), value2: formatValue(obj2[key]) })
-            } else if (!keys1.has(key)) {
-              diffs.push({ path: newPath, value1: undefined, value2: formatValue(obj2[key]) })
-            } else if (!keys2.has(key)) {
-              diffs.push({ path: newPath, value1: formatValue(obj1[key]), value2: undefined })
-            } else {
-              compare(obj1[key], obj2[key], newPath)
-            }
-          }
-        })
-      }
-
-      function formatValue(val) {
-        return _.isObject(val) ? JSON.stringify(val) : val
-      }
-
-      compare(obj1, obj2)
-      return diffs
+    deepCompare(options) {
+      return deepCompare(options)
     },
 
     filterOperate() {
-      this.queryParams.page = 1
-      this.queryParams.page_size = 50
-      this.getTable(this.queryParams)
+      this.applyFilter()
     },
     filterOperateReset() {
-      this.queryParams.page = 1
-      this.queryParams.page_size = 50
-      this.queryParams.operate_type = undefined
-      this.getTable(this.queryParams)
+      this.applyFilter({ operate_type: undefined })
     },
     filterOption(input, option) {
       return option.componentOptions.children[0].text.indexOf(input) >= 0
@@ -512,61 +483,53 @@ export default {
 
     async handleExport(params) {
       const hide = this.$message.loading(this.$t('loading'), 0)
-      const res = await getCITypesTable({
-        ...params,
-        page: this.queryParams.page,
-        page_size: this.queryParams.page_size,
-      })
-      hide()
+      try {
+        const res = await getCITypesTable({
+          ...params,
+          page: this.queryParams.page,
+          page_size: this.queryParams.page_size,
+        })
+        hide()
 
-      res.result.forEach((item) => {
-        this.handleChangeDescription(item, item.operate_type)
-        item.operate_type = this.handleOperateType(item.operate_type)
-        item.type_id = this.handleTypeId(item.type_id)
-        item.uid = this.handleUID(item.uid)
-        if (item.operate_type.includes(this.$t('update'))) {
-          item.changeDescription = item.changeArr.join(';')
+        if (!res.result || res.result.length === 0) {
+          this.$message.warning(this.$t('noData'))
+          return
         }
-      })
 
-      this.$refs.xTable.exportData({
-        filename: this.$t('cmdb.history.ciTypeChange'),
-        sheetName: 'Sheet1',
-        type: 'xlsx',
-        types: ['xlsx', 'csv', 'html', 'xml', 'txt'],
-        isMerge: true,
-        isColgroup: true,
-        data: res.result,
-      })
+        res.result.forEach((item) => {
+          this.handleChangeDescription(item, item.operate_type)
+          item.operate_type = this.handleOperateType(item.operate_type)
+          item.type_id = this.handleTypeId(item.type_id)
+          item.uid = this.handleUID(item.uid)
+          if (item.operate_type.includes(this.$t('update'))) {
+            item.changeDescription = item.changeArr.join(';')
+          }
+        })
+
+        await this.$refs.xTable.exportData({
+          filename: `${this.$t('cmdb.history.ciTypeChange')}_${new Date().toISOString().split('T')[0]}`,
+          sheetName: 'Sheet1',
+          type: 'xlsx',
+          types: ['xlsx'],
+          isMerge: true,
+          isColgroup: true,
+          data: res.result,
+        })
+
+        this.$message.success(this.$t('exportSuccess'))
+      } catch (error) {
+        hide()
+        this.handleError(error, 'export')
+      }
     },
   },
 }
 </script>
 
 <style lang="less" scoped>
+@import '../styles/table.less';
+
 .row {
   margin-top: 5px;
-}
-.filter {
-  margin-left: 10px;
-  color: #c0c4cc;
-  cursor: pointer;
-  &:hover {
-    color: #606266;
-  }
-}
-.more-tag {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-p {
-  margin-bottom: 0;
-}
-
-.filter-content {
-  display: flex;
-  align-items: center;
-  column-gap: 8px;
 }
 </style>

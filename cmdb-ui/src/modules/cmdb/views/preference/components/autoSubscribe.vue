@@ -21,6 +21,7 @@
           v-model="form.base_strategy"
           :options="baseStrategyOptions"
         />
+        <div class="ant-form-explain">{{ $t('cmdb.preference.autoSubScopeHint') }}</div>
       </a-form-model-item>
       <a-form-model-item
         :label="form.base_strategy === 'all' ? $t('cmdb.preference.excludeGroup') : $t('cmdb.preference.selectGroup')"
@@ -31,7 +32,11 @@
           mode="multiple"
           optionFilterProp="title"
           :options="groupSelectOptions"
+          :placeholder="form.base_strategy === 'all' ? $t('cmdb.preference.excludeGroupPlaceholder') : $t('cmdb.preference.selectGroupPlaceholder')"
         />
+        <div class="ant-form-explain">
+          {{ form.base_strategy === 'all' ? $t('cmdb.preference.excludeGroupHint') : $t('cmdb.preference.selectGroupHint') }}
+        </div>
       </a-form-model-item>
 
       <a-form-model-item
@@ -42,6 +47,7 @@
           v-model="form.type_ids"
           mode="multiple"
           optionFilterProp="title"
+          :placeholder="form.base_strategy === 'all' ? $t('cmdb.preference.excludeModelPlaceholder') : $t('cmdb.preference.selectModelPlaceholder')"
         >
           <a-select-opt-group
             v-for="(group) in modelSelectOptions"
@@ -59,14 +65,17 @@
             </a-select-option>
           </a-select-opt-group>
         </a-select>
+        <div class="ant-form-explain">
+          {{ form.base_strategy === 'all' ? $t('cmdb.preference.excludeModelHint') : $t('cmdb.preference.selectModelHint') }}
+        </div>
       </a-form-model-item>
 
       <a-form-model-item
         :label="$t('cmdb.preference.isEnable')"
         prop="enabled"
-        :extra="$t('cmdb.preference.enableAutoSubTip')"
       >
         <a-switch v-model="form.enabled" />
+        <div class="ant-form-explain">{{ $t('cmdb.preference.enableAutoSubTip') }}</div>
       </a-form-model-item>
     </a-form-model>
   </a-modal>

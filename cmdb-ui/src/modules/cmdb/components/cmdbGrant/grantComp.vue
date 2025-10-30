@@ -2,6 +2,7 @@
   <div class="cmdb-grant" :style="{ }">
     <template v-if="cmdbGrantType.includes('ci_type')">
       <div class="cmdb-grant-title">{{ $t('cmdb.components.ciTypeGrant') }}</div>
+      <div class="cmdb-grant-desc">{{ $t('cmdb.components.ciTypeGrantDesc') }}</div>
       <CiTypeGrant
         :CITypeId="CITypeId"
         :tableData="tableData"
@@ -19,6 +20,7 @@
       "
     >
       <div class="cmdb-grant-title">{{ $t('cmdb.components.ciGrant') }}</div>
+      <div class="cmdb-grant-desc">{{ $t('cmdb.components.ciGrantDesc') }}</div>
       <CiTypeGrant
         :CITypeId="CITypeId"
         :tableData="tableData"
@@ -355,6 +357,13 @@ export default {
   .cmdb-grant-title {
     border-left: 4px solid @primary-color;
     padding-left: 10px;
+    margin-bottom: 8px;
+  }
+  .cmdb-grant-desc {
+    color: #999;
+    font-size: 12px;
+    margin-bottom: 12px;
+    padding-left: 14px;
   }
 }
 </style>

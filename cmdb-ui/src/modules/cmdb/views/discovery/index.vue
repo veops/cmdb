@@ -47,7 +47,7 @@
     </div>
     <div
       class="setting-discovery-body"
-      :style="{ height: !isSelected ? `${windowHeight - 155}px` : '' }"
+      :style="{ height: !isSelected ? `${windowHeight - 160}px` : '' }"
     >
       <template v-if="!showNullData">
         <div v-for="{ type, label } in typeCategory" :key="type">
@@ -312,12 +312,13 @@ export default {
   &-header {
     display: flex;
     align-items: center;
+    margin-bottom: 20px;
 
     &-action {
       margin-left: auto;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       flex-shrink: 0;
 
       &-btn {
@@ -333,92 +334,133 @@ export default {
   }
 
   &-search {
-    width: 254px;
+    width: 280px;
     flex-shrink: 0;
+
+    /deep/ .ant-input {
+      border-radius: 6px;
+      border: 1px solid #e8eaed;
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: #c3cdd7;
+      }
+
+      &:focus {
+        border-color: @primary-color;
+        box-shadow: 0 0 0 2px fade(@primary-color, 10%);
+      }
+    }
   }
 
   &-radio {
     display: flex;
     align-items: center;
-    margin-left: 15px;
-    gap: 15px;
+    margin-left: 16px;
+    gap: 8px;
     overflow: auto;
+    margin-right: 16px;
 
     &-item {
-      padding: 4px 14px;
+      padding: 6px 16px;
       font-size: 14px;
       font-weight: 400;
-      line-height: 24px;
+      line-height: 22px;
       cursor: pointer;
       flex-shrink: 0;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      color: @text-color_2;
 
       &:hover {
         color: @primary-color;
+        background-color: fade(@primary-color, 8%);
       }
 
       &_active {
-        background-color: @primary-color_3;
-        color: @primary-color;
+        background-color: @primary-color;
+        color: #fff;
+        font-weight: 500;
       }
     }
   }
 
   &-body {
     background-color: #fff;
-    border-radius: @border-radius-box;
-    box-shadow: 0px 0px 4px 0px rgba(158, 171, 190, 0.25);
-    padding: 20px;
-    margin-top: 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    padding: 24px;
     overflow: auto;
 
     .setting-discovery-add {
       height: 105px;
       width: 180px;
-      border-radius: @border-radius-base;
-      border: 1px dashed @primary-color_8;
+      border-radius: 6px;
+      border: 2px dashed #d9d9d9;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      transition: all 0.3s ease;
+      background: #fafafa;
+
+      &:hover {
+        border-color: @primary-color;
+        background: fade(@primary-color, 5%);
+
+        .setting-discovery-add-icon {
+          color: @primary-color;
+          transform: scale(1.1);
+        }
+      }
 
       &-icon {
-        color: @primary-color_9;
+        color: #bfbfbf;
+        font-size: 24px;
+        transition: all 0.3s ease;
       }
 
       &-text {
-        color: @text-color_3;
-        font-size: 12px;
+        color: @text-color_2;
+        font-size: 13px;
         font-weight: 400;
-        margin-top: 13px;
+        margin-top: 8px;
       }
     }
 
     .setting-discovery-empty {
       text-align: center;
-      padding: 20px 0;
+      padding: 40px 0;
 
       &-text {
-        margin-top: 20px;
+        margin-top: 16px;
+        color: @text-color_3;
+        font-size: 14px;
       }
 
       &-img {
-        width: 100px;
+        width: 120px;
+        opacity: 0.6;
       }
     }
   }
 
   .type-header {
     width: 100%;
-    display: inline-flex;
-    height: 32px;
-    line-height: 32px;
-    padding-left: 10px;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding-left: 12px;
     margin-bottom: 20px;
-    border-left: 4px solid @primary-color;
-    justify-content: space-between;
+    border-left: 3px solid @primary-color;
+    background: linear-gradient(90deg, fade(@primary-color, 5%) 0%, transparent 100%);
+    border-radius: 0 4px 4px 0;
+
     > div {
-      font-weight: bold;
+      font-weight: 600;
+      font-size: 15px;
+      color: @text-color_1;
     }
   }
 }

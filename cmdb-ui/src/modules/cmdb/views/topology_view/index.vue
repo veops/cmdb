@@ -52,27 +52,24 @@
                 <div>
                   <OpsMoveIcon
                     v-if="group.id"
-                    style="width: 17px; height: 17px; display: none; position: absolute; left: -3px; top: 10px"
+                    style="width: 17px; height: 17px; display: none; position: absolute; left: 5px; top: 13px"
                   />
-                  <span style="font-weight: 700">{{ group.name || $t('other') }}</span>
-                  <span :style="{ color: '#c3cdd7' }">({{ group.views.length }})</span>
+                  <span class="topo-left-group-name">{{ group.name || $t('other') }}</span>
+                  <span>{{ group.views.length }}</span>
                 </div>
-                <a-space>
-                  <a-tooltip>
-                    <template slot="title">{{ $t('cmdb.topo.addTopoViewInGroup') }}</template>
+                <div class="topo-left-group-action">
+                  <a-tooltip :title="$t('cmdb.topo.addTopoViewInGroup')">
                     <a v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')"><ops-icon type="veops-increase" @click="handleCreate(group)"/></a>
                   </a-tooltip>
                   <template v-if="group.id">
-                    <a-tooltip >
-                      <template slot="title">{{ $t('cmdb.ciType.editGroup') }}</template>
+                    <a-tooltip :title="$t('cmdb.ciType.editGroup')">
                       <a v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')"><a-icon type="edit" @click="handleEditGroup(group)"/></a>
                     </a-tooltip>
-                    <a-tooltip>
-                      <template slot="title">{{ $t('cmdb.ciType.deleteGroup') }}</template>
+                    <a-tooltip :title="$t('cmdb.ciType.deleteGroup')">
                       <a v-if="permissions.includes('admin') || permissions.includes('cmdb_admin')" :style="{color: 'red'}"><a-icon type="delete" @click="handleDeleteGroup(group)"/></a>
                     </a-tooltip>
                   </template>
-                </a-space>
+                </div>
               </div>
               <draggable
                 v-model="group.views"
@@ -243,6 +240,7 @@
             :placeholder="$t('cmdb.ciType.selectModel')"
             @change="CITypeChange"
           />
+          <div class="ant-form-explain">{{ $t('cmdb.topo.centralNodeTypeTip') }}</div>
         </a-form-item>
         <a-form-item :label="$t('cmdb.topo.filterInstances')" prop="central_node_instances">
           <a-input
@@ -251,6 +249,7 @@
           >
             <a @click="handleOpenCmdb" slot="suffix"><a-icon type="menu"/></a>
           </a-input>
+          <div class="ant-form-explain">{{ $t('cmdb.topo.filterInstancesTip') }}</div>
         </a-form-item>
         <a-form-item :label="$t('cmdb.topo.path')" prop="path">
           <div :style="{ height: '250px', border: '1px solid #e4e7ed' }">
@@ -493,7 +492,7 @@ export default {
       },
     }
   },
-  mounted() {
+  async mounted() {
     searchResourceType({ page_size: 9999, app_id: 'cmdb' }).then((res) => {
       this.resource_type = { groups: res.groups, id2perms: res.id2perms }
     })
@@ -501,8 +500,10 @@ export default {
     if (_currentId) {
       this.currentId = _currentId
     }
-    this.loadTopoViews(!_currentId)
-    this.showTopoView(this.currentId.split('%')[1])
+    await this.loadTopoViews(!_currentId)
+    if (this.currentId) {
+      this.showTopoView(this.currentId.split('%')[1])
+    }
   },
   computed: {
     windowHeight() {
@@ -1305,18 +1306,47 @@ export default {
 
   .topo-left {
     width: 100%;
+    height: calc(100% - 28px);
     overflow: auto;
     float: left;
+    background-color: #f7f8fa;
+    border-right: 1px solid #e8eaed;
+    padding-bottom: 12px;
+    padding-right: 8px;
 
     .topo-left-content {
       max-height: calc(100% - 45px);
       overflow: hidden;
+
       &:hover {
         overflow: auto;
       }
+
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: transparent;
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
+
+      &:hover {
+        &::-webkit-scrollbar-thumb {
+          background-color: rgba(0, 0, 0, 0.1);
+
+          &:hover {
+            background-color: rgba(0, 0, 0, 0.15);
+          }
+        }
+      }
     }
     .topo-left-title {
-      padding: 10px 0;
+      padding-bottom: 4px;
       display: flex;
       flex-direction: row;
       justify-content: space-between;
@@ -1324,20 +1354,75 @@ export default {
     }
     .topo-left-group {
       position: relative;
-      padding: 8px 0 8px 14px;
-      color: rgb(99, 99, 99);
+      padding: 10px 12px 10px 22px;
+      margin-bottom: 8px;
+      color: #333;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 15px;
+      font-weight: 600;
       display: flex;
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
-      > div:nth-child(2) {
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      width: 100%;
+      overflow: hidden;
+      column-gap: 6px;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 2px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 32px;
+        background: @primary-color;
+        border-radius: 2px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      > div:first-child {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        max-width: 100%;
+        overflow: hidden;
+
+        > span:last-child {
+          font-size: 12px;
+          font-weight: 500;
+          background: #e8eaed;
+          color: @text-color_3;
+          padding: 2px 6px;
+          border-radius: 10px;
+        }
+      }
+
+      &-name {
+        font-weight: 700;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-wrap: nowrap;
+      }
+
+      &-action {
+        align-items: center;
+        column-gap: 4px;
         font-size: 14px;
         display: none;
       }
+
       &:hover {
-        background-color: @primary-color_3;
+        background-color: @primary-color_7;
+
+        // &::before {
+        //   opacity: 1;
+        // }
+
         > div:nth-child(2) {
           display: inline-flex;
         }
@@ -1347,54 +1432,105 @@ export default {
       }
     }
     .topo-left-detail {
-      padding: 3px 14px;
+      padding: 6px 12px 6px 26px;
+      margin: 0 4px 6px 4px;
       cursor: pointer;
       position: relative;
       display: flex;
       flex-direction: row;
       justify-content: flex-start;
       align-items: center;
-      margin-bottom: 4px;
-      height: 32px;
-      line-height: 32px;
+      height: 36px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: @primary-color;
+        border-radius: 0 2px 2px 0;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
       .topo-left-detail-action {
         display: none;
         margin-left: auto;
       }
+
       .topo-left-detail-title {
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+        font-size: 14px;
+        color: @text-color_1;
+        transition: color 0.2s ease;
       }
+
       .topo-left-detail-icon {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 20px;
-        height: 20px;
-        border-radius: 2px;
-        box-shadow: 0px 1px 2px rgba(47, 84, 235, 0.2);
-        margin-right: 6px;
-        background-color: #fff;
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-right: 8px;
+        background: #fff;
+        border: 1px solid #e8eaed;
+        transition: transform 0.2s ease;
+
         img {
-          max-height: 20px;
-          max-width: 20px;
+          max-height: 18px;
+          max-width: 18px;
+        }
+
+        .ops-icon {
+          font-size: 16px;
+        }
+
+        > span {
+          font-weight: 600;
+          font-size: 12px;
         }
       }
+
       &:hover {
-        background-color: @primary-color_3;
+        background-color: @primary-color_7;
+        transform: translateX(2px);
+
+        .topo-left-detail-icon {
+          transform: scale(1.05);
+        }
+
         svg {
           display: inline !important;
         }
+
         .topo-left-detail-action {
           display: inline-flex;
         }
       }
     }
     .selected {
-      background-color: @primary-color_3;
+      background-color: @primary-color_6;
+      box-shadow: 0 1px 3px fade(@primary-color, 10%);
+
+      &::before {
+        opacity: 1;
+      }
+
       .topo-left-detail-title {
-        font-weight: 700;
+        font-weight: 600;
+        color: @primary-color;
+      }
+
+      .topo-left-detail-icon {
+        box-shadow: 0 2px 4px fade(@primary-color, 20%);
       }
     }
   }
@@ -1402,6 +1538,8 @@ export default {
     width: 100%;
     position: relative;
     background-color: #fff;
+    height: 100%;
+
     .topo-right-empty {
       position: absolute;
       text-align: center;
@@ -1418,18 +1556,45 @@ export default {
       width: 300px;
     }
   }
-  .topo-left,
-  .topo-right {
-    height: 100%;
-  }
+
   .node-tips {
     z-index: 999;
-    padding: 10px;
+    padding: 16px;
     background-color: #ffffff;
-    border:#eeeeee solid 1px;
-    box-shadow: 0px 0px 8px #cccccc;
+    border: 1px solid #e8eaed;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     position: absolute;
     overflow: auto;
+    max-width: 400px;
+    max-height: 500px;
+
+    .ant-descriptions-bordered .ant-descriptions-item-label {
+      background-color: #f7f8fa;
+      font-weight: 500;
+      color: @text-color_2;
+      padding: 10px 12px;
+    }
+
+    .ant-descriptions-bordered .ant-descriptions-item-content {
+      padding: 10px 12px;
+      color: @text-color_1;
+    }
+
+    .ant-descriptions-bordered .ant-descriptions-row {
+      border-bottom: 1px solid #f0f0f0;
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    .ant-descriptions-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: @text-color_1;
+      margin-bottom: 12px;
+    }
   }
 }
 .chart-left-preview {
@@ -1504,11 +1669,26 @@ export default {
 
 <style lang="less">
 .cmdb-topo-left-input {
+  margin-bottom: 12px;
+
   input {
-    background-color: transparent;
+    background-color: #fff;
+    border-radius: 6px;
+    border: 1px solid #e8eaed;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: #c3cdd7;
+    }
+
+    &:focus {
+      border-color: @primary-color;
+      box-shadow: 0 0 0 2px fade(@primary-color, 10%);
+    }
   }
-  .ant-input:focus {
-    box-shadow: none;
+
+  .ant-input-prefix {
+    color: @text-color_3;
   }
 }
 .ant-message {

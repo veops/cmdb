@@ -193,5 +193,13 @@ export default {
     border-bottom: none;
     padding-bottom: 0;
   }
+
+  .ant-tabs-ink-bar {
+    background-color: @primary-color;
+  }
+
+  .ant-tabs-tab-active {
+    color: @primary-color;
+  }
 }
 </style>

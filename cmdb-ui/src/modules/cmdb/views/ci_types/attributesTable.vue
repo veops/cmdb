@@ -627,7 +627,7 @@ export default {
     background-color: @primary-color_5;
   }
   .property-item-empty {
-    color: #40a9ff;
+    color: @primary-color;
     width: calc(100% - 20px);
     margin: 5px;
     border: 1px dotted #d9d9d9;

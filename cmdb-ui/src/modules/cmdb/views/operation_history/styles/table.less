@@ -1,0 +1,146 @@
+.operation-history-table {
+  background: #fff;
+  border-radius: 2px;
+
+  :deep(.vxe-table) {
+    border: 1px solid #e8e8e8;
+    border-radius: 2px;
+    font-size: 13px;
+
+    .vxe-header--row {
+      background: #fafafa;
+
+      .vxe-header--column {
+        background: #fafafa;
+        color: rgba(0, 0, 0, 0.85);
+        font-weight: 600;
+        font-size: 13px;
+        padding: 12px 8px;
+
+        &.col--center {
+          text-align: center;
+        }
+      }
+    }
+
+    .vxe-body--row {
+      &:hover {
+        background: #f5f5f5;
+      }
+
+      .vxe-body--column {
+        padding: 10px 8px;
+        color: rgba(0, 0, 0, 0.65);
+        font-size: 13px;
+        line-height: 22px;
+      }
+    }
+
+    &.ops-stripe-table {
+      .vxe-body--row {
+        &:nth-child(even) {
+          background: #fafafa;
+        }
+
+        &:hover {
+          background: #e6f7ff;
+        }
+      }
+    }
+
+    &.ops-unstripe-table {
+      .vxe-body--row {
+        &:hover {
+          background: #e6f7ff;
+        }
+      }
+    }
+
+    .vxe-table--empty-placeholder {
+      padding: 60px 0;
+    }
+  }
+
+  .filter {
+    margin-left: 8px;
+    color: #bfbfbf;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+    vertical-align: middle;
+
+    &:hover {
+      color: #8c8c8c;
+    }
+
+    &.active {
+      color: @primary-color;
+    }
+  }
+
+  .filter-content {
+    display: flex;
+    align-items: center;
+    column-gap: 8px;
+    padding: 8px 0;
+
+    .ant-input,
+    .ant-select {
+      flex: 1;
+    }
+
+    .filterButton {
+      color: @primary-color;
+      padding: 4px 8px;
+      font-size: 13px;
+
+      &:hover {
+        color: @primary-color;
+      }
+    }
+
+    .filterResetButton {
+      color: #8c8c8c;
+      padding: 4px 8px;
+      font-size: 13px;
+
+      &:hover {
+        color: #595959;
+      }
+    }
+  }
+}
+
+.change-text {
+  margin-bottom: 4px;
+  line-height: 20px;
+  font-size: 13px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.update-text {
+  color: #fa8c16;
+  background: #fff7e6;
+  padding: 2px 6px;
+  border-radius: 2px;
+  border-left: 3px solid #ffa940;
+}
+
+.new-text {
+  color: #52c41a;
+  background: #f6ffed;
+  padding: 2px 6px;
+  border-radius: 2px;
+  border-left: 3px solid #73d13d;
+}
+
+.delete-text {
+  color: #f5222d;
+  background: #fff1f0;
+  padding: 2px 6px;
+  border-radius: 2px;
+  border-left: 3px solid #ff4d4f;
+}

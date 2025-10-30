@@ -1,25 +1,34 @@
 <template>
-  <div>
-    <p class="cmdb-batch-upload-label"><span>*</span>1. {{ $t('cmdb.batch.selectCIType') }}</p>
-    <CMDBTypeSelectAntd
-      v-model="selectNum"
-      ref="CMDBTypeSelectAntd"
-      :placeholder="$t('cmdb.batch.selectCITypeTips')"
-      :style="{ width: '50%', marginBottom: '1em' }"
-      :CITypeGroup="CITypeGroup"
-      @change="selectCiType"
-    />
-    <p class="cmdb-batch-upload-label">&nbsp;&nbsp;2. {{ $t('cmdb.batch.downloadTemplate') }}</p>
-    <a-button
-      :style="{ marginBottom: '1em' }"
-      @click="openModal"
-      :disabled="!selectNum"
-      type="primary"
-      ghost
-      class="ops-button-ghost"
-      icon="download"
-    >{{ $t('cmdb.batch.clickDownload') }}</a-button
-    >
+  <div class="ci-type-choice-container">
+    <div class="ci-type-choice-row">
+      <div class="ci-type-choice-label">
+        <span class="required-mark">*</span>
+        <span>{{ $t('cmdb.batch.selectCIType') }}</span>
+      </div>
+      <CMDBTypeSelectAntd
+        v-model="selectNum"
+        ref="CMDBTypeSelectAntd"
+        :placeholder="$t('cmdb.batch.selectCITypeTips')"
+        class="ci-type-choice-select"
+        :CITypeGroup="CITypeGroup"
+        @change="selectCiType"
+      />
+    </div>
+    <div class="ci-type-choice-row">
+      <div class="ci-type-choice-label">
+        <span>{{ $t('cmdb.batch.downloadTemplate') }}</span>
+      </div>
+      <a-button
+        @click="openModal"
+        :disabled="!selectNum"
+        type="primary"
+        ghost
+        class="ops-button-ghost"
+      >
+        <a-icon type="download" />
+        {{ $t('cmdb.batch.clickDownload') }}
+      </a-button>
+    </div>
     <a-modal
       :bodyStyle="{ paddingTop: 0 }"
       width="800px"
@@ -162,6 +171,7 @@ export default {
       getCITypeAttributesById(id).then((res) => {
         this.$emit('getCiTypeAttr', res)
         this.selectCiTypeAttrList = res
+        this.$emit('stepChange', 1)
       })
 
       const selectOptions = this.$refs?.CMDBTypeSelectAntd?.selectOptions
@@ -181,6 +191,7 @@ export default {
     },
 
     openModal() {
+      this.$emit('stepChange', 1)
       getCITypeParent(this.selectNum).then(async (res) => {
         for (let i = 0; i < res.parents.length; i++) {
           await getCanEditByParentIdChildId(res.parents[i].id, this.selectNum).then((p_res) => {
@@ -293,6 +304,35 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.ci-type-choice-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ci-type-choice-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ci-type-choice-label {
+  min-width: 140px;
+  font-size: 14px;
+  font-weight: 500;
+  color: @text-color_1;
+
+  .required-mark {
+    color: #ff4d4f;
+    margin-right: 4px;
+  }
+}
+
+.ci-type-choice-select {
+  flex: 1;
+  max-width: 500px;
+}
+
 .step-form-style-desc {
   padding: 0 56px;
   color: rgba(0, 0, 0, 0.45);
@@ -319,8 +359,8 @@ export default {
 <style lang="less">
 .ci-type-choice-modal {
   .ant-checkbox-disabled .ant-checkbox-inner {
-    border-color: #2f54eb !important;
-    background-color: #2f54eb;
+    border-color: @primary-color !important;
+    background-color: @primary-color;
   }
   .ant-checkbox-disabled.ant-checkbox-checked .ant-checkbox-inner::after {
     border-color: #fff;

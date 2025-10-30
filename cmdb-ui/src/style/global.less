@@ -786,18 +786,23 @@ body {
 .dag-history-filter {
   .ant-popover-inner-content {
     padding: 0;
+
     .dag-history-filter-inner {
-      width: 100px;
+      width: 140px;
       height: 30px;
-      line-height: 30px;
-      text-align: center;
+      padding: 0 8px;
       cursor: pointer;
       font-size: 12px;
+      display: flex;
+      align-items: center;
+
       &:hover {
         background: #f0f0f0;
       }
-      .dag-history-filter-icon {
-        cursor: pointer;
+
+      > span {
+        display: inline-flex;
+        align-items: center;
       }
     }
   }

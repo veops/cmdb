@@ -10,7 +10,13 @@
       :row-class-name="(params) => getCurrentRowClass(params, addedRids)"
     >
       <vxe-column field="name"></vxe-column>
-      <vxe-column v-for="col in columns" :key="col" :field="col" :title="permMap[col]">
+      <vxe-column v-for="col in columns" :key="col" :field="col">
+        <template #header>
+          <span>{{ permMap[col] }}</span>
+          <a-tooltip v-if="permDescMap[col]" :title="permDescMap[col]">
+            <a-icon type="question-circle" style="margin-left: 4px; color: #999; cursor: help;" />
+          </a-tooltip>
+        </template>
         <template #default="{row}">
           <ReadCheckbox
             v-if="['read'].includes(col.split('_')[0])"
@@ -42,7 +48,7 @@
 
 <script>
 import _ from 'lodash'
-import { permMap } from './constants.js'
+import { permMap, permDescMap } from './constants.js'
 import { grantCiType, revokeCiType } from '../../api/CIType'
 import ReadCheckbox from './readCheckbox.vue'
 import { getCurrentRowClass } from './utils'
@@ -97,6 +103,9 @@ export default {
     },
     permMap() {
       return permMap()
+    },
+    permDescMap() {
+      return permDescMap()
     }
   },
   methods: {

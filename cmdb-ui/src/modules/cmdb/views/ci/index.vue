@@ -265,28 +265,60 @@ export default {
   padding-top: 150px;
 }
 
+.ci-types-left-header-input {
+  margin-bottom: 12px;
+
+  /deep/ input {
+    background-color: #fff;
+    border-radius: 6px;
+    border: 1px solid #e8eaed;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: #c3cdd7;
+    }
+
+    &:focus {
+      border-color: @primary-color;
+      box-shadow: 0 0 0 2px fade(@primary-color, 10%);
+    }
+  }
+
+  /deep/ .ant-input-prefix {
+    color: @text-color_3;
+  }
+}
+
 .ci-left {
   height: calc(100vh - 90px);
   width: 100%;
+  background-color: #f7f8fa;
+  border-right: 1px solid #e8eaed;
+  padding: 0px 8px 12px;
 
   &-list {
     width: 100%;
     height: calc(100% - 40px);
-    overflow-x: hidden;
-    overflow-y: auto;
-    margin-top: 8px;
+    overflow: hidden;
+
+    &:hover {
+      overflow-y: auto;
+    }
   }
 
   &-group {
     width: 100%;
 
     &:not(:last-child) {
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     &-name {
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       font-weight: 600;
+      font-size: 13px;
+      color: #666;
+      padding: 8px 12px;
     }
   }
 
@@ -294,28 +326,84 @@ export default {
     width: 100%;
     display: flex;
     align-items: center;
-    padding: 3px 14px;
-    margin-bottom: 4px;
+    padding: 6px 12px;
+    margin: 0 4px 6px 4px;
     cursor: pointer;
+    border-radius: 6px;
+    height: 36px;
+    position: relative;
+    transition: all 0.2s ease;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: @primary-color;
+      border-radius: 0 2px 2px 0;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .ci-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      border: 1px solid #e8eaed;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+    }
 
     &-name {
-      margin-left: 6px;
+      margin-left: 8px;
+      margin-right: 8px;
       text-wrap: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      font-size: 14px;
+      color: @text-color_1;
+      transition: color 0.2s ease;
+      flex: 1;
     }
 
     &-more {
       margin-left: auto;
       display: none;
+      flex-shrink: 0;
     }
 
     &_active {
-      background-color: #ebeff8;
+      background-color: @primary-color_6;
+      box-shadow: 0 1px 3px fade(@primary-color, 10%);
+
+      &::before {
+        opacity: 1;
+      }
+
+      .ci-left-item-name {
+        color: @primary-color;
+        font-weight: 600;
+      }
+
+      .ci-icon {
+        box-shadow: 0 2px 4px fade(@primary-color, 20%);
+      }
     }
 
     &:hover {
-      background-color: #ebeff8;
+      background-color: @primary-color_7;
+      transform: translateX(2px);
+
+      .ci-icon {
+        transform: scale(1.05);
+      }
 
       .ci-left-item-more {
         display: block;

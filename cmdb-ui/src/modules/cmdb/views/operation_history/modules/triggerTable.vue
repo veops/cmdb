@@ -1,75 +1,73 @@
 <template>
-  <div :style="{ height: '100%' }">
+  <div class="operation-history-table">
     <vxe-table
       show-overflow
       show-header-overflow
       stripe
       size="small"
-      class="ops-unstripe-table"
+      class="ops-stripe-table"
+      :loading="loading"
       :data="tableData"
-      v-bind="ci_id ? { height: 'auto' } : { height: `${windowHeight - 225}px` }"
+      v-bind="ci_id ? { height: 'auto' } : { 'max-height': `${windowHeight - 290}px` }"
     >
       <template #empty>
         <a-empty :image-style="{ height: '100px' }" :style="{ paddingTop: '10%' }">
           <img slot="image" :src="require('@/assets/data_empty.png')" />
-          <span slot="description"> {{ $t('noData') }} </span>
+          <span slot="description">{{ $t('noData') }}</span>
         </a-empty>
       </template>
-      <vxe-column field="trigger_name" :title="$t('cmdb.history.triggerName')"> </vxe-column>
-      <vxe-column field="type" :title="$t('type')">
+      <vxe-column field="trigger_name" min-width="150" :title="$t('cmdb.history.triggerName')"></vxe-column>
+      <vxe-column field="type" min-width="120" :title="$t('type')">
         <template #default="{ row }">
-          <span v-if="row.trigger && row.trigger.attr_id">{{ $t('cmdb.ciType.triggerDate') }}</span>
-          <span v-else-if="row.trigger && !row.trigger.attr_id">{{ $t('cmdb.ciType.triggerDataChange') }}</span>
+          {{ getTriggerType(row) }}
         </template>
       </vxe-column>
-      <vxe-column :title="$t('cmdb.history.event')">
+      <vxe-column min-width="120" :title="$t('cmdb.history.event')">
         <template #default="{ row }">
-          <span v-if="row.operate_type === '0'">{{ $t('cmdb.ciType.addInstance') }}</span>
-          <span v-else-if="row.operate_type === '1'">{{ $t('cmdb.ciType.deleteInstance') }}</span>
-          <span v-else-if="row.operate_type === '2'">{{ $t('cmdb.ciType.changeInstance') }}</span>
+          {{ getEventType(row) }}
         </template>
       </vxe-column>
-      <vxe-column :title="$t('cmdb.history.action')">
+      <vxe-column min-width="100" :title="$t('cmdb.history.action')">
         <template #default="{ row }">
-          <span v-if="row.webhook">Webhook</span>
-          <span v-else-if="row.notify">{{ $t('cmdb.ciType.notify') }}</span>
+          {{ getActionType(row) }}
         </template>
       </vxe-column>
-      <vxe-column :title="$t('cmdb.history.status')">
+      <vxe-column min-width="80" :title="$t('cmdb.history.status')">
         <template #default="{ row }">
-          <a-tag color="green" v-if="row.is_ok">{{ $t('cmdb.history.done') }}</a-tag>
-          <a-tag color="red" v-else>{{ $t('cmdb.history.undone') }}</a-tag>
+          <a-tag :color="row.is_ok ? 'green' : 'red'">
+            {{ row.is_ok ? $t('cmdb.history.done') : $t('cmdb.history.undone') }}
+          </a-tag>
         </template>
       </vxe-column>
-      <vxe-column :title="$t('cmdb.history.triggerTime')">
-        <template #default="{row}">
+      <vxe-column min-width="160" :title="$t('cmdb.history.triggerTime')">
+        <template #default="{ row }">
           {{ row.updated_at || row.created_at }}
         </template>
       </vxe-column>
     </vxe-table>
-    <div :style="{ textAlign: 'right' }" v-if="!ci_id">
-      <a-pagination
-        size="small"
-        show-size-changer
-        show-quick-jumper
-        :page-size-options="pageSizeOptions"
-        :current="tablePage.currentPage"
-        :total="tablePage.totalResult"
-        :show-total="(total, range) => $t('cmdb.history.totalItems', { total: total })"
-        :page-size="tablePage.pageSize"
-        :default-current="1"
-        @change="pageOrSizeChange"
-        @showSizeChange="pageOrSizeChange"
-      >
-      </a-pagination>
-    </div>
+    <pager
+      v-if="!ci_id"
+      :current-page.sync="tablePage.currentPage"
+      :page-size.sync="tablePage.pageSize"
+      :page-sizes="PAGE_SIZE_OPTIONS"
+      :total="tablePage.totalResult"
+      :isLoading="loading"
+      @change="onChange"
+      @showSizeChange="onShowSizeChange"
+    ></pager>
   </div>
 </template>
 
 <script>
-import { getCiTriggers, getCiTriggersByCiId } from '../../../api/history'
+import Pager from '@/components/Pager'
+import { getCiTriggers, getCiTriggersByCiId } from '@/modules/cmdb/api/history'
+import { PAGINATION_CONFIG } from '../constants'
+import commonMixin from '../mixins/commonMixin'
+
 export default {
   name: 'TriggerTable',
+  components: { Pager },
+  mixins: [commonMixin],
   props: {
     ci_id: {
       type: Number,
@@ -78,52 +76,87 @@ export default {
   },
   data() {
     return {
+      loading: false,
       tableData: [],
       tablePage: {
         currentPage: 1,
-        pageSize: 50,
+        pageSize: PAGINATION_CONFIG.DEFAULT_PAGE_SIZE,
         totalResult: 0,
       },
-      pageSizeOptions: ['50', '100', '200'],
+      PAGE_SIZE_OPTIONS: PAGINATION_CONFIG.PAGE_SIZE_OPTIONS
     }
   },
   computed: {
     windowHeight() {
       return this.$store.state.windowHeight
     },
+    operateTypeMap() {
+      return {
+        '0': this.$t('cmdb.ciType.addInstance'),
+        '1': this.$t('cmdb.ciType.deleteInstance'),
+        '2': this.$t('cmdb.ciType.changeInstance'),
+      }
+    },
   },
   mounted() {
     this.updateTableData()
   },
   methods: {
-    updateTableData(currentPage = 1, pageSize = this.tablePage.pageSize) {
-      const params = { page: currentPage, page_size: pageSize }
-      if (this.ci_id) {
-        getCiTriggersByCiId(this.ci_id, params).then((res) => {
-          this.tableData = res.items.map((item) => {
-            return {
-              ...item,
-              trigger: res.id2trigger[item.trigger_id],
-            }
-          })
-        })
-      } else {
-        getCiTriggers(params).then((res) => {
+    async updateTableData(currentPage = 1, pageSize = this.tablePage.pageSize) {
+      try {
+        this.loading = true
+        const params = { page: currentPage, page_size: pageSize }
+
+        if (this.ci_id) {
+          const res = await getCiTriggersByCiId(this.ci_id, params)
+          this.tableData = res.items.map((item) => ({
+            ...item,
+            trigger: res.id2trigger[item.trigger_id],
+          }))
+        } else {
+          const res = await getCiTriggers(params)
           this.tableData = res?.result || []
           this.tablePage = {
-            ...this.tablePage,
             currentPage: res.page,
             pageSize: res.page_size,
             totalResult: res.numfound,
           }
-        })
+        }
+      } catch (error) {
+        this.handleError(error, 'fetch trigger history')
+      } finally {
+        this.loading = false
       }
     },
-    pageOrSizeChange(currentPage, pageSize) {
-      this.updateTableData(currentPage, pageSize)
+
+    onChange(pageNum) {
+      this.updateTableData(pageNum, this.tablePage.pageSize)
+    },
+
+    onShowSizeChange(size) {
+      this.updateTableData(1, size)
+    },
+
+    getTriggerType(row) {
+      if (!row.trigger) return ''
+      return row.trigger.attr_id
+        ? this.$t('cmdb.ciType.triggerDate')
+        : this.$t('cmdb.ciType.triggerDataChange')
+    },
+
+    getEventType(row) {
+      return this.operateTypeMap[row.operate_type] || ''
+    },
+
+    getActionType(row) {
+      if (row.webhook) return 'Webhook'
+      if (row.notify) return this.$t('cmdb.ciType.notify')
+      return ''
     },
   },
 }
 </script>
 
-<style></style>
+<style lang="less" scoped>
+@import '../styles/table.less';
+</style>

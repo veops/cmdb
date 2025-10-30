@@ -546,55 +546,66 @@ export default {
 <style lang="less" scoped>
 .ci-relation-table {
   width: 100%;
-  margin-top: 32px;
+  margin-top: 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 
   &-wrap {
-    border: solid 1px #E4E7ED;
-    border-top: none;
+    border: none;
     display: flex;
     width: 100%;
   }
 
   &-tab {
     flex-shrink: 0;
-    width: 160px;
+    width: 180px;
     min-height: 300px;
     max-height: 600px;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 6px 0px;
-    border-right: solid 1px #E4E7ED;
+    padding: 8px 0px;
+    border-right: solid 1px #e8eaed;
+    background: #f8f9fb;
 
     .tab-group {
       width: 100%;
 
       &-name {
-        padding-left: 8px;
+        padding-left: 12px;
         height: 32px;
         line-height: 32px;
         width: 100%;
         font-weight: 600;
-        color: rgba(0, 0, 0, .45);
+        font-size: 12px;
+        color: @text-color_3;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
     }
 
     .tab-item {
-      height: 32px;
-      width: 100%;
+      height: 36px;
+      width: calc(100% - 16px);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding-left: 16px;
       padding-right: 10px;
-      background-color: #FFFFFF;
+      margin: 2px 8px;
+      border-radius: 4px;
+      background-color: transparent;
       cursor: pointer;
+      transition: all 0.2s ease;
+      column-gap: 6px;
 
       &-name {
-        font-size: 14px;
+        font-size: 13px;
         color: @text-color_1;
         display: flex;
         align-items: baseline;
-        max-width: calc(100% - 16px);
+        max-width: calc(100% - 28px);
 
         &-text {
           text-overflow: ellipsis;
@@ -606,30 +617,37 @@ export default {
         &-count {
           color: @text-color_3;
           font-size: 12px;
+          margin-left: 4px;
         }
       }
 
       &-add {
-        width: 14px;
-        height: 14px;
-        border-radius: 14px;
-        background-color: #FFFFFF;
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        background-color: @primary-color;
         display: none;
         align-items: center;
         justify-content: center;
-        color: @primary-color;
+        color: #ffffff;
         font-size: 12px;
+        flex-shrink: 0;
       }
 
       &-active {
-        background-color: #F0F5FF;
+        background-color: @primary-color_6;
+        border-left: 3px solid @primary-color;
+        padding-left: 13px;
 
         .tab-item-name-text {
           color: @text-color_1;
+          font-weight: 500;
         }
       }
 
       &:hover {
+        background-color: @primary-color_7;
+
         .tab-item-name-text {
           color: @text-color_1;
         }
@@ -643,8 +661,9 @@ export default {
 
   &-container {
     width: 100%;
-    padding: 15px 17px;
-    overflow: hidden;
+    padding: 20px;
+    min-height: 300px;
+    background: #ffffff;
     min-height: 300px;
     max-height: 600px;
     overflow-y: auto;
@@ -652,20 +671,42 @@ export default {
   }
 
   &-item {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
 
     &-name {
       margin-bottom: 12px;
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 600;
       color: @text-color_1;
-
       display: flex;
       align-items: baseline;
+      padding-left: 12px;
+      position: relative;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 14px;
+        background: @primary-color;
+        border-radius: 2px;
+      }
+
+      &-text {
+        flex: 1;
+      }
 
       &-count {
         font-size: 12px;
         color: @text-color_3;
+        margin-left: 6px;
       }
     }
   }

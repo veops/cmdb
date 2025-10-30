@@ -65,7 +65,7 @@
                     'cmdb-preference-avatar': true,
                     'cmdb-preference-avatar-noicon': !ciType.icon,
                   }"
-                  :style="{ width: '30px', height: '30px', marginRight: '10px' }"
+                  :style="{ marginRight: '10px' }"
                 >
                   <template v-if="ciType.icon">
                     <img
@@ -599,16 +599,18 @@ export default {
       }
       .cmdb-preference-group-title {
         text-align: center;
-        margin-bottom: 5px;
+        margin-bottom: 12px;
         i {
           color: @primary-color;
         }
         > span {
           display: inline-block;
-          color: @text-color_2;
+          color: @text-color_1;
           border-radius: 16px;
           font-weight: 600;
-          padding: 6px 12px;
+          font-size: 15px;
+          padding: 8px 16px;
+          background-color: #f7f8fa;
         }
       }
       .cmdb-preference-group-content {
@@ -621,12 +623,14 @@ export default {
         cursor: move;
         justify-content: flex-start;
         &:hover {
-          background: #ffffff;
-          box-shadow: 0px 2px 8px rgba(149, 160, 208, 0.25);
-          border-radius: @border-radius-box;
+          background: @primary-color_7;
+          box-shadow: 0px 2px 8px fade(@primary-color, 15%);
+          border-radius: 6px;
+          transform: translateX(2px);
           .cmdb-preference-avatar {
-            box-shadow: none;
-            background-color: @primary-color_5;
+            border-color: @primary-color;
+            box-shadow: 0 2px 4px fade(@primary-color, 20%);
+            transform: scale(1.05);
           }
           .cmdb-preference-group-content-action {
             display: inline;
@@ -760,7 +764,7 @@ export default {
             color: rgba(0, 0, 0, 0.5);
             height: 14px;
             width: 14px;
-            background-color: #f0f5ff;
+            background-color: @primary-color_7;
             border-radius: 50%;
             font-size: 12px;
             line-height: 14px;
@@ -837,11 +841,13 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
-    box-shadow: 0px 4px 4px rgba(129, 140, 186, 0.25);
-    border-radius: 1px;
-    background-color: #fff;
+    width: 30px;
+    height: 30px;
+    background: #fff;
+    border: 1px solid #e8eaed;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
   }
   .cmdb-preference-avatar-noicon {
     > span {

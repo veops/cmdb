@@ -1,20 +1,45 @@
 <template>
-  <div class="cmdb-batch-upload-result" v-if="visible">
-    <p class="cmdb-batch-upload-label">5. {{ $t('cmdb.batch.uploadResult') }}</p>
-    <div class="cmdb-batch-upload-result-content">
-      <h4>
-        {{ $t('cmdb.batch.total') }}&nbsp;<span style="color: blue">{{ total }}</span>
-        {{ $t('cmdb.batch.successItems') }} <span style="color: lightgreen">{{ success }}</span>
-        {{ $t('cmdb.batch.failedItems') }} <span style="color: red">{{ errorNum }} </span>{{ $t('cmdb.batch.items') }}
-      </h4>
-      <div>
-        <span>{{ $t('cmdb.batch.errorTips') }}: </span>
-        <ol>
-          <li :key="item + index" v-for="(item, index) in errorItems">{{ item }}</li>
-        </ol>
+  <a-modal
+    v-model="visible"
+    :title="$t('cmdb.batch.uploadResult')"
+    :footer="null"
+    :width="700"
+    :maskClosable="false"
+  >
+    <div class="cmdb-batch-upload-result">
+      <a-result
+        :status="errorNum > 0 ? 'warning' : 'success'"
+        :title="errorNum > 0 ? $t('cmdb.batch.uploadPartialSuccess') : $t('cmdb.batch.uploadAllSuccess')"
+      >
+        <template #subTitle>
+          <div class="upload-result-summary">
+            <span>{{ $t('cmdb.batch.total') }}: <strong>{{ total }}</strong></span>
+            <a-divider type="vertical" />
+            <span class="success-text">{{ $t('cmdb.batch.successItems') }}: <strong>{{ success }}</strong></span>
+            <a-divider type="vertical" />
+            <span class="error-text">{{ $t('cmdb.batch.failedItems') }}: <strong>{{ errorNum }}</strong></span>
+          </div>
+        </template>
+        <template #extra>
+          <a-button type="primary" @click="handleOk">{{ $t('confirm') }}</a-button>
+        </template>
+      </a-result>
+
+      <div v-if="errorItems.length > 0" class="error-details">
+        <a-divider orientation="left">{{ $t('cmdb.batch.errorTips') }}</a-divider>
+        <div class="error-list">
+          <div
+            v-for="(item, index) in errorItems"
+            :key="index"
+            class="error-item"
+          >
+            <a-icon type="close-circle" class="error-icon" />
+            <span>{{ item }}</span>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+  </a-modal>
 </template>
 
 <script>
@@ -64,7 +89,6 @@ export default {
   },
   methods: {
     async upload2Server() {
-      this.visible = true
       this.success = 0
       this.errorNum = 0
       this.errorItems = []
@@ -93,20 +117,79 @@ export default {
         }
       }
       if (this.isUploading) {
+        this.visible = true
         this.$emit('uploadResultDone')
-        this.$message.success(this.$t('cmdb.batch.requestSuccessTips'))
       }
+    },
+    handleOk() {
+      this.visible = false
     },
   },
 }
 </script>
 <style lang="less" scoped>
-
 .cmdb-batch-upload-result {
-  .cmdb-batch-upload-result-content {
-    background-color: rgba(240, 245, 255, 0.35);
-    border-radius: 5px;
-    padding: 12px;
+  .upload-result-summary {
+    font-size: 14px;
+    margin-top: 16px;
+
+    strong {
+      font-size: 18px;
+      margin-left: 4px;
+    }
+
+    .success-text {
+      color: #52c41a;
+
+      strong {
+        color: #52c41a;
+      }
+    }
+
+    .error-text {
+      color: #ff4d4f;
+
+      strong {
+        color: #ff4d4f;
+      }
+    }
+  }
+
+  .error-details {
+    margin-top: 24px;
+
+    .error-list {
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 12px;
+      background: #fff1f0;
+      border: 1px solid #ffccc7;
+      border-radius: 6px;
+
+      .error-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 8px 0;
+        color: @text-color_2;
+
+        &:not(:last-child) {
+          border-bottom: 1px solid #ffe7e5;
+        }
+
+        .error-icon {
+          color: #ff4d4f;
+          font-size: 16px;
+          margin-top: 2px;
+          flex-shrink: 0;
+        }
+
+        span {
+          flex: 1;
+          word-break: break-all;
+        }
+      }
+    }
   }
 }
 </style>

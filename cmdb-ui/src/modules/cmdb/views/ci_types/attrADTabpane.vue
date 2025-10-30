@@ -15,7 +15,12 @@
       </a-space>
     </a>
     <div class="attr-ad-header attr-ad-header_between">
-      {{ $t('cmdb.ciType.attributeMap') }}
+      <span>
+        {{ $t('cmdb.ciType.attributeMap') }}
+        <a-tooltip :title="$t('cmdb.ciType.attributeMapHint')">
+          <a-icon type="question-circle" style="margin-left: 4px; color: #999; font-size: 14px; cursor: help;" />
+        </a-tooltip>
+      </span>
       <div class="attr-ad-open">
         <span class="attr-ad-open-label">{{ $t('cmdb.ciType.enable') }}</span>
         <a-switch v-model="form.enabled" v-if="isClient" />
@@ -95,14 +100,10 @@
           >
             <a @click="handleOpenCmdb" slot="suffix"><a-icon type="menu"/></a>
           </a-input>
-          <span
-            v-show="agent_type === 'master'"
-            slot="extra_master"
-            class="radio-master-tip"
-          >
-            {{ $t('cmdb.ciType.masterNodeTip') }}
-          </span>
         </CustomRadio>
+        <div class="ant-form-explain" v-if="agent_type === 'all'">{{ $t('cmdb.ciType.allNodesTip') }}</div>
+        <div class="ant-form-explain" v-if="agent_type === 'query_expr'">{{ $t('cmdb.ciType.queryExprTip') }}</div>
+        <div class="ant-form-explain" v-if="agent_type === 'master'">{{ $t('cmdb.ciType.masterNodeTip') }}</div>
       </a-form-model-item>
       <a-form-model-item
         :labelCol="labelCol"
@@ -110,6 +111,7 @@
         :extra="$t('cmdb.ciType.adAutoInLibTip')"
       >
         <a-switch v-model="form.auto_accept" />
+        <div class="ant-form-explain">{{ $t('cmdb.ciType.adAutoInLibTip') }}</div>
       </a-form-model-item>
       <a-form-model-item
         :labelCol="labelCol"
@@ -794,12 +796,6 @@ export default {
     font-weight: 400;
     margin-left: 17px;
     margin-bottom: 20px;
-  }
-
-  .radio-master-tip {
-    font-size: 12px;
-    color: #86909c;
-    line-height: 14px;
   }
 }
 .attr-ad-snmp-form {

@@ -87,27 +87,24 @@
                 <div>
                   <OpsMoveIcon
                     v-if="g.id !== -1"
-                    style="width: 17px; height: 17px; display: none; position: absolute; left: -3px; top: 10px"
+                    style="width: 17px; height: 17px; display: none; position: absolute; left: 5px; top: 13px"
                   />
-                  <span style="font-weight: 700">{{ g.name || $t('other') }}</span>
-                  <span :style="{ color: '#c3cdd7' }">({{ g.ci_types.length }})</span>
+                  <span class="ci-types-left-group-name">{{ g.name || $t('other') }}</span>
+                  <span>{{ g.ci_types.length }}</span>
                 </div>
-                <a-space>
-                  <a-tooltip>
-                    <template slot="title">{{ $t('cmdb.ciType.addCITypeInGroup') }}</template>
+                <div class="ci-types-left-group-action">
+                  <a-tooltip :title="$t('cmdb.ciType.addCITypeInGroup')">
                     <a><ops-icon type="veops-increase" @click="handleCreate(g)"/></a>
                   </a-tooltip>
                   <template v-if="g.id !== -1">
-                    <a-tooltip>
-                      <template slot="title">{{ $t('cmdb.ciType.editGroup') }}</template>
+                    <a-tooltip :title="$t('cmdb.ciType.editGroup')">
                       <a><a-icon type="edit" @click="handleEditGroup(g)"/></a>
                     </a-tooltip>
-                    <a-tooltip>
-                      <template slot="title">{{ $t('cmdb.ciType.deleteGroup') }}</template>
-                      <a style="color: red"><a-icon type="delete" @click="handleDeleteGroup(g)"/></a>
+                    <a-tooltip :title="$t('cmdb.ciType.deleteGroup')">
+                      <a :style="{color: 'red'}"><a-icon type="delete" @click="handleDeleteGroup(g)"/></a>
                     </a-tooltip>
                   </template>
-                </a-space>
+                </div>
               </div>
               <draggable
                 v-model="g.ci_types"
@@ -127,7 +124,7 @@
                   <div :class="`${ g.id === -1 ? 'undraggable' : '' }`">
                     <OpsMoveIcon
                       v-if="g.id !== -1"
-                      style="width: 17px; height: 17px; display: none; position: absolute; left: -1px; top: 8px"
+                      style="width: 17px; height: 17px; display: none; position: absolute; left: 4px; top: 9px"
                     />
                     <span class="ci-types-left-detail-icon">
                       <template v-if="ci.icon">
@@ -220,6 +217,7 @@
       >
         <a-form-item :label="$t('cmdb.ciType.CITypeName')">
           <a-input
+            :disabled="drawerTitle === $t('cmdb.ciType.editCIType')"
             name="name"
             :placeholder="$t('cmdb.ciType.English')"
             v-decorator="[
@@ -235,6 +233,7 @@
               },
             ]"
           />
+          <div v-if="drawerTitle !== $t('cmdb.ciType.editCIType')" class="ant-form-explain">{{ $t('cmdb.ciType.ciTypeNameHint') }}</div>
         </a-form-item>
         <a-form-item :label="$t('alias')">
           <a-input name="alias" v-decorator="['alias', { rules: [] }]" />
@@ -248,6 +247,7 @@
               {{ $t('no') }}
             </a-radio>
           </a-radio-group>
+          <div class="ant-form-explain">{{ $t('cmdb.ciType.isInheritHint') }}</div>
         </a-form-item>
         <a-form-item v-if="isInherit" :label="$t('cmdb.ciType.inheritType')">
           <CMDBTypeSelect
@@ -267,9 +267,11 @@
               '--custom-multiple-lineHeight': '14px',
             }"
           />
+          <div class="ant-form-explain">{{ $t('cmdb.ciType.inheritTypeHint') }}</div>
         </a-form-item>
         <a-form-item :label="$t('icon')">
           <IconArea class="ci_types-icon-area" ref="iconArea" />
+          <div class="ant-form-explain">{{ $t('cmdb.ciType.iconHint') }}</div>
         </a-form-item>
         <a-form-item :label="$t('cmdb.ciType.defaultSort')" v-if="drawerTitle === $t('cmdb.ciType.editCIType')">
           <el-select
@@ -303,6 +305,7 @@
               </a-radio-group>
             </div>
           </el-select>
+          <div class="ant-form-explain">{{ $t('cmdb.ciType.defaultSortHint') }}</div>
         </a-form-item>
         <a-form-item :help="$t('cmdb.ciType.uniqueKeyTips')" :label="$t('cmdb.ciType.uniqueKey')">
           <el-select
@@ -1134,10 +1137,14 @@ export default {
     width: 100%;
     overflow: auto;
     float: left;
+    background-color: #f7f8fa;
+    border-right: 1px solid #e8eaed;
+    padding: 12px 8px;
 
     &-header {
       display: flex;
       gap: 6px;
+      margin-bottom: 12px;
 
       &-more {
         flex-shrink: 0;
@@ -1146,8 +1153,24 @@ export default {
       }
 
       /deep/ &-input {
-        .ant-input:focus {
-          box-shadow: none;
+        input {
+          background-color: #fff;
+          border-radius: 6px;
+          border: 1px solid #e8eaed;
+          transition: all 0.2s ease;
+
+          &:hover {
+            border-color: #c3cdd7;
+          }
+
+          &:focus {
+            border-color: @primary-color;
+            box-shadow: 0 0 0 2px fade(@primary-color, 10%);
+          }
+        }
+
+        .ant-input-prefix {
+          color: @text-color_3;
         }
       }
     }
@@ -1164,20 +1187,75 @@ export default {
 
     .ci-types-left-group {
       position: relative;
-      padding: 8px 0 8px 14px;
-      color: rgb(99, 99, 99);
+      padding: 10px 12px 10px 22px;
+      margin-bottom: 8px;
+      color: #333;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 15px;
+      font-weight: 600;
       display: flex;
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
-      > div:nth-child(2) {
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      width: 100%;
+      overflow: hidden;
+      column-gap: 6px;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 2px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 32px;
+        background: @primary-color;
+        border-radius: 2px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      > div:first-child {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        max-width: 100%;
+        overflow: hidden;
+
+        > span:last-child {
+          font-size: 12px;
+          font-weight: 500;
+          background: #e8eaed;
+          color: @text-color_3;
+          padding: 2px 6px;
+          border-radius: 10px;
+        }
+      }
+
+      &-name {
+        font-weight: 700;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-wrap: nowrap;
+      }
+
+      &-action {
+        align-items: center;
+        column-gap: 4px;
         font-size: 14px;
         display: none;
       }
+
       &:hover {
-        background-color: @primary-color_3;
+        background-color: @primary-color_7;
+
+        // &::before {
+        //   opacity: 1;
+        // }
+
         > div:nth-child(2) {
           display: inline-flex;
         }
@@ -1186,43 +1264,58 @@ export default {
         }
       }
     }
+
     .ci-types-left-detail {
-      padding: 3px 14px;
+      padding: 6px 12px 6px 26px;
+      margin: 0 4px 6px 4px;
       cursor: pointer;
       position: relative;
       display: flex;
       flex-direction: row;
       justify-content: flex-start;
       align-items: center;
-      margin-bottom: 4px;
-      height: 32px;
-      line-height: 32px;
+      height: 36px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: @primary-color;
+        border-radius: 0 2px 2px 0;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
       .ci-types-left-detail-action {
         display: none;
         margin-left: auto;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 10;
       }
+
       .ci-types-left-detail-title {
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+        font-size: 14px;
+        color: @text-color_1;
+        transition: color 0.2s ease;
+        flex: 1;
       }
-      .ci-types-left-detail-icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 20px;
-        height: 20px;
-        border-radius: 2px;
-        box-shadow: 0px 1px 2px rgba(47, 84, 235, 0.2);
-        margin-right: 6px;
-        background-color: #fff;
-        img {
-          max-height: 20px;
-          max-width: 20px;
-        }
-      }
+
       &:hover {
-        background-color: @primary-color_3;
+        background-color: @primary-color_7;
+
+        .ci-types-left-detail-icon {
+          transform: scale(1.05);
+        }
+
         svg {
           display: inline !important;
         }
@@ -1231,10 +1324,44 @@ export default {
         }
       }
     }
+
+    .ci-types-left-detail-icon {
+      display: inline-flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-right: 8px;
+      background-color: #fff;
+      border: 1px solid #e8eaed;
+      transition: transform 0.2s ease;
+
+      img {
+        max-height: 18px;
+        max-width: 18px;
+      }
+    }
+
     .selected {
-      background-color: @primary-color_3;
+      background-color: @primary-color_6;
+      box-shadow: 0 1px 3px fade(@primary-color, 10%);
+      position: relative;
+      z-index: 1;
+
+      &::before {
+        opacity: 1;
+      }
+
       .ci-types-left-detail-title {
         color: @primary-color;
+        font-weight: 600;
+      }
+
+      .ci-types-left-detail-icon {
+        box-shadow: 0 2px 4px fade(@primary-color, 20%);
       }
     }
   }

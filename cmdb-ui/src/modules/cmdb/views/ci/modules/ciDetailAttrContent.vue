@@ -33,8 +33,8 @@
             :key="value"
             :style="{
               borderRadius: '4px',
-              padding: '1px 5px',
-              margin: '2px',
+              padding: '1px 0',
+              margin: '0 2px',
               ...getChoiceValueStyle(attr, value),
               display: 'inline-flex',
               alignItems: 'center',
@@ -57,8 +57,8 @@
           v-else
           :style="{
             borderRadius: '4px',
-            padding: '1px 5px',
-            margin: '2px 0',
+            padding: '1px 0',
+            margin: '0',
             ...getChoiceValueStyle(attr, ci[attr.name]),
             display: 'inline-flex',
             alignItems: 'center',
@@ -109,7 +109,7 @@
             ]"
           />
           <a-select
-            :style="{ width: '100%' }"
+            :style="{ width: '200px' }"
             v-decorator="[
               attr.name,
               {

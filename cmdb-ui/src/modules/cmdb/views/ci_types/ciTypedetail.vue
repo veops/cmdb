@@ -13,6 +13,15 @@
       <a-tab-pane key="5" :tab="$t('cmdb.ciType.trigger')">
         <TriggerTable ref="triggerTable" :CITypeId="CITypeId"></TriggerTable>
       </a-tab-pane>
+      <a-tab-pane key="oneterm">
+        <template #tab>
+          <div class="oneterm-sync-tab-title">
+            <span>{{ $t('cmdb.ciType.onetermSyncTab') }}</span>
+            <span class="oneterm-sync-tab-title-pro">Pro</span>
+          </div>
+        </template>
+        <OnetermSyncTab v-if="activeKey === 'oneterm'" :CITypeId="CITypeId" :CITypeName="CITypeName"></OnetermSyncTab>
+      </a-tab-pane>
       <a-tab-pane key="6" :tab="$t('cmdb.ciType.grant')">
         <div class="grant-config-wrap" :style="{ maxHeight: `${windowHeight - 150}px` }" v-if="activeKey === '6'">
           <GrantComp :CITypeId="CITypeId" resourceType="CIType" :resourceTypeName="CITypeName"></GrantComp>
@@ -43,6 +52,7 @@ import RelationTable from './relationTable'
 import TriggerTable from './triggerTable.vue'
 import ADTab from './adTab.vue'
 import GrantComp from '../../components/cmdbGrant/grantComp.vue'
+import OnetermSyncTab from './onetermSync/index.vue'
 
 const ACTIVE_KEY_STORAGE_KEY = 'ops_model_config_tab_key'
 
@@ -54,6 +64,7 @@ export default {
     TriggerTable,
     ADTab,
     GrantComp,
+    OnetermSyncTab
   },
   props: {
     CITypeId: {
@@ -139,6 +150,24 @@ export default {
     .ant-tabs-tab:hover {
       color: @primary-color;
     }
+  }
+
+  .oneterm-sync-tab-title {
+    display: flex;
+    align-items: center;
+    column-gap: 4px;
+
+    &-pro {
+      background-color: #E1EFFF;
+      color: #2f54eb;
+      font-size: 12px;
+      font-weight: 400;
+      padding: 0 3px;
+    }
+  }
+
+  .ops-tab-button {
+    margin: 0px 12px;
   }
 }
 </style>

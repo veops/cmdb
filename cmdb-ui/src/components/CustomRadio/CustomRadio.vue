@@ -1,14 +1,19 @@
 <template>
   <div class="custom-radio">
     <div
-      :class="`custom-radio-inner custom-radio-inner-${layout || 'inline'}`"
-      v-for="{ value: radioValue, label, layout } in radioList"
-      :key="radioValue"
+      v-for="radio in radioList"
+      :class="`custom-radio-inner custom-radio-inner-${radio.layout || 'inline'}`"
+      :key="radio.value"
     >
-      <a-radio @click="clickRadio(radioValue)" :checked="value === radioValue" :key="`raido_${radioValue}`">{{
-        label
-      }}</a-radio>
-      <slot :name="`extra_${radioValue}`" v-bind="{ radioValue, label }"></slot>
+      <a-radio @click="clickRadio(radio.value)" :checked="value === radio.value" :key="`raido_${radio.value}`">
+        <slot :name="`label_${radio.value}`" :radio="radio">
+          {{ radio.label }}
+        </slot>
+      </a-radio>
+      <slot
+        :name="`extra_${radio.value}`"
+        v-bind="{ radioValue: radio.value, label: radio.label }"
+      ></slot>
     </div>
   </div>
 </template>

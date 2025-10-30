@@ -1,31 +1,62 @@
 <template>
   <div class="cmdb-batch-upload" :style="{ height: `${windowHeight - 64}px` }">
-    <div class="cmdb-views-header">
-      <span>
-        <span class="cmdb-views-header-title">{{ $t('cmdb.menu.batchUpload') }}</span>
-      </span>
+    <div class="cmdb-batch-upload-header">
+      <div class="cmdb-batch-upload-header-title">
+        <ops-icon type="ops-cmdb-batch" class="cmdb-batch-upload-header-icon" />
+        <span>{{ $t('cmdb.menu.batchUpload') }}</span>
+      </div>
     </div>
-    <CiTypeChoice ref="ciTypeChoice" @getCiTypeAttr="showCiType" />
-    <p class="cmdb-batch-upload-label"><span>*</span>3. {{ $t('cmdb.batch.uploadFile') }}</p>
-    <UploadFileForm
-      :isUploading="isUploading"
-      :ciType="ciType"
-      ref="uploadFileForm"
-      @uploadDone="uploadDone"
-    ></UploadFileForm>
-    <p class="cmdb-batch-upload-label">4. {{ $t('cmdb.batch.dataPreview') }}</p>
-    <CiUploadTable :ciTypeAttrs="ciTypeAttrs" ref="ciUploadTable" :uploadData="uploadData"></CiUploadTable>
+
+    <a-steps :current="currentStep" class="cmdb-batch-upload-steps">
+      <a-step>
+        <span slot="title">{{ $t('cmdb.batch.selectCIType') }}</span>
+        <span slot="description">{{ $t('cmdb.batch.downloadTemplate') }}</span>
+      </a-step>
+      <a-step :title="$t('cmdb.batch.uploadFile')" />
+      <a-step :title="$t('cmdb.batch.dataPreview')" />
+    </a-steps>
+
+    <div class="cmdb-batch-upload-content">
+      <a-card class="cmdb-batch-upload-card">
+        <template slot="title">
+          <span class="cmdb-batch-upload-card-title">1. {{ $t('cmdb.batch.selectCIType') }} & {{ $t('cmdb.batch.downloadTemplate') }}</span>
+        </template>
+        <CiTypeChoice ref="ciTypeChoice" @getCiTypeAttr="showCiType" @stepChange="handleStepChange" />
+      </a-card>
+
+      <a-card class="cmdb-batch-upload-card">
+        <template slot="title">
+          <span class="cmdb-batch-upload-card-title">2. {{ $t('cmdb.batch.uploadFile') }}</span>
+        </template>
+        <UploadFileForm
+          :isUploading="isUploading"
+          :ciType="ciType"
+          ref="uploadFileForm"
+          @uploadDone="uploadDone"
+        ></UploadFileForm>
+      </a-card>
+
+      <a-card class="cmdb-batch-upload-card">
+        <template slot="title">
+          <span class="cmdb-batch-upload-card-title">3. {{ $t('cmdb.batch.dataPreview') }}</span>
+        </template>
+        <CiUploadTable :ciTypeAttrs="ciTypeAttrs" ref="ciUploadTable" :uploadData="uploadData"></CiUploadTable>
+      </a-card>
+    </div>
     <div class="cmdb-batch-upload-action">
       <a-space size="large">
-        <a-button :disabled="!(ciType && uploadData.length)" @click="handleUpload" type="primary">{{
-          $t('upload')
-        }}</a-button>
+        <a-button :disabled="!(ciType && uploadData.length)" @click="handleUpload" type="primary">
+          <a-icon type="upload" />
+          {{ $t('upload') }}
+        </a-button>
         <a-button @click="handleCancel">{{ $t('cancel') }}</a-button>
-        <a-button v-if="hasError && !isUploading" @click="downloadError" type="primary">{{
-          $t('cmdb.batch.downloadFailed')
-        }}</a-button>
+        <a-button v-if="hasError && !isUploading" @click="downloadError" type="primary" ghost class="ops-button-ghost">
+          <a-icon type="download" />
+          {{ $t('cmdb.batch.downloadFailed') }}
+        </a-button>
       </a-space>
     </div>
+
     <UploadResult
       v-if="ciType"
       ref="uploadResult"
@@ -65,6 +96,7 @@ export default {
       uniqueId: 0,
       isUploading: false,
       hasError: false,
+      currentStep: 0,
     }
   },
   computed: {
@@ -78,6 +110,12 @@ export default {
       this.ciType = message?.type_id ?? 0
       this.uniqueField = message?.unique ?? ''
       this.uniqueId = message?.unique_id ?? 0
+      if (message) {
+        this.currentStep = Math.max(this.currentStep, 1)
+      }
+    },
+    handleStepChange(step) {
+      this.currentStep = Math.max(this.currentStep, step)
     },
     uploadDone(dataList) {
       const _uploadData = filterNull(dataList).map((item, i) => {
@@ -108,6 +146,9 @@ export default {
       this.uploadData = _uploadData.slice(1)
       this.hasError = false
       this.isUploading = false
+      if (_uploadData.length > 1) {
+        this.currentStep = Math.max(this.currentStep, 2)
+      }
     },
     handleUpload() {
       if (!this.ciType) {
@@ -128,6 +169,8 @@ export default {
         this.showCiType(null)
         this.$refs.ciTypeChoice.selectNum = undefined
         this.hasError = false
+        this.currentStep = 0
+        this.uploadData = []
       } else {
         this.$message.warning(this.$t('cmdb.batch.batchUploadCanceled'))
         this.isUploading = false
@@ -158,16 +201,104 @@ export default {
 }
 </style>
 <style lang="less" scoped>
-
 .cmdb-batch-upload {
   margin-bottom: -24px;
-  padding: 20px;
-  background-color: #fff;
+  padding: 24px;
+  background-color: #f7f8fa;
   border-radius: @border-radius-box;
   overflow: auto;
-  .cmdb-batch-upload-action {
-    width: 50%;
-    margin: 12px 0;
+
+  &-header {
+    margin-bottom: 24px;
+
+    &-title {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: @text-color_1;
+      gap: 10px;
+    }
+
+    &-icon {
+      font-size: 24px;
+      color: @primary-color;
+    }
+  }
+
+  &-steps {
+    background: #fff;
+    padding: 24px 48px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+    /deep/ .ant-steps-item-process .ant-steps-item-icon {
+      background-color: @primary-color;
+      border-color: @primary-color;
+
+      .ant-steps-icon {
+        color: #fff;
+      }
+    }
+
+    /deep/ .ant-steps-item-finish .ant-steps-item-icon {
+      border-color: @primary-color;
+
+      .ant-steps-icon {
+        color: @primary-color;
+      }
+    }
+
+    /deep/ .ant-steps-item-wait .ant-steps-item-icon {
+      border-color: #d9d9d9;
+
+      .ant-steps-icon {
+        color: rgba(0, 0, 0, 0.25);
+      }
+    }
+  }
+
+  &-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    /deep/ .ant-card-head {
+      border-bottom: 1px solid #e8eaed;
+      background: #fafafa;
+      border-radius: 8px 8px 0 0;
+
+      .ant-card-head-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: @text-color_1;
+      }
+    }
+
+    /deep/ .ant-card-body {
+      padding: 24px;
+    }
+  }
+
+  &-action {
+    margin-top: 24px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    display: flex;
+    justify-content: center;
   }
 }
 </style>

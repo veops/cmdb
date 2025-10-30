@@ -39,13 +39,19 @@
       </a-col>
       <a-col
         :span="12"
-      ><a-form-item
-        :label-col="formItemLayout.labelCol"
-        :wrapper-col="formItemLayout.wrapperCol"
-        :label="$t('alias')"
       >
-        <a-input name="alias" v-decorator="['alias', { rules: [] }]" /> </a-form-item
-      ></a-col>
+        <a-form-item
+          :label-col="formItemLayout.labelCol"
+          :wrapper-col="formItemLayout.wrapperCol"
+          :label="$t('alias')"
+        >
+          <a-input
+            name="alias"
+            :placeholder="$t('cmdb.ciType.aliasPlaceholder')"
+            v-decorator="['alias', { rules: [] }]"
+          />
+        </a-form-item>
+      </a-col>
       <a-col
         :span="12"
       ><a-form-item
@@ -209,8 +215,18 @@
         <a-form-item
           :label-col="horizontalFormItemLayout.labelCol"
           :wrapper-col="horizontalFormItemLayout.wrapperCol"
-          :label="$t('cmdb.ciType.unique')"
         >
+          <template slot="label">
+            <span style="position:relative;white-space:pre;">{{ $t('cmdb.ciType.unique') }}
+              <a-tooltip :title="$t('cmdb.ciType.uniqueHint')">
+                <a-icon
+                  style="position:absolute;top:2px;left:-17px;color:#A5A9BC;"
+                  type="info-circle"
+                  @click="(e) => { e.stopPropagation(); e.preventDefault() }"
+                />
+              </a-tooltip>
+            </span>
+          </template>
           <a-switch
             :disabled="isShowComputedArea"
             @change="onChange"
@@ -266,8 +282,18 @@
         <a-form-item
           :label-col="horizontalFormItemLayout.labelCol"
           :wrapper-col="horizontalFormItemLayout.wrapperCol"
-          :label="$t('cmdb.ciType.isSortable')"
         >
+          <template slot="label">
+            <span style="position:relative;white-space:pre;">{{ $t('cmdb.ciType.isSortable') }}
+              <a-tooltip :title="$t('cmdb.ciType.sortableHint')">
+                <a-icon
+                  style="position:absolute;top:2px;left:-17px;color:#A5A9BC;"
+                  type="info-circle"
+                  @click="(e) => { e.stopPropagation(); e.preventDefault() }"
+                />
+              </a-tooltip>
+            </span>
+          </template>
           <a-switch
             :disabled="isShowComputedArea"
             @change="(checked) => onChange(checked, 'is_sortable')"
@@ -341,22 +367,46 @@
       <a-divider style="font-size:14px;margin-top:6px;">{{ $t('cmdb.ciType.advancedSettings') }}</a-divider>
       <a-row>
         <a-col :span="24">
-          <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 12 }" :label="$t('cmdb.ciType.reg')">
+          <a-form-item
+            :label-col="{ span: 4 }"
+            :wrapper-col="{ span: 12 }"
+            :label="$t('cmdb.ciType.reg')"
+          >
             <RegSelect
               :isShowErrorMsg="false"
               :limitedFormat="getLimitedFormat()"
               :disabled="['6', '10', '11'].includes(currentValueType)"
               v-model="re_check"
             />
+            <div class="ant-form-explain">{{ $t('cmdb.ciType.regCheckHint') }}</div>
           </a-form-item>
         </a-col>
         <a-col :span="24">
-          <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" :label="$t('cmdb.ciType.font')">
+          <a-form-item
+            :label-col="{ span: 4 }"
+            :wrapper-col="{ span: 20 }"
+            :label="$t('cmdb.ciType.font')"
+          >
             <FontArea ref="fontArea" :fontColorDisabled="['8', '11'].includes(currentValueType)" />
+            <div class="ant-form-explain">{{ $t('cmdb.ciType.fontHint') }}</div>
           </a-form-item>
         </a-col>
         <a-col :span="24" v-if="!['6', '7', '10', '11'].includes(currentValueType)">
-          <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" :label="$t('cmdb.ciType.choiceValue')">
+          <a-form-item
+            :label-col="{ span: 4 }"
+            :wrapper-col="{ span: 20 }"
+          >
+            <template slot="label">
+              <span style="position:relative;white-space:pre;">{{ $t('cmdb.ciType.choiceValue') }}
+                <a-tooltip :title="$t('cmdb.ciType.choiceValueHint')">
+                  <a-icon
+                    style="position:absolute;top:2px;left:-17px;color:#A5A9BC;"
+                    type="info-circle"
+                    @click="(e) => { e.stopPropagation(); e.preventDefault() }"
+                  />
+                </a-tooltip>
+              </span>
+            </template>
             <PreValueArea
               v-if="drawerVisible"
               :canDefineScript="canDefineScript"
@@ -366,7 +416,7 @@
               :enumValueType="enumValueType"
             />
 
-            <a-button type="primary" size="small" ghost @click="resetPreValue" >{{ $t('reset') }}</a-button>
+            <a-button type="primary" size="small" ghost @click="resetPreValue" style="margin-top: 8px;">{{ $t('reset') }}</a-button>
           </a-form-item>
         </a-col>
         <a-col :span="24" v-if="!['6', '7', '10', '11'].includes(currentValueType)">

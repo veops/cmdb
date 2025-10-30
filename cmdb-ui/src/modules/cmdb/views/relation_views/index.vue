@@ -1711,7 +1711,9 @@ export default {
     float: left;
     position: relative;
     overflow: hidden;
-    padding: 0;
+    padding: 12px 8px;
+    background-color: #f7f8fa;
+    border-right: 1px solid #e8eaed;
     &:hover {
       overflow: auto;
     }
@@ -1780,25 +1782,52 @@ export default {
     }
     .ant-tree-node-content-wrapper {
       width: 100%;
-      padding: 4px 0;
+      padding: 6px 8px;
       display: inline-block;
       height: 100%;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: @primary-color_7;
+        transform: translateX(2px);
+      }
+
+      &.ant-tree-node-selected {
+        background-color: @primary-color_6;
+
+        .ant-tree-title {
+          color: @primary-color;
+          font-weight: 600;
+        }
+      }
       .ant-tree-title {
         display: inline-block;
         width: 100%;
-        padding: 0 6px;
+        padding: 0 4px;
       }
     }
     .relation-views-left-input {
       margin-bottom: 12px;
 
       .ant-input {
-        background-color: #FFFFFF;
-        border: solid 1px transparent;
+        background-color: #fff;
+        border-radius: 6px;
+        border: 1px solid #e8eaed;
+        transition: all 0.2s ease;
 
-        &:hover, &:focus {
-          border-color: @primary-color;
+        &:hover {
+          border-color: #c3cdd7;
         }
+
+        &:focus {
+          border-color: @primary-color;
+          box-shadow: 0 0 0 2px fade(@primary-color, 10%);
+        }
+      }
+
+      .ant-input-prefix {
+        color: @text-color_3;
       }
     }
   }

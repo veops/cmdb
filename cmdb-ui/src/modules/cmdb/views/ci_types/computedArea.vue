@@ -58,7 +58,7 @@ export default {
     return {
       activeKey: 'expr', // expr script
       compute_expr: '',
-      compute_script: 'def computed(): \n    return',
+      compute_script: this.$t('cmdb.ciType.computedScriptTemplate'),
     }
   },
   methods: {
@@ -73,7 +73,7 @@ export default {
     setData(data) {
       const { compute_expr, compute_script } = data
       this.compute_expr = compute_expr
-      this.compute_script = compute_script || 'def computed(): \n    return'
+      this.compute_script = compute_script || this.$t('cmdb.ciType.computedScriptTemplate')
       if (compute_script) {
         this.activeKey = 'script'
         this.$nextTick(() => {

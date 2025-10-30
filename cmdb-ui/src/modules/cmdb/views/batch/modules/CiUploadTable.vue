@@ -22,19 +22,15 @@
         :min-width="100"
       ></vxe-column>
     </vxe-table>
-    <a-empty
-      v-else
-      :image-style="{
-        height: '80px',
-        marginTop: '10px',
-      }"
-    >
-      <img slot="image" :src="require('@/assets/data_empty.png')" />
-      <template slot="description">
-        <p>{{ $t('noData') }}</p>
-        <p>{{ $t('cmdb.batch.pleaseUploadFile') }}</p>
-      </template>
-    </a-empty>
+    <div v-else class="upload-placeholder">
+      <div class="upload-placeholder-content">
+        <a-icon type="file-excel" class="upload-placeholder-icon" />
+        <div class="upload-placeholder-text">
+          <p class="upload-placeholder-title">{{ $t('cmdb.batch.pleaseUploadFile') }}</p>
+          <p class="upload-placeholder-hint">{{ $t('cmdb.batch.uploadFileHint') }}</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -113,19 +109,56 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-
 .cmdb-batch-upload-table {
-  height: 200px;
-  padding: 20px;
-  background: linear-gradient(90deg, @text-color_5 50%, transparent 0) repeat-x,
-    linear-gradient(90deg, @text-color_5 50%, transparent 0) repeat-x,
-    linear-gradient(0deg, @text-color_5 50%, transparent 0) repeat-y,
-    linear-gradient(0deg, @text-color_5 50%, transparent 0) repeat-y;
-  background-size: 15px 1px, 15px 1px, 1px 15px, 1px 15px;
-  background-position: 0 0, 0 100%, 0 0, 100% 0;
-  .ant-empty-description {
-    p:last-child {
-      color: @primary-color;
+  min-height: 200px;
+
+  .upload-placeholder {
+    height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #d9d9d9;
+    background: #fafafa;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: @primary-color;
+      background: fade(@primary-color, 5%);
+
+      .upload-placeholder-icon {
+        color: @primary-color;
+        transform: translateY(-4px);
+      }
+    }
+
+    &-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    &-icon {
+      font-size: 72px;
+      color: #bfbfbf;
+      transition: all 0.3s ease;
+    }
+
+    &-text {
+      text-align: center;
+    }
+
+    &-title {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      font-weight: 500;
+      color: @text-color_1;
+    }
+
+    &-hint {
+      margin: 0;
+      font-size: 14px;
+      color: @text-color_3;
     }
   }
 }

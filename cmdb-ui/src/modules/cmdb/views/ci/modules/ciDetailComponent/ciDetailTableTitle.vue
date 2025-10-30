@@ -29,6 +29,7 @@ export default {
   position: relative;
   overflow: hidden;
   background: #EBF0F9;
+  border-radius: 8px 8px 0 0;
 
   &::before {
     content: "";

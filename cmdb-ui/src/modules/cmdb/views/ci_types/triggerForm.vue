@@ -29,6 +29,8 @@
             {{ $t('cmdb.ciType.triggerDate') }}
           </a-radio-button>
         </a-radio-group>
+        <div class="ant-form-explain" v-if="category === 1">{{ $t('cmdb.ciType.triggerDataChangeDesc') }}</div>
+        <div class="ant-form-explain" v-if="category === 2">{{ $t('cmdb.ciType.triggerDateDesc') }}</div>
       </a-form-model-item>
       <a-form-model-item :label="$t('desc')" prop="description">
         <a-input v-model="form.description" :placeholder="$t('cmdb.ciType.descInput')" />
@@ -52,6 +54,7 @@
               {{ $t('cmdb.ciType.changeInstance') }}
             </a-radio>
           </a-radio-group>
+          <div class="ant-form-explain" v-if="form.action === '2'">{{ $t('cmdb.ciType.changeInstanceDesc') }}</div>
         </a-form-model-item>
         <a-form-model-item v-if="form.action === '2'" :label="$t('cmdb.ciType.attributes')" prop="attr_ids">
           <a-select
@@ -65,7 +68,18 @@
             }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item :label="$t('cmdb.ciType.filter')" class="trigger-form-filter">
+        <a-form-model-item class="trigger-form-filter">
+          <template slot="label">
+            <span style="position:relative;white-space:pre;">{{ $t('cmdb.ciType.filter') }}
+              <a-tooltip :title="$t('cmdb.ciType.filterDesc')">
+                <a-icon
+                  style="position:absolute;top:2px;left:-17px;color:#A5A9BC;"
+                  type="info-circle"
+                  @click="(e) => { e.stopPropagation(); e.preventDefault() }"
+                />
+              </a-tooltip>
+            </span>
+          </template>
           <FilterComp
             ref="filterComp"
             :isDropdown="false"
@@ -94,7 +108,18 @@
             }}</a-select-option>
           </a-select>
         </a-form-model-item>
-        <a-form-model-item :label="$t('cmdb.ciType.filter')" class="trigger-form-filter">
+        <a-form-model-item class="trigger-form-filter">
+          <template slot="label">
+            <span style="position:relative;white-space:pre;">{{ $t('cmdb.ciType.filter') }}
+              <a-tooltip :title="$t('cmdb.ciType.filterDesc')">
+                <a-icon
+                  style="position:absolute;top:2px;left:-17px;color:#A5A9BC;"
+                  type="info-circle"
+                  @click="(e) => { e.stopPropagation(); e.preventDefault() }"
+                />
+              </a-tooltip>
+            </span>
+          </template>
           <FilterComp
             ref="filterComp"
             :isDropdown="false"
@@ -109,6 +134,7 @@
         </a-form-model-item>
         <a-form-model-item :label="$t('cmdb.ciType.notifyAt')" prop="notify_at">
           <a-time-picker v-model="dateForm.notify_at" format="HH:mm" valueFormat="HH:mm" />
+          <div class="ant-form-explain">{{ $t('cmdb.ciType.dateTriggerdesc') }}</div>
         </a-form-model-item>
       </a-form-model>
     </template>
@@ -690,11 +716,11 @@ export default {
 }
 
 .trigger-tips {
-  border: 1px solid #d4380d;
-  background-color: #fff2e8;
+  border: 1px solid @primary-color;
+  background-color: #e6f7ff;
   padding: 2px 10px;
   border-radius: 4px;
-  color: #d4380d;
+  color: @primary-color;
   line-height: 1.5;
 }
 </style>

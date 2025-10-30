@@ -158,36 +158,59 @@ export default {
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
 
   .counter-group {
     display: flex;
-    align-items: center;
-    height: 82px;
-    border: solid 1px @border-color-base;
+    align-items: stretch;
+    height: 90px;
+    border: 1px solid #e8eaed;
+    border-radius: 8px;
     flex-grow: 0;
-    width: calc((100% - 30px) / 3);
+    width: calc((100% - 32px) / 3);
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+    overflow: hidden;
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+    }
 
     .counter-item {
-      padding: 16px 18px;
+      padding: 16px 20px;
       flex-grow: 0;
       width: 50%;
+      position: relative;
+
+      &:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 20px;
+        bottom: 20px;
+        width: 1px;
+        background: #e8eaed;
+      }
 
       &-header {
         width: 100%;
         display: flex;
         align-items: center;
+        margin-bottom: 8px;
       }
 
       &-icon {
-        font-size: 14px;
+        font-size: 16px;
+        color: @primary-color;
       }
 
       &-title {
-        font-size: 14px;
+        font-size: 13px;
         color: @text-color_2;
-        margin-left: 4px;
-
+        margin-left: 6px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -195,21 +218,24 @@ export default {
       }
 
       &-number {
-        color: @primary-color;
-        font-size: 22px;
-        font-weight: 700;
+        color: @text-color_1;
+        font-size: 24px;
+        font-weight: 600;
       }
 
       &-percent {
-        margin-left: 5px;
+        margin-left: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
 
         &-icon {
           font-size: 12px;
         }
 
         &-text {
-          font-size: 10px;
-          font-weight: 400;
+          font-size: 12px;
+          font-weight: 500;
         }
 
         &-up {
@@ -217,7 +243,7 @@ export default {
         }
 
         &-down {
-          color: #FD4C6A;
+          color: #F53F3F;
 
           .counter-item-percent-icon {
             transform: rotate(180deg);
@@ -226,7 +252,8 @@ export default {
       }
 
       &-percent-null {
-        padding: 0 10px;
+        padding: 0 8px;
+        color: @text-color_4;
       }
     }
   }

@@ -2,10 +2,9 @@
   <TwoColumnLayout appName="cmdb-adc" calcBasedParent>
     <template #one>
       <div class="cmdb-adc-group" v-for="group in ci_types_list" :key="group.id">
-        <p>
-          <strong>{{ group.name || $t('other') }}</strong
-          ><span :style="{ color: 'rgb(195, 205, 215)' }">({{ group.ci_types.length }})</span>
-        </p>
+        <div class="cmdb-adc-group-title">
+          <span>{{ group.name || $t('other') }} <span class="cmdb-adc-group-count">{{ group.ci_types.length }}</span></span>
+        </div>
         <div
           :class="{ 'cmdb-adc-side-item': true, 'cmdb-adc-side-item-selected': currentType === ciType.id }"
           v-for="ciType in group.ci_types"
@@ -37,10 +36,11 @@
           <div class="discovery-ci-header">
             <a-input-search
               :placeholder="$t('cmdb.components.pleaseSearch')"
-              :style="{ width: '200px' }"
               @search="handleSearch"
               allowClear
-            />
+            >
+              <a-icon slot="prefix" type="search" />
+            </a-input-search>
             <span class="ops-list-batch-action" v-show="selectedCount">
               <span @click="batchAccept">{{ $t('cmdb.ad.accept') }}</span>
               <a-divider type="vertical" />
@@ -488,48 +488,140 @@ export default {
 <style lang="less" scoped>
 .cmdb-adc {
   .cmdb-adc-group {
-    margin-bottom: 20px;
+    &:not(:last-child) {
+      margin-bottom: 12px;
+    }
+
+    &-title {
+      margin-bottom: 8px;
+      padding: 6px 12px;
+      font-weight: 600;
+      font-size: 13px;
+      color: #666;
+    }
+
+    &-count {
+      font-size: 12px;
+      font-weight: 500;
+      color: @text-color_3;
+      background: #e8eaed;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-left: 4px;
+    }
   }
+
   .cmdb-adc-side-item {
-    .ops_popover_item();
-    height: 32px;
+    width: 100%;
     display: flex;
     align-items: center;
-    justify-content: center;
+    padding: 6px 12px;
+    margin: 0 4px 6px 4px;
+    cursor: pointer;
+    border-radius: 6px;
+    height: 36px;
+    position: relative;
+    transition: all 0.2s ease;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: @primary-color;
+      border-radius: 0 2px 2px 0;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
     .cmdb-adc-side-icon {
+      width: 24px;
+      height: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 20px;
-      height: 20px;
-      border-radius: 2px;
-      box-shadow: 0px 1px 2px rgba(47, 84, 235, 0.2);
-      margin-right: 6px;
-      background-color: #fff;
+      background: #fff;
+      border: 1px solid #e8eaed;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+
       img {
         max-height: 20px;
         max-width: 20px;
       }
     }
+
     .cmdb-adc-side-name {
-      display: inline-block;
-      width: calc(100% - 30px);
+      margin-left: 8px;
+      text-wrap: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
+      font-size: 14px;
+      color: @text-color_1;
+      transition: color 0.2s ease;
+      flex: 1;
+    }
+
+    &:hover {
+      background-color: @primary-color_7;
+      transform: translateX(2px);
+
+      .cmdb-adc-side-icon {
+        transform: scale(1.05);
+      }
     }
   }
+
   .cmdb-adc-side-item-selected {
-    .ops_popover_item_selected();
-    background-color: @primary-color_3;
+    background-color: @primary-color_6;
+    box-shadow: 0 1px 3px fade(@primary-color, 10%);
+
+    &::before {
+      opacity: 1;
+    }
+
+    .cmdb-adc-side-name {
+      color: @primary-color;
+      font-weight: 600;
+    }
+
+    .cmdb-adc-side-icon {
+      box-shadow: 0 2px 4px fade(@primary-color, 20%);
+    }
   }
 
   .discovery-ci-header {
     display: flex;
     align-items: center;
-    column-gap: 20px;
-    padding-top: 18px;
-    padding-bottom: 10px;
+    gap: 12px;
+    padding-bottom: 16px;
+
+    /deep/ .ant-input-search {
+      width: 260px;
+
+      .ant-input {
+        border-radius: 6px;
+        border: 1px solid #e8eaed;
+        transition: all 0.2s ease;
+
+        &:hover {
+          border-color: #c3cdd7;
+        }
+
+        &:focus {
+          border-color: @primary-color;
+          box-shadow: 0 0 0 2px fade(@primary-color, 10%);
+        }
+      }
+    }
+
+    .ops-list-batch-action {
+      margin-left: auto;
+    }
   }
 
   .discovery-ci-log {

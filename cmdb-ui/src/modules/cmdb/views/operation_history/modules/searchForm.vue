@@ -1,9 +1,10 @@
 <template>
-  <div>
+  <div class="search-form-wrapper">
     <a-form
+      class="search-form"
       :colon="false"
-      :labelCol="{ span:4 }"
-      :wrapperCol="{ span:20 }"
+      :labelCol="{ span: 4 }"
+      :wrapperCol="{ span: 20 }"
       labelAlign="left"
     >
       <a-row :gutter="24">
@@ -36,12 +37,9 @@
               v-model="date"
               @change="onChange"
               :style="{width:'100%'}"
-              format="YYYY-MM-DD HH:mm:ss"
+              :format="DATE_FORMAT"
               :placeholder="[$t('cmdb.history.startTime'), $t('cmdb.history.endTime')]"
-              :show-time="{
-                hideDisabledOptions: true,
-                defaultValue: [moment('00:00:00', 'HH:mm:ss'), moment('23:59:59', 'HH:mm:ss')],
-              }"
+              :show-time="timeConfig"
               v-else-if="attr.value_type === '3'"
             />
             <a-input v-model="queryParams[attr.name]" style="width: 100%" allowClear v-else />
@@ -78,13 +76,10 @@
               <a-range-picker
                 :style="{width:'100%'}"
                 @change="onChange"
-                format="YYYY-MM-DD HH:mm"
+                :format="DATE_FORMAT"
                 :placeholder="[$t('cmdb.history.startTime'), $t('cmdb.history.endTime')]"
                 v-else-if="item.value_type === '3'"
-                :show-time="{
-                  hideDisabledOptions: true,
-                  defaultValue: [moment('00:00:00', 'HH:mm:ss'), moment('23:59:59', 'HH:mm:ss')],
-                }"
+                :show-time="timeConfig"
               />
               <a-input v-model="queryParams[item.name]" style="width: 100%" allowClear v-else/>
             </a-form-item>
@@ -92,19 +87,22 @@
         </template>
       </a-row>
       <a-row>
-        <a-col :span="24" :style="{ textAlign: 'right', marginBottom: '20px', marginTop: '-4px'}">
-          <a-button type="primary" html-type="submit" @click="handleSearch">
-            {{ $t('query') }}
-          </a-button>
-          <a-button :style="{ marginLeft: '8px' }" @click="handleExport">
-            {{ $t('export') }}
-          </a-button>
-          <a-button :style="{ marginLeft: '8px' }" @click="handleReset">
-            {{ $t('reset') }}
-          </a-button>
-          <a :style="{ marginLeft: '8px', fontSize: '12px' }" @click="toggle" v-if="attrList.length >= 4">
-            {{ expand?$t('hide'):$t('expand') }} <a-icon :type="expand ? 'up' : 'down'" />
-          </a>
+        <a-col :span="24" class="search-form-actions">
+          <a-space :size="8">
+            <a-button type="primary" html-type="submit" @click="handleSearch" icon="search">
+              {{ $t('query') }}
+            </a-button>
+            <a-button @click="handleExport" icon="download">
+              {{ $t('export') }}
+            </a-button>
+            <a-button @click="handleReset" icon="redo">
+              {{ $t('reset') }}
+            </a-button>
+            <a v-if="attrList.length >= 4" @click="toggle" class="expand-link">
+              {{ expand ? $t('hide') : $t('expand') }}
+              <a-icon :type="expand ? 'up' : 'down'" />
+            </a>
+          </a-space>
         </a-col>
       </a-row>
     </a-form>
@@ -113,7 +111,10 @@
 
 <script>
 import moment from 'moment'
+import { debounce } from 'lodash'
 import { valueTypeMap } from '../../../utils/const'
+import { DATE_FORMAT, TIME_DEFAULT_VALUE } from '../constants'
+
 export default {
   name: 'SearchForm',
   props: {
@@ -129,22 +130,45 @@ export default {
         page: 1,
         page_size: 50
       },
-      date: undefined
+      date: undefined,
+      DATE_FORMAT,
+      searchDebounced: null
     }
   },
   computed: {
     valueTypeMap() {
       return valueTypeMap()
     },
+    timeConfig() {
+      return {
+        hideDisabledOptions: TIME_DEFAULT_VALUE.hideDisabledOptions,
+        defaultValue: [
+          moment(TIME_DEFAULT_VALUE.defaultValue[0], 'HH:mm:ss'),
+          moment(TIME_DEFAULT_VALUE.defaultValue[1], 'HH:mm:ss')
+        ]
+      }
+    }
   },
   watch: {
     queryParams: {
       deep: true,
       handler: function (val) {
-        this.preProcessData()
-        this.$emit('searchFormChange', val)
+        if (this.searchDebounced) {
+          this.searchDebounced(val)
+        }
       }
     },
+  },
+  created() {
+    this.searchDebounced = debounce((val) => {
+      this.preProcessData()
+      this.$emit('searchFormChange', val)
+    }, 300)
+  },
+  beforeDestroy() {
+    if (this.searchDebounced) {
+      this.searchDebounced.cancel()
+    }
   },
   methods: {
     moment,
@@ -178,11 +202,13 @@ export default {
       this.queryParams.start = dateString[0]
       this.queryParams.end = dateString[1]
     },
+
     filterOption(input, option) {
       return (
         option.componentOptions.children[0].text.indexOf(input) >= 0
       )
     },
+
     preProcessData() {
       Object.keys(this.queryParams).forEach(item => {
         if (this.queryParams[item] === '' || this.queryParams[item] === undefined) {
@@ -195,6 +221,91 @@ export default {
 }
 </script>
 
-<style>
+<style lang="less" scoped>
+.search-form-wrapper {
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 2px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
 
+.search-form {
+  :deep(.ant-form-item) {
+    margin-bottom: 16px;
+  }
+
+  :deep(.ant-form-item-label) {
+    line-height: 32px;
+
+    > label {
+      color: rgba(0, 0, 0, 0.85);
+      font-weight: 500;
+    }
+  }
+
+  :deep(.ant-input),
+  :deep(.ant-select-selection),
+  :deep(.ant-calendar-picker-input) {
+    border-radius: 2px;
+
+    &:hover {
+      border-color: @primary-color;
+    }
+
+    &:focus,
+    &.ant-select-focused .ant-select-selection {
+      border-color: @primary-color;
+      box-shadow: 0 0 0 2px fade(@primary-color, 20%);
+    }
+  }
+}
+
+.search-form-actions {
+  text-align: right;
+  padding-top: 16px;
+  border-top: 1px solid #e8e8e8;
+
+  :deep(.ant-space) {
+    margin-top: 16px;
+  }
+
+  :deep(.ant-btn) {
+    border-radius: 2px;
+    font-weight: 400;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
+
+    &.ant-btn-primary {
+      &:hover {
+        background-color: @primary-color;
+        border-color: @primary-color;
+      }
+    }
+
+    &:not(.ant-btn-primary) {
+      &:hover {
+        color: @primary-color;
+        border-color: @primary-color;
+      }
+    }
+  }
+
+  .expand-link {
+    font-size: 12px;
+    color: @primary-color;
+    cursor: pointer;
+    transition: color 0.3s;
+    user-select: none;
+
+    &:hover {
+      color: @primary-color;
+    }
+
+    .anticon {
+      margin-left: 4px;
+      font-size: 12px;
+      transition: transform 0.3s;
+    }
+  }
+}
 </style>

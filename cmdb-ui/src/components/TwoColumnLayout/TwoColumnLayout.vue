@@ -67,7 +67,14 @@ export default {
   width: 100%;
   .two-column-layout-sidebar {
     height: 100%;
-    overflow-y: auto;
+    overflow: hidden;
+    background-color: #f7f8fa;
+    border-right: 1px solid #e8eaed;
+    padding: 12px 8px;
+
+    &:hover {
+      overflow: auto;
+    }
   }
   .two-column-layout-main {
     height: 100%;

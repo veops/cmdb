@@ -172,7 +172,6 @@
         :label="$t('cmdb.ciType.cascadeAttr')"
         :label-col="{ span: $i18n.locale === 'en' ? 3 : 2 }"
         :wrapper-col="{ span: 19 }"
-        :extra="scriptCodeExtraText"
         labelAlign="left"
       >
         <a-select
@@ -191,6 +190,7 @@
             {{ attr.name }}
           </a-select-option>
         </a-select>
+        <div class="ant-form-explain">{{ scriptCodeExtraText }}</div>
       </a-form-item>
 
       <div class="script-tip">
