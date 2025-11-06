@@ -9,7 +9,7 @@ services:
     volumes:
       - db-data:/var/lib/mysql
       - ./docs/mysqld.cnf:/etc/mysql/conf.d/mysqld.cnf
-      - ./docs/cmdb.sql:/docker-entrypoint-initdb.d/cmdb.sql
+      #- ./docs/cmdb.sql:/docker-entrypoint-initdb.d/cmdb.sql
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-p$MYSQL_ROOT_PASSWORD"]
       interval: 10s
@@ -41,7 +41,7 @@ services:
           - redis
 
   cmdb-api:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.5.4
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-api:2.5.5
     container_name: cmdb-api
     env_file:
       - .env
@@ -85,7 +85,7 @@ services:
       test: "ps aux|grep -v grep|grep -v '1 root'|grep gunicorn || exit 1"
 
   cmdb-ui:
-    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.5.4
+    image: registry.cn-hangzhou.aliyuncs.com/veops/cmdb-ui:2.5.5
     container_name: cmdb-ui
     depends_on:
       cmdb-api:
