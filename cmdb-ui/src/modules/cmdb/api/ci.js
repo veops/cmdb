@@ -43,7 +43,7 @@ export function deleteCI(ciId, isShowMessage = true) {
   })
 }
 
-//  获取单个ci实例
+// Get single CI instance
 export function getCIById(ciId) {
   return axios({
     // url: urlPrefix + `/ci/${ciId}`,
@@ -52,7 +52,7 @@ export function getCIById(ciId) {
   })
 }
 
-//  获取自动发现占比
+// Get auto-discovery statistics
 export function getCIAdcStatistics() {
   return axios({
     url: urlPrefix + `/ci/adc/statistics`,

@@ -81,8 +81,8 @@ const mixinPermissions = {
     })
   },
   methods: {
-    // 根据appName  资源名  perms名  返回true/false
-    // 判断该登录用户是否有传入的perms权限
+    // Based on appName, resource name, perms name, return true/false
+    // Check if the logged-in user has the passed perms permission
     hasDetailPermission(appName, resourceName, perms = []) {
       const appNamePer = this.detailPermissions[`${appName}`]
       const _findResourcePermissions = appNamePer.find(item => item.name === resourceName)

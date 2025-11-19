@@ -152,7 +152,7 @@ class DepartmentTree(object):
 
 class DepartmentForm(Form):
     department_name = StringField(validators=[
-        validators.DataRequired(message="部门名称不能为空"),
+        validators.DataRequired(message="Department name cannot be empty"),
         validators.Length(max=255),
     ])
 
@@ -553,7 +553,7 @@ class EditDepartmentInACL(object):
 
             cls.remove_single_employee_from_old_department(acl, employee, result)
 
-            # 在新部门中添加员工
+            # Add employee to new department
             cls.add_employee_to_new_department(acl, employee_acl_rid, new_department_acl_rid, result)
 
         return result

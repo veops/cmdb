@@ -233,7 +233,7 @@ export default {
       }
     },
     clickIcon(name) {
-      // 当name一样时，取消选择
+      // When name is the same, cancel selection
       if (name === this.value.name) {
         this.$emit('change', {
           name: '',

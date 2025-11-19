@@ -87,7 +87,7 @@ class EmployeeCRUD(object):
         try:
             return EmployeeCRUD.get_employee_by_uid(_uid).to_dict()
         except Exception as e:
-            if '不存在' not in str(e):
+            if 'does not exist' not in str(e):
                 abort(400, str(e))
 
             try:
@@ -320,7 +320,7 @@ class EmployeeCRUD(object):
         get expr: (and_list, or_list)
         """
         attr = EmployeeCRUD.get_attr_by_column(column)
-        # 根据operator生成条件表达式
+        # Generate condition expression based on operator
         if operator == OperatorType.EQUAL:
             expr = [attr == value]
         elif operator == OperatorType.NOT_EQUAL:

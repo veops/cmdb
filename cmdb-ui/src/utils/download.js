@@ -24,9 +24,9 @@ export const downloadExcel = (data, fileName = `${moment().format('YYYY-MM-DD HH
     const ws = XLSXS.utils.aoa_to_sheet(rowArray)
     XLSXS.utils.book_append_sheet(wb, ws, fileName)
 
-    let maxColumnNumber = 1 // 默认最大列数
+    let maxColumnNumber = 1 // Default maximum number of columns
     rowArray.forEach(item => { if (item.length > maxColumnNumber) { maxColumnNumber = item.length } })
-    // 合并  #将第一行标题列合并
+    // Merge - merge the first row title columns
     // const merges = ['A1:' + String.fromCharCode(64 + parseInt(maxColumnNumber)) + '1']
     const merges = ['A1:' + createCellPos(maxColumnNumber - 1) + '1']
     const wsMerge = []
@@ -38,13 +38,13 @@ export const downloadExcel = (data, fileName = `${moment().format('YYYY-MM-DD HH
 
     ws['!merges'] = wsMerge
 
-    // 添加列宽
+    // Add column width
     ws['!cols'] = (rowArray[1].map(item => {
         return { width: 22 }
     }))
-    // 添加行高
+    // Add row height
     ws['!rows'] = [{ 'hpt': 80 }]
-    // STEP 4: Write Excel file to browser  #导出
+    // STEP 4: Write Excel file to browser - export
     XLSXS.writeFile(wb, fileName + '.xlsx')
 }
 

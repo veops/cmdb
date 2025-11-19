@@ -322,8 +322,10 @@ const cmdb_en = {
         insecure: 'Certificate Validation',
         vcenterName: 'Platform Name',
         resourceSearchTip1: 'Please use conditional filtering for CI filtering and copy and paste the filter expression into the fill-in box in the previous step.',
-        resourceSearchTip2: 'Note 1: Please use the green button to the right of the expression to copy it',
-        resourceSearchTip3: 'Note 2: If you do not need to filter, please click the grey button to copy and paste directly to configure for all nodes',
+        resourceSearchTip2: 'Note 1: Please use the green button to the right of the expression',
+        resourceSearchTip2Suffix: 'to copy',
+        resourceSearchTip3: 'Note 2: If you do not need to filter, please click the grey button',
+        resourceSearchTip3Suffix: 'to copy and paste directly to configure for all nodes',
         enable: 'Enable',
         enableTip: 'Confirm switching on?',
         portScanConfig: 'Port Scan Config',
@@ -365,7 +367,7 @@ const cmdb_en = {
     """
     return`,
         example: 'Example',
-        attrFilterTip: `The third column of values allows you to select attributes of this model to cascade attributes`,
+        attrFilterTip: `The third column value can select attributes of this model to implement cascading attribute functionality`,
         rule: 'Rule',
         cascadeAttr: 'Cascade',
         cascadeAttrTip: 'Cascading attributes note the order',
@@ -462,6 +464,7 @@ const cmdb_en = {
             relationTemplateExample: '{{ datacenter.name }}/{{ datacenter.region }}',
             selectDirectory: 'Select Directory',
             refreshDirectory: 'Refresh Directory',
+            rootDirectory: 'Root Directory',
             loadDirectoryFailed: 'Failed to load directory',
             folderTemplatePlaceholder: 'e.g., {{ environment }}',
             byCIRelation: 'By CI Relation',
@@ -756,7 +759,7 @@ const cmdb_en = {
         itemsPerPage: '/page',
         triggerName: 'Name',
         event: 'Event',
-        action: 'Actoin',
+        action: 'Action',
         status: 'Status',
         done: 'Done',
         undone: 'Undone',
@@ -1156,7 +1159,7 @@ if __name__ == "__main__":
         calcUnitFreeCount: 'Calculate Rack Free Unit Count',
         calcUnitFreeCountTip: 'Calculating in the background, refresh the page later to see the result',
         calcUnitFreeCountTip1: 'Calculate Trigger Success, refresh the page later to see the result',
-        calcUnitFreeCountTip2: `Confirm that you want to calculate the number of free Units for all rack?`
+        calcUnitFreeCountTip2: 'Confirm that you want to calculate the number of free Units for all racks?'
     }
 }
 export default cmdb_en

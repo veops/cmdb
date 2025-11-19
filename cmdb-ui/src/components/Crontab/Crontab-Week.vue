@@ -65,7 +65,7 @@ export default {
   name: 'CrontabWeek',
   props: ['check', 'cron'],
   methods: {
-    // 单选按钮值变化时
+    // When radio button value changes
     radioChange() {
       if (this.radioValue !== 2) {
         this.$emit('update', 'day', '?')
@@ -92,27 +92,27 @@ export default {
           break
       }
     },
-    // 根据互斥事件，更改radio的值
+    // Change radio value based on mutual exclusion event
 
-    // 周期两个值变化时
+    // When cycle two values change
     cycleChange() {
       if (this.radioValue == '3') {
         this.$emit('update', 'week', this.cycleTotal)
       }
     },
-    // 平均两个值变化时
+    // When average two values change
     averageChange() {
       if (this.radioValue == '4') {
         this.$emit('update', 'week', this.averageTotal)
       }
     },
-    // 最近工作日值变化时
+    // When nearest workday value changes
     weekdayChange() {
       if (this.radioValue == '5') {
         this.$emit('update', 'week', this.weekday + 'L')
       }
     },
-    // checkbox值变化时
+    // When checkbox value changes
     checkboxChange() {
       if (this.radioValue == '6') {
         this.$emit('update', 'week', this.checkboxString)
@@ -127,24 +127,24 @@ export default {
     checkboxString: 'checkboxChange',
   },
   computed: {
-    // 计算两个周期值
+    // Calculate two cycle values
     cycleTotal: function() {
       this.cycle01 = this.checkNum(this.cycle01, 1, 7)
       this.cycle02 = this.checkNum(this.cycle02, 1, 7)
       return this.cycle01 + '-' + this.cycle02
     },
-    // 计算平均用到的值
+    // Calculate average used values
     averageTotal: function() {
       this.average01 = this.checkNum(this.average01, 1, 4)
       this.average02 = this.checkNum(this.average02, 1, 7)
       return this.average01 + '#' + this.average02
     },
-    // 最近的工作日（格式）
+    // Nearest workday (format)
     weekdayCheck: function() {
       this.weekday = this.checkNum(this.weekday, 1, 7)
       return this.weekday
     },
-    // 计算勾选的checkbox值合集
+    // Calculate selected checkbox value collection
     checkboxString: function() {
       const str = this.checkboxList.join()
       return str == '' ? '*' : str

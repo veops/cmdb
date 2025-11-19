@@ -145,6 +145,7 @@ export default {
         this.default_allTreeDepAndEmp = res
       })
       // 获取全部员工和部门的平铺列表
+      // Get all employees and departments' flat list
       getEmployeeList({ block_status: 0, page_size: 99999 }).then((res) => {
         this.default_allFlatEmployees = res.data_list
       })

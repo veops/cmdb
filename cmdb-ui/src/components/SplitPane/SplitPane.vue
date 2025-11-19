@@ -73,7 +73,7 @@ export default {
   },
   data() {
     return {
-      triggerLeftOffset: 0, // 鼠标距滑动器左(顶)侧偏移量
+      triggerLeftOffset: 0, // Mouse offset from left (top) side of slider
       isExpanded: localStorage.getItem(`${this.appName}-isExpanded`)
         ? JSON.parse(localStorage.getItem(`${this.appName}-isExpanded`))
         : false,
@@ -130,7 +130,7 @@ export default {
   },
 
   methods: {
-    // 按下滑动器
+    // Press down slider
     handleMouseDown(e) {
       document.addEventListener('mousemove', this.handleMouseMove)
       document.addEventListener('mouseup', this.handleMouseUp)
@@ -141,7 +141,7 @@ export default {
       }
     },
 
-    // 按下滑动器后移动鼠标
+    // Move mouse after pressing down slider
     handleMouseMove(e) {
       this.isExpanded = false
       this.$emit('expand', this.isExpanded)
@@ -168,7 +168,7 @@ export default {
       localStorage.setItem(`${this.appName}-paneLengthPixel`, paneLengthPixel)
     },
 
-    // 松开滑动器
+    // Release slider
     handleMouseUp() {
       document.removeEventListener('mousemove', this.handleMouseMove)
     },

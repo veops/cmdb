@@ -50,7 +50,7 @@ export default {
   name: 'CrontabSecond',
   props: ['check', 'radioParent'],
   methods: {
-    // 单选按钮值变化时
+    // When radio button value changes
     radioChange() {
       switch (this.radioValue) {
         case 1:
@@ -68,27 +68,27 @@ export default {
           break
       }
     },
-    // 周期两个值变化时
+    // When cycle two values change
     cycleChange() {
       if (this.radioValue == '2') {
         this.$emit('update', 'second', this.cycleTotal)
       }
     },
-    // 平均两个值变化时
+    // When average two values change
     averageChange() {
       if (this.radioValue == '3') {
         this.$emit('update', 'second', this.averageTotal)
       }
     },
-    // checkbox值变化时
+    // When checkbox value changes
     checkboxChange() {
       if (this.radioValue == '4') {
         this.$emit('update', 'second', this.checkboxString)
       }
     },
     othChange() {
-      // 反解析
-      const ins = this.cron.second('反解析 second', ins)
+      // Reverse parse
+      const ins = this.cron.second('Reverse parse second', ins)
       if (ins === '*') {
         this.radioValue = 1
       } else if (ins.indexOf('-') > -1) {
@@ -111,19 +111,19 @@ export default {
     },
   },
   computed: {
-    // 计算两个周期值
+    // Calculate two cycle values
     cycleTotal: function() {
       this.cycle01 = this.checkNum(this.cycle01, 0, 59)
       this.cycle02 = this.checkNum(this.cycle02, 0, 59)
       return this.cycle01 + '-' + this.cycle02
     },
-    // 计算平均用到的值
+    // Calculate average used values
     averageTotal: function() {
       this.average01 = this.checkNum(this.average01, 0, 59)
       this.average02 = this.checkNum(this.average02, 1, 59)
       return this.average01 + '/' + this.average02
     },
-    // 计算勾选的checkbox值合集
+    // Calculate selected checkbox value collection
     checkboxString: function() {
       const str = this.checkboxList.join()
       return str == '' ? '*' : str

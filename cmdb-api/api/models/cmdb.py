@@ -541,7 +541,7 @@ class CustomDashboard(Model):
     __tablename__ = "c_c_d"
 
     name = db.Column(db.String(64))
-    category = db.Column(db.SmallInteger)  # 0: 总数统计, 1: 字段值统计, 2: 关系统计
+    category = db.Column(db.SmallInteger)  # 0: Total statistics, 1: Field value statistics, 2: Relationship statistics
     enabled = db.Column(db.Boolean, default=False)
     order = db.Column(db.Integer, default=0)
 

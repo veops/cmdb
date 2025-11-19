@@ -11,7 +11,7 @@ from future.moves.urllib.parse import urlparse
 
 
 def build_api_key(path, params):
-    current_user is not None or abort(403, u"您得登陆才能进行该操作")
+    current_user is not None or abort(403, u"You must login to perform this operation")
     key = current_user.key
     secret = current_user.secret
     values = "".join([str(params[k]) for k in sorted(params.keys())

@@ -42,7 +42,7 @@ export function getCITypeGroupsConfig(params) {
     })
 }
 
-// 更新模型配置分组的排序
+// Update model configuration group sorting
 export const putCITypeGroups = (data) => {
     return axios({
         url: `${urlPrefix}/ci_types/groups/order`,
@@ -51,7 +51,7 @@ export const putCITypeGroups = (data) => {
     })
 }
 
-// 导出模型分组
+// Export model groups
 export function exportCITypeGroups(params) {
   return axios({
     url: `${urlPrefix}/ci_types/template/export`,

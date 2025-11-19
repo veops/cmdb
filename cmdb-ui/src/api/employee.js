@@ -107,7 +107,7 @@ export function getEmployeeByEmployeeId(employee_id) {
   })
 }
 
-// 下载员工列表
+// Download employee list
 export function downloadAllEmployee(params) {
   return axios({
     url: `/common-setting/v1/employee/export_all`,

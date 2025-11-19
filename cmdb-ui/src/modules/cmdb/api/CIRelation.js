@@ -29,7 +29,7 @@ export function statisticsCIRelation(params) {
   })
 }
 
-// 批量添加子节点
+// Batch add child nodes
 export function batchUpdateCIRelationChildren(ciIds, parents, ancestor_ids = undefined) {
   return axios({
     url: '/v0.1/ci_relations/batch',
@@ -38,7 +38,7 @@ export function batchUpdateCIRelationChildren(ciIds, parents, ancestor_ids = und
   })
 }
 
-// 批量添加父节点
+// Batch add parent nodes
 export function batchUpdateCIRelationParents(ciIds, children) {
   return axios({
     url: '/v0.1/ci_relations/batch',
@@ -47,7 +47,7 @@ export function batchUpdateCIRelationParents(ciIds, children) {
   })
 }
 
-// 批量删除
+// Batch delete
 export function batchDeleteCIRelation(ciIds, parents, ancestor_ids = undefined) {
   return axios({
     url: '/v0.1/ci_relations/batch',
@@ -56,7 +56,7 @@ export function batchDeleteCIRelation(ciIds, parents, ancestor_ids = undefined) 
   })
 }
 
-// 单个添加
+// Single add
 export function addCIRelationView(firstCiId, secondCiId, data) {
   return axios({
     url: `/v0.1/ci_relations/${firstCiId}/${secondCiId}`,
@@ -65,7 +65,7 @@ export function addCIRelationView(firstCiId, secondCiId, data) {
   })
 }
 
-// 单个删除
+// Single delete
 export function deleteCIRelationView(firstCiId, secondCiId, data) {
   return axios({
     url: `/v0.1/ci_relations/${firstCiId}/${secondCiId}`,

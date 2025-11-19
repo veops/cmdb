@@ -105,9 +105,9 @@ export function putRelationView(id, data) {
   })
 }
 
-// 用户保存条件过滤选项
+// User save condition filter options
 export function getPreferenceSearch(payload) {
-  // 参数有prv_id: 关系视图的id， ptv_id: 层级视图的id, type_id: 模型id
+  // Parameters include prv_id: relation view id, ptv_id: hierarchy view id, type_id: model id
   return axios({
     url: `/v0.1/preference/search/option`,
     method: 'GET',
@@ -116,7 +116,7 @@ export function getPreferenceSearch(payload) {
 }
 
 export function savePreferenceSearch(payload) {
-  // 参数包括GET的参数 ，必须参数name，option option是个json
+  // Parameters include GET parameters, required parameter name, option is a JSON
   return axios({
     url: `/v0.1/preference/search/option`,
     method: 'POST',
@@ -131,7 +131,7 @@ export function deletePreferenceSearch(id) {
   })
 }
 
-// 服务树授权
+// Service tree authorization
 export function grantRelationView(rid, data) {
   return axios({
     url: `/v0.1/preference/relation/view/roles/${rid}/grant`,
@@ -140,7 +140,7 @@ export function grantRelationView(rid, data) {
   })
 }
 
-// 服务树权限回收
+// Service tree permission revocation
 export function revokeRelationView(rid, data) {
   return axios({
     url: `/v0.1/preference/relation/view/roles/${rid}/revoke`,
