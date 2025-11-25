@@ -43,7 +43,7 @@ cp cmdb-api/settings.example.py cmdb-api/settings.py
 - 安装库
   - 后端: `cd cmdb-api && pipenv run pipenv install && cd ..`
   - 前端: `cd cmdb-ui && yarn install && cd ..`
-    - node推荐使用14.x版本,推荐使用nvm进行nodejs版本管理：`nvm install 14 && nvm use 14`
+    - node推荐使用16.x版本,推荐使用nvm进行nodejs版本管理：`nvm install 16 && nvm use 16`
 - 可以将 docs/cmdb.sql 导入到数据库里,登录用户和密码分别是:demo/123456
 - 创建数据库表: 进入**cmdb-api**目录执行 `pipenv run flask db-setup && pipenv run flask common-check-new-columns && pipenv run flask cmdb-init-cache`
 - 启动服务

@@ -23,7 +23,7 @@ For new feature additions, please first contact us directly via the contact info
 
 ## ❖ Development Environment
 - Python >= 3.8
-- node >= 14.17.6
+- node >= 16.20.0
 - docker
 
 ## ❖ Code Style
