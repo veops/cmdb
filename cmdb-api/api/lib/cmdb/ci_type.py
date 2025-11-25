@@ -215,8 +215,21 @@ class CITypeManager(object):
 
         CITypeCache.clean(type_id)
 
-        if kwargs.get('name') and kwargs['name'] != ci_type2['name'] and current_app.config.get("USE_ACL"):
-            ACLManager().update_resource(ci_type2['name'], kwargs['name'], ResourceTypeEnum.CI)
+        new_name = kwargs.get('name')
+        new_alias = kwargs.get('alias')
+        new_unique_id = kwargs.get('unique_id')
+
+        name_changed = bool(new_name) and new_name != ci_type2['name']
+        alias_changed = bool(new_alias) and new_alias != ci_type2.get('alias')
+        unique_changed = bool(new_unique_id) and new_unique_id != ci_type2.get('unique_id')
+        if name_changed or alias_changed or unique_changed:
+            from api.tasks.cmdb import batch_ci_cache
+            ci_ids = [i.id for i in CI.get_by(type_id=type_id, to_dict=False)]
+            if ci_ids:
+                batch_ci_cache.apply_async(args=(ci_ids,), queue=CMDB_QUEUE)
+
+        if name_changed and current_app.config.get("USE_ACL"):
+            ACLManager().update_resource(ci_type2['name'], new_name, ResourceTypeEnum.CI)
 
         CITypeHistoryManager.add(CITypeOperateType.UPDATE, ci_type.id,
                                  change=dict(old=ci_type2, new=new.to_dict()))
