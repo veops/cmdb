@@ -699,6 +699,7 @@ class CITypeAttributeManager(object):
 
         for attr_id in attr_ids:
             attr = AttributeCache.get(attr_id)
+            ci_ids_to_cache = set()
 
             if ci_type.default_order_attr == attr.name or ci_type.default_order_attr == "-{}".format(attr.name):
                 return abort(400, ErrFormat.cannot_delete_default_order_attr)
@@ -717,13 +718,15 @@ class CITypeAttributeManager(object):
             if existed is not None:
                 existed.soft_delete()
 
-                for ci in CI.get_by(type_id=type_id, to_dict=False):
-                    AttributeValueManager.delete_attr_value(attr_id, ci.id, commit=False)
-
-                    ci_cache.apply_async(args=(ci.id, None, None), queue=CMDB_QUEUE)
-
                 child_ids = CITypeInheritanceManager.recursive_children(type_id)
-                for _type_id in [type_id] + child_ids:
+                type_ids_for_cleanup = [type_id] + child_ids
+
+                for _type_id in type_ids_for_cleanup:
+                    for ci in CI.get_by(type_id=_type_id, to_dict=False):
+                        AttributeValueManager.delete_attr_value(attr_id, ci.id, commit=False)
+                        ci_ids_to_cache.add(ci.id)
+
+                for _type_id in type_ids_for_cleanup:
                     for item in CITypeUniqueConstraint.get_by(type_id=_type_id, to_dict=False):
                         if attr_id in item.attr_ids:
                             attr_ids = copy.deepcopy(item.attr_ids)
@@ -757,6 +760,8 @@ class CITypeAttributeManager(object):
                 db.session.commit()
 
                 CITypeAttributeCache.clean(type_id, attr_id)
+                for ci_id in ci_ids_to_cache:
+                    ci_cache.apply_async(args=(ci_id, None, None), queue=CMDB_QUEUE)
 
             if ci_type.show_id == attr_id:
                 ci_type.update(show_id=None, filter_none=False)
