@@ -160,6 +160,7 @@
 <script>
 import _ from 'lodash'
 import { deleteDevice } from '@/modules/cmdb/api/dcim.js'
+import { U_NUMBERING_DIRECTION } from '../../../constants.js'
 
 import RackHeader from './rackHeader/index.vue'
 import draggable from 'vuedraggable'
@@ -187,9 +188,9 @@ export default {
       type: Array,
       default: () => []
     },
-    rackId: {
-      type: Number,
-      default: 0
+    rackData: {
+      type: Object,
+      default: () => {}
     }
   },
   data() {
@@ -213,8 +214,14 @@ export default {
       const sliceUnitList = this.unitList.slice(0, index)
       const unitCount = sliceUnitList.reduce((acc, cur) => acc + cur.unitCount, 0)
 
+      const u_numbering_direction = this?.rackData?.u_numbering_direction
+      let unitStart = this.countList.length - unitCount
+      if (u_numbering_direction === U_NUMBERING_DIRECTION.TOP_TO_BOTTOM) {
+        unitStart = unitCount + 1
+      }
+
       this.$emit('openDeviceForm', {
-        unitStart: this.countList.length - unitCount
+        unitStart
       })
     },
 
@@ -283,10 +290,11 @@ export default {
         title: this.$t('warning'),
         content,
         onOk: () => {
-          deleteDevice(
-            this.rackId,
-            data.id
-          ).then(() => {
+          if (!this.rackData._id) {
+            return
+          }
+
+          deleteDevice(this.rackData._id, data.id).then(() => {
             this.$message.success(this.$t('deleteSuccess'))
             this.$emit('refreshRackAllData')
           })
@@ -383,6 +391,7 @@ export default {
           background: linear-gradient(90deg, rgba(0, 0, 0, 0.80) 0%, rgba(102, 102, 102, 0.80) 100%);
           align-items: center;
           justify-content: center;
+          z-index: 1;
 
           &-btn {
             font-size: 14px;

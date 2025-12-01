@@ -5,7 +5,7 @@
         viewType="front"
         :countList="countList"
         :unitList="unitList"
-        :rackId="rackData._id"
+        :rackData="rackData"
         @migrateDevice="migrateDevice"
         @openDeviceForm="openDeviceForm"
         @draggable="handleDraggable"
@@ -19,7 +19,7 @@
         viewType="rear"
         :countList="countList"
         :unitList="unitList"
-        :rackId="rackData._id"
+        :rackData="rackData"
         @migrateDevice="migrateDevice"
         @openDeviceForm="openDeviceForm"
         @draggable="handleDraggable"
@@ -52,7 +52,7 @@
 import _ from 'lodash'
 import { v4 as uuidv4 } from 'uuid'
 import { putDevice } from '@/modules/cmdb/api/dcim.js'
-import { DEVICE_CITYPE_NAME } from '../../../constants.js'
+import { DEVICE_CITYPE_NAME, U_NUMBERING_DIRECTION } from '../../../constants.js'
 
 import RackUnitView from './rackUnitView.vue'
 import DeviceForm from './deviceForm/index.vue'
@@ -194,8 +194,20 @@ export default {
         }
       }
 
-      this.unitList = _.reverse(unitList)
-      this.countList = Array.from({ length: this.rackData.u_count }, (_, i) => this.rackData.u_count - i)
+      /**
+       * 根据U位编号方向，调整U位列表和U位数量列表
+       * bottom_to_top: 底部到顶部
+       * top_to_bottom: 顶部到底部
+       * 如果为空，则默认为 bottom_to_top
+       */
+      const u_numbering_direction = this?.rackData?.u_numbering_direction || U_NUMBERING_DIRECTION.BOTTOM_TO_TOP
+      if (u_numbering_direction === U_NUMBERING_DIRECTION.TOP_TO_BOTTOM) {
+        this.unitList = unitList
+        this.countList = Array.from({ length: this.rackData.u_count }, (_, i) => i + 1)
+      } else {
+        this.unitList = _.reverse(unitList)
+        this.countList = Array.from({ length: this.rackData.u_count }, (_, i) => this.rackData.u_count - i)
+      }
     },
 
     getDeviceViewImage(name) {

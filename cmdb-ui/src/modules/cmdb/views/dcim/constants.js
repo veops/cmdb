@@ -22,6 +22,16 @@ export const DEVICE_CITYPE_NAME = {
   RAID: 'raid'
 }
 
+/**
+ * U位编号方向
+ * bottom_to_top: 底部到顶部
+ * top_to_bottom: 顶部到底部
+ */
+export const U_NUMBERING_DIRECTION = {
+  BOTTOM_TO_TOP: 'bottom_to_top',
+  TOP_TO_BOTTOM: 'top_to_bottom'
+}
+
 const createTypeNameMap = (typeObj, typeNameObj) => {
   const map = {}
 
