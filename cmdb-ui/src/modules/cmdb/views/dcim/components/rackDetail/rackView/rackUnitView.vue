@@ -248,10 +248,16 @@ export default {
       const sliceUnitList = this.unitList.slice(0, e.newIndex)
       const unitCount = sliceUnitList.reduce((acc, cur) => acc + cur.unitCount, 0)
 
+      const u_numbering_direction = this?.rackData?.u_numbering_direction
       /**
-       * 拖拽后的起始U位 = 总U数 - 该设备以上的U数 - 该设备U数 + 1
+       * 根据 u_numbering_direction (U位编号方向)，计算拖拽后的起始U位
+       * 从下往上: 拖拽后的起始U位 = 总U数 - 该设备以上的设备U数合计 - 该设备U数 + 1
+       * 从上往下: 拖拽后的起始U位 = 该设备以上的设备U数合计 + 1
        */
-      const startUnit = this.countList.length - unitCount - this.draggableDevice.unitCount + 1
+      let startUnit = this.countList.length - unitCount - this.draggableDevice.unitCount + 1
+      if (u_numbering_direction === U_NUMBERING_DIRECTION.TOP_TO_BOTTOM) {
+        startUnit = unitCount + 1
+      }
 
       if (this?.draggableDevice?.id) {
         this.$emit('draggable', {
