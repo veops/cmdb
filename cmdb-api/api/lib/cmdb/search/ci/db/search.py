@@ -537,6 +537,8 @@ class Search(object):
             if isinstance(q, dict):
                 if len(q['queries']) == 1 and ";" in q['queries'][0]:
                     values = q['queries'][0].split(";")
+                    # Escape values to prevent SQL injection
+                    values = [v.replace("'", "\\'").replace('"', '\\"') for v in values]
                     in_values = ",".join("'{0}'".format(v) for v in values)
                     _query_sql = QUERY_CI_BY_NO_ATTR_IN.format(in_values, alias)
                     operator = q['operator']
@@ -556,7 +558,9 @@ class Search(object):
                     q = q.replace("*", "%").replace('\\n', '%')
                     _query_sql = QUERY_CI_BY_NO_ATTR.format(q, alias)
                 else:
-                    _query_sql = QUERY_CI_BY_NO_ATTR_IN.format(",".join("'{0}'".format(v) for v in q), alias)
+                    # Escape list values to prevent SQL injection
+                    escaped_q = [v.replace("'", "\\'").replace('"', '\\"') for v in q]
+                    _query_sql = QUERY_CI_BY_NO_ATTR_IN.format(",".join("'{0}'".format(v) for v in escaped_q), alias)
 
             if is_first and _query_sql and not self.only_type_query:
                 query_sql = "SELECT * FROM ({0}) AS {1}".format(_query_sql, alias)
