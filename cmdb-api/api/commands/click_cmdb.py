@@ -213,9 +213,19 @@ def cmdb_counter():
             RackManager().check_u_slot()
 
             i += 1
+
+            db.session.expunge_all()
+            db.session.close()
+
         except:
             import traceback
             print(traceback.format_exc())
+
+            try:
+                db.session.rollback()
+                db.session.expunge_all()
+            except:
+                pass
 
         time.sleep(60)
 
