@@ -39,6 +39,20 @@
               }
             ]"
           />
+          <a-textarea
+            v-else-if="attr.value_type === '2' && !attr.is_index"
+            v-decorator="[
+              attr.name,
+              {
+                validateTrigger: ['submit'],
+                rules: [{ required: attr.is_required, message: $t('placeholder1') + `${attr.alias || attr.name}` }],
+                initialValue: attr.default && attr.default.default ? attr.default.default : null,
+              },
+            ]"
+            style="width: 100%"
+            @focus="(e) => handleFocusInput(e, attr)"
+            @blur="handleChange(attr)"
+          />
           <a-select
             :style="{ width: '100%' }"
             v-decorator="[

@@ -52,6 +52,7 @@
     </template>
     <span
       v-else
+      :style="{ whiteSpace: isEllipsis ? 'nowrap' : 'pre-wrap' }"
       v-html="markSearchValue((attr.is_list && Array.isArray(ci[attr.name])) ? ci[attr.name].join(',') : ci[attr.name])"
     ></span>
   </div>

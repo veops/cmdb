@@ -1,6 +1,6 @@
 <template>
   <span :id="`ci-detail-attr-${attr.name}`">
-    <span v-if="!isEdit || attr.value_type === '6'">
+    <span class="ci-detail-attr-preview" v-if="!isEdit || attr.value_type === '6'">
       <template v-if="attr.is_reference" >
         <a
           v-for="(ciId) in (attr.is_list ? ci[attr.name] : [ci[attr.name]])"
@@ -108,6 +108,20 @@
               }
             ]"
           />
+
+          <a-textarea
+            v-else-if="attr.value_type === '2' && !attr.is_index"
+            size="small"
+            v-decorator="[
+              attr.name,
+              {
+                validateTrigger: ['submit'],
+                rules: [{ required: attr.is_required }],
+              },
+            ]"
+            style="width: 100%"
+          />
+
           <a-select
             :style="{ width: '200px' }"
             v-decorator="[
@@ -357,6 +371,10 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.ci-detail-attr-preview {
+  white-space: pre-wrap;
+}
+
 .ci-detail-attr-json {
   overflow: hidden;
   text-overflow: ellipsis;

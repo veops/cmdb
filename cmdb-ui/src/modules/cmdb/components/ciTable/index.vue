@@ -57,7 +57,7 @@
             <span>{{ col.title }}</span>
           </span>
         </template>
-        <template v-if="col.is_choice || col.is_password || col.is_bool || col.is_reference" #edit="{ row }">
+        <template v-if="showCustomEditComponent(col)" #edit="{ row }">
           <CIReferenceAttr
             v-if="col.is_reference"
             :referenceTypeId="col.reference_type_id"
@@ -71,6 +71,17 @@
             v-model="row[col.field]"
           />
           <vxe-input v-else-if="col.is_password" v-model="passwordValue[col.field]" />
+
+          <a-textarea
+            v-else-if="col.value_type === '2' && !col.is_index"
+            :value="col.is_list && Array.isArray(row[col.field]) ? row[col.field].join(',') : row[col.field]"
+            :style="{ resize: 'none' }"
+            :rows="1"
+            @input="(e) => {
+              row[col.field] = e.target.value
+            }"
+          />
+
           <a-select
             v-if="col.is_choice"
             v-model="row[col.field]"
@@ -527,7 +538,15 @@ export default {
       })
 
       return option
-    }
+    },
+
+    showCustomEditComponent(col) {
+      if (col.value_type === '2' && !col.is_index) {
+        return true
+      }
+
+      return col.is_choice || col.is_password || col.is_bool || col.is_reference
+    },
   }
 }
 </script>

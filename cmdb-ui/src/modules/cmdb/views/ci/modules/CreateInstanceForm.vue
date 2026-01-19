@@ -108,6 +108,12 @@
                   }
                 ]"
               />
+              <a-textarea
+                v-else-if="getFieldType(list.name) === 'textarea'"
+                v-decorator="[list.name, { rules: getDecoratorRules(list) }]"
+                @focus="(e) => handleFocusInput(e, list)"
+                @blur="handleCascadeAttrByUpdate(list)"
+              />
               <a-select
                 :style="{ width: '100%' }"
                 v-decorator="[list.name, { rules: getDecoratorRules(list) }]"
@@ -459,6 +465,8 @@ export default {
           return 'input_number'
         } else if (_find.value_type === '4' || _find.value_type === '3') {
           return _find.value_type
+        } else if (_find.value_type === '2' && !_find.is_index) {
+          return 'textarea'
         } else {
           return 'input'
         }
