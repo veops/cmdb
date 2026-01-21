@@ -189,7 +189,7 @@
       <a-tab-pane key="tab_5">
         <span slot="tab"><ops-icon type="itsm-association" />{{ $t('cmdb.ci.relITSM') }}</span>
         <div :style="{ padding: '24px', height: '100%' }">
-          <RelatedItsmTable ref="relatedITSMTable" :ci_id="ci._id" :ciHistory="ciHistory" :itsmInstalled="itsmInstalled" :attrList="attrList" />
+          <RelatedItsm ref="relatedITSM" />
         </div>
       </a-tab-pane>
     </a-tabs>
@@ -209,7 +209,7 @@
 <script>
 import _ from 'lodash'
 import { getCITypeGroupById, getCITypes } from '@/modules/cmdb/api/CIType'
-import { getCIHistory, judgeItsmInstalled } from '@/modules/cmdb/api/history'
+import { getCIHistory } from '@/modules/cmdb/api/history'
 import { getCIById, searchCI } from '@/modules/cmdb/api/ci'
 
 import RelationMixin from './ciDetailMixin/relationMixin.js'
@@ -220,7 +220,7 @@ import CIDetailAttrContent from './ciDetailAttrContent.vue'
 import CIRelationTable from './ciDetailComponent/ciRelationTable.vue'
 import CIDetailRelation from './ciDetailRelation.vue'
 import TriggerTable from '../../operation_history/modules/triggerTable.vue'
-import RelatedItsmTable from './ciDetailRelatedItsmTable.vue'
+import RelatedItsm from './ciDetailRelatedItsm.vue'
 import CIRollbackForm from './ciRollbackForm.vue'
 import OperateTypeTag from '../../operation_history/components/OperateTypeTag.vue'
 
@@ -231,7 +231,7 @@ export default {
     CIDetailAttrContent,
     CIDetailRelation,
     TriggerTable,
-    RelatedItsmTable,
+    RelatedItsm,
     CIRollbackForm,
     CIDetailTitle,
     CIDetailTableTitle,
@@ -263,7 +263,6 @@ export default {
       ciId: null,
       ci_types: [],
       hasPermission: true,
-      itsmInstalled: true,
       tableHeight: this.attributeHistoryTableHeight || (this.$store.state.windowHeight - 130),
       initQueryLoading: true,
       ciHistoryStatsList: [
@@ -334,7 +333,6 @@ export default {
       this.ciId = ciId
 
       await this.getCI()
-      await this.judgeItsmInstalled()
       if (this.hasPermission) {
         this.getAttributes()
         this.getCIHistory()
@@ -430,16 +428,6 @@ export default {
             this.hasPermission = false
           }
         })
-        .catch((e) => {
-          if (e.response.status === 404) {
-            this.itsmInstalled = false
-          }
-        })
-    },
-    async judgeItsmInstalled() {
-      await judgeItsmInstalled().catch((e) => {
-        this.itsmInstalled = false
-      })
     },
 
     getCIHistory() {

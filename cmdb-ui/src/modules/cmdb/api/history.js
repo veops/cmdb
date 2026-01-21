@@ -58,23 +58,6 @@ export function getCiTriggersByCiId(ci_id, params) {
   })
 }
 
-export function getCiRelatedTickets(params) {
-  return axios({
-    url: `/itsm/v1/process_ticket/get_tickets_by`,
-    method: 'POST',
-    data: params,
-    isShowMessage: false
-  })
-}
-
-export function judgeItsmInstalled() {
-  return axios({
-    url: `/itsm/v1/process_ticket/itsm_existed`,
-    method: 'GET',
-    isShowMessage: false
-  })
-}
-
 export function getCIsBaseline(params) {
   return axios({
     url: `/v0.1/ci/baseline`,
