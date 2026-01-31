@@ -419,3 +419,79 @@ def dcim_calc_u_free_count():
     for rack in racks:
         payload = {RackBuiltinAttributes.FREE_U_COUNT: rack_m.calc_u_free_count(rack.id)}
         CIManager().update(rack.id, **payload)
+
+
+@celery.task(name="cmdb.counter_main", queue="beat_tasks")
+@reconnect_db
+def counter_main():
+    """
+    Main counter task - runs every minute
+    """
+    from api.lib.cmdb.dcim.rack import RackManager
+    from api.lib.cmdb.cache import CMDBCounterCache
+    from api.lib.perm.acl.user import UserCRUD
+    import uuid
+
+    if not has_request_context():
+        current_app.test_request_context().push()
+
+    if not UserCache.get('worker'):
+        UserCRUD.add(username='worker', password=uuid.uuid4().hex, email='worker@xxx.com')
+    login_user(UserCache.get('worker'))
+
+    try:
+        db.session.commit()
+        CMDBCounterCache.reset()
+        CMDBCounterCache.flush_sub_counter()
+        RackManager().check_u_slot()
+
+        return "counter_main success"
+    except Exception as e:
+        db.session.rollback()
+        raise
+    finally:
+        db.session.close()
+
+
+@celery.task(name="cmdb.counter_adc", queue="beat_tasks")
+@reconnect_db
+def counter_adc():
+    """
+    ADC counter task - runs every 5 minutes
+    """
+    from api.lib.cmdb.cache import CMDBCounterCache
+
+    if not has_request_context():
+        current_app.test_request_context().push()
+        login_user(UserCache.get('worker'))
+
+    try:
+        CMDBCounterCache.flush_adc_counter()
+        return "counter_adc success"
+    except Exception as e:
+        db.session.rollback()
+        raise
+    finally:
+        db.session.close()
+
+
+@celery.task(name="cmdb.counter_daily", queue="beat_tasks")
+@reconnect_db
+def counter_daily():
+    """
+    Daily cleanup task - runs at 00:00 every day
+    """
+    from api.lib.cmdb.cache import CMDBCounterCache
+
+    if not has_request_context():
+        current_app.test_request_context().push()
+        login_user(UserCache.get('worker'))
+
+    try:
+        CMDBCounterCache.clear_ad_exec_history()
+        return "counter_daily success"
+    except Exception as e:
+        db.session.rollback()
+        raise
+    finally:
+        db.session.close()

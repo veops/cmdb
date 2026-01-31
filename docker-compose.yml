@@ -73,7 +73,8 @@ services:
         flask init-import-user-from-acl
         flask init-department
         nohup flask cmdb-patch -v 2.4.17 &
-        flask cmdb-counter > counter.log 2>&1
+
+        celery -A celery_worker.celery worker --beat -E -Q beat_tasks --loglevel=info --autoscale=3,1 --max-tasks-per-child=10 > counter.log 2>&1
     networks:
       new:
         aliases:
