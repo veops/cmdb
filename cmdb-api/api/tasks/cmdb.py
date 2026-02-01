@@ -495,3 +495,22 @@ def counter_daily():
         raise
     finally:
         db.session.close()
+
+
+# Beat schedule for CMDB tasks
+from celery.schedules import crontab
+
+CMDB_BEAT_SCHEDULE = {
+    'cmdb-counter-main': {
+        'task': 'cmdb.counter_main',
+        'schedule': crontab(minute='*'),
+    },
+    'cmdb-counter-adc': {
+        'task': 'cmdb.counter_adc',
+        'schedule': crontab(minute='*/5'),
+    },
+    'cmdb-counter-daily': {
+        'task': 'cmdb.counter_daily',
+        'schedule': crontab(hour=0, minute=0),
+    },
+}
