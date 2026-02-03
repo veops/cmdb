@@ -170,8 +170,9 @@ export default {
           const loginParams = { ...values }
           delete loginParams.username
           loginParams.username = values.username
-          loginParams.password = appConfig.useEncryption ? md5(values.password) : values.password
+
           loginParams.auth_with_ldap = hasLDAP ? Number(auth_with_ldap) : undefined
+          loginParams.password = (appConfig.useEncryption && !loginParams.auth_with_ldap) ? md5(values.password) : values.password
 
           localStorage.setItem('ops_auth_type', '')
           Login({ userInfo: loginParams })
