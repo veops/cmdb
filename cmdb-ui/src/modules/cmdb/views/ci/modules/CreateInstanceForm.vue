@@ -181,11 +181,13 @@ import moment from 'moment'
 import { Select, Option } from 'element-ui'
 import { getCIType, getCITypeGroupById } from '@/modules/cmdb/api/CIType'
 import { addCI } from '@/modules/cmdb/api/ci'
-import JsonEditor from '../../../components/JsonEditor/jsonEditor.vue'
-import { valueTypeMap } from '../../../utils/const'
-import CreateInstanceFormByGroup from './createInstanceFormByGroup.vue'
 import { getCITypeParent, getCanEditByParentIdChildId } from '@/modules/cmdb/api/CITypeRelation'
+import { valueTypeMap } from '../../../utils/const'
+import { isLongText } from '@/modules/cmdb/utils/helper'
+
+import CreateInstanceFormByGroup from './createInstanceFormByGroup.vue'
 import CIReferenceAttr from '@/components/ciReferenceAttr/index.vue'
+import JsonEditor from '../../../components/JsonEditor/jsonEditor.vue'
 
 export default {
   name: 'CreateInstanceForm',
@@ -465,7 +467,7 @@ export default {
           return 'input_number'
         } else if (_find.value_type === '4' || _find.value_type === '3') {
           return _find.value_type
-        } else if (_find.value_type === '2' && !_find.is_index) {
+        } else if (isLongText(_find)) {
           return 'textarea'
         } else {
           return 'input'

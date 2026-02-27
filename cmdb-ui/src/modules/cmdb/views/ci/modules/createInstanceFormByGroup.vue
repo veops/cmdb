@@ -40,7 +40,7 @@
             ]"
           />
           <a-textarea
-            v-else-if="attr.value_type === '2' && !attr.is_index"
+            v-else-if="isLongText(attr)"
             v-decorator="[
               attr.name,
               {
@@ -164,6 +164,8 @@
 <script>
 import _ from 'lodash'
 import moment from 'moment'
+import { isLongText } from '@/modules/cmdb/utils/helper'
+
 import JsonEditor from '../../../components/JsonEditor/jsonEditor.vue'
 import CIReferenceAttr from '@/components/ciReferenceAttr/index.vue'
 
@@ -196,6 +198,7 @@ export default {
   },
   methods: {
     moment,
+    isLongText,
     handleFocusInput(e, attr) {
       console.log(attr)
       const _tempFind = this.attributeList.find((item) => item.name === attr.name)

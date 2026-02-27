@@ -128,6 +128,7 @@ export function getCITableColumns(data, attrList, width = 1600, height) {
             is_fixed: attr.is_fixed,
             is_bool: attr.is_bool,
             is_reference: attr.is_reference,
+            is_index: attr.is_index,
             reference_type_id: attr.reference_type_id
         })
     }
@@ -295,4 +296,8 @@ export const getAllParentNodesLabel = (node, label) => {
 }
 export const getTreeSelectLabel = (node) => {
     return `${getAllParentNodesLabel(node, node.label)}`
+}
+
+export const isLongText = (attr) => {
+  return attr.value_type === '2' && attr.is_index === false && !attr.is_link && !attr.is_attachment && !attr.is_password
 }

@@ -73,7 +73,7 @@
           <vxe-input v-else-if="col.is_password" v-model="passwordValue[col.field]" />
 
           <a-textarea
-            v-else-if="col.value_type === '2' && !col.is_index"
+            v-else-if="isLongText(col)"
             :value="col.is_list && Array.isArray(row[col.field]) ? row[col.field].join(',') : row[col.field]"
             :style="{ resize: 'none' }"
             :rows="1"
@@ -226,6 +226,8 @@
 import _ from 'lodash'
 import { getCITypes } from '@/modules/cmdb/api/CIType'
 import { searchCI } from '@/modules/cmdb/api/ci'
+import { isLongText } from '@/modules/cmdb/utils/helper.js'
+
 import JsonEditor from '../JsonEditor/jsonEditor.vue'
 import PasswordField from '../passwordField/index.vue'
 import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
@@ -353,6 +355,7 @@ export default {
   },
 
   methods: {
+    isLongText,
     getVxetableRef() {
       return this?.$refs?.['xTable']?.getVxetableRef?.() || null
     },
@@ -541,7 +544,7 @@ export default {
     },
 
     showCustomEditComponent(col) {
-      if (col.value_type === '2' && !col.is_index) {
+      if (isLongText(col)) {
         return true
       }
 

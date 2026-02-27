@@ -110,7 +110,7 @@
           />
 
           <a-textarea
-            v-else-if="attr.value_type === '2' && !attr.is_index"
+            v-else-if="isLongText(attr)"
             size="small"
             v-decorator="[
               attr.name,
@@ -209,9 +209,11 @@
 import _ from 'lodash'
 import moment from 'moment'
 import { updateCI } from '@/modules/cmdb/api/ci'
+import { getAttrPassword } from '../../../api/CITypeAttr'
+import { isLongText } from '@/modules/cmdb/utils/helper'
+
 import JsonEditor from '../../../components/JsonEditor/jsonEditor.vue'
 import PasswordField from '../../../components/passwordField/index.vue'
-import { getAttrPassword } from '../../../api/CITypeAttr'
 import CIReferenceAttr from '@/components/ciReferenceAttr/index.vue'
 
 export default {
@@ -245,6 +247,7 @@ export default {
   },
   methods: {
     moment,
+    isLongText,
     eventListener(e) {
       const datePickerContainer = document.getElementsByClassName('ant-calendar-picker-container')
       if (this.isEdit && !datePickerContainer.length) {
