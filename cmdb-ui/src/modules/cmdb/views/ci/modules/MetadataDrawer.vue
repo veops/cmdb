@@ -56,14 +56,13 @@
                   { label: $t('no'), value: false },
                 ]
           "
-          type="html"
         >
           <template #default="{ row }">
             <span v-if="column.field !== 'name' && column.field !== 'alias' && column.field !== 'value_type'">
               <a-icon :style="{ color: '#1fb51f' }" type="check" v-if="row[column.field]" />
             </span>
-            <span v-else-if="column.field === 'value_type'" v-html="valueTypeMap[row.value_type]"> </span>
-            <span v-else v-html="row[column.field]"> </span>
+            <span v-else-if="column.field === 'value_type'">{{ valueTypeMap[row.value_type] }}</span>
+            <span v-else>{{ row[column.field] }}</span>
           </template>
         </vxe-column>
       </vxe-table>
@@ -196,9 +195,8 @@ export default {
         .trim()
         .toLowerCase()
       if (filterName) {
-        const filterRE = new RegExp(filterName, 'gi')
         const searchProps = ['name', 'alias', 'value_type']
-        const rest = this.tableData.filter((item) =>
+        this.list = this.tableData.filter((item) =>
           searchProps.some(
             (key) =>
               XEUtils.toValueString(item[key])
@@ -206,16 +204,6 @@ export default {
                 .indexOf(filterName) > -1
           )
         )
-        this.list = rest.map((row) => {
-          const item = Object.assign({}, row)
-          searchProps.forEach((key) => {
-            item[key] = XEUtils.toValueString(item[key]).replace(
-              filterRE,
-              (match) => `<span style='background: yellow'>${match}</span>`
-            )
-          })
-          return item
-        })
       } else {
         this.list = this.tableData
       }

@@ -18,6 +18,8 @@ from api.lib.cmdb.const import RoleEnum
 from api.lib.cmdb.const import ValueTypeEnum
 from api.lib.cmdb.history import CITypeHistoryManager
 from api.lib.cmdb.resp_format import ErrFormat
+from api.lib.cmdb.safe_script import UnsafeScriptError
+from api.lib.cmdb.safe_script import load_class_from_script
 from api.lib.cmdb.utils import ValueTypeMap
 from api.lib.decorator import kwargs_required
 from api.lib.perm.acl.acl import is_app_admin
@@ -80,11 +82,12 @@ class AttributeManager(object):
 
         elif choice_other.get('script'):
             try:
-                x = compile(choice_other['script'], '', "exec")
-                local_ns = {}
-                exec(x, {}, local_ns)
-                res = local_ns['ChoiceValue']().values() or []
+                choice_cls = load_class_from_script(choice_other['script'], 'ChoiceValue')
+                res = choice_cls().values() or []
                 return [[i, {}] for i in res]
+            except UnsafeScriptError as e:
+                current_app.logger.error("get choice values from script: {}".format(e))
+                return []
             except Exception as e:
                 current_app.logger.error("get choice values from script: {}".format(e))
                 return []
