@@ -22,6 +22,8 @@ from api.models.common_setting import Employee, Department
 
 from api.tasks.common_setting import refresh_employee_acl_info, edit_employee_department_in_acl
 
+EMPLOYEE_HTTP_TIMEOUT = 5
+
 acl_user_columns = [
     'email',
     'mobile',
@@ -529,7 +531,7 @@ class EmployeeCRUD(object):
                 phone=mobile,
                 sender=_platform
             )
-            res = requests.post(url, json=payload)
+            res = requests.post(url, json=payload, timeout=EMPLOYEE_HTTP_TIMEOUT)
             result = res.json()
             if res.status_code != 200:
                 raise Exception(result.get('msg', ''))

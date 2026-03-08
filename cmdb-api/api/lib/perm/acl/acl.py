@@ -27,13 +27,15 @@ from api.models.acl import ResourceGroup
 from api.models.acl import ResourceType
 from api.models.acl import Role
 
+ACL_HTTP_TIMEOUT = 5
+
 
 def get_access_token():
     url = "{0}/acl/apps/token".format(current_app.config.get('ACL_URI'))
     payload = dict(app_id=current_app.config.get('APP_ID'),
                    secret_key=hashlib.sha256(current_app.config.get('APP_SECRET_KEY').encode('utf-8')).hexdigest())
     try:
-        res = requests.post(url, data=payload).json()
+        res = requests.post(url, data=payload, timeout=ACL_HTTP_TIMEOUT).json()
         return res.get("token")
     except Exception as e:
         current_app.logger.error(str(e))
@@ -208,7 +210,8 @@ class ACLManager(object):
         url = "{0}/acl/auth_with_token".format(current_app.config.get('ACL_URI'))
         try:
             return requests.post(url, json={"token": token},
-                                 headers={'App-Access-Token': AccessTokenCache.get()}).json()
+                                 headers={'App-Access-Token': AccessTokenCache.get()},
+                                 timeout=ACL_HTTP_TIMEOUT).json()
         except:
             return {}
 

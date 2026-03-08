@@ -11,6 +11,8 @@ from markdownify import markdownify as md
 from api.lib.common_setting.notice_config import NoticeConfigCRUD
 from api.lib.mail import send_mail
 
+NOTIFY_HTTP_TIMEOUT = 5
+
 
 def _request_messenger(subject, body, tos, sender, payload):
     params = dict(sender=sender, title=subject,
@@ -49,7 +51,7 @@ def _request_messenger(subject, body, tos, sender, payload):
     if not url.endswith("message"):
         url = "{}/v1/message".format(url)
 
-    resp = requests.post(url, json=params)
+    resp = requests.post(url, json=params, timeout=NOTIFY_HTTP_TIMEOUT)
     if resp.status_code != 200:
         raise Exception(resp.text)
 

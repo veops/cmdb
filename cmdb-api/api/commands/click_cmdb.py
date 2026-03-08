@@ -46,6 +46,8 @@ from api.models.cmdb import OperationRecord
 from api.models.cmdb import PreferenceRelationView
 from api.tasks.cmdb import batch_ci_cache
 
+INNER_SECRET_HTTP_TIMEOUT = 5
+
 
 @click.command()
 @with_appcontext
@@ -367,7 +369,8 @@ def cmdb_inner_secrets_init(address):
             token = click.prompt('Enter root token', hide_input=True, confirmation_prompt=False)
         assert token is not None
         resp = requests.post("{}/api/v0.1/secrets/auto_seal".format(address.strip("/")),
-                             headers={"Inner-Token": token})
+                             headers={"Inner-Token": token},
+                             timeout=INNER_SECRET_HTTP_TIMEOUT)
         if resp.status_code == 200:
             KeyManage.print_response(resp.json())
         else:
@@ -430,7 +433,7 @@ def cmdb_inner_secrets_seal(address, token):
     address = "{}/api/v0.1/secrets/seal".format(address.strip("/"))
     resp = requests.post(address, headers={
         "Inner-Token": token,
-    })
+    }, timeout=INNER_SECRET_HTTP_TIMEOUT)
     if resp.status_code == 200:
         KeyManage.print_response(resp.json())
     else:

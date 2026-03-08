@@ -9,6 +9,8 @@ from flask import current_app
 from flask_login import current_user
 from future.moves.urllib.parse import urlparse
 
+API_REQUEST_TIMEOUT = 5
+
 
 def build_api_key(path, params):
     current_user is not None or abort(403, u"您得登陆才能进行该操作")
@@ -30,9 +32,9 @@ def api_request(url, method="get", params=None, ret_key=None):
         method = method.lower()
         params = build_api_key(urlparse(url).path, params)
         if method == "get":
-            resp = getattr(requests, method)(url, params=params)
+            resp = getattr(requests, method)(url, params=params, timeout=API_REQUEST_TIMEOUT)
         else:
-            resp = getattr(requests, method)(url, data=params)
+            resp = getattr(requests, method)(url, data=params, timeout=API_REQUEST_TIMEOUT)
         if resp.status_code != 200:
             return abort(resp.status_code, resp.json().get("message"))
         resp = resp.json()
