@@ -16,6 +16,11 @@ import api.lib.cmdb.ci
 from api.extensions import db
 from api.extensions import rd
 from api.lib.cmdb.cache import AttributeCache
+from api.lib.cmdb.cache import CITypeAttributesCache
+from api.lib.cmdb.cache import CITypeCache
+from api.lib.cmdb.cache import RelationTypeCache
+from api.lib.cmdb.const import BuiltinModelEnum
+from api.lib.cmdb.const import ConstraintEnum
 from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import REDIS_PREFIX_CI
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
@@ -41,9 +46,12 @@ from api.models.cmdb import AttributeHistory
 from api.models.cmdb import CI
 from api.models.cmdb import CIRelation
 from api.models.cmdb import CIType
+from api.models.cmdb import CITypeAttribute
+from api.models.cmdb import CITypeRelation
 from api.models.cmdb import CITypeTrigger
 from api.models.cmdb import OperationRecord
 from api.models.cmdb import PreferenceRelationView
+from api.models.cmdb import RelationType
 from api.tasks.cmdb import batch_ci_cache
 
 INNER_SECRET_HTTP_TIMEOUT = 5
@@ -524,6 +532,230 @@ def cmdb_agent_init():
 
     click.echo("Key   : {}".format(click.style(user.key, bg='red')))
     click.echo("Secret: {}".format(click.style(user.secret, bg='red')))
+
+
+@click.command()
+@click.option(
+    '--repair-existing',
+    is_flag=True,
+    default=False,
+    help='Repair existing built-in model definitions if field/type mappings are outdated',
+)
+@with_appcontext
+def cmdb_bootstrap_builtin_models(repair_existing):
+    """
+    Bootstrap minimal built-in models for DCIM/IPAM pages.
+    """
+    summary = {
+        "attrs_created": 0,
+        "attrs_updated": 0,
+        "types_created": 0,
+        "types_updated": 0,
+        "type_attrs_created": 0,
+        "type_attrs_updated": 0,
+        "type_relations_created": 0,
+        "relation_types_created": 0,
+    }
+
+    def ensure_attr(name, alias, value_type, **options):
+        existed = Attribute.get_by(name=name, first=True, to_dict=False)
+        if existed is None:
+            attr = Attribute.create(name=name, alias=alias, value_type=value_type, uid=0, **options)
+            summary["attrs_created"] += 1
+            return attr
+
+        if existed.value_type != value_type:
+            raise click.ClickException(
+                f"Existing attribute '{name}' has value_type={existed.value_type}, "
+                f"expected={value_type}. Please fix it manually before bootstrap."
+            )
+
+        if repair_existing:
+            updates = {}
+            if alias and existed.alias != alias:
+                updates["alias"] = alias
+            for key, value in options.items():
+                if getattr(existed, key) != value:
+                    updates[key] = value
+            if updates:
+                existed.update(**updates)
+                summary["attrs_updated"] += 1
+
+        return existed
+
+    def ensure_type(name, alias, unique_attr, show_attr=None):
+        show_attr = show_attr or unique_attr
+        existed = CIType.get_by(name=name, first=True, to_dict=False)
+        if existed is None:
+            ci_type = CIType.create(name=name, alias=alias, unique_id=unique_attr.id, show_id=show_attr.id, uid=0)
+            summary["types_created"] += 1
+            return ci_type
+
+        if repair_existing:
+            updates = {}
+            if existed.unique_id != unique_attr.id:
+                updates["unique_id"] = unique_attr.id
+            if existed.show_id != show_attr.id:
+                updates["show_id"] = show_attr.id
+            if alias and existed.alias != alias:
+                updates["alias"] = alias
+            if updates:
+                existed.update(**updates)
+                summary["types_updated"] += 1
+
+        return existed
+
+    def ensure_type_attr(ci_type, attr, is_required=False, default_show=True, order=0):
+        existed = CITypeAttribute.get_by(type_id=ci_type.id, attr_id=attr.id, first=True, to_dict=False)
+        if existed is None:
+            CITypeAttribute.create(
+                type_id=ci_type.id,
+                attr_id=attr.id,
+                is_required=is_required,
+                default_show=default_show,
+                order=order,
+            )
+            summary["type_attrs_created"] += 1
+            return
+
+        if repair_existing:
+            updates = {}
+            if existed.is_required != is_required:
+                updates["is_required"] = is_required
+            if existed.default_show != default_show:
+                updates["default_show"] = default_show
+            if updates:
+                existed.update(**updates)
+                summary["type_attrs_updated"] += 1
+
+    def ensure_relation_type():
+        relation_type = RelationType.get_by(first=True, to_dict=False)
+        if relation_type is not None:
+            return relation_type
+
+        relation_type = RelationType.create(name="connect")
+        summary["relation_types_created"] += 1
+        return relation_type
+
+    def ensure_type_relation(parent_type, child_type, relation_type_id):
+        existed = CITypeRelation.get_by(
+            parent_id=parent_type.id, child_id=child_type.id, first=True, to_dict=False
+        )
+        if existed is not None:
+            if repair_existing and existed.relation_type_id != relation_type_id:
+                existed.update(relation_type_id=relation_type_id, constraint=ConstraintEnum.One2Many)
+            return
+
+        CITypeRelation.create(
+            parent_id=parent_type.id,
+            child_id=child_type.id,
+            relation_type_id=relation_type_id,
+            constraint=ConstraintEnum.One2Many,
+        )
+        summary["type_relations_created"] += 1
+
+    try:
+        attrs = {}
+        attrs["name"] = ensure_attr("name", "Name", ValueTypeEnum.TEXT, is_index=True)
+        attrs["cidr"] = ensure_attr("cidr", "CIDR", ValueTypeEnum.TEXT, is_index=True)
+        attrs["hosts_count"] = ensure_attr("hosts_count", "Hosts Count", ValueTypeEnum.INT)
+        attrs["assign_count"] = ensure_attr("assign_count", "Assigned Count", ValueTypeEnum.INT)
+        attrs["used_count"] = ensure_attr("used_count", "Used Count", ValueTypeEnum.INT)
+        attrs["free_count"] = ensure_attr("free_count", "Free Count", ValueTypeEnum.INT)
+        attrs["ip"] = ensure_attr("ip", "IP", ValueTypeEnum.TEXT, is_index=True)
+        attrs["assign_status"] = ensure_attr("assign_status", "Assign Status", ValueTypeEnum.INT)
+        attrs["is_used"] = ensure_attr("is_used", "Is Used", ValueTypeEnum.BOOL, is_bool=True)
+        attrs["u_count"] = ensure_attr("u_count", "U Count", ValueTypeEnum.INT)
+        attrs["free_u_count"] = ensure_attr("free_u_count", "Free U Count", ValueTypeEnum.INT)
+        attrs["u_slot_abnormal"] = ensure_attr(
+            "u_slot_abnormal", "U Slot Abnormal", ValueTypeEnum.BOOL, is_bool=True
+        )
+
+        types = {}
+        types[BuiltinModelEnum.DCIM_REGION] = ensure_type(
+            BuiltinModelEnum.DCIM_REGION, "DCIM Region", attrs["name"], attrs["name"]
+        )
+        types[BuiltinModelEnum.DCIM_IDC] = ensure_type(
+            BuiltinModelEnum.DCIM_IDC, "DCIM IDC", attrs["name"], attrs["name"]
+        )
+        types[BuiltinModelEnum.DCIM_SERVER_ROOM] = ensure_type(
+            BuiltinModelEnum.DCIM_SERVER_ROOM, "DCIM Server Room", attrs["name"], attrs["name"]
+        )
+        types[BuiltinModelEnum.DCIM_RACK] = ensure_type(
+            BuiltinModelEnum.DCIM_RACK, "DCIM Rack", attrs["name"], attrs["name"]
+        )
+        types[BuiltinModelEnum.IPAM_SCOPE] = ensure_type(
+            BuiltinModelEnum.IPAM_SCOPE, "IPAM Scope", attrs["name"], attrs["name"]
+        )
+        types[BuiltinModelEnum.IPAM_SUBNET] = ensure_type(
+            BuiltinModelEnum.IPAM_SUBNET, "IPAM Subnet", attrs["cidr"], attrs["name"]
+        )
+        types[BuiltinModelEnum.IPAM_ADDRESS] = ensure_type(
+            BuiltinModelEnum.IPAM_ADDRESS, "IPAM Address", attrs["ip"], attrs["ip"]
+        )
+
+        ensure_type_attr(types[BuiltinModelEnum.DCIM_REGION], attrs["name"], is_required=True)
+        ensure_type_attr(types[BuiltinModelEnum.DCIM_IDC], attrs["name"], is_required=True)
+        ensure_type_attr(types[BuiltinModelEnum.DCIM_SERVER_ROOM], attrs["name"], is_required=True)
+
+        ensure_type_attr(types[BuiltinModelEnum.DCIM_RACK], attrs["name"], is_required=True)
+        ensure_type_attr(types[BuiltinModelEnum.DCIM_RACK], attrs["u_count"], is_required=True)
+        ensure_type_attr(types[BuiltinModelEnum.DCIM_RACK], attrs["free_u_count"])
+        ensure_type_attr(types[BuiltinModelEnum.DCIM_RACK], attrs["u_slot_abnormal"])
+
+        ensure_type_attr(types[BuiltinModelEnum.IPAM_SCOPE], attrs["name"], is_required=True)
+
+        ensure_type_attr(types[BuiltinModelEnum.IPAM_SUBNET], attrs["name"])
+        ensure_type_attr(types[BuiltinModelEnum.IPAM_SUBNET], attrs["cidr"], is_required=True)
+        ensure_type_attr(types[BuiltinModelEnum.IPAM_SUBNET], attrs["hosts_count"])
+        ensure_type_attr(types[BuiltinModelEnum.IPAM_SUBNET], attrs["assign_count"])
+        ensure_type_attr(types[BuiltinModelEnum.IPAM_SUBNET], attrs["used_count"])
+        ensure_type_attr(types[BuiltinModelEnum.IPAM_SUBNET], attrs["free_count"])
+
+        ensure_type_attr(types[BuiltinModelEnum.IPAM_ADDRESS], attrs["name"])
+        ensure_type_attr(types[BuiltinModelEnum.IPAM_ADDRESS], attrs["ip"], is_required=True)
+        ensure_type_attr(types[BuiltinModelEnum.IPAM_ADDRESS], attrs["assign_status"])
+        ensure_type_attr(types[BuiltinModelEnum.IPAM_ADDRESS], attrs["is_used"])
+
+        relation_type = ensure_relation_type()
+        ensure_type_relation(
+            types[BuiltinModelEnum.DCIM_REGION], types[BuiltinModelEnum.DCIM_IDC], relation_type.id
+        )
+        ensure_type_relation(
+            types[BuiltinModelEnum.DCIM_IDC], types[BuiltinModelEnum.DCIM_SERVER_ROOM], relation_type.id
+        )
+        ensure_type_relation(
+            types[BuiltinModelEnum.DCIM_SERVER_ROOM], types[BuiltinModelEnum.DCIM_RACK], relation_type.id
+        )
+        ensure_type_relation(
+            types[BuiltinModelEnum.IPAM_SCOPE], types[BuiltinModelEnum.IPAM_SCOPE], relation_type.id
+        )
+        ensure_type_relation(
+            types[BuiltinModelEnum.IPAM_SCOPE], types[BuiltinModelEnum.IPAM_SUBNET], relation_type.id
+        )
+        ensure_type_relation(
+            types[BuiltinModelEnum.IPAM_SUBNET], types[BuiltinModelEnum.IPAM_SUBNET], relation_type.id
+        )
+        ensure_type_relation(
+            types[BuiltinModelEnum.IPAM_SUBNET], types[BuiltinModelEnum.IPAM_ADDRESS], relation_type.id
+        )
+
+        for attr in attrs.values():
+            AttributeCache.clean(attr)
+        for ci_type in types.values():
+            CITypeAttributesCache.clean(ci_type.id)
+            CITypeCache.clean(ci_type.id)
+        RelationTypeCache.clean(relation_type.id)
+
+    except Exception as e:
+        db.session.rollback()
+        raise click.ClickException(f"cmdb bootstrap built-in models failed: {e}")
+
+    click.echo("CMDB built-in models bootstrap completed.")
+    click.echo(json.dumps(summary, ensure_ascii=False))
+    click.echo("Next recommended commands:")
+    click.echo("  flask cmdb-init-acl")
+    click.echo("  flask cmdb-init-cache")
 
 
 @click.command()
