@@ -13,7 +13,7 @@
       <span :class="expandButtonClass" :style="{'background-color':(nodeProps.color||graphSetting.defaultNodeColor)}" @click.stop="expandOrCollapseNode">
       </span>
     </div>
-    <div v-if="nodeProps.html" v-html="nodeProps.html" />
+    <div v-if="nodeProps.html" v-html="safeHtml(nodeProps.html)" />
     <div
       v-else
       :class="['rel-node-shape-'+(nodeProps.nodeShape===undefined?graphSetting.defaultNodeShape:nodeProps.nodeShape),'rel-node-type-'+nodeProps.type, (nodeProps.id===graphSetting.checkedNodeId?'rel-node-checked':''), (nodeProps.selected?'rel-node-selected':''), nodeProps.styleClass, (hovering?'rel-node-hover':''), (nodeProps.innerHTML?'rel-diy-node':'')]"
@@ -23,9 +23,9 @@
       <template v-if="!(graphSetting.hideNodeContentByZoom === true && graphSetting.canvasZoom<40)">
         <slot :node="nodeProps" name="node">
           <div v-if="!nodeProps.innerHTML" :style="{'color':(nodeProps.fontColor || graphSetting.defaultNodeFontColor)}" class="c-node-text">
-            <span v-html="getNodeName()" />
+            <span v-html="safeHtml(getNodeName())" />
           </div>
-          <div v-else v-html="nodeProps.innerHTML" />
+          <div v-else v-html="safeHtml(nodeProps.innerHTML)" />
         </slot>
       </template>
     </div>
@@ -219,6 +219,14 @@ export default {
       if (this.onNodeClick) {
         this.onNodeClick(this.nodeProps, e)
       }
+    },
+    safeHtml(content) {
+      if (this.graphSetting && this.graphSetting.allowUnsafeHtml === true) {
+        return content || ''
+      }
+      const div = document.createElement('div')
+      div.textContent = content || ''
+      return div.innerHTML
     },
     // beforeEnter(el) {
     //   console.log('beforeEnter')
