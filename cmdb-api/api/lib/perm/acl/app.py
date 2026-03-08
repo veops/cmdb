@@ -83,8 +83,14 @@ class AppCRUD(object):
         if not isinstance(secret, str):
             abort(403, ErrFormat.app_secret_invalid)
         secret_sha256 = hashlib.sha256(app.secret_key.encode('utf-8')).hexdigest()
-        secret_md5 = hashlib.md5(app.secret_key.encode('utf-8')).hexdigest()
-        if not (hmac.compare_digest(secret_sha256, secret) or hmac.compare_digest(secret_md5, secret)):
+        authenticated = hmac.compare_digest(secret_sha256, secret)
+
+        if not authenticated and current_app.config.get("ACL_ALLOW_LEGACY_MD5_APP_SECRET", False):
+            # Backward compatibility for old clients; disabled by default.
+            secret_md5 = hashlib.md5(app.secret_key.encode('utf-8')).hexdigest()  # nosec B324
+            authenticated = hmac.compare_digest(secret_md5, secret)
+
+        if not authenticated:
             abort(403, ErrFormat.app_secret_invalid)
 
         token = jwt.encode({

@@ -25,10 +25,14 @@ def _build_signatures(path, secret, args):
     values = "".join([str(i) for i in (args or [])])
     payload = '{0}{1}{2}'.format(path or "", secret or "", values).encode("utf-8")
 
-    return {
+    signatures = {
         "sha256": hashlib.sha256(payload).hexdigest(),
-        "sha1": hashlib.sha1(payload).hexdigest(),
     }
+    if current_app.config.get("ACL_ALLOW_LEGACY_SHA1_SIGNATURE", False):
+        # Backward compatibility for old clients; disabled by default.
+        signatures["sha1"] = hashlib.sha1(payload).hexdigest()  # nosec B324
+
+    return signatures
 
 
 def _verify_signature(path, secret, args, provided):
@@ -38,13 +42,19 @@ def _verify_signature(path, secret, args, provided):
         return False
 
     signatures = _build_signatures(path, secret, args)
+    if hmac.compare_digest(signatures["sha256"], provided):
+        return True
 
-    return (hmac.compare_digest(signatures["sha256"], provided) or
-            hmac.compare_digest(signatures["sha1"], provided))
+    return "sha1" in signatures and hmac.compare_digest(signatures["sha1"], provided)
 
 
 def _is_bcrypt_hash(password):
     return isinstance(password, str) and password.startswith(("$2a$", "$2b$", "$2y$"))
+
+
+def _upgrade_legacy_password(principal, password):
+    principal.password = password
+    return True
 
 
 class App(Model):
@@ -172,8 +182,17 @@ class User(CRUDModel, SoftDeleteMixin):
                 return bcrypt.check_password_hash(self.password, password)
             except ValueError:
                 return False
-        legacy_md5 = hashlib.md5(password.encode('utf-8')).hexdigest()
-        return self.password == password or self.password == legacy_md5
+
+        if current_app.config.get("ACL_ALLOW_LEGACY_PLAINTEXT_PASSWORD", False):
+            if hmac.compare_digest(self.password, password):
+                return _upgrade_legacy_password(self, password)
+
+        if current_app.config.get("ACL_ALLOW_LEGACY_MD5_PASSWORD", False):
+            legacy_md5 = hashlib.md5(password.encode('utf-8')).hexdigest()  # nosec B324
+            if hmac.compare_digest(self.password, legacy_md5):
+                return _upgrade_legacy_password(self, password)
+
+        return False
 
 
 class RoleQuery(BaseQuery):
@@ -233,8 +252,17 @@ class Role(Model):
                 return bcrypt.check_password_hash(self.password, password)
             except ValueError:
                 return False
-        legacy_md5 = hashlib.md5(password.encode('utf-8')).hexdigest()
-        return self.password == password or self.password == legacy_md5
+
+        if current_app.config.get("ACL_ALLOW_LEGACY_PLAINTEXT_PASSWORD", False):
+            if hmac.compare_digest(self.password, password):
+                return _upgrade_legacy_password(self, password)
+
+        if current_app.config.get("ACL_ALLOW_LEGACY_MD5_PASSWORD", False):
+            legacy_md5 = hashlib.md5(password.encode('utf-8')).hexdigest()  # nosec B324
+            if hmac.compare_digest(self.password, legacy_md5):
+                return _upgrade_legacy_password(self, password)
+
+        return False
 
 
 class RoleRelation(Model):
