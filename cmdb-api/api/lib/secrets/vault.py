@@ -2,6 +2,7 @@ from base64 import b64decode
 from base64 import b64encode
 
 import hvac
+import os
 
 
 class VaultClient:
@@ -128,7 +129,9 @@ class VaultClient:
 
 if __name__ == "__main__":
     _base_url = "http://localhost:8200"
-    _token = "your token"
+    _token = os.environ.get("VAULT_TOKEN", "")
+    if not _token:
+        raise RuntimeError("VAULT_TOKEN is required")
 
     _path = "test001"
     # Example
