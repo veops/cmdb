@@ -1069,6 +1069,7 @@ if __name__ == "__main__":
         deleteCatalog: 'Delete Catalog',
         updateSubnet: 'Update Subnet',
         deleteSubnet: 'Delete Subnet',
+        moveSubnet: 'Move Subnet',
         revokeAddress: 'Revoke Address',
         operateTime: 'Operate Time',
         operateUser: 'Operate User',

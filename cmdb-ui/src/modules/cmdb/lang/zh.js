@@ -1065,6 +1065,7 @@ if __name__ == "__main__":
         deleteCatalog: '删除目录',
         updateSubnet: '修改子网',
         deleteSubnet: '删除子网',
+        moveSubnet: '移动子网',
         revokeAddress: '地址回收',
         operateTime: '操作时间',
         operateUser: '操作人',

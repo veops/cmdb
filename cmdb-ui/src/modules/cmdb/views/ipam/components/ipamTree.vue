@@ -13,12 +13,23 @@
         :treeData="filterTreeData"
         :selectedKeys="treeKey ? [treeKey] : []"
         :defaultExpandedKeys="treeKey ? [treeKey] : []"
+        :draggable="!searchValue"
+        :allowDrop="allowDrop"
+        @dragstart="handleDragStart"
+        @drop="handleDrop"
       >
         <template #title="treeNodeData">
           <div
-            class="ipam-tree-node"
+            :class="[
+              'ipam-tree-node',
+              treeNodeData.isSubnet && !searchValue ? 'ipam-tree-node-draggable' : ''
+            ]"
             @click="clickTreeNode(treeNodeData)"
           >
+            <OpsMoveIcon
+              v-if="treeNodeData.isSubnet && !searchValue"
+              class="ipam-tree-node-drag-icon"
+            />
             <ops-icon
               :type="treeNodeData.icon"
               class="ipam-tree-node-icon"
@@ -102,7 +113,8 @@
 
 <script>
 import _ from 'lodash'
-import { deleteIPAMSubnet, deleteIPAMScope } from '@/modules/cmdb/api/ipam.js'
+import { deleteIPAMSubnet, deleteIPAMScope, moveIPAMSubnet } from '@/modules/cmdb/api/ipam.js'
+import { ops_move_icon as OpsMoveIcon } from '@/core/icons'
 
 import SubnetForm from './subnetForm.vue'
 import CatalogForm from './catalogForm.vue'
@@ -110,6 +122,7 @@ import CatalogForm from './catalogForm.vue'
 export default {
   name: 'IPAMTree',
   components: {
+    OpsMoveIcon,
     SubnetForm,
     CatalogForm
   },
@@ -146,6 +159,21 @@ export default {
     }
   },
   methods: {
+    findNodeByKey(nodes, key) {
+      for (const node of nodes) {
+        if (String(node.key) === String(key)) {
+          return node
+        }
+        if (node.children) {
+          const foundNode = this.findNodeByKey(node.children, key)
+          if (foundNode) {
+            return foundNode
+          }
+        }
+      }
+      return null
+    },
+
     handleTreeDataBySearch(data) {
       const isMatch = data?.title?.indexOf?.(this.searchValue) !== -1
       if (!data?.children?.length) {
@@ -203,6 +231,50 @@ export default {
 
     clickTreeNode(node) {
       this.$emit('updateTreeKey', node.key)
+    },
+
+    allowDrop({ dropNode, dropPosition }) {
+      if (this.searchValue || dropPosition !== 0) {
+        return false
+      }
+
+      const targetNode = this.findNodeByKey(this.treeData, dropNode?.eventKey)
+      return targetNode?.key === 'all' || !targetNode?.isSubnet
+    },
+
+    handleDragStart(info) {
+      const dragNode = this.findNodeByKey(this.treeData, info?.node?.eventKey)
+      if (!dragNode?.isSubnet) {
+        const event = info && info.event
+        if (event && event.preventDefault) {
+          event.preventDefault()
+        }
+        if (event && event.stopPropagation) {
+          event.stopPropagation()
+        }
+        return false
+      }
+    },
+
+    async handleDrop(info) {
+      const dragNode = this.findNodeByKey(this.treeData, info?.dragNode?.eventKey)
+      const targetNode = this.findNodeByKey(this.treeData, info?.node?.eventKey)
+
+      if (!dragNode?.isSubnet || !targetNode) {
+        return
+      }
+
+      const targetParentId = targetNode.key === 'all' ? null : targetNode.key
+      if (`${dragNode.parentId || ''}` === `${targetParentId || ''}`) {
+        return
+      }
+
+      await moveIPAMSubnet(dragNode.key, {
+        target_parent_id: targetParentId
+      })
+
+      this.$message.success(this.$t('editSuccess'))
+      this.refreshData()
     }
   }
 }
@@ -223,8 +295,17 @@ export default {
     height: 100%;
 
     /deep/ .ant-tree {
+      .ant-tree-switcher {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 32px;
+        line-height: 32px;
+      }
+
       .ant-tree-node-content-wrapper {
-        width: calc(100% - 24px);
+        width: calc(100% - 18px);
         padding: 0px;
         display: inline-block;
         height: fit-content;
@@ -232,7 +313,7 @@ export default {
         .ant-tree-title {
           display: inline-block;
           width: 100%;
-          padding: 0 6px;
+          padding: 0 4px 0 2px;
         }
       }
 
@@ -261,6 +342,16 @@ export default {
     &-icon {
       font-size: 12px;
       flex-shrink: 0;
+    }
+
+    &-drag-icon {
+      width: 12px;
+      height: 12px;
+      margin-right: 1px;
+      flex-shrink: 0;
+      color: #A5A9BC;
+      opacity: 0;
+      transition: opacity 0.2s ease;
     }
 
     &-title {
@@ -306,8 +397,20 @@ export default {
     }
 
     &:hover {
+      .ipam-tree-node-drag-icon {
+        opacity: 1;
+      }
+
       .ipam-tree-node-action {
         display: inline-block;
+      }
+    }
+
+    &-draggable {
+      cursor: grab;
+
+      &:active {
+        cursor: grabbing;
       }
     }
   }

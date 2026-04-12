@@ -18,6 +18,7 @@ class OperateTypeEnum(BaseEnum):
     DELETE_SUBNET = "5"
     ASSIGN_ADDRESS = "6"
     REVOKE_ADDRESS = "7"
+    MOVE_SUBNET = "8"
 
 
 class SubnetBuiltinAttributes(BaseEnum):

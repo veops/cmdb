@@ -51,6 +51,15 @@ class SubnetView(APIView):
         return self.jsonify(id=SubnetManager().delete(_id))
 
 
+class SubnetMoveView(APIView):
+    url_prefix = "/ipam/subnet/<int:_id>/move"
+
+    @perms_role_required(app_cli.app_name, app_cli.resource_type_name, app_cli.op.IPAM,
+                         app_cli.op.read, app_cli.admin_name)
+    def put(self, _id):
+        return self.jsonify(id=SubnetManager().move(_id, request.values.get('target_parent_id')))
+
+
 class SubnetScopeView(APIView):
     url_prefix = ("/ipam/scope", "/ipam/scope/<int:_id>")
 

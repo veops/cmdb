@@ -27,6 +27,8 @@ class SubnetManager(object):
             404, ErrFormat.ipam_subnet_model_not_found.format(BuiltinModelEnum.IPAM_SUBNET))
 
         self.type_id = self.ci_type.id
+        self.scope_type = CITypeCache.get(BuiltinModelEnum.IPAM_SCOPE)
+        self.scope_type_id = self.scope_type.id if self.scope_type else None
 
     def scan_rules(self, oneagent_id, last_update_at=None):
         result = []
@@ -269,6 +271,66 @@ class SubnetManager(object):
                                     cidr=cur.get(SubnetBuiltinAttributes.CIDR),
                                     description="{} -> {}".format(cur.get(SubnetBuiltinAttributes.CIDR),
                                                                   kwargs.get(SubnetBuiltinAttributes.CIDR)))
+
+        return _id
+
+    def move(self, _id, target_parent_id=None):
+        if target_parent_id in ('', 'null'):
+            target_parent_id = None
+        elif target_parent_id is not None:
+            target_parent_id = int(target_parent_id)
+
+        current_subnet = CIManager.get_ci_by_id(_id, need_children=False)
+        if current_subnet['ci_type'] != BuiltinModelEnum.IPAM_SUBNET:
+            abort(400, ErrFormat.ipam_subnet_not_found)
+
+        if target_parent_id == _id:
+            abort(400, 'Cannot move subnet under itself')
+
+        if target_parent_id is not None and target_parent_id in CIRelationManager.recursive_children(_id):
+            abort(400, 'Cannot move subnet under its descendant')
+
+        parent_type_ids = [self.type_id] + ([self.scope_type_id] if self.scope_type_id else [])
+        current_parent_relations = CIRelation.get_by(only_query=True).join(
+            CI, CI.id == CIRelation.first_ci_id).filter(
+            CIRelation.second_ci_id == _id).filter(
+            CIRelation.ancestor_ids.is_(None)).filter(CI.type_id.in_(parent_type_ids)).all()
+
+        if len(current_parent_relations) > 1:
+            abort(400, 'Subnet has multiple parents')
+
+        current_parent_relation = current_parent_relations[0] if current_parent_relations else None
+        current_parent_id = current_parent_relation.first_ci_id if current_parent_relation else None
+
+        if current_parent_id == target_parent_id:
+            return _id
+
+        target_parent = None
+        if target_parent_id is not None:
+            target_parent = CIManager.get_ci_by_id(target_parent_id, need_children=False)
+            if target_parent['ci_type'] != BuiltinModelEnum.IPAM_SCOPE:
+                abort(400, 'Target node must be a scope or root')
+
+        self.validate_cidr(target_parent_id, current_subnet.get(SubnetBuiltinAttributes.CIDR), _id)
+
+        if current_parent_relation is not None:
+            CIRelationManager.delete(current_parent_relation.id, apply_async=False, valid=False)
+
+        if target_parent_id is not None:
+            CIRelationManager.add(target_parent_id, _id, valid=False, apply_async=False)
+
+        current_parent_name = 'root'
+        if current_parent_id is not None:
+            current_parent = CIManager.get_ci_by_id(current_parent_id, need_children=False)
+            current_parent_name = current_parent.get('name') or current_parent.get(SubnetBuiltinAttributes.CIDR) or 'root'
+
+        target_parent_name = 'root'
+        if target_parent is not None:
+            target_parent_name = target_parent.get('name') or target_parent.get(SubnetBuiltinAttributes.CIDR) or 'root'
+
+        OperateHistoryManager().add(operate_type=OperateTypeEnum.MOVE_SUBNET,
+                                    cidr=current_subnet.get(SubnetBuiltinAttributes.CIDR),
+                                    description='{} -> {}'.format(current_parent_name, target_parent_name))
 
         return _id
 

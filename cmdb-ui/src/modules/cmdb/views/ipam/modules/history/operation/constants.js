@@ -7,6 +7,7 @@ export const OPERATE_TYPE = {
   DELETE_SUBNET: '5',
   ASSIGN_ADDRESS: '6',
   REVOKE_ADDRESS: '7',
+  MOVE_SUBNET: '8',
 }
 
 export const OPERATE_TYPE_TEXT = {
@@ -18,6 +19,7 @@ export const OPERATE_TYPE_TEXT = {
   [OPERATE_TYPE.DELETE_SUBNET]: 'cmdb.ipam.deleteSubnet',
   [OPERATE_TYPE.ASSIGN_ADDRESS]: 'cmdb.ipam.addressAssign',
   [OPERATE_TYPE.REVOKE_ADDRESS]: 'cmdb.ipam.revokeAddress',
+  [OPERATE_TYPE.MOVE_SUBNET]: 'cmdb.ipam.moveSubnet',
 }
 
 export const OPERATE_TYPE_COLOR = {
@@ -52,5 +54,9 @@ export const OPERATE_TYPE_COLOR = {
   [OPERATE_TYPE.REVOKE_ADDRESS]: {
     color: '#0AA5A8',
     backgroundColor: '#E8FFFB'
+  },
+  [OPERATE_TYPE.MOVE_SUBNET]: {
+    color: '#722ED1',
+    backgroundColor: '#F9F0FF'
   },
 }

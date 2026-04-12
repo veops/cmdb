@@ -173,17 +173,14 @@ export default {
       }
 
       const allCount = treeData.reduce((acc, cur) => acc + cur.count, 0)
-      const rootShowSubnetBtn = treeData.every((item) => item.ci_type === SUB_NET_CITYPE_NAME)
-      const rootShowCatalogBtn = treeData.every((item) => item.ci_type === SCOPE_CITYPE_NAME)
-
       treeData.unshift({
         key: 'all',
         title: this.$t('all'),
         count: allCount,
         icon: 'veops-entire_network_',
         iconColor: '#2F54EB',
-        showCatalogBtn: rootShowCatalogBtn,
-        showSubnetBtn: rootShowSubnetBtn,
+        showCatalogBtn: true,
+        showSubnetBtn: true,
         parentId: '',
         class: 'ipam-tree-node-all'
       })
@@ -217,14 +214,13 @@ export default {
         return this.handleTreeData(item, type2name, key)
       })
 
-      const showSubnetBtn = children.every((item) => item.ci_type === SUB_NET_CITYPE_NAME)
       return {
         key,
         title,
         icon,
         iconColor,
-        showCatalogBtn: !isSubnet && !showSubnetBtn,
-        showSubnetBtn: showSubnetBtn,
+        showCatalogBtn: !isSubnet,
+        showSubnetBtn: true,
         isSubnet,
         parentId,
         ...data,

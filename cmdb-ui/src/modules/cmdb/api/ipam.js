@@ -37,6 +37,14 @@ export function deleteIPAMSubnet(id) {
   })
 }
 
+export function moveIPAMSubnet(id, data) {
+  return axios({
+    url: `/v0.1/ipam/subnet/${id}/move`,
+    method: 'PUT',
+    data
+  })
+}
+
 export function postIPAMScope(data) {
   return axios({
     url: '/v0.1/ipam/scope',
