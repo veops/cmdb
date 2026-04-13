@@ -130,7 +130,9 @@ export default {
       return this.$t('cmdb.components.readCIModalDesc')
     },
     attrGroup() {
-      return this.provide_attrGroup()
+      const attrGroup = this.provide_attrGroup?.() || []
+
+      return attrGroup.filter(group => group?.attributes?.length)
     },
     filerPerimissions() {
       return this.provide_filerPerimissions()
