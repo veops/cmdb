@@ -85,7 +85,7 @@
         <vxe-column type="checkbox" width="60px"></vxe-column>
         <vxe-column field="content" title="标题内容">
           <template #default="{row}">
-            <span v-html="row.content"></span>
+            <span>{{ row.content }}</span>
           </template>
         </vxe-column>
         <vxe-column field="created_at" title="提交时间" width="150px">
