@@ -262,6 +262,9 @@ def cmdb_trigger():
                 i = 0
                 triggers = CITypeTrigger.get_by(to_dict=False, __func_isnot__key_attr_id=None)
                 for trigger in triggers:
+                    if not trigger.option.get('enable'):
+                        continue
+
                     try:
                         ready_cis = CITriggerManager.waiting_cis(trigger)
                     except Exception as e:

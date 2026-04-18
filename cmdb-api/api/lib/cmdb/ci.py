@@ -1721,6 +1721,9 @@ class CITriggerManager(object):
 
     @classmethod
     def waiting_cis(cls, trigger):
+        if not trigger.option.get('enable'):
+            return []
+
         now = datetime.datetime.today()
 
         config = trigger.option.get('notifies') or {}
@@ -1731,7 +1734,12 @@ class CITriggerManager(object):
 
         value_table = TableMap(attr=attr).table
 
-        values = value_table.get_by(attr_id=attr.id, to_dict=False)
+        values = (
+            value_table.get_by(attr_id=attr.id, to_dict=False, only_query=True)
+            .join(CI, CI.id == value_table.ci_id)
+            .filter(CI.type_id == trigger.type_id)
+            .filter(CI.deleted.is_(False))
+        )
 
         result = []
         for v in values:
@@ -1754,6 +1762,9 @@ class CITriggerManager(object):
         :param only_test:
         :return:
         """
+        if not only_test and not trigger.option.get('enable'):
+            return False
+
         if (trigger.option.get('notifies', {}).get('notify_at') == datetime.datetime.now().strftime("%H:%M") or
             not trigger.option.get('notifies', {}).get('notify_at')) or only_test:
 
