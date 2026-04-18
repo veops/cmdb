@@ -26,6 +26,8 @@ from api.lib.cmdb.const import PermEnum
 from api.lib.cmdb.const import ResourceTypeEnum
 from api.lib.cmdb.custom_dashboard import SystemConfigManager
 from api.lib.cmdb.resp_format import ErrFormat
+from api.lib.cmdb.safe_script import UnsafeScriptError
+from api.lib.cmdb.safe_script import load_class_from_script
 from api.lib.cmdb.search import SearchError
 from api.lib.cmdb.search.ci import search as ci_search
 from api.lib.common_setting.role_perm_base import CMDBApp
@@ -52,11 +54,12 @@ app_cli = CMDBApp()
 def parse_plugin_script(script):
     attributes = []
     try:
-        x = compile(script, '', "exec")
-        local_ns = {}
-        exec(x, {}, local_ns)
-        unique_key = local_ns['AutoDiscovery']().unique_key
-        attrs = local_ns['AutoDiscovery']().attributes() or []
+        plugin_cls = load_class_from_script(script, 'AutoDiscovery')
+        plugin = plugin_cls()
+        unique_key = plugin.unique_key
+        attrs = plugin.attributes() or []
+    except UnsafeScriptError as e:
+        return abort(400, str(e))
     except Exception as e:
         return abort(400, str(e))
 
