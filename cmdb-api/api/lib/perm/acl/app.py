@@ -2,6 +2,7 @@
 
 import datetime
 import hashlib
+import hmac
 
 import jwt
 from flask import abort
@@ -79,7 +80,18 @@ class AppCRUD(object):
     @classmethod
     def gen_token(cls, key, secret):
         app = cls._get_by_key(key) or abort(404, ErrFormat.app_not_found.format("key={}".format(key)))
-        secret != hashlib.md5(app.secret_key.encode('utf-8')).hexdigest() and abort(403, ErrFormat.app_secret_invalid)
+        if not isinstance(secret, str):
+            abort(403, ErrFormat.app_secret_invalid)
+        secret_sha256 = hashlib.sha256(app.secret_key.encode('utf-8')).hexdigest()
+        authenticated = hmac.compare_digest(secret_sha256, secret)
+
+        if not authenticated and current_app.config.get("ACL_ALLOW_LEGACY_MD5_APP_SECRET", False):
+            # Backward compatibility for old clients; disabled by default.
+            secret_md5 = hashlib.md5(app.secret_key.encode('utf-8')).hexdigest()  # nosec B324
+            authenticated = hmac.compare_digest(secret_md5, secret)
+
+        if not authenticated:
+            abort(403, ErrFormat.app_secret_invalid)
 
         token = jwt.encode({
             'sub': app.name,

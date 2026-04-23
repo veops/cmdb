@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Click commands."""
 import os
+import re
 from glob import glob
 from subprocess import call
 
@@ -12,6 +13,7 @@ from api.extensions import db
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir, os.pardir)
 TEST_PATH = os.path.join(PROJECT_ROOT, "tests")
+LANG_CODE_RE = re.compile(r"^[A-Za-z0-9_.@-]+$")
 
 
 @click.command()
@@ -108,16 +110,22 @@ def translate():
     """Translation and localization commands."""
 
 
+def _run_translate_command(command, err):
+    if call(command):
+        raise RuntimeError(err)
+
+
 @translate.command()
 @click.argument('lang')
 def init(lang):
     """Initialize a new language."""
+    if not LANG_CODE_RE.fullmatch(lang):
+        raise click.BadParameter("Invalid language code", param_hint="lang")
 
-    if os.system('pybabel extract -F babel.cfg -k _l -o messages.pot .'):
-        raise RuntimeError('extract command failed')
-    if os.system(
-            'pybabel init -i messages.pot -d api/translations -l ' + lang):
-        raise RuntimeError('init command failed')
+    _run_translate_command(['pybabel', 'extract', '-F', 'babel.cfg', '-k', '_l', '-o', 'messages.pot', '.'],
+                           'extract command failed')
+    _run_translate_command(['pybabel', 'init', '-i', 'messages.pot', '-d', 'api/translations', '-l', lang],
+                           'init command failed')
     os.remove('messages.pot')
 
 
@@ -125,10 +133,10 @@ def init(lang):
 def update():
     """Update all languages."""
 
-    if os.system('pybabel extract -F babel.cfg -k _l -o messages.pot .'):
-        raise RuntimeError('extract command failed')
-    if os.system('pybabel update -i messages.pot -d api/translations'):
-        raise RuntimeError('update command failed')
+    _run_translate_command(['pybabel', 'extract', '-F', 'babel.cfg', '-k', '_l', '-o', 'messages.pot', '.'],
+                           'extract command failed')
+    _run_translate_command(['pybabel', 'update', '-i', 'messages.pot', '-d', 'api/translations'],
+                           'update command failed')
     os.remove('messages.pot')
 
 
@@ -136,5 +144,4 @@ def update():
 def compile():
     """Compile all languages."""
 
-    if os.system('pybabel compile -d api/translations'):
-        raise RuntimeError('compile command failed')
+    _run_translate_command(['pybabel', 'compile', '-d', 'api/translations'], 'compile command failed')

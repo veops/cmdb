@@ -5,7 +5,7 @@ import base64
 import elasticsearch
 import redis
 import six
-from Crypto.Cipher import AES
+from Cryptodome.Cipher import AES
 from elasticsearch import Elasticsearch
 from flask import current_app
 

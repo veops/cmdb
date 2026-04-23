@@ -369,7 +369,13 @@ class KeyManage:
                 "unseal token " + str(i + 1) + ": " + Fore.RED + Back.BLACK + v.decode("utf-8") + Style.RESET_ALL)
             print()
 
-        print(Fore.GREEN + "root token:  " + root_token.decode("utf-8") + Style.RESET_ALL)
+        show_root_token = str(os.environ.get("CMDB_SHOW_ROOT_TOKEN_ON_INIT", "")).lower() == "true"
+        if show_root_token:
+            print(Fore.GREEN + "root token:  " + root_token.decode("utf-8") + Style.RESET_ALL)
+        else:
+            token = root_token.decode("utf-8")
+            masked = "{0}...{1}".format(token[:4], token[-4:]) if len(token) > 8 else "********"
+            print(Fore.GREEN + "root token (masked):  " + masked + Style.RESET_ALL)
 
     @classmethod
     def print_response(cls, data):
