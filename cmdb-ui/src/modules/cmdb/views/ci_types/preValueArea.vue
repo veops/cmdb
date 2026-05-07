@@ -2,7 +2,6 @@
   <a-tabs
     id="preValueArea"
     v-model="activeKey"
-    @change="changeActiveKey"
     size="small"
     :tabBarStyle="{ borderBottom: 'none' }"
   >
@@ -206,12 +205,13 @@
       </div>
       <AllAttrDrawer ref="allAttrDrawer" />
 
-      <CustomCodeMirror
-        codeMirrorId="cmdb-pre-value"
-        ref="codemirror"
-        @changeCodeContent="changeCodeContent"
-      ></CustomCodeMirror>
-      <!-- <codemirror style="z-index: 9999" :options="cmOptions" v-model="script"></codemirror> -->
+      <MonacoCodeEditor
+        v-model="script"
+        language="python"
+        :height="300"
+        storage-key="cmdbPreValueMonacoEditorConfig"
+        @change="changeCodeContent"
+      />
     </a-tab-pane>
   </a-tabs>
 </template>
@@ -230,15 +230,11 @@ import AllAttrDrawer from './allAttrDrawer.vue'
 import PreValueDefine from './preValueAttr/define/index.vue'
 import PreValueBuiltIn from './preValueAttr/builtin/index.vue'
 import { ENUM_VALUE_TYPE } from './preValueAttr/constants.js'
-
-import CustomCodeMirror from '@/components/CustomCodeMirror'
-import 'codemirror/lib/codemirror.css'
-import 'codemirror/theme/monokai.css'
-require('codemirror/mode/python/python.js')
+import MonacoCodeEditor from '@/components/MonacoCodeEditor'
 
 export default {
   name: 'PreValueArea',
-  components: { draggable, PreValueTag, ColorPicker, Webhook, AttrFilter, CustomCodeMirror, AllAttrDrawer, PreValueDefine, PreValueBuiltIn },
+  components: { draggable, PreValueTag, ColorPicker, Webhook, AttrFilter, MonacoCodeEditor, AllAttrDrawer, PreValueDefine, PreValueBuiltIn },
   props: {
     disabled: {
       type: Boolean,
@@ -284,15 +280,6 @@ export default {
       filterExp: '',
       script:
         this.$t('cmdb.ciType.choiceScriptDemo'),
-      cmOptions: {
-        lineNumbers: true,
-        mode: 'python',
-        height: '200px',
-        theme: 'monokai',
-        tabSize: 4,
-        lineWrapping: true,
-        readOnly: this.disabled || !this.canDefineScript,
-      },
       curModelAttrList: [], // 当前模型属性
       cascade_attributes: [] // 级联属性id列表
     }
@@ -420,9 +407,6 @@ export default {
         if (choice_other.script) {
           this.activeKey = 'script'
           this.script = choice_other.script
-          this.$nextTick(() => {
-            this.$refs.codemirror.initCodeMirror(choice_other.script)
-          })
         } else {
           this.activeKey = 'choice_other'
           const { type_ids, attr_id, filter } = choice_other
@@ -493,9 +477,6 @@ export default {
 
         this.script = ''
         this.cascade_attributes = []
-        if (this.$refs.codemirror) {
-          this.$refs.codemirror.initCodeMirror('')
-        }
 
         this.choice_other = {
           type_ids: undefined,
@@ -526,13 +507,6 @@ export default {
     },
     changeCodeContent(value) {
       this.script = value && value.replace('\t', '    ')
-    },
-    changeActiveKey(value) {
-      if (value === 'script') {
-        this.$nextTick(() => {
-          this.$refs.codemirror.initCodeMirror(this.script)
-        })
-      }
     },
 
     showAllPropDrawer() {
@@ -592,6 +566,7 @@ export default {
   display: flex;
   justify-content: flex-end;
   margin-top: 10px;
+  margin-bottom: 10px;
 }
 </style>
 

@@ -113,6 +113,12 @@ export default {
     requestServiceError: 'Unknown error on the server, please contact the administrator',
     requestWait: 'The modification has been submitted, please wait for review ({time} seconds)',
     documentCenter: 'Document Center',
+    editorDecreaseFont: 'Decrease font size',
+    editorIncreaseFont: 'Increase font size',
+    editorWordWrap: 'Word wrap',
+    editorFormat: 'Format code',
+    editorFullscreen: 'Fullscreen',
+    editorExitFullscreen: 'Exit fullscreen',
     exception: {
         backToHome: 'Back to home page',
         desc1: 'Sorry, you are not authorized to access this page',

@@ -1,6 +1,6 @@
 <template>
   <CustomDrawer
-    width="800px"
+    width="980px"
     :title="title"
     :visible="visible"
     :bodyStyle="{ height: 'calc(-108px + 100vh)' }"
@@ -33,12 +33,13 @@
         </a-form-model-item>
       </a-form-model>
       <a-divider :style="{ margin: '5px 0' }">{{ $t('cmdb.ad.collectSettings') }}</a-divider>
-      <CustomCodeMirror
-        codeMirrorId="cmdb-adt"
+      <MonacoCodeEditor
         v-if="form.is_plugin"
-        ref="codemirror"
-        @changeCodeContent="changeCodeContent"
-      ></CustomCodeMirror>
+        v-model="plugin_script"
+        language="python"
+        :height="380"
+        storageKey="cmdbAutoDiscoveryPluginEditor"
+      />
       <div style="margin:10px 0;text-align:right;">
         <a-button
           v-show="form.is_plugin"
@@ -46,8 +47,9 @@
           type="primary"
           ghost
           @click="handleSubmit(true)"
-        >{{ $t('cmdb.ad.updateFields') }}</a-button
         >
+          {{ $t('cmdb.ad.updateFields') }}
+        </a-button>
       </div>
       <a-button
         v-show="!form.is_plugin"
@@ -124,15 +126,13 @@ import { DISCOVERY_CATEGORY_TYPE } from './constants.js'
 import AgentTable from './agentTable.vue'
 import CustomIconSelect from '@/components/CustomIconSelect'
 import HttpSnmpAD from '../../components/httpSnmpAD'
-import CustomCodeMirror from '@/components/CustomCodeMirror'
-import 'codemirror/lib/codemirror.css'
-import 'codemirror/theme/monokai.css'
+import MonacoCodeEditor from '@/components/MonacoCodeEditor'
 
 export default {
   name: 'EditDrawer',
   components: {
     CustomIconSelect,
-    CustomCodeMirror,
+    MonacoCodeEditor,
     HttpSnmpAD,
     AgentTable
   },
@@ -158,14 +158,6 @@ export default {
       tableData: [],
       editDefaultTableData: [],
       plugin_script: '',
-      cmOptions: {
-        lineNumbers: true,
-        mode: 'python',
-        height: '200px',
-        theme: 'monokai',
-        tabSize: 4,
-        lineWrapping: true,
-      },
       DISCOVERY_CATEGORY_TYPE,
     }
   },
@@ -222,11 +214,6 @@ export default {
           this.customIcon = { name: 'caise-chajian', color: '' }
           // eslint-disable-next-line no-useless-escape
           this.plugin_script = this.default_plugin_script
-        }
-        if (this.form?.is_plugin) {
-          this.$nextTick(() => {
-            this.$refs.codemirror.initCodeMirror(this.plugin_script)
-          })
         }
       })
     },
@@ -314,15 +301,10 @@ export default {
       }
     },
     changeIsPlugin(e) {
-      if (e.target.value) {
-        this.$nextTick(() => {
-          this.$refs.codemirror.initCodeMirror(this.plugin_script)
-        })
+      if (e.target.value && !this.plugin_script) {
+        this.plugin_script = this.default_plugin_script
       }
-    },
-    changeCodeContent(value) {
-      this.plugin_script = value && value.replace('\t', '    ')
-    },
+    }
   },
 }
 </script>

@@ -113,6 +113,12 @@ export default {
     requestServiceError: '服务端未知错误, 请联系管理员！',
     requestWait: '修改已提交，请等待审核（{time}s）',
     documentCenter: '文档中心',
+    editorDecreaseFont: '减小字号',
+    editorIncreaseFont: '增大字号',
+    editorWordWrap: '自动换行',
+    editorFormat: '格式化代码',
+    editorFullscreen: '全屏编辑',
+    editorExitFullscreen: '退出全屏',
     exception: {
         backToHome: '返回首页',
         desc1: '抱歉，你无权访问该页面',

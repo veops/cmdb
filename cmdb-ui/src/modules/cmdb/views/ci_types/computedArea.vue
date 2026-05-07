@@ -6,11 +6,13 @@
     </a-tab-pane>
     <a-tab-pane key="script" :disabled="!canDefineComputed">
       <span style="font-size:12px;" slot="tab">{{ $t('cmdb.ciType.code') }}</span>
-      <CustomCodeMirror
-        codeMirrorId="cmdb-computed-attr"
-        ref="codemirror"
-        @changeCodeContent="onCodeChange"
-      ></CustomCodeMirror>
+      <MonacoCodeEditor
+        v-model="compute_script"
+        language="python"
+        :height="360"
+        storage-key="cmdbComputedAreaMonacoEditorConfig"
+        @change="onCodeChange"
+      />
     </a-tab-pane>
     <template slot="tabBarExtraContent">
       <a-button size="small" @click="showAllPropDrawer">
@@ -32,16 +34,12 @@
 
 <script>
 import AllAttrDrawer from './allAttrDrawer.vue'
+import MonacoCodeEditor from '@/components/MonacoCodeEditor'
 
-import CustomCodeMirror from '@/components/CustomCodeMirror'
-import 'codemirror/lib/codemirror.css'
-import 'codemirror/theme/monokai.css'
-
-require('codemirror/mode/python/python.js')
 export default {
   name: 'ComputedArea',
   components: {
-    CustomCodeMirror,
+    MonacoCodeEditor,
     AllAttrDrawer
   },
   props: {
@@ -76,9 +74,6 @@ export default {
       this.compute_script = compute_script || this.$t('cmdb.ciType.computedScriptTemplate')
       if (compute_script) {
         this.activeKey = 'script'
-        this.$nextTick(() => {
-          this.$refs.codemirror.initCodeMirror(this.compute_script)
-        })
       } else {
         this.activeKey = 'expr'
       }
@@ -102,11 +97,6 @@ export default {
 
     handleTabsChange(activeKey) {
       console.log('handleTabsChange', activeKey)
-      if (activeKey === 'script') {
-        this.$nextTick(() => {
-          this.$refs.codemirror.initCodeMirror(this.compute_script)
-        })
-      }
     }
   },
 }

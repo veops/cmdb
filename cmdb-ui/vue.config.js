@@ -1,7 +1,5 @@
 const path = require('path')
-const webpack = require('webpack')
-const ThemeColorReplacer = require('webpack-theme-color-replacer')
-const generate = require('@ant-design/colors/lib/generate').default
+const { webpackPlugins } = require('./config/plugin.config')
 
 function resolve(dir) {
   return path.join(__dirname, dir)
@@ -11,37 +9,7 @@ function resolve(dir) {
 module.exports = {
   // runtimeCompiler: true,
   configureWebpack: {
-    plugins: [
-      // Ignore all locale files of moment.js
-      new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-      // generate theme color replacement styles
-      new ThemeColorReplacer({
-        fileName: 'css/theme-colors-[contenthash:8].css',
-        matchColors: getAntdSerials('#2f54eb'), // primary color series
-        // change style selectors to solve style override issues
-        changeSelector(selector) {
-          switch (selector) {
-            case '.ant-calendar-today .ant-calendar-date':
-              return ':not(.ant-calendar-selected-date):not(.ant-calendar-selected-day)' + selector
-            case '.ant-btn:focus,.ant-btn:hover':
-              return '.ant-btn:focus:not(.ant-btn-primary),.ant-btn:hover:not(.ant-btn-primary)'
-            case '.ant-steps-item-process .ant-steps-item-icon > .ant-steps-icon':
-              return ':not(.ant-steps-item-process)' + selector
-            case '.ant-btn.active,.ant-btn:active':
-              return '.ant-btn.active:not(.ant-btn-primary),.ant-btn:active:not(.ant-btn-primary)'
-            case '.ant-menu-horizontal>.ant-menu-item-active,.ant-menu-horizontal>.ant-menu-item-open,.ant-menu-horizontal>.ant-menu-item-selected,.ant-menu-horizontal>.ant-menu-item:hover,.ant-menu-horizontal>.ant-menu-submenu-active,.ant-menu-horizontal>.ant-menu-submenu-open,.ant-menu-horizontal>.ant-menu-submenu-selected,.ant-menu-horizontal>.ant-menu-submenu:hover':
-            case '.ant-menu-horizontal > .ant-menu-item-active,.ant-menu-horizontal > .ant-menu-item-open,.ant-menu-horizontal > .ant-menu-item-selected,.ant-menu-horizontal > .ant-menu-item:hover,.ant-menu-horizontal > .ant-menu-submenu-active,.ant-menu-horizontal > .ant-menu-submenu-open,.ant-menu-horizontal > .ant-menu-submenu-selected,.ant-menu-horizontal > .ant-menu-submenu:hover':
-              return '.ant-menu-horizontal > .ant-menu-item-active,.ant-menu-horizontal > .ant-menu-item-open,.ant-menu-horizontal > .ant-menu-item-selected,.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item:hover,.ant-menu-horizontal > .ant-menu-submenu-active,.ant-menu-horizontal > .ant-menu-submenu-open,.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu-selected,.ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu:hover'
-            case '.ant-menu-horizontal > .ant-menu-item-selected > a':
-              return ':not(.ant-menu-horizontal)' + selector
-            case '.ant-menu-horizontal > .ant-menu-item > a:hover':
-              return ':not(.ant-menu-horizontal)' + selector
-            default:
-              return selector
-          }
-        },
-      }),
-    ],
+    plugins: webpackPlugins,
   },
 
   chainWebpack: (config) => {
@@ -61,6 +29,15 @@ module.exports = {
       .loader('file-loader')
       .options({
         name: 'assets/[name].[hash:8].[ext]',
+      })
+
+    config.module
+      .rule('monaco-font')
+      .test(/\.ttf$/)
+      .use('file-loader')
+      .loader('file-loader')
+      .options({
+        name: 'fonts/[name].[hash:8].[ext]'
       })
   },
 
@@ -100,13 +77,4 @@ module.exports = {
   lintOnSave: undefined,
   // babel-loader no-ignore node_modules/*
   transpileDependencies: [],
-}
-
-function getAntdSerials(color) {
-  // Lighten (similar to less's tint)
-  const lightens = new Array(9).fill().map((t, i) => {
-    return ThemeColorReplacer.varyColor.lighten(color, i / 10)
-  })
-  const colorPalettes = generate(color)
-  return lightens.concat(colorPalettes)
 }
