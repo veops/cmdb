@@ -142,6 +142,11 @@ DEFAULT_PAGE_COUNT = 50
 # # permission
 WHITE_LIST = ['127.0.0.1']
 USE_ACL = True
+# Legacy compatibility switches. Keep disabled in new deployments.
+ACL_ALLOW_LEGACY_MD5_APP_SECRET = False
+ACL_ALLOW_LEGACY_SHA1_SIGNATURE = False
+ACL_ALLOW_LEGACY_MD5_PASSWORD = False
+ACL_ALLOW_LEGACY_PLAINTEXT_PASSWORD = False
 
 # # elastic search
 ES_HOST = '127.0.0.1'

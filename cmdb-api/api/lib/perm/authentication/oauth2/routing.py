@@ -23,21 +23,35 @@ from api.lib.perm.acl.cache import UserCache
 from api.lib.perm.acl.resp_format import ErrFormat
 
 blueprint = Blueprint('oauth2', __name__)
+OAUTH_HTTP_TIMEOUT = 5
+
+
+def _safe_next_path(target):
+    if not target:
+        return None
+
+    parsed = urlparse(target)
+    if parsed.scheme or parsed.netloc or target.startswith('//') or not target.startswith('/'):
+        return None
+
+    return target
 
 
 @blueprint.route('/api/<string:auth_type>/login')
 def login(auth_type):
     config = AuthenticateDataCRUD(auth_type.upper()).get()
 
-    if request.values.get("next"):
-        session["next"] = request.values.get("next")
+    next_path = _safe_next_path(request.values.get("next"))
+    if next_path:
+        session["next"] = next_path
 
     session[f'{auth_type}_state'] = secrets.token_urlsafe(16)
 
     auth_type = auth_type.upper()
 
-    redirect_uri = "{}://{}{}".format(urlparse(request.referrer).scheme,
-                                      urlparse(request.referrer).netloc,
+    referrer = request.referrer or request.host_url
+    redirect_uri = "{}://{}{}".format(urlparse(referrer).scheme,
+                                      urlparse(referrer).netloc,
                                       url_for('oauth2.callback', auth_type=auth_type.lower()))
     qs = urlencode({
         'client_id': config['client_id'],
@@ -55,9 +69,9 @@ def callback(auth_type):
     auth_type = auth_type.upper()
     config = AuthenticateDataCRUD(auth_type).get()
 
-    redirect_url = session.get("next") or config.get('after_login') or '/'
+    redirect_url = _safe_next_path(session.get("next")) or config.get('after_login') or '/'
 
-    if request.values['state'] != session.get(f'{auth_type.lower()}_state'):
+    if request.values.get('state') != session.get(f'{auth_type.lower()}_state'):
         return abort(401, "state is invalid")
 
     if 'code' not in request.values:
@@ -69,7 +83,7 @@ def callback(auth_type):
         'code': request.values['code'],
         'grant_type': current_app.config[f'{auth_type}_GRANT_TYPE'],
         'redirect_uri': url_for('oauth2.callback', auth_type=auth_type.lower(), _external=True),
-    }, headers={'Accept': 'application/json'})
+    }, headers={'Accept': 'application/json'}, timeout=OAUTH_HTTP_TIMEOUT)
     if response.status_code != 200:
         current_app.logger.error(response.text)
         return abort(401)
@@ -80,7 +94,7 @@ def callback(auth_type):
     response = requests.get(config['user_info']['url'], headers={
         'Authorization': 'Bearer {}'.format(access_token),
         'Accept': 'application/json',
-    })
+    }, timeout=OAUTH_HTTP_TIMEOUT)
     if response.status_code != 200:
         return abort(401)
 

@@ -210,12 +210,34 @@ export default {
     return {}
   },
   methods: {
+    escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+    },
+    escapeRegExp(value) {
+      return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    },
     markSearchValue(text) {
-      if (!text || !this.searchValue) {
-        return text
+      if (text === undefined || text === null) {
+        return ''
       }
-      const regex = new RegExp(`(${this.searchValue})`, 'gi')
-      return String(text).replace(
+
+      const safeText = this.escapeHtml(text)
+      if (!this.searchValue) {
+        return safeText
+      }
+
+      const keyword = this.escapeRegExp(this.searchValue)
+      if (!keyword) {
+        return safeText
+      }
+
+      const regex = new RegExp(`(${keyword})`, 'gi')
+      return safeText.replace(
         regex,
         `<span style="background-color: #D3EEFE; padding: 0 2px;">$1</span>`
       )

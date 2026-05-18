@@ -23,6 +23,8 @@ from api.lib.utils import get_page
 from api.lib.utils import get_page_size
 from api.resource import APIView
 
+HR_HTTP_TIMEOUT = 5
+
 
 class GetUserInfoView(APIView):
     url_prefix = "/users/info"
@@ -136,7 +138,7 @@ class UserOnTheJobView(APIView):
     def get(self):
         if current_app.config.get('HR_URI'):
             try:
-                return self.jsonify(requests.get(current_app.config["HR_URI"]).json())
+                return self.jsonify(requests.get(current_app.config["HR_URI"], timeout=HR_HTTP_TIMEOUT).json())
             except:
                 return abort(400, ErrFormat.invalid_request)
         else:

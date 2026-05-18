@@ -8,6 +8,9 @@ from jinja2 import Template
 from requests.auth import HTTPBasicAuth
 from requests_oauthlib import OAuth2Session
 
+WEBHOOK_DEFAULT_TIMEOUT = 5
+WEBHOOK_MAX_TIMEOUT = 30
+
 
 class BearerAuth(requests.auth.AuthBase):
     def __init__(self, token):
@@ -94,6 +97,14 @@ def webhook_request(webhook, payload):
 
     data = Template(json.dumps(webhook.get('body', ''))).render(payload).encode('utf-8')
     auth = _wrap_auth(**webhook.get('authorization', {}))
+    timeout = webhook.get('timeout', WEBHOOK_DEFAULT_TIMEOUT)
+    try:
+        timeout = float(timeout)
+        if timeout <= 0:
+            timeout = WEBHOOK_DEFAULT_TIMEOUT
+    except (TypeError, ValueError):
+        timeout = WEBHOOK_DEFAULT_TIMEOUT
+    timeout = min(timeout, WEBHOOK_MAX_TIMEOUT)
 
     if (webhook.get('authorization', {}).get("type") or '').lower() == 'oauth2.0':
         request = getattr(auth, webhook.get('method', 'GET').lower())
@@ -105,5 +116,6 @@ def webhook_request(webhook, payload):
         params=params,
         headers=headers or None,
         data=data,
-        auth=auth
+        auth=auth,
+        timeout=timeout,
     )

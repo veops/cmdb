@@ -8,6 +8,8 @@ from wtforms import StringField
 from wtforms import validators
 from flask import abort, current_app
 
+NOTICE_HTTP_TIMEOUT = 5
+
 
 class NoticeConfigCRUD(object):
 
@@ -123,7 +125,7 @@ class NoticeConfigCRUD(object):
             "tos": [recipient_email],
         }
         current_app.logger.info(f"test_send_email: {url}, {payload}")
-        response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload, timeout=NOTICE_HTTP_TIMEOUT)
         if response.status_code != 200:
             abort(400, response.text)
 

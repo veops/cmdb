@@ -3,12 +3,14 @@
 
 import copy
 import hashlib
+import hmac
 from datetime import datetime
 
 from flask import current_app
 from flask import session
 from flask_sqlalchemy import BaseQuery
 
+from api.extensions import bcrypt
 from api.extensions import db
 from api.lib.database import CRUDModel
 from api.lib.database import Model
@@ -17,6 +19,42 @@ from api.lib.database import SoftDeleteMixin
 from api.lib.perm.acl.const import ACL_QUEUE
 from api.lib.perm.acl.const import OperateType
 from api.lib.perm.acl.resp_format import ErrFormat
+
+
+def _build_signatures(path, secret, args):
+    values = "".join([str(i) for i in (args or [])])
+    payload = '{0}{1}{2}'.format(path or "", secret or "", values).encode("utf-8")
+
+    signatures = {
+        "sha256": hashlib.sha256(payload).hexdigest(),
+    }
+    if current_app.config.get("ACL_ALLOW_LEGACY_SHA1_SIGNATURE", False):
+        # Backward compatibility for old clients; disabled by default.
+        signatures["sha1"] = hashlib.sha1(payload).hexdigest()  # nosec B324
+
+    return signatures
+
+
+def _verify_signature(path, secret, args, provided):
+    if isinstance(provided, bytes):
+        provided = provided.decode("utf-8", "ignore")
+    if not isinstance(provided, str):
+        return False
+
+    signatures = _build_signatures(path, secret, args)
+    if hmac.compare_digest(signatures["sha256"], provided):
+        return True
+
+    return "sha1" in signatures and hmac.compare_digest(signatures["sha1"], provided)
+
+
+def _is_bcrypt_hash(password):
+    return isinstance(password, str) and password.startswith(("$2a$", "$2b$", "$2y$"))
+
+
+def _upgrade_legacy_password(principal, password):
+    principal.password = password
+    return True
 
 
 class App(Model):
@@ -55,8 +93,7 @@ class UserQuery(BaseQuery):
         user = self.filter(User.key == key).filter(User.deleted.is_(False)).filter(User.block == 0).first()
         if not user:
             return None, False
-        if user and hashlib.sha1('{0}{1}{2}'.format(
-                path, user.secret, "".join(args)).encode("utf-8")).hexdigest() == secret:
+        if user and _verify_signature(path, user.secret, args, secret):
             authenticated = True
         else:
             authenticated = False
@@ -132,14 +169,30 @@ class User(CRUDModel, SoftDeleteMixin):
         return self._password
 
     def _set_password(self, password):
-        self._password = hashlib.md5(password.encode('utf-8')).hexdigest()
+        if password:
+            self._password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     password = db.synonym("_password", descriptor=property(_get_password, _set_password))
 
     def check_password(self, password):
         if self.password is None:
             return False
-        return self.password == password or self.password == hashlib.md5(password.encode('utf-8')).hexdigest()
+        if _is_bcrypt_hash(self.password):
+            try:
+                return bcrypt.check_password_hash(self.password, password)
+            except ValueError:
+                return False
+
+        if current_app.config.get("ACL_ALLOW_LEGACY_PLAINTEXT_PASSWORD", False):
+            if hmac.compare_digest(self.password, password):
+                return _upgrade_legacy_password(self, password)
+
+        if current_app.config.get("ACL_ALLOW_LEGACY_MD5_PASSWORD", False):
+            legacy_md5 = hashlib.md5(password.encode('utf-8')).hexdigest()  # nosec B324
+            if hmac.compare_digest(self.password, legacy_md5):
+                return _upgrade_legacy_password(self, password)
+
+        return False
 
 
 class RoleQuery(BaseQuery):
@@ -162,8 +215,7 @@ class RoleQuery(BaseQuery):
         role = self.filter(Role.key == key).filter(Role.deleted.is_(False)).first()
         if not role:
             return None, False
-        if role and hashlib.sha1('{0}{1}{2}'.format(
-                path, role.secret, "".join(args)).encode("utf-8")).hexdigest() == secret:
+        if role and _verify_signature(path, role.secret, args, secret):
             authenticated = True
         else:
             authenticated = False
@@ -188,14 +240,29 @@ class Role(Model):
 
     def _set_password(self, password):
         if password:
-            self._password = hashlib.md5(password.encode('utf-8')).hexdigest()
+            self._password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     password = db.synonym("_password", descriptor=property(_get_password, _set_password))
 
     def check_password(self, password):
         if self.password is None:
             return False
-        return self.password == password or self.password == hashlib.md5(password.encode('utf-8')).hexdigest()
+        if _is_bcrypt_hash(self.password):
+            try:
+                return bcrypt.check_password_hash(self.password, password)
+            except ValueError:
+                return False
+
+        if current_app.config.get("ACL_ALLOW_LEGACY_PLAINTEXT_PASSWORD", False):
+            if hmac.compare_digest(self.password, password):
+                return _upgrade_legacy_password(self, password)
+
+        if current_app.config.get("ACL_ALLOW_LEGACY_MD5_PASSWORD", False):
+            legacy_md5 = hashlib.md5(password.encode('utf-8')).hexdigest()  # nosec B324
+            if hmac.compare_digest(self.password, legacy_md5):
+                return _upgrade_legacy_password(self, password)
+
+        return False
 
 
 class RoleRelation(Model):
