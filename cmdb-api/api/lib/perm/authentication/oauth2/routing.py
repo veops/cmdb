@@ -39,6 +39,9 @@ def login(auth_type):
     redirect_uri = "{}://{}{}".format(urlparse(request.referrer).scheme,
                                       urlparse(request.referrer).netloc,
                                       url_for('oauth2.callback', auth_type=auth_type.lower()))
+    # Persist redirect_uri for callback token exchange to avoid
+    # reverse proxy Host normalization causing redirect_uri mismatch.
+    session[f'{auth_type.lower()}_redirect_uri'] = redirect_uri
     qs = urlencode({
         'client_id': config['client_id'],
         'redirect_uri': redirect_uri,
@@ -63,12 +66,16 @@ def callback(auth_type):
     if 'code' not in request.values:
         return abort(401, 'code is invalid')
 
+    redirect_uri = session.get(f'{auth_type.lower()}_redirect_uri') or session.get(
+        f'{auth_type}_redirect_uri') or url_for(
+        'oauth2.callback', auth_type=auth_type.lower(), _external=True)
+
     response = requests.post(config['token_url'], data={
         'client_id': config['client_id'],
         'client_secret': config['client_secret'],
         'code': request.values['code'],
         'grant_type': current_app.config[f'{auth_type}_GRANT_TYPE'],
-        'redirect_uri': url_for('oauth2.callback', auth_type=auth_type.lower(), _external=True),
+        'redirect_uri': redirect_uri,
     }, headers={'Accept': 'application/json'})
     if response.status_code != 200:
         current_app.logger.error(response.text)
@@ -126,6 +133,7 @@ def logout(auth_type):
     "acl" in session and session.pop("acl")
     "uid" in session and session.pop("uid")
     f'{auth_type}_state' in session and session.pop(f'{auth_type}_state')
+    f'{auth_type}_redirect_uri' in session and session.pop(f'{auth_type}_redirect_uri')
     "next" in session and session.pop("next")
 
     redirect_url = url_for('oauth2.login', auth_type=auth_type, _external=True, next=request.referrer)

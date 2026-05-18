@@ -70,7 +70,7 @@ export default {
         username: 'name',
         avatar: 'picture',
       },
-      scopes: this.data_type === 'OAUTH2' ? ['profile', 'email'] : ['profile', 'email', 'openId'],
+      scopes: this.data_type === 'OAUTH2' ? ['profile', 'email'] : ['profile', 'email', 'openid'],
       after_login: '/',
     }
     return {
