@@ -20,6 +20,7 @@ from api.lib.cmdb.const import REDIS_PREFIX_CI
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION
 from api.lib.cmdb.const import REDIS_PREFIX_CI_RELATION2
 from api.lib.cmdb.const import RelationSourceEnum
+from api.lib.cmdb.const import BuiltinModelEnum
 from api.lib.cmdb.perms import CIFilterPermsCRUD
 from api.lib.cmdb.utils import TableMap
 from api.lib.decorator import flush_db
@@ -168,6 +169,25 @@ def ci_relation_cache(parent_id, child_id, ancestor_ids):
 
             rd.create_or_update({key: json.dumps(grandson)}, REDIS_PREFIX_CI_RELATION2)
 
+        # Check if parent is a DCIM rack and child has U-related attributes
+        # If so, recalculate the rack's free U count
+        try:
+            from api.lib.cmdb.cache import CITypeCache
+            from api.lib.cmdb.dcim.rack import RackManager
+            from api.lib.cmdb.dcim.const import RackBuiltinAttributes
+
+            parent_ci = CI.get_by_id(parent_id)
+            if parent_ci and parent_ci.ci_type.name == BuiltinModelEnum.DCIM_RACK:
+                # Check if child CI has U_START attribute (indicating it's a rack-mounted device)
+                child_ci = api.lib.cmdb.ci.CIManager().get_ci_by_id(child_id, need_children=False)
+                if child_ci and child_ci.get(RackBuiltinAttributes.U_START) is not None:
+                    # Recalculate rack free U count
+                    payload = {RackBuiltinAttributes.FREE_U_COUNT: RackManager.calc_u_free_count(parent_id)}
+                    api.lib.cmdb.ci.CIManager().update(parent_id, _sync=True, **payload)
+                    current_app.logger.info("Updated rack {} free U count after adding device {}".format(parent_id, child_id))
+        except Exception as e:
+            current_app.logger.warning("Failed to update DCIM rack U count: {}".format(e))
+
     current_app.logger.info("ADD ci relation cache: {0} -> {1}".format(parent_id, child_id))
 
 
@@ -241,6 +261,25 @@ def ci_relation_delete(parent_id, child_id, ancestor_ids):
                 grandson.pop(str(child_id))
 
             rd.create_or_update({key: json.dumps(grandson)}, REDIS_PREFIX_CI_RELATION2)
+
+        # Check if parent is a DCIM rack and child was a rack-mounted device
+        # If so, recalculate the rack's free U count
+        try:
+            from api.lib.cmdb.cache import CITypeCache
+            from api.lib.cmdb.dcim.rack import RackManager
+            from api.lib.cmdb.dcim.const import RackBuiltinAttributes
+
+            parent_ci = CI.get_by_id(parent_id)
+            if parent_ci and parent_ci.ci_type.name == BuiltinModelEnum.DCIM_RACK:
+                # Check if child CI had U_START attribute (indicating it was a rack-mounted device)
+                child_ci = api.lib.cmdb.ci.CIManager().get_ci_by_id(child_id, need_children=False)
+                if child_ci and child_ci.get(RackBuiltinAttributes.U_START) is not None:
+                    # Recalculate rack free U count
+                    payload = {RackBuiltinAttributes.FREE_U_COUNT: RackManager.calc_u_free_count(parent_id)}
+                    api.lib.cmdb.ci.CIManager().update(parent_id, _sync=True, **payload)
+                    current_app.logger.info("Updated rack {} free U count after removing device {}".format(parent_id, child_id))
+        except Exception as e:
+            current_app.logger.warning("Failed to update DCIM rack U count: {}".format(e))
 
     current_app.logger.info("DELETE ci relation cache: {0} -> {1}".format(parent_id, child_id))
 
