@@ -254,4 +254,39 @@ export default {
     }
   }
 }
+
+@media screen and (max-width: 768px) {
+  .ops-login {
+    min-width: auto;
+    flex-direction: column;
+
+    .ops-login-left {
+      width: 100%;
+      height: 30vh;
+      min-height: 180px;
+
+      > img {
+        width: 60%;
+        max-width: 300px;
+      }
+
+      > span {
+        font-size: 18px;
+        bottom: 12%;
+      }
+    }
+
+    .ops-login-right {
+      width: 100%;
+      padding: 24px 32px;
+
+      > img {
+        width: 50%;
+        max-width: 200px;
+        margin-left: 25%;
+        margin-bottom: 16px;
+      }
+    }
+  }
+}
 </style>
