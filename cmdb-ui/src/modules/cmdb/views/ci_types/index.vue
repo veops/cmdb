@@ -58,6 +58,7 @@
                     name="file"
                     accept=".json"
                     :showUploadList="false"
+                    :with-credentials="true"
                     style="display: inline-block"
                     :action="ciTypesUploadUrl"
                     @change="changeUploadFile"
