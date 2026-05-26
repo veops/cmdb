@@ -27,6 +27,11 @@
           <a-select-option v-for="item in typeList" :key="item.id" :values="item.id">{{ item.label }}</a-select-option>
         </a-select>
       </a-form-item>
+      <a-form-item :label="$t('cmdb.ci.qrcodeExport')">
+        <a-checkbox v-decorator="['exportQRCode', { valuePropName: 'checked', initialValue: false }]">
+          {{ $t('cmdb.ci.qrcodeExport') }}
+        </a-checkbox>
+      </a-form-item>
       <a-form-item :label="$t('cmdb.ciType.selectAttributes')">
         <div
           :style="{

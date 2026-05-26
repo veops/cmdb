@@ -54,6 +54,13 @@
                 <ops-icon type="ops-cmdb-citype" />
                 {{ $t('cmdb.menu.citypeManage') }}
               </a-menu-item>
+              <a-menu-item
+                key="qrcodeExportAll"
+                @click="openBatchQRCodeAll"
+              >
+                <a-icon type="qrcode" />
+                {{ $t('cmdb.ci.qrcodeExportAll') }}
+              </a-menu-item>
             </a-menu>
           </a-dropdown>
         </a-space>
@@ -75,6 +82,8 @@
           />
           <div class="ops-list-batch-action" v-show="!!selectedRowKeys.length">
             <span @click="$refs.create.handleOpen(true, 'update')">{{ $t('update') }}</span>
+            <a-divider type="vertical" />
+            <span @click="openBatchQRCode">{{ $t('cmdb.ci.qrcodeExport') }}</span>
             <a-divider type="vertical" />
             <span @click="openBatchDownload">{{ $t('download') }}</span>
             <a-divider type="vertical" />
@@ -141,6 +150,7 @@
         />
         <BatchDownload ref="batchDownload" @batchDownload="batchDownload" />
         <CiRollbackForm ref="ciRollbackForm" @batchRollbackAsync="batchRollbackAsync($event)" :ciIds="selectedRowKeys" />
+        <QRCodeBatchExport ref="qrcodeBatchExport" />
         <MetadataDrawer ref="metadataDrawer" />
         <CMDBGrant ref="cmdbGrant" resourceTypeName="CIType" app_id="cmdb" />
       </div>
@@ -151,6 +161,9 @@
 <script>
 import _ from 'lodash'
 import Sortable from 'sortablejs'
+import ExcelJS from 'exceljs'
+import FileSaver from 'file-saver'
+import QRCode from 'qrcode'
 
 import { searchCI, updateCI, deleteCI } from '@/modules/cmdb/api/ci'
 import { getSubscribeAttributes, subscribeCIType, subscribeTreeView } from '@/modules/cmdb/api/preference'
@@ -166,6 +179,7 @@ import PreferenceSearch from '../../components/preferenceSearch/preferenceSearch
 import MetadataDrawer from './modules/MetadataDrawer.vue'
 import CMDBGrant from '../../components/cmdbGrant'
 import CiRollbackForm from './modules/ciRollbackForm.vue'
+import QRCodeBatchExport from '@/modules/cmdb/components/QRCodeBatchExport.vue'
 import SearchForm from '@/modules/cmdb/components/searchForm/SearchForm.vue'
 import CreateInstanceForm from './modules/CreateInstanceForm'
 import CiDetailDrawer from './modules/ciDetailDrawer.vue'
@@ -184,6 +198,7 @@ export default {
     MetadataDrawer,
     CMDBGrant,
     CiRollbackForm,
+    QRCodeBatchExport,
     CITable
   },
   props: {
@@ -440,7 +455,23 @@ export default {
         ciTypeName: this.CIType.alias || this.CIType.name,
       })
     },
-    batchDownload({ filename, type, checkedKeys }) {
+    openBatchQRCode() {
+      const ciList = this.selectedRowKeys.map((ciId) => ({
+        ciId,
+        typeId: this.typeId,
+        label: (this.instanceList.find((i) => (i.ci_id || i._id) === ciId) || {}).name || `CI ${ciId}`
+      }))
+      this.$refs.qrcodeBatchExport.open(ciList)
+    },
+    openBatchQRCodeAll() {
+      const ciList = this.instanceList.map((ci) => ({
+        ciId: ci.ci_id || ci._id,
+        typeId: ci._type || this.typeId,
+        label: ci.name || ci.hostname || ci.ip || `CI ${ci.ci_id || ci._id}`
+      }))
+      this.$refs.qrcodeBatchExport.open(ciList)
+    },
+    batchDownload({ filename, type, checkedKeys, exportQRCode }) {
       const jsonAttrList = []
       checkedKeys.forEach((key) => {
         const _find = this.attrList.find((attr) => attr.name === key)
@@ -450,7 +481,15 @@ export default {
         ...this.$refs.xTable.getVxetableRef().getCheckboxReserveRecords(),
         ...this.$refs.xTable.getVxetableRef().getCheckboxRecords(true),
       ])
-      this.$refs.xTable.getVxetableRef().exportData({
+
+      const tableRef = this.$refs.xTable.getVxetableRef()
+
+      if (exportQRCode) {
+        this.batchDownloadWithQRCode({ filename, checkedKeys, jsonAttrList, data, tableRef })
+        return
+      }
+
+      tableRef.exportData({
         filename,
         type,
         columnFilterMethod({ column }) {
@@ -464,8 +503,89 @@ export default {
         ],
       })
       this.selectedRowKeys = []
-      this.$refs.xTable.getVxetableRef().clearCheckboxRow()
-      this.$refs.xTable.getVxetableRef().clearCheckboxReserve()
+      tableRef.clearCheckboxRow()
+      tableRef.clearCheckboxReserve()
+    },
+    async batchDownloadWithQRCode({ filename, checkedKeys, jsonAttrList, data, tableRef }) {
+      const columns = tableRef.getColumns()
+      const checkedCols = columns.filter((col) => col.property && checkedKeys.includes(col.property))
+      const checkedColProps = checkedCols.map((c) => c.property)
+
+      const wb = new ExcelJS.Workbook()
+      const ws = wb.addWorksheet(filename || 'Sheet1')
+
+      const qrColHeader = this.$t('cmdb.ci.qrcode')
+      const allHeaders = [qrColHeader, ...checkedCols.map((c) => c.title || c.property)]
+      ws.columns = allHeaders.map((h, i) => ({
+        header: h,
+        key: i === 0 ? '__qr__' : checkedColProps[i - 1],
+        width: i === 0 ? 22 : 18
+      }))
+      ws.getRow(1).height = 30
+      ws.getRow(1).eachCell((cell) => {
+        cell.font = { bold: true, size: 12 }
+        cell.alignment = { vertical: 'middle', horizontal: 'center' }
+      })
+
+      for (let rowIdx = 0; rowIdx < data.length; rowIdx++) {
+        const item = data[rowIdx]
+        const ciId = item.ci_id || item._id
+        const typeId = item._type || this.typeId
+        const mobileUrl = `${window.location.origin}/cmdb/mobile/${typeId}/${ciId}`
+
+        const rowValues = {}
+        rowValues.__qr__ = ''
+        checkedColProps.forEach((prop) => {
+          let val = item[prop]
+          if (jsonAttrList.includes(prop) && val) {
+            val = JSON.stringify(val)
+          }
+          rowValues[prop] = val
+        })
+
+        const row = ws.addRow(rowValues)
+        row.height = 110
+
+        row.eachCell((cell) => {
+          cell.alignment = { vertical: 'middle', wrapText: true }
+        })
+
+        const qrCell = row.getCell('__qr__')
+        qrCell.alignment = { vertical: 'middle', horizontal: 'center' }
+
+        try {
+          const qrDataUrl = await QRCode.toDataURL(mobileUrl, {
+            width: 120,
+            margin: 1,
+            color: { dark: '#000000', light: '#ffffff' }
+          })
+
+          const base64Data = qrDataUrl.split(',')[1]
+          const imageId = wb.addImage({
+            base64: base64Data,
+            extension: 'png'
+          })
+
+          ws.addImage(imageId, {
+            tl: { col: 0, row: row.number - 1 },
+            ext: { width: 80, height: 80 },
+            editAs: 'oneCell'
+          })
+        } catch (e) {
+          qrCell.value = 'QR ERR'
+        }
+      }
+
+      const buffer = await wb.xlsx.writeBuffer()
+      const blob = new Blob([buffer], { type: 'application/octet-stream' })
+      const fileName = `${filename}.xlsx`
+      FileSaver.saveAs(blob, fileName)
+
+      this.selectedRowKeys = []
+      tableRef.clearCheckboxRow()
+      tableRef.clearCheckboxReserve()
+
+      this.$message.success(this.$t('export') + ' ' + this.$t('success'))
     },
     batchUpdate(values) {
       const that = this

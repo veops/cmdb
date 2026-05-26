@@ -1,10 +1,13 @@
 <template>
   <div :style="{ height: '100%' }">
     <a-tabs v-if="hasPermission" class="ci-detail-tab" v-model="activeTabKey" @change="changeTab">
-      <a @click="shareCi" slot="tabBarExtraContent" :style="{ marginRight: '24px' }">
-        <a-icon type="share-alt" />
-        {{ $t('cmdb.ci.share') }}
-      </a>
+      <span slot="tabBarExtraContent" class="tab-bar-extra">
+        <QRCodeButton :typeId="typeId" :ciId="ciId" />
+        <a @click="shareCi">
+          <a-icon type="share-alt" />
+          {{ $t('cmdb.ci.share') }}
+        </a>
+      </span>
       <a-tab-pane key="tab_1">
         <span slot="tab"><a-icon type="book" />{{ $t('cmdb.ci.detail') }}</span>
 
@@ -223,6 +226,7 @@ import TriggerTable from '../../operation_history/modules/triggerTable.vue'
 import RelatedItsm from './ciDetailRelatedItsm.vue'
 import CIRollbackForm from './ciRollbackForm.vue'
 import OperateTypeTag from '../../operation_history/components/OperateTypeTag.vue'
+import QRCodeButton from '@/modules/cmdb/components/QRCodeButton.vue'
 
 export default {
   name: 'CiDetailTab',
@@ -236,7 +240,8 @@ export default {
     CIDetailTitle,
     CIDetailTableTitle,
     CIRelationTable,
-    OperateTypeTag
+    OperateTypeTag,
+    QRCodeButton
   },
   props: {
     typeId: {
