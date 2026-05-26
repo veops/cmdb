@@ -304,7 +304,7 @@ class CIMobileDetailView(APIView):
             children = CIRelationManager.get_children(ci_id, ret_key=RetKey.NAME)
             for type_name, cis in children.items():
                 for c in cis:
-                    c["_type_name"] = type_name
+                    c["_type_name"] = CITypeCache.get(type_name).alias if type_name else type_name
                     relations["children"].append(c)
 
             parent_ids = CIRelationManager.get_parent_ids([ci_id])
@@ -313,7 +313,8 @@ class CIMobileDetailView(APIView):
                     parent_ci = CIManager.get_cis_by_ids([str(p_id)], ret_key=RetKey.NAME)
                     if parent_ci:
                         for p in parent_ci:
-                            p["_type_name"] = CITypeCache.get(p_type_id).name if p_type_id else ""
+                            p_type = CITypeCache.get(p_type_id) if p_type_id else None
+                            p["_type_name"] = p_type.alias if p_type else ""
                             relations["parents"].append(p)
         except Exception:
             pass

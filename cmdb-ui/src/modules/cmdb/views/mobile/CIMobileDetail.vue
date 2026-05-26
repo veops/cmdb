@@ -35,15 +35,20 @@
             <span class="mobile-attr-label">{{ entry.alias }}</span>
             <span class="mobile-attr-value">{{ entry.value }}</span>
           </div>
+          <div v-if="coreAttrEntries.length === 0" class="mobile-attr-empty">
+            {{ $t('noData') }}
+          </div>
         </div>
       </div>
 
       <div class="mobile-card" v-if="parentRelations.length">
-        <div class="mobile-card-title">
+        <div class="mobile-card-title mobile-card-title-collapsible" @click="parentCollapsed = !parentCollapsed">
           <a-icon type="arrow-up" />
           {{ $t('cmdb.ci.parentRelations') }}
+          <span class="mobile-card-title-count">({{ parentRelations.length }})</span>
+          <a-icon :type="parentCollapsed ? 'down' : 'up'" class="mobile-card-title-arrow" />
         </div>
-        <div class="mobile-card-body">
+        <div class="mobile-card-body" v-show="!parentCollapsed">
           <div
             class="mobile-relation-item"
             v-for="(item, idx) in parentRelations"
@@ -61,11 +66,13 @@
       </div>
 
       <div class="mobile-card" v-if="childRelations.length">
-        <div class="mobile-card-title">
+        <div class="mobile-card-title mobile-card-title-collapsible" @click="childCollapsed = !childCollapsed">
           <a-icon type="arrow-down" />
           {{ $t('cmdb.ci.childRelations') }}
+          <span class="mobile-card-title-count">({{ childRelations.length }})</span>
+          <a-icon :type="childCollapsed ? 'down' : 'up'" class="mobile-card-title-arrow" />
         </div>
-        <div class="mobile-card-body">
+        <div class="mobile-card-body" v-show="!childCollapsed">
           <div
             class="mobile-relation-item"
             v-for="(item, idx) in childRelations"
@@ -124,6 +131,8 @@ export default {
       parentRelations: [],
       childRelations: [],
       historyList: [],
+      parentCollapsed: false,
+      childCollapsed: false,
       loading: true,
       hasPermission: true
     }
@@ -139,16 +148,20 @@ export default {
       Object.keys(ci).forEach((key) => {
         if (!excludeKeys.has(key) && !key.startsWith('__') && !key.startsWith('_')) {
           const value = ci[key]
-          if (value !== null && value !== undefined && value !== '') {
-            const alias = aliasMap[key] || key
-            const strValue = this.formatValue(value)
-            entries.push({
-              name: key,
-              alias: alias,
-              value: strValue,
-              _isLongValue: strValue.length > 24
-            })
+          if (value === null || value === undefined || value === '') {
+            return
           }
+          if (Array.isArray(value) || (typeof value === 'object' && !Array.isArray(value))) {
+            return
+          }
+          const alias = aliasMap[key] || key
+          const strValue = String(value)
+          entries.push({
+            name: key,
+            alias: alias,
+            value: strValue,
+            _isLongValue: strValue.length > 24
+          })
         }
       })
 
@@ -156,13 +169,25 @@ export default {
     }
   },
   mounted() {
-    this.typeId = Number(this.$route.params.typeId)
-    this.ciId = Number(this.$route.params.ciId)
-    if (this.ciId) {
-      this.fetchData()
+    this.loadFromRoute()
+  },
+  watch: {
+    '$route.params': {
+      handler() {
+        this.loadFromRoute()
+      }
     }
   },
   methods: {
+    loadFromRoute() {
+      const typeId = Number(this.$route.params.typeId)
+      const ciId = Number(this.$route.params.ciId)
+      if (ciId && (ciId !== this.ciId || typeId !== this.typeId)) {
+        this.typeId = typeId
+        this.ciId = ciId
+        this.fetchData()
+      }
+    },
     async fetchData() {
       this.loading = true
       try {
@@ -197,7 +222,18 @@ export default {
     },
     getCIName(ci) {
       if (!ci) return ''
-      return ci.name || ci.alias || ci.hostname || ci.ip || ci._id || ''
+      const ipFields = ['ip', 'manage_ip', 'wan_port_ip', 'wan_ip', 'lan_ip', 'private_ip', 'public_ip', 'ips']
+      for (const f of ipFields) {
+        const val = ci[f]
+        if (val != null && val !== '') {
+          if (Array.isArray(val)) return val[0] || ''
+          return String(val)
+        }
+      }
+      if (ci.unique && ci[ci.unique] != null && String(ci[ci.unique]).trim() !== '') {
+        return String(ci[ci.unique])
+      }
+      return ci.name || ci.alias || ci.hostname || ci.manage_ip || ci.ip || ci.netdev_name || ci._id || ''
     },
     goToCI(typeId, ciId) {
       if (typeId != null && ciId != null) {
@@ -306,6 +342,37 @@ export default {
   color: #bbb;
 }
 
+.mobile-card-title-collapsible {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+
+  &:active {
+    background: #f0f0f0;
+  }
+}
+
+.mobile-card-title-count {
+  margin-left: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #bbb;
+}
+
+.mobile-card-title-arrow {
+  margin-left: auto;
+  font-size: 12px;
+  color: #bbb;
+  transition: transform 0.2s;
+}
+
+.mobile-attr-empty {
+  padding: 24px 0;
+  text-align: center;
+  color: #bbb;
+  font-size: 13px;
+}
+
 .mobile-card-body {
   padding: 0;
 }
@@ -327,22 +394,29 @@ export default {
 }
 
 .mobile-attr-label {
-  min-width: 80px;
-  max-width: 40%;
+  width: 100px;
   flex-shrink: 0;
   font-size: 13px;
   color: #999;
+  text-align: left;
   line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
   .mobile-attr-row-stacked & {
-    max-width: 100%;
+    width: 100%;
+    text-align: left;
     margin-bottom: 2px;
+    overflow: visible;
+    white-space: normal;
   }
 }
 
 .mobile-attr-value {
   flex: 1;
   min-width: 0;
+  padding-left: 12px;
   font-size: 13px;
   color: #333;
   word-break: break-word;
