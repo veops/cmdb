@@ -276,3 +276,55 @@ class CIBaselineView(APIView):
             return self.jsonify(**CIManager().rollback(ci_id, before_date))
 
         return self.get(ci_id)
+
+
+class CIMobileDetailView(APIView):
+    url_prefix = "/ci/<int:ci_id>/mobile"
+
+    def get(self, ci_id):
+        ci = CIManager.get_ci_by_id_from_db(ci_id, ret_key=RetKey.NAME, fields=None, valid=True)
+
+        ci_type = CITypeCache.get(ci.get("_type", 0)) if ci.get("_type") else None
+        type_info = {"id": ci_type.id, "name": ci_type.name, "alias": ci_type.alias} if ci_type else {}
+
+        attribute_alias_map = {}
+        if ci_type:
+            from api.lib.cmdb.ci_type import CITypeAttributeManager
+            attrs = CITypeAttributeManager.get_attr_names_by_type_id(ci_type.id)
+            if attrs:
+                from api.lib.cmdb.cache import AttributeCache
+                for attr_name in attrs:
+                    attr_obj = AttributeCache.get(attr_name)
+                    if attr_obj:
+                        attribute_alias_map[attr_obj.name] = attr_obj.alias or attr_obj.name
+
+        relations = {"parents": [], "children": []}
+        try:
+            from api.lib.cmdb.ci import CIRelationManager
+            children = CIRelationManager.get_children(ci_id, ret_key=RetKey.NAME)
+            for type_name, cis in children.items():
+                for c in cis:
+                    c["_type_name"] = CITypeCache.get(type_name).alias if type_name else type_name
+                    relations["children"].append(c)
+
+            parent_ids = CIRelationManager.get_parent_ids([ci_id])
+            if ci_id in parent_ids:
+                for p_id, p_type_id in parent_ids[ci_id]:
+                    parent_ci = CIManager.get_cis_by_ids([str(p_id)], ret_key=RetKey.NAME)
+                    if parent_ci:
+                        for p in parent_ci:
+                            p_type = CITypeCache.get(p_type_id) if p_type_id else None
+                            p["_type_name"] = p_type.alias if p_type else ""
+                            relations["parents"].append(p)
+        except Exception:
+            pass
+
+        from api.lib.cmdb.history import AttributeHistoryManger
+        try:
+            history = AttributeHistoryManger.get_by_ci_id(ci_id)
+            history = history[:10]
+        except Exception:
+            history = []
+
+        return self.jsonify(ci=ci, type=type_info, relations=relations, history=history,
+                            attribute_alias_map=attribute_alias_map)

@@ -52,6 +52,14 @@ export function getCIById(ciId) {
   })
 }
 
+//  获取移动端CI详情
+export function getCIMobileDetail(ciId) {
+  return axios({
+    url: urlPrefix + `/ci/${ciId}/mobile`,
+    method: 'GET'
+  })
+}
+
 //  获取自动发现占比
 export function getCIAdcStatistics() {
   return axios({

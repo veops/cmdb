@@ -104,6 +104,13 @@ export const constantRouterMap = [
     // redirect: () => { return store.getters.appRoutes[0] },
   },
   {
+    path: '/cmdb/mobile/:typeId/:ciId',
+    name: 'cmdb_mobile_detail',
+    hidden: true,
+    meta: { title: 'cmdb.ci.mobileDetail' },
+    component: () => import(/* webpackChunkName: "mobile" */ '@/modules/cmdb/views/mobile/CIMobileDetail.vue')
+  },
+  {
     path: '/user/login',
     name: 'login',
     component: () => import(/* webpackChunkName: "user" */ '@/views/user/Login'),
