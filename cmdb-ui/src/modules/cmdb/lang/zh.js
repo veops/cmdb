@@ -962,7 +962,8 @@ if __name__ == "__main__":
         childRelations: '下游关系',
         recentHistory: '最近变更',
         scanToView: '扫码查看',
-        printQRCode: '打印二维码'
+        printQRCode: '打印二维码',
+        qrcodeBatchGenerating: '正在生成 {generatedCount} / {totalCount} ...'
     },
     serviceTree: {
         remove: '移除',

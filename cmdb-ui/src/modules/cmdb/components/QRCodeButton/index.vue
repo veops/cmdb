@@ -39,12 +39,18 @@ export default {
   name: 'QRCodeButton',
   props: {
     typeId: {
-      type: [Number, String],
-      required: true
+      required: false,
+      default: null,
+      validator(value) {
+        return value === null || typeof value === 'number' || typeof value === 'string'
+      }
     },
     ciId: {
-      type: [Number, String],
-      required: true
+      required: false,
+      default: null,
+      validator(value) {
+        return value === null || typeof value === 'number' || typeof value === 'string'
+      }
     }
   },
   data() {
@@ -53,13 +59,22 @@ export default {
     }
   },
   computed: {
+    hasValidId() {
+      return this.typeId !== null && this.typeId !== undefined && this.ciId !== null && this.ciId !== undefined
+    },
     mobileUrl() {
+      if (!this.hasValidId) {
+        return ''
+      }
       const origin = window.location.origin
       return `${origin}/cmdb/mobile/${this.typeId}/${this.ciId}`
     }
   },
   methods: {
     async showQRCode() {
+      if (!this.hasValidId) {
+        return
+      }
       this.visible = true
       this.$nextTick(() => {
         this.generateQRCode()
@@ -83,13 +98,16 @@ export default {
     },
     downloadQRCode() {
       const canvas = this.$refs.qrcodeCanvas
-      if (!canvas) return
+      if (!canvas || !this.hasValidId) return
       const link = document.createElement('a')
       link.download = `cmdb-ci-${this.ciId}-qrcode.png`
       link.href = canvas.toDataURL('image/png')
       link.click()
     },
     copyMobileUrl() {
+      if (!this.hasValidId) {
+        return
+      }
       this.$copyText(this.mobileUrl)
         .then(() => {
           this.$message.success(this.$t('copySuccess'))

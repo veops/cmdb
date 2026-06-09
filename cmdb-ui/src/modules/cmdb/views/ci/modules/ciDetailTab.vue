@@ -226,7 +226,7 @@ import TriggerTable from '../../operation_history/modules/triggerTable.vue'
 import RelatedItsm from './ciDetailRelatedItsm.vue'
 import CIRollbackForm from './ciRollbackForm.vue'
 import OperateTypeTag from '../../operation_history/components/OperateTypeTag.vue'
-import QRCodeButton from '@/modules/cmdb/components/QRCodeButton.vue'
+import QRCodeButton from '@/modules/cmdb/components/QRCodeButton/index.vue'
 
 export default {
   name: 'CiDetailTab',
@@ -610,6 +610,7 @@ export default {
   }
   .ant-tabs-extra-content {
     line-height: 44px;
+    margin-right: 24px;
   }
   .ci-detail-table {
     height: 100%;

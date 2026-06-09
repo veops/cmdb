@@ -1,12 +1,16 @@
 <template>
   <a-modal
     v-model="visible"
-    :title="$t('cmdb.ci.qrcodeBatchTitle')"
     width="800px"
     :footer="null"
     :maskClosable="true"
   >
-    <p class="qrcode-batch-tip">{{ $t('cmdb.ci.qrcodeBatchTip') }}</p>
+    <p slot="title">
+      {{ $t('cmdb.ci.qrcodeBatchTitle') }}
+      <a-tooltip :title="$t('cmdb.ci.qrcodeBatchTip')">
+        <a-icon style="color: #999; cursor: pointer;" type="question-circle" />
+      </a-tooltip>
+    </p>
 
     <div v-if="qrcodeList.length === 0 && !generating" class="qrcode-batch-empty">
       <a-empty :description="$t('cmdb.ci.qrcodeBatchEmpty')" />
@@ -14,7 +18,7 @@
 
     <div v-if="generating" class="qrcode-batch-generating">
       <a-spin />
-      <span>正在生成 {{ generatedCount }} / {{ totalCount }} ...</span>
+      <span>{{ $t('cmdb.ci.qrcodeBatchGenerating', { generatedCount, totalCount }) }}</span>
     </div>
 
     <div v-if="qrcodeList.length" class="qrcode-batch-grid" ref="qrcodeGrid">
@@ -93,7 +97,7 @@ export default {
         if (canvas) {
           try {
             await QRCode.toCanvas(canvas, item.url, {
-              width: 150,
+              width: 140,
               margin: 1,
               color: { dark: '#000000', light: '#ffffff' }
             })
@@ -135,7 +139,20 @@ export default {
         return
       }
 
-      const content = grid.innerHTML
+      const printGrid = grid.cloneNode(true)
+      const sourceCanvases = grid.querySelectorAll('canvas')
+      const printCanvases = printGrid.querySelectorAll('canvas')
+      printCanvases.forEach((canvas, index) => {
+        const sourceCanvas = sourceCanvases[index]
+        if (!sourceCanvas) return
+        const img = printWindow.document.createElement('img')
+        img.src = sourceCanvas.toDataURL('image/png')
+        img.width = sourceCanvas.width || 140
+        img.height = sourceCanvas.height || 140
+        canvas.replaceWith(img)
+      })
+
+      const content = printGrid.innerHTML
       printWindow.document.write(`
         <html>
           <head>
@@ -146,6 +163,7 @@ export default {
               .qrcode-batch-item { text-align: center; width: 170px; }
               .qrcode-batch-item-label { font-size: 12px; margin: 4px 0 2px; word-break: break-all; }
               .qrcode-batch-item-id { font-size: 11px; color: #999; margin: 0; }
+              .qrcode-batch-item img { display: block; margin: 0 auto; }
               @media print {
                 .qrcode-batch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
                 .qrcode-batch-item { page-break-inside: avoid; }
@@ -192,7 +210,8 @@ export default {
   flex-wrap: wrap;
   gap: 16px;
   justify-content: center;
-  padding: 8px 0;
+  max-height: 50vh;
+  overflow-y: auto;
 }
 
 .qrcode-batch-item {

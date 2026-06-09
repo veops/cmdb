@@ -966,7 +966,8 @@ if __name__ == "__main__":
         childRelations: 'Downstream Relations',
         recentHistory: 'Recent Changes',
         scanToView: 'Scan to View',
-        printQRCode: 'Print QR Codes'
+        printQRCode: 'Print QR Codes',
+        qrcodeBatchGenerating: 'Generating {generatedCount} / {totalCount} ...'
     },
     serviceTree: {
         remove: 'Remove',

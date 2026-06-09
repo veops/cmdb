@@ -54,13 +54,6 @@
                 <ops-icon type="ops-cmdb-citype" />
                 {{ $t('cmdb.menu.citypeManage') }}
               </a-menu-item>
-              <a-menu-item
-                key="qrcodeExportAll"
-                @click="openBatchQRCodeAll"
-              >
-                <a-icon type="qrcode" />
-                {{ $t('cmdb.ci.qrcodeExportAll') }}
-              </a-menu-item>
             </a-menu>
           </a-dropdown>
         </a-space>
@@ -179,7 +172,7 @@ import PreferenceSearch from '../../components/preferenceSearch/preferenceSearch
 import MetadataDrawer from './modules/MetadataDrawer.vue'
 import CMDBGrant from '../../components/cmdbGrant'
 import CiRollbackForm from './modules/ciRollbackForm.vue'
-import QRCodeBatchExport from '@/modules/cmdb/components/QRCodeBatchExport.vue'
+import QRCodeBatchExport from '@/modules/cmdb/components/QRCodeBatchExport/index.vue'
 import SearchForm from '@/modules/cmdb/components/searchForm/SearchForm.vue'
 import CreateInstanceForm from './modules/CreateInstanceForm'
 import CiDetailDrawer from './modules/ciDetailDrawer.vue'
@@ -456,19 +449,20 @@ export default {
       })
     },
     openBatchQRCode() {
-      const ciList = this.selectedRowKeys.map((ciId) => ({
-        ciId,
-        typeId: this.typeId,
-        label: (this.instanceList.find((i) => (i.ci_id || i._id) === ciId) || {}).name || `CI ${ciId}`
-      }))
-      this.$refs.qrcodeBatchExport.open(ciList)
-    },
-    openBatchQRCodeAll() {
-      const ciList = this.instanceList.map((ci) => ({
-        ciId: ci.ci_id || ci._id,
-        typeId: ci._type || this.typeId,
-        label: ci.name || ci.hostname || ci.ip || `CI ${ci.ci_id || ci._id}`
-      }))
+      const showAttrName = this.attrList.find((attr) => attr?.id === this.CIType?.show_id)?.name || ''
+      const uniqueAttrName = this.attrList.find((attr) => attr?.id === this.CIType?.unique_id)?.name || ''
+
+      const ciList = this.selectedRowKeys.map((ciId) => {
+        const item = this.instanceList.find((i) => i._id === ciId) || {}
+        const label = item?.[showAttrName] || item?.[uniqueAttrName] || `CI ${ciId}`
+
+        return {
+          ciId,
+          typeId: this.typeId,
+          label,
+        }
+      })
+
       this.$refs.qrcodeBatchExport.open(ciList)
     },
     batchDownload({ filename, type, checkedKeys, exportQRCode }) {
