@@ -300,24 +300,34 @@ class CIMobileDetailView(APIView):
 
         relations = {"parents": [], "children": []}
         try:
-            from api.lib.cmdb.ci import CIRelationManager
             children = CIRelationManager.get_children(ci_id, ret_key=RetKey.NAME)
             for type_name, cis in children.items():
+                child_type = CITypeCache.get(type_name) if type_name else None
+                child_type_name = child_type.alias if child_type else (type_name or "")
                 for c in cis:
-                    c["_type_name"] = CITypeCache.get(type_name).alias if type_name else type_name
+                    c["_type_name"] = child_type_name
                     relations["children"].append(c)
+        except Exception as e:
+            current_app.logger.exception("failed to load child relations for ci_id=%s: %s", ci_id, e)
 
-            parent_ids = CIRelationManager.get_parent_ids([ci_id])
-            if ci_id in parent_ids:
-                for p_id, p_type_id in parent_ids[ci_id]:
-                    parent_ci = CIManager.get_cis_by_ids([str(p_id)], ret_key=RetKey.NAME)
-                    if parent_ci:
-                        for p in parent_ci:
-                            p_type = CITypeCache.get(p_type_id) if p_type_id else None
-                            p["_type_name"] = p_type.alias if p_type else ""
-                            relations["parents"].append(p)
-        except Exception:
-            pass
+        try:
+            parent_ids = CIRelationManager.get_parent_ids([ci_id]) or {}
+            for p_id, p_type_id in parent_ids.get(ci_id, []):
+                try:
+                    parent_ci = CIManager.get_cis_by_ids([str(p_id)], ret_key=RetKey.NAME) or []
+                except Exception as e:
+                    current_app.logger.exception(
+                        "failed to load parent ci for ci_id=%s parent_id=%s: %s", ci_id, p_id, e
+                    )
+                    continue
+
+                p_type = CITypeCache.get(p_type_id) if p_type_id else None
+                parent_type_name = p_type.alias if p_type else ""
+                for p in parent_ci:
+                    p["_type_name"] = parent_type_name
+                    relations["parents"].append(p)
+        except Exception as e:
+            current_app.logger.exception("failed to load parent relations for ci_id=%s: %s", ci_id, e)
 
         from api.lib.cmdb.history import AttributeHistoryManger
         try:
