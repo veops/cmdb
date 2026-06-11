@@ -2,6 +2,7 @@
 
 import datetime
 import hashlib
+import hmac
 
 import jwt
 from flask import abort
@@ -79,7 +80,12 @@ class AppCRUD(object):
     @classmethod
     def gen_token(cls, key, secret):
         app = cls._get_by_key(key) or abort(404, ErrFormat.app_not_found.format("key={}".format(key)))
-        secret != hashlib.md5(app.secret_key.encode('utf-8')).hexdigest() and abort(403, ErrFormat.app_secret_invalid)
+        if not isinstance(secret, str):
+            abort(403, ErrFormat.app_secret_invalid)
+        secret_sha256 = hashlib.sha256(app.secret_key.encode('utf-8')).hexdigest()
+        secret_md5 = hashlib.md5(app.secret_key.encode('utf-8')).hexdigest()
+        if not (hmac.compare_digest(secret_sha256, secret) or hmac.compare_digest(secret_md5, secret)):
+            abort(403, ErrFormat.app_secret_invalid)
 
         token = jwt.encode({
             'sub': app.name,

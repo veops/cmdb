@@ -17,7 +17,7 @@ def build_api_key(path, params):
     values = "".join([str(params[k]) for k in sorted(params.keys())
                       if params[k] is not None]) if params.keys() else ""
     _secret = "".join([path, secret, values]).encode("utf-8")
-    params["_secret"] = hashlib.sha1(_secret).hexdigest()
+    params["_secret"] = hashlib.sha256(_secret).hexdigest()
     params["_key"] = key
 
     return params
