@@ -31,7 +31,7 @@ from api.models.acl import Role
 def get_access_token():
     url = "{0}/acl/apps/token".format(current_app.config.get('ACL_URI'))
     payload = dict(app_id=current_app.config.get('APP_ID'),
-                   secret_key=hashlib.md5(current_app.config.get('APP_SECRET_KEY').encode('utf-8')).hexdigest())
+                   secret_key=hashlib.sha256(current_app.config.get('APP_SECRET_KEY').encode('utf-8')).hexdigest())
     try:
         res = requests.post(url, data=payload).json()
         return res.get("token")
