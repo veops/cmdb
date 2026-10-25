@@ -18,6 +18,8 @@ from api.lib.cmdb.search import SearchError
 from api.lib.cmdb.search.ci import search as ci_search
 from api.lib.decorator import args_required
 from api.lib.perm.acl.acl import has_perm_from_args
+from api.lib.perm.acl.acl import is_app_admin
+from api.lib.perm.acl.acl import validate_permission
 from api.lib.utils import get_page
 from api.lib.utils import get_page_size
 from api.lib.utils import handle_arg_list
@@ -109,6 +111,11 @@ class CIView(APIView):
                            ticket_id=ticket_id,
                            **ci_dict)
         else:
+            if not is_app_admin("cmdb"):
+                ci_type_obj, existed = CIManager.find_existed(ci_type, ci_dict)
+                perm = PermEnum.UPDATE if existed is not None else PermEnum.ADD
+                validate_permission(ci_type_obj.name, ResourceTypeEnum.CI, perm, "cmdb")
+
             request.values.pop('exist_policy', None)
             ci_id = manager.add(ci_type,
                                 exist_policy=ExistPolicy.REPLACE,

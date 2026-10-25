@@ -249,6 +249,20 @@ class CIManager(object):
         if unique:
             return CI.get_by_id(unique.ci_id)
 
+    @classmethod
+    def find_existed(cls, ci_type_name, ci_dict):
+        ci_type = CITypeManager.check_is_existed(ci_type_name)
+        unique_key = AttributeCache.get(ci_type.unique_id) or abort(
+            400, ErrFormat.unique_value_not_found.format("unique_id={}".format(ci_type.unique_id)))
+        unique_value = ci_dict.get(unique_key.name) or ci_dict.get(unique_key.alias) or ci_dict.get(unique_key.id)
+        auto_inc = unique_key.default and unique_key.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID
+        if auto_inc and not ci_dict.get(unique_key.name):
+            return ci_type, None
+        if not unique_value:
+            return ci_type, None
+
+        return ci_type, cls.ci_is_exist(unique_key, unique_value, ci_type.id)
+
     @staticmethod
     def _delete_ci_by_id(ci_id):
         ci = CI.get_by_id(ci_id)
@@ -390,11 +404,13 @@ class CIManager(object):
         unique_key = AttributeCache.get(ci_type.unique_id) or abort(
             400, ErrFormat.unique_value_not_found.format("unique_id={}".format(ci_type.unique_id)))
 
-        unique_value = None
-        # primary key is not auto inc id
-        if not (unique_key.default and unique_key.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID):
-            unique_value = ci_dict.get(unique_key.name) or ci_dict.get(unique_key.alias) or ci_dict.get(unique_key.id)
+        is_auto_inc = bool(
+            unique_key.default and unique_key.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID)
+        unique_value = ci_dict.get(unique_key.name) or ci_dict.get(unique_key.alias) or ci_dict.get(unique_key.id)
+        if not is_auto_inc:
             unique_value = unique_value or abort(400, ErrFormat.unique_key_required.format(unique_key.name))
+        elif not ci_dict.get(unique_key.name):
+            unique_value = None
 
         attrs = CITypeAttributeManager.get_all_attributes(ci_type.id)
         ci_type_attrs_name = {attr.name: attr for _, attr in attrs}
@@ -408,8 +424,7 @@ class CIManager(object):
         with redis_lock.Lock(rd.r, ci_type.name, expire=10):
             db.session.commit()
 
-            if (unique_key.default and unique_key.default.get('default') == AttributeDefaultValueEnum.AUTO_INC_ID and
-                    not ci_dict.get(unique_key.name)):
+            if is_auto_inc and not ci_dict.get(unique_key.name):
                 ci_dict[unique_key.name] = cls._auto_inc_id(unique_key)
                 current_app.logger.info(ci_dict[unique_key.name])
                 unique_value = ci_dict[unique_key.name]
