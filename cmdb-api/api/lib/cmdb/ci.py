@@ -953,6 +953,9 @@ class CIManager(object):
     def load_password(cls, ci_id, attr_id):
         ci = CI.get_by_id(ci_id) or abort(404, ErrFormat.ci_not_found.format(ci_id))
 
+        if not is_app_admin("cmdb"):
+            validate_permission(CIManager.get_type_name(ci.id), ResourceTypeEnum.CI, PermEnum.READ, "cmdb")
+
         limit_attrs = cls._valid_ci_for_no_read(ci, ci.ci_type)
         if limit_attrs:
             attr = AttributeCache.get(attr_id)
